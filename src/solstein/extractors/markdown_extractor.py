@@ -1,0 +1,266 @@
+"""
+Markdown file extractor for SolStein.
+
+Extracts structured data from markdown files following SolStein's format.
+Replaces the monolithic extract_competitor_data.py script.
+"""
+
+import re
+import json
+from pathlib import Path
+from typing import Dict, List, Optional, Any
+from loguru import logger
+
+from ..data.models import CompanyProfile, FinancialMetric, ConfidenceLevel
+
+
+class MarkdownExtractor:
+    """Extract structured data from markdown files."""
+    
+    def __init__(self):
+        self.patterns = {
+            "revenue": re.compile(r"Revenue:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
+            "growth_rate": re.compile(r"Growth Rate:\s*([\d.,]+\s*%)"),
+            "employees": re.compile(r"Employees:\s*([\d.,]+)"),
+            "profit_margin": re.compile(r"Profit Margin:\s*([\d.,]+\s*%)"),
+            "funding": re.compile(r"Funding Raised:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
+            "valuation": re.compile(r"Valuation:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
+            "ai_maturity": re.compile(r"AI Maturity:\s*(\w+(?:\s+\w+)*)"),
+            "threat_level": re.compile(r"Threat Level:\s*(\w+)"),
+            "tier": re.compile(r"Tier:\s*(\w+(?:\s+\w+)*)"),
+        }
+        
+    def extract_from_file(self, file_path: Path) -> Optional[Dict[str, Any]]:
+        """Extract data from a single markdown file."""
+        try:
+            content = file_path.read_text(encoding="utf-8")
+            return self._parse_content(content, str(file_path))
+        except Exception as e:
+            logger.error(f"Failed to extract from {file_path}: {e}")
+            return None
+    
+    def _parse_content(self, content: str, source: str) -> Dict[str, Any]:
+        """Parse markdown content and extract structured data."""
+        data = {"source": source}
+        
+        # Extract basic metrics
+        for key, pattern in self.patterns.items():
+            match = pattern.search(content)
+            if match:
+                data[key] = match.group(1).strip()
+        
+        # Extract company name from filename or content
+        name_match = re.search(r"#\s+(.+)", content)
+        if name_match:
+            data["name"] = name_match.group(1).strip()
+        
+        # Extract description (first paragraph after title)
+        desc_match = re.search(r"#\s+.+\n\n(.+?)(?:\n\n|$)", content, re.DOTALL)
+        if desc_match:
+            data["description"] = desc_match.group(1).strip()
+        
+        # Extract geographic presence
+        geo_match = re.search(r"Geographic Presence:\s*(.+)", content)
+        if geo_match:
+            data["geographic_presence"] = [
+                g.strip() for g in geo_match.group(1).split(",")
+            ]
+        
+        # Extract tech stack
+        tech_match = re.search(r"Tech Stack:\s*(.+)", content)
+        if tech_match:
+            data["tech_stack"] = [
+                t.strip() for t in tech_match.group(1).split(",")
+            ]
+        
+        # Extract confidence levels
+        data["confidence"] = self._extract_confidence(content)
+        
+        return data
+    
+    def _extract_confidence(self, content: str) -> Dict[str, str]:
+        """Extract confidence levels from content."""
+        confidence = {}
+        
+        # Look for confidence annotations
+        conf_pattern = re.compile(r"\(([Cc]onfirmed|[Ee]stimated|[Uu]nknown)\)")
+        lines = content.split("\n")
+        
+        for line in lines:
+            if "(" in line and ")" in line:
+                matches = conf_pattern.findall(line)
+                if matches:
+                    # Get the metric name from the line
+                    metric = line.split(":")[0].strip().lower()
+                    confidence[metric] = matches[0].capitalize()
+        
+        return confidence
+    
+    def to_company_profile(self, extracted_data: Dict[str, Any]) -> CompanyProfile:
+        """Convert extracted data to CompanyProfile model."""
+        # Generate ID from name
+        company_id = (
+            extracted_data.get("name", "unknown")
+            .lower()
+            .replace(" ", "-")
+            .replace(".", "")
+            .replace(",", "")
+        )
+        
+        # Create financial metrics
+        financials = FinancialMetric(
+            revenue=self._parse_numeric(extracted_data.get("revenue")),
+            revenue_confidence=self._get_confidence(extracted_data, "revenue"),
+            growth_rate=self._parse_percentage(extracted_data.get("growth_rate")),
+            growth_confidence=self._get_confidence(extracted_data, "growth_rate"),
+            employees=self._parse_numeric(extracted_data.get("employees")),
+            employees_confidence=self._get_confidence(extracted_data, "employees"),
+            profit_margin=self._parse_percentage(extracted_data.get("profit_margin")),
+            margin_confidence=self._get_confidence(extracted_data, "profit_margin"),
+            funding_raised=self._parse_numeric(extracted_data.get("funding")),
+            funding_confidence=self._get_confidence(extracted_data, "funding"),
+            valuation=self._parse_numeric(extracted_data.get("valuation")),
+            valuation_confidence=self._get_confidence(extracted_data, "valuation"),
+        )
+        
+        # Create company profile
+        profile = CompanyProfile(
+            id=company_id,
+            name=extracted_data.get("name", "Unknown Company"),
+            description=extracted_data.get("description"),
+            financials=financials,
+            ai_maturity=self._parse_ai_maturity(extracted_data.get("ai_maturity")),
+            threat_level=self._parse_threat_level(extracted_data.get("threat_level")),
+            tier=self._parse_tier(extracted_data.get("tier")),
+            geographic_presence=extracted_data.get("geographic_presence", []),
+            tech_stack=extracted_data.get("tech_stack", []),
+            data_source=extracted_data.get("source"),
+        )
+        
+        return profile
+    
+    def _parse_numeric(self, value: Optional[str]) -> Optional[float]:
+        """Parse numeric values with suffixes (K, M, B, T)."""
+        if not value:
+            return None
+        
+        try:
+            # Remove currency symbols and whitespace
+            value = value.strip().replace("€", "").replace("$", "").replace(",", "")
+            
+            # Handle suffixes
+            if value.endswith("T"):
+                return float(value[:-1]) * 1_000_000_000_000
+            elif value.endswith("B"):
+                return float(value[:-1]) * 1_000_000_000
+            elif value.endswith("M"):
+                return float(value[:-1]) * 1_000_000
+            elif value.endswith("K"):
+                return float(value[:-1]) * 1_000
+            else:
+                return float(value)
+        except (ValueError, AttributeError):
+            logger.warning(f"Failed to parse numeric value: {value}")
+            return None
+    
+    def _parse_percentage(self, value: Optional[str]) -> Optional[float]:
+        """Parse percentage values."""
+        if not value:
+            return None
+        
+        try:
+            value = value.strip().replace("%", "").replace(",", "")
+            return float(value)
+        except (ValueError, AttributeError):
+            logger.warning(f"Failed to parse percentage: {value}")
+            return None
+    
+    def _parse_ai_maturity(self, value: Optional[str]) -> str:
+        """Parse AI maturity level."""
+        if not value:
+            return "None"
+        
+        value = value.strip().lower()
+        if "very strong" in value:
+            return "Very Strong"
+        elif "strong" in value:
+            return "Strong"
+        elif "moderate" in value:
+            return "Moderate"
+        elif "low" in value:
+            return "Low"
+        else:
+            return "None"
+    
+    def _parse_threat_level(self, value: Optional[str]) -> str:
+        """Parse threat level."""
+        if not value:
+            return "Medium"
+        
+        value = value.strip().capitalize()
+        if value in ["Low", "Medium", "High", "Critical"]:
+            return value
+        return "Medium"
+    
+    def _parse_tier(self, value: Optional[str]) -> str:
+        """Parse company tier."""
+        if not value:
+            return "Tier 3"
+        
+        value = value.strip()
+        if "Tier 1" in value:
+            return "Tier 1"
+        elif "Tier 2" in value:
+            return "Tier 2"
+        elif "Tier 3" in value:
+            return "Tier 3"
+        elif "Tier 4" in value:
+            return "Tier 4"
+        return "Tier 3"
+    
+    def _get_confidence(self, data: Dict[str, Any], metric: str) -> str:
+        """Get confidence level for a metric."""
+        confidence_data = data.get("confidence", {})
+        return confidence_data.get(metric, "Unknown")
+
+
+class BatchExtractor:
+    """Batch extraction from multiple files."""
+    
+    def __init__(self, extractor: MarkdownExtractor = None):
+        self.extractor = extractor or MarkdownExtractor()
+    
+    def extract_directory(self, directory: Path, pattern: str = "*.md") -> List[CompanyProfile]:
+        """Extract data from all markdown files in a directory."""
+        profiles = []
+        
+        if not directory.exists():
+            logger.error(f"Directory does not exist: {directory}")
+            return profiles
+        
+        md_files = list(directory.rglob(pattern))
+        logger.info(f"Found {len(md_files)} markdown files in {directory}")
+        
+        for md_file in md_files:
+            logger.debug(f"Processing {md_file}")
+            extracted = self.extractor.extract_from_file(md_file)
+            if extracted:
+                try:
+                    profile = self.extractor.to_company_profile(extracted)
+                    profiles.append(profile)
+                except Exception as e:
+                    logger.error(f"Failed to create profile from {md_file}: {e}")
+        
+        logger.info(f"Successfully extracted {len(profiles)} profiles")
+        return profiles
+    
+    def save_to_json(self, profiles: List[CompanyProfile], output_path: Path) -> None:
+        """Save profiles to JSON file."""
+        try:
+            data = [profile.model_dump() for profile in profiles]
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
+            logger.info(f"Saved {len(profiles)} profiles to {output_path}")
+        except Exception as e:
+            logger.error(f"Failed to save to JSON: {e}")
+            raise
