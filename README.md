@@ -15,6 +15,8 @@
 [![Coverage](https://img.shields.io/badge/Coverage-57%25-ffd700?style=for-the-badge&logo=codecov&logoColor=4b0082)](tests/)
 [![License](https://img.shields.io/badge/License-Proprietary-4b0082?style=for-the-badge&logo=scroll&logoColor=ffd700)](LICENSE)
 
+> **📖 Documentation Site**: [https://ai-whisperers.github.io/solstein/](https://ai-whisperers.github.io/solstein/)
+
 </div>
 
 ---
