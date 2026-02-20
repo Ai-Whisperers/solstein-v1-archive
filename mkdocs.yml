@@ -55,45 +55,18 @@ markdown_extensions:
       title: "On this scroll"
 
 nav:
-  - "🏠 Home": "README.md"
+  - "Home": "README.md"
 
-  - "📜 The Lore":
-    - "The Origin": "LORE/origin.md"
-    - "The Three-Entity Flywheel": "LORE/the-play.md"
-    - "The Grimoire": "LORE/grimoire.md"
+  - "The Lore | Foundation":
+    - "The Origin | Vision": "LORE/origin.md"
+    - "The Three-Entity Flywheel | Strategy": "LORE/the-play.md"
+    - "The Grimoire | Methodology": "LORE/grimoire.md"
 
-  - "⚔️ The Pitch":
+  - "The Pitch | Investment":
     - "Executive Brief": "PITCH/executive-brief.md"
     - "Full Proposal": "PITCH/full-proposal.md"
-    - "Case Study — First Summoning": "PITCH/case-study.md"
-    - "Commercial Architecture": "PITCH/business-model.md"
-
-  - "🤝 Proposals":
-    - "The Real Play": "PROPOSAL/the-real-play.md"
-    - "The Full Picture": "PROPOSAL/the-full-picture.md"
-    - "Equity & Value Sharing": "PROPOSAL/solstein-equity-and-value-sharing.md"
-    - "Corporate Structure Options": "PROPOSAL/corporate-structure-options.md"
-    - "Michiel Proposal": "PROPOSAL/solstein-proposal-michiel.md"
-    - "Michiel Email (Feb 2025)": "PROPOSAL/michiel-kuiper-email-2025-02-19.md"
-    - "Analysis: Proposal vs Solstein": "PROPOSAL/analysis-proposal-vs-solstein.md"
-    - "Gaston Conversation": "PROPOSAL/gaston-conversation.md"
-    - "Ivan & Kyrian Conversation": "PROPOSAL/ivan-kyrian-conversation.md"
-
-  - "⚙️ For Developers":
-    - "Developer Guide": "guides/developer.md"
-    - "Operator Guide": "guides/operator.md"
-    - "API Reference": "api/reference.md"
-
-  - "🏛️ Architecture":
-    - "Decision Records": "architecture/decisions.md"
-    - "Repository Structure": "STRUCTURE.md"
-
-  - "📚 Archive":
-    - "Analysis": "archive/ANALYSIS.md"
-    - "Critical Analysis": "archive/CRITICAL_ANALYSIS.md"
-    - "Reorganization Summary": "archive/REORGANIZATION_SUMMARY.md"
-    - "CI/CD Cursor Integration Plan": "archive/CI_CD_CURSOR_INTEGRATION_PLAN.md"
-    - "Comprehensive Gap Analysis": "archive/COMPREHENSIVE_TODO_AND_GAP_ANALYSIS.md"
+    - "Case Study | Portfolio Analysis": "PITCH/case-study.md"
+    - "Commercial Architecture | Finance": "PITCH/business-model.md"
 
 
 extra:
