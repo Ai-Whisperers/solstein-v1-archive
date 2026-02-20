@@ -4,19 +4,9 @@ Version: 0.1.0
 Summary: AI-Powered Competitive Intelligence Platform for PE/VC
 Author-email: AI Whisperers <team@ai-whisperers.com>
 License: Proprietary
-Project-URL: Homepage, https://github.com/Ai-Whisperers/solstein
-Project-URL: Repository, https://github.com/Ai-Whisperers/solstein
-Project-URL: Issues, https://github.com/Ai-Whisperers/solstein/issues
-Classifier: Development Status :: 3 - Alpha
-Classifier: Intended Audience :: Financial and Insurance Industry
-Classifier: Topic :: Office/Business :: Financial :: Investment
-Classifier: License :: Other/Proprietary License
-Classifier: Programming Language :: Python :: 3
-Classifier: Programming Language :: Python :: 3.10
-Classifier: Programming Language :: Python :: 3.11
-Classifier: Programming Language :: Python :: 3.12
 Requires-Python: >=3.10
 Description-Content-Type: text/markdown
+License-File: LICENSE
 Requires-Dist: pydantic>=2.0
 Requires-Dist: pydantic-settings>=2.0
 Requires-Dist: pandas>=2.0
@@ -40,17 +30,7 @@ Requires-Dist: black>=23.0; extra == "dev"
 Requires-Dist: ruff>=0.1; extra == "dev"
 Requires-Dist: mypy>=1.6; extra == "dev"
 Requires-Dist: pre-commit>=3.5; extra == "dev"
-Requires-Dist: jupyter>=1.0; extra == "dev"
-Provides-Extra: docs
-Requires-Dist: mkdocs>=1.5; extra == "docs"
-Requires-Dist: mkdocs-material>=9.4; extra == "docs"
-Requires-Dist: mkdocstrings[python]>=0.24; extra == "docs"
-Provides-Extra: test
-Requires-Dist: pytest>=7.4; extra == "test"
-Requires-Dist: pytest-cov>=4.1; extra == "test"
-Requires-Dist: pytest-asyncio>=0.21; extra == "test"
-Requires-Dist: pytest-mock>=3.11; extra == "test"
-Requires-Dist: factory-boy>=3.3; extra == "test"
+Dynamic: license-file
 
 # SolStein Competitive Intelligence Platform
 

@@ -1,2 +1,0 @@
-[console_scripts]
-solstein = solstein.cli:main

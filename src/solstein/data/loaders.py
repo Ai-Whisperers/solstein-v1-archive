@@ -6,15 +6,19 @@ and converts them to standardized CompanyProfile models.
 """
 
 import json
-from pathlib import Path
-from typing import List, Optional, Dict, Any
-from datetime import datetime
 import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 from ..config import Settings
 from .models import (
-    CompanyProfile, FinancialMetric, ConfidenceLevel,
-    CompanyTier, AIMaturity, ThreatLevel
+    AIMaturity,
+    CompanyProfile,
+    CompanyTier,
+    ConfidenceLevel,
+    FinancialMetric,
+    ThreatLevel,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,19 +27,19 @@ settings = Settings()
 
 class CompetitorDataLoader:
     """Load competitor data from JSON files and convert to models."""
-    
-    def __init__(self, data_dir: Optional[Path] = None):
+
+    def __init__(self, data_dir: Path | None = None):
         self.data_dir = data_dir or Path(settings.data.data_dir)
         self._cache = {}
-    
-    def load_companies(self, limit: Optional[int] = None) -> List[CompanyProfile]:
+
+    def load_companies(self, limit: int | None = None) -> list[CompanyProfile]:
         """Load all companies from data directory."""
         cache_key = f"companies_{limit}"
         if cache_key in self._cache:
             return self._cache[cache_key]
-        
+
         companies = []
-        
+
         # Try to load from the main competitor data JSON
         json_path = self.data_dir / "competitor_data.json"
         if json_path.exists():
@@ -49,23 +53,23 @@ class CompetitorDataLoader:
                 logger.warning(f"No competitor data found at {json_path} or {project_json}")
                 # Create sample data for demo
                 companies.extend(self._create_sample_data(limit or 10))
-        
+
         if limit:
             companies = companies[:limit]
-        
+
         self._cache[cache_key] = companies
         return companies
-    
-    def _load_from_json(self, json_path: Path, limit: Optional[int] = None) -> List[CompanyProfile]:
+
+    def _load_from_json(self, json_path: Path, limit: int | None = None) -> list[CompanyProfile]:
         """Load companies from JSON file."""
         try:
-            with open(json_path, 'r') as f:
+            with open(json_path) as f:
                 data = json.load(f)
-            
+
             competitors = data.get("competitors", [])
             if limit:
                 competitors = competitors[:limit]
-            
+
             companies = []
             for i, comp in enumerate(competitors):
                 try:
@@ -74,24 +78,24 @@ class CompetitorDataLoader:
                 except Exception as e:
                     logger.warning(f"Error converting competitor {i}: {e}")
                     continue
-            
+
             logger.info(f"Loaded {len(companies)} companies from {json_path}")
             return companies
-            
+
         except Exception as e:
             logger.error(f"Error loading JSON from {json_path}: {e}")
             return []
-    
-    def _convert_to_company_profile(self, raw_data: Dict[str, Any], index: int) -> CompanyProfile:
+
+    def _convert_to_company_profile(self, raw_data: dict[str, Any], index: int) -> CompanyProfile:
         """Convert raw JSON data to CompanyProfile model."""
         # Extract basic info
         company_name = raw_data.get("company_name", f"Company {index}")
         folder = raw_data.get("folder", f"company-{index}")
-        
+
         # Extract financial data
         revenue_data = raw_data.get("revenue", {})
         timeline = revenue_data.get("timeline", [])
-        
+
         if timeline:
             latest = timeline[0]
             revenue = latest.get("eur_millions")
@@ -101,7 +105,7 @@ class CompetitorDataLoader:
             revenue = None
             growth = None
             revenue_confidence = ConfidenceLevel.UNKNOWN
-        
+
         # Create financial metric
         financial = FinancialMetric(
             revenue=revenue,
@@ -111,15 +115,15 @@ class CompetitorDataLoader:
             employees=self._estimate_employees(revenue),
             employees_confidence=ConfidenceLevel.ESTIMATED
         )
-        
+
         # Determine tier based on revenue
         tier = self._determine_tier(revenue)
-        
+
         # Determine AI maturity from scorecard
         scorecard = raw_data.get("scorecard", {})
         dimensions = scorecard.get("dimensions", {})
         saas_score = dimensions.get("SaaS Maturity", {}).get("score", 5)
-        
+
         # Convert to AI maturity
         if saas_score >= 8:
             ai_maturity = AIMaturity.STRONG
@@ -127,7 +131,7 @@ class CompetitorDataLoader:
             ai_maturity = AIMaturity.MODERATE
         else:
             ai_maturity = AIMaturity.LOW
-        
+
         # Determine threat level from composite score
         composite_score = scorecard.get("composite_score", 5)
         if composite_score >= 8:
@@ -136,13 +140,13 @@ class CompetitorDataLoader:
             threat_level = ThreatLevel.MEDIUM
         else:
             threat_level = ThreatLevel.LOW
-        
+
         # Create company profile
         company = CompanyProfile(
             id=folder.lower().replace(" ", "-").replace("/", "-"),
             name=company_name,
             industry="Energy Software",  # Default for this dataset
-            description=f"Competitor in energy software market",
+            description="Competitor in energy software market",
             website=None,  # Would extract from data in production
             headquarters=self._estimate_headquarters(folder),
             founded_year=self._estimate_founded_year(index),
@@ -164,14 +168,14 @@ class CompetitorDataLoader:
             financial_health_score=None,
             competitive_position_score=None
         )
-        
+
         return company
-    
-    def _convert_confidence(self, confidence_str: Optional[str]) -> ConfidenceLevel:
+
+    def _convert_confidence(self, confidence_str: str | None) -> ConfidenceLevel:
         """Convert string confidence to ConfidenceLevel enum."""
         if not confidence_str:
             return ConfidenceLevel.UNKNOWN
-        
+
         confidence_str = confidence_str.lower()
         if "confirm" in confidence_str:
             return ConfidenceLevel.CONFIRMED
@@ -179,21 +183,21 @@ class CompetitorDataLoader:
             return ConfidenceLevel.ESTIMATED
         else:
             return ConfidenceLevel.UNKNOWN
-    
-    def _estimate_employees(self, revenue: Optional[float]) -> Optional[int]:
+
+    def _estimate_employees(self, revenue: float | None) -> int | None:
         """Estimate number of employees based on revenue."""
         if revenue is None:
             return None
-        
+
         # Rough estimate: €200,000 revenue per employee for software companies
         employees = int(revenue * 1_000_000 / 200_000)
         return max(10, min(employees, 10000))  # Bound between 10 and 10,000
-    
-    def _determine_tier(self, revenue: Optional[float]) -> CompanyTier:
+
+    def _determine_tier(self, revenue: float | None) -> CompanyTier:
         """Determine company tier based on revenue."""
         if revenue is None:
             return CompanyTier.TIER_4
-        
+
         if revenue > 1000:  # > €1B
             return CompanyTier.TIER_1
         elif revenue > 100:  # > €100M
@@ -202,11 +206,11 @@ class CompetitorDataLoader:
             return CompanyTier.TIER_3
         else:
             return CompanyTier.TIER_4
-    
-    def _estimate_headquarters(self, folder: str) -> Optional[str]:
+
+    def _estimate_headquarters(self, folder: str) -> str | None:
         """Estimate headquarters based on folder name."""
         folder_lower = folder.lower()
-        
+
         if "uk" in folder_lower or "british" in folder_lower:
             return "United Kingdom"
         elif "german" in folder_lower or "deutsch" in folder_lower:
@@ -223,16 +227,16 @@ class CompetitorDataLoader:
             return "Switzerland"
         else:
             return "Europe"
-    
-    def _estimate_founded_year(self, index: int) -> Optional[int]:
+
+    def _estimate_founded_year(self, index: int) -> int | None:
         """Estimate founded year (for demo purposes)."""
         base_year = 2000
         return base_year + (index % 25)  # Between 2000 and 2025
-    
-    def _create_sample_data(self, count: int) -> List[CompanyProfile]:
+
+    def _create_sample_data(self, count: int) -> list[CompanyProfile]:
         """Create sample data for demo purposes."""
         companies = []
-        
+
         sample_names = [
             "Eneve (formerly Energy21)",
             "Volue ASA",
@@ -245,12 +249,12 @@ class CompetitorDataLoader:
             "Engineering Ingegneria",
             "Hansen Technologies"
         ]
-        
+
         for i in range(min(count, len(sample_names))):
             # Create sample financial data
             revenue = 1000.0 * (i + 1)  # €1M to €10M
             growth = 5.0 + (i * 2)  # 5% to 23%
-            
+
             financial = FinancialMetric(
                 revenue=revenue,
                 revenue_confidence=ConfidenceLevel.CONFIRMED,
@@ -259,7 +263,7 @@ class CompetitorDataLoader:
                 employees=int(revenue * 5),  # Rough estimate
                 employees_confidence=ConfidenceLevel.ESTIMATED
             )
-            
+
             # Create company
             company = CompanyProfile(
                 id=f"sample-{i}",
@@ -277,12 +281,12 @@ class CompetitorDataLoader:
                 last_updated=datetime.now(),
                 data_source="Sample Data"
             )
-            
+
             companies.append(company)
-        
+
         logger.info(f"Created {len(companies)} sample companies")
         return companies
-    
+
     def clear_cache(self):
         """Clear the data cache."""
         self._cache.clear()

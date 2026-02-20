@@ -102,6 +102,7 @@ for i in range(N):
             matrix[i][j] = overlap_score(competitors[i], competitors[j])
 
 from collections import Counter
+
 score_counts = Counter()
 for i in range(N):
     for j in range(i+1, N):
@@ -160,7 +161,7 @@ for i in range(N):
             row += "    ---"
         else:
             row += f"      {matrix[i][j]}"
-        
+
     lines.append(row)
 
 # Write to file

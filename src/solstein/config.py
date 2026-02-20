@@ -4,12 +4,11 @@ Configuration management for SolStein.
 Handles environment variables, configuration files, and settings.
 """
 
-import os
 from pathlib import Path
-from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field, field_validator, ConfigDict
-from pydantic_settings import BaseSettings
+
 from loguru import logger
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic_settings import BaseSettings
 
 
 class DatabaseConfig(BaseModel):
@@ -17,7 +16,7 @@ class DatabaseConfig(BaseModel):
     url: str = Field(default="postgresql://postgres:postgres@localhost:5432/solstein")
     pool_size: int = Field(default=20, ge=1, le=100)
     echo: bool = Field(default=False)
-    
+
     @field_validator("url")
     def validate_url(cls, v):
         """Validate database URL."""
@@ -30,13 +29,13 @@ class RedisConfig(BaseModel):
     """Redis configuration for caching and job queues."""
     url: str = Field(default="redis://localhost:6379/0")
     cache_ttl: int = Field(default=3600, ge=60, description="Cache TTL in seconds")
-    
+
     @property
     def host(self) -> str:
         """Extract host from URL."""
         parts = self.url.split("://")[1].split(":")
         return parts[0]
-    
+
     @property
     def port(self) -> int:
         """Extract port from URL."""
@@ -46,6 +45,16 @@ class RedisConfig(BaseModel):
         return 6379
 
 
+class CeleryConfig(BaseModel):
+    """Celery configuration."""
+    broker_url: str = Field(default="redis://localhost:6379/0")
+    result_backend: str = Field(default="redis://localhost:6379/0")
+    task_serializer: str = Field(default="json")
+    result_serializer: str = Field(default="json")
+    accept_content: list[str] = Field(default=["json"])
+    timezone: str = Field(default="UTC")
+    enable_utc: bool = Field(default=True)
+
 class APIConfig(BaseModel):
     """API configuration."""
     host: str = Field(default="0.0.0.0")
@@ -53,7 +62,7 @@ class APIConfig(BaseModel):
     debug: bool = Field(default=False)
     cors_origins: list[str] = Field(default=["http://localhost:3000"])
     api_prefix: str = Field(default="/api/v1")
-    
+
     @property
     def base_url(self) -> str:
         """Get base URL for API."""
@@ -65,7 +74,7 @@ class SecurityConfig(BaseModel):
     secret_key: str = Field(default="change-me-in-production")
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30, ge=1)
-    
+
     @field_validator("secret_key")
     def validate_secret_key(cls, v):
         """Validate secret key."""
@@ -78,10 +87,10 @@ class LoggingConfig(BaseModel):
     """Logging configuration."""
     level: str = Field(default="INFO")
     format: str = Field(default="json")
-    file_path: Optional[Path] = Field(default=None)
+    file_path: Path | None = Field(default=None)
     rotation: str = Field(default="500 MB")
     retention: str = Field(default="30 days")
-    
+
     @field_validator("level")
     def validate_level(cls, v):
         """Validate log level."""
@@ -93,10 +102,10 @@ class LoggingConfig(BaseModel):
 
 class DataConfig(BaseModel):
     """Data configuration."""
-    data_dir: Path = Field(default=Path("data"))
-    cache_dir: Path = Field(default=Path(".cache"))
-    export_dir: Path = Field(default=Path("exports"))
-    
+    data_dir: Path = Field(default=Path("data/input"))
+    cache_dir: Path = Field(default=Path("data/cache"))
+    export_dir: Path = Field(default=Path("data/output/exports"))
+
     @field_validator("data_dir", "cache_dir", "export_dir", mode='before')
     def resolve_paths(cls, v):
         """Resolve paths to absolute."""
@@ -107,7 +116,7 @@ class DataConfig(BaseModel):
             project_root = Path(__file__).parent.parent.parent
             v = project_root / v
         return v
-    
+
     def ensure_dirs(self) -> None:
         """Ensure all directories exist."""
         self.data_dir.mkdir(parents=True, exist_ok=True)
@@ -117,11 +126,11 @@ class DataConfig(BaseModel):
 
 class Settings(BaseSettings):
     """Main settings class that loads from environment variables."""
-    
+
     # Environment
     environment: str = Field(default="development")
     debug: bool = Field(default=False)
-    
+
     # Components
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     redis: RedisConfig = Field(default_factory=RedisConfig)
@@ -129,18 +138,19 @@ class Settings(BaseSettings):
     security: SecurityConfig = Field(default_factory=SecurityConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     data: DataConfig = Field(default_factory=DataConfig)
-    
+    celery: CeleryConfig = Field(default_factory=CeleryConfig)
+
     # External APIs (optional)
-    openai_api_key: Optional[str] = Field(default=None)
-    perplexity_api_key: Optional[str] = Field(default=None)
-    
+    openai_api_key: str | None = Field(default=None)
+    perplexity_api_key: str | None = Field(default=None)
+
     model_config = ConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         env_nested_delimiter="__",
         case_sensitive=False
     )
-    
+
     @classmethod
     def load(cls) -> "Settings":
         """Load settings with environment variable overrides."""
@@ -150,17 +160,17 @@ class Settings(BaseSettings):
             logger.info(f"Loading configuration from {env_file}")
         else:
             logger.warning("No .env file found, using defaults")
-        
+
         settings = cls()
         settings.data.ensure_dirs()
-        
+
         # Log configuration summary
         logger.info(f"Environment: {settings.environment}")
         logger.info(f"Debug mode: {settings.debug}")
         logger.info(f"Data directory: {settings.data.data_dir}")
-        
+
         return settings
-    
+
     def get_database_url(self, test: bool = False) -> str:
         """Get database URL, optionally for tests."""
         url = self.database.url
@@ -173,7 +183,7 @@ class Settings(BaseSettings):
 
 
 # Global settings instance
-_settings: Optional[Settings] = None
+_settings: Settings | None = None
 
 
 def get_settings() -> Settings:
@@ -187,10 +197,10 @@ def get_settings() -> Settings:
 def configure_logging(settings: Settings) -> None:
     """Configure logging based on settings."""
     from loguru import logger
-    
+
     # Remove default handler
     logger.remove()
-    
+
     # Add console handler
     logger.add(
         lambda msg: print(msg, end=""),
@@ -198,7 +208,7 @@ def configure_logging(settings: Settings) -> None:
         level=settings.logging.level,
         colorize=True,
     )
-    
+
     # Add file handler if configured
     if settings.logging.file_path:
         settings.logging.file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -210,7 +220,7 @@ def configure_logging(settings: Settings) -> None:
             format=settings.logging.format,
             compression="zip",
         )
-    
+
     logger.info(f"Logging configured at level {settings.logging.level}")
 
 
@@ -231,6 +241,11 @@ DATABASE__ECHO=false
 REDIS__URL=redis://localhost:6379/0
 REDIS__CACHE_TTL=3600
 
+# Celery
+CELERY__BROKER_URL=redis://localhost:6379/0
+CELERY__RESULT_BACKEND=redis://localhost:6379/0
+
+
 # API
 API__HOST=0.0.0.0
 API__PORT=8000
@@ -246,7 +261,7 @@ SECURITY__ACCESS_TOKEN_EXPIRE_MINUTES=30
 # Logging
 LOGGING__LEVEL=INFO
 LOGGING__FORMAT=json
-LOGGING__FILE_PATH=logs/solstein.log
+LOGGING__FILE_PATH=data/output/logs/solstein.log
 LOGGING__ROTATION="500 MB"
 LOGGING__RETENTION="30 days"
 

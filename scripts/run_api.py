@@ -9,7 +9,6 @@ Production-ready API server with:
 - Health checks
 """
 
-import os
 import sys
 from pathlib import Path
 
@@ -26,14 +25,14 @@ from solstein.config import Settings
 def configure_logging():
     """Configure structured logging."""
     logger.remove()  # Remove default handler
-    
+
     # Add console handler
     logger.add(
         sys.stderr,
         format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
         level="INFO"
     )
-    
+
     # Add file handler
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
@@ -50,25 +49,25 @@ def main():
     """Main entry point."""
     # Configure logging
     configure_logging()
-    
+
     # Load settings
     settings = Settings()
-    
+
     logger.info("=" * 60)
     logger.info("SolStein Competitive Intelligence API")
     logger.info("=" * 60)
-    logger.info(f"Version: 1.0.0")
+    logger.info("Version: 1.0.0")
     logger.info(f"Environment: {settings.environment}")
     logger.info(f"Host: {settings.api.host}")
     logger.info(f"Port: {settings.api.port}")
     logger.info(f"Debug: {settings.api.debug}")
     logger.info(f"Data directory: {settings.data.data_dir}")
     logger.info("=" * 60)
-    
+
     # Create necessary directories
-    Path("exports/excel").mkdir(parents=True, exist_ok=True)
-    Path("exports/json").mkdir(parents=True, exist_ok=True)
-    
+    Path("data/output/exports/excel").mkdir(parents=True, exist_ok=True)
+    Path("data/output/exports/json").mkdir(parents=True, exist_ok=True)
+
     # Run server
     uvicorn.run(
         "solstein.api.main:app",

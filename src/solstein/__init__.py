@@ -10,8 +10,9 @@ __author__ = "AI Whisperers"
 __email__ = "team@ai-whisperers.com"
 
 import logging
-from loguru import logger
 import sys
+
+from loguru import logger
 
 # Configure logging
 logger.remove()
