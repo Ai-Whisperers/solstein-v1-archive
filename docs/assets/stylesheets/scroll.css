@@ -1,173 +1,324 @@
 /* ============================================================
-   SOLSTEIN — THE ALCHEMY GRID
-   Modern Mysticism aesthetic
-   Font: Cinzel (headers) + Lato (body) + Fira Code (code)
+   SOLSTEIN — THE MAGIC SCROLL
+   Modern Mysticism × Physical Grimoire
+   Organic edges, gold leaf text, leather depth, glassmorphism
    ============================================================ */
 
 /* --- GOOGLE FONTS IMPORT --- */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&family=Lato:wght@300;400;700&family=Fira+Code:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Fira+Code:wght@400;500&display=swap');
 
 /* --- ROOT TOKENS --- */
 :root {
-  --obsidian-dark: #0f0c08;
-  --obsidian-mid: #201b15;
-  --gold-muted: rgba(196, 150, 15, 0.25);
-  --gold-shimmer: #e8c84a;
-  --gold-accent: #c4960f;
-  --gold-dark: #8b6914;
+  /* The Obsidian Void */
+  --void-deepest: #060504;
+  --void-dark: #0b0908;
+  --void-mid: #151110;
+
+  /* The Scroll Surface */
+  --scroll-surface: #1a1612;
+  --scroll-leather: #1e1915;
+  --scroll-edge: #2a221c;
+
+  /* Gold Leaf Palette */
+  --gold-deep: #9e7312;
+  --gold-mid: #c4960f;
+  --gold-bright: #cf9d44;
+  --gold-shine: #ffefbb;
+  --gold-glow: rgba(207, 157, 68, 0.15);
+  --gold-border: rgba(196, 150, 15, 0.2);
+
+  /* Ember Accents */
   --ember: #b84c1a;
-  --glass-bg: rgba(26, 22, 18, 0.75);
-  --glass-border: rgba(196, 150, 15, 0.15);
-  --text-primary: #e6dfd3;
-  --text-secondary: #a39b8c;
+  --ember-glow: rgba(184, 76, 26, 0.12);
 
-  /* Material overrides */
-  --md-primary-fg-color: #0f0c08;
-  --md-primary-fg-color--dark: #0f0c08;
-  --md-primary-bg-color: #0f0c08;
-  --md-accent-fg-color: #c4960f;
-  --md-typeset-color: var(--text-primary);
-  --md-typeset-a-color: var(--gold-shimmer);
-  --md-default-bg-color: transparent;
-  --md-default-fg-color: var(--text-primary);
+  /* Text */
+  --ivory: #f0e6d2;
+  --ivory-dim: #c8baa0;
+  --ivory-faint: #8a7e6a;
+
+  /* Material Theme Overrides (force dark everywhere) */
+  --md-primary-fg-color: var(--void-dark);
+  --md-primary-fg-color--light: var(--gold-mid);
+  --md-primary-fg-color--dark: var(--void-deepest);
+  --md-primary-bg-color: var(--void-dark);
+  --md-accent-fg-color: var(--gold-mid);
+  --md-typeset-color: var(--ivory);
+  --md-typeset-a-color: var(--gold-bright);
+  --md-default-bg-color: var(--void-deepest);
+  --md-default-fg-color: var(--ivory);
+  --md-default-fg-color--light: var(--ivory-dim);
+  --md-default-fg-color--lighter: var(--ivory-faint);
+  --md-default-fg-color--lightest: rgba(255, 255, 255, 0.06);
+  --md-footer-bg-color: var(--void-deepest);
+  --md-footer-bg-color--dark: var(--void-deepest);
+  --md-footer-fg-color: var(--ivory-dim);
+  --md-footer-fg-color--light: var(--ivory-faint);
+  --md-footer-fg-color--lighter: var(--ivory-faint);
+  --md-code-bg-color: rgba(0, 0, 0, 0.4);
+  --md-code-fg-color: var(--gold-shine);
 }
 
-/* --- BODY / BACKGROUND --- */
-body {
-  background-color: var(--obsidian-dark);
+/* ============================================================
+   LAYER 0 — THE VOID (Background)
+   ============================================================ */
+body,
+body[data-md-color-scheme="default"] {
+  background-color: var(--void-deepest) !important;
   background-image:
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E"),
-    linear-gradient(135deg, #0f0c08 0%, #201b15 50%, #0f0c08 100%);
+    /* Subtle grain texture */
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"),
+    /* Deep ambient glow */
+    radial-gradient(ellipse at 30% 0%, rgba(207, 157, 68, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 100%, rgba(184, 76, 26, 0.03) 0%, transparent 60%),
+    linear-gradient(170deg, #0b0908 0%, #151110 40%, #0b0908 100%);
   background-attachment: fixed;
-  color: var(--text-primary);
+  color: var(--ivory);
 }
 
-/* Force specific material elements to be transparent/darker */
-.md-main__inner {
-  margin-top: 2rem;
-}
+/* ============================================================
+   LAYER 1 — THE SCROLL BODY (Main content)
+   Physical, leather-textured, with burned gold edges
+   ============================================================ */
 
-.md-sidebar {
+/* Kill ALL white backgrounds from Material theme */
+.md-main {
   background: transparent !important;
 }
 
-/* --- MAIN CONTENT AREA — GLASS GRIMOIRE --- */
+.md-main__inner {
+  background: transparent !important;
+  margin-top: 0;
+}
+
+.md-content {
+  background: transparent !important;
+}
+
 .md-content__inner {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  border-radius: 8px;
-  padding: 3rem 4rem;
-  max-width: 900px;
+  background:
+    /* Leather grain */
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23leather)' opacity='0.025'/%3E%3C/svg%3E"),
+    /* Surface color */
+    var(--scroll-surface);
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-image: linear-gradient(180deg,
+      rgba(207, 157, 68, 0.5) 0%,
+      rgba(207, 157, 68, 0.15) 30%,
+      rgba(207, 157, 68, 0.08) 70%,
+      rgba(207, 157, 68, 0.4) 100%) 1;
+  box-shadow:
+    /* Inner leather depth */
+    inset 6px 0 25px rgba(0, 0, 0, 0.4),
+    inset -6px 0 25px rgba(0, 0, 0, 0.4),
+    /* Gold edge glow */
+    -1px 0 15px rgba(207, 157, 68, 0.06),
+    1px 0 15px rgba(207, 157, 68, 0.06),
+    /* Hovering shadow */
+    0 0 80px rgba(0, 0, 0, 0.8);
+  padding: 3rem 3.5rem;
+  max-width: 920px;
   margin: 0 auto;
   position: relative;
   min-height: 80vh;
 }
 
-/* --- TYPOGRAPHY --- */
+/* Burned top edge */
+.md-content__inner::before {
+  content: "";
+  display: block;
+  height: 4px;
+  margin: -3rem -3.5rem 2.5rem -3.5rem;
+  background: linear-gradient(90deg,
+      var(--gold-deep) 0%,
+      var(--gold-bright) 15%,
+      var(--gold-shine) 50%,
+      var(--gold-bright) 85%,
+      var(--gold-deep) 100%);
+  opacity: 0.6;
+  box-shadow: 0 0 20px rgba(207, 157, 68, 0.25);
+}
+
+/* Burned bottom edge */
+.md-content__inner::after {
+  content: "";
+  display: block;
+  height: 4px;
+  margin: 2.5rem -3.5rem -3rem -3.5rem;
+  background: linear-gradient(90deg,
+      var(--gold-deep) 0%,
+      var(--gold-bright) 15%,
+      var(--gold-shine) 50%,
+      var(--gold-bright) 85%,
+      var(--gold-deep) 100%);
+  opacity: 0.6;
+  box-shadow: 0 -0px 20px rgba(207, 157, 68, 0.25);
+}
+
+/* ============================================================
+   LAYER 2 — ALCHEMICAL TYPOGRAPHY
+   ============================================================ */
+
 .md-typeset {
-  font-family: 'Lato', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Lora', Georgia, 'Times New Roman', serif;
   font-size: 17px;
-  line-height: 1.7;
-  color: var(--text-primary);
+  line-height: 1.75;
+  color: var(--ivory);
 }
 
-/* Main headers get the full Cinzel treatment */
-.md-typeset h1,
-.md-typeset h2,
-.md-typeset h3,
-.md-typeset h4,
-.md-typeset h5,
-.md-typeset h6 {
-  color: var(--gold-shimmer);
-}
-
+/* --- Gold Leaf H1 --- */
 .md-typeset h1 {
   font-family: 'Cinzel Decorative', serif;
-  font-size: 2.2rem;
-  font-weight: 800;
+  font-size: 2.4rem;
+  font-weight: 700;
   text-align: center;
-  letter-spacing: 0.1em;
-  margin: 1.5rem 0 0.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid var(--gold-muted);
+  letter-spacing: 0.12em;
+  margin: 1.5rem 0 1rem;
+  padding-bottom: 1rem;
+  /* Gold leaf gradient */
+  background: linear-gradient(to bottom, #cf9d44 0%, #ffefbb 50%, #9e7312 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  /* Subtle glow behind */
+  filter: drop-shadow(0 0 8px rgba(207, 157, 68, 0.3));
+  border-bottom: 1px solid var(--gold-border);
 }
 
 .md-typeset h2 {
   font-family: 'Cinzel', serif;
-  font-size: 1.35rem;
+  font-size: 1.4rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  color: var(--gold-bright);
+  letter-spacing: 0.06em;
   margin: 2.5rem 0 0.75rem;
-  padding-bottom: 0.4rem;
-  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(207, 157, 68, 0.12);
+  text-shadow: 0 0 20px rgba(207, 157, 68, 0.15);
 }
 
 .md-typeset h3 {
   font-family: 'Cinzel', serif;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 500;
-  letter-spacing: 0.03em;
+  color: var(--gold-mid);
+  letter-spacing: 0.04em;
   margin: 1.75rem 0 0.5rem;
 }
 
-/* Blockquotes — the oracle speaks */
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  font-family: 'Cinzel', serif;
+  color: var(--ivory-dim);
+  letter-spacing: 0.03em;
+}
+
+/* Scroll offsets for anchor links */
+.md-typeset [id] {
+  scroll-margin-top: 120px;
+}
+
+/* --- Blockquotes — The Oracle Speaks --- */
 .md-typeset blockquote {
-  font-family: 'IM Fell English', serif;
+  font-family: 'Lora', serif;
   font-style: italic;
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  border-left: 4px solid var(--gold-accent);
-  background: linear-gradient(90deg, rgba(196, 150, 15, 0.05) 0%, transparent 100%);
+  font-size: 1.05rem;
+  color: var(--ivory-dim);
+  border-left: 3px solid var(--gold-mid);
+  background: linear-gradient(90deg, var(--gold-glow) 0%, transparent 100%);
   padding: 1rem 1.5rem;
   margin: 1.5rem 0;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 6px 6px 0;
 }
 
 .md-typeset blockquote p {
   margin: 0;
 }
 
-/* Links */
+/* --- Links --- */
 .md-typeset a {
-  color: var(--gold-shimmer);
-  text-decoration: underline;
-  text-decoration-color: var(--gold-muted);
-  transition: all 0.2s ease;
+  color: var(--gold-bright);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(207, 157, 68, 0.25);
+  transition: all 0.25s ease;
 }
 
 .md-typeset a:hover {
-  text-decoration-color: var(--gold-shimmer);
-  text-shadow: 0 0 8px rgba(232, 200, 74, 0.3);
+  color: var(--gold-shine);
+  border-bottom-color: var(--gold-shine);
+  text-shadow: 0 0 12px rgba(255, 239, 187, 0.25);
 }
 
-/* Suppress '¶' permalink markers for cleaner visual & accessibility */
+/* Kill permalink symbols */
 .headerlink {
   display: none !important;
 }
 
-/* --- TABLES — THE ATTRACTIVENESS BOARD --- */
+/* --- Bold / Strong --- */
+.md-typeset strong {
+  color: var(--ivory);
+  font-weight: 700;
+}
+
+/* --- Lists --- */
+.md-typeset ul li::marker {
+  color: var(--gold-mid);
+}
+
+.md-typeset ol li::marker {
+  font-family: 'Cinzel', serif;
+  color: var(--gold-bright);
+  font-weight: 600;
+}
+
+/* --- Horizontal Rules — Rune Dividers --- */
+.md-typeset hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--gold-border) 20%,
+      var(--gold-mid) 50%,
+      var(--gold-border) 80%,
+      transparent 100%);
+  margin: 3rem 0;
+  position: relative;
+}
+
+.md-typeset hr::after {
+  content: "⚗";
+  position: absolute;
+  top: -0.7rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--scroll-surface);
+  padding: 0 1rem;
+  color: var(--gold-mid);
+  font-size: 1.1rem;
+  text-shadow: 0 0 10px rgba(207, 157, 68, 0.3);
+}
+
+/* ============================================================
+   LAYER 3 — TABLES (Integrated into the scroll)
+   ============================================================ */
+
 .md-typeset table {
   border-collapse: collapse;
   width: 100%;
   display: table;
   margin: 1.5rem 0;
-  background: rgba(15, 12, 8, 0.4);
-  backdrop-filter: blur(4px);
-  border: 1px solid var(--glass-border);
+  background: var(--scroll-leather) !important;
+  border: 1px solid var(--gold-border);
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Make tables scrollable on mobile */
 .md-typeset .table-wrapper {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   margin-bottom: 1.5rem;
-  border-radius: 6px;
 }
 
 @media screen and (max-width: 76.25em) {
@@ -179,54 +330,86 @@ body {
 
 .md-typeset table th {
   font-family: 'Cinzel', serif;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: var(--gold-dark);
-  color: #fffaf0;
-  padding: 0.8rem 1rem;
-  border-bottom: 1px solid var(--gold-accent);
+  background: linear-gradient(180deg,
+      rgba(207, 157, 68, 0.2) 0%,
+      rgba(158, 115, 18, 0.12) 100%) !important;
+  color: var(--gold-shine) !important;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--gold-mid);
   text-align: left;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .md-typeset table td {
-  padding: 0.7rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
+  padding: 0.7rem 1.1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--ivory) !important;
+  background: transparent !important;
 }
 
 .md-typeset table tr {
   transition: background 0.2s ease;
+  background: transparent !important;
+}
+
+.md-typeset table tr:nth-child(even) {
+  background: rgba(207, 157, 68, 0.03) !important;
 }
 
 .md-typeset table tr:nth-child(even) td {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(207, 157, 68, 0.03) !important;
 }
 
 .md-typeset table tr:hover td {
-  background: rgba(196, 150, 15, 0.08);
+  background: rgba(207, 157, 68, 0.08) !important;
 }
 
-/* --- CODE BLOCKS --- */
+/* ============================================================
+   LAYER 4 — CODE BLOCKS
+   ============================================================ */
+
 .md-typeset code {
   font-family: 'Fira Code', monospace;
   font-size: 0.875em;
-  background: rgba(0, 0, 0, 0.4);
-  color: var(--gold-shimmer);
-  padding: 0.2em 0.4em;
+  background: rgba(0, 0, 0, 0.5) !important;
+  color: var(--gold-shine) !important;
+  padding: 0.2em 0.45em;
   border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(207, 157, 68, 0.1);
 }
 
 .md-typeset pre>code {
-  background: var(--obsidian-dark);
-  color: var(--text-primary);
-  border: 1px solid var(--glass-border);
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+  background: var(--void-dark) !important;
+  color: var(--ivory) !important;
+  border: 1px solid var(--gold-border);
+  box-shadow: inset 0 2px 20px rgba(0, 0, 0, 0.6);
+  border-radius: 6px;
 }
 
-/* --- NAVIGATION (the index of scrolls) --- */
+/* ============================================================
+   LAYER 5 — SIDEBAR & NAVIGATION (Glassmorphism)
+   ============================================================ */
+
+/* Kill ALL white/light backgrounds on sidebars */
+.md-sidebar,
+.md-sidebar--primary,
+.md-sidebar--secondary {
+  background: transparent !important;
+}
+
+.md-sidebar__scrollwrap {
+  background: transparent !important;
+}
+
+.md-sidebar__inner {
+  background: transparent !important;
+}
+
+/* Navigation fonts */
 .md-nav {
   font-family: 'Cinzel', serif;
   font-size: 0.78rem;
@@ -235,175 +418,293 @@ body {
 
 .md-nav__title {
   font-weight: 700;
-  color: var(--gold-shimmer);
+  color: var(--gold-bright) !important;
+  background: transparent !important;
 }
 
+/* Force dark text on ALL nav links */
 .md-nav__link {
-  color: var(--text-secondary) !important;
+  color: var(--ivory-faint) !important;
   transition: all 0.2s ease;
   padding: 0.35rem 0.75rem;
   border-radius: 4px;
 }
 
 .md-nav__link:hover {
-  color: var(--gold-shimmer) !important;
-  background: rgba(196, 150, 15, 0.08);
+  color: var(--gold-bright) !important;
+  background: var(--gold-glow) !important;
 }
 
-/* Active section in main navigation */
+/* Active nav link — golden thread indicator */
 .md-nav__item--active>.md-nav__link {
-  color: var(--gold-shimmer) !important;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  background: linear-gradient(90deg, rgba(196, 150, 15, 0.15) 0%, transparent 100%);
-  border-left: 2px solid var(--gold-accent);
-  margin-top: 8px;
-  margin-bottom: 8px;
+  color: var(--gold-bright) !important;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--gold-glow) 0%, transparent 100%) !important;
+  border-left: 2px solid var(--gold-mid);
 }
 
-/* --- HEADER / TOP BAR --- */
+/* "On This Scroll" sidebar */
+.md-nav--secondary .md-nav__title {
+  font-family: 'Cinzel', serif;
+  color: var(--gold-bright) !important;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  border-bottom: 1px solid var(--gold-border);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  background: transparent !important;
+}
+
+.md-nav--secondary .md-nav__link {
+  color: var(--ivory-faint) !important;
+}
+
+.md-nav--secondary .md-nav__link--active {
+  color: var(--gold-bright) !important;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--gold-glow) 0%, transparent 100%) !important;
+  border-left: 2px solid var(--gold-mid);
+  border-radius: 0 4px 4px 0;
+  padding-left: 14px !important;
+  transition: all 0.3s ease;
+}
+
+.md-nav--secondary .md-nav__link--passed {
+  color: var(--ivory-faint) !important;
+  opacity: 0.5;
+}
+
+/* ============================================================
+   LAYER 6 — HEADER & TABS
+   ============================================================ */
+
 .md-header {
-  background: rgba(15, 12, 8, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--glass-border);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  background: rgba(6, 5, 4, 0.92) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--gold-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
 }
 
 .md-header__title {
   font-family: 'Cinzel Decorative', serif;
-  letter-spacing: 0.06em;
-  color: var(--gold-shimmer) !important;
+  letter-spacing: 0.08em;
+  /* Gold leaf on the title */
+  background: linear-gradient(to right, #cf9d44 0%, #ffefbb 40%, #cf9d44 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-weight: 700;
 }
 
-/* --- TABS --- */
+/* Header icons & buttons */
+.md-header__button {
+  color: var(--ivory-dim) !important;
+}
+
+.md-header__button:hover {
+  color: var(--gold-bright) !important;
+}
+
+.md-header__topic {
+  color: var(--ivory-dim) !important;
+}
+
+/* Tabs */
 .md-tabs {
-  background: rgba(15, 12, 8, 0.6);
-  backdrop-filter: blur(5px);
-  border-bottom: 1px solid var(--glass-border);
+  background: rgba(6, 5, 4, 0.7) !important;
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(207, 157, 68, 0.08);
 }
 
 .md-tabs__link {
   font-family: 'Cinzel', serif;
   font-size: 0.75rem;
   letter-spacing: 0.06em;
-  color: var(--text-secondary) !important;
+  color: var(--ivory-faint) !important;
   opacity: 1 !important;
+  transition: all 0.2s ease;
 }
 
 .md-tabs__link--active,
 .md-tabs__link:hover {
-  color: var(--gold-shimmer) !important;
-  border-bottom: 2px solid var(--gold-shimmer);
+  color: var(--gold-shine) !important;
+  text-shadow: 0 0 15px rgba(255, 239, 187, 0.2);
 }
 
-/* --- ADMONITIONS — ARCANE WARNINGS --- */
-.md-typeset .admonition {
-  border: 1px solid var(--glass-border);
-  background: rgba(15, 12, 8, 0.5);
-  backdrop-filter: blur(5px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+/* ============================================================
+   LAYER 7 — ADMONITIONS
+   ============================================================ */
+
+.md-typeset .admonition,
+.md-typeset details {
+  border: 1px solid var(--gold-border) !important;
+  background: rgba(26, 22, 18, 0.8) !important;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   border-radius: 6px;
+  color: var(--ivory) !important;
 }
 
-.md-typeset .admonition-title {
+.md-typeset .admonition-title,
+.md-typeset summary {
   font-family: 'Cinzel', serif;
   font-size: 0.85rem;
   letter-spacing: 0.05em;
   font-weight: 600;
-  color: var(--gold-shimmer);
+  color: var(--gold-bright) !important;
+  background: rgba(207, 157, 68, 0.08) !important;
+  border-bottom: 1px solid var(--gold-border) !important;
 }
 
-/* --- FOOTER --- */
+/* ============================================================
+   LAYER 8 — FOOTER
+   ============================================================ */
+
 .md-footer {
-  background: var(--obsidian-dark);
-  border-top: 1px solid var(--glass-border);
+  background: var(--void-deepest) !important;
+  border-top: 1px solid var(--gold-border);
+}
+
+.md-footer__inner {
+  background: transparent !important;
 }
 
 .md-footer-meta {
-  background: transparent;
+  background: var(--void-deepest) !important;
   font-family: 'Cinzel', serif;
   font-size: 0.7rem;
   letter-spacing: 0.05em;
-  color: var(--gold-muted);
+  color: var(--ivory-faint) !important;
 }
 
-/* --- TABLE OF CONTENTS (On this scroll) --- */
-.md-nav--secondary .md-nav__title {
-  font-family: 'Cinzel', serif;
-  color: var(--gold-shimmer);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  border-bottom: 1px solid var(--glass-border);
-  padding-bottom: 0.5rem;
-  margin-bottom: 0.5rem;
+.md-footer-meta a {
+  color: var(--gold-mid) !important;
 }
 
-.md-nav--secondary .md-nav__link--active {
-  color: var(--gold-shimmer) !important;
-  font-weight: 700;
-  background: linear-gradient(90deg, rgba(196, 150, 15, 0.15) 0%, transparent 100%);
-  border-left: 2px solid var(--gold-accent);
-  border-radius: 0 4px 4px 0;
-  padding-left: 15px !important;
-  transition: all 0.3s ease;
+/* Footer nav buttons */
+.md-footer__link {
+  color: var(--ivory-dim) !important;
 }
 
-.md-nav--secondary .md-nav__link--passed {
-  color: var(--text-secondary) !important;
-  opacity: 0.6;
+.md-footer__title {
+  color: var(--ivory-dim) !important;
 }
 
-/* --- SEARCH --- */
+.md-footer__direction {
+  color: var(--ivory-faint) !important;
+}
+
+/* ============================================================
+   LAYER 9 — SEARCH
+   ============================================================ */
+
 .md-search__input {
-  font-family: 'Lato', serif;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
-  border: 1px solid var(--glass-border);
+  font-family: 'Lora', serif;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: var(--ivory) !important;
+  border: 1px solid var(--gold-border);
   border-radius: 20px;
 }
 
-/* --- HORIZONTAL RULES — RUNE DIVIDERS --- */
-.md-typeset hr {
-  border: none;
-  border-top: 1px solid var(--glass-border);
-  margin: 3rem 0;
-  position: relative;
-  text-align: center;
+.md-search__input::placeholder {
+  color: var(--ivory-faint) !important;
 }
 
-.md-typeset hr::after {
-  content: "⚗";
-  position: absolute;
-  top: -0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--glass-bg);
-  padding: 0 1rem;
-  color: var(--gold-muted);
-  font-size: 1.2rem;
+.md-search-result {
+  background: var(--scroll-surface) !important;
+  color: var(--ivory) !important;
 }
 
-/* --- BOLD / STRONG --- */
-.md-typeset strong {
-  color: #ffffff;
-  font-weight: 700;
+.md-search-result__meta {
+  background: var(--void-dark) !important;
+  color: var(--ivory-faint) !important;
 }
 
-/* --- LISTS --- */
-.md-typeset ul li::marker,
-.md-typeset ol li::marker {
-  color: var(--gold-accent);
+.md-search-result__item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
-/* --- COPY BUTTON --- */
+/* ============================================================
+   LAYER 10 — COPY BUTTON & MISC
+   ============================================================ */
+
 .md-clipboard {
-  color: var(--gold-muted) !important;
+  color: var(--ivory-faint) !important;
 }
 
 .md-clipboard:hover {
-  color: var(--gold-shimmer) !important;
+  color: var(--gold-bright) !important;
+}
+
+/* Kill any remaining white Material backgrounds */
+.md-typeset .md-typeset__scrollwrap {
+  background: transparent !important;
+}
+
+.md-typeset__table {
+  background: transparent !important;
+}
+
+/* Source/edit links */
+.md-source {
+  color: var(--ivory-faint) !important;
+}
+
+.md-source__repository {
+  color: var(--ivory-dim) !important;
+}
+
+/* ============================================================
+   ANIMATION — Scroll Unfurl
+   ============================================================ */
+
+@keyframes scrollUnfurl {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.md-content {
+  animation: scrollUnfurl 0.4s ease-out;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media screen and (max-width: 76.25em) {
+  .md-content__inner {
+    padding: 2rem 1.5rem;
+  }
+
+  .md-content__inner::before {
+    margin: -2rem -1.5rem 1.5rem -1.5rem;
+  }
+
+  .md-content__inner::after {
+    margin: 1.5rem -1.5rem -2rem -1.5rem;
+  }
+
+  /* Mobile nav drawer */
+  .md-nav--primary .md-nav__title {
+    background: var(--void-dark) !important;
+    color: var(--gold-bright) !important;
+  }
+
+  .md-nav--primary .md-nav__title[for="__drawer"] {
+    background: var(--void-dark) !important;
+    color: var(--gold-bright) !important;
+  }
+
+  .md-nav--primary>.md-nav__list {
+    background: var(--void-dark) !important;
+  }
 }
