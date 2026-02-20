@@ -686,7 +686,6 @@ body[data-md-color-scheme="default"] {
 .md-nav--lifted>.md-nav__list>.md-nav__item--active>.md-nav__link,
 .md-nav--lifted .md-nav[data-md-level="0"]>.md-nav__list>.md-nav__item--active>.md-nav__link,
 [data-md-toggle="nav"]~.md-nav__title {
-  background: var(--void-dark) !important;
   color: var(--gold-bright) !important;
   box-shadow: none !important;
   border: none !important;
