@@ -1,7 +1,4 @@
-"""
-Celery background tasks.
-"""
-
+from datetime import datetime
 from typing import Any
 
 from celery import shared_task
@@ -11,8 +8,6 @@ from .config import get_settings
 from .data.repositories import JsonFileRepository
 from .exporters.excel_exporter import ExcelExporter
 
-settings = get_settings()
-
 
 @shared_task(name="export_marketing_report")
 def export_marketing_report(filters: dict[str, Any], output_filename: str) -> str:
@@ -21,6 +16,7 @@ def export_marketing_report(filters: dict[str, Any], output_filename: str) -> st
     """
     logger.info(f"Starting background export task. Filters: {filters}")
 
+    settings = get_settings()
     # 1. Initialize Repository
     repo = JsonFileRepository(data_dir=settings.data.data_dir)
 
@@ -53,6 +49,7 @@ def batch_score_companies(filters: dict[str, Any]) -> dict[str, Any]:
     from .analytics.scoring import GrowthScorer
     from .core.repositories import CompanyFilter
 
+    settings = get_settings()
     repo = JsonFileRepository(data_dir=settings.data.data_dir)
     scorer = GrowthScorer()
 

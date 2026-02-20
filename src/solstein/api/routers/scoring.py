@@ -4,7 +4,9 @@ from typing import Any
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from loguru import logger
 
+from ...analytics.scoring import GrowthScorer
 from ...tasks import batch_score_companies, export_marketing_report
+from ...core.repositories import CompanyRepository
 from ..dependencies import get_current_user, get_repository
 
 router = APIRouter(tags=["Scoring"])

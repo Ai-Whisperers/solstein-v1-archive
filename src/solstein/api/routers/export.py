@@ -11,6 +11,7 @@ from ...config import get_settings
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...exporters.excel_exporter import ExcelExporter
 from ...tasks import export_marketing_report
+from ...core.repositories import CompanyRepository
 from ..dependencies import get_current_user, get_repository
 
 router = APIRouter(tags=["Export"])

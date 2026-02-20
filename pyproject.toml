@@ -107,5 +107,5 @@ strict = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 addopts = "-v --cov=solstein --cov-report=term-missing"

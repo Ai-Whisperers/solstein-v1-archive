@@ -16,16 +16,16 @@ class GrowthScoringConfig(BaseModel):
     revenue_growth_divisor: float = 20.0
     revenue_growth_cap: float = 4.0
 
-    # Revenue per Employee thresholds
+    # Revenue per Employee thresholds (in EUR)
     efficiency_high_threshold: float = 500_000.0
     efficiency_high_bonus: float = 2.0
     efficiency_med_threshold: float = 200_000.0
     efficiency_med_bonus: float = 1.0
 
-    # Funding thresholds
-    funding_high_threshold: float = 50_000_000.0
+    # Funding thresholds (in Millions)
+    funding_high_threshold: float = 50.0
     funding_high_bonus: float = 2.0
-    funding_med_threshold: float = 10_000_000.0
+    funding_med_threshold: float = 10.0
     funding_med_bonus: float = 1.0
 
     # Profitability thresholds
@@ -41,12 +41,12 @@ class FinancialHealthConfig(BaseModel):
 
     base_score: float = 5.0
 
-    # Revenue Scale
-    revenue_large_threshold: float = 100_000_000.0
+    # Revenue Scale (in Millions)
+    revenue_large_threshold: float = 100.0
     revenue_large_bonus: float = 2.5
-    revenue_med_threshold: float = 10_000_000.0
+    revenue_med_threshold: float = 10.0
     revenue_med_bonus: float = 1.25
-    revenue_small_threshold: float = 1_000_000.0
+    revenue_small_threshold: float = 1.0
     revenue_small_penalty: float = -1.0
 
     # Profitability
@@ -56,7 +56,7 @@ class FinancialHealthConfig(BaseModel):
     margin_med_bonus: float = 1.25
     margin_negative_penalty: float = -2.5
 
-    # Efficiency (Rev/Emp)
+    # Efficiency (Rev/Emp - Absolute EUR)
     efficiency_exceptional_threshold: float = 1_000_000.0
     efficiency_exceptional_bonus: float = 2.5
     efficiency_good_threshold: float = 500_000.0

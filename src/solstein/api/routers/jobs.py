@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 from celery.result import AsyncResult
 from loguru import logger
 
-from ..worker import celery_app
+from ...worker import celery_app
 
 router = APIRouter(tags=["Jobs"])
 

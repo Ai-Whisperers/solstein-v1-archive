@@ -360,13 +360,13 @@ class MarketAnalyzer:
         else:
             return "Competitive"
 
-    def _calculate_swot(self, profiles: list[Company]) -> dict[str, Any]:
+    def _calculate_swot(self, profiles: list[Company]) -> dict[str, list[str]]:
         """Generate basic SWOT analysis based on company data."""
         return {
-            "strengths": ["Strong Growth"] if any(p.financials.growth_rate and p.financials.growth_rate > 20 for p in profiles) else ["Established Players"],
-            "weaknesses": ["Fragmented Market"] if len(profiles) > 10 else ["Niche Market"],
-            "opportunities": ["AI Adoption", "Regional Expansion"],
-            "threats": ["High Barriers to Entry", "Regulatory Changes"],
+            "Strengths": ["Strong Growth"] if any(p.financials.growth_rate and p.financials.growth_rate > 20 for p in profiles) else ["Established Players"],
+            "Weaknesses": ["Fragmented Market"] if len(profiles) > 10 else ["Niche Market"],
+            "Opportunities": ["AI Adoption", "Regional Expansion"],
+            "Threats": ["High Barriers to Entry", "Regulatory Changes"],
         }
 
 

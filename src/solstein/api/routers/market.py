@@ -13,7 +13,7 @@ router = APIRouter(tags=["Market Analysis"])
 market_analyzer = MarketAnalyzer()
 
 
-@router.get("/market/analysis")
+@router.get("/analysis")
 async def analyze_market(
     industry: str | None = Query(None, description="Industry to analyze"),
     region: str | None = Query(None, description="Geographic region"),
@@ -48,7 +48,7 @@ async def analyze_market(
         ) from e
 
 
-@router.get("/market/overlap/{company_id}", response_model=list[CompetitiveOverlap])
+@router.get("/overlap/{company_id}", response_model=list[CompetitiveOverlap])
 async def get_competitive_overlap(
     company_id: str,
     top_n: int = Query(10, ge=1, le=50, description="Number of top overlaps to return"),
