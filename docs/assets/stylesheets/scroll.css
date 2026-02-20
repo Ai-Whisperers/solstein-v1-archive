@@ -165,14 +165,35 @@ body {
   text-decoration-color: var(--gold-bright);
 }
 
+/* Suppress '¶' permalink markers for cleaner visual & accessibility */
+.headerlink {
+  display: none !important;
+}
+
 /* --- TABLES — THE ATTRACTIVENESS BOARD --- */
 .md-typeset table {
   border-collapse: collapse;
   width: 100%;
+  display: table;
   margin: 1.5rem 0;
   background: var(--parchment-dark);
   border: 2px solid var(--scroll-border);
   box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile Responsiveness for tables */
+.md-typeset .table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+}
+
+@media screen and (max-width: 76.25em) {
+  .md-typeset table {
+    display: block;
+    overflow-x: auto;
+  }
 }
 
 .md-typeset table th {
@@ -262,9 +283,9 @@ body {
 
 /* --- HEADER / TOP BAR --- */
 .md-header {
-  background: var(--ink-black);
+  background: linear-gradient(180deg, #1a1208 0%, #0d0904 100%);
   border-bottom: 2px solid var(--gold);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.7);
 }
 
 .md-header__title {
