@@ -95,11 +95,7 @@ body[data-md-color-scheme="default"] {
 }
 
 .md-content__inner {
-  background:
-    /* Leather grain */
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23leather)' opacity='0.025'/%3E%3C/svg%3E"),
-    /* Surface color */
-    var(--scroll-surface);
+  background: var(--scroll-surface);
   border-left: 3px solid transparent;
   border-right: 3px solid transparent;
   border-image: linear-gradient(180deg,
@@ -645,6 +641,11 @@ body[data-md-color-scheme="default"] {
 
 .md-typeset__table {
   background: transparent !important;
+}
+
+/* Hide "Edit this page" button */
+.md-content__button[rel="edit"] {
+  display: none !important;
 }
 
 /* Source/edit links */

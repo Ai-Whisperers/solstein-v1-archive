@@ -5,7 +5,7 @@ site_url: "https://ai-whisperers.github.io/solstein/"
 
 repo_name: "AI-Whisperers/solstein"
 repo_url: "https://github.com/Ai-Whisperers/solstein"
-edit_uri: "edit/main/docs/"
+edit_uri: ""
 
 docs_dir: docs
 theme:
@@ -26,7 +26,6 @@ theme:
     - navigation.top
     - toc.follow
     - content.code.copy
-    - content.action.edit
   icon:
     logo: material/crystal-ball
     repo: fontawesome/brands/github
