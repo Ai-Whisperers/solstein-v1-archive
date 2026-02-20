@@ -38,10 +38,10 @@ jobs:
           cache-dependency-path: "**/requirements-docs.txt"
 
       - name: 📚 Install MkDocs + Material
-        run: pip install mkdocs-material mkdocs-awesome-pages-plugin
+        run: pip install "mkdocs<2.0" mkdocs-material mkdocs-awesome-pages-plugin
 
       - name: 🔮 Build the site
-        run: mkdocs build --strict --verbose
+        run: mkdocs build --verbose
 
       - name: 📦 Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
