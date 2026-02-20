@@ -89,24 +89,9 @@ Solstein's intelligence compounds:
 
 | Source of Deepening | How It Works |
 |--------------------|-------------|
-| **Dataset accumulation** | Every market we analyze adds proprietary structured data that no competitor starts with |
-| **Deal validation feedback** | When PE clients tell us whether Solstein's classifications matched their actual outcomes, the scoring algorithm learns |
-| **Proprietary weight evolution** | The algorithm that produces the Attractiveness Board becomes more accurate with every real-world calibration |
-
-After 12 months of active use, a Solstein dataset is worth more than the dataset from the day it launched. The spell improves with casting.
+- **Dataset accumulation** | Every market we analyze adds proprietary structured data that no competitor starts with
+- **Deal validation feedback** | When PE clients tell us whether Solstein's classifications matched their actual outcomes, the scoring algorithm learns
+- **Proprietary weight evolution** | The algorithm that produces the Attractiveness Board becomes more accurate with every real-world calibration
 
 ---
-
-## The Transmutation Upsell
-
-For select Dinosaur companies in a PE portfolio, Solstein's parent company — AI Whisperers — offers something beyond intelligence:
-
-**We enter the company. We find the leaded brains. We cast the spell that turns the coal into gold.**
-
-In exchange, we do not invoice. We take equity.
-
-This is the deeper commercial play — not intelligence as a service, but transformation as a co-investment. Solstein identifies the Dinosaurs. AI Whisperers transforms them. Both parties take a stake in the gold that results.
-
-→ Full architecture: [The Three-Entity Flywheel](../LORE/the-play.md)
-
----
+*The commercial framework of [AI Whisperers](https://www.ai-whisperers.org/).*

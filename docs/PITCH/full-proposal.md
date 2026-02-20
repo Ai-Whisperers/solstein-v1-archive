@@ -48,9 +48,12 @@ Every company receives its classification — not as a label, but as a verdict:
 
 | Classification | Score | What It Means — and What It Opens |
 |---------------|-------|-----------------------------------|
-| 🚀 **Rocket** | ≥ 7.0 | High-growth, AI-native or rapidly becoming so. Acquisition premium justified. Prioritize. |
-| ⚖️ **Neutral** | 4.0–7.0 | Stable. Directional. The signal in these companies is what separates great intelligence from mediocre. |
-| 🦕 **Dinosaur** | ≤ 4.0 | Carrying coal. Not a write-off — a transformation opportunity. Assess the people before the balance sheet. |
+| Rocket | ≥ 7.0 | High-growth, AI-native or rapidly becoming so. Acquisition premium justified. Prioritize. |
+| Neutral | 4.0–7.0 | Stable. Directional. The signal in these companies is what separates great intelligence from mediocre. |
+| Dinosaur | ≤ 4.0 | Carrying coal. Not a write-off — a transformation opportunity. Assess the people before the balance sheet. |
+
+---
+*The full architecture of [AI Whisperers](https://www.ai-whisperers.org/).*
 
 **V. The Attractiveness Board**
 Every score links to its underlying evidence. Every classification exposes its reasoning. When your deal team clicks a score, they see the signals that produced it. No black boxes. No "our proprietary algorithm says." Full chain of reasoning, source to conclusion.

@@ -24,7 +24,7 @@ Solstein is an AI-orchestrated intelligence engine. In the same time it takes a 
 
 - Every company in the target market, profiled across growth, financial health, and AI maturity
 - A ranked Attractiveness Board — clickable, reasoned, source-exposed
-- Full classification: 🚀 Rockets (accelerate), ⚖️ Neutrals (watch), 🦕 Dinosaurs (transform or exit)
+- Full classification: Rockets (accelerate), Neutrals (watch), Dinosaurs (transform or exit)
 - Every score linked to its underlying signal — no black boxes, no "trust the algorithm"
 
 ---
@@ -34,9 +34,9 @@ Solstein is an AI-orchestrated intelligence engine. In the same time it takes a 
 ```
 Rank  Company          Growth  Financial  AI Maturity  Classification
 ────  ───────────────  ──────  ─────────  ───────────  ──────────────
-1     Acme Energy BV   8.4     7.2        Strong       🚀 Rocket
-2     GridTech BV      6.1     6.8        Moderate     ⚖️ Neutral
-3     LegacyPower AG   3.2     4.1        None         🦕 Dinosaur
+1     Acme Energy BV   8.4     7.2        Strong       Rocket
+2     GridTech BV      6.1     6.8        Moderate     Neutral
+3     LegacyPower AG   3.2     4.1        None         Dinosaur
 ...   (29 companies, fully scored, fully explained)
 ```
 
@@ -79,5 +79,8 @@ For years PE could buy a Dinosaur, repackage it, and sell the coal wrapped in po
 → [Proof of Magic — Live Case Study](./case-study.md)
 → [The Commercial Architecture](./business-model.md)
 → [The Deeper Play — Transmuting Portfolio Companies](../LORE/the-play.md)
+
+---
+*Powered by [AI Whisperers](https://www.ai-whisperers.org/).*
 
 ---

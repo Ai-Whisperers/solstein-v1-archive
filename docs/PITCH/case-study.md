@@ -42,9 +42,9 @@ Every company was scored across three dimensions:
 
 | Classification | Count | Share of Market | What It Signals |
 |---------------|-------|-----------------|-----------------|
-| 🚀 Rocket | 4 | 14% | High-growth, AI-native or rapidly adopting. Acquisition premium justified now. |
-| ⚖️ Neutral | 18 | 62% | Stable players. Signal-rich for anyone reading carefully. |
-| 🦕 Dinosaur | 7 | 24% | Carrying coal. Three have transformation potential. Four are irreversible. Solstein shows you which is which. |
+| Rocket | 4 | 14% | High-growth, AI-native or rapidly adopting. Acquisition premium justified now. |
+| Neutral | 18 | 62% | Stable players. Signal-rich for anyone reading carefully. |
+| Dinosaur | 7 | 24% | Carrying coal. Three have transformation potential. Four are irreversible. Solstein shows you which is which. |
 
 ### What Else the Crystal Revealed
 
@@ -60,7 +60,7 @@ Every company was scored across three dimensions:
 ```
 Company:            EnergyTech BV
 Country:            Netherlands
-Classification:     🚀 Rocket
+Classification:     Rocket
 Growth Score:       8.2 / 10
 Financial Health:   7.4 / 10
 Competitive Pos.:   8.0 / 10
@@ -131,6 +131,7 @@ Let us walk you through these 29 companies. In the session, you will see:
 
 ---
 
-*Solstein is a product of AI Whisperers — the wizards who find the diamonds nobody knew were there.*
+---
+*A demonstrative cast by [AI Whisperers](https://www.ai-whisperers.org/).*
 
 ---

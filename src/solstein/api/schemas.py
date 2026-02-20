@@ -65,6 +65,19 @@ class FinancialMetricSchema(BaseModel):
         return v
 
 
+class ScoreComponentSchema(BaseModel):
+    """A single component of a score calculation."""
+    name: str
+    value: float
+    formula: str
+    reasoning: str
+
+class ScoringExplanationSchema(BaseModel):
+    """Detailed explanation of how a final score was calculated."""
+    base_score: float
+    components: list[ScoreComponentSchema] = Field(default_factory=list)
+    final_score: float
+
 class CompanyProfileSchema(BaseModel):
     """Company profile API schema."""
 
@@ -100,6 +113,7 @@ class CompanyProfileSchema(BaseModel):
     growth_score: float | None = None
     financial_health_score: float | None = None
     competitive_position_score: float | None = None
+    scoring_breakdown: dict[str, ScoringExplanationSchema] = Field(default_factory=dict)
 
 
 class ConditionSchema(BaseModel):

@@ -12,9 +12,9 @@ We are not here to invoice you. We are here to **transmute your portfolio** — 
 
 This is alchemy. Real alchemy. Not metaphor.
 
-- **Lead in:** A Dinosaur company carrying decades of coal — legacy systems, buried talent, promised synergies that never materialized.
-- **Process:** The Spell — AI tooling, wizard methodology, unlocking the people inside.
-- **Gold out:** A Rocket company with compounding growth, realized synergies, and a technical team that now moves like an AI-native.
+- Lead in: A Dinosaur company carrying decades of coal — legacy systems, buried talent, promised synergies that never materialized.
+- Process: The Spell — AI tooling, wizard methodology, unlocking the people inside.
+- Gold out: A Rocket company with compounding growth, realized synergies, and a technical team that now moves like an AI-native.
 
 The equity is how the alchemist gets paid. Not by the hour. By the transformation.
 
@@ -145,5 +145,8 @@ We take our share of that.
 
 ---
 
-→ *The doctrine that powers the transformation: [The Grimoire](./the-grimoire.md)*
+→ *The doctrine that powers the transformation: [The Grimoire](./grimoire.md)*
 → *The instrument that reads the market: [The Sunstone](../PITCH/executive-brief.md)*
+
+---
+*Built by [AI Whisperers](https://www.ai-whisperers.org/).*

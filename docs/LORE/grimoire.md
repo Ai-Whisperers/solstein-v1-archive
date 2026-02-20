@@ -148,37 +148,7 @@ Because some of us re-read the appendices.
 
 Covering the remaining fandoms.
 
-### Matrix / Simulation Theory
-- **Red pill** = taking the SolStein analysis seriously instead of the CEO's press release
-- **The Architect** = the scoring config — the visible rules of the constructed reality
-- **Seeing the code** = when a leaded brain first has AI autocomplete their 8-year project's boilerplate in 45 minutes
-- **Agent Smith** = technical debt that replicates itself every time you try to fight it without the right tools
-
-### Star Wars
-- **The Force** = domain expertise + AI tooling. The Force is strong with this one = they've been in the trenches and can actually build.
-- **Midi-chlorians** = AI maturity score — a number that tries to quantify something that is, actually, real
-- **The Empire** = the legacy consultancy ecosystem
-- **The Rebellion** = companies choosing the AI-native path before the window closes
-- **The Death Star** = the monolith — perfectly engineered, one weakness, impossible to maintain incrementally
-
-### Cyberpunk
-- **The corporate sprawl** = the PE portfolio, viewed from altitude
-- **The netrunner** = the AI Whisperer practitioner — in the system, moving faster than it can track
-- **ICE** = legacy auth, legacy permission structures, everything that keeps the leaded brain from touching what they know needs to change
-- **Jacking in** = the activation moment — when the methodology lands and the engineer starts compressing months into hours
-- **The ripperdoc** = AI Whisperers — we don't fix the body; we add chrome to it
+→ *The strategic architecture: [The Three-Entity Flywheel](./the-play.md)*
 
 ---
-
-## 📜 HOW TO USE THIS DOCUMENT
-
-These analogies are a living vocabulary. Use them to:
-
-1. **Calibrate the pitch** — different audiences respond to different frames. PE partners: alchemy. Engineers: sci-fi. Strategy teams: Tolkien.
-2. **Write consistent docs** — if you're writing a new module and reach for a metaphor, check here first. Stay in the same universe.
-3. **Onboard new team members** — hand them this before anything else. If they get it, they're already in.
-4. **Remember what we're actually doing** — when the spreadsheet feels like just arithmetic, come back here. The numbers are real. So is the spell.
-
----
-
-*The grimoire is never finished. If you find a trope we missed, add it.*
+*The codified doctrine of [AI Whisperers](https://www.ai-whisperers.org/).*

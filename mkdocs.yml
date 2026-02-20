@@ -1,0 +1,107 @@
+site_name: "⚗️ Solstein — The Sunstone"
+site_description: "AI-Powered Competitive Intelligence for Private Equity. The sunstone that reads the market fog."
+site_author: "AI Whisperers"
+site_url: "https://ai-whisperers.github.io/solstein/"
+
+repo_name: "AI-Whisperers/solstein"
+repo_url: "https://github.com/Ai-Whisperers/solstein"
+edit_uri: "edit/main/docs/"
+
+docs_dir: docs
+theme:
+  name: material
+  custom_dir: docs/overrides
+  language: en
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+  font:
+    text: "Cinzel"
+    code: "Fira Code"
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - toc.follow
+    - content.code.copy
+    - content.action.edit
+  icon:
+    logo: material/crystal-ball
+    repo: fontawesome/brands/github
+  logo: assets/images/logo.png
+
+extra_css:
+  - assets/stylesheets/scroll.css
+
+extra_javascript:
+  - assets/javascripts/scroll.js
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - tables
+  - toc:
+      permalink: true
+      title: "On this scroll"
+
+nav:
+  - "🏠 Home": "README.md"
+
+  - "📜 The Lore":
+    - "The Origin": "LORE/origin.md"
+    - "The Three-Entity Flywheel": "LORE/the-play.md"
+    - "The Grimoire": "LORE/grimoire.md"
+
+  - "⚔️ The Pitch":
+    - "Executive Brief": "PITCH/executive-brief.md"
+    - "Full Proposal": "PITCH/full-proposal.md"
+    - "Case Study — First Summoning": "PITCH/case-study.md"
+    - "Commercial Architecture": "PITCH/business-model.md"
+
+  - "🤝 Proposals":
+    - "The Real Play": "PROPOSAL/the-real-play.md"
+    - "The Full Picture": "PROPOSAL/the-full-picture.md"
+    - "Equity & Value Sharing": "PROPOSAL/solstein-equity-and-value-sharing.md"
+    - "Corporate Structure Options": "PROPOSAL/corporate-structure-options.md"
+    - "Michiel Proposal": "PROPOSAL/solstein-proposal-michiel.md"
+    - "Michiel Email (Feb 2025)": "PROPOSAL/michiel-kuiper-email-2025-02-19.md"
+    - "Analysis: Proposal vs Solstein": "PROPOSAL/analysis-proposal-vs-solstein.md"
+    - "Gaston Conversation": "PROPOSAL/gaston-conversation.md"
+    - "Ivan & Kyrian Conversation": "PROPOSAL/ivan-kyrian-conversation.md"
+
+  - "⚙️ For Developers":
+    - "Developer Guide": "guides/developer.md"
+    - "Operator Guide": "guides/operator.md"
+    - "API Reference": "api/reference.md"
+
+  - "🏛️ Architecture":
+    - "Decision Records": "architecture/decisions.md"
+    - "Repository Structure": "STRUCTURE.md"
+
+  - "📚 Archive":
+    - "Analysis": "archive/ANALYSIS.md"
+    - "Critical Analysis": "archive/CRITICAL_ANALYSIS.md"
+    - "Reorganization Summary": "archive/REORGANIZATION_SUMMARY.md"
+    - "CI/CD Cursor Integration Plan": "archive/CI_CD_CURSOR_INTEGRATION_PLAN.md"
+    - "Comprehensive Gap Analysis": "archive/COMPREHENSIVE_TODO_AND_GAP_ANALYSIS.md"
+
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Ai-Whisperers/solstein
+      name: "AI Whisperers on GitHub"
+  generator: false
+
+copyright: "⚗️ <a href='https://www.ai-whisperers.org/'>AI Whisperers</a> — The wizards who find the diamonds nobody knew were there."

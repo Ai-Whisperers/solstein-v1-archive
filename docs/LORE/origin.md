@@ -76,15 +76,15 @@ The result: a complete competitive intelligence platform — built in the time i
 
 Every company in every market is one of three things. Solstein reads which.
 
-### 🚀 Rockets
+### Rockets
 
-Moving. Compounding. AI-native or rapidly becoming so. They ship fast. They iterate. They attract talent and capital that compounds the advantage. They do not need us — and we are not chasing them. We are *tracking* them, because every Neutral wants to know how far ahead the Rockets are.
+Moving. Compounding. AI-native or rapidly becoming so. They ship fast. They iterate. They attract talent and capital that compounds the advantage. They do not need us — and we are not chasing them. We are tracking them, because every Neutral wants to know how far ahead the Rockets are.
 
-### ⚖️ Neutrals
+### Neutrals
 
 Stable. Alive. Profitable, often. But not flying. These are the most misread companies in any portfolio — underestimated by acquirers who see "flat growth" and overvalued by sellers who see "stable recurring revenue." Solstein reads the directional signal inside the quiet numbers. That's the edge.
 
-### 🦕 Dinosaurs
+### Dinosaurs
 
 Carrying coal.
 
@@ -112,5 +112,8 @@ The wizards are available now. The lead is waiting.
 
 ---
 
-→ *The methodology behind the transformation: [The Grimoire](./the-grimoire.md)*
+→ *The methodology behind the transformation: [The Grimoire](./grimoire.md)*
 → *The strategic architecture: [The Three-Entity Flywheel](./the-play.md)*
+
+---
+*Solstein is a vision of [AI Whisperers](https://www.ai-whisperers.org/).*

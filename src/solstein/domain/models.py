@@ -107,6 +107,7 @@ class Company:
     growth_score: float | None = None
     financial_health_score: float | None = None
     competitive_position_score: float | None = None
+    scoring_breakdown: dict[str, ScoringExplanation] = field(default_factory=dict)
 
     @property
     def is_public(self) -> bool:
@@ -174,6 +175,25 @@ class MarketAnalysis:
     @property
     def market_leaders(self) -> list[Company]:
         return [c for c in self.companies if c.tier == CompanyTier.TIER_1]
+
+
+@dataclass
+class ScoreComponent:
+    """A single component of a score calculation."""
+
+    name: str
+    value: float
+    formula: str
+    reasoning: str
+
+
+@dataclass
+class ScoringExplanation:
+    """Detailed explanation of how a final score was calculated."""
+
+    base_score: float
+    components: list[ScoreComponent] = field(default_factory=list)
+    final_score: float = 0.0
 
 
 @dataclass

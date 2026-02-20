@@ -40,7 +40,7 @@ async def score_company(
                 detail=f"Company with ID {company_id} not found",
             )
 
-        # Calculate scores (could be done in background for large datasets)
+        # Calculate scores with explanations
         scored_company = growth_scorer.calculate_scores(target_company)
 
         growth = scored_company.growth_score or 0.0
@@ -57,6 +57,7 @@ async def score_company(
             "financial_health_score": scored_company.financial_health_score,
             "competitive_position_score": scored_company.competitive_position_score,
             "classification": classification,
+            "scoring_breakdown": scored_company.scoring_breakdown,
             "calculated_at": datetime.now().isoformat(),
         }
     except HTTPException:
