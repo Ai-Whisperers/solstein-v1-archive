@@ -97,3 +97,64 @@ class JsonFileRepository(CompanyRepository):
         """
         logger.info(f"Persisted company profile for {company.name}")
         return company
+
+
+class SupabaseRepository(CompanyRepository):
+    """
+    Repository implementation that reads and writes from Supabase PostgreSQL.
+    """
+
+    def __init__(self) -> None:
+        from ..core.supabase_client import get_supabase
+        self.client = get_supabase()
+        self.table_name = "companies"
+
+    def _to_domain(self, record: dict[str, Any]) -> Company:
+        """Helper to convert Supabase dict to Domain Entity."""
+        # Convert financials dict to FinancialMetric domain object
+        fin_data = record.pop("financials", {})
+        financials = FinancialMetric(**fin_data)
+        
+        # Parse complex types if they come back as JSON strings depending on schema
+        # (Assuming they come back as dicts/lists for now)
+        return Company(financials=financials, **record)
+
+    def _to_record(self, company: Company) -> dict[str, Any]:
+        """Convert Domain entity to Supabase dictionary."""
+        record = company.model_dump()
+        return record
+
+    def get_all(
+        self, limit: int | None = None, filters: CompanyFilter | None = None
+    ) -> list[Company]:
+        """Retrieve all companies from Supabase, applying optional filters."""
+        query = self.client.table(self.table_name).select("*")
+        
+        if filters:
+            if filters.tier:
+                query = query.eq("tier", filters.tier)
+            if filters.industry:
+                query = query.ilike("industry", f"%{filters.industry}%")
+            if filters.min_revenue:
+                # Assuming 'financials' is a jsonb column
+                query = query.gte("financials->>revenue", filters.min_revenue)
+                
+        if limit:
+            query = query.limit(limit)
+            
+        response = query.execute()
+        return [self._to_domain(record) for record in response.data]
+
+    def get_by_id(self, company_id: str) -> Company | None:
+        """Retrieve a specific company by ID."""
+        response = self.client.table(self.table_name).select("*").eq("id", company_id).execute()
+        if not response.data:
+            return None
+        return self._to_domain(response.data[0])
+
+    def save(self, company: Company) -> Company:
+        """Persist a company to Supabase (Upsert)."""
+        record = self._to_record(company)
+        self.client.table(self.table_name).upsert(record).execute()
+        logger.info(f"Persisted company profile to Supabase: {company.name}")
+        return company

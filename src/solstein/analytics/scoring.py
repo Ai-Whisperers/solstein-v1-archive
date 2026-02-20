@@ -14,6 +14,8 @@ from ..domain.models import (
     Company,
     FinancialMetric,
     MarketAnalysis,
+    ScoreComponent,
+    ScoringExplanation,
 )
 
 

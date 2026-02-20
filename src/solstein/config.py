@@ -51,16 +51,20 @@ class RedisConfig(BaseModel):
         return 6379
 
 
-class CeleryConfig(BaseModel):
-    """Celery configuration."""
+class SupabaseConfig(BaseModel):
+    """Supabase configuration."""
 
-    broker_url: str = Field(default="redis://localhost:6379/0")
-    result_backend: str = Field(default="redis://localhost:6379/0")
-    task_serializer: str = Field(default="json")
-    result_serializer: str = Field(default="json")
-    accept_content: list[str] = Field(default=["json"])
-    timezone: str = Field(default="UTC")
-    enable_utc: bool = Field(default=True)
+    url: str = Field(default="")
+    key: str = Field(default="")
+    anon_key: str = Field(default="")
+
+
+class TemporalConfig(BaseModel):
+    """Temporal orchestration configuration."""
+
+    host_url: str = Field(default="localhost:7233")
+    namespace: str = Field(default="default")
+    api_key: str | None = Field(default=None)
 
 
 class APIConfig(BaseModel):
@@ -156,7 +160,10 @@ class Settings(BaseSettings):
     security: SecurityConfig = Field(default_factory=SecurityConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     data: DataConfig = Field(default_factory=DataConfig)
-    celery: CeleryConfig = Field(default_factory=CeleryConfig)
+    
+    # New Intelligence Engine Backends
+    supabase: SupabaseConfig = Field(default_factory=SupabaseConfig)
+    temporal: TemporalConfig = Field(default_factory=TemporalConfig)
 
     # External APIs (optional)
     openai_api_key: str | None = Field(default=None)
@@ -166,6 +173,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         env_nested_delimiter="__",
+        extra="ignore",
         case_sensitive=True,
     )
 
@@ -264,19 +272,20 @@ ENV_TEMPLATE = """# SolStein Configuration
 ENVIRONMENT=development
 DEBUG=true
 
-# Database
+# Database (legacy, kept for SQLAlchemy compatibility)
 DATABASE__URL=postgresql://postgres:postgres@localhost:5432/solstein
 DATABASE__POOL_SIZE=20
 DATABASE__ECHO=false
 
-# Redis
-REDIS__URL=redis://localhost:6379/0
-REDIS__CACHE_TTL=3600
+# Supabase
+SUPABASE__URL=https://your-project.supabase.co
+SUPABASE__KEY=sb_secret_your_key
+SUPABASE__ANON_KEY=sb_publishable_your_key
 
-# Celery
-CELERY__BROKER_URL=redis://localhost:6379/0
-CELERY__RESULT_BACKEND=redis://localhost:6379/0
-
+# Temporal
+TEMPORAL__HOST_URL=localhost:7233
+TEMPORAL__NAMESPACE=default
+TEMPORAL__API_KEY=
 
 # API
 API__HOST=0.0.0.0

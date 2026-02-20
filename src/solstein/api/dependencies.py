@@ -9,15 +9,14 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from ..config import get_settings
 from ..core.repositories import CompanyRepository
-from ..data.repositories import JsonFileRepository
+from ..data.repositories import SupabaseRepository
 
 security = HTTPBearer(auto_error=False)
 
 
 def get_repository() -> CompanyRepository:
     """Get repository instance."""
-    settings = get_settings()
-    return JsonFileRepository(data_dir=settings.data.data_dir)
+    return SupabaseRepository()
 
 
 async def get_current_user(

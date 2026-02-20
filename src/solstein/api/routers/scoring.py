@@ -1,11 +1,14 @@
+import uuid
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from loguru import logger
+from temporalio.client import Client as TemporalClient
 
 from ...analytics.scoring import GrowthScorer
-from ...tasks import batch_score_companies, export_marketing_report
+from ...analytics.workflows import BatchScoreMarketWorkflow
+from ...config import get_settings
 from ...core.repositories import CompanyRepository
 from ..dependencies import get_current_user, get_repository
 
@@ -16,7 +19,6 @@ growth_scorer = GrowthScorer()
 @router.post("/company/{company_id}/score")
 async def score_company(
     company_id: str,
-    background_tasks: BackgroundTasks,
     _: dict[str, Any] = Depends(get_current_user),
     repo: CompanyRepository = Depends(get_repository),
 ) -> dict[str, Any]:
@@ -76,20 +78,32 @@ async def batch_score_companies_endpoint(
     min_revenue: float | None = Query(None, ge=0, description="Minimum revenue"),
     _: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, Any]:
-    """Batch score multiple companies in the background."""
+    """Batch score multiple companies via Temporal workflow."""
     try:
         filters = {
             "industry": industry,
             "min_revenue": min_revenue
         }
-        
-        # Trigger Celery task
-        task = batch_score_companies.delay(filters=filters)
+
+        settings = get_settings()
+        client = await TemporalClient.connect(
+            settings.temporal.host_url,
+            namespace=settings.temporal.namespace,
+            api_key=settings.temporal.api_key,
+        )
+
+        workflow_id = f"batch-score-{uuid.uuid4().hex[:8]}"
+        handle = await client.start_workflow(
+            BatchScoreMarketWorkflow.run,
+            filters,
+            id=workflow_id,
+            task_queue="solstein-scoring",
+        )
 
         return {
-            "message": "Batch scoring task started",
-            "task_id": task.id,
-            "status": "processing",
+            "message": "Batch scoring workflow started",
+            "workflow_id": handle.id,
+            "status": "running",
             "filters": filters
         }
     except Exception as e:

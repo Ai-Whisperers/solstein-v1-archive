@@ -107,7 +107,8 @@ class Company:
     growth_score: float | None = None
     financial_health_score: float | None = None
     competitive_position_score: float | None = None
-    scoring_breakdown: dict[str, ScoringExplanation] = field(default_factory=dict)
+    scoring_breakdown: dict[str, Any] = field(default_factory=dict)
+    classification: str | None = None
 
     @property
     def is_public(self) -> bool:

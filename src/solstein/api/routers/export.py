@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse
 from loguru import logger
 
@@ -10,8 +10,6 @@ from ...api.schemas import CompanyProfileSchema
 from ...config import get_settings
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...exporters.excel_exporter import ExcelExporter
-from ...tasks import export_marketing_report
-from ...core.repositories import CompanyRepository
 from ..dependencies import get_current_user, get_repository
 
 router = APIRouter(tags=["Export"])
@@ -20,8 +18,19 @@ growth_scorer = GrowthScorer()
 excel_exporter = ExcelExporter()
 
 
+def _run_excel_export(repo: CompanyRepository, filters: dict[str, Any], filename: str) -> None:
+    """Background task to generate excel report."""
+    company_filter = CompanyFilter(**filters) if filters else None
+    companies = repo.get_all(filters=company_filter)
+    if companies:
+        output_path = settings.data.export_dir / filename
+        excel_exporter.create_dashboard(companies, output_path)
+        logger.info(f"Excel report generated at {output_path}")
+
+
 @router.get("/excel")
 async def export_to_excel(
+    background_tasks: BackgroundTasks,
     industry: str | None = Query(None, description="Industry to export"),
     include_charts: bool = Query(True, description="Include charts in Excel"),
     _: dict[str, Any] = Depends(get_current_user),
@@ -29,25 +38,20 @@ async def export_to_excel(
 ) -> dict[str, Any]:
     """Trigger background Excel export."""
     try:
-        # Generate filters
         filters: dict[str, Any] = {}
         if industry:
             filters["industry"] = industry
 
-        # Generate filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         if industry:
             filename = f"solstein_{industry.lower().replace(' ', '_')}_{timestamp}.xlsx"
         else:
             filename = f"solstein_dashboard_{timestamp}.xlsx"
 
-        # Trigger Celery task
-        # Note: In production we'd use .delay(). For now assuming Celery is configured.
-        task = export_marketing_report.delay(filters=filters, output_filename=filename)
+        background_tasks.add_task(_run_excel_export, repo, filters, filename)
 
         return {
             "message": "Export started",
-            "task_id": task.id,
             "filename": filename,
             "status": "processing",
         }
@@ -55,9 +59,7 @@ async def export_to_excel(
         logger.error(f"Error triggering export: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=(
-                f"Error triggering export: {str(e)}"
-            ),
+            detail=f"Error triggering export: {str(e)}",
         ) from e
 
 

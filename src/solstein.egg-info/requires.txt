@@ -11,8 +11,8 @@ uvicorn[standard]>=0.24
 sqlalchemy>=2.0
 alembic>=1.12
 psycopg2-binary>=2.9
-redis>=5.0
-celery>=5.3
+supabase>=2.3
+temporalio>=1.5
 
 [dev]
 pytest>=7.4

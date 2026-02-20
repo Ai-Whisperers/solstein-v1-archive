@@ -1,28 +1,43 @@
 """
-Celery worker entrypoint.
+Temporal Worker entry point for Solstein Intelligence Engine.
+
+Run this to start the worker that listens for and executes scoring workflows.
+Usage: python -m solstein.worker
 """
 
-from celery import Celery
+import asyncio
+from temporalio.client import Client as TemporalClient
+from temporalio.worker import Worker
+from loguru import logger
 
 from .config import get_settings
+from .analytics.activities import calculate_company_score, fetch_market_company_ids
+from .analytics.workflows import BatchScoreMarketWorkflow
 
-settings = get_settings()
+TASK_QUEUE = "solstein-scoring"
 
-celery_app = Celery(
-    "solstein",
-    broker=settings.celery.broker_url,
-    backend=settings.celery.result_backend,
-    include=["solstein.tasks"],
-)
 
-celery_app.conf.update(
-    task_serializer=settings.celery.task_serializer,
-    result_serializer=settings.celery.result_serializer,
-    accept_content=settings.celery.accept_content,
-    timezone=settings.celery.timezone,
-    enable_utc=settings.celery.enable_utc,
-    task_track_started=True,
-)
+async def run_worker() -> None:
+    """Connect to Temporal and run a worker."""
+    settings = get_settings()
+
+    logger.info(f"Connecting Temporal worker to {settings.temporal.host_url}")
+    client = await TemporalClient.connect(
+        settings.temporal.host_url,
+        namespace=settings.temporal.namespace,
+        api_key=settings.temporal.api_key,
+    )
+
+    worker = Worker(
+        client,
+        task_queue=TASK_QUEUE,
+        workflows=[BatchScoreMarketWorkflow],
+        activities=[calculate_company_score, fetch_market_company_ids],
+    )
+
+    logger.info(f"Temporal worker listening on queue '{TASK_QUEUE}'")
+    await worker.run()
+
 
 if __name__ == "__main__":
-    celery_app.start()
+    asyncio.run(run_worker())
