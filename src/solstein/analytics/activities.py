@@ -3,13 +3,14 @@ Temporal Activities for Solstein Intelligence Engine.
 These represent the atomic, side-effect-heavy tasks orchestratd by Temporal.
 """
 
+import asyncio
 from typing import Any
 from temporalio import activity
 from loguru import logger
 
 from ..data.repositories import SupabaseRepository
 from ..core.repositories import CompanyFilter
-from .scoring import GrowthScorer
+from .scoring import GrowthScorer, classify_company
 
 @activity.defn
 async def calculate_company_score(company_id: str) -> dict[str, Any]:
@@ -18,7 +19,7 @@ async def calculate_company_score(company_id: str) -> dict[str, Any]:
     
     # 1. Fetch from Supabase
     repo = SupabaseRepository()
-    company = repo.get_by_id(company_id)
+    company = await asyncio.to_thread(repo.get_by_id, company_id)
     if not company:
         raise ValueError(f"Company {company_id} not found in database.")
 
@@ -27,17 +28,11 @@ async def calculate_company_score(company_id: str) -> dict[str, Any]:
     scored = scorer.calculate_scores(company)
     
     # 3. Classify
-    growth = scored.growth_score or 0.0
-    classification = "Neutral"
-    if growth >= 7.0:
-        classification = "Rocket"
-    elif growth <= 4.0:
-        classification = "Dinosaur"
-
+    classification = classify_company(scored.growth_score)
     scored.classification = classification
     
     # 4. Save back to Supabase
-    repo.save(scored)
+    await asyncio.to_thread(repo.save, scored)
     
     return {
         "company_id": company.id,
@@ -49,5 +44,5 @@ async def calculate_company_score(company_id: str) -> dict[str, Any]:
 async def fetch_market_company_ids(filters: dict[str, Any]) -> list[str]:
     """Fetch all company IDs matching a filter for batch scoring."""
     repo = SupabaseRepository()
-    companies = repo.get_all(filters=CompanyFilter(**filters))
+    companies = await asyncio.to_thread(repo.get_all, filters=CompanyFilter(**filters))
     return [c.id for c in companies if c.id]

@@ -13,6 +13,7 @@ from ..config import get_settings
 from ..core.repositories import CompanyRepository, CompanyFilter
 from ..data.loaders import CompetitorDataLoader
 from ..domain.models import Company, FinancialMetric, CompanyTier
+import dataclasses
 
 
 class JsonFileRepository(CompanyRepository):
@@ -121,11 +122,11 @@ class SupabaseRepository(CompanyRepository):
 
     def _to_record(self, company: Company) -> dict[str, Any]:
         """Convert Domain entity to Supabase dictionary."""
-        record = company.model_dump()
+        record = dataclasses.asdict(company)
         return record
 
     def get_all(
-        self, limit: int | None = None, filters: CompanyFilter | None = None
+        self, limit: int | None = None, offset: int = 0, filters: CompanyFilter | None = None
     ) -> list[Company]:
         """Retrieve all companies from Supabase, applying optional filters."""
         query = self.client.table(self.table_name).select("*")
@@ -134,13 +135,14 @@ class SupabaseRepository(CompanyRepository):
             if filters.tier:
                 query = query.eq("tier", filters.tier)
             if filters.industry:
-                query = query.ilike("industry", f"%{filters.industry}%")
+                query = query.ilike("industry", filters.industry)  # Exact or wildcard properly handled by caller
             if filters.min_revenue:
                 # Assuming 'financials' is a jsonb column
                 query = query.gte("financials->>revenue", filters.min_revenue)
                 
+        # Pagination
         if limit:
-            query = query.limit(limit)
+            query = query.range(offset, offset + limit - 1)
             
         response = query.execute()
         return [self._to_domain(record) for record in response.data]

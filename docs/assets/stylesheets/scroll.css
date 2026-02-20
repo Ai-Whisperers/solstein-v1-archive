@@ -162,44 +162,56 @@ body[data-md-color-scheme="default"] {
   color: var(--ivory);
 }
 
-/* --- Gold Leaf H1 --- */
+/* --- Gold Leaf H1 — The Alchemical Title --- */
 .md-typeset h1 {
   font-family: 'Cinzel Decorative', serif;
-  font-size: 2.4rem;
-  font-weight: 700;
+  font-size: 2.6rem;
+  font-weight: 900;
   text-align: center;
-  letter-spacing: 0.12em;
-  margin: 1.5rem 0 1rem;
-  padding-bottom: 1rem;
+  letter-spacing: 0.14em;
+  margin: 2rem 0 1.2rem;
+  padding-bottom: 1.2rem;
   /* Gold leaf gradient */
-  background: linear-gradient(to bottom, #cf9d44 0%, #ffefbb 50%, #9e7312 100%);
+  background: linear-gradient(to bottom, #e8c84a 0%, #ffefbb 35%, #cf9d44 65%, #9e7312 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  /* Subtle glow behind */
-  filter: drop-shadow(0 0 8px rgba(207, 157, 68, 0.3));
+  /* Pulsing aura */
+  filter: drop-shadow(0 0 12px rgba(207, 157, 68, 0.5)) drop-shadow(0 0 30px rgba(207, 157, 68, 0.15));
+  animation: goldAura 4s ease-in-out infinite alternate;
   border-bottom: 1px solid var(--gold-border);
+}
+
+@keyframes goldAura {
+  from {
+    filter: drop-shadow(0 0 8px rgba(207, 157, 68, 0.4)) drop-shadow(0 0 20px rgba(207, 157, 68, 0.1));
+  }
+
+  to {
+    filter: drop-shadow(0 0 18px rgba(232, 200, 74, 0.65)) drop-shadow(0 0 40px rgba(207, 157, 68, 0.25));
+  }
 }
 
 .md-typeset h2 {
   font-family: 'Cinzel', serif;
-  font-size: 1.4rem;
-  font-weight: 600;
+  font-size: 1.45rem;
+  font-weight: 700;
   color: var(--gold-bright);
-  letter-spacing: 0.06em;
-  margin: 2.5rem 0 0.75rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(207, 157, 68, 0.12);
-  text-shadow: 0 0 20px rgba(207, 157, 68, 0.15);
+  letter-spacing: 0.08em;
+  margin: 3rem 0 0.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(207, 157, 68, 0.15);
+  text-shadow: 0 0 30px rgba(207, 157, 68, 0.2), 0 1px 0 rgba(0, 0, 0, 0.8);
 }
 
 .md-typeset h3 {
   font-family: 'Cinzel', serif;
-  font-size: 1.15rem;
-  font-weight: 500;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: var(--gold-mid);
-  letter-spacing: 0.04em;
-  margin: 1.75rem 0 0.5rem;
+  letter-spacing: 0.05em;
+  margin: 2rem 0 0.6rem;
+  text-shadow: 0 0 20px rgba(196, 150, 15, 0.15);
 }
 
 .md-typeset h4,

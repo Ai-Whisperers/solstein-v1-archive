@@ -22,7 +22,7 @@ from loguru import logger
 from ..config import Settings
 
 # Import Routers
-from .routers import companies, export, jobs, market, scoring, simulation
+from .routers import companies, export, jobs, market, scoring
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -52,7 +52,6 @@ app.include_router(companies.router)
 app.include_router(scoring.router, prefix="/scoring")
 app.include_router(market.router, prefix="/market")
 app.include_router(export.router, prefix="/export")
-app.include_router(simulation.router, prefix="/simulation")
 app.include_router(jobs.router, prefix="/jobs")
 
 

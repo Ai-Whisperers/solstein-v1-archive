@@ -19,6 +19,17 @@ from ..domain.models import (
 )
 
 
+def classify_company(growth_score: float | None) -> str:
+    """Central logic to classify a company based on its growth score."""
+    if growth_score is None:
+        return "Neutral"
+    if growth_score >= 7.0:
+        return "Rocket"
+    elif growth_score <= 4.0:
+        return "Dinosaur"
+    return "Neutral"
+
+
 class GrowthScorer:
     """Calculate growth scores for companies."""
 

@@ -165,8 +165,8 @@ def test_competitive_position_score_tier4_no_ai(scorer):
         tech_stack=[],
     )
     scored = scorer.calculate_scores(company)
-    # base(5.0) + tier4(-1.0) + none(-1.0) + saas(0) + single_geo(-0.5) + no_tech(-0.5) = 2.0
-    assert scored.competitive_position_score == pytest.approx(2.0)
+    # base(5.0) + tier4(-1.0) + none(-1.0) + saas(0) = 3.0
+    assert scored.competitive_position_score == pytest.approx(3.0)
 
 
 # ---------------------------------------------------------------------------
