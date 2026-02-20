@@ -1,6 +1,6 @@
 /* ============================================================
-   SOLSTEIN — THE SCROLL
-   Medieval / parchment aesthetic for the grimoire of capital.
+   SOLSTEIN — THE ALCHEMY GRID
+   Modern Mysticism aesthetic
    Font: Cinzel (headers) + Lato (body) + Fira Code (code)
    ============================================================ */
 
@@ -9,75 +9,61 @@
 
 /* --- ROOT TOKENS --- */
 :root {
-  --parchment-bg: #f5edd6;
-  --parchment-dark: #e8d9b5;
-  --parchment-shadow: #c9b48a;
-  --ink-black: #1a1208;
-  --ink-dark: #2d1f0a;
-  --ink-mid: #4a3520;
-  --gold: #8b6914;
-  --gold-bright: #c4960f;
-  --gold-light: #e8c84a;
-  --ember: #7a2e0e;
-  --ember-light: #b84c1a;
-  --scroll-border: #6b4e1a;
+  --obsidian-dark: #0f0c08;
+  --obsidian-mid: #201b15;
+  --gold-muted: rgba(196, 150, 15, 0.25);
+  --gold-shimmer: #e8c84a;
+  --gold-accent: #c4960f;
+  --gold-dark: #8b6914;
+  --ember: #b84c1a;
+  --glass-bg: rgba(26, 22, 18, 0.75);
+  --glass-border: rgba(196, 150, 15, 0.15);
+  --text-primary: #e6dfd3;
+  --text-secondary: #a39b8c;
 
   /* Material overrides */
-  --md-primary-fg-color: #4a3520;
-  --md-primary-fg-color--light: #8b6914;
-  --md-primary-fg-color--dark: #1a1208;
-  --md-primary-bg-color: #f5edd6;
+  --md-primary-fg-color: #0f0c08;
+  --md-primary-fg-color--dark: #0f0c08;
+  --md-primary-bg-color: #0f0c08;
   --md-accent-fg-color: #c4960f;
-  --md-typeset-color: #1a1208;
-  --md-typeset-a-color: #7a2e0e;
+  --md-typeset-color: var(--text-primary);
+  --md-typeset-a-color: var(--gold-shimmer);
+  --md-default-bg-color: transparent;
+  --md-default-fg-color: var(--text-primary);
 }
 
 /* --- BODY / BACKGROUND --- */
 body {
-  background-color: #2a1f0f;
+  background-color: var(--obsidian-dark);
   background-image:
-    radial-gradient(ellipse at 20% 20%, rgba(139, 105, 20, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 80%, rgba(122, 46, 14, 0.06) 0%, transparent 60%);
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, #0f0c08 0%, #201b15 50%, #0f0c08 100%);
+  background-attachment: fixed;
+  color: var(--text-primary);
 }
 
-/* --- MAIN CONTENT AREA — THE SCROLL --- */
+/* Force specific material elements to be transparent/darker */
+.md-main__inner {
+  margin-top: 2rem;
+}
+
+.md-sidebar {
+  background: transparent !important;
+}
+
+/* --- MAIN CONTENT AREA — GLASS GRIMOIRE --- */
 .md-content__inner {
-  background-color: var(--parchment-bg);
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  border-left: 3px solid var(--scroll-border);
-  border-right: 3px solid var(--scroll-border);
-  box-shadow:
-    inset 8px 0 20px rgba(107, 78, 26, 0.15),
-    inset -8px 0 20px rgba(107, 78, 26, 0.15),
-    0 0 60px rgba(0, 0, 0, 0.6);
-  padding: 2rem 3rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 3rem 4rem;
   max-width: 900px;
   margin: 0 auto;
   position: relative;
-  min-height: 100vh;
-}
-
-/* Scroll top curl effect */
-.md-content__inner::before {
-  content: "";
-  display: block;
-  height: 24px;
-  margin: -2rem -3rem 2rem -3rem;
-  background: linear-gradient(180deg, var(--parchment-shadow) 0%, var(--parchment-dark) 40%, var(--parchment-bg) 100%);
-  border-bottom: 2px solid var(--scroll-border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Scroll bottom curl effect */
-.md-content__inner::after {
-  content: "";
-  display: block;
-  height: 24px;
-  margin: 2rem -3rem -2rem -3rem;
-  background: linear-gradient(0deg, var(--parchment-shadow) 0%, var(--parchment-dark) 40%, var(--parchment-bg) 100%);
-  border-top: 2px solid var(--scroll-border);
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+  min-height: 80vh;
 }
 
 /* --- TYPOGRAPHY --- */
@@ -85,54 +71,46 @@ body {
   font-family: 'Lato', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-size: 17px;
   line-height: 1.7;
-  color: var(--ink-dark);
+  color: var(--text-primary);
 }
 
 /* Main headers get the full Cinzel treatment */
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  color: var(--gold-shimmer);
+}
+
 .md-typeset h1 {
   font-family: 'Cinzel Decorative', serif;
   font-size: 2.2rem;
   font-weight: 800;
-  color: #1a1208;
   text-align: center;
   letter-spacing: 0.1em;
   margin: 1.5rem 0 0.5rem;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid var(--gold);
+  border-bottom: 2px solid var(--gold-muted);
 }
 
 .md-typeset h2 {
   font-family: 'Cinzel', serif;
   font-size: 1.35rem;
   font-weight: 600;
-  color: var(--ember);
   letter-spacing: 0.05em;
   margin: 2.5rem 0 0.75rem;
   padding-bottom: 0.4rem;
-  border-bottom: 1px solid var(--parchment-shadow);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .md-typeset h3 {
   font-family: 'Cinzel', serif;
   font-size: 1.1rem;
   font-weight: 500;
-  color: var(--ink-mid);
   letter-spacing: 0.03em;
   margin: 1.75rem 0 0.5rem;
-}
-
-.md-typeset h4,
-.md-typeset h5,
-.md-typeset h6 {
-  font-family: 'Cinzel', serif;
-  color: var(--gold);
-  letter-spacing: 0.02em;
-}
-
-/* Ensure sections have spacing when linked from ToC */
-.md-typeset [id] {
-  scroll-margin-top: 120px;
-  /* Increased for better optical alignment with top curl */
 }
 
 /* Blockquotes — the oracle speaks */
@@ -140,9 +118,9 @@ body {
   font-family: 'IM Fell English', serif;
   font-style: italic;
   font-size: 1.1rem;
-  color: var(--ember);
-  border-left: 4px solid var(--gold);
-  background: linear-gradient(90deg, rgba(196, 150, 15, 0.08) 0%, transparent 100%);
+  color: var(--text-secondary);
+  border-left: 4px solid var(--gold-accent);
+  background: linear-gradient(90deg, rgba(196, 150, 15, 0.05) 0%, transparent 100%);
   padding: 1rem 1.5rem;
   margin: 1.5rem 0;
   border-radius: 0 4px 4px 0;
@@ -154,15 +132,15 @@ body {
 
 /* Links */
 .md-typeset a {
-  color: var(--ember);
+  color: var(--gold-shimmer);
   text-decoration: underline;
-  text-decoration-color: rgba(122, 46, 14, 0.3);
-  transition: color 0.2s, text-decoration-color 0.2s;
+  text-decoration-color: var(--gold-muted);
+  transition: all 0.2s ease;
 }
 
 .md-typeset a:hover {
-  color: var(--gold-bright);
-  text-decoration-color: var(--gold-bright);
+  text-decoration-color: var(--gold-shimmer);
+  text-shadow: 0 0 8px rgba(232, 200, 74, 0.3);
 }
 
 /* Suppress '¶' permalink markers for cleaner visual & accessibility */
@@ -176,17 +154,20 @@ body {
   width: 100%;
   display: table;
   margin: 1.5rem 0;
-  background: var(--parchment-dark);
-  border: 2px solid var(--scroll-border);
-  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+  background: rgba(15, 12, 8, 0.4);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Mobile Responsiveness for tables */
+/* Make tables scrollable on mobile */
 .md-typeset .table-wrapper {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   margin-bottom: 1.5rem;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 @media screen and (max-width: 76.25em) {
@@ -198,47 +179,51 @@ body {
 
 .md-typeset table th {
   font-family: 'Cinzel', serif;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: var(--ink-dark);
-  color: var(--gold-light);
-  padding: 0.75rem 1rem;
-  border-bottom: 2px solid var(--gold);
+  background: var(--gold-dark);
+  color: #fffaf0;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--gold-accent);
   text-align: left;
 }
 
 .md-typeset table td {
-  padding: 0.6rem 1rem;
-  border-bottom: 1px solid var(--parchment-shadow);
-  color: var(--ink-dark);
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.md-typeset table tr {
+  transition: background 0.2s ease;
 }
 
 .md-typeset table tr:nth-child(even) td {
-  background: rgba(107, 78, 26, 0.06);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .md-typeset table tr:hover td {
-  background: rgba(196, 150, 15, 0.1);
+  background: rgba(196, 150, 15, 0.08);
 }
 
 /* --- CODE BLOCKS --- */
 .md-typeset code {
   font-family: 'Fira Code', monospace;
   font-size: 0.875em;
-  background: rgba(26, 18, 8, 0.08);
-  color: var(--ember-light);
-  padding: 0.15em 0.4em;
-  border-radius: 3px;
-  border: 1px solid rgba(107, 78, 26, 0.2);
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--gold-shimmer);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .md-typeset pre>code {
-  background: var(--ink-black);
-  color: #e8d5a3;
-  border: 1px solid var(--scroll-border);
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+  background: var(--obsidian-dark);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 /* --- NAVIGATION (the index of scrolls) --- */
@@ -250,76 +235,77 @@ body {
 
 .md-nav__title {
   font-weight: 700;
-  color: var(--gold);
+  color: var(--gold-shimmer);
 }
 
 .md-nav__link {
-  color: var(--ink-mid) !important;
+  color: var(--text-secondary) !important;
   transition: all 0.2s ease;
   padding: 0.35rem 0.75rem;
   border-radius: 4px;
 }
 
 .md-nav__link:hover {
-  color: var(--ember) !important;
-  background: rgba(139, 105, 20, 0.08);
-  /* Subtle gold ink splash */
+  color: var(--gold-shimmer) !important;
+  background: rgba(196, 150, 15, 0.08);
 }
 
-/* Active section in main navigation — more elegant header style */
+/* Active section in main navigation */
 .md-nav__item--active>.md-nav__link {
-  color: var(--ember) !important;
+  color: var(--gold-shimmer) !important;
   font-weight: 800;
-  font-family: 'Cinzel Decorative', serif;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.4) 60%, transparent 100%);
-  border-left: 5px solid var(--gold);
-  box-shadow: 2px 4px 15px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(90deg, rgba(196, 150, 15, 0.15) 0%, transparent 100%);
+  border-left: 2px solid var(--gold-accent);
   margin-top: 8px;
   margin-bottom: 8px;
-  transform: translateX(2px);
 }
 
 /* --- HEADER / TOP BAR --- */
 .md-header {
-  background: linear-gradient(180deg, #1a1208 0%, #0d0904 100%);
-  border-bottom: 2px solid var(--gold);
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.7);
+  background: rgba(15, 12, 8, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
 .md-header__title {
   font-family: 'Cinzel Decorative', serif;
   letter-spacing: 0.06em;
-  color: var(--gold-light) !important;
+  color: var(--gold-shimmer) !important;
+  font-weight: 700;
 }
 
 /* --- TABS --- */
 .md-tabs {
-  background: #1a1208;
-  border-bottom: 1px solid var(--gold);
+  background: rgba(15, 12, 8, 0.6);
+  backdrop-filter: blur(5px);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .md-tabs__link {
   font-family: 'Cinzel', serif;
   font-size: 0.75rem;
   letter-spacing: 0.06em;
-  color: var(--parchment-shadow) !important;
+  color: var(--text-secondary) !important;
   opacity: 1 !important;
 }
 
 .md-tabs__link--active,
 .md-tabs__link:hover {
-  color: var(--gold-light) !important;
-  border-bottom: 2px solid var(--gold-light);
+  color: var(--gold-shimmer) !important;
+  border-bottom: 2px solid var(--gold-shimmer);
 }
 
 /* --- ADMONITIONS — ARCANE WARNINGS --- */
 .md-typeset .admonition {
-  border: 1px solid var(--scroll-border);
-  background: var(--parchment-dark);
-  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
+  border: 1px solid var(--glass-border);
+  background: rgba(15, 12, 8, 0.5);
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
 }
 
 .md-typeset .admonition-title {
@@ -327,79 +313,64 @@ body {
   font-size: 0.85rem;
   letter-spacing: 0.05em;
   font-weight: 600;
+  color: var(--gold-shimmer);
 }
 
 /* --- FOOTER --- */
 .md-footer {
-  background: var(--ink-black);
-  border-top: 2px solid var(--gold);
+  background: var(--obsidian-dark);
+  border-top: 1px solid var(--glass-border);
 }
 
 .md-footer-meta {
-  background: var(--ink-black);
+  background: transparent;
   font-family: 'Cinzel', serif;
   font-size: 0.7rem;
   letter-spacing: 0.05em;
-  color: var(--gold);
+  color: var(--gold-muted);
 }
 
 /* --- TABLE OF CONTENTS (On this scroll) --- */
 .md-nav--secondary .md-nav__title {
   font-family: 'Cinzel', serif;
-  color: var(--ember);
+  color: var(--gold-shimmer);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  border-bottom: 1px solid var(--gold);
+  border-bottom: 1px solid var(--glass-border);
   padding-bottom: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-/* The 'white section' or active highlight for ToC — now an elegant parchment highlight */
 .md-nav--secondary .md-nav__link--active {
-  color: var(--ember) !important;
+  color: var(--gold-shimmer) !important;
   font-weight: 700;
-  background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 70%, transparent 100%);
-  box-shadow: -4px 0 15px rgba(255, 255, 255, 0.4), 2px 2px 10px rgba(0, 0, 0, 0.05);
-  border-left: 3px solid var(--gold);
+  background: linear-gradient(90deg, rgba(196, 150, 15, 0.15) 0%, transparent 100%);
+  border-left: 2px solid var(--gold-accent);
   border-radius: 0 4px 4px 0;
-  position: relative;
-  transform: translateX(-5px);
   padding-left: 15px !important;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s ease;
 }
 
-.md-nav--secondary .md-nav__link--active::before {
-  content: "✦";
-  position: absolute;
-  left: 2px;
-  font-size: 0.7rem;
-  color: var(--gold);
-  top: 50%;
-  transform: translateY(-50%);
-  text-shadow: 0 0 5px var(--gold-light);
-}
-
-/* Sections already scrolled past — keep them legible but secondary */
 .md-nav--secondary .md-nav__link--passed {
-  color: var(--ink-mid) !important;
+  color: var(--text-secondary) !important;
   opacity: 0.6;
-  text-decoration: none;
 }
 
 /* --- SEARCH --- */
 .md-search__input {
   font-family: 'Lato', serif;
-  background: rgba(245, 237, 214, 0.1);
-  color: var(--parchment-bg);
-  border: 1px solid var(--gold);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
 }
 
 /* --- HORIZONTAL RULES — RUNE DIVIDERS --- */
 .md-typeset hr {
   border: none;
-  border-top: 1px solid var(--parchment-shadow);
-  margin: 2rem 0;
+  border-top: 1px solid var(--glass-border);
+  margin: 3rem 0;
   position: relative;
   text-align: center;
 }
@@ -410,56 +381,29 @@ body {
   top: -0.75rem;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--parchment-bg);
-  padding: 0 0.5rem;
-  color: var(--gold);
-  font-size: 1rem;
+  background: var(--glass-bg);
+  padding: 0 1rem;
+  color: var(--gold-muted);
+  font-size: 1.2rem;
 }
 
 /* --- BOLD / STRONG --- */
 .md-typeset strong {
-  color: var(--ember);
+  color: #ffffff;
   font-weight: 700;
 }
 
 /* --- LISTS --- */
-.md-typeset ul li::marker {
-  color: var(--gold);
-}
-
+.md-typeset ul li::marker,
 .md-typeset ol li::marker {
-  font-family: 'Cinzel', serif;
-  color: var(--ember);
-  font-weight: 600;
-}
-
-/* --- RESPONSIVE: SIDEBAR BACKGROUND --- */
-.md-sidebar {
-  background: #221508;
-}
-
-.md-sidebar--secondary {
-  background: transparent;
+  color: var(--gold-accent);
 }
 
 /* --- COPY BUTTON --- */
 .md-clipboard {
-  color: var(--gold) !important;
+  color: var(--gold-muted) !important;
 }
 
-/* --- SCROLL ENTER ANIMATION --- */
-@keyframes scrollUnfurl {
-  from {
-    opacity: 0;
-    transform: translateY(-12px) scaleY(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scaleY(1);
-  }
-}
-
-.md-content {
-  animation: scrollUnfurl 0.4s ease-out;
+.md-clipboard:hover {
+  color: var(--gold-shimmer) !important;
 }
