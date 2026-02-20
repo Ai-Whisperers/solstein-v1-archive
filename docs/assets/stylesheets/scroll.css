@@ -716,7 +716,6 @@ body[data-md-color-scheme="default"] {
 /* "On This Scroll" - kill the underline bar that has white glow */
 .md-nav--secondary .md-nav__title {
   background: transparent !important;
-  box-shadow: none !important;
   border-bottom: 1px solid var(--gold-border) !important;
 }
 
