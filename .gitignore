@@ -131,7 +131,9 @@ venv.bak/
 
 # mkdocs documentation
 /site
-/src/solstein/ui/node_modules
+/dashboard/node_modules
+/dashboard/.next
+/dashboard/.env.local
 # mypy
 .mypy_cache/
 .dmypy.json

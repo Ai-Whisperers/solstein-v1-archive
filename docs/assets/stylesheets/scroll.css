@@ -677,6 +677,50 @@ body[data-md-color-scheme="default"] {
 }
 
 /* ============================================================
+   NUCLEAR WHITE-KILL — Catch every Material theme bright element
+   ============================================================ */
+
+/* The "Home" button and all primary nav titles */
+.md-nav--primary .md-nav__title,
+.md-nav--primary .md-nav__title[for="__drawer"],
+.md-nav--lifted>.md-nav__list>.md-nav__item--active>.md-nav__link,
+.md-nav--lifted .md-nav[data-md-level="0"]>.md-nav__list>.md-nav__item--active>.md-nav__link,
+[data-md-toggle="nav"]~.md-nav__title {
+  background: var(--void-dark) !important;
+  color: var(--gold-bright) !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Kill the white gradient that Material uses on active nav items */
+.md-nav--primary .md-nav__item--active>.md-nav__link,
+.md-nav__item--nested>.md-nav__link,
+.md-nav--primary .md-nav__item--section>.md-nav__link {
+  background: transparent !important;
+  color: var(--gold-bright) !important;
+}
+
+/* The sidebar container itself */
+.md-nav--primary,
+.md-nav--primary .md-nav,
+.md-nav--primary .md-nav__list {
+  background: transparent !important;
+}
+
+/* Any remaining white overlays */
+.md-nav__item--active>.md-nav__link--index,
+.md-nav__item--active>.md-nav__link--index~.md-nav {
+  background: var(--void-dark) !important;
+}
+
+/* "On This Scroll" - kill the underline bar that has white glow */
+.md-nav--secondary .md-nav__title {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--gold-border) !important;
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 
