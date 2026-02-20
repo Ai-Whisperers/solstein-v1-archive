@@ -168,7 +168,11 @@ body[data-md-color-scheme="default"] {
   font-size: 2.6rem;
   font-weight: 900;
   text-align: center;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
+  /* Increased from 0.14em to fix H-E overlap */
+  word-spacing: 0.2em;
+  font-variant-ligatures: none;
+  /* Disable ligatures that might cause overlap */
   margin: 2rem 0 1.2rem;
   padding-bottom: 1.2rem;
   /* Gold leaf gradient */
@@ -180,6 +184,7 @@ body[data-md-color-scheme="default"] {
   filter: drop-shadow(0 0 12px rgba(207, 157, 68, 0.5)) drop-shadow(0 0 30px rgba(207, 157, 68, 0.15));
   animation: goldAura 4s ease-in-out infinite alternate;
   border-bottom: 1px solid var(--gold-border);
+  text-rendering: optimizeLegibility;
 }
 
 @keyframes goldAura {
