@@ -11,6 +11,7 @@ Production-ready REST API following Vete's architecture patterns:
 """
 
 from datetime import datetime
+from typing import Any
 
 import uvicorn
 from fastapi import FastAPI
@@ -21,7 +22,7 @@ from loguru import logger
 from ..config import Settings
 
 # Import Routers
-from .routers import companies, export, market, scoring, simulation
+from .routers import companies, export, jobs, market, scoring, simulation
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -30,7 +31,7 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    openapi_url="/openapi.json"
+    openapi_url="/openapi.json",
 )
 
 # CORS middleware
@@ -52,34 +53,35 @@ app.include_router(scoring.router, prefix="/scoring")
 app.include_router(market.router, prefix="/market")
 app.include_router(export.router, prefix="/export")
 app.include_router(simulation.router, prefix="/simulation")
+app.include_router(jobs.router, prefix="/jobs")
 
 
 # Health check endpoint
 @app.get("/health", tags=["Health"])
-async def health_check():
+async def health_check() -> dict[str, Any]:
     """Health check endpoint."""
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "version": "1.0.0",
-        "environment": settings.environment
+        "environment": settings.environment,
     }
 
 
 # Custom docs endpoint
 @app.get("/docs", include_in_schema=False)
-async def custom_swagger_ui_html():
+async def custom_swagger_ui_html() -> Any:
     """Custom Swagger UI with SolStein branding."""
     return get_swagger_ui_html(
         openapi_url="/openapi.json",
         title="SolStein API Documentation",
-        swagger_favicon_url="https://solstein.ai/favicon.ico"
+        swagger_favicon_url="https://solstein.ai/favicon.ico",
     )
 
 
 # Startup event
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
     """Initialize application on startup."""
     logger.info("Starting SolStein API server")
     logger.info(f"Environment: {settings.environment}")
@@ -90,16 +92,17 @@ async def startup_event():
     if settings.logging.file_path:
         settings.logging.file_path.parent.mkdir(parents=True, exist_ok=True)
 
+
 # Health check endpoint alias
 @app.get("/healthz", tags=["Health"], include_in_schema=False)
-async def health_check_alias():
+async def health_check_alias() -> dict[str, Any]:
     """Health check alias for K8s."""
     return await health_check()
 
 
 # Shutdown event
 @app.on_event("shutdown")
-async def shutdown_event():
+async def shutdown_event() -> None:
     """Cleanup on shutdown."""
     logger.info("Shutting down SolStein API server")
 
@@ -111,5 +114,5 @@ if __name__ == "__main__":
         host=settings.api.host,
         port=settings.api.port,
         reload=settings.environment == "development",
-        log_level="info"
+        log_level="info",
     )

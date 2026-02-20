@@ -23,8 +23,10 @@ class ExcelExporter:
 
     def __init__(self, template_path: Path | None = None):
         self.settings = Settings()
-        self.template_path = template_path or (self.settings.data.data_dir / "templates" / "dashboard_template.xlsx")
-        self.styles = {}
+        self.template_path = template_path or (
+            self.settings.data.data_dir / "templates" / "dashboard_template.xlsx"
+        )
+        self.styles: dict[str, Any] = {}
 
     def _create_styles(self) -> dict[str, Any]:
         """Create consistent styles for the dashboard."""
@@ -44,41 +46,53 @@ class ExcelExporter:
             left=Side(style="thin"),
             right=Side(style="thin"),
             top=Side(style="thin"),
-            bottom=Side(style="thin")
+            bottom=Side(style="thin"),
         )
 
         return {
             "header_font": Font(name="Calibri", size=14, bold=True, color="FFFFFF"),
-            "header_fill": PatternFill(start_color=colors["header"], end_color=colors["header"], fill_type="solid"),
+            "header_fill": PatternFill(
+                start_color=colors["header"],
+                end_color=colors["header"],
+                fill_type="solid",
+            ),
             "header_alignment": Alignment(horizontal="center", vertical="center"),
-
             "subheader_font": Font(name="Calibri", size=12, bold=True, color="FFFFFF"),
-            "subheader_fill": PatternFill(start_color=colors["subheader"], end_color=colors["subheader"], fill_type="solid"),
+            "subheader_fill": PatternFill(
+                start_color=colors["subheader"],
+                end_color=colors["subheader"],
+                fill_type="solid",
+            ),
             "subheader_alignment": Alignment(horizontal="center", vertical="center"),
-
             "data_font": Font(name="Calibri", size=11),
-            "data_fill_even": PatternFill(start_color=colors["data_even"], end_color=colors["data_even"], fill_type="solid"),
-            "data_fill_odd": PatternFill(start_color=colors["data_odd"], end_color=colors["data_odd"], fill_type="solid"),
+            "data_fill_even": PatternFill(
+                start_color=colors["data_even"],
+                end_color=colors["data_even"],
+                fill_type="solid",
+            ),
+            "data_fill_odd": PatternFill(
+                start_color=colors["data_odd"],
+                end_color=colors["data_odd"],
+                fill_type="solid",
+            ),
             "data_alignment": Alignment(horizontal="left", vertical="center"),
             "data_border": thin_border,
-
             "number_font": Font(name="Calibri", size=11),
             "number_alignment": Alignment(horizontal="right", vertical="center"),
-
             "positive_fill": PatternFill(
                 start_color=colors["positive"],
                 end_color=colors["positive"],
-                fill_type="solid"
+                fill_type="solid",
             ),
             "negative_fill": PatternFill(
                 start_color=colors["negative"],
                 end_color=colors["negative"],
-                fill_type="solid"
+                fill_type="solid",
             ),
             "warning_fill": PatternFill(
                 start_color=colors["warning"],
                 end_color=colors["warning"],
-                fill_type="solid"
+                fill_type="solid",
             ),
         }
 
@@ -88,7 +102,10 @@ class ExcelExporter:
 
         wb = Workbook()
         ws = wb.active
-        ws.title = "Competitive Dashboard"
+        if ws is None:
+            ws = wb.create_sheet("Competitive Dashboard")
+        else:
+            ws.title = "Competitive Dashboard"
 
         # Add metadata
         self._add_metadata(ws, len(profiles))
@@ -112,7 +129,7 @@ class ExcelExporter:
         wb.save(output_path)
         logger.info(f"Dashboard saved to {output_path}")
 
-    def _add_metadata(self, ws, company_count: int) -> None:
+    def _add_metadata(self, ws: Any, company_count: int) -> None:
         """Add metadata section to worksheet."""
         ws["A1"] = "SolStein Competitive Intelligence Dashboard"
         ws["A1"].font = self.styles["header_font"]
@@ -126,7 +143,7 @@ class ExcelExporter:
         ws["A3"] = f"Companies Analyzed: {company_count}"
         ws["A3"].font = Font(name="Calibri", size=10, bold=True)
 
-    def _add_summary_table(self, ws, profiles: list[Company], start_row: int) -> None:
+    def _add_summary_table(self, ws: Any, profiles: list[Company], start_row: int) -> None:
         """Add summary table to worksheet."""
         # Table headers
         headers = [
@@ -151,11 +168,15 @@ class ExcelExporter:
         # Write data rows
         for row_idx, profile in enumerate(profiles, start_row + 1):
             # Alternate row colors
-            fill = self.styles["data_fill_even"] if row_idx % 2 == 0 else self.styles["data_fill_odd"]
+            fill = (
+                self.styles["data_fill_even"]
+                if row_idx % 2 == 0
+                else self.styles["data_fill_odd"]
+            )
 
             # Format revenue in millions
             revenue = profile.financials.revenue
-            revenue_str = f"{revenue/1_000_000:.1f}" if revenue else "N/A"
+            revenue_str = f"{revenue / 1_000_000:.1f}" if revenue else "N/A"
 
             # Format growth rate
             growth = profile.financials.growth_rate
@@ -199,9 +220,13 @@ class ExcelExporter:
                     if profile.threat_level == "High":
                         cell.fill = self.styles["negative_fill"]
                     elif profile.threat_level == "Critical":
-                        cell.font = Font(name="Calibri", size=11, bold=True, color="FF0000")
+                        cell.font = Font(
+                            name="Calibri", size=11, bold=True, color="FF0000"
+                        )
 
-    def _add_detailed_analysis(self, ws, profiles: list[Company], start_row: int) -> None:
+    def _add_detailed_analysis(
+        self, ws: Any, profiles: list[Company], start_row: int
+    ) -> None:
         """Add detailed analysis section."""
         # Section header
         ws.cell(row=start_row, column=1, value="Detailed Financial Analysis")
@@ -226,16 +251,18 @@ class ExcelExporter:
             cell = ws.cell(row=detail_start, column=col_idx, value=header)
             cell.font = self.styles["subheader_font"]
             cell.fill = PatternFill(
-                start_color="95B3D7",
-                end_color="95B3D7",
-                fill_type="solid"
+                start_color="95B3D7", end_color="95B3D7", fill_type="solid"
             )
             cell.alignment = self.styles["subheader_alignment"]
             cell.border = self.styles["data_border"]
 
         # Detailed data
         for row_idx, profile in enumerate(profiles, detail_start + 1):
-            fill = self.styles["data_fill_even"] if row_idx % 2 == 0 else self.styles["data_fill_odd"]
+            fill = (
+                self.styles["data_fill_even"]
+                if row_idx % 2 == 0
+                else self.styles["data_fill_odd"]
+            )
 
             # Format large numbers with commas
             revenue = profile.financials.revenue
@@ -280,7 +307,7 @@ class ExcelExporter:
                     cell.alignment = self.styles["number_alignment"]
                 cell.border = self.styles["data_border"]
 
-    def _add_charts(self, ws, profiles: list[Company], start_row: int) -> None:
+    def _add_charts(self, ws: Any, profiles: list[Company], start_row: int) -> None:
         """Add charts to the dashboard."""
         # Revenue comparison chart
         ws.cell(row=start_row, column=1, value="Revenue Comparison (Top 10)")
@@ -290,7 +317,7 @@ class ExcelExporter:
         sorted_profiles = sorted(
             [p for p in profiles if p.financials.revenue],
             key=lambda p: p.financials.revenue or 0,
-            reverse=True
+            reverse=True,
         )[:10]
 
         if sorted_profiles:
@@ -298,7 +325,11 @@ class ExcelExporter:
             chart_data_start = start_row + 2
             for i, profile in enumerate(sorted_profiles):
                 ws.cell(row=chart_data_start + i, column=1, value=profile.name)
-                ws.cell(row=chart_data_start + i, column=2, value=profile.financials.revenue or 0)
+                ws.cell(
+                    row=chart_data_start + i,
+                    column=2,
+                    value=profile.financials.revenue or 0,
+                )
 
             # Create bar chart
             chart = BarChart()
@@ -312,13 +343,13 @@ class ExcelExporter:
                 ws,
                 min_col=2,
                 min_row=chart_data_start,
-                max_row=chart_data_start + len(sorted_profiles) - 1
+                max_row=chart_data_start + len(sorted_profiles) - 1,
             )
             categories = Reference(
                 ws,
                 min_col=1,
                 min_row=chart_data_start,
-                max_row=chart_data_start + len(sorted_profiles) - 1
+                max_row=chart_data_start + len(sorted_profiles) - 1,
             )
 
             chart.add_data(data, titles_from_data=False)
@@ -326,7 +357,7 @@ class ExcelExporter:
 
             ws.add_chart(chart, f"D{start_row}")
 
-    def _auto_adjust_columns(self, ws) -> None:
+    def _auto_adjust_columns(self, ws: Any) -> None:
         """Auto-adjust column widths based on content."""
         for column in ws.columns:
             max_length = 0
@@ -334,10 +365,11 @@ class ExcelExporter:
 
             for cell in column:
                 try:
-                    if len(str(cell.value)) > max_length:
+                    if cell.value and len(str(cell.value)) > max_length:
                         max_length = len(str(cell.value))
-                except:
-                    pass
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Error calculating column width for cell {cell.coordinate}: {e}")
+                    continue
 
             adjusted_width = min(max_length + 2, 50)  # Cap at 50
             ws.column_dimensions[column_letter].width = adjusted_width
@@ -347,20 +379,9 @@ class TemplateExporter(ExcelExporter):
     """Export using a template file."""
 
     def create_dashboard(self, profiles: list[Company], output_path: Path) -> None:
-        """Create dashboard using a template."""
-        if not self.template_path:
-            raise ValueError("Template path required for TemplateExporter")
-
-        logger.info(f"Using template: {self.template_path}")
-
-        # Load template
-        wb = Workbook()
-        wb = wb.load_workbook(self.template_path)
-
-        # TODO: Populate template with data
-        # This would involve mapping profiles to specific cells in the template
-
-        # Save output
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        wb.save(output_path)
-        logger.info(f"Dashboard saved to {output_path}")
+        """Create dashboard using a template (Not Implemented)."""
+        logger.error("Template-based export is not yet implemented.")
+        raise NotImplementedError(
+            "Template-based export requires mapping profiles to specific template cells. "
+            "Use standard ExcelExporter for generated dashboards."
+        )

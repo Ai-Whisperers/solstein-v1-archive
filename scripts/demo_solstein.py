@@ -18,9 +18,9 @@ from pathlib import Path
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
-from solstein.analytics.scoring import GrowthScorer
-from solstein.config import Settings
-from solstein.data.models import (
+from solstein.analytics.scoring import GrowthScorer  # noqa: E402
+from solstein.config import Settings  # noqa: E402
+from solstein.data.models import (  # noqa: E402
     AIMaturity,
     CompanyProfile,
     CompanyTier,
@@ -28,13 +28,20 @@ from solstein.data.models import (
     FinancialMetric,
     ThreatLevel,
 )
-from solstein.exporters.excel_exporter import ExcelExporter
+from solstein.exporters.excel_exporter import ExcelExporter  # noqa: E402
 
 
 def load_competitor_data():
     """Load sample competitor data."""
     # Use the existing competitor data from the SolStein project
-    data_path = Path(__file__).parent.parent / "legacy" / "old_root_backup" / "SolStein" / "COMPETITION" / "competitor_data.json"
+    data_path = (
+        Path(__file__).parent.parent
+        / "legacy"
+        / "old_root_backup"
+        / "SolStein"
+        / "COMPETITION"
+        / "competitor_data.json"
+    )
 
     if not data_path.exists():
         print(f"❌ Competitor data not found at: {data_path}")
@@ -52,6 +59,7 @@ def load_competitor_data():
         print("⚠️  No competitor data found, using sample data")
         return create_sample_data()
 
+
 def create_sample_data():
     """Create sample competitor data for demo."""
     return {
@@ -62,25 +70,58 @@ def create_sample_data():
                 "data_availability": "High",
                 "scorecard": {
                     "dimensions": {
-                        "Revenue Growth": {"score": 8.5, "evidence": "15% CAGR over 3 years"},
-                        "Funding Momentum": {"score": 7.0, "evidence": "Series B completed 2024"},
-                        "Employee Growth": {"score": 6.5, "evidence": "Growing from 50 to 120 in 2 years"},
-                        "Geographic Expansion": {"score": 8.0, "evidence": "Expanded to 3 new countries"},
-                        "M&A Activity": {"score": 5.0, "evidence": "1 acquisition in 2023"},
-                        "SaaS Maturity": {"score": 9.0, "evidence": "Cloud-native, 100% SaaS"}
+                        "Revenue Growth": {
+                            "score": 8.5,
+                            "evidence": "15% CAGR over 3 years",
+                        },
+                        "Funding Momentum": {
+                            "score": 7.0,
+                            "evidence": "Series B completed 2024",
+                        },
+                        "Employee Growth": {
+                            "score": 6.5,
+                            "evidence": "Growing from 50 to 120 in 2 years",
+                        },
+                        "Geographic Expansion": {
+                            "score": 8.0,
+                            "evidence": "Expanded to 3 new countries",
+                        },
+                        "M&A Activity": {
+                            "score": 5.0,
+                            "evidence": "1 acquisition in 2023",
+                        },
+                        "SaaS Maturity": {
+                            "score": 9.0,
+                            "evidence": "Cloud-native, 100% SaaS",
+                        },
                     },
                     "composite_score": 7.3,
-                    "classification": "Rocket"
+                    "classification": "Rocket",
                 },
                 "revenue": {
                     "timeline": [
-                        {"year": "2024", "eur_millions": 45.0, "yoy_growth_pct": 15.0, "confidence": "Confirmed"},
-                        {"year": "2023", "eur_millions": 39.1, "yoy_growth_pct": 18.0, "confidence": "Confirmed"},
-                        {"year": "2022", "eur_millions": 33.1, "yoy_growth_pct": 20.0, "confidence": "Confirmed"}
+                        {
+                            "year": "2024",
+                            "eur_millions": 45.0,
+                            "yoy_growth_pct": 15.0,
+                            "confidence": "Confirmed",
+                        },
+                        {
+                            "year": "2023",
+                            "eur_millions": 39.1,
+                            "yoy_growth_pct": 18.0,
+                            "confidence": "Confirmed",
+                        },
+                        {
+                            "year": "2022",
+                            "eur_millions": 33.1,
+                            "yoy_growth_pct": 20.0,
+                            "confidence": "Confirmed",
+                        },
                     ],
                     "cagr_3yr_pct": 17.7,
-                    "latest_revenue_eur_m": 45.0
-                }
+                    "latest_revenue_eur_m": 45.0,
+                },
             },
             {
                 "company_name": "Volue ASA",
@@ -88,28 +129,62 @@ def create_sample_data():
                 "data_availability": "High",
                 "scorecard": {
                     "dimensions": {
-                        "Revenue Growth": {"score": 9.0, "evidence": "25% CAGR, public company"},
-                        "Funding Momentum": {"score": 8.5, "evidence": "Strong institutional backing"},
-                        "Employee Growth": {"score": 7.5, "evidence": "Steady growth to 800+ employees"},
-                        "Geographic Expansion": {"score": 9.5, "evidence": "Global presence across 15 countries"},
-                        "M&A Activity": {"score": 8.0, "evidence": "Multiple strategic acquisitions"},
-                        "SaaS Maturity": {"score": 8.5, "evidence": "Hybrid model, strong recurring revenue"}
+                        "Revenue Growth": {
+                            "score": 9.0,
+                            "evidence": "25% CAGR, public company",
+                        },
+                        "Funding Momentum": {
+                            "score": 8.5,
+                            "evidence": "Strong institutional backing",
+                        },
+                        "Employee Growth": {
+                            "score": 7.5,
+                            "evidence": "Steady growth to 800+ employees",
+                        },
+                        "Geographic Expansion": {
+                            "score": 9.5,
+                            "evidence": "Global presence across 15 countries",
+                        },
+                        "M&A Activity": {
+                            "score": 8.0,
+                            "evidence": "Multiple strategic acquisitions",
+                        },
+                        "SaaS Maturity": {
+                            "score": 8.5,
+                            "evidence": "Hybrid model, strong recurring revenue",
+                        },
                     },
                     "composite_score": 8.5,
-                    "classification": "Rocket"
+                    "classification": "Rocket",
                 },
                 "revenue": {
                     "timeline": [
-                        {"year": "2024", "eur_millions": 180.0, "yoy_growth_pct": 25.0, "confidence": "Estimated"},
-                        {"year": "2023", "eur_millions": 144.0, "yoy_growth_pct": 20.0, "confidence": "Confirmed"},
-                        {"year": "2022", "eur_millions": 120.0, "yoy_growth_pct": 18.0, "confidence": "Confirmed"}
+                        {
+                            "year": "2024",
+                            "eur_millions": 180.0,
+                            "yoy_growth_pct": 25.0,
+                            "confidence": "Estimated",
+                        },
+                        {
+                            "year": "2023",
+                            "eur_millions": 144.0,
+                            "yoy_growth_pct": 20.0,
+                            "confidence": "Confirmed",
+                        },
+                        {
+                            "year": "2022",
+                            "eur_millions": 120.0,
+                            "yoy_growth_pct": 18.0,
+                            "confidence": "Confirmed",
+                        },
                     ],
                     "cagr_3yr_pct": 21.0,
-                    "latest_revenue_eur_m": 180.0
-                }
-            }
+                    "latest_revenue_eur_m": 180.0,
+                },
+            },
         ]
     }
+
 
 def create_company_profile(company_data):
     """Create a CompanyProfile from raw data."""
@@ -128,11 +203,15 @@ def create_company_profile(company_data):
     # Create financial metric
     financial_metric = FinancialMetric(
         revenue=revenue,
-        revenue_confidence=ConfidenceLevel.CONFIRMED if revenue else ConfidenceLevel.UNKNOWN,
+        revenue_confidence=ConfidenceLevel.CONFIRMED
+        if revenue
+        else ConfidenceLevel.UNKNOWN,
         growth_rate=growth,
-        growth_confidence=ConfidenceLevel.ESTIMATED if growth else ConfidenceLevel.UNKNOWN,
+        growth_confidence=ConfidenceLevel.ESTIMATED
+        if growth
+        else ConfidenceLevel.UNKNOWN,
         employees=company_data.get("employee_count", 100),  # Default
-        employees_confidence=ConfidenceLevel.ESTIMATED
+        employees_confidence=ConfidenceLevel.ESTIMATED,
     )
 
     # Determine tier based on revenue
@@ -158,10 +237,11 @@ def create_company_profile(company_data):
         tech_stack=["Python", "React", "PostgreSQL"],  # Default
         geographic_presence=["Europe"],  # Default
         key_customers=["Utilities", "Energy Traders"],  # Default
-        last_updated=datetime.now()
+        last_updated=datetime.now(),
     )
 
     return profile
+
 
 def analyze_market(profiles):
     """Analyze the competitive landscape."""
@@ -170,7 +250,11 @@ def analyze_market(profiles):
 
     market_insights = []
     for profile in profiles:
-        market_share = (profile.financials.revenue / total_revenue * 100) if total_revenue > 0 else 0
+        market_share = (
+            (profile.financials.revenue / total_revenue * 100)
+            if total_revenue > 0
+            else 0
+        )
 
         insight = {
             "company": profile.name,
@@ -179,7 +263,7 @@ def analyze_market(profiles):
             "market_share": round(market_share, 1),
             "tier": profile.tier.value,
             "ai_maturity": profile.ai_maturity.value,
-            "threat_level": profile.threat_level.value
+            "threat_level": profile.threat_level.value,
         }
         market_insights.append(insight)
 
@@ -187,6 +271,7 @@ def analyze_market(profiles):
     market_insights.sort(key=lambda x: x["revenue_eur_m"] or 0, reverse=True)
 
     return market_insights
+
 
 def generate_excel_report(profiles, market_insights, output_path):
     """Generate Excel report."""
@@ -201,20 +286,31 @@ def generate_excel_report(profiles, market_insights, output_path):
         # Also create a simple CSV for market insights (fallback)
         csv_path = output_path.with_suffix(".csv")
         import csv
-        with open(csv_path, 'w', newline='') as csvfile:
-            fieldnames = ["company", "revenue_eur_m", "growth_rate", "market_share", "tier", "ai_maturity", "threat_level"]
+
+        with open(csv_path, "w", newline="") as csvfile:
+            fieldnames = [
+                "company",
+                "revenue_eur_m",
+                "growth_rate",
+                "market_share",
+                "tier",
+                "ai_maturity",
+                "threat_level",
+            ]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             for insight in market_insights:
-                writer.writerow({
-                    "company": insight["company"],
-                    "revenue_eur_m": insight["revenue_eur_m"],
-                    "growth_rate": insight["growth_rate"],
-                    "market_share": insight["market_share"],
-                    "tier": insight["tier"],
-                    "ai_maturity": insight["ai_maturity"],
-                    "threat_level": insight["threat_level"]
-                })
+                writer.writerow(
+                    {
+                        "company": insight["company"],
+                        "revenue_eur_m": insight["revenue_eur_m"],
+                        "growth_rate": insight["growth_rate"],
+                        "market_share": insight["market_share"],
+                        "tier": insight["tier"],
+                        "ai_maturity": insight["ai_maturity"],
+                        "threat_level": insight["threat_level"],
+                    }
+                )
 
         print(f"   ✅ CSV backup created: {csv_path}")
 
@@ -226,27 +322,39 @@ def generate_excel_report(profiles, market_insights, output_path):
         # Fallback: Create simple CSV
         try:
             import csv
+
             csv_path = output_path.with_suffix(".csv")
-            with open(csv_path, 'w', newline='') as csvfile:
-                fieldnames = ["company", "revenue_eur_m", "growth_rate", "market_share", "tier", "ai_maturity", "threat_level"]
+            with open(csv_path, "w", newline="") as csvfile:
+                fieldnames = [
+                    "company",
+                    "revenue_eur_m",
+                    "growth_rate",
+                    "market_share",
+                    "tier",
+                    "ai_maturity",
+                    "threat_level",
+                ]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
                 for insight in market_insights:
-                    writer.writerow({
-                        "company": insight["company"],
-                        "revenue_eur_m": insight["revenue_eur_m"],
-                        "growth_rate": insight["growth_rate"],
-                        "market_share": insight["market_share"],
-                        "tier": insight["tier"],
-                        "ai_maturity": insight["ai_maturity"],
-                        "threat_level": insight["threat_level"]
-                    })
+                    writer.writerow(
+                        {
+                            "company": insight["company"],
+                            "revenue_eur_m": insight["revenue_eur_m"],
+                            "growth_rate": insight["growth_rate"],
+                            "market_share": insight["market_share"],
+                            "tier": insight["tier"],
+                            "ai_maturity": insight["ai_maturity"],
+                            "threat_level": insight["threat_level"],
+                        }
+                    )
 
             print(f"   ✅ Created CSV report: {csv_path}")
             return True
         except Exception as e2:
             print(f"❌ CSV fallback also failed: {e2}")
             return False
+
 
 def main():
     """Main demo function."""
@@ -272,7 +380,11 @@ def main():
     for i, company in enumerate(competitors[:5]):  # Limit to 5 for demo
         profile = create_company_profile(company)
         profiles.append(profile)
-        print(f"   {i+1}. {profile.name}: €{profile.financials.revenue or 'N/A'}M, {profile.financials.growth_rate or 'N/A'}% growth")
+        print(
+            f"   {i + 1}. {profile.name}: "
+            f"€{profile.financials.revenue or 'N/A'}M, "
+            f"{profile.financials.growth_rate or 'N/A'}% growth"
+        )
 
     # Step 4: Analyze market
     print("\n4. Analyzing competitive landscape...")
@@ -281,14 +393,18 @@ def main():
     print("\n   MARKET ANALYSIS RESULTS:")
     print("   " + "-" * 50)
     for insight in market_insights:
-        print(f"   • {insight['company']}: {insight['market_share']}% market share "
-              f"(€{insight['revenue_eur_m']}M, {insight['growth_rate']}% growth)")
+        print(
+            f"   • {insight['company']}: {insight['market_share']}% market share "
+            f"(€{insight['revenue_eur_m']}M, {insight['growth_rate']}% growth)"
+        )
 
     # Step 5: Generate Excel report
     print("\n5. Generating Excel report...")
     output_dir = Path("data/output/demo")
     output_dir.mkdir(exist_ok=True)
-    output_path = output_dir / f"solstein_demo_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    output_path = (
+        output_dir / f"solstein_demo_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    )
 
     if generate_excel_report(profiles, market_insights, output_path):
         print(f"   ✅ Report saved to: {output_path}")
@@ -303,10 +419,19 @@ def main():
             if profile.financials.revenue and profile.financials.growth_rate:
                 scored_profile = scorer.calculate_scores(profile)
                 # Get growth score from the scored profile
-                growth_score = getattr(scored_profile, 'growth_score', None)
+                growth_score = getattr(scored_profile, "growth_score", None)
                 if growth_score:
-                    classification = "Rocket" if growth_score >= 7.0 else "Dinosaur" if growth_score <= 4.0 else "Neutral"
-                    print(f"   • {profile.name}: Score {growth_score:.1f}/10 ({classification})")
+                    classification = (
+                        "Rocket"
+                        if growth_score >= 7.0
+                        else "Dinosaur"
+                        if growth_score <= 4.0
+                        else "Neutral"
+                    )
+                    print(
+                        f"   • {profile.name}: Score {growth_score:.1f}/10 "
+                        f"({classification})"
+                    )
                 else:
                     print(f"   • {profile.name}: Score calculation not available")
             else:
@@ -337,6 +462,7 @@ def main():
 
     return True
 
+
 if __name__ == "__main__":
     try:
         success = main()
@@ -347,5 +473,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Demo failed with error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

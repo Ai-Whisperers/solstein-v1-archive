@@ -13,27 +13,20 @@ from .exporters.excel_exporter import ExcelExporter
 
 settings = get_settings()
 
+
 @shared_task(name="export_marketing_report")
 def export_marketing_report(filters: dict[str, Any], output_filename: str) -> str:
     """
     Generate Excel report in background.
-
-    Args:
-        filters: Dictionary of filters to apply to the repository query.
-        output_filename: Name of the output file.
-
-    Returns:
-        Absolute path to the generated file.
     """
     logger.info(f"Starting background export task. Filters: {filters}")
 
-    # 1. Initialize Repository (fresh instance for the worker)
-    # Note: in a real DB scenario, we'd use a session factory.
-    # For JSON file repo, it's safe to instantiate.
+    # 1. Initialize Repository
     repo = JsonFileRepository(data_dir=settings.data.data_dir)
 
+    from .core.repositories import CompanyFilter
     # 2. Fetch Data
-    companies = repo.get_all(filters=filters)
+    companies = repo.get_all(filters=CompanyFilter(**filters))
 
     if not companies:
         logger.warning("No companies found matching filters.")
@@ -48,3 +41,53 @@ def export_marketing_report(filters: dict[str, Any], output_filename: str) -> st
     exporter.create_dashboard(companies, output_path)
 
     return str(output_path)
+
+
+@shared_task(name="batch_score_companies")
+def batch_score_companies(filters: dict[str, Any]) -> dict[str, Any]:
+    """
+    Score multiple companies in the background.
+    """
+    logger.info(f"Starting background batch scoring task. Filters: {filters}")
+
+    from .analytics.scoring import GrowthScorer
+    from .core.repositories import CompanyFilter
+
+    repo = JsonFileRepository(data_dir=settings.data.data_dir)
+    scorer = GrowthScorer()
+
+    # Fetch data
+    companies = repo.get_all(filters=CompanyFilter(**filters))
+    
+    results = []
+    for company in companies:
+        try:
+            scored = scorer.calculate_scores(company)
+            growth = scored.growth_score or 0.0
+            
+            classification = "Neutral"
+            if growth >= 7.0:
+                classification = "Rocket"
+            elif growth <= 4.0:
+                classification = "Dinosaur"
+
+            results.append({
+                "company_id": company.id,
+                "company_name": company.name,
+                "growth_score": scored.growth_score,
+                "classification": classification,
+                "status": "success"
+            })
+        except Exception as e:
+            logger.warning(f"Error scoring company {company.id}: {e}")
+            results.append({
+                "company_id": company.id,
+                "error": str(e),
+                "status": "error"
+            })
+
+    return {
+        "total_processed": len(results),
+        "results": results,
+        "completed_at": datetime.now().isoformat()
+    }

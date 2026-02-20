@@ -12,7 +12,7 @@ celery_app = Celery(
     "solstein",
     broker=settings.celery.broker_url,
     backend=settings.celery.result_backend,
-    include=["solstein.tasks"]
+    include=["solstein.tasks"],
 )
 
 celery_app.conf.update(

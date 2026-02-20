@@ -4,11 +4,12 @@ Domain models for market simulation.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 
-class MarketConditionType(str, Enum):
+class MarketConditionType(StrEnum):
     """Types of market conditions."""
+
     INTEREST_RATE = "interest_rate"
     INFLATION = "inflation"
     SECTOR_GROWTH = "sector_growth"
@@ -19,6 +20,7 @@ class MarketConditionType(str, Enum):
 @dataclass
 class MarketCondition:
     """A specific market condition modifier."""
+
     type: MarketConditionType
     name: str
     impact_factor: float  # Multiplier or additive factor depending on logic
@@ -29,6 +31,7 @@ class MarketCondition:
 @dataclass
 class Scenario:
     """A simulation scenario composed of multiple market conditions."""
+
     id: str
     name: str
     description: str
@@ -39,6 +42,7 @@ class Scenario:
 @dataclass
 class SimulationResult:
     """Result of a simulation for a single company."""
+
     company_id: str
     company_name: str
     base_valuation: float | None

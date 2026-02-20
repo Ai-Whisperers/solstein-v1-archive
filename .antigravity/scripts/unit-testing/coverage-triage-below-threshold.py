@@ -49,11 +49,13 @@ import json
 import logging
 import os
 import sys
-from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Mapping
 
 
 @dataclass(frozen=True)
@@ -137,7 +139,9 @@ def emit_azure_pipeline_error(message: str) -> None:
         sys.stdout.flush()
 
 
-def _require_headers(reader: csv.DictReader, required: set[str], *, csv_path: Path) -> None:
+def _require_headers(
+    reader: csv.DictReader, required: set[str], *, csv_path: Path
+) -> None:
     missing = sorted(required.difference(reader.fieldnames or []))
     if missing:
         raise ScriptError(
@@ -217,12 +221,12 @@ def is_actionable(row: CoverageRow) -> bool:
         return False
     if row.method.startswith(("get_", "set_", "op_")):
         return False
-    if "<" in row.full_method_name and ">" in row.full_method_name:
-        return False
-    return True
+    return not ("<" in row.full_method_name and ">" in row.full_method_name)
 
 
-def below_coverage(rows: Iterable[CoverageRow], max_coverage_exclusive: float) -> list[CoverageRow]:
+def below_coverage(
+    rows: Iterable[CoverageRow], max_coverage_exclusive: float
+) -> list[CoverageRow]:
     return [r for r in rows if r.coverage < max_coverage_exclusive]
 
 
@@ -230,7 +234,14 @@ def sort_for_triage(rows: Iterable[CoverageRow]) -> list[CoverageRow]:
     # Lowest coverage first; then highest CRAP score; then highest cyclomatic complexity.
     return sorted(
         rows,
-        key=lambda r: (r.coverage, -r.crap_score, -r.complexity, r.assembly, r.full_class_name, r.method),
+        key=lambda r: (
+            r.coverage,
+            -r.crap_score,
+            -r.complexity,
+            r.assembly,
+            r.full_class_name,
+            r.method,
+        ),
     )
 
 
@@ -242,14 +253,27 @@ def write_csv(path: Path, rows: Iterable[CoverageRow]) -> None:
         # - header row not quoted
         # - all string fields quoted
         # - numeric fields not quoted
-        f.write("Assembly,FullClassName,Method,Coverage,CrapScore,Complexity,FullMethodName\n")
+        f.write(
+            "Assembly,FullClassName,Method,Coverage,CrapScore,Complexity,FullMethodName\n"
+        )
         writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
         for r in rows:
             writer.writerow(
-                [r.assembly, r.full_class_name, r.method, r.coverage, r.crap_score, r.complexity, r.full_method_name]
+                [
+                    r.assembly,
+                    r.full_class_name,
+                    r.method,
+                    r.coverage,
+                    r.crap_score,
+                    r.complexity,
+                    r.full_method_name,
+                ]
             )
 
-def render_console_preview(logger: logging.Logger, title: str, rows: list[CoverageRow], *, limit: int) -> None:
+
+def render_console_preview(
+    logger: logging.Logger, title: str, rows: list[CoverageRow], *, limit: int
+) -> None:
     logger.info("")
     logger.info(title)
     logger.info("-" * len(title))
@@ -295,7 +319,7 @@ def _load_json_config(path: Path) -> dict[str, Any]:
             exit_code=ExitCode.config_error,
             title="Config file root must be a JSON object",
             explanation="The script expects a JSON object with simple key/value pairs.",
-            solution="Update the config file so the root is an object (e.g. {\"max_coverage\": 50}).",
+            solution='Update the config file so the root is an object (e.g. {"max_coverage": 50}).',
             location=str(path),
         )
 
@@ -385,7 +409,13 @@ def _coalesce_config(
     raw_config: Mapping[str, Any],
     args: argparse.Namespace,
 ) -> tuple[Path, Path, float, str, bool, int]:
-    allowed_keys = {"out_dir", "max_coverage", "assembly", "actionable_filter", "preview_limit"}
+    allowed_keys = {
+        "out_dir",
+        "max_coverage",
+        "assembly",
+        "actionable_filter",
+        "preview_limit",
+    }
     unknown = sorted(set(raw_config.keys()).difference(allowed_keys))
     if unknown:
         raise ScriptError(
@@ -398,10 +428,18 @@ def _coalesce_config(
 
     csv_path = Path(args.csv)
 
-    out_dir_value = args.out_dir if args.out_dir is not None else raw_config.get("out_dir", ".")
-    out_dir = out_dir_value if isinstance(out_dir_value, Path) else Path(str(out_dir_value))
+    out_dir_value = (
+        args.out_dir if args.out_dir is not None else raw_config.get("out_dir", ".")
+    )
+    out_dir = (
+        out_dir_value if isinstance(out_dir_value, Path) else Path(str(out_dir_value))
+    )
 
-    max_cov_value = args.max_coverage if args.max_coverage is not None else raw_config.get("max_coverage", 50.0)
+    max_cov_value = (
+        args.max_coverage
+        if args.max_coverage is not None
+        else raw_config.get("max_coverage", 50.0)
+    )
     try:
         max_cov = float(max_cov_value)
     except (TypeError, ValueError) as ex:
@@ -421,8 +459,10 @@ def _coalesce_config(
             solution="Use a value like 50 (meaning: include rows with Coverage < 50).",
         )
 
-    assembly_value = args.assembly if args.assembly is not None else raw_config.get(
-        "assembly", "Eneve.eBase.DataMigrator"
+    assembly_value = (
+        args.assembly
+        if args.assembly is not None
+        else raw_config.get("assembly", "Eneve.eBase.DataMigrator")
     )
     assembly = str(assembly_value)
     if not assembly.strip():
@@ -447,7 +487,11 @@ def _coalesce_config(
         )
     actionable_filter = bool(actionable_value)
 
-    preview_value = args.preview_limit if args.preview_limit is not None else raw_config.get("preview_limit", 50)
+    preview_value = (
+        args.preview_limit
+        if args.preview_limit is not None
+        else raw_config.get("preview_limit", 50)
+    )
     try:
         preview_limit = int(preview_value)
     except (TypeError, ValueError) as ex:
@@ -487,19 +531,29 @@ def main() -> int:
         if args.config_file is not None:
             raw_config = _load_json_config(Path(args.config_file))
 
-        csv_path, out_dir, max_cov, assembly, actionable_filter, preview_limit = _coalesce_config(raw_config, args)
+        csv_path, out_dir, max_cov, assembly, actionable_filter, preview_limit = (
+            _coalesce_config(raw_config, args)
+        )
 
         rows = parse_rows(csv_path)
         below = sort_for_triage(below_coverage(rows, max_cov))
 
-        below_actionable = [r for r in below if is_actionable(r)] if actionable_filter else list(below)
+        below_actionable = (
+            [r for r in below if is_actionable(r)] if actionable_filter else list(below)
+        )
         below_assembly = [r for r in below_actionable if r.assembly == assembly]
 
-        max_label = str(int(max_cov)) if float(max_cov).is_integer() else str(max_cov).replace(".", "_")
+        max_label = (
+            str(int(max_cov))
+            if float(max_cov).is_integer()
+            else str(max_cov).replace(".", "_")
+        )
 
         all_actionable_path = out_dir / f"coverage-below-{max_label}-all-actionable.csv"
         assembly_path = out_dir / f"coverage-below-{max_label}-{assembly}.csv"
-        assembly_actionable_path = out_dir / f"coverage-below-{max_label}-{assembly}-actionable.csv"
+        assembly_actionable_path = (
+            out_dir / f"coverage-below-{max_label}-{assembly}-actionable.csv"
+        )
 
         write_csv(all_actionable_path, below_actionable)
         write_csv(assembly_path, [r for r in below if r.assembly == assembly])
@@ -507,10 +561,16 @@ def main() -> int:
 
         if preview_limit > 0:
             render_console_preview(
-                logger, f"Coverage < {max_cov:g}% ({assembly}) - actionable", below_assembly, limit=preview_limit
+                logger,
+                f"Coverage < {max_cov:g}% ({assembly}) - actionable",
+                below_assembly,
+                limit=preview_limit,
             )
             render_console_preview(
-                logger, f"Coverage < {max_cov:g}% (all assemblies) - actionable", below_actionable, limit=preview_limit
+                logger,
+                f"Coverage < {max_cov:g}% (all assemblies) - actionable",
+                below_actionable,
+                limit=preview_limit,
             )
 
         logger.info("")
@@ -536,5 +596,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-

@@ -12,13 +12,20 @@ from typing import Any
 
 from loguru import logger
 
-from ..data.models import CompanyProfile, FinancialMetric
+from ..data.models import (
+    AIMaturity,
+    CompanyProfile,
+    CompanyTier,
+    ConfidenceLevel,
+    FinancialMetric,
+    ThreatLevel,
+)
 
 
 class MarkdownExtractor:
     """Extract structured data from markdown files."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.patterns = {
             "revenue": re.compile(r"Revenue:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
             "growth_rate": re.compile(r"Growth Rate:\s*([\d.,]+\s*%)"),
@@ -42,7 +49,7 @@ class MarkdownExtractor:
 
     def _parse_content(self, content: str, source: str) -> dict[str, Any]:
         """Parse markdown content and extract structured data."""
-        data = {"source": source}
+        data: dict[str, Any] = {"source": source}
 
         # Extract basic metrics
         for key, pattern in self.patterns.items():
@@ -70,9 +77,7 @@ class MarkdownExtractor:
         # Extract tech stack
         tech_match = re.search(r"Tech Stack:\s*(.+)", content)
         if tech_match:
-            data["tech_stack"] = [
-                t.strip() for t in tech_match.group(1).split(",")
-            ]
+            data["tech_stack"] = [t.strip() for t in tech_match.group(1).split(",")]
 
         # Extract confidence levels
         data["confidence"] = self._extract_confidence(content)
@@ -109,12 +114,15 @@ class MarkdownExtractor:
         )
 
         # Create financial metrics
+        employees_val = self._parse_numeric(extracted_data.get("employees"))
+        employees = int(employees_val) if employees_val is not None else None
+
         financials = FinancialMetric(
             revenue=self._parse_numeric(extracted_data.get("revenue")),
             revenue_confidence=self._get_confidence(extracted_data, "revenue"),
             growth_rate=self._parse_percentage(extracted_data.get("growth_rate")),
             growth_confidence=self._get_confidence(extracted_data, "growth_rate"),
-            employees=self._parse_numeric(extracted_data.get("employees")),
+            employees=employees,
             employees_confidence=self._get_confidence(extracted_data, "employees"),
             profit_margin=self._parse_percentage(extracted_data.get("profit_margin")),
             margin_confidence=self._get_confidence(extracted_data, "profit_margin"),
@@ -176,64 +184,94 @@ class MarkdownExtractor:
             logger.warning(f"Failed to parse percentage: {value}")
             return None
 
-    def _parse_ai_maturity(self, value: str | None) -> str:
+    def _parse_ai_maturity(self, value: str | None) -> AIMaturity:
         """Parse AI maturity level."""
         if not value:
-            return "None"
+            return AIMaturity.NONE
 
         value = value.strip().lower()
         if "very strong" in value:
-            return "Very Strong"
+            return AIMaturity.VERY_STRONG
         elif "strong" in value:
-            return "Strong"
+            return AIMaturity.STRONG
         elif "moderate" in value:
-            return "Moderate"
+            return AIMaturity.MODERATE
         elif "low" in value:
-            return "Low"
+            return AIMaturity.LOW
         else:
-            return "None"
+            return AIMaturity.NONE
 
-    def _parse_threat_level(self, value: str | None) -> str:
+    def _parse_threat_level(self, value: str | None) -> ThreatLevel:
         """Parse threat level."""
         if not value:
-            return "Medium"
+            return ThreatLevel.MEDIUM
 
-        value = value.strip().capitalize()
-        if value in ["Low", "Medium", "High", "Critical"]:
-            return value
-        return "Medium"
+        value = value.strip().upper()
+        try:
+            return ThreatLevel(value.capitalize())
+        except ValueError:
+            # Try to map common variations
+            if "HIGH" in value:
+                return ThreatLevel.HIGH
+            elif "CRITICAL" in value:
+                return ThreatLevel.CRITICAL
+            elif "LOW" in value:
+                return ThreatLevel.LOW
+            return ThreatLevel.MEDIUM
 
-    def _parse_tier(self, value: str | None) -> str:
+    def _parse_tier(self, value: str | None) -> CompanyTier:
         """Parse company tier."""
         if not value:
-            return "Tier 3"
+            return CompanyTier.TIER_3
 
         value = value.strip()
         if "Tier 1" in value:
-            return "Tier 1"
+            return CompanyTier.TIER_1
         elif "Tier 2" in value:
-            return "Tier 2"
+            return CompanyTier.TIER_2
         elif "Tier 3" in value:
-            return "Tier 3"
+            return CompanyTier.TIER_3
         elif "Tier 4" in value:
-            return "Tier 4"
-        return "Tier 3"
+            return CompanyTier.TIER_4
+        return CompanyTier.TIER_3
 
-    def _get_confidence(self, data: dict[str, Any], metric: str) -> str:
+    def _get_confidence(self, data: dict[str, Any], metric: str) -> ConfidenceLevel:
         """Get confidence level for a metric."""
         confidence_data = data.get("confidence", {})
-        return confidence_data.get(metric, "Unknown")
+        val = confidence_data.get(metric, "Unknown")
+        try:
+            return ConfidenceLevel(val.upper())
+        except ValueError:
+            return ConfidenceLevel.UNKNOWN
 
 
 class BatchExtractor:
     """Batch extraction from multiple files."""
 
-    def __init__(self, extractor: MarkdownExtractor = None):
+    def __init__(self, extractor: MarkdownExtractor | None = None):
         self.extractor = extractor or MarkdownExtractor()
 
-    def extract_directory(self, directory: Path, pattern: str = "*.md") -> list[CompanyProfile]:
+    @classmethod
+    async def process_file(
+        cls, file_path: Path, extractor: "MarkdownExtractor | None" = None
+    ) -> CompanyProfile | None:
+        """Process a single file asynchronously."""
+        if extractor is None:
+            extractor = MarkdownExtractor()
+        
+        extracted = extractor.extract_from_file(file_path)
+        if extracted:
+            try:
+                return extractor.to_company_profile(extracted)
+            except Exception as e:
+                logger.error(f"Failed to create profile from {file_path}: {e}")
+        return None
+
+    def extract_directory(
+        self, directory: Path, pattern: str = "*.md"
+    ) -> list[CompanyProfile]:
         """Extract data from all markdown files in a directory."""
-        profiles = []
+        profiles: list[CompanyProfile] = []
 
         if not directory.exists():
             logger.error(f"Directory does not exist: {directory}")
@@ -260,7 +298,9 @@ class BatchExtractor:
         try:
             data = [profile.model_dump() for profile in profiles]
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            output_path.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
+            output_path.write_text(
+                json.dumps(data, indent=2, default=str), encoding="utf-8"
+            )
             logger.info(f"Saved {len(profiles)} profiles to {output_path}")
         except Exception as e:
             logger.error(f"Failed to save to JSON: {e}")

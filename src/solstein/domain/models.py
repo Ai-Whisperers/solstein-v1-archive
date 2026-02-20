@@ -7,41 +7,50 @@ They are NOT coupled to any framework (Pydantic, FastAPI, SQLAlchemy).
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class ConfidenceLevel(str, Enum):
+class ConfidenceLevel(StrEnum):
     """Confidence levels for data points."""
+
     CONFIRMED = "Confirmed"
     ESTIMATED = "Estimated"
     UNKNOWN = "Unknown"
 
-class AIMaturity(str, Enum):
+
+class AIMaturity(StrEnum):
     """AI adoption maturity levels."""
+
     NONE = "None"
     LOW = "Low"
     MODERATE = "Moderate"
     STRONG = "Strong"
     VERY_STRONG = "Very Strong"
 
-class ThreatLevel(str, Enum):
+
+class ThreatLevel(StrEnum):
     """Competitive threat levels."""
+
     LOW = "Low"
     MEDIUM = "Medium"
     HIGH = "High"
     CRITICAL = "Critical"
 
-class CompanyTier(str, Enum):
+
+class CompanyTier(StrEnum):
     """Company size/market position tiers."""
+
     TIER_1 = "Tier 1"
     TIER_2 = "Tier 2"
     TIER_3 = "Tier 3"
     TIER_4 = "Tier 4"
 
+
 @dataclass
 class FinancialMetric:
     """Financial metrics domain entity."""
+
     revenue: float | None = None
     revenue_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
     growth_rate: float | None = None
@@ -55,9 +64,11 @@ class FinancialMetric:
     valuation: float | None = None
     valuation_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
 
+
 @dataclass
 class Company:
     """Company domain entity."""
+
     id: str
     name: str
     industry: str = "Energy Software"
@@ -100,14 +111,16 @@ class Company:
     @property
     def is_public(self) -> bool:
         """Domain logic: Check if company is publicly traded."""
-        return self.financials.valuation is not None and self.financials.valuation > 100_000_000
+        return (
+            self.financials.valuation is not None
+            and self.financials.valuation > 100_000_000
+        )
 
     @property
     def is_high_growth(self) -> bool:
         """Domain logic: Check if company is high growth."""
         return (
-            self.financials.growth_rate is not None
-            and self.financials.growth_rate > 20
+            self.financials.growth_rate is not None and self.financials.growth_rate > 20
         )
 
     @property
@@ -118,9 +131,11 @@ class Company:
             and self.financials.profit_margin > 0
         )
 
+
 @dataclass
 class MarketAnalysis:
     """Market-level analysis domain entity."""
+
     market_name: str
     analysis_date: datetime = field(default_factory=datetime.now)
     companies: list[Company] = field(default_factory=list)
@@ -148,7 +163,8 @@ class MarketAnalysis:
     @property
     def average_growth_rate(self) -> float | None:
         growth_rates = [
-            c.financials.growth_rate for c in self.companies
+            c.financials.growth_rate
+            for c in self.companies
             if c.financials.growth_rate is not None
         ]
         if not growth_rates:
@@ -159,9 +175,11 @@ class MarketAnalysis:
     def market_leaders(self) -> list[Company]:
         return [c for c in self.companies if c.tier == CompanyTier.TIER_1]
 
+
 @dataclass
 class CompetitiveOverlap:
     """Competitive overlap domain entity."""
+
     company_a_id: str
     company_b_id: str
     overlap_score: float

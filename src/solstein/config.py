@@ -4,21 +4,26 @@ Configuration management for SolStein.
 Handles environment variables, configuration files, and settings.
 """
 
+import sys
+from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 from loguru import logger
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-from pydantic_settings import BaseSettings
+from pydantic import BaseModel, Field, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class DatabaseConfig(BaseModel):
     """Database configuration."""
+
     url: str = Field(default="postgresql://postgres:postgres@localhost:5432/solstein")
     pool_size: int = Field(default=20, ge=1, le=100)
     echo: bool = Field(default=False)
 
     @field_validator("url")
-    def validate_url(cls, v):
+    @classmethod
+    def validate_url(cls, v: str) -> str:
         """Validate database URL."""
         if not v:
             raise ValueError("Database URL cannot be empty")
@@ -27,6 +32,7 @@ class DatabaseConfig(BaseModel):
 
 class RedisConfig(BaseModel):
     """Redis configuration for caching and job queues."""
+
     url: str = Field(default="redis://localhost:6379/0")
     cache_ttl: int = Field(default=3600, ge=60, description="Cache TTL in seconds")
 
@@ -47,6 +53,7 @@ class RedisConfig(BaseModel):
 
 class CeleryConfig(BaseModel):
     """Celery configuration."""
+
     broker_url: str = Field(default="redis://localhost:6379/0")
     result_backend: str = Field(default="redis://localhost:6379/0")
     task_serializer: str = Field(default="json")
@@ -55,9 +62,11 @@ class CeleryConfig(BaseModel):
     timezone: str = Field(default="UTC")
     enable_utc: bool = Field(default=True)
 
+
 class APIConfig(BaseModel):
     """API configuration."""
-    host: str = Field(default="0.0.0.0")
+
+    host: str = Field(default="127.0.0.1")
     port: int = Field(default=8000, ge=1, le=65535)
     debug: bool = Field(default=False)
     cors_origins: list[str] = Field(default=["http://localhost:3000"])
@@ -71,12 +80,14 @@ class APIConfig(BaseModel):
 
 class SecurityConfig(BaseModel):
     """Security configuration."""
+
     secret_key: str = Field(default="change-me-in-production")
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30, ge=1)
 
     @field_validator("secret_key")
-    def validate_secret_key(cls, v):
+    @classmethod
+    def validate_secret_key(cls, v: str) -> str:
         """Validate secret key."""
         if v == "change-me-in-production":
             logger.warning("Using default secret key - change in production!")
@@ -85,6 +96,7 @@ class SecurityConfig(BaseModel):
 
 class LoggingConfig(BaseModel):
     """Logging configuration."""
+
     level: str = Field(default="INFO")
     format: str = Field(default="json")
     file_path: Path | None = Field(default=None)
@@ -92,7 +104,8 @@ class LoggingConfig(BaseModel):
     retention: str = Field(default="30 days")
 
     @field_validator("level")
-    def validate_level(cls, v):
+    @classmethod
+    def validate_level(cls, v: str) -> str:
         """Validate log level."""
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         if v.upper() not in valid_levels:
@@ -102,20 +115,25 @@ class LoggingConfig(BaseModel):
 
 class DataConfig(BaseModel):
     """Data configuration."""
+
     data_dir: Path = Field(default=Path("data/input"))
     cache_dir: Path = Field(default=Path("data/cache"))
     export_dir: Path = Field(default=Path("data/output/exports"))
 
-    @field_validator("data_dir", "cache_dir", "export_dir", mode='before')
-    def resolve_paths(cls, v):
+    @field_validator("data_dir", "cache_dir", "export_dir", mode="before")
+    @classmethod
+    def resolve_paths(cls, v: Any) -> Path:
         """Resolve paths to absolute."""
         if isinstance(v, str):
-            v = Path(v)
-        if v and not v.is_absolute():
+            v_path = Path(v)
+        else:
+            v_path = v
+            
+        if v_path and not v_path.is_absolute():
             # Resolve relative to project root
             project_root = Path(__file__).parent.parent.parent
-            v = project_root / v
-        return v
+            v_path = project_root / v_path
+        return v_path
 
     def ensure_dirs(self) -> None:
         """Ensure all directories exist."""
@@ -144,11 +162,11 @@ class Settings(BaseSettings):
     openai_api_key: str | None = Field(default=None)
     perplexity_api_key: str | None = Field(default=None)
 
-    model_config = ConfigDict(
+    model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         env_nested_delimiter="__",
-        case_sensitive=False
+        case_sensitive=True,
     )
 
     @classmethod
@@ -174,24 +192,33 @@ class Settings(BaseSettings):
     def get_database_url(self, test: bool = False) -> str:
         """Get database URL, optionally for tests."""
         url = self.database.url
-        if test and "test" not in url:
+        if test and "test" not in url and "/" in url:
             # Append _test to database name
-            if "/" in url:
-                parts = url.rsplit("/", 1)
-                url = f"{parts[0]}_test/{parts[1]}"
+            parts = url.rsplit("/", 1)
+            url = f"{parts[0]}_test/{parts[1]}"
         return url
 
 
-# Global settings instance
-_settings: Settings | None = None
+@lru_cache
+def get_settings() -> "Settings":
+    """Get cached settings instance."""
+    settings = Settings.load()
 
+    # Try to load from .env file
+    env_file = Path(".env")
+    if env_file.exists():
+        logger.info(f"Loading configuration from {env_file}")
+    else:
+        logger.warning("No .env file found, using defaults")
 
-def get_settings() -> Settings:
-    """Get or create settings instance."""
-    global _settings
-    if _settings is None:
-        _settings = Settings.load()
-    return _settings
+    settings.data.ensure_dirs()
+
+    # Log configuration summary
+    logger.info(f"Environment: {settings.environment}")
+    logger.info(f"Debug mode: {settings.debug}")
+    logger.info(f"Data directory: {settings.data.data_dir}")
+
+    return settings
 
 
 def configure_logging(settings: Settings) -> None:
@@ -203,8 +230,13 @@ def configure_logging(settings: Settings) -> None:
 
     # Add console handler
     logger.add(
-        lambda msg: print(msg, end=""),
-        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+        sys.stderr,
+        format=(
+            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+            "<level>{message}</level>"
+        ),
         level=settings.logging.level,
         colorize=True,
     )

@@ -1,68 +1,60 @@
 from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from loguru import logger
 
 from ...analytics.scoring import MarketAnalyzer
-from ...core.repositories import CompanyRepository
-from ...data.models import CompetitiveOverlap
+from ...core.repositories import CompanyRepository, CompanyFilter
+from ...data.models import CompetitiveOverlap, MarketAnalysis
 from ..dependencies import get_current_user, get_repository
 
 router = APIRouter(tags=["Market Analysis"])
 market_analyzer = MarketAnalyzer()
 
+
 @router.get("/market/analysis")
 async def analyze_market(
     industry: str | None = Query(None, description="Industry to analyze"),
     region: str | None = Query(None, description="Geographic region"),
-    _: dict = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository)
-):
+    _: dict[str, Any] = Depends(get_current_user),
+    repo: CompanyRepository = Depends(get_repository),
+) -> MarketAnalysis:
     """Analyze market competitive landscape."""
     try:
         # Use repository with filters
-        filters = {}
-        if industry:
-            filters["industry"] = industry
-
-        companies = repo.get_all(filters=filters if industry else None)
-
-        # Filter by industry if specified
-        if industry:
-            filtered_companies = [
-                c for c in companies
-                if c.industry and industry.lower() in c.industry.lower()
-            ]
-        else:
-            filtered_companies = companies
+        filters = CompanyFilter(industry=industry)
+        filtered_companies = repo.get_all(filters=filters)
 
         if not filtered_companies:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No companies found for industry: {industry}"
+                detail=f"No companies found for industry: {industry}",
             )
 
         # Perform market analysis
         analysis = market_analyzer.analyze_market(filtered_companies)
 
-        return analysis
+        return MarketAnalysis.model_validate(analysis)
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error analyzing market: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error analyzing market: {str(e)}"
-        )
+            detail=(
+                f"Error analyzing market: {str(e)}"
+            ),
+        ) from e
 
 
 @router.get("/market/overlap/{company_id}", response_model=list[CompetitiveOverlap])
 async def get_competitive_overlap(
     company_id: str,
     top_n: int = Query(10, ge=1, le=50, description="Number of top overlaps to return"),
-    _: dict = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository)
-):
+    _: dict[str, Any] = Depends(get_current_user),
+    repo: CompanyRepository = Depends(get_repository),
+) -> list[CompetitiveOverlap]:
     """Get competitive overlap for a company."""
     try:
         # Get target company directly
@@ -71,14 +63,14 @@ async def get_competitive_overlap(
         if not target_company:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Company with ID {company_id} not found"
+                detail=f"Company with ID {company_id} not found",
             )
 
         # Get all other companies for comparison
         companies = repo.get_all()
 
-        # Check if target company exists in full list just in case repo.get_by_id behaves differently
-        # (Assuming it matches)
+        # Check if target company exists in full list just in case
+        # repo.get_by_id behaves differently (Assuming it matches)
 
         # Calculate overlaps (simplified for demo)
         overlaps = []
@@ -95,13 +87,14 @@ async def get_competitive_overlap(
             if company.ai_maturity == target_company.ai_maturity:
                 overlap_score += 0.2
 
-            overlaps.append(CompetitiveOverlap(
-                company_a_id=company_id,
-                company_b_id=company.id,
-                overlap_score=overlap_score,
-                overlap_type="industry_tier_ai",
-                last_calculated=datetime.now()
-            ))
+            overlaps.append(
+                CompetitiveOverlap(
+                    company_a_id=company_id,
+                    company_b_id=company.id,
+                    overlap_score=overlap_score,
+                    notes=f"Calculated based on industry and tier match at {datetime.now()}",
+                )
+            )
 
         # Sort by overlap score and return top N
         overlaps.sort(key=lambda x: x.overlap_score, reverse=True)
@@ -112,16 +105,19 @@ async def get_competitive_overlap(
         logger.error(f"Error calculating competitive overlap: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error calculating competitive overlap: {str(e)}"
-        )
+            detail=f"Error calculating competitive overlap: {str(e)}",
+        ) from e
+
 
 @router.get("/search", tags=["Search"])
 async def search_companies(
     query: str = Query(..., min_length=2, description="Search query"),
-    field: str = Query("name", description="Field to search (name, industry, description)"),
-    _: dict = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository)
-):
+    field: str = Query(
+        "name", description="Field to search (name, industry, description)"
+    ),
+    _: dict[str, Any] = Depends(get_current_user),
+    repo: CompanyRepository = Depends(get_repository),
+) -> dict[str, Any]:
     """Search companies by various fields."""
     try:
         # In a real impl, repo would have a search method
@@ -147,11 +143,11 @@ async def search_companies(
             "query": query,
             "field": field,
             "total_results": len(results),
-            "results": results[:100]  # Limit results
+            "results": results[:100],  # Limit results
         }
     except Exception as e:
         logger.error(f"Error searching companies: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error searching companies: {str(e)}"
-        )
+            detail=f"Error searching companies: {str(e)}",
+        ) from e

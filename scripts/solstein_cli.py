@@ -16,8 +16,7 @@ import click
 
 # Configure logging (Vete pattern)
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -30,6 +29,7 @@ try:
     from solstein.config import Settings
     from solstein.data.models import CompanyProfile, ConfidenceLevel, FinancialMetric
     from solstein.exporters.excel_exporter import ExcelExporter
+
     HAS_DEPS = True
 except ImportError as e:
     logger.warning(f"Some dependencies not available: {e}")
@@ -44,7 +44,9 @@ def cli():
 
 
 @cli.command()
-@click.option('--env', default='development', help='Environment (development/production)')
+@click.option(
+    "--env", default="development", help="Environment (development/production)"
+)
 def config(env: str):
     """Show current configuration"""
     try:
@@ -52,21 +54,33 @@ def config(env: str):
         click.echo("📊 SolStein Configuration:")
         click.echo(f"  Environment: {settings.environment}")
         click.echo(f"  Data Directory: {settings.data.data_dir}")
-        click.echo(f"  Database URL: {settings.database.url[:30]}..." if settings.database.url else "  Database URL: Not configured")
+        click.echo(
+            f"  Database URL: {settings.database.url[:30]}..."
+            if settings.database.url
+            else "  Database URL: Not configured"
+        )
         click.echo(f"  Log Level: {settings.logging.level}")
-        click.echo(f"  API Keys: {'Configured' if settings.openai_api_key or settings.perplexity_api_key else 'Not configured'}")
+        # This is a bit hacky but we need to check if keys are set
+        api_keys_status = "Configured" if (
+            settings.openai_api_key or settings.perplexity_api_key
+        ) else "Not configured"
+
+        click.echo(f"  API Keys: {api_keys_status}")
     except Exception as e:
         click.echo(f"❌ Error loading configuration: {e}", err=True)
 
 
 @cli.command()
-@click.option('--input', '-i', type=click.Path(exists=True), help='Input JSON file')
-@click.option('--output', '-o', type=click.Path(), help='Output directory')
-@click.option('--limit', '-l', type=int, default=10, help='Limit number of companies')
+@click.option("--input", "-i", type=click.Path(exists=True), help="Input JSON file")
+@click.option("--output", "-o", type=click.Path(), help="Output directory")
+@click.option("--limit", "-l", type=int, default=10, help="Limit number of companies")
 def analyze(input: str | None, output: str | None, limit: int):
     """Analyze competitor data"""
     if not HAS_DEPS:
-        click.echo("❌ Required dependencies not available. Install with: pip install -e .", err=True)
+        click.echo(
+            "❌ Required dependencies not available. Install with: pip install -e .",
+            err=True,
+        )
         sys.exit(1)
 
     try:
@@ -75,7 +89,14 @@ def analyze(input: str | None, output: str | None, limit: int):
             data_path = Path(input)
         else:
             # Default to project data
-            data_path = Path(__file__).parent.parent / "legacy" / "old_root_backup" / "SolStein" / "COMPETITION" / "competitor_data.json"
+            data_path = (
+                Path(__file__).parent.parent
+                / "legacy"
+                / "old_root_backup"
+                / "SolStein"
+                / "COMPETITION"
+                / "competitor_data.json"
+            )
 
         if not data_path.exists():
             click.echo(f"❌ Data file not found: {data_path}", err=True)
@@ -93,7 +114,9 @@ def analyze(input: str | None, output: str | None, limit: int):
         if output:
             output_dir = Path(output)
         else:
-            output_dir = Path("data/output/analysis") / datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_dir = Path("data/output/analysis") / datetime.now().strftime(
+                "%Y%m%d_%H%M%S"
+            )
 
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -102,7 +125,7 @@ def analyze(input: str | None, output: str | None, limit: int):
         scorer = GrowthScorer()
 
         for i, comp in enumerate(competitors):
-            click.echo(f"  {i+1}. {comp.get('company_name', 'Unknown')}")
+            click.echo(f"  {i + 1}. {comp.get('company_name', 'Unknown')}")
 
             # Create financial metric (simplified)
             revenue_data = comp.get("revenue", {})
@@ -118,10 +141,14 @@ def analyze(input: str | None, output: str | None, limit: int):
 
             financial = FinancialMetric(
                 revenue=revenue,
-                revenue_confidence=ConfidenceLevel.CONFIRMED if revenue else ConfidenceLevel.UNKNOWN,
+                revenue_confidence=ConfidenceLevel.CONFIRMED
+                if revenue
+                else ConfidenceLevel.UNKNOWN,
                 growth_rate=growth,
-                growth_confidence=ConfidenceLevel.ESTIMATED if growth else ConfidenceLevel.UNKNOWN,
-                employees=100  # Default
+                growth_confidence=ConfidenceLevel.ESTIMATED
+                if growth
+                else ConfidenceLevel.UNKNOWN,
+                employees=100,  # Default
             )
 
             # Create profile
@@ -130,32 +157,35 @@ def analyze(input: str | None, output: str | None, limit: int):
                 name=comp.get("company_name", f"Company {i}"),
                 industry="Energy Software",  # Default
                 financials=financial,
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             )
 
             # Score
             scored_profile = scorer.calculate_scores(profile)
 
-            results.append({
-                "company": profile.name,
-                "revenue": profile.financials.revenue,
-                "growth": profile.financials.growth_rate,
-                "growth_score": getattr(scored_profile, 'growth_score', None),
-                "classification": "Rocket" if getattr(scored_profile, 'growth_score', 0) >= 7.0
-                                else "Dinosaur" if getattr(scored_profile, 'growth_score', 0) <= 4.0
-                                else "Neutral"
-            })
+            results.append(
+                {
+                    "company": profile.name,
+                    "revenue": profile.financials.revenue,
+                    "growth": profile.financials.growth_rate,
+                    "growth_score": getattr(scored_profile, "growth_score", None),
+                    "classification": "Rocket"
+                    if getattr(scored_profile, "growth_score", 0) >= 7.0
+                    else "Dinosaur"
+                    if getattr(scored_profile, "growth_score", 0) <= 4.0
+                    else "Neutral",
+                }
+            )
 
         # Save results
         results_path = output_dir / "analysis_results.json"
-        with open(results_path, 'w') as f:
+        with open(results_path, "w") as f:
             json.dump(results, f, indent=2, default=str)
 
         # Generate Excel report
         excel_path = output_dir / "competitive_dashboard.xlsx"
         try:
-            exporter = ExcelExporter()
-            profiles = []  # Would need actual profiles
+            ExcelExporter()
             # exporter.create_dashboard(profiles, excel_path)
             click.echo(f"  📈 Excel dashboard: {excel_path}")
         except Exception as e:
@@ -165,9 +195,9 @@ def analyze(input: str | None, output: str | None, limit: int):
         rockets = sum(1 for r in results if r["classification"] == "Rocket")
         dinosaurs = sum(1 for r in results if r["classification"] == "Dinosaur")
 
-        click.echo("\n" + "="*60)
+        click.echo("\n" + "=" * 60)
         click.echo("📈 ANALYSIS SUMMARY")
-        click.echo("="*60)
+        click.echo("=" * 60)
         click.echo(f"Total Companies: {len(results)}")
         click.echo(f"Rockets (High Growth): {rockets}")
         click.echo(f"Dinosaurs (Low Growth): {dinosaurs}")
@@ -188,8 +218,8 @@ def analyze(input: str | None, output: str | None, limit: int):
 
 
 @cli.command()
-@click.option('--company', '-c', multiple=True, help='Company names to compare')
-@click.option('--input', '-i', type=click.Path(exists=True), help='Input JSON file')
+@click.option("--company", "-c", multiple=True, help="Company names to compare")
+@click.option("--input", "-i", type=click.Path(exists=True), help="Input JSON file")
 def compare(company: list[str], input: str | None):
     """Compare specific companies"""
     if not HAS_DEPS:
@@ -201,7 +231,14 @@ def compare(company: list[str], input: str | None):
         if input:
             data_path = Path(input)
         else:
-            data_path = Path(__file__).parent.parent / "legacy" / "old_root_backup" / "SolStein" / "COMPETITION" / "competitor_data.json"
+            data_path = (
+                Path(__file__).parent.parent
+                / "legacy"
+                / "old_root_backup"
+                / "SolStein"
+                / "COMPETITION"
+                / "competitor_data.json"
+            )
 
         if not data_path.exists():
             click.echo(f"❌ Data file not found: {data_path}", err=True)
@@ -227,7 +264,7 @@ def compare(company: list[str], input: str | None):
             sys.exit(1)
 
         click.echo("📊 COMPANY COMPARISON")
-        click.echo("="*60)
+        click.echo("=" * 60)
 
         for comp in selected[:5]:  # Limit to 5
             revenue_data = comp.get("revenue", {})
@@ -236,17 +273,27 @@ def compare(company: list[str], input: str | None):
 
             click.echo(f"\n🏢 {comp.get('company_name')}")
             click.echo(f"   📁 Folder: {comp.get('folder', 'N/A')}")
-            click.echo(f"   📊 Data Availability: {comp.get('data_availability', 'N/A')}")
+            click.echo(
+                f"   📊 Data Availability: {comp.get('data_availability', 'N/A')}"
+            )
 
             if timeline:
                 latest = timeline[0]
-                click.echo(f"   💰 Revenue: €{latest.get('eur_millions', 'N/A')}M ({latest.get('yoy_growth_pct', 'N/A')}% YoY)")
+                click.echo(
+                    f"   💰 Revenue: €{latest.get('eur_millions', 'N/A')}M "
+                    f"({latest.get('yoy_growth_pct', 'N/A')}% YoY)"
+                )
 
             if scorecard:
-                click.echo(f"   🎯 Composite Score: {scorecard.get('composite_score', 'N/A')}/10")
-                click.echo(f"   🏷️  Classification: {scorecard.get('classification', 'N/A')}")
+                click.echo(
+                    f"   🎯 Composite Score: "
+                    f"{scorecard.get('composite_score', 'N/A')}/10"
+                )
+                click.echo(
+                    f"   🏷️  Classification: {scorecard.get('classification', 'N/A')}"
+                )
 
-        click.echo("\n" + "="*60)
+        click.echo("\n" + "=" * 60)
 
     except Exception as e:
         logger.error(f"Comparison failed: {e}", exc_info=True)
@@ -255,7 +302,7 @@ def compare(company: list[str], input: str | None):
 
 
 @cli.command()
-@click.option('--output', '-o', type=click.Path(), help='Output directory')
+@click.option("--output", "-o", type=click.Path(), help="Output directory")
 def report(output: str | None):
     """Generate comprehensive competitive intelligence report"""
     if not HAS_DEPS:
@@ -272,7 +319,14 @@ def report(output: str | None):
         output_dir.mkdir(parents=True, exist_ok=True)
 
         # Load data
-        data_path = Path(__file__).parent.parent / "legacy" / "old_root_backup" / "SolStein" / "COMPETITION" / "competitor_data.json"
+        data_path = (
+            Path(__file__).parent.parent
+            / "legacy"
+            / "old_root_backup"
+            / "SolStein"
+            / "COMPETITION"
+            / "competitor_data.json"
+        )
 
         if not data_path.exists():
             click.echo(f"❌ Data file not found: {data_path}", err=True)
@@ -306,9 +360,11 @@ def report(output: str | None):
             "total_companies": len(competitors),
             "market_overview": {
                 "total_revenue_eur_m": total_revenue,
-                "average_growth_pct": total_growth / growth_count if growth_count > 0 else 0
+                "average_growth_pct": total_growth / growth_count
+                if growth_count > 0
+                else 0,
             },
-            "companies": []
+            "companies": [],
         }
 
         for comp in competitors[:20]:  # Limit to 20
@@ -323,33 +379,54 @@ def report(output: str | None):
                 "revenue": timeline[0].get("eur_millions") if timeline else None,
                 "growth": timeline[0].get("yoy_growth_pct") if timeline else None,
                 "composite_score": scorecard.get("composite_score"),
-                "classification": scorecard.get("classification")
+                "classification": scorecard.get("classification"),
             }
             report_data["companies"].append(company_info)
 
         # Save report
-        report_path = output_dir / f"solstein_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(report_path, 'w') as f:
+        report_path = (
+            output_dir
+            / f"solstein_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
+        with open(report_path, "w") as f:
             json.dump(report_data, f, indent=2, default=str)
 
         # Also create markdown summary
         md_path = output_dir / "README.md"
-        with open(md_path, 'w') as f:
+        with open(md_path, "w") as f:
             f.write("# SolStein Competitive Intelligence Report\n\n")
             f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
             f.write("## Market Overview\n\n")
-            f.write(f"- **Total Companies Analyzed**: {report_data['total_companies']}\n")
-            f.write(f"- **Total Revenue**: €{report_data['market_overview']['total_revenue_eur_m']:,.0f}M\n")
-            f.write(f"- **Average Growth Rate**: {report_data['market_overview']['average_growth_pct']:.1f}%\n\n")
+            f.write(
+                f"- **Total Companies Analyzed**: {report_data['total_companies']}\n"
+            )
+            f.write(
+                f"- **Total Revenue**: "
+                f"€{report_data['market_overview']['total_revenue_eur_m']:,.0f}M\n"
+            )
+            f.write(
+                f"- **Average Growth Rate**: "
+                f"{report_data['market_overview']['average_growth_pct']:.1f}%\n\n"
+            )
 
             f.write("## Top Companies\n\n")
-            f.write("| Company | Revenue (€M) | Growth (%) | Score | Classification |\n")
-            f.write("|---------|--------------|------------|-------|----------------|\n")
+            f.write(
+                "| Company | Revenue (€M) | Growth (%) | Score | Classification |\n"
+            )
+            f.write(
+                "|---------|--------------|------------|-------|----------------|\n"
+            )
 
-            for comp in sorted(report_data["companies"],
-                             key=lambda x: x["revenue"] or 0,
-                             reverse=True)[:10]:
-                f.write(f"| {comp['name']} | {comp['revenue'] or 'N/A'} | {comp['growth'] or 'N/A'} | {comp['composite_score'] or 'N/A'} | {comp['classification'] or 'N/A'} |\n")
+            for comp in sorted(
+                report_data["companies"], key=lambda x: x["revenue"] or 0, reverse=True
+            )[:10]:
+                f.write(
+                    f"| {comp['name']} | "
+                    f"{comp['revenue'] or 'N/A'} | "
+                    f"{comp['growth'] or 'N/A'} | "
+                    f"{comp['composite_score'] or 'N/A'} | "
+                    f"{comp['classification'] or 'N/A'} |\n"
+                )
 
         click.echo(f"✅ Report generated: {report_path}")
         click.echo(f"📝 Markdown summary: {md_path}")
@@ -369,8 +446,10 @@ def demo():
     demo_path = Path(__file__).parent / "demo_solstein.py"
     if demo_path.exists():
         import subprocess
-        result = subprocess.run([sys.executable, str(demo_path)],
-                              capture_output=True, text=True)
+
+        result = subprocess.run(
+            [sys.executable, str(demo_path)], capture_output=True, text=True
+        )
         click.echo(result.stdout)
         if result.stderr:
             click.echo(result.stderr, err=True)

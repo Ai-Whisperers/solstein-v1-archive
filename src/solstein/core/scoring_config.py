@@ -4,12 +4,12 @@ Scoring Configuration Schemas.
 Defines the tunable parameters for the scoring algorithms.
 """
 
-
 from pydantic import BaseModel, Field
 
 
 class GrowthScoringConfig(BaseModel):
     """Configuration for growth score calculation."""
+
     base_score: float = 5.0
 
     # Weights & Factors
@@ -35,8 +35,10 @@ class GrowthScoringConfig(BaseModel):
     margin_med_bonus: float = 1.0
     margin_negative_penalty: float = -1.0
 
+
 class FinancialHealthConfig(BaseModel):
     """Configuration for financial health score calculation."""
+
     base_score: float = 5.0
 
     # Revenue Scale
@@ -70,26 +72,32 @@ class FinancialHealthConfig(BaseModel):
     cushion_thin_ratio: float = 0.5
     cushion_thin_penalty: float = -1.0
 
+
 class CompetitivePositionConfig(BaseModel):
     """Configuration for competitive position score."""
+
     base_score: float = 5.0
 
     # Tier Scores
-    tier_scores: dict[str, float] = Field(default_factory=lambda: {
-        "Tier 1": 3.0,
-        "Tier 2": 1.5,
-        "Tier 3": 0.0,
-        "Tier 4": -1.0,
-    })
+    tier_scores: dict[str, float] = Field(
+        default_factory=lambda: {
+            "Tier 1": 3.0,
+            "Tier 2": 1.5,
+            "Tier 3": 0.0,
+            "Tier 4": -1.0,
+        }
+    )
 
     # AI Maturity Scores
-    ai_maturity_scores: dict[str, float] = Field(default_factory=lambda: {
-        "Very Strong": 2.5,
-        "Strong": 1.5,
-        "Moderate": 0.5,
-        "Low": -0.5,
-        "None": -1.0,
-    })
+    ai_maturity_scores: dict[str, float] = Field(
+        default_factory=lambda: {
+            "Very Strong": 2.5,
+            "Strong": 1.5,
+            "Moderate": 0.5,
+            "Low": -0.5,
+            "None": -1.0,
+        }
+    )
 
     # Geographic Presence
     geo_global_count: int = 10
@@ -103,8 +111,12 @@ class CompetitivePositionConfig(BaseModel):
     tech_diverse_bonus: float = 0.5
     tech_none_penalty: float = -0.5
 
+
 class ScoringSettings(BaseModel):
     """Root configuration for all scoring."""
+
     growth: GrowthScoringConfig = Field(default_factory=GrowthScoringConfig)
     financial: FinancialHealthConfig = Field(default_factory=FinancialHealthConfig)
-    competitive: CompetitivePositionConfig = Field(default_factory=CompetitivePositionConfig)
+    competitive: CompetitivePositionConfig = Field(
+        default_factory=CompetitivePositionConfig
+    )

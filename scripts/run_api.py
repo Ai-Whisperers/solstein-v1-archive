@@ -12,14 +12,14 @@ Production-ready API server with:
 import sys
 from pathlib import Path
 
+import uvicorn
+from loguru import logger
+
 # Add src to path
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
-import uvicorn
-from loguru import logger
-
-from solstein.config import Settings
+from solstein.config import Settings  # noqa: E402
 
 
 def configure_logging():
@@ -29,8 +29,13 @@ def configure_logging():
     # Add console handler
     logger.add(
         sys.stderr,
-        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
-        level="INFO"
+        format=(
+        "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+        "<level>{level: <8}</level> | "
+        "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+        "<level>{message}</level>"
+    ),
+        level="INFO",
     )
 
     # Add file handler
@@ -40,8 +45,11 @@ def configure_logging():
         log_dir / "solstein_api_{time:YYYY-MM-DD}.log",
         rotation="1 day",
         retention="30 days",
-        format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
-        level="DEBUG"
+        format=(
+            "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | "
+            "{name}:{function}:{line} - {message}"
+        ),
+        level="DEBUG",
     )
 
 
@@ -75,7 +83,7 @@ def main():
         port=settings.api.port,
         reload=settings.environment == "development",
         log_level="info",
-        access_log=True
+        access_log=True,
     )
 
 

@@ -74,8 +74,7 @@ def test_scoring():
     print(f"  Testing with company ID: {company_id}")
 
     response = requests.post(
-        f"{BASE_URL}/scoring/company/{company_id}/score",
-        headers=HEADERS
+        f"{BASE_URL}/scoring/company/{company_id}/score", headers=HEADERS
     )
     print(f"  Status: {response.status_code}")
 
@@ -112,7 +111,7 @@ def test_search():
     response = requests.get(
         f"{BASE_URL}/search",
         params={"query": "energy", "field": "name"},
-        headers=HEADERS
+        headers=HEADERS,
     )
     print(f"  Status: {response.status_code}")
 
@@ -136,7 +135,8 @@ def test_stats():
         data = response.json()
         print("  Statistics retrieved")
         print(f"  Total companies: {data.get('total_companies', 0)}")
-        print(f"  Total revenue: €{data.get('revenue_statistics', {}).get('total_revenue_eur_m', 0):,.0f}M")
+        revenue = data.get("revenue_statistics", {}).get("total_revenue_eur_m", 0)
+        print(f"  Total revenue: €{revenue:,.0f}M")
         return True
     else:
         print(f"  Error: {response.text}")
@@ -160,7 +160,7 @@ def main():
         test_scoring,
         test_export,
         test_search,
-        test_stats
+        test_stats,
     ]
 
     results = []

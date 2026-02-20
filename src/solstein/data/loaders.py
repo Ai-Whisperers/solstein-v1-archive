@@ -30,7 +30,7 @@ class CompetitorDataLoader:
 
     def __init__(self, data_dir: Path | None = None):
         self.data_dir = data_dir or Path(settings.data.data_dir)
-        self._cache = {}
+        self._cache: dict[str, list[CompanyProfile]] = {}
 
     def load_companies(self, limit: int | None = None) -> list[CompanyProfile]:
         """Load all companies from data directory."""
@@ -42,17 +42,15 @@ class CompetitorDataLoader:
 
         # Try to load from the main competitor data JSON
         json_path = self.data_dir / "competitor_data.json"
-        if json_path.exists():
-            companies.extend(self._load_from_json(json_path, limit))
-        else:
-            # Fallback: look for JSON files in the project
-            project_json = Path(__file__).parent.parent.parent.parent / "SolStein" / "COMPETITION" / "competitor_data.json"
-            if project_json.exists():
-                companies.extend(self._load_from_json(project_json, limit))
-            else:
-                logger.warning(f"No competitor data found at {json_path} or {project_json}")
-                # Create sample data for demo
-                companies.extend(self._create_sample_data(limit or 10))
+        
+        if not json_path.exists():
+            error_msg = f"Critical error: Competitor data not found at {json_path}"
+            logger.error(error_msg)
+            # In a production repository, we should not silently fallback to relative project paths
+            # or generate sample data unless explicitly in simulation/dev mode.
+            raise FileNotFoundError(error_msg)
+
+        companies.extend(self._load_from_json(json_path, limit))
 
         if limit:
             companies = companies[:limit]
@@ -60,7 +58,9 @@ class CompetitorDataLoader:
         self._cache[cache_key] = companies
         return companies
 
-    def _load_from_json(self, json_path: Path, limit: int | None = None) -> list[CompanyProfile]:
+    def _load_from_json(
+        self, json_path: Path, limit: int | None = None
+    ) -> list[CompanyProfile]:
         """Load companies from JSON file."""
         try:
             with open(json_path) as f:
@@ -86,7 +86,9 @@ class CompetitorDataLoader:
             logger.error(f"Error loading JSON from {json_path}: {e}")
             return []
 
-    def _convert_to_company_profile(self, raw_data: dict[str, Any], index: int) -> CompanyProfile:
+    def _convert_to_company_profile(
+        self, raw_data: dict[str, Any], index: int
+    ) -> CompanyProfile:
         """Convert raw JSON data to CompanyProfile model."""
         # Extract basic info
         company_name = raw_data.get("company_name", f"Company {index}")
@@ -111,9 +113,11 @@ class CompetitorDataLoader:
             revenue=revenue,
             revenue_confidence=revenue_confidence,
             growth_rate=growth,
-            growth_confidence=ConfidenceLevel.ESTIMATED if growth else ConfidenceLevel.UNKNOWN,
+            growth_confidence=ConfidenceLevel.ESTIMATED
+            if growth
+            else ConfidenceLevel.UNKNOWN,
             employees=self._estimate_employees(revenue),
-            employees_confidence=ConfidenceLevel.ESTIMATED
+            employees_confidence=ConfidenceLevel.ESTIMATED,
         )
 
         # Determine tier based on revenue
@@ -163,10 +167,13 @@ class CompetitorDataLoader:
             acquisitions=[],
             last_updated=datetime.now(),
             data_source="SolStein Competitive Intelligence",
-            notes=f"Loaded from competitor data. Data availability: {raw_data.get('data_availability', 'Unknown')}",
+            notes=(
+                f"Loaded from competitor data. Data availability: "
+                f"{raw_data.get('data_availability', 'Unknown')}"
+            ),
             growth_score=None,  # Will be calculated separately
             financial_health_score=None,
-            competitive_position_score=None
+            competitive_position_score=None,
         )
 
         return company
@@ -247,7 +254,7 @@ class CompetitorDataLoader:
             "Indra Sistemas",
             "Asseco Poland",
             "Engineering Ingegneria",
-            "Hansen Technologies"
+            "Hansen Technologies",
         ]
 
         for i in range(min(count, len(sample_names))):
@@ -261,7 +268,7 @@ class CompetitorDataLoader:
                 growth_rate=growth,
                 growth_confidence=ConfidenceLevel.ESTIMATED,
                 employees=int(revenue * 5),  # Rough estimate
-                employees_confidence=ConfidenceLevel.ESTIMATED
+                employees_confidence=ConfidenceLevel.ESTIMATED,
             )
 
             # Create company
@@ -269,7 +276,7 @@ class CompetitorDataLoader:
                 id=f"sample-{i}",
                 name=sample_names[i],
                 industry="Energy Software",
-                description=f"Sample competitor {i+1} in energy software market",
+                description=f"Sample competitor {i + 1} in energy software market",
                 tier=self._determine_tier(revenue),
                 threat_level=ThreatLevel.MEDIUM,
                 ai_maturity=AIMaturity.MODERATE,
@@ -279,7 +286,7 @@ class CompetitorDataLoader:
                 geographic_presence=["Europe"],
                 key_customers=["Utilities", "Energy Traders"],
                 last_updated=datetime.now(),
-                data_source="Sample Data"
+                data_source="Sample Data",
             )
 
             companies.append(company)
@@ -287,7 +294,7 @@ class CompetitorDataLoader:
         logger.info(f"Created {len(companies)} sample companies")
         return companies
 
-    def clear_cache(self):
+    def clear_cache(self) -> None:
         """Clear the data cache."""
         self._cache.clear()
         logger.debug("Cleared data cache")

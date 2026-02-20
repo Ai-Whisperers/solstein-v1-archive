@@ -2,6 +2,7 @@
 """
 Script to check for 'God Files' that exceed line count limits.
 """
+
 import os
 import sys
 from pathlib import Path
@@ -11,6 +12,7 @@ MAX_LINES = 400
 EXCLUDE_DIRS = ["venv", ".git", "__pycache__", ".ruff_cache", "migrations"]
 EXCLUDE_FILES = []
 
+
 def count_lines(filepath: Path) -> int:
     """Count lines in file."""
     try:
@@ -18,6 +20,7 @@ def count_lines(filepath: Path) -> int:
             return len(f.readlines())
     except Exception:
         return 0
+
 
 def check_files(root_dir: Path) -> list[tuple[Path, int]]:
     """Recursively check files in directory."""
@@ -42,6 +45,7 @@ def check_files(root_dir: Path) -> list[tuple[Path, int]]:
 
     return violations
 
+
 def main():
     """Main execution."""
     root_dir = Path("src")
@@ -61,6 +65,7 @@ def main():
     else:
         print("\nSUCCESS: No God Files found! All files are modular.")
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

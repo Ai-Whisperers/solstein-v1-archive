@@ -28,7 +28,7 @@ lint:
 
 # Build Docker image
 docker-build:
-	docker build -t solstein-api .
+	docker build -f docker/Dockerfile -t solstein-api .
 
 # Run Docker container
 docker-run:

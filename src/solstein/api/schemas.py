@@ -18,11 +18,12 @@ from ..domain.models import AIMaturity, CompanyTier, ConfidenceLevel, ThreatLeve
 
 class FinancialMetricSchema(BaseModel):
     """Financial metrics schema."""
+
     model_config = ConfigDict(extra="forbid", from_attributes=True)
 
-    revenue: float | None = Field(None, description="Annual revenue in EUR")
+    revenue: float | None = Field(default=None, description="Annual revenue in EUR")
     revenue_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
-    growth_rate: float | None = Field(None, description="Annual growth rate %")
+    growth_rate: float | None = Field(default=None, description="Annual growth rate %")
     growth_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
     employees: int | None = None
     employees_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
@@ -33,13 +34,28 @@ class FinancialMetricSchema(BaseModel):
     valuation: float | None = None
     valuation_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
 
-    @field_validator("revenue", "growth_rate", "employees", "profit_margin", "funding_raised", "valuation", mode='before')
-    def validate_numeric_fields(cls, v):
+    @field_validator(
+        "revenue",
+        "growth_rate",
+        "employees",
+        "profit_margin",
+        "funding_raised",
+        "valuation",
+        mode="before",
+    )
+    @classmethod
+    def validate_numeric_fields(cls, v: Any) -> Any:
         """Sanitize string inputs."""
         if v is None or v == "":
             return None
         if isinstance(v, str):
-            v = v.replace("€", "").replace("$", "").replace(",", "").replace(" ", "").replace("%", "")
+            v = (
+                v.replace("€", "")
+                .replace("$", "")
+                .replace(",", "")
+                .replace(" ", "")
+                .replace("%", "")
+            )
             if v.endswith("M"):
                 return float(v[:-1]) * 1_000_000
             elif v.endswith("B"):
@@ -48,8 +64,10 @@ class FinancialMetricSchema(BaseModel):
                 return float(v[:-1]) * 1_000
         return v
 
+
 class CompanyProfileSchema(BaseModel):
     """Company profile API schema."""
+
     model_config = ConfigDict(extra="forbid", from_attributes=True)
 
     id: str
@@ -65,8 +83,8 @@ class CompanyProfileSchema(BaseModel):
     ai_maturity: AIMaturity = AIMaturity.NONE
     saas_maturity: int = 1
     tech_stack: list[str] = Field(default_factory=list)
-
-    financials: FinancialMetricSchema = Field(default_factory=FinancialMetricSchema)
+    
+    financials: FinancialMetricSchema = Field(default_factory=lambda: FinancialMetricSchema())
 
     geographic_presence: list[str] = Field(default_factory=list)
     key_customers: list[str] = Field(default_factory=list)
@@ -82,3 +100,36 @@ class CompanyProfileSchema(BaseModel):
     growth_score: float | None = None
     financial_health_score: float | None = None
     competitive_position_score: float | None = None
+
+
+class ConditionSchema(BaseModel):
+    """Market condition schema."""
+
+    type: str
+    name: str
+    impact_factor: float
+    description: str
+    affected_industries: list[str] | None = None
+
+
+class ScenarioSchema(BaseModel):
+    """Simulation scenario schema."""
+
+    id: str
+    name: str
+    description: str
+    conditions: list[ConditionSchema]
+
+
+class SimulationResultSchema(BaseModel):
+    """Simulation result schema."""
+
+    company_id: str
+    company_name: str
+    base_valuation: float
+    simulated_valuation: float
+    valuation_change_pct: float
+    base_growth_score: float
+    simulated_growth_score: float
+    growth_score_change: float
+    notes: list[str]

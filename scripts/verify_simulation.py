@@ -17,10 +17,8 @@ def verify_simulation():
         tier=CompanyTier.TIER_2,
         industry="SaaS",
         financials=FinancialMetric(
-            revenue=10_000_000,
-            growth_rate=50.0,
-            valuation=100_000_000
-        )
+            revenue=10_000_000, growth_rate=50.0, valuation=100_000_000
+        ),
     )
 
     # 2. Define Scenario: "Tech Recession"
@@ -33,15 +31,15 @@ def verify_simulation():
             MarketCondition(
                 type=MarketConditionType.INTEREST_RATE,
                 name="Rate Hike",
-                impact_factor=1.05  # 5% rate -> negative impact on valuation
+                impact_factor=1.05,  # 5% rate -> negative impact on valuation
             ),
             MarketCondition(
                 type=MarketConditionType.SECTOR_GROWTH,
                 name="SaaS Cooling",
                 impact_factor=-1.0,  # -1.0 to growth score
-                affected_industries=["SaaS"]
-            )
-        ]
+                affected_industries=["SaaS"],
+            ),
+        ],
     )
 
     # 3. Run Simulation
@@ -52,9 +50,15 @@ def verify_simulation():
     # 4. Assertions
     print(f"\nResults for {result.company_name}:")
     print(f"Base Valuation: ${result.base_valuation:,.0f}")
-    print(f"Simulated Valuation: ${result.simulated_valuation:,.0f} ({result.valuation_change_pct:+.1%})")
+    print(
+        f"Simulated Valuation: ${result.simulated_valuation:,.0f} "
+        f"({result.valuation_change_pct:+.1%})"
+    )
     print(f"Base Growth Score: {result.base_growth_score:.2f}")
-    print(f"Simulated Growth Score: {result.simulated_growth_score:.2f} ({result.growth_score_change:+.2f})")
+    print(
+        f"Simulated Growth Score: {result.simulated_growth_score:.2f} "
+        f"({result.growth_score_change:+.2f})"
+    )
     print("Notes:")
     for note in result.notes:
         print(f" - {note}")
@@ -69,6 +73,7 @@ def verify_simulation():
         exit(1)
 
     print("\nSUCCESS: Simulation logic verified!")
+
 
 if __name__ == "__main__":
     verify_simulation()

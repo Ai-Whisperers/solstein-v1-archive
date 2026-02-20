@@ -5,6 +5,7 @@ Calculates growth scores, financial health scores, and competitive positioning.
 """
 
 from typing import Any
+from datetime import datetime
 
 from loguru import logger
 
@@ -12,6 +13,7 @@ from ..core.scoring_config import ScoringSettings
 from ..domain.models import (
     Company,
     FinancialMetric,
+    MarketAnalysis,
 )
 
 
@@ -27,7 +29,9 @@ class GrowthScorer:
 
         # Calculate individual scores
         growth_score = self._calculate_growth_score(profile.financials)
-        financial_health_score = self._calculate_financial_health_score(profile.financials)
+        financial_health_score = self._calculate_financial_health_score(
+            profile.financials
+        )
         competitive_position_score = self._calculate_competitive_position_score(profile)
 
         # Update profile with scores
@@ -44,7 +48,10 @@ class GrowthScorer:
 
         # Revenue growth
         if financials.growth_rate is not None:
-            growth_factor = min(financials.growth_rate / cfg.revenue_growth_divisor, cfg.revenue_growth_cap)
+            growth_factor = min(
+                financials.growth_rate / cfg.revenue_growth_divisor,
+                cfg.revenue_growth_cap,
+            )
             score += growth_factor
 
         # Employee productivity (Revenue per Employee)
@@ -113,7 +120,11 @@ class GrowthScorer:
                 score += cfg.cushion_high_bonus
             elif funding_to_revenue > cfg.cushion_med_ratio:
                 score += cfg.cushion_med_bonus
-            elif funding_to_revenue < cfg.cushion_thin_ratio and financials.profit_margin is not None and financials.profit_margin < 5:
+            elif (
+                funding_to_revenue < cfg.cushion_thin_ratio
+                and financials.profit_margin is not None
+                and financials.profit_margin < 5
+            ):
                 score += cfg.cushion_thin_penalty
 
         return max(0.0, min(score, 10.0))
@@ -130,8 +141,6 @@ class GrowthScorer:
         score += cfg.ai_maturity_scores.get(profile.ai_maturity, 0.0)
 
         # SaaS maturity (Scale 1-10 to 0-2 normalized)
-        # Assuming we want to keep the same logic: (value - 1) / 9 * 2.0
-        # This part was formula based, we can keep it as is or config it if overly complex
         saas_score = (profile.saas_maturity - 1) / 9 * 2.0
         score += saas_score
 
@@ -155,20 +164,70 @@ class GrowthScorer:
 class MarketAnalyzer:
     """Analyze market-level metrics and trends."""
 
-    def analyze_market(self, profiles: list[Company]) -> dict[str, Any]:
+    def analyze_market(self, profiles: list[Company]) -> MarketAnalysis:
         """Analyze a market based on company profiles."""
         logger.info(f"Analyzing market with {len(profiles)} companies")
 
-        analysis = {
-            "company_count": len(profiles),
-            "tier_distribution": self._calculate_tier_distribution(profiles),
-            "growth_metrics": self._calculate_growth_metrics(profiles),
-            "financial_metrics": self._calculate_financial_metrics(profiles),
-            "technology_metrics": self._calculate_technology_metrics(profiles),
-            "competitive_intensity": self._calculate_competitive_intensity(profiles),
-        }
+        # Calculate base metrics needed for return
+        revenues = [p.financials.revenue for p in profiles if p.financials.revenue]
+        market_size = sum(revenues) if revenues else 0.0
+        
+        growth_rates = [
+            p.financials.growth_rate 
+            for p in profiles 
+            if p.financials.growth_rate is not None
+        ]
+        avg_growth = sum(growth_rates) / len(growth_rates) if growth_rates else 0.0
+        
+        # Calculate CR4
+        cr4 = 0.0
+        if revenues:
+            sorted_revenues = sorted(revenues, reverse=True)
+            top_4 = sorted_revenues[:4]
+            if sum(revenues) > 0:
+                cr4 = sum(top_4) / sum(revenues) * 100
 
-        return analysis
+        # Return Domain Entity
+        return MarketAnalysis(
+            market_name=profiles[0].industry if profiles else "Unknown Market",
+            analysis_date=datetime.now(),
+            companies=profiles,
+            total_market_size=market_size,
+            growth_rate=avg_growth,
+            concentration_ratio=cr4,
+            barriers_to_entry=self._determine_barriers(profiles),
+            key_trends=self._determine_trends(profiles),
+            regulatory_environment=["Industry Standard Compliance", "Data Privacy Regulations"],
+            swot_analysis=self._calculate_swot(profiles),
+            recommendations=self._generate_recommendations(profiles, avg_growth, cr4),
+        )
+
+    def _determine_barriers(self, profiles: list[Company]) -> list[str]:
+        """Determine likely barriers to entry based on market state."""
+        barriers = ["Capital Intensity"]
+        if len(profiles) > 5:
+            barriers.append("High Competitive Rivalry")
+        return barriers
+
+    def _determine_trends(self, profiles: list[Company]) -> list[str]:
+        """Identify market trends from aggregate company data."""
+        trends = ["Digital Transformation"]
+        if any(p.ai_maturity in ["Strong", "Very Strong"] for p in profiles):
+            trends.append("Advanced AI Integration")
+        if any("Cloud" in str(p.tech_stack) for p in profiles):
+            trends.append("Cloud-Native Infrastructure")
+        return trends
+
+    def _generate_recommendations(self, profiles: list[Company], avg_growth: float, cr4: float) -> list[str]:
+        """Generate strategic recommendations based on market metrics."""
+        recommendations = []
+        if avg_growth > 15:
+            recommendations.append("Aggressive expansion into high-growth verticals")
+        if cr4 > 70:
+            recommendations.append("Focus on niche differentiation to compete with market leaders")
+        else:
+            recommendations.append("Consolidation opportunities in a fragmented market")
+        return recommendations
 
     def _calculate_tier_distribution(self, profiles: list[Company]) -> dict[str, int]:
         """Calculate distribution of companies across tiers."""
@@ -182,7 +241,8 @@ class MarketAnalyzer:
     def _calculate_growth_metrics(self, profiles: list[Company]) -> dict[str, float]:
         """Calculate market growth metrics."""
         growth_rates = [
-            p.financials.growth_rate for p in profiles
+            p.financials.growth_rate
+            for p in profiles
             if p.financials.growth_rate is not None
         ]
 
@@ -194,7 +254,9 @@ class MarketAnalyzer:
 
         return {
             "average": sum(growth_rates) / n,
-            "median": sorted_rates[n // 2] if n % 2 == 1 else (sorted_rates[n // 2 - 1] + sorted_rates[n // 2]) / 2,
+            "median": sorted_rates[n // 2]
+            if n % 2 == 1
+            else (sorted_rates[n // 2 - 1] + sorted_rates[n // 2]) / 2,
             "high_growth_count": len([r for r in growth_rates if r > 20]),
             "declining_count": len([r for r in growth_rates if r < 0]),
         }
@@ -202,7 +264,11 @@ class MarketAnalyzer:
     def _calculate_financial_metrics(self, profiles: list[Company]) -> dict[str, Any]:
         """Calculate market financial metrics."""
         revenues = [p.financials.revenue for p in profiles if p.financials.revenue]
-        profits = [p.financials.profit_margin for p in profiles if p.financials.profit_margin is not None]
+        profits = [
+            p.financials.profit_margin
+            for p in profiles
+            if p.financials.profit_margin is not None
+        ]
 
         metrics = {
             "total_revenue": sum(revenues) if revenues else 0,
@@ -235,14 +301,18 @@ class MarketAnalyzer:
 
         return {
             "ai_adoption": ai_counts,
-            "average_saas_maturity": sum(saas_scores) / len(saas_scores) if saas_scores else 0,
+            "average_saas_maturity": sum(saas_scores) / len(saas_scores)
+            if saas_scores
+            else 0,
             "unique_technologies": len(all_tech),
             "most_common_technologies": self._most_common_tech(profiles),
         }
 
-    def _most_common_tech(self, profiles: list[Company], top_n: int = 5) -> list[tuple[str, int]]:
+    def _most_common_tech(
+        self, profiles: list[Company], top_n: int = 5
+    ) -> list[tuple[str, int]]:
         """Find most common technologies in the market."""
-        tech_counts = {}
+        tech_counts: dict[str, int] = {}
 
         for profile in profiles:
             for tech in profile.tech_stack:
@@ -250,27 +320,33 @@ class MarketAnalyzer:
 
         return sorted(tech_counts.items(), key=lambda x: x[1], reverse=True)[:top_n]
 
-    def _calculate_competitive_intensity(self, profiles: list[Company]) -> dict[str, Any]:
+    def _calculate_competitive_intensity(
+        self, profiles: list[Company]
+    ) -> dict[str, Any]:
         """Calculate competitive intensity metrics."""
         threat_counts = {"Low": 0, "Medium": 0, "High": 0, "Critical": 0}
 
         for profile in profiles:
-            threat_counts[profile.threat_level] = threat_counts.get(profile.threat_level, 0) + 1
+            threat_counts[profile.threat_level] = (
+                threat_counts.get(profile.threat_level, 0) + 1
+            )
 
         # Calculate Herfindahl-Hirschman Index (HHI) approximation
         revenues = [p.financials.revenue for p in profiles if p.financials.revenue]
         if revenues:
             total_revenue = sum(revenues)
             market_shares = [r / total_revenue * 100 for r in revenues]
-            hhi = sum(share ** 2 for share in market_shares)
+            hhi = sum(share**2 for share in market_shares)
         else:
-            hhi = 0
+            hhi = 0.0
 
         return {
             "threat_distribution": threat_counts,
             "hhi": hhi,
             "market_concentration": self._interpret_hhi(hhi),
-            "direct_competitors": len([p for p in profiles if p.threat_level in ["High", "Critical"]]),
+            "direct_competitors": len(
+                [p for p in profiles if p.threat_level in ["High", "Critical"]]
+            ),
         }
 
     def _interpret_hhi(self, hhi: float) -> str:
@@ -283,6 +359,15 @@ class MarketAnalyzer:
             return "Somewhat Concentrated"
         else:
             return "Competitive"
+
+    def _calculate_swot(self, profiles: list[Company]) -> dict[str, Any]:
+        """Generate basic SWOT analysis based on company data."""
+        return {
+            "strengths": ["Strong Growth"] if any(p.financials.growth_rate and p.financials.growth_rate > 20 for p in profiles) else ["Established Players"],
+            "weaknesses": ["Fragmented Market"] if len(profiles) > 10 else ["Niche Market"],
+            "opportunities": ["AI Adoption", "Regional Expansion"],
+            "threats": ["High Barriers to Entry", "Regulatory Changes"],
+        }
 
 
 class CompetitiveOverlapCalculator:
@@ -357,7 +442,6 @@ class CompetitiveOverlapCalculator:
             return 0.0
 
         # Count overlapping industries/sectors in customer lists
-        # This is a simplified approach
         common_terms = 0
         for cust1 in p1.key_customers:
             for cust2 in p2.key_customers:
