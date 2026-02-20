@@ -1,0 +1,436 @@
+# Azure DevOps Pipeline for SolStein
+# Multi-Language CI/CD with Tag-Based Versioning
+# .NET 8+ and Python 3.11+ with Research Quality Gates
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+      - feature/*
+      - release/*
+      - hotfix/*
+  tags:
+    include:
+      - release-*
+      - test-*
+      - coverage-*
+      - security-*
+      - research-*
+      - benchmark-*
+  paths:
+    include:
+      - src/**
+      - SolStein.API/**
+      - SolStein.Domain/**
+      - SolStein.Application/**
+      - SolStein.Infrastructure/**
+      - SolStein.Tests/**
+      - research/**
+      - dashboards/**
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+      - release/*
+
+variables:
+  # Build Configuration
+  buildConfiguration: 'Release'
+  dotnetVersion: '8.x'
+  pythonVersion: '3.11'
+  
+  # Solution and Project Paths
+  solutionPath: 'SolStein.sln'
+  apiProject: 'SolStein.API/SolStein.API.csproj'
+  domainProject: 'SolStein.Domain/SolStein.Domain.csproj'
+  applicationProject: 'SolStein.Application/SolStein.Application.csproj'
+  infrastructureProject: 'SolStein.Infrastructure/SolStein.Infrastructure.csproj'
+  testProject: 'SolStein.Tests/SolStein.Tests.csproj'
+  
+  # Coverage Thresholds by Branch
+  ${{ if or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/release-')) }}:
+    dotnetCoverageThreshold: 80
+    pythonCoverageThreshold: 70
+    researchQualityThreshold: 95
+  ${{ elseif eq(variables['Build.SourceBranch'], 'refs/heads/develop') }}:
+    dotnetCoverageThreshold: 75
+    pythonCoverageThreshold: 65
+    researchQualityThreshold: 90
+  ${{ else }}:
+    dotnetCoverageThreshold: 70
+    pythonCoverageThreshold: 60
+    researchQualityThreshold: 85
+  
+  # Tag Build Detection
+  isTagBuild: ${{ startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}
+  
+  # Feed Configuration (Update with actual feed names)
+  testFeed: 'NuGet Packages/SolStein-Test'
+  productionFeed: 'NuGet Packages/SolStein'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+  # Stage 1: Policy Resolution
+  - stage: Policy_Resolve
+    displayName: 'Resolve Quality Policy'
+    jobs:
+      - job: ResolvePolicy
+        displayName: 'Resolve Quality Policy'
+        steps:
+          - task: PowerShell@2
+            name: ResolveQualityPolicy
+            displayName: 'Resolve Quality Policy'
+            inputs:
+              targetType: 'filePath'
+              filePath: 'cicd/scripts/resolve-quality-policy.ps1'
+              arguments: '-OutputPath "$(Build.ArtifactStagingDirectory)/policy-report" -SetPipelineVariables $true'
+              pwsh: true
+
+  # Stage 2: Build & Validate (.NET)
+  - stage: Build_Validate_DotNet
+    displayName: 'Build & Validate (.NET)'
+    dependsOn: Policy_Resolve
+    jobs:
+      - job: Build_DotNet
+        displayName: 'Build .NET Solution'
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET SDK $(dotnetVersion)'
+            inputs:
+              version: '$(dotnetVersion)'
+              
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore NuGet Packages'
+            inputs:
+              command: 'restore'
+              projects: '$(solutionPath)'
+              
+          - task: DotNetCoreCLI@2
+            displayName: 'Build Solution'
+            inputs:
+              command: 'build'
+              projects: '$(solutionPath)'
+              arguments: '--configuration $(buildConfiguration) --no-restore'
+              
+          - task: PowerShell@2
+            displayName: 'Verify XML Documentation'
+            inputs:
+              targetType: 'filePath'
+              filePath: 'cicd/scripts/verify-xml-files.ps1'
+              arguments: '-Configuration $(buildConfiguration)'
+              pwsh: true
+
+  # Stage 3: Build & Validate (Python)
+  - stage: Build_Validate_Python
+    displayName: 'Build & Validate (Python)'
+    dependsOn: Policy_Resolve
+    jobs:
+      - job: Build_Python
+        displayName: 'Build Python Components'
+        steps:
+          - task: UsePythonVersion@0
+            displayName: 'Use Python $(pythonVersion)'
+            inputs:
+              versionSpec: '$(pythonVersion)'
+              
+          - script: |
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+            displayName: 'Install Python Dependencies'
+            
+          - script: |
+              python -m pytest --version
+              python -m mypy --version
+            displayName: 'Verify Python Tools'
+
+  # Stage 4: Security Scan
+  - stage: Security_Scan
+    displayName: 'Security Scan'
+    dependsOn: 
+      - Build_Validate_DotNet
+      - Build_Validate_Python
+    jobs:
+      - job: Security_DotNet
+        displayName: '.NET Security Scan'
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET SDK'
+            inputs:
+              version: '$(dotnetVersion)'
+              
+          - task: PowerShell@2
+            displayName: 'Scan for Vulnerable Packages'
+            inputs:
+              targetType: 'inline'
+              pwsh: true
+              script: |
+                $vulnerabilities = dotnet list package --vulnerable --include-transitive
+                if ($LASTEXITCODE -ne 0) {
+                  Write-Host "##vso[task.logissue type=error]Failed to scan for vulnerabilities"
+                  exit 1
+                }
+                
+                # Parse vulnerabilities
+                if ($vulnerabilities -match "Critical|High") {
+                  Write-Host "##vso[task.logissue type=error]Critical or High vulnerabilities found"
+                  Write-Host $vulnerabilities
+                  exit 1
+                } elseif ($vulnerabilities -match "Moderate|Low") {
+                  Write-Host "##vso[task.logissue type=warning]Moderate or Low vulnerabilities found"
+                  Write-Host $vulnerabilities
+                } else {
+                  Write-Host "✅ No vulnerabilities found"
+                }
+                
+      - job: Security_Python
+        displayName: 'Python Security Scan'
+        steps:
+          - task: UsePythonVersion@0
+            displayName: 'Use Python'
+            inputs:
+              versionSpec: '$(pythonVersion)'
+              
+          - script: |
+              pip install safety
+              safety check --full-report
+            displayName: 'Scan Python Dependencies'
+
+  # Stage 5: Test & Coverage (.NET)
+  - stage: Test_Coverage_DotNet
+    displayName: 'Test & Coverage (.NET)'
+    dependsOn: Security_Scan
+    jobs:
+      - job: Test_DotNet
+        displayName: 'Run .NET Tests'
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET SDK'
+            inputs:
+              version: '$(dotnetVersion)'
+              
+          - task: DotNetCoreCLI@2
+            displayName: 'Run Tests with Coverage'
+            inputs:
+              command: 'test'
+              projects: '$(testProject)'
+              arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage" --logger trx --results-directory $(Agent.TempDirectory)/test-results'
+              
+          - task: PublishTestResults@2
+            displayName: 'Publish Test Results'
+            inputs:
+              testResultsFormat: 'VSTest'
+              testResultsFiles: '$(Agent.TempDirectory)/test-results/*.trx'
+              
+          - task: PowerShell@2
+            displayName: 'Analyze Coverage'
+            inputs:
+              targetType: 'filePath'
+              filePath: 'cicd/scripts/enhanced-coverage-analysis.ps1'
+              arguments: '-CoveragePath "$(Agent.TempDirectory)/test-results" -Threshold $(dotnetCoverageThreshold)'
+              pwsh: true
+
+  # Stage 6: Test & Coverage (Python)
+  - stage: Test_Coverage_Python
+    displayName: 'Test & Coverage (Python)'
+    dependsOn: Security_Scan
+    jobs:
+      - job: Test_Python
+        displayName: 'Run Python Tests'
+        steps:
+          - task: UsePythonVersion@0
+            displayName: 'Use Python'
+            inputs:
+              versionSpec: '$(pythonVersion)'
+              
+          - script: |
+              pip install pytest pytest-cov
+              python -m pytest --cov=src --cov-report=xml --cov-report=html --junitxml=test-results.xml
+            displayName: 'Run Tests with Coverage'
+            
+          - task: PublishTestResults@2
+            displayName: 'Publish Test Results'
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: 'test-results.xml'
+              
+          - task: PowerShell@2
+            displayName: 'Check Python Coverage'
+            inputs:
+              targetType: 'inline'
+              pwsh: true
+              script: |
+                $coverageFile = "coverage.xml"
+                if (Test-Path $coverageFile) {
+                  [xml]$coverage = Get-Content $coverageFile
+                  $lineRate = [double]$coverage.coverage.'line-rate'
+                  $coveragePercent = [math]::Round($lineRate * 100, 2)
+                  
+                  Write-Host "Coverage: $coveragePercent% (Threshold: $(pythonCoverageThreshold)%)"
+                  
+                  if ($coveragePercent -lt $(pythonCoverageThreshold)) {
+                    Write-Host "##vso[task.logissue type=error]Coverage below threshold"
+                    exit 1
+                  }
+                } else {
+                  Write-Host "##vso[task.logissue type=warning]Coverage file not found"
+                }
+
+  # Stage 7: Research Quality Validation
+  - stage: Research_Quality
+    displayName: 'Research Quality Validation'
+    dependsOn: 
+      - Test_Coverage_DotNet
+      - Test_Coverage_Python
+    jobs:
+      - job: Validate_Research
+        displayName: 'Validate Research Outputs'
+        steps:
+          - task: PowerShell@2
+            displayName: 'Validate Research Data'
+            inputs:
+              targetType: 'filePath'
+              filePath: 'cicd/scripts/validate-research-data.ps1'
+              arguments: '-ResearchPath "research/" -Threshold $(researchQualityThreshold)'
+              pwsh: true
+              
+          - task: PowerShell@2
+            displayName: 'Validate Dashboards'
+            inputs:
+              targetType: 'filePath'
+              filePath: 'cicd/scripts/validate-dashboards.ps1'
+              arguments: '-DashboardPath "dashboards/"'
+              pwsh: true
+              
+          - task: PowerShell@2
+            displayName: 'Generate Research Report'
+            inputs:
+              targetType: 'filePath'
+              filePath: 'cicd/scripts/generate-doc-report.ps1'
+              arguments: '-Configuration $(buildConfiguration) -OutputPath "$(Build.ArtifactStagingDirectory)/research-report"'
+              pwsh: true
+
+  # Stage 8: Package & SBOM
+  - stage: Package_SBOM
+    displayName: 'Package & SBOM'
+    dependsOn: Research_Quality
+    condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+    jobs:
+      - job: Package_DotNet
+        displayName: 'Package .NET Components'
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET SDK'
+            inputs:
+              version: '$(dotnetVersion)'
+              
+          - task: PowerShell@2
+            displayName: 'Parse Tag Version'
+            condition: eq(variables.isTagBuild, true)
+            inputs:
+              targetType: 'filePath'
+              filePath: 'cicd/scripts/validate-tag-context.ps1'
+              pwsh: true
+              
+          - task: DotNetCoreCLI@2
+            displayName: 'Pack NuGet Packages'
+            inputs:
+              command: 'pack'
+              packagesToPack: '$(apiProject)'
+              configuration: '$(buildConfiguration)'
+              versioningScheme: 'byBuildNumber'
+              
+          - task: DotNetCoreCLI@2
+            displayName: 'Generate SBOM'
+            inputs:
+              command: 'sbom'
+              arguments: '--project $(apiProject)'
+              
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish .NET Artifacts'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'dotnet-packages'
+              
+      - job: Package_Python
+        displayName: 'Package Python Components'
+        steps:
+          - task: UsePythonVersion@0
+            displayName: 'Use Python'
+            inputs:
+              versionSpec: '$(pythonVersion)'
+              
+          - script: |
+              pip install build
+              python -m build
+            displayName: 'Build Python Package'
+            
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Python Artifacts'
+            inputs:
+              PathtoPublish: 'dist'
+              ArtifactName: 'python-packages'
+
+  # Stage 9: Documentation & Reports
+  - stage: Documentation_Reports
+    displayName: 'Documentation & Reports'
+    dependsOn: Package_SBOM
+    jobs:
+      - job: Generate_Documentation
+        displayName: 'Generate Documentation'
+        steps:
+          - task: PowerShell@2
+            displayName: 'Generate Complete Documentation'
+            inputs:
+              targetType: 'filePath'
+              filePath: 'cicd/scripts/generate-doc-report.ps1'
+              arguments: '-Configuration $(buildConfiguration) -OutputPath "$(Build.ArtifactStagingDirectory)/documentation" -FullReport'
+              pwsh: true
+              
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Documentation'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)/documentation'
+              ArtifactName: 'documentation'
+              
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Pipeline Artifact'
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)'
+              artifact: 'solstein-build-$(Build.BuildId)'
+
+# Conditional Publishing (Tag Builds Only)
+- stage: Publish_Feeds
+  displayName: 'Publish to Feeds'
+  dependsOn: Documentation_Reports
+  condition: and(succeeded(), eq(variables.isTagBuild, true))
+  jobs:
+    - job: Publish_Test_Feed
+      displayName: 'Publish to Test Feed'
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/test-')
+      steps:
+        - task: NuGetCommand@2
+          displayName: 'Publish to Test Feed'
+          inputs:
+            command: 'push'
+            packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+            nuGetFeedType: 'internal'
+            publishVstsFeed: '$(testFeed)'
+            allowPackageConflicts: false
+            
+    - job: Publish_Production_Feed
+      displayName: 'Publish to Production Feed'
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/release-')
+      steps:
+        - task: NuGetCommand@2
+          displayName: 'Publish to Production Feed'
+          inputs:
+            command: 'push'
+            packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+            nuGetFeedType: 'internal'
+            publishVstsFeed: '$(productionFeed)'
+            allowPackageConflicts: false

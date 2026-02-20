@@ -1,0 +1,372 @@
+---
+id: rule.solstein.research-quality.v1
+kind: rule
+version: 1.0.0
+description: Enforces John-level research quality standards for SolStein competitive intelligence platform
+globs: research/**/*.md, dashboards/**/*.html, src/**/*.cs, src/**/*.py
+governs: research reports, dashboard generation, data analysis, competitor intelligence
+implements: solstein.research
+requires:
+  - rule.cicd.tag-based-versioning.v2
+  - rule.documentation.standards.v1
+model_hints: { temp: 0.1, top_p: 0.9 }
+provenance: { owner: solstein-team, last_review: 2026-02-18 }
+alwaysApply: true
+---
+
+# SolStein Research Quality Rule
+
+## Purpose & Scope
+
+This rule defines the **John-level research methodology** that makes SolStein unique. Every research output MUST follow the 8-category analysis framework with source attribution, confidence scoring, and dashboard-ready data.
+
+**Applies to**: All research reports, competitor analyses, market intelligence, and dashboard generation in SolStein
+
+**Does not apply to**: Internal documentation, configuration files, test data
+
+**Reference Implementation**: Original SolStein research methodology (John's 8-category framework)
+
+---
+
+## ⚠️ Quality Standards
+
+### 1. 8-Category Analysis (MANDATORY)
+
+Every competitor analysis MUST include all 8 categories:
+
+1. **Company Fundamentals**
+   - Revenue, profitability, funding history
+   - Employee count, geographic presence
+   - Leadership team, organizational structure
+
+2. **Market Position**
+   - Market share estimates (with methodology)
+   - Competitive landscape mapping
+   - Customer segmentation analysis
+   - Growth trajectory vs. market
+
+3. **Product & Technology**
+   - Product portfolio analysis
+   - Technology stack assessment
+   - Architecture evaluation
+   - Technical debt analysis
+
+4. **AI & Innovation**
+   - AI/ML capabilities assessment
+   - R&D investment analysis
+   - Patent portfolio evaluation
+   - Innovation pipeline review
+
+5. **Growth & Trajectory**
+   - Historical growth rates
+   - Future projections
+   - Expansion plans
+   - Strategic partnerships
+
+6. **Specialization**
+   - Core competencies
+   - Unique selling propositions
+   - Differentiation factors
+   - Niche market dominance
+
+7. **Pricing & Business Model**
+   - Pricing strategy analysis
+   - Revenue model breakdown
+   - Customer acquisition costs
+   - Lifetime value calculations
+
+8. **Threat Assessment**
+   - SWOT analysis (Strengths, Weaknesses, Opportunities, Threats)
+   - Competitive threats
+   - Market risks
+   - Regulatory challenges
+
+### 2. Source Attribution (MANDATORY)
+
+Every factual claim MUST have source attribution:
+
+**Format**: `[Source: Type - Name - Date - Confidence]`
+
+**Examples**:
+- `[Source: Financial Report - Annual Report 2024 - 2024-12-31 - High]`
+- `[Source: News Article - TechCrunch - 2025-01-15 - Medium]`
+- `[Source: LinkedIn - Employee Count - 2025-02-01 - Low]`
+
+**Confidence Levels**:
+- **High**: Official sources (financial reports, government filings)
+- **Medium**: Reputable news, analyst reports
+- **Low**: Social media, unverified claims, estimates
+
+### 3. Data Freshness (MANDATORY)
+
+All data MUST include collection date:
+- Financial data: Maximum 12 months old
+- Employee counts: Maximum 6 months old
+- Technology stack: Maximum 3 months old
+- Market share: Maximum 6 months old
+
+### 4. Dashboard-Ready Format (MANDATORY)
+
+Research outputs MUST be structured for dashboard integration:
+
+**JSON Structure**:
+```json
+{
+  "company": {
+    "name": "Company Name",
+    "industry": "Industry",
+    "analysis_date": "2025-02-18"
+  },
+  "categories": [
+    {
+      "name": "Company Fundamentals",
+      "score": 85,
+      "confidence": "High",
+      "data_points": [...]
+    }
+  ],
+  "sources": [...],
+  "market_analysis": {...},
+  "visualizations": {...}
+}
+```
+
+---
+
+## Implementation Guidelines
+
+### Research Report Template
+
+```markdown
+# Competitor Analysis: [Company Name]
+
+## Executive Summary
+[One paragraph summarizing key findings]
+
+## 1. Company Fundamentals
+### Revenue & Financials
+- **Revenue**: €X million (2024) [Source: Annual Report - 2024-12-31 - High]
+- **Profitability**: X% margin [Source: Financial Analysis - 2024-Q4 - High]
+- **Funding**: €Y million total [Source: Crunchbase - 2024-11-15 - Medium]
+
+### Team & Organization
+- **Employees**: X,XXX [Source: LinkedIn - 2025-01-31 - Medium]
+- **Geographic Presence**: X countries [Source: Company Website - 2025-02-01 - High]
+
+## 2. Market Position
+### Market Share
+- **Estimated Share**: X% [Source: Market Analysis - 2025-01-20 - Medium]
+- **Market Rank**: #X in segment [Source: Industry Report - 2024-Q4 - High]
+
+## 3. Product & Technology
+### Technology Stack
+- **Frontend**: React, TypeScript [Source: GitHub - 2025-02-10 - High]
+- **Backend**: .NET 8, PostgreSQL [Source: Tech Stack Analysis - 2025-01-25 - Medium]
+
+## 4. AI & Innovation
+### AI Capabilities
+- **ML Models**: X active models [Source: Research Paper - 2024-12-15 - High]
+- **R&D Investment**: €X million/year [Source: Financial Report - 2024 - High]
+
+## 5. Growth & Trajectory
+### Historical Growth
+- **CAGR**: X% (2020-2024) [Source: Financial Analysis - 2024 - High]
+- **Customer Growth**: +X% YoY [Source: Company Announcement - 2024-Q4 - Medium]
+
+## 6. Specialization
+### Core Competencies
+- **Primary**: [Specialization 1] [Source: Market Analysis - 2025-01-15 - High]
+- **Secondary**: [Specialization 2] [Source: Customer Reviews - 2024-12-20 - Medium]
+
+## 7. Pricing & Business Model
+### Revenue Model
+- **Primary**: SaaS subscriptions [Source: Pricing Page - 2025-02-01 - High]
+- **Average Price**: €X/month [Source: Market Research - 2024-Q4 - Medium]
+
+## 8. Threat Assessment
+### SWOT Analysis
+**Strengths**:
+- [Strength 1] [Source: Analysis - 2025-02-18 - High]
+- [Strength 2] [Source: Customer Feedback - 2024-12-15 - Medium]
+
+**Weaknesses**:
+- [Weakness 1] [Source: Technical Analysis - 2025-01-20 - High]
+- [Weakness 2] [Source: Market Research - 2024-Q4 - Medium]
+
+## Sources
+1. [Source Type] - [Name] - [Date] - [Confidence]
+2. [Source Type] - [Name] - [Date] - [Confidence]
+
+## Dashboard Data
+```json
+[Insert JSON structure for dashboard integration]
+```
+
+## Confidence Summary
+- **Overall Confidence**: X%
+- **High Confidence Sources**: X
+- **Medium Confidence Sources**: Y
+- **Low Confidence Sources**: Z
+```
+
+### Dashboard Generation Rules
+
+1. **Interactive Elements Required**:
+   - Market share pie/bar charts
+   - Competitor comparison tables
+   - Growth trajectory graphs
+   - SWOT visualization
+
+2. **Downloadable Formats**:
+   - PDF report (full analysis)
+   - JSON data (dashboard integration)
+   - CSV data (spreadsheet analysis)
+   - PowerPoint summary (executive presentation)
+
+3. **Responsive Design**:
+   - Mobile-friendly layouts
+   - Accessible color schemes
+   - Fast loading times (< 3 seconds)
+
+### Data Enhancement Guidelines
+
+1. **Market Share Calculations**:
+   ```python
+   # Example calculation methodology
+   def calculate_market_share(revenue, market_size):
+       """
+       Calculate market share percentage
+       
+       Args:
+           revenue: Company annual revenue (€)
+           market_size: Total market size (€)
+           
+       Returns:
+           Market share percentage
+       """
+       if market_size <= 0:
+           return 0
+       return (revenue / market_size) * 100
+   ```
+
+2. **Confidence Scoring Algorithm**:
+   ```python
+   def calculate_confidence_score(sources):
+       """
+       Calculate overall confidence score
+       
+       Args:
+           sources: List of sources with confidence levels
+           
+       Returns:
+           Confidence score (0-100)
+       """
+       weights = {'High': 1.0, 'Medium': 0.7, 'Low': 0.3}
+       total_weight = sum(weights[s.confidence] for s in sources)
+       if len(sources) == 0:
+           return 0
+       return (total_weight / len(sources)) * 100
+   ```
+
+---
+
+## Validation Checklist
+
+### For Research Reports
+- [ ] All 8 categories completed
+- [ ] Every fact has source attribution
+- [ ] Confidence levels assigned
+- [ ] Data freshness validated
+- [ ] Executive summary included
+- [ ] Dashboard-ready JSON provided
+- [ ] Sources listed comprehensively
+- [ ] Confidence score calculated
+
+### For Dashboards
+- [ ] Interactive charts implemented
+- [ ] Responsive design tested
+- [ ] Downloadable formats available
+- [ ] Data accuracy verified
+- [ ] Loading performance optimized
+- [ ] Accessibility standards met
+- [ ] Cross-browser compatibility
+
+### For Data Enhancement
+- [ ] Market share calculations explained
+- [ ] Confidence scoring methodology documented
+- [ ] Data transformation logic validated
+- [ ] Error handling implemented
+- [ ] Performance benchmarks met
+
+---
+
+## Anti-Patterns to Avoid
+
+### ❌ Incomplete Analysis
+**Problem**: Missing categories or superficial analysis
+**Solution**: Follow 8-category framework completely
+
+### ❌ Unattributed Claims
+**Problem**: Facts without source attribution
+**Solution**: Every claim MUST have source
+
+### ❌ Stale Data
+**Problem**: Using outdated information
+**Solution**: Enforce data freshness rules
+
+### ❌ Non-Interactive Dashboards
+**Problem**: Static, non-interactive visualizations
+**Solution**: Implement interactive charts and filters
+
+### ❌ Inconsistent Formatting
+**Problem**: Inconsistent report structures
+**Solution**: Use standardized templates
+
+---
+
+## Integration Points
+
+- **CI/CD Pipeline**: Research quality validation stage
+- **Dashboard Generator**: Template-based visualization
+- **Data Enhancement**: Automated data processing
+- **Client Delivery**: Configurable output formats
+
+---
+
+## Related Rules
+
+- `rule.cicd.tag-based-versioning.v2` - Versioning for research data
+- `rule.documentation.standards.v1` - Documentation requirements
+- `rule.quality.code-quality-enforcement-rule.mdc` - Code quality standards
+
+---
+
+## Examples
+
+### Good Example (Complete Analysis)
+```markdown
+# Competitor Analysis: Octopus Energy Kraken
+
+## 1. Company Fundamentals
+**Revenue**: €2.1 billion (2024) [Source: Annual Report - 2024-12-31 - High]
+**Employees**: 3,500 [Source: LinkedIn - 2025-01-31 - Medium]
+```
+
+### Bad Example (Incomplete)
+```markdown
+# Competitor Analysis: Some Company
+They make about €100M and have some employees.
+[No sources, no categories, no structure]
+```
+
+---
+
+## Enforcement
+
+This rule is enforced by:
+1. **CI/CD Pipeline**: Research quality validation stage
+2. **Code Review**: Mandatory checklist for research outputs
+3. **Automated Testing**: Validation scripts in `cicd/scripts/`
+4. **Cursor AI**: Prompt templates for consistent generation
+
+**Failure Action**: Research outputs that don't meet these standards MUST be rejected and reworked.

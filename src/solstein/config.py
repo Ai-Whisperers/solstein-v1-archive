@@ -7,7 +7,7 @@ Handles environment variables, configuration files, and settings.
 import os
 from pathlib import Path
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from pydantic_settings import BaseSettings
 from loguru import logger
 
@@ -18,7 +18,7 @@ class DatabaseConfig(BaseModel):
     pool_size: int = Field(default=20, ge=1, le=100)
     echo: bool = Field(default=False)
     
-    @validator("url")
+    @field_validator("url")
     def validate_url(cls, v):
         """Validate database URL."""
         if not v:
@@ -66,7 +66,7 @@ class SecurityConfig(BaseModel):
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30, ge=1)
     
-    @validator("secret_key")
+    @field_validator("secret_key")
     def validate_secret_key(cls, v):
         """Validate secret key."""
         if v == "change-me-in-production":
@@ -82,7 +82,7 @@ class LoggingConfig(BaseModel):
     rotation: str = Field(default="500 MB")
     retention: str = Field(default="30 days")
     
-    @validator("level")
+    @field_validator("level")
     def validate_level(cls, v):
         """Validate log level."""
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -97,7 +97,7 @@ class DataConfig(BaseModel):
     cache_dir: Path = Field(default=Path(".cache"))
     export_dir: Path = Field(default=Path("exports"))
     
-    @validator("data_dir", "cache_dir", "export_dir", pre=True)
+    @field_validator("data_dir", "cache_dir", "export_dir", mode='before')
     def resolve_paths(cls, v):
         """Resolve paths to absolute."""
         if isinstance(v, str):
@@ -134,11 +134,12 @@ class Settings(BaseSettings):
     openai_api_key: Optional[str] = Field(default=None)
     perplexity_api_key: Optional[str] = Field(default=None)
     
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        env_nested_delimiter = "__"
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_nested_delimiter="__",
+        case_sensitive=False
+    )
     
     @classmethod
     def load(cls) -> "Settings":

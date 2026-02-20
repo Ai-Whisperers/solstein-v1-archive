@@ -7,7 +7,7 @@ All models use Pydantic for validation and serialization.
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from enum import Enum
-from pydantic import BaseModel, Field, validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class ConfidenceLevel(str, Enum):
@@ -109,14 +109,14 @@ class FinancialMetric(BaseModel):
         default=ConfidenceLevel.UNKNOWN
     )
     
-    @validator("revenue", "growth_rate", "employees", "profit_margin", "funding_raised", "valuation", pre=True)
+    @field_validator("revenue", "growth_rate", "employees", "profit_margin", "funding_raised", "valuation", mode='before')
     def validate_numeric_fields(cls, v):
         """Convert string numbers to floats/ints."""
         if v is None or v == "":
             return None
         if isinstance(v, str):
-            # Remove currency symbols, commas, etc.
-            v = v.replace("€", "").replace("$", "").replace(",", "").replace(" ", "")
+            # Remove currency symbols, commas, percentage signs, etc.
+            v = v.replace("€", "").replace("$", "").replace(",", "").replace(" ", "").replace("%", "")
             if v.endswith("M"):
                 return float(v[:-1]) * 1_000_000
             elif v.endswith("B"):

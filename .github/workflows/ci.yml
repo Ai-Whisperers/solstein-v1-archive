@@ -8,6 +8,34 @@ on:
   workflow_dispatch:
 
 jobs:
+  dotnet-build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore SolStein.sln
+    
+    - name: Build
+      run: dotnet build SolStein.sln --configuration Release --no-restore
+    
+    - name: Test
+      run: dotnet test SolStein.sln --configuration Release --no-build --verbosity normal
+    
+    - name: Publish
+      run: dotnet publish SolStein.API/SolStein.API.csproj --configuration Release --output ./publish
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dotnet-api
+        path: ./publish
+
   test:
     runs-on: ubuntu-latest
     strategy:
