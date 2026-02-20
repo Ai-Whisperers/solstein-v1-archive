@@ -49,10 +49,11 @@ import json
 import logging
 import os
 import sys
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any
 
 
 @dataclass(frozen=True)
