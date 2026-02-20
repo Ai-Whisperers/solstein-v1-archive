@@ -1,10 +1,10 @@
-# 📜 The Origin — How the Sunstone Was Forged
+# The Origin | Vision
 
 > *"Not engineers. Wizards. All the rigor of engineering, all the precision of science — channeled through the will of someone who has spent years learning to summon what others cannot see."*
 
 ---
 
-## Imagine a World Where Companies Are Born With Wings
+## Operational Agility & The Lifecycle of Scale
 
 They start light. Agile. Ready to soar.
 
@@ -18,7 +18,7 @@ This is the **Gravity of Legacy.** And it is the silent killer of innovation.
 
 ---
 
-## The Scary Forest
+## The Complexity Trap | The Scary Forest
 
 Founders and CTOs know this feeling intimately. They enter it every morning.
 
@@ -46,7 +46,7 @@ This path is not for everyone. It is for those willing to abandon the Standard a
 
 ---
 
-## The Sunstone Appears
+## Data Transparency | The Sunstone
 
 In Viking navigation, the *solarsteinn* — the sunstone — was a crystal that, when raised to a clouded sky, revealed the hidden sun. Not by creating light. By reading what was already there, beneath the fog.
 
@@ -58,7 +58,7 @@ When a market is opaque — when every competitor hides behind a press release a
 
 ---
 
-## Built in a Day. That Is the Spell.
+## Rapid Deployment | Proof of Methodology
 
 Solstein was built in a day.
 
@@ -72,7 +72,7 @@ The result: a complete competitive intelligence platform — built in the time i
 
 ---
 
-## The Three Species
+## Market Classification Models | The Three Species
 
 Every company in every market is one of three things. Solstein reads which.
 

@@ -1,12 +1,12 @@
-# 📜 The Commercial Architecture
+# Commercial Architecture | Business Model
 
-**How the Spell Scales — Solstein's Business Model**
+**Strategic Scale | Solstein's Revenue Framework**
 
 ---
 
 ## The Positioning Principle
 
-Solstein is not a dashboard. It is not a data subscription. It is not a consulting engagement.
+Solstein is not merely a dashboard or a data subscription.
 
 It is **capital infrastructure** — the intelligence layer that makes every acquisition decision, every portfolio review, and every exit preparation sharper than anything that existed before it.
 
@@ -14,7 +14,7 @@ Pricing reflects that. We are not competing with EUR 20K/yr data platforms. We a
 
 ---
 
-## The Go-To-Market Incantation: Four Phases
+## Go-To-Market Roadmap | Sequential Expansion
 
 The market is won in sequence. Each phase creates the foundation for the next.
 
@@ -22,9 +22,9 @@ The market is won in sequence. Each phase creates the foundation for the next.
 Validate  →  Monetize  →  Authority  →  Scale  →  (Exit?)
 ```
 
-### Phase 1 — The First Proving *(Month 1)*
+### Phase 1 — Initial Validation *(Month 1)*
 
-One anchor client. One market. Full spell cast.
+One anchor client. One market. Complete methodology deployment.
 
 | Parameter | Value |
 |-----------|-------|
@@ -33,7 +33,7 @@ One anchor client. One market. Full spell cast.
 | Deliverable | Complete Attractiveness Board, 20–30 companies, all scores explained |
 | Strategic outcome | Validated proof that Solstein scores predict real deal outcomes |
 
-The success bonus is not a marketing tactic. It is a structural statement: **we believe our spell enough to eat the risk of its accuracy.**
+The success bonus is a structural commitment to accuracy and aligned outcomes.
 
 ### Phase 2 — Controlled Expansion *(Month 2)*
 
@@ -72,16 +72,16 @@ The intelligence factory runs. Outbound becomes inbound. Roundtables create cros
 
 ## The Pricing Tiers
 
-| Tier | Annual Price | What Is Conjured |
+| Tier | Annual Price | Deliverables |
 |------|-------------|-----------------|
-| **Anchor Pilot** | EUR 60K + bonus | Single market, full cast, success bonus |
-| **PE Subscription** | EUR 75K–150K/yr | 1 vertical, continuous monitoring, quarterly refresh, unlimited board access |
-| **Portfolio Intelligence** | EUR 2M–3M + EUR 300K/yr | Up to 10 portfolio markets, cross-portfolio analysis, M&A target identification |
-| **Enterprise Grimoire** | EUR 3M–5M + EUR 500K/yr | Unlimited markets, full architecture transfer, methodology team embedded |
+| **Anchor Pilot** | EUR 60K + bonus | Single market vertical, success bonus |
+| **PE Subscription** | EUR 75K–150K/yr | 1 vertical, continuous monitoring, quarterly refresh |
+| **Portfolio Intelligence** | EUR 2M–3M + EUR 300K/yr | Up to 10 portfolio markets, cross-portfolio analysis |
+| **Enterprise Platform** | EUR 3M–5M + EUR 500K/yr | Unlimited markets, full architecture transfer |
 
 ---
 
-## Why the Moat Deepens Over Time
+## Value Compounding | Competitive Advantage
 
 A consulting firm's insight is worth nothing after the engagement ends. The PDF ages. The market moves. The file collects dust.
 

@@ -1,4 +1,4 @@
-# 📜 Executive Brief
+# Executive Brief | The SolStein Platform
 
 **Solstein — The Sunstone for Capital Navigation**
 
@@ -6,7 +6,7 @@
 
 ---
 
-## The Old Ritual Is Dead
+## Market Inefficiency | The Traditional Model
 
 Every serious PE deal requires market intelligence. For thirty years, the ritual was the same:
 
@@ -16,11 +16,11 @@ Everyone knew the ritual was broken. No one had an alternative — until now.
 
 ---
 
-## The Spell
+## The Methodology | AI-Orchestrated Intelligence
 
 Solstein is an AI-orchestrated intelligence engine. In the same time it takes a traditional firm to schedule the kickoff call, Solstein delivers a complete, scored, classified, and explainable view of any market.
 
-**What it conjures:**
+**Key Deliverables:**
 
 - Every company in the target market, profiled across growth, financial health, and AI maturity
 - A ranked Attractiveness Board — clickable, reasoned, source-exposed
@@ -42,7 +42,7 @@ Rank  Company          Growth  Financial  AI Maturity  Classification
 
 ---
 
-## Why the Window Is Now
+## Strategic Timing | The 2026 Window
 
 AI broke the perfume trick.
 
@@ -52,12 +52,12 @@ For years PE could buy a Dinosaur, repackage it, and sell the coal wrapped in po
 
 ---
 
-## The Numbers
+## Commercial Framework | Capital Efficiency
 
 | Signal | Reading |
 |--------|---------|
 | Markets with live data | European Energy Software (29 companies, complete) |
-| Time to cast the spell | 3–7 days per market |
+| Time to delivery | 3–7 days per market |
 | Intelligence dimensions | Growth + Financial Health + Competitive Position |
 | Pilot price | EUR 60K + success bonus |
 | Subscription | EUR 75–150K/yr |
@@ -65,20 +65,19 @@ For years PE could buy a Dinosaur, repackage it, and sell the coal wrapped in po
 
 ---
 
-## The Ask
+## Engagement Model | Phase 1 Deployment
 
-**Phase 1 — The First Incantation:** EUR 60K. Your market. 3–7 days. We deliver the full Attractiveness Board, every company scored and explained, one working session with your deal team.
+**Phase 1 — The Initial Deployment:** EUR 60K. Your market. 3–7 days. We deliver the full Attractiveness Board, every company scored and explained, one working session with your deal team.
 
 **Success bonus** tied to validated accuracy vs. your actual deal outcomes within 12 months. We eat our own cooking.
 
 ---
 
-## The Scrolls
+## Strategic Documentation
 
-→ [The Full Spell — Complete Proposal](./full-proposal.md)
-→ [Proof of Magic — Live Case Study](./case-study.md)
+→ [The Full Case Study](./case-study.md)
 → [The Commercial Architecture](./business-model.md)
-→ [The Deeper Play — Transmuting Portfolio Companies](../LORE/the-play.md)
+→ [The Deeper Strategy — Transmuting Portfolio Companies](../LORE/the-play.md)
 
 ---
 *Powered by [AI Whisperers](https://www.ai-whisperers.org/).*

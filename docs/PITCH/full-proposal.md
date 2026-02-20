@@ -1,4 +1,4 @@
-# 📜 The Full Spell — Solstein Proposal
+# SolStein Platform | Comprehensive Proposal
 
 **The Sunstone for Capital Navigation**
 
@@ -6,7 +6,7 @@
 
 ---
 
-## The Problem Was Never Information
+## Market Intelligence | Solving for Noise
 
 PE firms are not starved for data. Bloomberg, PitchBook, Preqin — the data flows constantly.
 
@@ -20,13 +20,13 @@ The ritual is over. The question is what comes next.
 
 ---
 
-## The Spell
+## The Methodology | AI-Orchestrated Intelligence
 
 Solstein is an AI-orchestrated intelligence engine.
 
 It does what a team of elite analysts would do — if those analysts could process 30 companies simultaneously, never sleep, update in real time, and show every step of their reasoning.
 
-### The Five Incantations
+### The Five Core Capabilities
 
 **I. Market Mapping**
 Solstein identifies every meaningful player in a target market. Not just the obvious ten — the complete landscape, including the companies that competitor analysis usually misses.
@@ -34,7 +34,7 @@ Solstein identifies every meaningful player in a target market. Not just the obv
 **II. Deep Profiling**
 Every company is profiled across eight structural dimensions: growth trajectory, revenue scale, margin health, funding position, AI maturity, SaaS adoption, tech stack depth, and geographic footprint. Not from press releases — from product signals, protocol certifications, engineering job postings, and funding structures.
 
-**III. The Scoring Ritual**
+**III. Scoring Methodology**
 Three scores are calculated for each company:
 
 | Score | What It Measures |
@@ -60,9 +60,9 @@ Every score links to its underlying evidence. Every classification exposes its r
 
 ---
 
-## The Proof Is Already Cast
+## Evidence of Efficacy | Performance Data
 
-We did not theorize this. We ran the spell.
+We have moved beyond theory. The methodology is active and yielding results.
 
 **The European Energy Software Market — Live Cast:**
 
@@ -78,7 +78,7 @@ The question we invite you to consider, when you see it: *What would you have pa
 
 ---
 
-## The Deeper Spell — Transmuting Portfolio Companies
+## Strategic Value Creation | Portfolio Transformation
 
 Solstein is the sunstone. It reads the landscape. It tells you which companies are Rockets and which are Dinosaurs.
 
@@ -92,9 +92,9 @@ When we leave, the wizards stay. The coal becomes gold. And we take a stake in t
 
 ---
 
-## The Commercial Structure
+## Commercial Framework | Capital Efficiency
 
-### Incantation I — The Anchor Pilot
+### Phase I — The Anchor Pilot
 
 | | |
 |---|---|
@@ -103,16 +103,16 @@ When we leave, the wizards stay. The coal becomes gold. And we take a stake in t
 | **Delivers** | Full Attractiveness Board for your chosen market, 20–30 companies, all scores explained, one session with your deal team |
 | **Success bonus** | Tied to validated accuracy of Solstein scores vs. your actual deal outcomes within 12 months |
 
-We believe in our spell enough to tie compensation to whether it is right.
+The methodology is backed by aligned performance metrics.
 
-### Incantation II — The Ongoing Watch
+### Phase II — The Ongoing Watch
 
 | | |
 |---|---|
 | **Price** | EUR 75K–150K per year |
 | **Delivers** | Continuous monitoring of one market vertical, quarterly profile refresh, real-time alerting on classification changes, unlimited Attractiveness Board access |
 
-### Incantation III — The Portfolio Sweep
+### Phase III — The Portfolio Sweep
 
 | | |
 |---|---|
@@ -121,7 +121,7 @@ We believe in our spell enough to tie compensation to whether it is right.
 
 ---
 
-## Why Solstein Against Every Alternative
+## Comparative Advantage | Performance vs. Tradition
 
 | Dimension | The Old Ritual | Solstein |
 |-----------|---------------|---------|
@@ -134,7 +134,7 @@ We believe in our spell enough to tie compensation to whether it is right.
 
 ---
 
-## The Incantation We Offer You
+## Next Steps | Strategic Onboarding
 
 Schedule a 45-minute session with us. We will open the European Energy Software dataset and walk your team through 29 fully scored, fully explained company profiles.
 

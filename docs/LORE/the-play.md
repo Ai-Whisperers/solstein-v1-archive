@@ -1,10 +1,10 @@
-# 📜 The Three-Entity Flywheel — The Architecture of the Spell
+# The Three-Entity Flywheel | Strategy
 
 > *"The billion-dollar play is not SaaS subscriptions. It is not consulting fees. It is equity in the companies you transmute."*
 
 ---
 
-## The Alchemist's Insight
+## Equity-Based Transformation | The Alchemist's Insight
 
 Lesser firms charge for their time. The great ones take a stake in what they create.
 
@@ -20,7 +20,7 @@ The equity is how the alchemist gets paid. Not by the hour. By the transformatio
 
 ---
 
-## We Are a Guild of Architects
+## Professional Guild vs. Mercenary Agencies
 
 Let this be clear from the start.
 
@@ -67,7 +67,7 @@ There are three distinct players in this flywheel. Each has a different role. Ea
 
 ---
 
-## The First Entity: Solstein — The Sunstone
+## Intelligence Layer | Solstein
 
 Solstein is the instrument that sees through market fog.
 
@@ -79,7 +79,7 @@ When a PE partner sees the full Attractiveness Board — every portfolio-adjacen
 
 ---
 
-## The Second Entity: AI Whisperers — The Spellcasters
+## Transformation Layer | AI Whisperers
 
 Inside every Dinosaur company lives what we call **the leaded brain.**
 
@@ -105,7 +105,7 @@ When a typical developer is hired, the company gets code. When the Guild enters 
 
 ---
 
-## The Third Entity: The Value Creation Vehicle — The Gold
+## Investment Layer | Value Creation Vehicle
 
 The Spell is cast. The Dinosaur is becoming a Riser. The integration roadmap that was "eighteen months out" for three years is now complete.
 
@@ -133,7 +133,7 @@ We take our share of that.
 
 ---
 
-## The Full Incantation
+## The Strategic Mandate | The Full Incantation
 
 > *"You know what lives in your portfolio. You know the deal deck promised synergies that never materialized. You know the integration roadmap that has been 'eighteen months out' for three years.*
 >

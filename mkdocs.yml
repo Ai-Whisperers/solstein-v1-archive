@@ -55,7 +55,7 @@ markdown_extensions:
       title: "On this scroll"
 
 nav:
-  - "Home": "README.md"
+  - "Home": "index.md"
 
   - "The Lore | Foundation":
     - "The Origin | Vision": "LORE/origin.md"

@@ -1,32 +1,32 @@
-# 📜 Case Study — The First Summoning
+# Case Study | Market Intelligence Demonstration
 
 **European Energy Software Market — A Live Demonstration of Solstein**
 
-> *"We ran the spell. Here is what it produced."*
+> *"Data transparency at the speed of thought. Here is the output."*
 
 *Status: Complete — Available for walkthrough in any introductory session*
 
 ---
 
-## The Brief
+## Market Analysis Brief
 
 A PE firm needed to understand the European energy software and utilities management market before making acquisition decisions. They needed to know who was winning, who was fading, and where the hidden opportunities lived.
 
 The traditional path: commission a consulting firm, wait three months, receive a report covering 8–10 companies.
 
-**We ran Solstein instead.**
+**The SolStein Deployment:**
 
 | Parameter | Value |
 |-----------|-------|
 | Market | European Energy Software & Utilities Management |
 | Geography | Netherlands, Germany, Belgium, UK, Spain, Nordics |
-| Companies entered into the ritual | 29 |
+| Companies within scope | 29 |
 | Days to complete | **3** |
 | Refresh cadence | Continuous — the data does not go stale |
 
 ---
 
-## What the Spell Revealed
+## Analysis Outcomes | Structural Signal Mapping
 
 ### The Attractiveness Board
 
@@ -46,7 +46,7 @@ Every company was scored across three dimensions:
 | Neutral | 18 | 62% | Stable players. Signal-rich for anyone reading carefully. |
 | Dinosaur | 7 | 24% | Carrying coal. Three have transformation potential. Four are irreversible. Solstein shows you which is which. |
 
-### What Else the Crystal Revealed
+### Structural Indicators | Deep-Dive Insights
 
 - **15+ European energy protocols** mapped to exactly which companies hold certifications — exposing gaps competitors do not advertise
 - **M&A genealogy** for 8 major players — full acquisition family trees showing who absorbed what and which synergies were claimed vs. realized
@@ -55,7 +55,7 @@ Every company was scored across three dimensions:
 
 ---
 
-## A Sample Profile from the Ritual
+## Sample Asset Profile | Data Granularity
 
 ```
 Company:            EnergyTech BV
@@ -78,7 +78,7 @@ Transformation potential: N/A — already a Rocket. Watch for acquisition premiu
 
 ---
 
-## The Comparison Spell
+## Methodology Comparison | Efficiency Metrics
 
 | | Old Ritual | Solstein |
 |---|---|---|
@@ -92,7 +92,7 @@ Transformation potential: N/A — already a Rocket. Watch for acquisition premiu
 
 ---
 
-## What This Intelligence Actually Opens
+## Strategic Utility | Decision Support
 
 **1. Target screening before committing to full DD**
 Rank the 29 companies in 3 days. Spend DD budget on the 3 that matter. Skip the 7 that are irreversible Dinosaurs.
@@ -108,9 +108,9 @@ For a portfolio company approaching exit, Solstein's Attractiveness Board shows 
 
 ---
 
-## The Next Markets We Can Open
+## Expansion Roadmap | Target Verticals
 
-The spell is not limited to one market. Every structured market with identifiable players is a candidate.
+The methodology is scalable across all high-complexity sectors. Every structured market with identifiable players is a candidate.
 
 - DACH energy software (Germany, Austria, Switzerland)
 - European building automation and smart building platforms
@@ -119,7 +119,7 @@ The spell is not limited to one market. Every structured market with identifiabl
 
 ---
 
-## What We Invite You to Do
+## Next Steps | Interactive Walkthrough
 
 Let us walk you through these 29 companies. In the session, you will see:
 
