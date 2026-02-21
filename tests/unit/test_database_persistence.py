@@ -4,7 +4,6 @@ Tests verify that scoring records, signals, and market snapshots
 are correctly stored and retrieved from PostgreSQL.
 """
 
-
 import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine

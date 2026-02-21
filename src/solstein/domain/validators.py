@@ -1,11 +1,14 @@
 """Input validators for SolStein domain models."""
 
+from typing import Any
+
 from pydantic import (
     BaseModel,
     field_validator,
+)
+from pydantic import (
     ValidationError as PydanticValidationError,
 )
-from typing import Any
 
 
 class CompanyValidator(BaseModel):

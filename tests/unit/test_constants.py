@@ -1,15 +1,14 @@
 """Tests for solstein constants module."""
 
-import pytest
 from solstein.constants import (
-    ScoringWeights,
-    Thresholds,
+    AI_EXCEPTIONAL,
+    GROWTH_RATE_EXCEPTIONAL,
+    REVENUE_PER_EMPLOYEE_EXCEPTIONAL,
     Classification,
     CompanyTier,
+    ScoringWeights,
     ThreatLevel,
-    REVENUE_PER_EMPLOYEE_EXCEPTIONAL,
-    GROWTH_RATE_EXCEPTIONAL,
-    AI_EXCEPTIONAL,
+    Thresholds,
 )
 
 
@@ -41,17 +40,14 @@ class TestThresholds:
 
 
 class TestClassification:
-    def test_rocket(self):
-        assert Classification.ROCKET.value == "Rocket"
+    def test_phoenix(self):
+        assert Classification.PHOENIX.value == "Phoenix"
 
-    def test_riser(self):
-        assert Classification.RISER.value == "Riser"
+    def test_salt(self):
+        assert Classification.SALT.value == "Salt"
 
-    def test_steady(self):
-        assert Classification.STEADY.value == "Steady"
-
-    def test_dinosaur(self):
-        assert Classification.DINOSAUR.value == "Dinosaur"
+    def test_lead(self):
+        assert Classification.LEAD.value == "Lead"
 
 
 class TestCompanyTier:

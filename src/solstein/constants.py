@@ -25,10 +25,9 @@ class Thresholds(Enum):
 class Classification(Enum):
     """Company classification based on composite score."""
 
-    ROCKET = "Rocket"
-    RISER = "Riser"
-    STEADY = "Steady"
-    DINOSAUR = "Dinosaur"
+    PHOENIX = "Phoenix"
+    SALT = "Salt"
+    LEAD = "Lead"
 
 
 class CompanyTier(Enum):

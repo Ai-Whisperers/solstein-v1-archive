@@ -4,9 +4,9 @@ Market Simulation Engine.
 
 from loguru import logger
 
-from ..domain.models import Company
-from ..domain.simulation import MarketConditionType, Scenario, SimulationResult
-from .scoring import GrowthScorer
+from ...domain.models import Company
+from ...domain.simulation import MarketConditionType, Scenario, SimulationResult
+from ..scoring import GrowthScorer
 
 
 class SimulationEngine:

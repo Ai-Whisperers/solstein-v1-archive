@@ -20,7 +20,6 @@ class TemporalClient:
         pass
 
 
-
 router = APIRouter(tags=["Jobs"])
 
 

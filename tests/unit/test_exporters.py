@@ -2,7 +2,6 @@
 Unit tests for SolStein exporters.
 """
 
-
 import pytest
 from openpyxl import load_workbook
 
@@ -79,14 +78,19 @@ class TestExcelExporter:
 
         # Verify content
         wb = load_workbook(output_file)
-        expected_sheets = ["Executive Summary", "Market Rankings", "Financial Intelligence", "Tech & AI Maturity"]
+        expected_sheets = [
+            "Executive Summary",
+            "Market Rankings",
+            "Financial Intelligence",
+            "Tech & AI Maturity",
+        ]
         for sheet in expected_sheets:
             assert sheet in wb.sheetnames
 
         ws_summary = wb["Executive Summary"]
         # Banner check
         assert "SOLSTEIN | EXECUTIVE SUMMARY" in ws_summary["A1"].value
-        
+
         # KPI check
         assert "Total Portfolio Size" in str(ws_summary["A5"].value)
         assert str(len(sample_profiles)) in str(ws_summary["B5"].value)

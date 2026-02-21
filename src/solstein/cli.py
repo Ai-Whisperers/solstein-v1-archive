@@ -253,11 +253,11 @@ def generate_report(company_name: str, output: Path | None) -> None:
         reports = generator.generate_client_report(target, competitors)
 
         click.echo(f"✅ Reports generated in: {output_dir}")
-        click.echo(f"   - corporate-history.md")
-        click.echo(f"   - deep-analysis.md")
-        click.echo(f"   - financial-growth.md")
-        click.echo(f"   - competitive-analysis.md")
-        click.echo(f"   - market-overview.md")
+        click.echo("   - corporate-history.md")
+        click.echo("   - deep-analysis.md")
+        click.echo("   - financial-growth.md")
+        click.echo("   - competitive-analysis.md")
+        click.echo("   - market-overview.md")
 
     except Exception as e:
         click.echo(f"❌ Failed to generate report: {e}", err=True)
@@ -312,8 +312,9 @@ def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) ->
             generator = ClientReportGenerator(output_dir=output_dir, use_llm=False)
             reports = generator.generate_client_report(target, competitors)
         else:
-            from .exporters.report_generator import LLMEnhancedReportGenerator
             import asyncio
+
+            from .exporters.report_generator import LLMEnhancedReportGenerator
 
             generator = LLMEnhancedReportGenerator(output_dir=output_dir, use_llm=True)
             reports = asyncio.run(

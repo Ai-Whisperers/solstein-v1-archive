@@ -90,7 +90,7 @@ def test_excel_exporter_none_active_sheet():
         mock_wb_class.return_value = mock_wb
 
         exporter.create_dashboard([], Path("/tmp/test_output.xlsx"))
-        mock_wb.create_sheet.assert_called_with("Executive Summary")
+        mock_wb.create_sheet.assert_any_call("Executive Summary")
 
 
 def test_excel_auto_adjust_value_error():

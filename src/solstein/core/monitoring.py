@@ -181,6 +181,58 @@ class HealthMonitor:
             self.checks["configuration"] = check
             return check
 
+    async def check_llm_services(self) -> HealthCheck:
+        """Check LLM service availability.
+
+        Returns:
+            HealthCheck result
+        """
+        start = datetime.now(UTC)
+        try:
+            from ..exporters.llm import LLMReportEnhancer
+
+            enhancer = LLMReportEnhancer()
+
+            # Simple check for any available backend
+            available = enhancer.is_available()
+
+            if available:
+                backends = []
+                if enhancer._check_ollama():
+                    backends.append("ollama")
+                if enhancer._has_valid_api_key():
+                    backends.append("cloud_api")
+
+                check = HealthCheck(
+                    name="llm_services",
+                    status=HealthStatus.HEALTHY,
+                    message="LLM services available",
+                    duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
+                    details={"backends": backends},
+                )
+            else:
+                check = HealthCheck(
+                    name="llm_services",
+                    status=HealthStatus.DEGRADED,
+                    message="No LLM backends available, using fallbacks",
+                    duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
+                    details={"fallback": "keyword_and_template_based"},
+                )
+
+            self.checks["llm_services"] = check
+            return check
+        except Exception as e:
+            check = HealthCheck(
+                name="llm_services",
+                status=HealthStatus.DEGRADED,
+                message=f"LLM health check failed: {str(e)}",
+                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
+                details={"error": str(e), "fallback": "active"},
+            )
+            self.checks["llm_services"] = check
+            logger.error(f"LLM health check failed: {str(e)}")
+            return check
+
     async def run_all_checks(self) -> dict[str, HealthCheck]:
         """Run all health checks in parallel.
 
@@ -191,6 +243,7 @@ class HealthMonitor:
             self.check_database(),
             self.check_api_responsiveness(),
             self.check_configuration(),
+            self.check_llm_services(),
         )
         return self.checks
 

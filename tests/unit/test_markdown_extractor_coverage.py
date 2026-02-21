@@ -1,4 +1,3 @@
-
 import pytest
 
 from solstein.domain.models import AIMaturity, CompanyTier, ConfidenceLevel, ThreatLevel

@@ -4,7 +4,6 @@ Tests verify that signals are correctly defined, categorized, and extracted
 from various agent data sources.
 """
 
-
 from solstein.analytics.signals.extractors import (
     AggregateSignalExtractor,
     CompaniesHouseSignalExtractor,

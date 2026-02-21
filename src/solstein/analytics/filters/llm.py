@@ -97,7 +97,7 @@ class LLMFilter:
     """
 
     def __init__(self):
-        from ..config import get_settings
+        from ...config import get_settings
 
         settings = get_settings()
         self.groq_api_key = settings.groq_api_key

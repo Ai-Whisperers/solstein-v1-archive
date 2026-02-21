@@ -1,7 +1,7 @@
 """LLM-powered report enhancement module for SolStein."""
 
 import os
-from typing import Any, Optional
+from typing import Any
 
 from loguru import logger
 
@@ -181,7 +181,7 @@ Write for institutional investors."""
         result = await self._generate(prompt)
         return result or self._fallback_market_insights(companies)
 
-    async def _generate(self, prompt: str, system_prompt: str = None) -> Optional[str]:
+    async def _generate(self, prompt: str, system_prompt: str = None) -> str | None:
         """Generate text using available LLM backend."""
         if self._check_ollama():
             return await self._query_ollama(prompt, system_prompt)
@@ -189,7 +189,7 @@ Write for institutional investors."""
             return await self._query_api(prompt, system_prompt)
         return None
 
-    async def _generate_json(self, prompt: str) -> Optional[dict]:
+    async def _generate_json(self, prompt: str) -> dict | None:
         """Generate JSON using available LLM backend."""
         json_prompt = f"{prompt}\n\nIMPORTANT: Response must be valid JSON only, no markdown formatting."
 
@@ -205,7 +205,7 @@ Write for institutional investors."""
 
     async def _query_ollama(
         self, prompt: str, system_prompt: str = None
-    ) -> Optional[str]:
+    ) -> str | None:
         """Query local Ollama instance."""
         try:
             import aiohttp
@@ -215,28 +215,27 @@ Write for institutional investors."""
                 or "You are an expert business analyst specializing in technology companies and private equity. Provide concise, data-driven insights."
             )
 
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    f"{self.ollama_url}/api/chat",
-                    json={
-                        "model": self.ollama_model,
-                        "messages": [
-                            {"role": "system", "content": system},
-                            {"role": "user", "content": prompt},
-                        ],
-                        "stream": False,
-                        "options": {"temperature": 0.3},
-                    },
-                    timeout=aiohttp.ClientTimeout(total=60),
-                ) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        return data.get("message", {}).get("content", "")
+            async with aiohttp.ClientSession() as session, session.post(
+                f"{self.ollama_url}/api/chat",
+                json={
+                    "model": self.ollama_model,
+                    "messages": [
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "stream": False,
+                    "options": {"temperature": 0.3},
+                },
+                timeout=aiohttp.ClientTimeout(total=60),
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return data.get("message", {}).get("content", "")
         except Exception as e:
             logger.warning(f"Ollama query failed: {e}")
         return None
 
-    async def _query_api(self, prompt: str, system_prompt: str = None) -> Optional[str]:
+    async def _query_api(self, prompt: str, system_prompt: str = None) -> str | None:
         """Query cloud LLM API."""
         try:
             client = self._get_client()
@@ -343,17 +342,16 @@ Threat Level: {company.threat_level.value if company.threat_level else "N/A"}
 
     def _format_market_overview(self, companies: list) -> str:
         """Format market overview for LLM."""
-        rockets = len([c for c in companies if c.classification == "Rocket"])
-        risers = len([c for c in companies if c.classification == "Rearer"])
-        steadys = len([c for c in companies if c.classification == "Steady"])
-        dinosaurs = len([c for c in companies if c.classification == "Dinosaur"])
+        phoenixes = len([c for c in companies if c.classification == "Phoenix"])
+        salts = len([c for c in companies if c.classification == "Salt"])
+        leads = len([c for c in companies if c.classification == "Lead"])
 
         revenues = [c.financials.revenue for c in companies if c.financials.revenue]
         avg_revenue = sum(revenues) / len(revenues) if revenues else 0
 
         return f"""
 Market Analysis: {len(companies)} companies
-- Rockets: {rockets}, Risers: {risers}, Steadys: {steadys}, Dinosaurs: {dinosaurs}
+- Phoenixes: {phoenixes}, Salts: {salts}, Leads: {leads}
 - Average Revenue: €{avg_revenue:.1f}M
 - Total Revenue: €{sum(revenues):.1f}M
 """
@@ -399,7 +397,7 @@ expanding market presence in adjacent segments."""
         opportunities.append("Potential AI adoption")
         opportunities.append("Geographic diversification")
 
-        threats.append("Competitive pressure from Rocket-class companies")
+        threats.append("Competitive pressure from Phoenix-class companies")
         threats.append("Technology disruption")
 
         return {
@@ -435,7 +433,7 @@ AI maturity at {company.ai_score or 0}/10 represents both a challenge and opport
 for future development.
 
 Competitive threats include larger players with greater resources and 
-faster-growing Rocket-class companies. Strategic priorities should focus on 
+faster-growing Phoenix-class companies. Strategic priorities should focus on 
 differentiating through technology investment and market expansion."""
 
     def _fallback_market_insights(self, companies: list) -> str:

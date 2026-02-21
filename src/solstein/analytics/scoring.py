@@ -22,13 +22,13 @@ from .scorers.financial_health import FinancialHealthScorer
 from .scorers.growth_momentum import GrowthMomentumScorer
 
 
-def classify_company(growth_score: float | None) -> str:
-    """Central logic to classify a company based on its growth score."""
-    if growth_score is None:
+def classify_company(score: float | None) -> str:
+    """Central logic to classify a company based on its composite or growth score."""
+    if score is None:
         return "Salt"
-    if growth_score >= 7.0:
+    if score >= 7.0:
         return "Phoenix"
-    elif growth_score <= 4.0:
+    elif score <= 3.9:
         return "Lead"
     return "Salt"
 
@@ -75,9 +75,8 @@ class GrowthScorer:
         else:
             profile.composite_score = growth_score
 
-        # Preserve classification from JSON if it exists, otherwise calculate
-        if profile.classification is None:
-            profile.classification = classify_company(profile.growth_score)
+        # Always calculate classification
+        profile.classification = classify_company(profile.composite_score)
 
         profile.scoring_breakdown["growth"] = growth_expl
         profile.scoring_breakdown["financial"] = fin_expl

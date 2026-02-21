@@ -15,15 +15,15 @@ from typing import Any
 
 from loguru import logger
 
-from .exceptions import (
-    SolsteinError,
-    DataLoadError,
-    ValidationError,
-    LLMAvailabilityError,
-)
 from .constants import ScoringWeights, Thresholds
-from .domain.models import Company, CompanyTier, ThreatLevel, AIMaturity
 from .data.loaders import CompetitorDataLoader
+from .domain.models import AIMaturity, Company, CompanyTier, ThreatLevel
+from .exceptions import (
+    DataLoadError,
+    LLMAvailabilityError,
+    SolsteinError,
+    ValidationError,
+)
 from .exporters.excel import ExcelExporter
 
 # Configure logging

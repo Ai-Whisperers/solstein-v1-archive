@@ -8,7 +8,6 @@ deep analysis, financial growth, and competitive dashboards.
 import asyncio
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 from loguru import logger
 
@@ -102,7 +101,7 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
 | Industry | {company.industry or "N/A"} |
 | Headquarters | {company.headquarters or "N/A"} |
 | Founded | {company.founded_year or "N/A"} |
-| Employees | {company.financials.employees or "N/A":,} |
+| Employees | {f"{company.financials.employees:,}" if company.financials.employees else "N/A"} |
 | Revenue | €{company.financials.revenue or 0:.1f}M |
 | Ownership | {"PE-backed" if company.funding_rounds else "Independent"} |
 | Data Source | {company.data_source or "SolStein Intelligence"} |
@@ -122,7 +121,7 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
 
 | Metric | Value |
 |---|---|
-| Current Headcount | {company.financials.employees or "N/A":,} |
+| Current Headcount | {f"{company.financials.employees:,}" if company.financials.employees else "N/A"} |
 | Employee CAGR (3yr) | {company.employee_cagr_3yr or "N/A"}% |
 | Open Positions | {company.open_positions or "N/A"} |
 
@@ -222,7 +221,7 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
 | Industry | {company.industry or "N/A"} | High |
 | Headquarters | {company.headquarters or "N/A"} | High |
 | Founded | {company.founded_year or "N/A"} | Medium |
-| Employees | {company.financials.employees or "N/A":,} | High |
+| Employees | {f"{company.financials.employees:,}" if company.financials.employees else "N/A"} | High |
 | Revenue | €{company.financials.revenue or 0:.1f}M | High |
 | Ownership | {"PE-backed" if company.funding_rounds else "Independent"} | High |
 | Last Updated | {company.last_updated.strftime("%Y-%m-%d") if company.last_updated else "N/A"} | High |
@@ -388,7 +387,7 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
 
 | Year | Headcount | Growth |
 |---|---|---|
-| Current | {company.financials.employees or "N/A":,} | |
+| Current | {f"{company.financials.employees:,}" if company.financials.employees else "N/A"} | |
 | CAGR (3yr) | {company.employee_cagr_3yr or "N/A"}% | |
 | Open Positions | {company.open_positions or "N/A"} | |
 
@@ -410,10 +409,9 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
 
 ## Classification: {company.classification or "N/A"}
 
-- **Rocket** (7.0-10.0): Explosive growth, heavy investment
-- **Riser** (5.0-6.9): Strong growth, investing in future
-- **Steady** (3.0-4.9): Stable, evolutionary
-- **Dinosaur** (1.0-2.9): Legacy, declining
+- 🔥 **Phoenix** (Score ≥ 7.0): Explosive growth, market disruptor
+- 🧂 **Salt** (Score 4.0-6.9): Stable, investing in future
+- ⚖️ **Lead** (Score ≤ 3.9): Legacy, evolutionary
 
 ---
 
@@ -444,10 +442,9 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
             companies, key=lambda c: c.composite_score or 0, reverse=True
         )
 
-        rockets = [c for c in sorted_companies if c.classification == "Rocket"]
-        risers = [c for c in sorted_companies if c.classification == "Riser"]
-        steadys = [c for c in sorted_companies if c.classification == "Steady"]
-        dinosaurs = [c for c in sorted_companies if c.classification == "Dinosaur"]
+        phoenixes = [c for c in sorted_companies if c.classification == "Phoenix"]
+        salts = [c for c in sorted_companies if c.classification == "Salt"]
+        leads = [c for c in sorted_companies if c.classification == "Lead"]
 
         report = f"""# Competitive Landscape Overview
 
@@ -467,10 +464,9 @@ revenue growth, funding, technology maturity, and market positioning.
 
 | Classification | Count | Description |
 |---|---|---|
-| 🔥 Rocket | {len(rockets)} | Explosive growth, market disruptors |
-| 🧂 Riser | {len(risers)} | Strong growth signals |
-| ⚖️ Steady | {len(steadys)} | Stable, evolutionary |
-| 🦕 Dinosaur | {len(dinosaurs)} | Legacy, declining |
+| 🔥 Phoenix | {len(phoenixes)} | Explosive growth, market disruptors |
+| 🧂 Salt | {len(salts)} | Stable, investing in future |
+| ⚖️ Lead | {len(leads)} | Legacy, evolutionary |
 
 ---
 
@@ -483,48 +479,37 @@ revenue growth, funding, technology maturity, and market positioning.
         for i, c in enumerate(sorted_companies[:20], 1):
             report += f"| {i} | {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.classification or 'N/A'} |\n"
 
-        report += f"""
+        report += """
 
 ## Growth Classification Matrix
 
-### Rockets (Composite Score 7.0-10.0)
+### 🔥 Phoenixes (Composite Score ≥ 7.0)
 
 | Company | Composite | Revenue | Growth | SaaS |
 |---|---|---|---|---|
 """
-        for c in rockets:
+        for c in phoenixes:
             report += f"| {c.name} | {c.composite_score or 'N/A'} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.saas_maturity or 'N/A'} |\n"
 
-        report += f"""
+        report += """
 
-### Risers (Composite Score 5.0-6.9)
+### 🧂 Salts (Composite Score 4.0-6.9)
 
 | Company | Composite | Revenue | Growth | SaaS |
 |---|---|---|---|---|
 """
-        for c in risers:
+        for c in salts:
             report += f"| {c.name} | {c.composite_score or 'N/A'} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.saas_maturity or 'N/A'} |\n"
 
-        report += f"""
+        report += """
 
-### Steadys (Composite Score 3.0-4.9)
+### ⚖️ Leads (Composite Score ≤ 3.9)
 
 | Company | Composite | Revenue | Growth | SaaS |
 |---|---|---|---|---|
 """
-        for c in steadys[:10]:
+        for c in leads[:10]:
             report += f"| {c.name} | {c.composite_score or 'N/A'} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.saas_maturity or 'N/A'} |\n"
-
-        if dinosaurs:
-            report += f"""
-
-### Dinosaurs (Composite Score 1.0-2.9)
-
-| Company | Composite | Revenue | Growth | SaaS |
-|---|---|---|---|---|
-"""
-            for c in dinosaurs:
-                report += f"| {c.name} | {c.composite_score or 'N/A'} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.saas_maturity or 'N/A'} |\n"
 
         # AI Adoption Ranking
         ai_sorted = sorted(
@@ -533,7 +518,7 @@ revenue growth, funding, technology maturity, and market positioning.
             reverse=True,
         )
 
-        report += f"""
+        report += """
 
 ## AI Adoption Ranking
 
@@ -669,20 +654,23 @@ revenue growth, funding, technology maturity, and market positioning.
         score = company.composite_score or 5
 
         if score >= 7:
-            return f"""**{company.name}** is a high-growth company with strong market momentum.
-With a composite score of {score:.1f}, the company demonstrates excellence across
-growth, financial health, and competitive positioning. The {company.classification or "N/A"}
-classification indicates significant market disruption potential."""
-        elif score >= 5:
-            return f"""**{company.name}** shows solid fundamentals with room for improvement.
-At {score:.1f} composite score, the company demonstrates {company.classification or "N/A"}
-characteristics with steady growth. Key opportunities include AI adoption and
-international expansion."""
+            return f"""> [!IMPORTANT]
+> **{company.name}** is a high-growth company with strong market momentum.
+> With a composite score of {score:.1f}, the company demonstrates excellence across
+> growth, financial health, and competitive positioning. The 🔥 **Phoenix**
+> classification indicates significant market disruption potential."""
+        elif score >= 4:
+            return f"""> [!NOTE]
+> **{company.name}** shows solid fundamentals with room for improvement.
+> At {score:.1f} composite score, the company demonstrates 🧂 **Salt**
+> characteristics with steady growth. Key opportunities include AI adoption and
+> international expansion."""
         else:
-            return f"""**{company.name}** faces significant competitive challenges.
-With a composite score of {score:.1f}, the company ranks below market leaders.
-The {company.classification or "N/A"} classification suggests legacy positioning
-that requires strategic transformation."""
+            return f"""> [!WARNING]
+> **{company.name}** faces significant competitive challenges.
+> With a composite score of {score:.1f}, the company ranks below market leaders.
+> The ⚖️ **Lead** classification suggests legacy positioning
+> that requires strategic transformation."""
 
     def _format_funding_rounds(self, funding_rounds: list) -> str:
         """Format funding rounds for display."""
@@ -948,7 +936,7 @@ These companies operate in the same tier with similar market positioning:
         for c in direct:
             report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {c.classification or 'N/A'} |\n"
 
-        report += f"""
+        report += """
 
 ## Competitive Threats
 
@@ -1218,7 +1206,7 @@ class LLMEnhancedReportGenerator(ClientReportGenerator):
 
     def _save_swot_report(self, swot: dict, output_dir: Path) -> Path:
         """Save SWOT analysis as markdown."""
-        content = f"""# SWOT Analysis
+        content = """# SWOT Analysis
 
 ## Strengths
 

@@ -1,6 +1,5 @@
 """Service for managing drill-down data and audit trail retrieval."""
 
-
 from ...domain.models import (
     AggregatedDataRecord,
     CompanyAnalysisAuditTrail,
