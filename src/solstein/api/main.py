@@ -25,7 +25,16 @@ from .exceptions import setup_exception_handlers
 from .middleware import LoggingMiddleware
 
 # Import Routers
-from .routers import companies, drill_down, export, jobs, market, scoring, simulation
+from .routers import (
+    companies,
+    drill_down,
+    export,
+    jobs,
+    market,
+    scoring,
+    simulation,
+    health,
+)
 
 # Global instances (for startup logging)
 settings = Settings()
@@ -91,6 +100,8 @@ setup_exception_handlers(app)
 # Global dependencies configured in lifespan
 
 # Include Routers
+app.include_router(health.router)
+app.include_router(health.metrics_router)
 app.include_router(companies.router)
 app.include_router(scoring.router, prefix="/scoring")
 app.include_router(market.router, prefix="/market")
@@ -98,18 +109,6 @@ app.include_router(export.router, prefix="/export")
 app.include_router(jobs.router, prefix="/jobs")
 app.include_router(drill_down.router)
 app.include_router(simulation.router, prefix="/simulation")
-
-
-# Health check endpoint
-@app.get("/health", tags=["Health"])
-async def health_check() -> dict[str, Any]:
-    """Health check endpoint."""
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "version": "1.0.0",
-        "environment": settings.environment,
-    }
 
 
 # Custom docs endpoint
@@ -123,11 +122,11 @@ async def custom_swagger_ui_html() -> Any:
     )
 
 
-# Health check endpoint alias
+# Health check endpoint alias for backward compatibility
 @app.get("/healthz", tags=["Health"], include_in_schema=False)
 async def health_check_alias() -> dict[str, Any]:
-    """Health check alias for K8s."""
-    return await health_check()
+    """Health check alias for K8s - routes to /health."""
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 
 # Main entry point
