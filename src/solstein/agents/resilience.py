@@ -106,6 +106,7 @@ class ExponentialBackoff:
             jitter_amount = delay * 0.2  # ±20%
             delay += random.uniform(-jitter_amount, jitter_amount)
             delay = max(0, delay)  # Ensure non-negative
+            delay = min(delay, self.max_delay)  # Cap again after jitter
 
         return delay
 

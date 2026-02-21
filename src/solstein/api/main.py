@@ -12,7 +12,7 @@ Production-ready REST API following Vete's architecture patterns:
 
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Optional
 
 import uvicorn
 from fastapi import FastAPI
@@ -23,8 +23,13 @@ from loguru import logger
 from ..config import Settings, ConfigurationError
 from .exceptions import setup_exception_handlers
 from .middleware import LoggingMiddleware
+from ..core.production_hardening import (
+    FeatureFlagManager,
+    ResponseCache,
+    GracefulDegradation,
+    GracefulShutdown,
+)
 
-# Import Routers
 from .routers import (
     companies,
     drill_down,
@@ -36,8 +41,12 @@ from .routers import (
     health,
 )
 
-# Global instances (for startup logging)
 settings = Settings()
+
+feature_flags: Optional[FeatureFlagManager] = None
+response_cache: Optional[ResponseCache] = None
+graceful_degradation: Optional[GracefulDegradation] = None
+graceful_shutdown: Optional[GracefulShutdown] = None
 
 
 @asynccontextmanager
@@ -47,11 +56,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     On startup:
     1. Validates required configuration
     2. Creates necessary directories
-    3. Logs environment information
+    3. Initializes production hardening components
+    4. Logs environment information
 
     On shutdown:
-    - Logs shutdown message
+    - Executes graceful shutdown sequence
     """
+    global feature_flags, response_cache, graceful_degradation, graceful_shutdown
+
     logger.info("Starting SolStein API server")
 
     try:
@@ -67,7 +79,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     if settings.logging.file_path:
         settings.logging.file_path.parent.mkdir(parents=True, exist_ok=True)
 
+    feature_flags = FeatureFlagManager()
+    response_cache = ResponseCache()
+    graceful_degradation = GracefulDegradation()
+    graceful_shutdown = GracefulShutdown()
+
+    logger.info("Production hardening components initialized")
+    logger.info(f"Feature flags available: {len(feature_flags.flags)}")
+    logger.info(f"Response cache initialized with TTL support")
+
     yield
+
+    logger.info("Executing graceful shutdown sequence")
+    await graceful_shutdown.shutdown()
     logger.info("Shutting down SolStein API server")
 
 
