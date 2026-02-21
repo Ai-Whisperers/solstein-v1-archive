@@ -12,7 +12,7 @@ Production-ready REST API following Vete's architecture patterns:
 
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any
+from typing import Any, AsyncGenerator
 
 import uvicorn
 from fastapi import FastAPI
@@ -20,7 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from loguru import logger
 
-from ..config import Settings
+from ..config import Settings, ConfigurationError
 from .exceptions import setup_exception_handlers
 from .middleware import LoggingMiddleware
 
@@ -32,16 +32,32 @@ settings = Settings()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> Any:
-    """Lifecycle manager for startup and shutdown events."""
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Lifecycle manager for startup and shutdown events.
+
+    On startup:
+    1. Validates required configuration
+    2. Creates necessary directories
+    3. Logs environment information
+
+    On shutdown:
+    - Logs shutdown message
+    """
     logger.info("Starting SolStein API server")
+
+    try:
+        settings.check_configuration()
+    except ConfigurationError as e:
+        logger.error(f"Configuration validation failed: {e}")
+        raise
+
     logger.info(f"Environment: {settings.environment}")
     logger.info(f"Data directory: {settings.data.data_dir}")
 
-    # Create necessary directories
     settings.data.ensure_dirs()
     if settings.logging.file_path:
         settings.logging.file_path.parent.mkdir(parents=True, exist_ok=True)
+
     yield
     logger.info("Shutting down SolStein API server")
 

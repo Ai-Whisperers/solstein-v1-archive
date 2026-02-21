@@ -4,6 +4,7 @@ Configuration management for SolStein.
 Handles environment variables, configuration files, and settings.
 """
 
+import os
 import sys
 from functools import lru_cache
 from pathlib import Path
@@ -12,6 +13,12 @@ from typing import Any
 from loguru import logger
 from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class ConfigurationError(Exception):
+    """Raised when configuration is invalid or incomplete."""
+
+    pass
 
 
 class DatabaseConfig(BaseModel):
@@ -197,10 +204,49 @@ class Settings(BaseSettings):
         """Get database URL, optionally for tests."""
         url = self.database.url
         if test and "test" not in url and "/" in url:
-            # Append _test to database name
             parts = url.rsplit("/", 1)
             url = f"{parts[0]}_test/{parts[1]}"
         return url
+
+    def check_configuration(self) -> None:
+        """Check required configuration at startup.
+
+        Validates that required API keys are set. Raises ConfigurationError
+        if critical keys are missing. Warns if optional keys are missing.
+
+        Required:
+            GITHUB_TOKEN - Used for GitHub API calls
+
+        Optional (warns if missing):
+            COMPANIES_HOUSE_API_KEY - For Companies House data extraction
+            GOOGLE_API_KEY - For web search data extraction
+
+        Raises:
+            ConfigurationError: If GITHUB_TOKEN is not set.
+        """
+        github_token = os.getenv("GITHUB_TOKEN")
+        if not github_token:
+            raise ConfigurationError(
+                "GITHUB_TOKEN environment variable is required but not set. "
+                "Please set it before starting the application. "
+                "Get a token from: https://github.com/settings/tokens"
+            )
+
+        companies_house_key = os.getenv("COMPANIES_HOUSE_API_KEY")
+        if not companies_house_key:
+            logger.warning(
+                "COMPANIES_HOUSE_API_KEY not configured. "
+                "Companies House data gathering will be disabled."
+            )
+
+        google_api_key = os.getenv("GOOGLE_API_KEY")
+        if not google_api_key:
+            logger.warning(
+                "GOOGLE_API_KEY not configured. "
+                "Web search data gathering will be disabled."
+            )
+
+        logger.info("Configuration validation passed")
 
 
 @lru_cache

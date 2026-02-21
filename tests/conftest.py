@@ -1,6 +1,9 @@
+import os
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
+
+os.environ.setdefault("GITHUB_TOKEN", "test-github-token-12345")
 
 from solstein.api.main import app
 from solstein.api.dependencies import get_current_user, get_repository
@@ -32,7 +35,10 @@ def mock_repo(mock_company):
 @pytest.fixture
 def client(mock_repo):
     """Provides an authenticated TestClient with dependency overrides."""
-    app.dependency_overrides[get_current_user] = lambda: {"username": "testuser", "role": "admin"}
+    app.dependency_overrides[get_current_user] = lambda: {
+        "username": "testuser",
+        "role": "admin",
+    }
     app.dependency_overrides[get_repository] = lambda: mock_repo
 
     with TestClient(app) as test_client:
