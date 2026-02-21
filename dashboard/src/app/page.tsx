@@ -7,10 +7,11 @@ import { KPICards } from "@/components/KPICards";
 import { CompanyTable } from "@/components/CompanyTable";
 import { SignalChainPanel } from "@/components/SignalChainPanel";
 import { Text } from "@tremor/react";
+import { Company } from "@/types";
 
 export default function Dashboard() {
-    const [companies, setCompanies] = useState([]);
-    const [selectedCompany, setSelectedCompany] = useState(null);
+    const [companies, setCompanies] = useState<Company[]>([]);
+    const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -21,7 +22,7 @@ export default function Dashboard() {
                 const { data } = await api.get('/companies');
                 setCompanies(data || []);
                 setError(null);
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Aura | Dashboard Fetch Failed:", err);
                 setError(err.message || "Failed to consult the Oracle.");
             } finally {

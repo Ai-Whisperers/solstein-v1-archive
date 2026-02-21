@@ -5,6 +5,11 @@ import os
 from typing import Any
 
 from loguru import logger
+from pydantic import BaseModel, Field
+
+class FilterResponse(BaseModel):
+    matches: bool = Field(description="Whether the company matches the criteria")
+    reasoning: str = Field(description="Reasoning for the match status")
 
 
 class KeywordFilter:
@@ -205,6 +210,7 @@ Does this company match? JSON only."""
                         "temperature": 0.1,
                         "max_tokens": 200,
                         "stream": False,
+                        "format": FilterResponse.model_json_schema(),
                     },
                     timeout=aiohttp.ClientTimeout(total=30),
                 ) as resp,
@@ -214,10 +220,16 @@ Does this company match? JSON only."""
                 data = await resp.json()
                 content = data.get("message", {}).get("content", "")
 
-                result = json.loads(content)
-                matches = result.get("matches", True)
-                reasoning = result.get("reasoning", "")
-                return matches, f"[Ollama] {reasoning}"
+                try:
+                    result = FilterResponse.model_validate_json(content)
+                except Exception:
+                    # Fallback string manipulation if ollama hallucinates wrapper
+                    if "```json" in content:
+                        clean = content.split("```json")[-1].split("```")[0].strip()
+                        result = FilterResponse.model_validate_json(clean)
+                    else:
+                        raise
+                return result.matches, f"[Ollama] {result.reasoning}"
 
         except Exception as e:
             logger.warning(f"Ollama error: {e}, falling back to keyword")
@@ -250,21 +262,35 @@ Does this company match? JSON only."""
             else:
                 model = "gpt-4o-mini"
 
-            response = await client.chat.completions.create(
-                model=model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                temperature=0.1,
-                max_tokens=200,
-            )
-            result_text = response.choices[0].message.content
-
-            result = json.loads(result_text)
-            matches = result.get("matches", True)
-            reasoning = result.get("reasoning", "")
-            return matches, reasoning
+            if hasattr(client.chat.completions, "parse") and (self.openai_api_key or model.startswith("gpt")):
+                response = await client.beta.chat.completions.parse(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    temperature=0.1,
+                    max_tokens=200,
+                    response_format=FilterResponse,
+                )
+                result = response.choices[0].message.parsed
+                if result:
+                    return result.matches, result.reasoning
+                raise Exception("Empty parsed response")
+            else:
+                response = await client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    temperature=0.1,
+                    max_tokens=200,
+                    response_format={"type": "json_object"},
+                )
+                result_text = response.choices[0].message.content
+                result = FilterResponse.model_validate_json(result_text)
+                return result.matches, result.reasoning
 
         except Exception as e:
             logger.warning(f"LLM API error: {e}, falling back to keyword")

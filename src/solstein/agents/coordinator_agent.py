@@ -1,15 +1,18 @@
 """Coordinator agent that orchestrates specialist agents.
 
-Runs multiple specialist agents in parallel, aggregates results,
+Runs multiple specialist agents in sequence/parallel via a LangGraph DAG, aggregates results,
 detects contradictions, scores confidence, and prepares signals
 for the main scoring engine.
 """
 
 import asyncio
+import operator
 from datetime import UTC, datetime
-from typing import Any
+from typing import Annotated, Any
 
 from loguru import logger
+from typing_extensions import TypedDict
+from langgraph.graph import StateGraph, START, END
 
 from ..api.services.drill_down_service import get_drill_down_service
 from ..domain.models import (
@@ -27,8 +30,20 @@ from .github_agent import GitHubAgent
 from .web_search_agent import WebSearchAgent
 
 
+class AgentState(TypedDict):
+    company_name: str
+    gathering_batch_id: str
+    company_id: str
+    context: dict
+    enabled_sources: list[DataSourceType]
+    agent_results: Annotated[list, operator.add]
+    errors: Annotated[list[str], operator.add]
+    raw_records: RawDataRecord | None
+    aggregated: AggregatedDataRecord | None
+    signals: SignalExtractionRecord | None
+
 class CoordinatorAgent:
-    """Coordinates specialist agents and aggregates results."""
+    """Coordinates specialist agents and aggregates results via LangGraph."""
 
     def __init__(self):
         """Initialize coordinator agent."""
@@ -36,6 +51,68 @@ class CoordinatorAgent:
         self.github_agent = GitHubAgent()
         self.web_search_agent = WebSearchAgent()
         self.companies_house_agent = CompaniesHouseAgent()
+        self.workflow = self._build_graph()
+
+    def _build_graph(self):
+        workflow = StateGraph(AgentState)
+
+        async def gather_sources(state: AgentState):
+            agent_tasks = []
+            if DataSourceType.GITHUB in state["enabled_sources"]:
+                agent_tasks.append(self.github_agent.gather(state["company_name"], state["context"]))
+            if DataSourceType.NEWS in state["enabled_sources"]:
+                agent_tasks.append(self.web_search_agent.gather(state["company_name"], state["context"]))
+            if DataSourceType.COMPANY_FILINGS in state["enabled_sources"]:
+                agent_tasks.append(self.companies_house_agent.gather(state["company_name"], state["context"]))
+
+            self.logger.info(f"Aura | Stage: Gathering | Spawning {len(agent_tasks)} specialist agents")
+            results = await asyncio.gather(*agent_tasks, return_exceptions=True)
+            
+            valid_results = []
+            errors = []
+            for r in results:
+                if isinstance(r, Exception):
+                    self.logger.warning(f"Aura | Agent error: {r}")
+                    errors.append(str(r))
+                elif isinstance(r, AgentTaskResult):
+                    self.logger.info(
+                        f"Aura | {r.agent_name}: {len(r.raw_sources)} sources, "
+                        f"{len(r.extracted_facts)} facts"
+                    )
+                    valid_results.append(r)
+            return {"agent_results": valid_results, "errors": errors}
+
+        async def process_raw(state: AgentState):
+            self.logger.info("Aura | Stage: Internal Processing | Creating raw records")
+            raw_records = self._create_raw_data_records(
+                state.get("agent_results", []), state["company_name"], state["gathering_batch_id"]
+            )
+            return {"raw_records": raw_records}
+
+        async def logic_fusion(state: AgentState):
+            if not state.get("raw_records"): return {}
+            self.logger.info("Aura | Stage: Logic Fusion | Aggregating facts")
+            aggregated = self._aggregate_facts(state["raw_records"])
+            return {"aggregated": aggregated}
+
+        async def extract_signals_node(state: AgentState):
+            if not state.get("aggregated"): return {}
+            self.logger.info("Aura | Stage: Signal Extraction | Parsing business signals")
+            signals = self._extract_signals(state["aggregated"])
+            return {"signals": signals}
+
+        workflow.add_node("gather_sources", gather_sources)
+        workflow.add_node("process_raw", process_raw)
+        workflow.add_node("logic_fusion", logic_fusion)
+        workflow.add_node("extract_signals", extract_signals_node)
+
+        workflow.add_edge(START, "gather_sources")
+        workflow.add_edge("gather_sources", "process_raw")
+        workflow.add_edge("process_raw", "logic_fusion")
+        workflow.add_edge("logic_fusion", "extract_signals")
+        workflow.add_edge("extract_signals", END)
+
+        return workflow.compile()
 
     async def analyze_company(
         self,
@@ -44,7 +121,7 @@ class CoordinatorAgent:
         context: dict,
         enabled_sources: list[DataSourceType] | None = None,
     ) -> CompanyAnalysisAuditTrail:
-        """Analyze a single company using all enabled specialist agents."""
+        """Analyze a single company using LangGraph StateMachine."""
         start_time = datetime.now(UTC)
         company_id = company_name.lower().replace(" ", "-")
 
@@ -55,76 +132,48 @@ class CoordinatorAgent:
                 DataSourceType.COMPANY_FILINGS,
             ]
 
-        # Use contextualize to bind metadata to all logs in this block
         with logger.contextualize(company_id=company_id, batch_id=gathering_batch_id):
-            self.logger.info(
-                f"Aura | Entering Analysis Phase | Company: {company_name}"
-            )
+            self.logger.info(f"Aura | Entering Analysis Phase via LangGraph | Company: {company_name}")
+
+            initial_state = {
+                "company_name": company_name,
+                "gathering_batch_id": gathering_batch_id,
+                "company_id": company_id,
+                "context": context,
+                "enabled_sources": enabled_sources,
+                "agent_results": [],
+                "errors": [],
+                "raw_records": None,
+                "aggregated": None,
+                "signals": None,
+            }
+
+            final_state = await self.workflow.ainvoke(initial_state)
 
             audit_trail = CompanyAnalysisAuditTrail(
                 company_id=company_id,
                 gathering_batch_id=gathering_batch_id,
                 company_name=company_name,
                 analysis_started_at=start_time,
+                analysis_completed_at=datetime.now(UTC),
+                raw_data=final_state.get("raw_records"),
+                aggregated_facts=final_state.get("aggregated"),
+                extracted_signals=final_state.get("signals"),
+                errors=final_state.get("errors", []),
             )
 
-            agent_tasks = []
-            if DataSourceType.GITHUB in enabled_sources:
-                agent_tasks.append(self.github_agent.gather(company_name, context))
-            if DataSourceType.NEWS in enabled_sources:
-                agent_tasks.append(self.web_search_agent.gather(company_name, context))
-            if DataSourceType.COMPANY_FILINGS in enabled_sources:
-                agent_tasks.append(
-                    self.companies_house_agent.gather(company_name, context)
-                )
+            if audit_trail.aggregated_facts:
+                audit_trail.data_completeness = self._calculate_completeness(audit_trail.aggregated_facts)
+                audit_trail.confidence_level = self._determine_confidence_level(audit_trail.aggregated_facts)
 
-            self.logger.info(
-                f"Aura | Stage: Gathering | Spawning {len(agent_tasks)} specialist agents"
-            )
-            agent_results = await asyncio.gather(*agent_tasks, return_exceptions=True)
-
-            for result in agent_results:
-                if isinstance(result, Exception):
-                    self.logger.warning(f"Aura | Agent error: {result}")
-                    audit_trail.errors.append(str(result))
-                    continue
-
-                if not isinstance(result, AgentTaskResult):
-                    continue
-
-                self.logger.info(
-                    f"Aura | {result.agent_name}: {len(result.raw_sources)} sources, "
-                    f"{len(result.extracted_facts)} facts"
-                )
-
-            self.logger.info("Aura | Stage: Internal Processing | Creating raw records")
-            raw_records = self._create_raw_data_records(
-                agent_results, company_name, gathering_batch_id
-            )
-            audit_trail.raw_data = raw_records
-
-            self.logger.info("Aura | Stage: Logic Fusion | Aggregating facts")
-            aggregated = self._aggregate_facts(raw_records)
-            audit_trail.aggregated_facts = aggregated
-
-            self.logger.info(
-                "Aura | Stage: Signal Extraction | Parsing business signals"
-            )
-            signals = self._extract_signals(aggregated)
-            audit_trail.extracted_signals = signals
-
-            audit_trail.analysis_completed_at = datetime.now(UTC)
             audit_trail.analysis_duration_seconds = (
                 audit_trail.analysis_completed_at - start_time
             ).total_seconds()
 
-            audit_trail.data_completeness = self._calculate_completeness(aggregated)
-            audit_trail.confidence_level = self._determine_confidence_level(aggregated)
-
             self.logger.info(
                 f"Aura | Analysis Sequence Finalized | "
-                f"Facts: {len(aggregated.facts)} | "
-                f"Completeness: {audit_trail.data_completeness:.0%} | "
+                f"Facts: {len(audit_trail.aggregated_facts.facts) if audit_trail.aggregated_facts else 0} | "
+                f"Completeness: {(audit_trail.data_completeness or 0.0):.0%} | "
                 f"Duration: {audit_trail.analysis_duration_seconds:.1f}s"
             )
 

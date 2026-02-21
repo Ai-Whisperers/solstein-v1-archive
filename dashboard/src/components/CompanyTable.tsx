@@ -1,6 +1,7 @@
 import { ClassificationBadge } from "./ClassificationBadge";
+import { Company } from "@/types";
 
-export function ScoreBar({ score, maxScore = 10, color }) {
+export function ScoreBar({ score, maxScore = 10, color }: { score: number; maxScore?: number; color?: string }) {
     const percentage = (score / maxScore) * 100;
     return (
         <div className="score-bar" style={{ width: "100%" }}>
@@ -15,7 +16,15 @@ export function ScoreBar({ score, maxScore = 10, color }) {
     );
 }
 
-export function CompanyTable({ companies, selectedCompany, onSelect }) {
+export function CompanyTable({
+    companies,
+    selectedCompany,
+    onSelect,
+}: {
+    companies: Company[];
+    selectedCompany: Company | null;
+    onSelect: (company: Company | null) => void;
+}) {
     return (
         <div className="glass-card animate-in overflow-x-auto" style={{ padding: "0", marginBottom: "32px" }}>
             <div

@@ -1,6 +1,10 @@
 import { Badge } from "@tremor/react";
 
-export function ClassificationBadge({ classification }) {
+export function ClassificationBadge({
+    classification,
+}: {
+    classification: string;
+}) {
     const isPhoenix = classification === "Phoenix";
     const isLead = classification === "Lead";
     const isSalt = classification === "Salt";

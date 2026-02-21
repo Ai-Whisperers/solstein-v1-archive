@@ -11,7 +11,11 @@ export const metadata = {
     description: "AI-Powered Competitive Intelligence Platform for PE/VC. See through the market fog.",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return (
         <html lang="en" className={inter.variable}>
             <body className="grid-bg min-h-screen">

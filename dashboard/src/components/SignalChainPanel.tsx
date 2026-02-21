@@ -3,9 +3,10 @@ import ReactECharts from "echarts-for-react";
 import { ClassificationBadge } from "./ClassificationBadge";
 import { useState, useEffect } from "react";
 import { api } from "@/../lib/api";
+import { Company, AuditTrail } from "@/types";
 
-export function SignalChainPanel({ selectedCompany }) {
-    const [auditTrail, setAuditTrail] = useState(null);
+export function SignalChainPanel({ selectedCompany }: { selectedCompany: Company | null }) {
+    const [auditTrail, setAuditTrail] = useState<AuditTrail | null>(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -15,6 +16,7 @@ export function SignalChainPanel({ selectedCompany }) {
         }
 
         async function fetchAuditTrail() {
+            if (!selectedCompany) return;
             try {
                 setLoading(true);
                 const companyId = selectedCompany.id || selectedCompany.company_id || selectedCompany.name.toLowerCase().replace(/ /g, '-');
@@ -145,8 +147,8 @@ export function SignalChainPanel({ selectedCompany }) {
                                 ⚗️ Signal Chain — Why This Score
                             </p>
                             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                                {displayData.extracted_signals?.length > 0 ? (
-                                    displayData.extracted_signals.map((signal, idx) => (
+                                {(displayData.extracted_signals?.length ?? 0) > 0 ? (
+                                    displayData.extracted_signals?.map((signal, idx) => (
                                         <div key={idx}>
                                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                                                 <p style={{ fontSize: "0.75rem", color: "var(--solstein-text-muted)" }}>{signal.signal_name}</p>
@@ -157,7 +159,7 @@ export function SignalChainPanel({ selectedCompany }) {
                                             <p style={{ fontSize: "0.7rem", color: "var(--solstein-text-muted)" }}>
                                                 Evidence: {signal.source_facts.join(", ")} | Method: {signal.calculation_method}
                                             </p>
-                                            {idx < displayData.extracted_signals.length - 1 && (
+                                            {idx < (displayData.extracted_signals?.length ?? 0) - 1 && (
                                                 <div style={{ height: "1px", background: "var(--solstein-border)", marginTop: "12px" }} />
                                             )}
                                         </div>

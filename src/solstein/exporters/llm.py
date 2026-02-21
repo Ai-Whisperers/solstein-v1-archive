@@ -4,6 +4,16 @@ import os
 from typing import Any
 
 from loguru import logger
+from pydantic import BaseModel, Field
+
+class SWOTAnalysis(BaseModel):
+    strengths: list[str] = Field(description="Key strengths")
+    weaknesses: list[str] = Field(description="Key weaknesses")
+    opportunities: list[str] = Field(description="Market opportunities")
+    threats: list[str] = Field(description="Competitive threats")
+
+class StrategicRecommendations(BaseModel):
+    recommendations: list[str] = Field(description="Specific actionable recommendations")
 
 from ..config import get_settings
 
@@ -102,9 +112,9 @@ Return as JSON with format:
 
 Each list should have 4-6 items. Be specific and data-driven."""
 
-        result = await self._generate_json(prompt)
+        result = await self._generate_structured(prompt, SWOTAnalysis)
         if result:
-            return result
+            return result.model_dump()
         return self._fallback_swot(company)
 
     async def generate_strategic_recommendations(
@@ -130,9 +140,9 @@ Recommendations should be:
 
 Return as JSON: {{"recommendations": ["...", "..."]}}"""
 
-        result = await self._generate_json(prompt)
-        if result and "recommendations" in result:
-            return result["recommendations"]
+        result = await self._generate_structured(prompt, StrategicRecommendations)
+        if result:
+            return result.recommendations
         return self._fallback_recommendations(company)
 
     async def generate_competitive_narrative(
@@ -189,23 +199,19 @@ Write for institutional investors."""
             return await self._query_api(prompt, system_prompt)
         return None
 
-    async def _generate_json(self, prompt: str) -> dict | None:
-        """Generate JSON using available LLM backend."""
-        json_prompt = f"{prompt}\n\nIMPORTANT: Response must be valid JSON only, no markdown formatting."
-
-        result = await self._generate(json_prompt)
-        if result:
-            try:
-                import json
-
-                return json.loads(result)
-            except json.JSONDecodeError:
-                pass
+    async def _generate_structured(self, prompt: str, schema: type[BaseModel]) -> BaseModel | None:
+        """Generate structured Pydantic output using available LLM backend."""
+        json_prompt = f"{prompt}\n\nIMPORTANT: Respond ONLY with valid JSON matching this schema: {schema.model_json_schema()}"
+        
+        if self._check_ollama():
+            return await self._query_ollama(json_prompt, None, schema)
+        if self._has_valid_api_key():
+            return await self._query_api(json_prompt, None, schema)
         return None
 
     async def _query_ollama(
-        self, prompt: str, system_prompt: str = None
-    ) -> str | None:
+        self, prompt: str, system_prompt: str = None, schema: type[BaseModel] | None = None
+    ) -> Any | None:
         """Query local Ollama instance."""
         try:
             import aiohttp
@@ -214,28 +220,40 @@ Write for institutional investors."""
                 system_prompt
                 or "You are an expert business analyst specializing in technology companies and private equity. Provide concise, data-driven insights."
             )
+            
+            payload = {
+                "model": self.ollama_model,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt},
+                ],
+                "stream": False,
+                "options": {"temperature": 0.3},
+            }
+            if schema:
+                payload["format"] = schema.model_json_schema()
 
             async with aiohttp.ClientSession() as session, session.post(
                 f"{self.ollama_url}/api/chat",
-                json={
-                    "model": self.ollama_model,
-                    "messages": [
-                        {"role": "system", "content": system},
-                        {"role": "user", "content": prompt},
-                    ],
-                    "stream": False,
-                    "options": {"temperature": 0.3},
-                },
+                json=payload,
                 timeout=aiohttp.ClientTimeout(total=60),
             ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    return data.get("message", {}).get("content", "")
+                    content = data.get("message", {}).get("content", "")
+                    if schema:
+                        try:
+                            if "```json" in content: content = content.split("```json")[-1].split("```")[0].strip()
+                            return schema.model_validate_json(content)
+                        except Exception as e:
+                            logger.warning(f"Ollama Pydantic validation failed: {e}")
+                            return None
+                    return content
         except Exception as e:
             logger.warning(f"Ollama query failed: {e}")
         return None
 
-    async def _query_api(self, prompt: str, system_prompt: str = None) -> str | None:
+    async def _query_api(self, prompt: str, system_prompt: str = None, schema: type[BaseModel] | None = None) -> Any | None:
         """Query cloud LLM API."""
         try:
             client = self._get_client()
@@ -246,18 +264,34 @@ Write for institutional investors."""
                 system_prompt
                 or "You are an expert business analyst specializing in technology companies and private equity. Provide concise, data-driven insights."
             )
+            model="llama-3.1-70b-instruct"
 
             if hasattr(client, "chat"):
-                response = await client.chat.completions.create(
-                    model="llama-3.1-70b-instruct",
-                    messages=[
-                        {"role": "system", "content": system},
-                        {"role": "user", "content": prompt},
-                    ],
-                    temperature=0.3,
-                    max_tokens=2000,
-                )
-                return response.choices[0].message.content
+                if schema and hasattr(client.chat.completions, "parse") and (self.openai_api_key or model.startswith("gpt")):
+                    response = await client.beta.chat.completions.parse(
+                        model=model,
+                        messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+                        temperature=0.3, max_tokens=2000, response_format=schema
+                    )
+                    return response.choices[0].message.parsed
+                elif schema:
+                    response = await client.chat.completions.create(
+                        model=model,
+                        messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+                        temperature=0.3, max_tokens=2000, response_format={"type": "json_object"}
+                    )
+                    return schema.model_validate_json(response.choices[0].message.content)
+                else:
+                    response = await client.chat.completions.create(
+                        model=model,
+                        messages=[
+                            {"role": "system", "content": system},
+                            {"role": "user", "content": prompt},
+                        ],
+                        temperature=0.3,
+                        max_tokens=2000,
+                    )
+                    return response.choices[0].message.content
         except Exception as e:
             logger.warning(f"API query failed: {e}")
         return None

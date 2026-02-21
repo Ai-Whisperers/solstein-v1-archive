@@ -1,6 +1,7 @@
 import { Card, Metric, Text } from "@tremor/react";
+import { Company } from "@/types";
 
-export function KPICards({ companies }) {
+export function KPICards({ companies }: { companies: Company[] }) {
     const phoenixes = companies.filter((c) => c.classification === "Phoenix");
     const totalRevenue = companies.reduce((sum, c) => sum + (c.revenue || 0), 0);
     const avgGrowth =
