@@ -46,16 +46,7 @@ class TestFinancialMetric:
         assert metric.employees is None
         assert metric.funding_raised is None
         assert metric.valuation is None
-
-    def test_numeric_parsing(self):
-        """FinancialMetric validation logic lives in Loaders; dataclass accepts raw floats."""
-        pytest.skip("FinancialMetric is a bare dataclass — numeric parsing is in Loaders layer")
-
-    def test_validation_bounds(self):
-        """Validation bounds are enforced by Pydantic/Domain validators, not the dataclass."""
-        pytest.skip("FinancialMetric is a bare dataclass without bounds validation — test via Loaders")
-
-
+        assert metric.valuation is None
 class TestCompany:
     """Test Company model and computed properties."""
 
@@ -101,32 +92,32 @@ class TestCompany:
             ),
         )
 
-        assert profile.is_public is True   # valuation=200M > 100M
-        assert profile.is_high_growth is True   # growth_rate=30 > 20
-        assert profile.is_profitable is True    # profit_margin=15 > 0
+        assert profile.is_large_cap is True   # valuation=200M > 100M
+        assert profile.is_high_growth is True  # growth=30% > 20%
+        assert profile.is_profitable is True   # margin=15% > 0
 
-    def test_is_public_false_when_no_valuation(self):
-        """is_public must return False when valuation is None (not set)."""
+    def test_is_large_cap_false_when_no_valuation(self):
+        """is_large_cap must return False when valuation is None (not set)."""
         profile = Company(id="x", name="X", financials=FinancialMetric(valuation=None))
-        assert profile.is_public is False
+        assert profile.is_large_cap is False
 
-    def test_is_public_false_when_valuation_below_threshold(self):
-        """is_public must return False when valuation ≤ 100M."""
+    def test_is_large_cap_false_when_valuation_below_threshold(self):
+        """is_large_cap must return False when valuation ≤ 100M."""
         profile = Company(
             id="x",
             name="X",
             financials=FinancialMetric(valuation=50_000_000.0),
         )
-        assert profile.is_public is False
+        assert profile.is_large_cap is False
 
-    def test_is_public_true_exactly_above_threshold(self):
-        """is_public must return True when valuation is just above 100M."""
+    def test_is_large_cap_true_exactly_above_threshold(self):
+        """is_large_cap must return True when valuation is just above 100M."""
         profile = Company(
             id="x",
             name="X",
             financials=FinancialMetric(valuation=100_000_001.0),
         )
-        assert profile.is_public is True
+        assert profile.is_large_cap is True
 
     def test_is_high_growth_false_when_growth_rate_none(self):
         """is_high_growth must return False when growth_rate is None."""

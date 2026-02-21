@@ -21,7 +21,10 @@ Requires-Dist: sqlalchemy>=2.0
 Requires-Dist: alembic>=1.12
 Requires-Dist: psycopg2-binary>=2.9
 Requires-Dist: supabase>=2.3
-Requires-Dist: temporalio>=1.5
+Requires-Dist: aiohttp>=3.9
+Requires-Dist: requests>=2.31
+Requires-Dist: beautifulsoup4>=4.12
+Requires-Dist: lxml>=4.9
 Provides-Extra: dev
 Requires-Dist: pytest>=7.4; extra == "dev"
 Requires-Dist: pytest-cov>=4.1; extra == "dev"

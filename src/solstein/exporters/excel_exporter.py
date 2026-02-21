@@ -26,7 +26,7 @@ class ExcelExporter:
         self.template_path = template_path or (
             self.settings.data.data_dir / "templates" / "dashboard_template.xlsx"
         )
-        self.styles: dict[str, Any] = {}
+        self.styles: dict[str, Any] = self._create_styles()
 
     def _create_styles(self) -> dict[str, Any]:
         """Create consistent styles for the dashboard."""
@@ -143,7 +143,7 @@ class ExcelExporter:
         ws["A3"] = f"Companies Analyzed: {company_count}"
         ws["A3"].font = Font(name="Calibri", size=10, bold=True)
 
-    def _add_summary_table(self, ws: Any, profiles: list[Company], start_row: int) -> None:
+    def _add_summary_table(self, ws: Any, profiles: list[Company], start_row: int) -> None:  # noqa: E501
         """Add summary table to worksheet."""
         # Table headers
         headers = [
@@ -368,7 +368,7 @@ class ExcelExporter:
                     if cell.value and len(str(cell.value)) > max_length:
                         max_length = len(str(cell.value))
                 except (ValueError, TypeError) as e:
-                    logger.warning(f"Error calculating column width for cell {cell.coordinate}: {e}")
+                    logger.warning(f"Error calculating column width for cell {cell.coordinate}: {e}")  # noqa: E501
                     continue
 
             adjusted_width = min(max_length + 2, 50)  # Cap at 50
@@ -382,6 +382,6 @@ class TemplateExporter(ExcelExporter):
         """Create dashboard using a template (Not Implemented)."""
         logger.error("Template-based export is not yet implemented.")
         raise NotImplementedError(
-            "Template-based export requires mapping profiles to specific template cells. "
+            "Template-based export requires mapping profiles to specific template cells. "  # noqa: E501
             "Use standard ExcelExporter for generated dashboards."
         )

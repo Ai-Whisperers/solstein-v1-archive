@@ -172,6 +172,485 @@ Always use `factories.py` rather than constructing domain objects directly in te
 
 ---
 
+## Comprehensive Testing Guide
+
+### Testing Strategy (4-Layer Pyramid)
+
+Solstein uses **4 layers of testing** ensuring reliability without brittleness:
+
+```
+                    ▲
+                   ╱ ╲
+                  ╱   ╲      Data Quality
+                 ╱  1  ╲    (Golden Dataset)
+                ╱───────╲    ~5 tests
+               ╱         ╲
+              ╱─────────── ╲
+             ╱   2    3    ╲  Integration & Worker
+            ╱               ╲  Tests
+           ╱───────────────── ╲  ~20 tests
+          ╱                    ╲
+         ╱──────────────────────╲
+        ╱           4            ╲  Unit Tests
+       ╱                          ╲  (Domain, Scoring)
+      ╱────────────────────────────╲  ~50 tests
+     ╱________________________________╲
+```
+
+#### Layer 1: Unit Tests (Bottom — Most Tests)
+
+**What:** Pure logic with no I/O (no database, no filesystem, no API calls)
+
+**Where:** `tests/unit/test_*.py`
+
+**Examples:**
+- `test_company_creation` — Domain model instantiation
+- `test_growth_score_calculation` — Scoring math with known inputs
+- `test_classification_boundaries` — Classification logic (Rocket/Neutral/Dinosaur)
+- `test_financial_metric_validation` — Input validation
+
+**How to write:**
+
+```python
+# tests/unit/test_scoring.py
+
+import pytest
+from solstein.analytics.scoring import GrowthScorer
+from solstein.domain.models import Company, FinancialMetric
+from solstein.core.scoring_config import ScoringSettings
+
+
+@pytest.fixture
+def scorer():
+    """Create scorer with default config."""
+    return GrowthScorer(ScoringSettings())
+
+
+def test_growth_score_with_zero_growth(scorer):
+    """Zero growth rate should result in base score."""
+    company = Company(id="test", name="Stagnant Corp")
+    company.financials = FinancialMetric(revenue=100.0, growth_rate=0.0)
+    
+    result = scorer.calculate_scores(company)
+    
+    # Use pytest.approx for float comparisons
+    assert result.growth_score == pytest.approx(5.0, abs=0.01)
+    assert result.classification == "Neutral"
+
+
+def test_growth_score_with_high_growth(scorer):
+    """High growth rate should increase score."""
+    company = Company(id="test", name="Rocket Corp")
+    company.financials = FinancialMetric(revenue=100.0, growth_rate=50.0)
+    
+    result = scorer.calculate_scores(company)
+    
+    assert result.growth_score > 7.0
+    assert result.classification == "Rocket"
+
+
+@pytest.mark.parametrize("growth_rate,expected_classification", [
+    (50.0, "Rocket"),
+    (25.0, "Rocket"),
+    (10.0, "Neutral"),
+    (3.0, "Dinosaur"),
+    (0.0, "Neutral"),
+])
+def test_classification_boundaries(scorer, growth_rate, expected_classification):
+    """Test all classification boundaries."""
+    company = Company(id="test", name="Test")
+    company.financials = FinancialMetric(revenue=100.0, growth_rate=growth_rate)
+    
+    result = scorer.calculate_scores(company)
+    
+    assert result.classification == expected_classification
+```
+
+**Key rules:**
+- Use `pytest.approx()` for float comparisons (not `==`)
+- Use `@pytest.mark.parametrize` for multiple input scenarios
+- Mock nothing — test pure logic only
+- Aim for >80% coverage in domain/scoring modules
+
+#### Layer 2: Integration Tests (API Contracts)
+
+**What:** API endpoints with mocked repository (tests request/response contracts)
+
+**Where:** `tests/test_fastapi.py`
+
+**Purpose:** Verify API endpoints accept correct input, return correct output schema, handle errors
+
+**How to write:**
+
+```python
+# tests/test_fastapi.py
+
+import pytest
+from fastapi.testclient import TestClient
+from solstein.api.main import app
+from tests.factories import make_company
+
+
+def test_list_companies_endpoint(client: TestClient, mock_repo):
+    """GET /companies should return list of companies."""
+    # Arrange
+    mock_repo.find_all.return_value = [
+        make_company(name="Corp 1"),
+        make_company(name="Corp 2"),
+    ]
+    
+    # Act
+    response = client.get("/companies")
+    
+    # Assert
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 2
+    assert data[0]["name"] == "Corp 1"
+    assert data[1]["name"] == "Corp 2"
+
+
+def test_score_company_endpoint(client: TestClient, mock_repo):
+    """POST /scoring/company/{id}/score should calculate and return scores."""
+    # Arrange
+    company = make_company(name="Test Corp", growth_rate=50.0)
+    mock_repo.find_by_id.return_value = company
+    
+    # Act
+    response = client.post("/scoring/company/test-corp/score")
+    
+    # Assert
+    assert response.status_code == 200
+    data = response.json()
+    assert data["growth_score"] is not None
+    assert data["classification"] == "Rocket"
+
+
+def test_missing_company_returns_404(client: TestClient, mock_repo):
+    """GET /companies/{id} should return 404 if not found."""
+    # Arrange
+    mock_repo.find_by_id.return_value = None
+    
+    # Act
+    response = client.get("/companies/nonexistent")
+    
+    # Assert
+    assert response.status_code == 404
+
+
+def test_invalid_filter_returns_422(client: TestClient):
+    """POST with invalid schema should return 422."""
+    # Act
+    response = client.post("/companies/score", json={"invalid": "field"})
+    
+    # Assert
+    assert response.status_code == 422  # Unprocessable Entity
+```
+
+**Key rules:**
+- Use `client` fixture (FastAPI TestClient with mocked repo)
+- Mock repository at dependency injection layer
+- Test happy path, error cases (404, 422, 500)
+- Test response schema matches OpenAPI spec
+- Aim for >70% coverage in API routers
+
+#### Layer 3: Worker Tests (Celery Tasks)
+
+**What:** Background job execution with mocked external services
+
+**Where:** `tests/integration/test_worker.py`
+
+**Purpose:** Verify Celery tasks execute correctly, handle failures, produce correct results
+
+**How to write:**
+
+```python
+# tests/integration/test_worker.py
+
+import pytest
+from unittest.mock import patch, MagicMock
+from solstein.tasks import batch_score_companies
+from solstein.domain.models import Company
+from tests.factories import make_company
+
+
+@patch('solstein.tasks.ExcelExporter')
+def test_batch_score_companies_task(mock_exporter):
+    """Batch scoring task should score all companies and export Excel."""
+    # Arrange
+    mock_exporter_instance = MagicMock()
+    mock_exporter.return_value = mock_exporter_instance
+    mock_exporter_instance.export.return_value = Path("output.xlsx")
+    
+    companies = [
+        make_company(name="Corp 1", growth_rate=50.0),
+        make_company(name="Corp 2", growth_rate=5.0),
+    ]
+    
+    # Act (tasks execute synchronously in tests)
+    result = batch_score_companies(companies)
+    
+    # Assert
+    assert result["status"] == "completed"
+    assert result["companies_scored"] == 2
+    assert result["file_path"] == "output.xlsx"
+    mock_exporter_instance.export.assert_called_once()
+```
+
+**Key rules:**
+- Don't start Redis or run real Celery worker
+- Call task function directly (executes synchronously)
+- Mock I/O (file exports, API calls, database writes)
+- Test success and failure cases
+- Aim for >70% coverage in tasks
+
+#### Layer 4: Data Quality Tests (Golden Dataset)
+
+**What:** Regression tests protecting classification boundaries with known data
+
+**Where:** `tests/data_quality/test_ai_insights.py`
+
+**Purpose:** Detect unintended changes to scoring logic (e.g., threshold drift)
+
+**How to write:**
+
+```python
+# tests/data_quality/test_ai_insights.py
+
+import pytest
+from solstein.analytics.scoring import GrowthScorer
+from solstein.domain.models import Company, FinancialMetric
+
+
+# Golden dataset — known companies with expected classifications
+GOLDEN_DATA = [
+    {
+        "id": "rocket-corp",
+        "name": "Rocket Corp",
+        "financials": {"revenue": 500.0, "growth_rate": 75.0, "profit_margin": 25.0},
+        "expected_classification": "Rocket",
+        "expected_growth_score_min": 7.0,
+    },
+    {
+        "id": "dinosaur-corp",
+        "name": "Dinosaur Corp",
+        "financials": {"revenue": 50.0, "growth_rate": -10.0, "profit_margin": -5.0},
+        "expected_classification": "Dinosaur",
+        "expected_growth_score_max": 4.0,
+    },
+]
+
+
+@pytest.fixture
+def scorer():
+    return GrowthScorer()
+
+
+@pytest.mark.parametrize("test_case", GOLDEN_DATA)
+def test_golden_dataset_classification(scorer, test_case):
+    """Golden dataset should maintain consistent classifications."""
+    company = Company(id=test_case["id"], name=test_case["name"])
+    company.financials = FinancialMetric(**test_case["financials"])
+    
+    result = scorer.calculate_scores(company)
+    
+    assert result.classification == test_case["expected_classification"], \
+        f"{test_case['name']} misclassified"
+    
+    if "expected_growth_score_min" in test_case:
+        assert result.growth_score >= test_case["expected_growth_score_min"]
+    
+    if "expected_growth_score_max" in test_case:
+        assert result.growth_score <= test_case["expected_growth_score_max"]
+```
+
+**Key rules:**
+- Use deterministic test data (not randomized)
+- Document expected outcomes
+- Run on every commit (prevents drift)
+- Update if scoring logic intentionally changes
+- Aim for 100% coverage of classification boundaries
+
+---
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest tests/
+
+# Run specific layer
+pytest tests/unit/               # Only unit tests
+pytest tests/test_fastapi.py    # Only API tests
+pytest tests/integration/       # Only worker tests
+pytest tests/data_quality/      # Only golden dataset
+
+# Run with coverage
+pytest tests/ --cov=src/solstein --cov-report=term-missing
+
+# Run single test file
+pytest tests/unit/test_scoring.py
+
+# Run single test function
+pytest tests/unit/test_scoring.py::test_growth_score_with_zero_growth
+
+# Run with verbose output
+pytest tests/ -v
+
+# Run and show print statements
+pytest tests/ -s
+
+# Stop on first failure
+pytest tests/ -x
+
+# Run only tests matching pattern
+pytest tests/ -k "classification"
+```
+
+### Test Fixtures (conftest.py)
+
+**Shared fixtures available to all tests:**
+
+```python
+# tests/conftest.py
+
+@pytest.fixture
+def mock_company():
+    """Deterministic test company from factories.py"""
+    return make_company()
+
+@pytest.fixture
+def mock_repo():
+    """Mocked CompanyRepository for testing."""
+    return MagicMock(spec=CompanyRepository)
+
+@pytest.fixture
+def client(mock_repo):
+    """FastAPI TestClient with mocked repo."""
+    # Dependency override: inject mock_repo instead of real one
+    app.dependency_overrides[get_repository] = lambda: mock_repo
+    return TestClient(app)
+    # Cleanup after test
+    yield client
+    app.dependency_overrides.clear()
+
+@pytest.fixture
+def unauthenticated_client(mock_repo):
+    """TestClient without auth (receives 'anonymous' user)."""
+    # Similar to client but simulates unauthenticated request
+    # See conftest.py for implementation
+    ...
+```
+
+**Do NOT create local fixtures** — use shared fixtures from `conftest.py`.
+
+### Test Data Factories (factories.py)
+
+**Single source of truth for test objects:**
+
+```python
+from tests.factories import (
+    make_company,
+    make_financial_metric,
+    make_scoring_explanation,
+)
+
+# Create default company
+c = make_company()
+
+# Create company with overrides
+c = make_company(
+    name="Custom Corp",
+    industry="Energy Software",
+    growth_rate=35.0,
+    employees=50,
+)
+
+# Create financial metric
+fm = make_financial_metric(revenue=100.0, growth_rate=25.0)
+```
+
+**Why factories instead of constructing directly?**
+- Ensures consistent defaults
+- Handles enum values correctly
+- Future-proof (if model changes, update factory once)
+- Reduces boilerplate in tests
+
+---
+
+### Coverage Targets
+
+| Module | Target | How to Check |
+|--------|--------|------------|
+| Domain models | > 90% | `pytest tests/unit/test_models.py --cov=src/solstein/domain` |
+| Scoring engine | > 85% | `pytest tests/unit/test_scoring.py --cov=src/solstein/analytics` |
+| API routers | > 75% | `pytest tests/test_fastapi.py --cov=src/solstein/api` |
+| Celery tasks | > 70% | `pytest tests/integration/test_worker.py --cov=src/solstein/tasks` |
+| **Overall** | > 65% | `pytest tests/ --cov=src/solstein` |
+
+Run this to check current coverage:
+
+```bash
+pytest tests/ --cov=src/solstein --cov-report=term-missing --cov-report=html
+# Open: htmlcov/index.html
+```
+
+---
+
+### Common Testing Patterns
+
+#### Mocking External Dependencies
+
+```python
+from unittest.mock import patch, MagicMock
+
+# Mock a function
+@patch('solstein.data.repositories.JsonFileRepository.find_all')
+def test_with_mocked_repo(mock_find_all):
+    mock_find_all.return_value = [make_company()]
+    # ... test code ...
+
+# Mock a class
+@patch('solstein.exporters.excel_exporter.ExcelExporter')
+def test_with_mocked_exporter(mock_exporter_class):
+    mock_instance = MagicMock()
+    mock_exporter_class.return_value = mock_instance
+    mock_instance.export.return_value = Path("test.xlsx")
+    # ... test code ...
+```
+
+#### Parametrized Tests (Multiple Inputs)
+
+```python
+@pytest.mark.parametrize("growth_rate,expected", [
+    (50.0, "Rocket"),
+    (10.0, "Neutral"),
+    (3.0, "Dinosaur"),
+])
+def test_classification(growth_rate, expected):
+    # ... test runs 3 times, once per parameter set
+    ...
+```
+
+#### Testing Async Code
+
+```python
+@pytest.mark.asyncio
+async def test_async_function():
+    result = await my_async_function()
+    assert result == expected
+```
+
+#### Testing Exceptions
+
+```python
+def test_invalid_input_raises_error():
+    with pytest.raises(ValueError, match="Expected positive number"):
+        calculate_score(-5)
+```
+
+---
+
 ## Makefile Commands
 
 ```bash

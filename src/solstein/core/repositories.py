@@ -4,9 +4,8 @@ Core repository interfaces.
 Defines the contract for data access, allowing us to swap implementations (JSON -> SQL).
 """
 
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from typing import Any
+from dataclasses import dataclass
 
 from ..domain.models import Company, CompanyTier
 
@@ -18,6 +17,9 @@ class CompanyFilter:
     tier: CompanyTier | None = None
     industry: str | None = None
     min_revenue: float | None = None
+    classification: str | None = None
+    min_growth_score: float | None = None
+    max_growth_score: float | None = None
 
 
 class CompanyRepository(ABC):
@@ -25,7 +27,10 @@ class CompanyRepository(ABC):
 
     @abstractmethod
     def get_all(
-        self, limit: int | None = None, filters: CompanyFilter | None = None
+        self,
+        limit: int | None = None,
+        offset: int = 0,
+        filters: CompanyFilter | None = None,
     ) -> list[Company]:
         """Retrieve all companies, optionally filtered."""
         pass
@@ -38,4 +43,14 @@ class CompanyRepository(ABC):
     @abstractmethod
     def save(self, company: Company) -> Company:
         """Persist a company profile."""
+        pass
+
+    @abstractmethod
+    def delete(self, company_id: str) -> bool:
+        """Remove a company profile."""
+        pass
+
+    @abstractmethod
+    def search(self, query: str, field: str = "name") -> list[Company]:
+        """Search companies by a specific field."""
         pass

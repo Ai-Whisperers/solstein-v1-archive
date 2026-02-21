@@ -2,9 +2,10 @@
 Domain models for market simulation.
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class MarketConditionType(StrEnum):
@@ -17,40 +18,43 @@ class MarketConditionType(StrEnum):
     REGULATORY_CHANGE = "regulatory_change"
 
 
-@dataclass
-class MarketCondition:
+class MarketCondition(BaseModel):
     """A specific market condition modifier."""
+
+    model_config = ConfigDict(validate_assignment=True)
 
     type: MarketConditionType
     name: str
     impact_factor: float  # Multiplier or additive factor depending on logic
     description: str | None = None
-    affected_industries: list[str] = field(default_factory=list)
+    affected_industries: list[str] = Field(default_factory=list)
 
 
-@dataclass
-class Scenario:
+class Scenario(BaseModel):
     """A simulation scenario composed of multiple market conditions."""
+
+    model_config = ConfigDict(validate_assignment=True)
 
     id: str
     name: str
     description: str
     conditions: list[MarketCondition]
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-@dataclass
-class SimulationResult:
+class SimulationResult(BaseModel):
     """Result of a simulation for a single company."""
+
+    model_config = ConfigDict(validate_assignment=True)
 
     company_id: str
     company_name: str
-    base_valuation: float | None
-    simulated_valuation: float | None
+    base_valuation: float | None = None
+    simulated_valuation: float | None = None
     valuation_change_pct: float
 
     base_growth_score: float
     simulated_growth_score: float
     growth_score_change: float
 
-    notes: list[str] = field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)

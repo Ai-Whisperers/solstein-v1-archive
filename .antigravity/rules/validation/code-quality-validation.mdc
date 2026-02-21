@@ -1,0 +1,454 @@
+---
+id: rule.validation.code-quality.v1
+kind: rule
+version: 1.0.0
+description: Comprehensive code quality validation rules for multiple programming languages
+globs: "**/*.py", "**/*.js", "**/**/*.ts", "**/*.tsx", "**/*.java", "**/*.cpp", "**/*.c", "**/*.cs"
+governs: ""
+requires: ["rule.clean-code.v1", "rule.naming-conventions.v1"]
+model_hints: { temp: 0.2, top_p: 0.9 }
+provenance: { owner: team-code-quality, last_review: 2025-12-06 }
+alwaysApply: false
+---
+
+# Code Quality Validation Rule
+
+## Purpose & Scope
+
+Defines comprehensive code quality validation standards for multiple programming languages. This rule ensures code follows best practices, is maintainable, and meets industry standards for production-quality software development.
+
+**Applies to**: All source code files before code review, merge, or deployment
+
+**Does not apply to**: Configuration files, documentation, test data, or build artifacts
+
+## Inputs (Contract)
+
+- Source code files in supported programming languages
+- Linter tools available for each language
+- Test environment for execution validation
+- Code review checklist
+- Performance profiling tools (optional)
+
+## Outputs (Contract)
+
+- Code quality score and metrics
+- Linter error and warning counts
+- Code complexity metrics
+- Security vulnerability assessment
+- Performance impact analysis
+- Validation report with specific issues and recommendations
+
+## Core Principles
+
+**NEVER merge code that fails quality standards.**
+
+**Code quality is not subjective - it's measurable and enforceable.**
+
+**Prevention is better than cure - catch issues early in development.**
+
+## Mandatory Quality Gates
+
+### Gate 1: Syntax and Basic Standards (REQUIRED)
+
+#### Python (flake8 + mypy + black)
+- [ ] Zero flake8 errors (E, F, W codes)
+- [ ] Zero mypy type errors
+- [ ] Black formatting compliance (line length 88)
+- [ ] Import organization (isort compliance)
+- [ ] No bare except clauses
+- [ ] No wildcard imports
+
+#### JavaScript/TypeScript (ESLint + Prettier)
+- [ ] Zero ESLint errors
+- [ ] Prettier formatting compliance
+- [ ] No console.log statements in production code
+- [ ] Proper type annotations (TypeScript)
+- [ ] No unused variables or imports
+
+#### Java (Checkstyle + SpotBugs)
+- [ ] Zero Checkstyle violations
+- [ ] No SpotBugs security warnings
+- [ ] Proper Javadoc documentation
+- [ ] No raw types
+- [ ] Proper exception handling
+
+#### C/C++ (clang-tidy + cppcheck)
+- [ ] Zero clang-tidy warnings
+- [ ] No cppcheck security issues
+- [ ] No memory leaks (Valgrind clean)
+- [ ] Proper resource management
+- [ ] No buffer overflows
+
+### Gate 2: Code Complexity and Maintainability (REQUIRED)
+
+#### Cyclomatic Complexity
+- [ ] Functions: Max 10 complexity (Python/JavaScript), 15 (Java/C++)
+- [ ] Classes: Max 20 complexity (Java/C++), 15 (Python/JavaScript)
+- [ ] Modules: Max 50 complexity overall
+
+#### Code Duplication
+- [ ] Less than 3% duplicated code (PyCodeStyle/Copy-Paste Detector)
+- [ ] No identical functions across modules
+- [ ] Common patterns extracted to utilities
+
+#### Documentation Quality
+- [ ] All public functions/classes have docstrings/comments
+- [ ] Complex algorithms explained
+- [ ] API documentation complete
+- [ ] Usage examples provided
+
+### Gate 3: Security and Safety (REQUIRED)
+
+#### Input Validation
+- [ ] All user inputs validated and sanitized
+- [ ] SQL injection prevention (parameterized queries)
+- [ ] XSS prevention (proper escaping)
+- [ ] Path traversal prevention
+
+#### Authentication and Authorization
+- [ ] Proper authentication mechanisms
+- [ ] Role-based access control
+- [ ] Session management secure
+- [ ] Password handling secure
+
+#### Data Protection
+- [ ] No hardcoded credentials
+- [ ] Proper encryption for sensitive data
+- [ ] Secure random number generation
+- [ ] Proper error handling without information leakage
+
+### Gate 4: Performance and Efficiency (HIGHLY RECOMMENDED)
+
+#### Algorithmic Efficiency
+- [ ] No O(n²) algorithms where O(n) exists
+- [ ] Proper data structures used
+- [ ] Caching implemented where appropriate
+- [ ] Database queries optimized
+
+#### Resource Usage
+- [ ] Memory usage within acceptable limits
+- [ ] No memory leaks detected
+- [ ] Proper connection pooling
+- [ ] Efficient I/O operations
+
+#### Scalability
+- [ ] Code handles concurrent access
+- [ ] Proper locking mechanisms
+- [ ] Thread-safe implementations
+- [ ] Load testing performed
+
+## Language-Specific Validation Rules
+
+### Python Specific Rules
+
+#### PEP 8 Compliance
+- [ ] Line length ≤80 characters (configurable)
+- [ ] Proper indentation (4 spaces)
+- [ ] Blank lines between functions/classes
+- [ ] Import organization (standard library, third-party, local)
+
+#### Type Safety
+- [ ] All function signatures have type hints
+- [ ] Return types specified
+- [ ] Complex data structures typed
+- [ ] No Any types (except for specific cases)
+
+#### Error Handling
+- [ ] Specific exceptions caught, not bare except
+- [ ] Custom exceptions defined for domain errors
+- [ ] Error messages informative but not revealing sensitive data
+- [ ] Resource cleanup in finally blocks
+
+### JavaScript/TypeScript Specific Rules
+
+#### TypeScript Strict Mode
+- [ ] Strict mode enabled
+- [ ] No implicit any types
+- [ ] Proper interface definitions
+- [ ] Type guards implemented
+
+#### React/Node.js Specific
+- [ ] No direct DOM manipulation (React)
+- [ ] Proper useEffect cleanup
+- [ ] No memory leaks in event listeners
+- [ ] Proper state management
+
+### Java Specific Rules
+
+#### Object-Oriented Design
+- [ ] Single responsibility principle followed
+- [ ] Proper encapsulation
+- [ ] Inheritance used appropriately
+- [ ] Interfaces preferred over concrete classes
+
+#### Memory Management
+- [ ] No memory leaks
+- [ ] Proper garbage collection
+- [ ] Resource cleanup in finally blocks
+- [ ] Proper use of try-with-resources
+
+### C/C++ Specific Rules
+
+#### Memory Safety
+- [ ] No buffer overflows
+- [ ] Proper null pointer checks
+- [ ] No use-after-free
+- [ ] Proper memory allocation/deallocation
+
+#### Pointer Safety
+- [ ] No dangling pointers
+- [ ] Proper ownership semantics
+- [ ] Smart pointers used appropriately
+- [ ] No pointer arithmetic where not needed
+
+## Validation Checklist Templates
+
+### Quick Quality Check (Pre-PR)
+
+Use this before submitting pull requests:
+
+```markdown
+## Code Quality Validation - Quick Check
+
+### Syntax and Standards
+- [ ] [Language] linter shows 0 errors
+- [ ] Code follows [Language] style guide
+- [ ] No syntax errors
+- [ ] All imports organized
+
+### Complexity and Maintainability
+- [ ] Functions have reasonable complexity (<10)
+- [ ] No duplicated code
+- [ ] All public APIs documented
+- [ ] Code is readable and understandable
+
+### Security
+- [ ] Input validation implemented
+- [ ] No hardcoded credentials
+- [ ] Proper error handling
+- [ ] Security best practices followed
+
+### Performance
+- [ ] No obvious performance issues
+- [ ] Efficient algorithms used
+- [ ] Proper resource management
+- [ ] Database queries optimized
+
+### Evidence
+- Linter output: [attach output]
+- Complexity metrics: [attach metrics]
+- Security scan: [attach results]
+- Performance test: [attach results]
+```
+
+### Comprehensive Quality Assessment (Pre-Merge)
+
+Use this for major changes or production code:
+
+```markdown
+## Code Quality Assessment - Comprehensive
+
+### Language-Specific Validation
+
+#### Python
+- [ ] flake8: 0 errors, 0 warnings
+- [ ] mypy: 0 type errors
+- [ ] black: 0 formatting issues
+- [ ] isort: 0 import issues
+- [ ] Complexity: <10 per function
+- [ ] Security: Bandit scan clean
+
+#### Security Analysis
+- [ ] Input validation: All user inputs sanitized
+- [ ] Authentication: Proper auth mechanisms
+- [ ] Authorization: Role-based access control
+- [ ] Data protection: Sensitive data encrypted
+- [ ] Error handling: No information leakage
+
+#### Performance Analysis
+- [ ] Algorithm complexity: Optimal solutions used
+- [ ] Memory usage: No leaks detected
+- [ ] Database: Queries optimized
+- [ ] Concurrency: Thread-safe implementations
+
+#### Maintainability
+- [ ] Documentation: All public APIs documented
+- [ ] Code structure: Clean architecture
+- [ ] Testing: Unit tests cover critical paths
+- [ ] Dependencies: No unnecessary dependencies
+
+### Quality Metrics
+- Cyclomatic complexity: [value]
+- Code duplication: [percentage]
+- Lines of code: [count]
+- Comment ratio: [percentage]
+- Test coverage: [percentage]
+
+### Issues Found and Fixed
+- Issue 1: [description] - Fixed
+- Issue 2: [description] - Fixed
+- Issue 3: [description] - Fixed
+
+### Validation Evidence
+- Linter output: [attach file]
+- Security scan: [attach file]
+- Performance test: [attach file]
+- Code coverage: [attach file]
+```
+
+## Anti-Patterns and Common Issues
+
+### Anti-Pattern 1: "Works on My Machine"
+[X] **Pattern**: Code works locally but fails in production
+[X] **Instead**: Test in environment matching production
+
+### Anti-Pattern 2: "Copy-Paste Programming"
+[X] **Pattern**: Duplicated code across modules
+[X] **Instead**: Extract common patterns to utilities
+
+### Anti-Pattern 3: "Quick Hack"
+[X] **Pattern**: Temporary solutions left in place
+[X] **Instead**: Implement proper solutions, even if time-consuming
+
+### Anti-Pattern 4: "Security Through Obscurity"
+[X] **Pattern**: Relying on hidden implementation for security
+[X] **Instead**: Proper security measures and validation
+
+### Anti-Pattern 5: "Performance Later"
+[X] **Pattern**: Ignoring performance until it's a problem
+[X] **Instead**: Consider performance during implementation
+
+## Deterministic Validation Steps
+
+Before merging or deploying code, execute in order:
+
+1. **Language-Specific Linting**
+   - Run appropriate linter for the language
+   - Fix all errors and warnings
+   - Verify compliance with style guides
+
+2. **Type Checking**
+   - Run type checker (mypy, TypeScript, etc.)
+   - Fix all type errors
+   - Add missing type annotations
+
+3. **Complexity Analysis**
+   - Measure cyclomatic complexity
+   - Refactor functions exceeding complexity limits
+   - Ensure maintainable code structure
+
+4. **Security Scanning**
+   - Run security scanner (Bandit, SonarQube, etc.)
+   - Fix all security vulnerabilities
+   - Validate input validation and sanitization
+
+5. **Performance Testing**
+   - Run performance benchmarks
+   - Identify and fix bottlenecks
+   - Ensure acceptable resource usage
+
+6. **Documentation Review**
+   - Verify all public APIs documented
+   - Check code comments explain "why" not "what"
+   - Ensure examples are accurate and helpful
+
+7. **Testing Validation**
+   - Run unit tests
+   - Verify test coverage meets requirements
+   - Test edge cases and error scenarios
+
+8. **Integration Testing**
+   - Test with dependent components
+   - Verify API compatibility
+   - Check for regressions
+
+## Integration with Development Workflow
+
+### In CI/CD Pipeline
+- Automated linting and type checking
+- Security scanning on every commit
+- Performance regression testing
+- Code coverage reporting
+
+### In Code Review
+- Quality metrics presented to reviewers
+- Automated checks run before review
+- Checklist for manual review items
+- Evidence of quality validation provided
+
+### In Development Process
+- Quality gates at each stage
+- Early detection of issues
+- Continuous improvement of standards
+- Team education on best practices
+
+## Success Criteria
+
+### Code is Production-Ready When:
+[X] All linters show 0 errors
+[X] Type checking passes
+[X] Complexity metrics within acceptable limits
+[X] Security scan shows no vulnerabilities
+[X] Performance benchmarks meet requirements
+[X] Documentation is complete and accurate
+[X] Tests cover critical paths
+[X] Integration with other components verified
+
+### Warning Signs of Poor Quality:
+[X] Linter errors present
+[X] Type errors in statically typed languages
+[X] High cyclomatic complexity
+[X] Security vulnerabilities detected
+[X] Poor performance metrics
+[X] Missing or inadequate documentation
+[X] Low test coverage
+
+## Enforcement
+
+### Automated Tools
+- Pre-commit hooks for linting
+- CI/CD pipeline quality gates
+- Automated security scanning
+- Performance regression testing
+
+### Manual Review
+- Code review checklist
+- Security review for sensitive code
+- Performance review for critical paths
+- Architecture review for major changes
+
+### Team Standards
+- Regular code quality training
+- Shared quality metrics dashboard
+- Continuous improvement of standards
+- Recognition for quality contributions
+
+## OPSEC and Security Considerations
+
+When validating code quality:
+- NO production credentials in test data
+- NO sensitive information in error messages
+- NO hardcoded API keys or secrets
+- NO customer data in test cases
+- Redact sensitive information in logs and reports
+
+## Related Rules
+
+- `rule.clean-code.v1` - Basic code quality standards
+- `rule.naming-conventions.v1` - Naming standards
+- `rule.security.v1` - Security best practices
+- `rule.performance.v1` - Performance optimization
+- `rule.documentation.v1` - Documentation standards
+
+## FINAL QUALITY VALIDATION CHECKLIST
+
+- [ ] Language-specific linting: 0 errors
+- [ ] Type checking: 0 errors
+- [ ] Cyclomatic complexity: <10 per function
+- [ ] Security scan: No vulnerabilities
+- [ ] Performance: Meets requirements
+- [ ] Documentation: Complete and accurate
+- [ ] Testing: Critical paths covered
+- [ ] Integration: Verified with other components
+- [ ] Evidence: All validation results documented
+- [ ] Only after ALL pass: Code is ready for review/deployment

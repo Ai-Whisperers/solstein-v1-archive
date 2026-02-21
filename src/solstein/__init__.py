@@ -11,8 +11,7 @@ __email__ = "team@ai-whisperers.com"
 
 import logging
 import sys
-from types import FrameType
-from typing import Any, cast
+from typing import Any
 
 from loguru import logger
 
@@ -43,7 +42,7 @@ class InterceptHandler(logging.Handler):
         # Find caller from where originated the logged message
         frame: Any = logging.currentframe()
         depth = 2
-        while frame and frame.f_code.co_filename == logging.__file__:
+        while frame and frame.f_code.co_filename == logging.__file__:  # noqa: E501
             frame = frame.f_back
             depth += 1
 

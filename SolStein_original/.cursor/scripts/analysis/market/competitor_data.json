@@ -1,0 +1,4940 @@
+{
+  "competitors": [
+    {
+      "company_name": "EG A/S (Utility Division)",
+      "folder": "eg-utility",
+      "data_availability": "High (PE-backed private company with published annual reports since 2022; Francisco Partners disclosures; extensive press releases)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 6.0,
+            "evidence": "3yr CAGR ~13.1% (2021-2024); 5yr CAGR ~16.2%; slowing from 18.3% (2022) to 8.2% (2024) as base grows"
+          },
+          "Funding Momentum": {
+            "score": 9.0,
+            "evidence": "EUR 400M raised Nov 2023; EUR 150M earmarked for acquisitions; Francisco Partners majority + Sofina/LGT minority"
+          },
+          "Employee Growth": {
+            "score": 8.0,
+            "evidence": "3yr CAGR ~23%; 1,000 (2019) to 3,000+ (2024); India center 20 to 850+ in 5 years"
+          },
+          "Geographic Expansion": {
+            "score": 6.0,
+            "evidence": "Active NO/FI utility expansion; India dev center; but all within existing Nordic footprint + India, no intercontinental market expansion"
+          },
+          "M&A Activity": {
+            "score": 10.0,
+            "evidence": "40+ acquisitions since 2019 (~7/year); 5 in 2024, Bright Energy in 2025; transformative buy-and-build machine with dedicated acquisition war chest"
+          },
+          "SaaS Maturity": {
+            "score": 9.0,
+            "evidence": "86.1% recurring revenue (2024), 96% gross retention, Microsoft Azure/D365 stack, steady 2pp/year increase"
+          }
+        },
+        "composite_score": 8.0,
+        "classification": "Rocket"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2025 (est.)",
+            "eur_millions": 382.0,
+            "yoy_growth_pct": 15.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 340.0,
+            "yoy_growth_pct": 8.2,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 314.0,
+            "yoy_growth_pct": 13.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 278.0,
+            "yoy_growth_pct": 18.3,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 235.0,
+            "yoy_growth_pct": 25.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 188.0,
+            "yoy_growth_pct": 17.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2019",
+            "eur_millions": 161.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated"
+          }
+        ],
+        "cagr_3yr_pct": 13.1,
+        "cagr_5yr_pct": 16.2,
+        "latest_revenue_eur_m": 382.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": 86.1,
+        "raw_metrics": {
+          "EBITDA (2024)": "DKK 856M (~EUR 115M)",
+          "EBITDA Margin (2024)": "33.7%",
+          "EBITDA (2023)": "DKK 823M (~EUR 110M)",
+          "EBITDA Margin (2023)": "35.1%",
+          "EBITDA (2022)": "DKK 745M (~EUR 100M)",
+          "EBITDA Margin (2022)": "35.9%",
+          "EBITDA Growth (2023-2024)": "4.0%",
+          "EBITDA Growth (2022-2023)": "10.5%",
+          "Net Profit / Loss": "Not disclosed (private company)",
+          "Recurring Revenue % (2024)": "86.1%",
+          "Recurring Revenue % (2023)": "83.7% (84% rounded)",
+          "Recurring Revenue % (2022)": "81.9%",
+          "Revenue per Employee (2024)": "~EUR 113K (DKK 846K)",
+          "Revenue per Employee (2022)": "~EUR 146K (DKK 1,093K)"
+        },
+        "ebitda_margin_pct": 33.7,
+        "revenue_per_employee_eur_k": 113.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "Jun 2019",
+            "round": "PE Acquisition",
+            "amount": "DKK 3.7B (~EUR 496M)",
+            "valuation": "DKK 3.7B (enterprise)",
+            "lead_investors": "Francisco Partners"
+          },
+          {
+            "date": "Nov 2023",
+            "round": "Growth Equity",
+            "amount": "EUR 400M (DKK 2,983M)",
+            "valuation": "Undisclosed (implied >EUR 1B)",
+            "lead_investors": "Sofina + LGT Capital Partners"
+          }
+        ],
+        "total_raised_text": "EUR 400M equity + DKK 3.7B acquisition = ~EUR 896M total capital deployed",
+        "latest_valuation_text": "Undisclosed, but the EUR 400M round (EUR 150M primary + EUR 250M secondary) at minority stakes implies enterprise value well above EUR 1B (Nov 2023). Given subsequent 2024 growth, likely EUR 1.2-1.5B range.",
+        "lead_investors": [
+          "Francisco Partners",
+          "Sofina + LGT Capital Partners"
+        ],
+        "war_chest_signals": "EUR 150M of the Nov 2023 round was primary capital earmarked specifically for acquisitions. CEO signaled in mid-2025 intention to \"ramp up acquisition activities\" after a consolidation period. Significant dry powder available."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2024",
+            "headcount": 3000.0
+          },
+          {
+            "year": "2023",
+            "headcount": 2400.0
+          },
+          {
+            "year": "2022",
+            "headcount": 1900.0
+          },
+          {
+            "year": "2021",
+            "headcount": 1600.0
+          },
+          {
+            "year": "2020",
+            "headcount": 1400.0
+          },
+          {
+            "year": "2019",
+            "headcount": 1000.0
+          }
+        ],
+        "employee_cagr_pct": 25.0,
+        "latest_headcount": 3000.0,
+        "open_positions": 61.0
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": 2
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 1b"
+    },
+    {
+      "company_name": "Previse Systems AG",
+      "folder": "previse-systems-coral",
+      "data_availability": "Medium (private, VC-backed startup; revenue estimated via proxy metrics, funding amount undisclosed, employee data from Growjo/LinkedIn; customer count confirmed via press releases and CTRM Center)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 9.0,
+            "evidence": "~69% 3yr CAGR (est.), 5x customer growth in 2yr (5->23+), explosive trajectory from near-zero to ~EUR 4.8M"
+          },
+          "Funding Momentum": {
+            "score": 6.0,
+            "evidence": "Lightrock growth equity (Aug 2025, est. EUR 10-20M), significant PE backing; amount undisclosed caps score"
+          },
+          "Employee Growth": {
+            "score": 9.0,
+            "evidence": "~36% 3yr CAGR, 6 founders to 52 in 6 years, aggressive hiring across all functions"
+          },
+          "Geographic Expansion": {
+            "score": 9.0,
+            "evidence": "5+ new countries in last 3yr (ES, IT, PL, AT, Benelux), intercontinental expansion planned (North America)"
+          },
+          "M&A Activity": {
+            "score": 1.0,
+            "evidence": "No acquisitions, no divestitures, no M&A signals; purely organic growth strategy"
+          },
+          "SaaS Maturity": {
+            "score": 10.0,
+            "evidence": "Cloud-native from founding, 100% recurring revenue, CI/CD, serverless, .NET Core microservices"
+          }
+        },
+        "composite_score": 7.3,
+        "classification": "Rocket"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2026 (est.)",
+            "eur_millions": 6.5,
+            "yoy_growth_pct": 35.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2025",
+            "eur_millions": 4.8,
+            "yoy_growth_pct": 45.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 3.3,
+            "yoy_growth_pct": 65.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 2.0,
+            "yoy_growth_pct": 100.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 1.0,
+            "yoy_growth_pct": 100.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 0.5,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          }
+        ],
+        "cagr_3yr_pct": 69.0,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 6.5
+      },
+      "profitability": {
+        "recurring_revenue_pct": 100.0,
+        "raw_metrics": {
+          "EBITDA (current)": "Unknown",
+          "EBITDA Margin": "Unknown (likely negative or breakeven)",
+          "Net Profit / Loss": "Unknown (likely reinvesting for growth)",
+          "Recurring Revenue %": "~100%",
+          "SaaS Revenue %": "~100%",
+          "Revenue per Employee": "~EUR 107K ($116K USD)"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 107.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "Aug 2025",
+            "round": "Growth Equity (minority stake)",
+            "amount": "Undisclosed (est. EUR 10-20M)",
+            "valuation": "Undisclosed (est. EUR 30-60M post-money)",
+            "lead_investors": "Lightrock"
+          },
+          {
+            "date": "Pre-2025",
+            "round": "Early funding",
+            "amount": "Undisclosed",
+            "valuation": "Unknown",
+            "lead_investors": "Swiss Technology Fund (unconfirmed)"
+          },
+          {
+            "date": "Aug 2019",
+            "round": "Founding / Bootstrapping",
+            "amount": "Self-funded (6 founders)",
+            "valuation": "N/A",
+            "lead_investors": "Founders"
+          }
+        ],
+        "total_raised_text": "Undisclosed (estimated EUR 10-25M cumulative)",
+        "latest_valuation_text": "Undisclosed (estimated EUR 30-60M post-money, based on Lightrock minority stake and typical SaaS multiples of 8-12x ARR on ~EUR 5M ARR)",
+        "lead_investors": [
+          "Founders",
+          "Lightrock",
+          "Swiss Technology Fund (unconfirmed)"
+        ],
+        "war_chest_signals": "Lightrock's Growth Fund manages $900M+ in commitments across 29 portfolio companies; their Climate Impact strategy has EUR 860M. Previse has access to a substantial growth equity platform for follow-on funding if needed."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 52.0
+          },
+          {
+            "year": "2025",
+            "headcount": 45.0
+          },
+          {
+            "year": "2024",
+            "headcount": 34.0
+          },
+          {
+            "year": "2023",
+            "headcount": 25.0
+          },
+          {
+            "year": "2022",
+            "headcount": 18.0
+          },
+          {
+            "year": "2021",
+            "headcount": 12.0
+          },
+          {
+            "year": "2020",
+            "headcount": 7.0
+          },
+          {
+            "year": "2019 (founding)",
+            "headcount": 6.0
+          }
+        ],
+        "employee_cagr_pct": 36.0,
+        "latest_headcount": 52.0,
+        "open_positions": null
+      },
+      "geographic": {
+        "international_revenue_pct": 100.0,
+        "countries_count": null
+      },
+      "saas": {
+        "deployment_model": "SaaS",
+        "cloud_revenue_pct": 100.0
+      },
+      "tier": "Tier 2"
+    },
+    {
+      "company_name": "tem (tem energy)",
+      "folder": "tem-energy",
+      "data_availability": "Medium (VC-funded private startup; funding rounds well-documented, revenue not disclosed, GTV and customer metrics available from press)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 9.0,
+            "evidence": "GTV exploded from ~$50M to $300M (6x) in 2025; revenue from near-zero to est. EUR 9-14M in two years"
+          },
+          "Funding Momentum": {
+            "score": 10.0,
+            "evidence": "$94M total raised; $75M Series B at $300M+ valuation; Lightspeed + Atomico + Allianz + Hitachi backing"
+          },
+          "Employee Growth": {
+            "score": 9.0,
+            "evidence": "From 4 founders (2021) to 70 employees (2025); est. ~80% CAGR over 3yr; aggressive multi-function hiring"
+          },
+          "Geographic Expansion": {
+            "score": 5.0,
+            "evidence": "UK-only today; intercontinental expansion to Texas + Australia announced but not yet executed"
+          },
+          "M&A Activity": {
+            "score": 1.0,
+            "evidence": "No acquisitions, no divestitures, no M&A signals; pure organic growth focus"
+          },
+          "SaaS Maturity": {
+            "score": 10.0,
+            "evidence": "Cloud-native from day one; AI-native platform; ~100% recurring transaction-based revenue; no legacy code"
+          }
+        },
+        "composite_score": 7.3,
+        "classification": "Rocket"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2026 (est.)",
+            "eur_millions": 24.5,
+            "yoy_growth_pct": 100.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2025",
+            "eur_millions": 11.5,
+            "yoy_growth_pct": 500.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 2.65,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 0.6,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2022",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2021",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated"
+          }
+        ],
+        "cagr_3yr_pct": null,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 24.5
+      },
+      "profitability": {
+        "recurring_revenue_pct": 100.0,
+        "raw_metrics": {
+          "EBITDA (current)": "Negative (loss-making)",
+          "EBITDA Margin": "Negative",
+          "Net Profit / Loss": "Net loss (investing ahead of revenue)",
+          "Recurring Revenue %": "~100% (transaction-based)",
+          "SaaS Revenue %": "~100% (cloud-only platform)",
+          "Revenue per Employee": "EUR 135-200K"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 167.5
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "2023",
+            "round": "Seed",
+            "amount": "£2.5M (~EUR 2.9M)",
+            "valuation": "Not disclosed",
+            "lead_investors": "AlbionVC"
+          },
+          {
+            "date": "Sep 2024",
+            "round": "Series A",
+            "amount": "£10.5M (~EUR 12.3M / ~$14.2M)",
+            "valuation": "Not disclosed",
+            "lead_investors": "Atomico"
+          },
+          {
+            "date": "Feb 2026",
+            "round": "Series B",
+            "amount": "$75M (~£55M / ~EUR 70M)",
+            "valuation": "$300M+ (~EUR 280M+) post-money",
+            "lead_investors": "Lightspeed Venture Partners"
+          }
+        ],
+        "total_raised_text": "$94M (~EUR 87M)",
+        "latest_valuation_text": "$300M+ (~EUR 280M+) post-money (February 2026)",
+        "lead_investors": [
+          "AlbionVC",
+          "Atomico",
+          "Lightspeed Venture Partners"
+        ],
+        "war_chest_signals": "$75M fresh capital (Feb 2026) earmarked for international expansion (Texas, Australia) and team scaling. At estimated ~£1M/month burn rate, runway extends well into 2028+. Strategic investors (Hitachi Ventures, Allianz) signal potential enterprise partnerships and energy sector access."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current, post-Series B)",
+            "headcount": 100.0
+          },
+          {
+            "year": "2025 (Jul)",
+            "headcount": 70.0
+          },
+          {
+            "year": "2024",
+            "headcount": 45.0
+          },
+          {
+            "year": "2023",
+            "headcount": 22.5
+          },
+          {
+            "year": "2022",
+            "headcount": 11.5
+          },
+          {
+            "year": "2021",
+            "headcount": 4.0
+          }
+        ],
+        "employee_cagr_pct": 80.0,
+        "latest_headcount": 100.0,
+        "open_positions": 74.0
+      },
+      "geographic": {
+        "international_revenue_pct": 0.0,
+        "countries_count": null
+      },
+      "saas": {
+        "deployment_model": "SaaS",
+        "cloud_revenue_pct": 100.0
+      },
+      "tier": "Tier 3"
+    },
+    {
+      "company_name": "Volue ASA",
+      "folder": "volue",
+      "data_availability": "High (publicly traded on Oslo Stock Exchange Oct 2020 - Dec 2024; 4 years of audited annual reports, quarterly results, and Euronext filings available. Post-delisting data from Arendals Fossekompani annual report 2024 and press releases.)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 6.0,
+            "evidence": "3yr CAGR ~15% (NOK), consistent 12-20% YoY growth; SaaS sub-segment growing 38-42%"
+          },
+          "Funding Momentum": {
+            "score": 9.0,
+            "evidence": "EUR 1.5B valuation (Feb 2026), 4 PE/institutional investors with $125B+ combined AUM, ~3x valuation increase in 15 months"
+          },
+          "Employee Growth": {
+            "score": 5.0,
+            "evidence": "12% CAGR (2020-2023) during growth phase; headcount declined post-divestiture then recovered via acquisitions; 21 open positions"
+          },
+          "Geographic Expansion": {
+            "score": 8.0,
+            "evidence": "Added Italy, Austria, Turkey, Poland, Serbia, Baltics in 2 years; acquisitions bring 26-country exchange connectivity"
+          },
+          "M&A Activity": {
+            "score": 9.0,
+            "evidence": "3 acquisitions in 16 months post-delisting (PowerBot, smartPulse, Optimeering) + 3 divestitures; clear capability-building pattern; 1-2 M&A/year guidance"
+          },
+          "SaaS Maturity": {
+            "score": 7.0,
+            "evidence": "71% recurring revenue, SaaS growing 38-42% YoY, modern .NET 8/React stack, new acquisitions cloud-native"
+          }
+        },
+        "composite_score": 7.3,
+        "classification": "Rocket"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2024",
+            "eur_millions": 143.0,
+            "yoy_growth_pct": 12.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 128.0,
+            "yoy_growth_pct": 20.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 121.0,
+            "yoy_growth_pct": 15.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 104.0,
+            "yoy_growth_pct": 19.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 83.0,
+            "yoy_growth_pct": 12.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2019 (pro forma)",
+            "eur_millions": 81.0,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          }
+        ],
+        "cagr_3yr_pct": 15.4,
+        "cagr_5yr_pct": 16.3,
+        "latest_revenue_eur_m": 143.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": 71.0,
+        "raw_metrics": {
+          "Adj. EBITDA (2024)": "~NOK 359M (~EUR 32M)",
+          "Adj. EBITDA Margin (2024)": "22%",
+          "Adj. EBITDA (2023)": "NOK 267M (~EUR 23M)",
+          "Adj. EBITDA Margin (2023)": "18%",
+          "EBITDA (2023)": "NOK 208M (14% margin)",
+          "Adj. EBITDA (2022)": "NOK 203M (17% margin)",
+          "EBITDA (2022)": "NOK 147M (12% margin)",
+          "Net Income (2023)": "NOK 36.0M (~EUR 3.2M)",
+          "Net Income (2022)": "~NOK 19.3M (~EUR 1.9M)",
+          "Net Income (2021)": "NOK 27.8M (~EUR 2.7M)",
+          "Recurring Revenue % (H1 2024)": "71%",
+          "Recurring Revenue % (Q4 2023)": "66%",
+          "Recurring Revenue % (2022)": "63%",
+          "SaaS Revenue % (H1 2024)": "32-33% of total revenue",
+          "SaaS Revenue Growth (Q1 2024 YoY)": "+42% (NOK 126M)",
+          "SaaS Revenue Growth (Q2 2024 YoY)": "+38% (NOK 135M)",
+          "Revenue per Employee (2023)": "~EUR 155K (NOK 1,464M / 825 employees)",
+          "Revenue per Employee (2024 est.)": "~EUR 183K (NOK 1,634M / ~780 est. employees)"
+        },
+        "ebitda_margin_pct": 22.0,
+        "revenue_per_employee_eur_k": 183.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "Oct 2020",
+            "round": "IPO (Euronext Growth Oslo)",
+            "amount": "NOK 500M primary (~EUR 47M) + secondary offering",
+            "valuation": "NOK 4.0B pre-money (~EUR 373M)",
+            "lead_investors": "9 cornerstone investors (Eika, Luxor, et al.)"
+          },
+          {
+            "date": "Jul 2024",
+            "round": "Take-private (tender offer)",
+            "amount": "NOK 6.1B enterprise value (~EUR 530M)",
+            "valuation": "NOK 42/share (51% premium)",
+            "lead_investors": "Advent International + Generation Investment Management + AFK"
+          },
+          {
+            "date": "Oct 2024",
+            "round": "Compulsory acquisition",
+            "amount": "98.9% shares tendered",
+            "valuation": "NOK 42/share",
+            "lead_investors": "Edison Bidco AS"
+          },
+          {
+            "date": "Feb 2026",
+            "round": "Growth PE investment",
+            "amount": "Undisclosed (AFK received EUR 38M cash)",
+            "valuation": "~EUR 1.5B equity (~NOK 17B)",
+            "lead_investors": "TA Associates"
+          }
+        ],
+        "total_raised_text": "NOK 500M IPO + NOK 6.1B take-private + EUR 1.5B valuation event = transformative capital trajectory",
+        "latest_valuation_text": "EUR 1.5 billion (February 2026) -- nearly 3x the take-private valuation of 15 months prior",
+        "lead_investors": [
+          "9 cornerstone investors (Eika",
+          "Advent International + Generation Investment Management + AFK",
+          "Edison Bidco AS",
+          "Luxor",
+          "TA Associates",
+          "et al.)"
+        ],
+        "war_chest_signals": "Four institutional investors with combined AUM exceeding $125B (Advent: $91B, TA: $47.5B, Generation: $33.8B). PE guidance calls for 1-2 M&A deals per year. Acquisition capacity is effectively unlimited within the energy software domain. AFK 2024 annual report notes comprehensive restructuring program improving cash generation."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (Feb)",
+            "headcount": 750.0
+          },
+          {
+            "year": "2025 (May)",
+            "headcount": 662.0
+          },
+          {
+            "year": "2023",
+            "headcount": 825.0
+          },
+          {
+            "year": "2022",
+            "headcount": 778.0
+          },
+          {
+            "year": "2021",
+            "headcount": 648.0
+          },
+          {
+            "year": "2020",
+            "headcount": 590.0
+          }
+        ],
+        "employee_cagr_pct": 11.8,
+        "latest_headcount": 750.0,
+        "open_positions": 21.0
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": 26
+      },
+      "saas": {
+        "deployment_model": "SaaS",
+        "cloud_revenue_pct": 33.0
+      },
+      "tier": "Tier 1"
+    },
+    {
+      "company_name": "Engrate AB",
+      "folder": "engrate",
+      "data_availability": "Low-Medium (VC-funded seed-stage startup; funding data confirmed via press releases and investor databases, but revenue and detailed financials are undisclosed. Employee data estimated from aggregator sites.)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 8.0,
+            "evidence": "Growing from near-zero; any revenue represents explosive YoY growth (>50%), but absolute figures are tiny (est. EUR 30K-400K). Scored 8 not 9-10 because revenue is unproven at meaningful scale."
+          },
+          "Funding Momentum": {
+            "score": 3.0,
+            "evidence": "EUR 3M+ total raised in 18 months. Rubric: <EUR 5M = 3-4 range. Strong investor quality (Maniv, Eviny) but small quantum."
+          },
+          "Employee Growth": {
+            "score": 9.0,
+            "evidence": "From 2 founders (Jan 2024) to 10-20 employees (Feb 2026) = ~7-10x growth in 2 years. Rapid team building from zero. CTO from Tibber/Volvo/Spotify signals ability to attract talent."
+          },
+          "Geographic Expansion": {
+            "score": 6.0,
+            "evidence": "Entered 2 new countries (DE, NL) via API in 18 months from Sweden base. No physical offices abroad. Plans for further Northern Europe expansion. Virtual expansion model is fast but shallow."
+          },
+          "M&A Activity": {
+            "score": 1.0,
+            "evidence": "No acquisitions, no divestitures, no M&A signals. Expected at seed stage."
+          },
+          "SaaS Maturity": {
+            "score": 10.0,
+            "evidence": "Cloud-native from day one. 100% API/SaaS. Zero on-premise. MCP Server for AI consumption. Purest cloud model in entire competitive landscape."
+          }
+        },
+        "composite_score": 6.2,
+        "classification": "Riser"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2026 (est.)",
+            "eur_millions": 0.1,
+            "yoy_growth_pct": 100.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2025",
+            "eur_millions": 0.03,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 0.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2023",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          }
+        ],
+        "cagr_3yr_pct": null,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 0.1
+      },
+      "profitability": {
+        "recurring_revenue_pct": 100.0,
+        "raw_metrics": {
+          "EBITDA (current)": "Negative (burning seed capital)",
+          "EBITDA Margin": "N/A (pre-profitability)",
+          "Net Profit / Loss": "Net loss (estimated EUR 500K-1.5M/year burn)",
+          "Recurring Revenue %": "~100% (API subscription model)",
+          "SaaS Revenue %": "100% (cloud API only, no services)",
+          "Revenue per Employee": "EUR 5K-20K (if revenue estimates correct)"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 5.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "Jun 2025",
+            "round": "Seed",
+            "amount": "EUR 2.5M ($2.874M)",
+            "valuation": "Undisclosed; est. EUR 10-15M post-money",
+            "lead_investors": "Maniv (Tel Aviv, transport/energy VC)"
+          },
+          {
+            "date": "2024",
+            "round": "Pre-seed",
+            "amount": "EUR 500K+",
+            "valuation": "Undisclosed",
+            "lead_investors": "NP-Hard Ventures (Dutch VC)"
+          },
+          {
+            "date": "2024",
+            "round": "Accelerator",
+            "amount": "Non-dilutive (program value)",
+            "valuation": "N/A",
+            "lead_investors": "Norrsken Foundation"
+          }
+        ],
+        "total_raised_text": "EUR 3.0M+ (~$2.9M equivalent per i3Connect)",
+        "latest_valuation_text": "Undisclosed; estimated EUR 10-15M post-money (based on typical European seed-round multiples of 4-6x on EUR 2.5M raise)",
+        "lead_investors": [
+          "Maniv (Tel Aviv",
+          "NP-Hard Ventures (Dutch VC)",
+          "Norrsken Foundation",
+          "transport/energy VC)"
+        ],
+        "war_chest_signals": "EUR 2.5M seed raised June 2025. At estimated burn rate of EUR 80K-125K/month, runway extends to approximately Q1-Q4 2027. Next fundraise (likely Series A of EUR 5-15M) expected in late 2026 or H1 2027 if traction materializes. No debt financing or government grants disclosed."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 15.0
+          },
+          {
+            "year": "2025",
+            "headcount": 11.5
+          },
+          {
+            "year": "2024 (mid)",
+            "headcount": 3.5
+          },
+          {
+            "year": "2024 (Jan)",
+            "headcount": 2.0
+          },
+          {
+            "year": "2023",
+            "headcount": 0.0
+          }
+        ],
+        "employee_cagr_pct": 300.0,
+        "latest_headcount": 15.0,
+        "open_positions": null
+      },
+      "geographic": {
+        "international_revenue_pct": 30.0,
+        "countries_count": null
+      },
+      "saas": {
+        "deployment_model": "SaaS",
+        "cloud_revenue_pct": 100.0
+      },
+      "tier": "Tier 1"
+    },
+    {
+      "company_name": "Molecule Software",
+      "folder": "molecule",
+      "data_availability": "Medium (VC-funded private company; funding rounds well-documented via Crunchbase/press releases, revenue undisclosed, employee data from BuiltIn/LinkedIn/team page)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 7.0,
+            "evidence": "Estimated ~45% CAGR (3yr) based on employee proxy and customer win acceleration; Chartis ranking jumped from #15 to Top 10"
+          },
+          "Funding Momentum": {
+            "score": 5.0,
+            "evidence": "$25.35M total raised ($11.87M Series B in 2025); solid but below EUR 50M threshold; Sundance Growth adds growth equity expertise"
+          },
+          "Employee Growth": {
+            "score": 7.0,
+            "evidence": "Estimated ~20-25% CAGR (3yr) from ~28 to ~45; post-Series B hiring underway with VP Engineering open"
+          },
+          "Geographic Expansion": {
+            "score": 7.0,
+            "evidence": "Entered EU/UK (2023) with dedicated production environment; customers in Canada and South America; Nuveen win spans US/EU/Asia"
+          },
+          "M&A Activity": {
+            "score": 1.0,
+            "evidence": "Zero acquisitions in company history; purely organic growth; Fidectus partnership only external move"
+          },
+          "SaaS Maturity": {
+            "score": 10.0,
+            "evidence": "Cloud-native from 2012 founding; 100% SaaS; AWS/Kubernetes; API-first; 30+ integrations; open-source contributor"
+          }
+        },
+        "composite_score": 6.2,
+        "classification": "Riser"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2026 (est.)",
+            "eur_millions": 13.0,
+            "yoy_growth_pct": 50.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2025",
+            "eur_millions": 9.0,
+            "yoy_growth_pct": 50.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 6.75,
+            "yoy_growth_pct": 50.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 4.5,
+            "yoy_growth_pct": 70.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 3.0,
+            "yoy_growth_pct": 75.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 1.65,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          }
+        ],
+        "cagr_3yr_pct": 45.0,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 13.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": 95.0,
+        "raw_metrics": {
+          "EBITDA (current)": "Unknown (likely negative or breakeven)",
+          "EBITDA Margin": "Unknown",
+          "Net Profit / Loss": "Unknown (likely net loss, reinvesting for growth)",
+          "Recurring Revenue %": "~90-95%",
+          "SaaS Revenue %": "~100%",
+          "Revenue per Employee": "~EUR 200K-250K (estimated)"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 200.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "May 2012",
+            "round": "Seed",
+            "amount": "Undisclosed",
+            "valuation": "Undisclosed",
+            "lead_investors": "Unknown (early backers)"
+          },
+          {
+            "date": "Dec 2013",
+            "round": "Seed VC",
+            "amount": "Undisclosed",
+            "valuation": "Undisclosed",
+            "lead_investors": "Mercury, Surge Ventures, Houston Angel Network"
+          },
+          {
+            "date": "May 2021",
+            "round": "Series A",
+            "amount": "$12M (EUR ~10.2M)",
+            "valuation": "Undisclosed",
+            "lead_investors": "Mercury (existing investor)"
+          },
+          {
+            "date": "Jul 2025",
+            "round": "Series B",
+            "amount": "$11.87M (EUR ~10.9M)",
+            "valuation": "Undisclosed",
+            "lead_investors": "Sundance Growth"
+          }
+        ],
+        "total_raised_text": "$25.35M (EUR ~23M) across 5 rounds (CB Insights)",
+        "latest_valuation_text": "Undisclosed (Series B typically implies $50-100M+ for SaaS companies at this ARR stage, but no data available)",
+        "lead_investors": [
+          "Houston Angel Network",
+          "Mercury",
+          "Mercury (existing investor)",
+          "Sundance Growth",
+          "Surge Ventures",
+          "Unknown (early backers)"
+        ],
+        "war_chest_signals": "$11.87M fresh capital (Jul 2025) earmarked for product innovation, team expansion, and global market entry. No debt financing disclosed. Sundance Growth is a software-focused growth equity firm, suggesting patient capital with operational expertise."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 55.0
+          },
+          {
+            "year": "2025",
+            "headcount": 45.0
+          },
+          {
+            "year": "2024",
+            "headcount": 37.5
+          },
+          {
+            "year": "2023",
+            "headcount": 32.5
+          },
+          {
+            "year": "2022",
+            "headcount": 27.5
+          },
+          {
+            "year": "2021",
+            "headcount": 17.5
+          }
+        ],
+        "employee_cagr_pct": 25.0,
+        "latest_headcount": 55.0,
+        "open_positions": 3.0
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": 1
+      },
+      "saas": {
+        "deployment_model": "SaaS",
+        "cloud_revenue_pct": 100.0
+      },
+      "tier": "Tier 2"
+    },
+    {
+      "company_name": "Indra Sistemas / Minsait",
+      "folder": "indra-minsait",
+      "data_availability": "High (public company, BME: IDR, IBEX 35 component; annual reports and quarterly filings publicly available via CNMV)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 6.0,
+            "evidence": "3yr CAGR of 12.6% (solid in 10-20% range); 4 consecutive years of double-digit group growth"
+          },
+          "Funding Momentum": {
+            "score": 7.0,
+            "evidence": "IBEX 35 component, EUR 9.5B market cap, stock +181% in 12mo, EUR 725M deployed for Hispasat, government-backed (28% SEPI)"
+          },
+          "Employee Growth": {
+            "score": 5.0,
+            "evidence": "3yr CAGR of 5.3% (steady); grew from 48K to 61K over 4 years; 3,500+ AI specialists"
+          },
+          "Geographic Expansion": {
+            "score": 5.0,
+            "evidence": "Already in 46 countries; North America Onesait launch (2021), Brazil (2023), defence expansion into Poland/Vietnam/UK; no Northern European energy market entry"
+          },
+          "M&A Activity": {
+            "score": 9.0,
+            "evidence": "13+ acquisitions in 3yr including transformative EUR 725M Hispasat; TESS Defence; creating Indra Space; Minsait bolt-on strategy"
+          },
+          "SaaS Maturity": {
+            "score": 4.0,
+            "evidence": "Services-heavy model; Onesait products on Azure/AWS/Google Cloud; no disclosed recurring revenue %; hybrid deployment; early-mid cloud transition"
+          }
+        },
+        "composite_score": 6.0,
+        "classification": "Riser"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2025 (est.)",
+            "eur_millions": 5180.0,
+            "yoy_growth_pct": 7.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 4843.0,
+            "yoy_growth_pct": 11.5,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 4343.0,
+            "yoy_growth_pct": 12.8,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 3851.0,
+            "yoy_growth_pct": 13.6,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 3390.0,
+            "yoy_growth_pct": 11.4,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 3043.0,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          }
+        ],
+        "cagr_3yr_pct": 12.6,
+        "cagr_5yr_pct": 12.3,
+        "latest_revenue_eur_m": 5180.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": null,
+        "raw_metrics": {
+          "EBITDA (2024)": "EUR 545.2M",
+          "EBITDA Margin (2024)": "11.3%",
+          "EBITDA (2023)": "EUR 446.1M",
+          "EBITDA Margin (2023)": "10.3%",
+          "EBITDA (2022)": "EUR 400.3M",
+          "EBITDA Margin (2022)": "10.4%",
+          "EBITDA (2021)": "EUR 349.1M",
+          "EBITDA Margin (2021)": "10.3%",
+          "EBITDA (2020)": "EUR 340.7M",
+          "EBITDA Margin (2020)": "11.2%",
+          "EBITDA (H1 2025)": "+15% YoY",
+          "EBIT (2024)": "EUR 438.3M (+26% YoY)",
+          "EBIT (2023)": "EUR 347.0M",
+          "Net Profit (2024)": "EUR 277.5M (+35% YoY)",
+          "Net Profit (2023)": "EUR 205.8M",
+          "Net Profit (2022)": "EUR 171.9M",
+          "Net Profit (2021)": "EUR 143.4M",
+          "Net Profit (2020)": "-EUR 65M (loss)",
+          "Net Profit (H1 2025)": "EUR 215M (+88% YoY)",
+          "Net Profit (2025 est.)": "EUR 384M (+38% YoY)",
+          "Recurring Revenue %": "Not disclosed (services-heavy model)",
+          "SaaS Revenue %": "Not disclosed",
+          "Revenue per Employee (2024)": "EUR 79,500"
+        },
+        "ebitda_margin_pct": 11.3,
+        "revenue_per_employee_eur_k": 79.5
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "1999",
+            "round": "",
+            "amount": "-",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2024-2025",
+            "round": "",
+            "amount": "Undisclosed",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2025-01",
+            "round": "",
+            "amount": "EUR 725M",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2025",
+            "round": "",
+            "amount": "EUR 0.25/share",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2025",
+            "round": "",
+            "amount": "Undisclosed",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2024-2025",
+            "round": "",
+            "amount": "~EUR 400-450M",
+            "valuation": "",
+            "lead_investors": ""
+          }
+        ],
+        "total_raised_text": "N/A (publicly traded since 1999; self-funded through operations and debt)",
+        "latest_valuation_text": null,
+        "lead_investors": [],
+        "war_chest_signals": "Net cash position of EUR 86M at year-end 2024 (improved from EUR 107M net debt in 2023). Deployed EUR 725M for Hispasat. Potential EUR 400-450M inflow from Minsait Payments sale. Strong free cash flow generation supports continued M&A."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2025 (Sep)",
+            "headcount": 61475.0
+          },
+          {
+            "year": "2025 (H1)",
+            "headcount": 3542.0
+          },
+          {
+            "year": "2024",
+            "headcount": 60907.0
+          },
+          {
+            "year": "2023",
+            "headcount": 57755.0
+          },
+          {
+            "year": "2022",
+            "headcount": 56735.0
+          },
+          {
+            "year": "2021",
+            "headcount": 52083.0
+          },
+          {
+            "year": "2020",
+            "headcount": 47980.0
+          }
+        ],
+        "employee_cagr_pct": 6.1,
+        "latest_headcount": 61475.0,
+        "open_positions": 35.0
+      },
+      "geographic": {
+        "international_revenue_pct": 30.0,
+        "countries_count": 46
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 1b"
+    },
+    {
+      "company_name": "Eneve (formerly Energy21)",
+      "folder": "eneve",
+      "data_availability": "Medium (private/PE-backed company; revenue estimates from press releases, no public filings)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 7.0,
+            "evidence": "CAGR ~44% (2022-2025) driven by PE buy-and-build; EUR 10M to EUR 28M in 3yr. Organic growth estimated 5-15%."
+          },
+          "Funding Momentum": {
+            "score": 5.0,
+            "evidence": "PE-backed (Vortex Capital Partners) since 2022; 3 add-on acquisitions funded. Undisclosed amounts. Active support but no large disclosed rounds."
+          },
+          "Employee Growth": {
+            "score": 6.0,
+            "evidence": "From 70 to 130+ (23% CAGR) but mostly M&A-driven. Only 5 current open roles; modest organic hiring pace. No AI/ML hires."
+          },
+          "Geographic Expansion": {
+            "score": 5.0,
+            "evidence": "Entered UK (2023), expanding Belgium (BASF), planning Germany. Still heavily Netherlands-focused (~80%+ revenue). 3 office countries."
+          },
+          "M&A Activity": {
+            "score": 8.0,
+            "evidence": "3 acquisitions in 2 years + brand unification. Clear capability-building pattern. Well-executed PE buy-and-build playbook."
+          },
+          "SaaS Maturity": {
+            "score": 4.0,
+            "evidence": "Core eBase is on-premise MSSQL (C++ migrating to C#/.NET). Ecedo is SaaS (PHP/Laravel). Heterogeneous tech estate. Estimated 30-40% cloud revenue. Migration in-progress."
+          }
+        },
+        "composite_score": 5.8,
+        "classification": "Riser"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2026 (est.)",
+            "eur_millions": 32.5,
+            "yoy_growth_pct": 15.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2025",
+            "eur_millions": 27.5,
+            "yoy_growth_pct": 50.0,
+            "confidence": "Confirmed (range)"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 23.5,
+            "yoy_growth_pct": 25.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 20.0,
+            "yoy_growth_pct": 100.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 10.0,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 9.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          }
+        ],
+        "cagr_3yr_pct": 44.0,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 32.5
+      },
+      "profitability": {
+        "recurring_revenue_pct": 60.0,
+        "raw_metrics": {
+          "EBITDA (current)": "Unknown",
+          "EBITDA Margin": "Unknown",
+          "Net Profit / Loss": "Unknown",
+          "Recurring Revenue %": "~40-60% (estimated)",
+          "SaaS Revenue %": "~30-40% (estimated)",
+          "Revenue per Employee": "~EUR 200-230K"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 215.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "Oct 2022",
+            "round": "PE Buyout (MBO)",
+            "amount": "Undisclosed",
+            "valuation": "Undisclosed",
+            "lead_investors": "Vortex Capital Partners + Management"
+          },
+          {
+            "date": "Aug 2023",
+            "round": "Add-on acquisition (Ecedo)",
+            "amount": "Undisclosed",
+            "valuation": "N/A",
+            "lead_investors": "Vortex Capital Partners"
+          },
+          {
+            "date": "Aug 2023",
+            "round": "Add-on acquisition (Jules)",
+            "amount": "Undisclosed",
+            "valuation": "N/A",
+            "lead_investors": "Vortex Capital Partners"
+          },
+          {
+            "date": "2024",
+            "round": "Add-on acquisition (Gridhub)",
+            "amount": "Undisclosed",
+            "valuation": "N/A",
+            "lead_investors": "Vortex Capital Partners"
+          }
+        ],
+        "total_raised_text": "Undisclosed (PE buyout + 3 add-on acquisitions; all funded by Vortex Capital Partners)",
+        "latest_valuation_text": "Undisclosed (typical PE multiples for EUR 28M revenue software co: EUR 50-100M range estimated)",
+        "lead_investors": [
+          "Vortex Capital Partners",
+          "Vortex Capital Partners + Management"
+        ],
+        "war_chest_signals": "Vortex has invested in 25+ platform companies with 75+ add-on acquisitions total. Active buy-and-build investor with demonstrated capacity for further acquisitions. Germany and Belgium expansion likely requires additional investment.\n\n> **Vortex Capital Partners profile**: Specialist investor in software and digital technology companies. Netherlands-based. Entrepreneurial approach. The 3 add-on acquisitions in 2 years signal ongoing availability of capital for growth."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 135.0
+          },
+          {
+            "year": "2025",
+            "headcount": 130.0
+          },
+          {
+            "year": "2024",
+            "headcount": 117.5
+          },
+          {
+            "year": "2023",
+            "headcount": 100.0
+          },
+          {
+            "year": "2022",
+            "headcount": 70.0
+          },
+          {
+            "year": "2021",
+            "headcount": 65.0
+          }
+        ],
+        "employee_cagr_pct": 23.0,
+        "latest_headcount": 135.0,
+        "open_positions": 5.0
+      },
+      "geographic": {
+        "international_revenue_pct": 20.0,
+        "countries_count": 30
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": 40.0
+      },
+      "tier": null
+    },
+    {
+      "company_name": "Asseco Poland S.A.",
+      "folder": "asseco",
+      "data_availability": "High (public company listed on WSE, extensive annual reports and financial disclosures)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 3.0,
+            "evidence": "3yr nominal CAGR 2.3%; constant currency 4-6%; low single-digit organic growth masked by acquisition contributions"
+          },
+          "Funding Momentum": {
+            "score": 6.0,
+            "evidence": "TSS invested EUR 413M for 24.84% strategic stake; strong market cap (EUR 2.9B); no VC-style growth funding but significant strategic capital infusion"
+          },
+          "Employee Growth": {
+            "score": 4.0,
+            "evidence": "4yr CAGR 4.8%; acquisition-driven headcount growth; no aggressive hiring signals; stable but not expanding organically"
+          },
+          "Geographic Expansion": {
+            "score": 8.0,
+            "evidence": "Entered 5+ new countries in 2024-2025 (US, India, Portugal, Spain, Egypt, Israel expansion); 60+ country presence; hyper-active geographic M&A"
+          },
+          "M&A Activity": {
+            "score": 10.0,
+            "evidence": "36+ acquisitions in 2024-2025; 150+ total since 2004; accelerating pace with TSS partnership; most active acquirer in European IT services"
+          },
+          "SaaS Maturity": {
+            "score": 3.0,
+            "evidence": "On-premise dominant; no cloud/SaaS revenue disclosed; traditional enterprise licensing; 79% proprietary products but not SaaS; gradual modernization"
+          }
+        },
+        "composite_score": 5.7,
+        "classification": "Riser"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2025 (est.)",
+            "eur_millions": 4235.0,
+            "yoy_growth_pct": 5.3,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 3977.0,
+            "yoy_growth_pct": 1.2,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 3722.0,
+            "yoy_growth_pct": 0.6,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 3582.0,
+            "yoy_growth_pct": 5.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 3502.0,
+            "yoy_growth_pct": 31.1,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 2748.0,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          }
+        ],
+        "cagr_3yr_pct": 2.3,
+        "cagr_5yr_pct": 8.8,
+        "latest_revenue_eur_m": 4235.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": null,
+        "raw_metrics": {
+          "Operating Profit (2024)": "PLN 1.8B (EUR 419M)",
+          "Operating Profit Growth (2024 YoY)": "+10%",
+          "Net Profit (2024, to parent shareholders)": "PLN 520M (EUR 121M)",
+          "Net Profit Growth (2024 YoY)": "+8% (record high)",
+          "Operating Margin (2024)": "~10.5%",
+          "EBITDA (2024)": "Not separately disclosed",
+          "Proprietary Products Revenue (2024)": "PLN 13.5B (79% of total)",
+          "Recurring Revenue %": "Not disclosed",
+          "SaaS Revenue %": "Not disclosed",
+          "Revenue per Employee (2024)": "EUR 118K (PLN 507K)"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 118.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "Jan 2025",
+            "round": "",
+            "amount": "PLN 706M (EUR 166M)",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "Feb 2025",
+            "round": "",
+            "amount": "PLN 1.05B (EUR 247M)",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2004",
+            "round": "",
+            "amount": "--",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2004-present",
+            "round": "",
+            "amount": "PLN 3.5B total (EUR ~830M)",
+            "valuation": "",
+            "lead_investors": ""
+          }
+        ],
+        "total_raised_text": null,
+        "latest_valuation_text": null,
+        "lead_investors": [],
+        "war_chest_signals": "PLN 1.05B raised from TSS treasury share sale (Feb 2025). Strong free cash flow from operations. PLN 13.5B order backlog for 2025 provides revenue visibility. TSS partnership brings Topicus/Constellation Software acquisition playbook and capital access."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2025 (est.)",
+            "headcount": 35500.0
+          },
+          {
+            "year": "2024",
+            "headcount": 33752.0
+          },
+          {
+            "year": "2023",
+            "headcount": 33062.0
+          },
+          {
+            "year": "2022",
+            "headcount": 31500.0
+          },
+          {
+            "year": "2021",
+            "headcount": 29500.0
+          },
+          {
+            "year": "2020",
+            "headcount": 28009.0
+          }
+        ],
+        "employee_cagr_pct": 4.6,
+        "latest_headcount": 35500.0,
+        "open_positions": null
+      },
+      "geographic": {
+        "international_revenue_pct": 88.0,
+        "countries_count": 60
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 1b"
+    },
+    {
+      "company_name": "CGI Inc.",
+      "folder": "cgi-edsn",
+      "data_availability": "High (CGI is publicly traded on TSX: GIB.A and NYSE: GIB with full annual report disclosure)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 4.0,
+            "evidence": "3yr CAGR 7.3% (CAD 12.87B to 15.91B); solid for a CAD 16B company but below 10% threshold"
+          },
+          "Funding Momentum": {
+            "score": 7.0,
+            "evidence": "Self-funded with CAD 2.2B+ annual cash generation; $1B AI investment; record CAD 872M Q1 cash; active acquirer"
+          },
+          "Employee Growth": {
+            "score": 3.0,
+            "evidence": "3yr CAGR 1.5%; headcount stable at ~90-94K; growth primarily acquisitive, not organic"
+          },
+          "Geographic Expansion": {
+            "score": 7.0,
+            "evidence": "Energy datahubs in 10 countries; Poland CSIRE (new); 6+ acquisitions adding UK/France/US/Poland in 2024-2025"
+          },
+          "M&A Activity": {
+            "score": 9.0,
+            "evidence": "6+ acquisitions in FY2025 alone; Umanis EUR 310M; BJSS 2,400 people; 105+ total since IPO; active consolidator"
+          },
+          "SaaS Maturity": {
+            "score": 4.0,
+            "evidence": "Services company (~45% managed services); energy datahubs cloud-native but overall model is consulting/services, not SaaS"
+          }
+        },
+        "composite_score": 5.7,
+        "classification": "Riser"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "FY2026 (Q1 annualized)",
+            "eur_millions": 10300.0,
+            "yoy_growth_pct": 7.7,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "FY2025 (ended Sep 2025)",
+            "eur_millions": 10080.0,
+            "yoy_growth_pct": 8.4,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "FY2024 (ended Sep 2024)",
+            "eur_millions": 9910.0,
+            "yoy_growth_pct": 2.7,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "FY2023 (ended Sep 2023)",
+            "eur_millions": 9800.0,
+            "yoy_growth_pct": 11.1,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "FY2022 (ended Sep 2022)",
+            "eur_millions": 9400.0,
+            "yoy_growth_pct": 6.1,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "FY2021 (ended Sep 2021)",
+            "eur_millions": 8180.0,
+            "yoy_growth_pct": 1.1,
+            "confidence": "Confirmed"
+          }
+        ],
+        "cagr_3yr_pct": 7.3,
+        "cagr_5yr_pct": 7.0,
+        "latest_revenue_eur_m": 10300.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": 45.0,
+        "raw_metrics": {
+          "Adjusted EBIT (FY2025)": "CAD 2,610.9M (EUR ~1,654M)",
+          "Adjusted EBIT Margin (FY2025)": "16.4%",
+          "Adjusted EBIT Margin (FY2024)": "16.5%",
+          "Adjusted EBIT Margin (FY2023)": "16.2%",
+          "Adjusted EBIT Margin (FY2022)": "16.2%",
+          "Net Earnings (FY2025)": "CAD 1,658.3M (10.4% margin)",
+          "Adjusted Net Earnings (FY2025)": "CAD 1,871.5M (11.8% margin)",
+          "Net Earnings (FY2024)": "CAD 1,690M (11.5% margin)",
+          "Net Earnings (FY2023)": "CAD 1,630M (~11.4% margin)",
+          "Net Earnings (FY2022)": "CAD 1,470M (11.4% margin)",
+          "Adjusted Diluted EPS (FY2025)": "CAD 8.30 (+8.9% YoY)",
+          "Cash from Operations (FY2025)": "CAD 2,234.2M (14.0% of revenue)",
+          "Cash from Operations (Q1 FY2026)": "CAD 871.9M (21.4% of revenue) -- record",
+          "Recurring Revenue %": "Not separately disclosed; managed services ~45% of revenue",
+          "SaaS Revenue %": "N/A -- CGI is a services company, not a SaaS vendor",
+          "Revenue per Employee (FY2025)": "CAD 169K / EUR ~107K"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 169.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "1986",
+            "round": "IPO (TSX)",
+            "amount": "N/A",
+            "valuation": "N/A",
+            "lead_investors": "Public markets"
+          },
+          {
+            "date": "1998",
+            "round": "NYSE listing",
+            "amount": "N/A",
+            "valuation": "N/A",
+            "lead_investors": "Public markets"
+          },
+          {
+            "date": "Ongoing",
+            "round": "Operations + debt",
+            "amount": "CAD 2.2B+ cash from ops annually",
+            "valuation": "Market cap: ~USD 27.5B (Feb 2026)",
+            "lead_investors": "Self-funded"
+          }
+        ],
+        "total_raised_text": "N/A (public company since 1986; self-funded through CAD 2.2B+ annual operating cash flow)",
+        "latest_valuation_text": "~USD 27.5 billion market cap (February 2026)",
+        "lead_investors": [
+          "Public markets",
+          "Self-funded"
+        ],
+        "war_chest_signals": "Record cash from operations (CAD 871.9M in Q1 FY2026 alone). CAD 31.3B backlog (1.9x annual revenue). $1B AI investment committed through 2026. Active acquisition pace (6+ deals in FY2025). 13% dividend increase announced FY2025."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2025 (current, FY2025)",
+            "headcount": 94000.0
+          },
+          {
+            "year": "2024 (FY2024)",
+            "headcount": 90250.0
+          },
+          {
+            "year": "2023 (FY2023)",
+            "headcount": 91500.0
+          },
+          {
+            "year": "2022 (FY2022)",
+            "headcount": 90000.0
+          },
+          {
+            "year": "2021 (FY2021)",
+            "headcount": 80000.0
+          }
+        ],
+        "employee_cagr_pct": 4.1,
+        "latest_headcount": 94000.0,
+        "open_positions": 400.0
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": 40
+      },
+      "saas": {
+        "deployment_model": "Services company",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 3"
+    },
+    {
+      "company_name": "Trayport (TMX Group)",
+      "folder": "trayport-periotheus",
+      "data_availability": "Medium-High (Trayport is a subsidiary of publicly listed TMX Group on TSX; segment-level revenue disclosed in MD&A, but not full standalone P&L)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 6.0,
+            "evidence": "~16% 3yr CAGR (2021-2024); consistent double-digit growth, CAD 235M confirmed for 2024"
+          },
+          "Funding Momentum": {
+            "score": 5.0,
+            "evidence": "No external funding (subsidiary), but TMX Group parent invested £550M+ and provides strong backing"
+          },
+          "Employee Growth": {
+            "score": 6.0,
+            "evidence": "~10% 3yr CAGR; steady growth from ~280 to 400+ employees across 4 offices"
+          },
+          "Geographic Expansion": {
+            "score": 6.0,
+            "evidence": "Entering North America (4% of revenue) and Asia-Pacific; new exchange partnerships (Abaxx)"
+          },
+          "M&A Activity": {
+            "score": 4.0,
+            "evidence": "4 acquisitions in 2019-2021 (strong), but no M&A activity since May 2021"
+          },
+          "SaaS Maturity": {
+            "score": 7.0,
+            "evidence": "Joule is cloud SaaS; ~90%+ recurring revenue; 9,800+ licensees; hybrid model for Periotheus"
+          }
+        },
+        "composite_score": 5.7,
+        "classification": "Riser"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2025 (est.)",
+            "eur_millions": 187.0,
+            "yoy_growth_pct": 19.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 157.0,
+            "yoy_growth_pct": 19.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 135.0,
+            "yoy_growth_pct": 10.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 131.0,
+            "yoy_growth_pct": 20.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 101.0,
+            "yoy_growth_pct": 15.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 88.0,
+            "yoy_growth_pct": 8.0,
+            "confidence": "Estimated"
+          }
+        ],
+        "cagr_3yr_pct": 16.0,
+        "cagr_5yr_pct": 14.0,
+        "latest_revenue_eur_m": 187.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": 90.0,
+        "raw_metrics": {
+          "EBITDA (current)": "Not separately disclosed",
+          "EBITDA Margin": "Not separately disclosed",
+          "Net Profit / Loss": "Not separately disclosed",
+          "Recurring Revenue %": "~90%+ estimated",
+          "SaaS Revenue %": "~70-80% estimated",
+          "Revenue per Employee": "~EUR 393K"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 393.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "Dec 2015",
+            "round": "ICE acquisition",
+            "amount": "USD $650M",
+            "valuation": "USD $650M",
+            "lead_investors": "Intercontinental Exchange (ICE)"
+          },
+          {
+            "date": "Dec 2017",
+            "round": "TMX acquisition from ICE",
+            "amount": "GBP £550M (~CAD $1B)",
+            "valuation": "GBP £550M",
+            "lead_investors": "TMX Group (forced divestiture by UK CMA)"
+          },
+          {
+            "date": "2019-2021",
+            "round": "Bolt-on acquisitions",
+            "amount": "Not separately disclosed",
+            "valuation": "N/A",
+            "lead_investors": "TMX Group (parent)"
+          }
+        ],
+        "total_raised_text": null,
+        "latest_valuation_text": "Not applicable (wholly-owned subsidiary). However, at 2024 revenue of CAD $235M and typical energy software multiples (8-12x revenue), implied value is CAD $1.9-2.8B -- a significant appreciation from the £550M (~CAD $1B) acquisition price.",
+        "lead_investors": [
+          "Intercontinental Exchange (ICE)",
+          "TMX Group (forced divestiture by UK CMA)",
+          "TMX Group (parent)"
+        ],
+        "war_chest_signals": "TMX Group has a strong investment-grade balance sheet. 2024 pricing table shows 2-3% CPI annual price increases for Trayport, indicating pricing power. TMX made 3 acquisitions in 2024 (VettaFi, Newsfile, iNDEX Research) showing parent is actively investing, though recent M&A focus has been on data/analytics rather than energy."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 400.0
+          },
+          {
+            "year": "2025",
+            "headcount": 400.0
+          },
+          {
+            "year": "2024",
+            "headcount": 376.0
+          },
+          {
+            "year": "2023",
+            "headcount": 350.0
+          },
+          {
+            "year": "2022",
+            "headcount": 320.0
+          },
+          {
+            "year": "2021",
+            "headcount": 280.0
+          }
+        ],
+        "employee_cagr_pct": 10.0,
+        "latest_headcount": 400.0,
+        "open_positions": 16.0
+      },
+      "geographic": {
+        "international_revenue_pct": 96.0,
+        "countries_count": 40
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": 80.0
+      },
+      "tier": "Tier 1"
+    },
+    {
+      "company_name": "Energy One Limited",
+      "folder": "energy-one-entrader",
+      "data_availability": "High (ASX-listed public company since 2007; annual reports, Appendix 4E filings, investor presentations publicly available)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 7.0,
+            "evidence": "3yr CAGR ~24% (boosted by EGSSIS full-year in FY2023); organic growth ~17% in FY2025"
+          },
+          "Funding Momentum": {
+            "score": 4.0,
+            "evidence": "Self-funded from operations; no external rounds post-IPO; profitable but no fresh investment fuel"
+          },
+          "Employee Growth": {
+            "score": 3.0,
+            "evidence": "CAGR ~3% (estimated); acquisition-driven historically; modest organic hiring"
+          },
+          "Geographic Expansion": {
+            "score": 6.0,
+            "evidence": "Three countries added via M&A (2018-2021); active CEE expansion; 30+ countries; US evaluation"
+          },
+          "M&A Activity": {
+            "score": 5.0,
+            "evidence": "Three acquisitions in 2018-2021; fully integrated; actively evaluating new deals but none since 2021"
+          },
+          "SaaS Maturity": {
+            "score": 7.0,
+            "evidence": "90% recurring revenue; 104% NRR; hybrid SaaS/on-prem; 63% gross margin (managed services dilution)"
+          }
+        },
+        "composite_score": 5.3,
+        "classification": "Riser"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "FY2026 (est.)",
+            "eur_millions": 43.6,
+            "yoy_growth_pct": 18.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "FY2025",
+            "eur_millions": 36.8,
+            "yoy_growth_pct": 17.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "FY2024",
+            "eur_millions": 32.0,
+            "yoy_growth_pct": 16.7,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "FY2023",
+            "eur_millions": 27.9,
+            "yoy_growth_pct": 38.7,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "FY2022",
+            "eur_millions": 21.1,
+            "yoy_growth_pct": 17.2,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "FY2021",
+            "eur_millions": 17.4,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          }
+        ],
+        "cagr_3yr_pct": 23.7,
+        "cagr_5yr_pct": 22.1,
+        "latest_revenue_eur_m": 43.6
+      },
+      "profitability": {
+        "recurring_revenue_pct": 90.0,
+        "raw_metrics": {
+          "EBITDA (FY2025)": "~AUD 16.1M",
+          "EBITDA Margin (FY2025)": "~26%",
+          "Operating Margin (FY2025)": "15.63%",
+          "Gross Margin": "~63%",
+          "Net Profit (FY2025)": "~AUD 4.5M",
+          "Net Profit (FY2024)": "~AUD 2.6M",
+          "Net Profit (FY2023)": "~AUD 3.1M",
+          "Net Profit (FY2022)": "~AUD 4.4M",
+          "Recurring Revenue %": "~90%",
+          "SaaS Revenue %": "Not separately disclosed",
+          "Net Revenue Retention": "~104% (H1 FY2025)",
+          "Revenue per Employee": "~AUD 376K (~EUR 226K)"
+        },
+        "ebitda_margin_pct": 26.0,
+        "revenue_per_employee_eur_k": 376.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "2007",
+            "round": "IPO (ASX listing)",
+            "amount": "Undisclosed",
+            "valuation": "--",
+            "lead_investors": "--"
+          },
+          {
+            "date": "Ongoing",
+            "round": "Organic cash flow",
+            "amount": "Self-funded",
+            "valuation": "Market Cap ~AU$525M (Apr 2025)",
+            "lead_investors": "--"
+          }
+        ],
+        "total_raised_text": "No external funding rounds post-IPO; growth funded through operating cash flow and debt",
+        "latest_valuation_text": "Market Cap ~AU$525M / ~EUR 315M (April 2025); peaked with share price up ~198% over prior year",
+        "lead_investors": [],
+        "war_chest_signals": "Net debt decreased from AUD 14.2M (Jun 2024) to AUD 13.0M (Dec 2024). Free cash flow at strongest level since June 2021 (~AUD 1.2M in H1 FY2025). Company actively evaluating \"profitable, synergistic acquisitions\" per FY2025 annual report. No dividends paid (capital preserved for growth and debt reduction)."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 163.0
+          },
+          {
+            "year": "2025 (FY end)",
+            "headcount": 160.0
+          },
+          {
+            "year": "2024",
+            "headcount": 155.0
+          },
+          {
+            "year": "2023",
+            "headcount": 150.0
+          },
+          {
+            "year": "2022",
+            "headcount": 145.0
+          },
+          {
+            "year": "2021",
+            "headcount": 135.0
+          }
+        ],
+        "employee_cagr_pct": 3.0,
+        "latest_headcount": 163.0,
+        "open_positions": null
+      },
+      "geographic": {
+        "international_revenue_pct": 17.0,
+        "countries_count": 2
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 2"
+    },
+    {
+      "company_name": "Hitachi Energy",
+      "folder": "hitachi-energy",
+      "data_availability": "Medium-High (subsidiary of public Hitachi Ltd; segment-level financials from parent annual reports. ETRM division-specific financials not separately disclosed.)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 6.0,
+            "evidence": "3yr CAGR ~15%; fiscal year YoY growth of +22-23% (FY2023-FY2024); strong but driven by hardware demand, not software"
+          },
+          "Funding Momentum": {
+            "score": 8.0,
+            "evidence": "No external funding needed; parent investing $9B+ in capex through 2027; functionally unlimited capital from Hitachi Ltd ($80B+ parent)"
+          },
+          "Employee Growth": {
+            "score": 5.0,
+            "evidence": "5yr CAGR ~7% (36k→50k); 3,000+ open roles; hiring plans for 2,000+ in Sweden, 4,000+ in India"
+          },
+          "Geographic Expansion": {
+            "score": 3.0,
+            "evidence": "Already in 90+ countries; expanding manufacturing capacity (US, Sweden, Finland, India) but not entering new markets"
+          },
+          "M&A Activity": {
+            "score": 7.0,
+            "evidence": "4 acquisitions since 2022 (ABB remaining stake, eks Energy x2, COET); clear capability-building pattern in BESS/EV/grid"
+          },
+          "SaaS Maturity": {
+            "score": 3.0,
+            "evidence": "ETRM products (TRMTracker) offer SaaS; overall business is >95% hardware/project revenue; no cloud revenue % disclosed"
+          }
+        },
+        "composite_score": 5.3,
+        "classification": "Riser"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2025 (est.)",
+            "eur_millions": 17600.0,
+            "yoy_growth_pct": 19.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 14800.0,
+            "yoy_growth_pct": 14.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023 (FY ending Mar 2024)",
+            "eur_millions": 14300.0,
+            "yoy_growth_pct": 22.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2022 (FY ending Mar 2023)",
+            "eur_millions": 12000.0,
+            "yoy_growth_pct": 23.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 8900.0,
+            "yoy_growth_pct": 5.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2020 (at JV formation)",
+            "eur_millions": 8800.0,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          }
+        ],
+        "cagr_3yr_pct": 15.0,
+        "cagr_5yr_pct": 14.0,
+        "latest_revenue_eur_m": 17600.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": null,
+        "raw_metrics": {
+          "EBITA Margin (FY2024, ending Mar 2025)": "~11.0%",
+          "EBITA Margin (FY2023, ending Mar 2024)": "~10.1%",
+          "EBITA Margin (FY2021)": "~6.1%",
+          "EBITA Margin Trajectory": "6.1% → 11.0% over 4 years",
+          "Net Profit / Loss": "Profitable (part of Hitachi consolidated)",
+          "Recurring Revenue %": "Not disclosed (predominantly project/equipment)",
+          "SaaS Revenue %": "Not disclosed (ETRM SaaS is tiny fraction of total)",
+          "Revenue per Employee": "~EUR 296K (€14.8B / 50,000)"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 296.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "2020-07",
+            "round": "",
+            "amount": "$6.85B",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2022-12",
+            "round": "",
+            "amount": "~$1.7B",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2024-04",
+            "round": "",
+            "amount": "$1.5B",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2024-06",
+            "round": "",
+            "amount": "$4.5B (by 2027)",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2024-06",
+            "round": "",
+            "amount": "$330M",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2025-04",
+            "round": "",
+            "amount": "$70M+",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2025-09",
+            "round": "",
+            "amount": "$1B",
+            "valuation": "",
+            "lead_investors": ""
+          },
+          {
+            "date": "2025 (cumulative)",
+            "round": "",
+            "amount": "~$9B+",
+            "valuation": "",
+            "lead_investors": ""
+          }
+        ],
+        "total_raised_text": null,
+        "latest_valuation_text": "$11B enterprise value at 2018 deal announcement; current implied value significantly higher given revenue growth from $10B to $16B+",
+        "lead_investors": [],
+        "war_chest_signals": "Hitachi Ltd parent has ~$80B+ annual revenue, investment-grade credit, and has demonstrated willingness to deploy billions into Hitachi Energy. Capital is functionally unlimited."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2025-2026 (current)",
+            "headcount": 50000.0
+          },
+          {
+            "year": "2024",
+            "headcount": 45000.0
+          },
+          {
+            "year": "2023",
+            "headcount": 42000.0
+          },
+          {
+            "year": "2022",
+            "headcount": 40000.0
+          },
+          {
+            "year": "2021",
+            "headcount": 38000.0
+          },
+          {
+            "year": "2020 (at JV formation)",
+            "headcount": 36000.0
+          }
+        ],
+        "employee_cagr_pct": 6.8,
+        "latest_headcount": 50000.0,
+        "open_positions": 3000.0
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": 90
+      },
+      "saas": {
+        "deployment_model": "SaaS",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 2"
+    },
+    {
+      "company_name": "Orchestrade Financial Systems",
+      "folder": "orchestrade",
+      "data_availability": "Low (private company, bootstrapped, no public financial filings or disclosed funding rounds)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 6.0,
+            "evidence": "Estimated CAGR ~15-20% based on proxy metrics; client win acceleration from 1-2/yr to 3-4/yr since 2023. Private = unconfirmed."
+          },
+          "Funding Momentum": {
+            "score": 3.0,
+            "evidence": "Zero disclosed external funding in 16 years; appears bootstrapped with profitability. Low score but notable independence."
+          },
+          "Employee Growth": {
+            "score": 6.0,
+            "evidence": "Estimated CAGR ~12-15%; grew from ~60 to ~110 over 4 years. Singapore office added 2024, all offices expanded."
+          },
+          "Geographic Expansion": {
+            "score": 7.0,
+            "evidence": "Singapore office (new continent, 2024), Poland + Austria clients (2025), expanded 4 existing offices. Active APAC push."
+          },
+          "M&A Activity": {
+            "score": 2.0,
+            "evidence": "Zero acquisitions, zero divestitures. Partnership-only strategy. No M&A signals or exploration."
+          },
+          "SaaS Maturity": {
+            "score": 7.0,
+            "evidence": "Cloud-native architecture (.NET/C#, event-driven, containerized), multi-cloud (AWS/GCP/Azure), <10wk deploys. Hybrid model keeps on-prem option."
+          }
+        },
+        "composite_score": 5.2,
+        "classification": "Riser"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2026 (est.)",
+            "eur_millions": 21.0,
+            "yoy_growth_pct": 20.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2025",
+            "eur_millions": 17.0,
+            "yoy_growth_pct": 20.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 13.5,
+            "yoy_growth_pct": 15.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 11.0,
+            "yoy_growth_pct": 15.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 10.5,
+            "yoy_growth_pct": 10.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 7.5,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          }
+        ],
+        "cagr_3yr_pct": 20.0,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 21.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": 70.0,
+        "raw_metrics": {
+          "EBITDA (current)": "Unknown",
+          "EBITDA Margin": "Unknown",
+          "Net Profit / Loss": "Likely profitable",
+          "Recurring Revenue %": "Unknown (likely 50-70%)",
+          "SaaS Revenue %": "Unknown",
+          "Revenue per Employee": "EUR 150-250K"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 200.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "None disclosed",
+            "round": "--",
+            "amount": "--",
+            "valuation": "--",
+            "lead_investors": "--"
+          }
+        ],
+        "total_raised_text": "EUR 0 (no disclosed external funding)",
+        "latest_valuation_text": "Unknown (private, no disclosed rounds)",
+        "lead_investors": [],
+        "war_chest_signals": "No external capital signals. 16-year survival and expansion without disclosed funding suggests profitability and self-financing. Growing from 0 to ~107 employees across 5 global offices with Tier 1 bank clients (Credit Agricole CIB, Mizuho) on bootstrap is a significant achievement."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 115.0
+          },
+          {
+            "year": "2025",
+            "headcount": 105.0
+          },
+          {
+            "year": "2024",
+            "headcount": 90.0
+          },
+          {
+            "year": "2023",
+            "headcount": 75.0
+          },
+          {
+            "year": "2022",
+            "headcount": 70.0
+          },
+          {
+            "year": "2021",
+            "headcount": 60.0
+          }
+        ],
+        "employee_cagr_pct": 15.0,
+        "latest_headcount": 115.0,
+        "open_positions": null
+      },
+      "geographic": {
+        "international_revenue_pct": 70.0,
+        "countries_count": 1
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 2"
+    },
+    {
+      "company_name": "Sopra Steria (cpX.Energy)",
+      "folder": "sopra-steria-cpx-energy",
+      "data_availability": "High (Sopra Steria SE is publicly listed on Euronext Paris: SOP, ISIN FR0000050809. Annual reports, financial filings, and investor presentations available. cpX.Energy-specific revenue not disclosed separately as it is a product division, not a standalone entity.)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 4.0,
+            "evidence": "3yr CAGR ~7.2% (M&A-inflated; organic growth turned negative: -0.5% in 2024, -3.8% in H1 2025)"
+          },
+          "Funding Momentum": {
+            "score": 4.0,
+            "evidence": "Public company, strong FCF (EUR 432M), self-funded. No new capital raises. Restored acquisition capacity after 2023 wave."
+          },
+          "Employee Growth": {
+            "score": 2.0,
+            "evidence": "3yr CAGR ~2.4% masks M&A-driven spike (56K) then divestiture-driven decline (51K→projected 46K by 2026). Net trajectory is shrinking."
+          },
+          "Geographic Expansion": {
+            "score": 7.0,
+            "evidence": "Ordina acquisition added major NL/BE presence (4,000+ employees). CS Group added French critical systems. cpX.Energy added EDSN (NL) connectivity."
+          },
+          "M&A Activity": {
+            "score": 8.0,
+            "evidence": "3 acquisitions in 2023 (CS Group, Ordina EUR 518M, Tobania) + 1 strategic divestiture (SBS EUR 330M). Active portfolio reshaping."
+          },
+          "SaaS Maturity": {
+            "score": 6.0,
+            "evidence": "cpX.Energy is cloud-native SaaS with usage-based pricing (scores 9-10 standalone). But parent is traditional IT services with no disclosed recurring revenue %. Blended score reflects the split."
+          }
+        },
+        "composite_score": 5.2,
+        "classification": "Riser"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2025 (est.)",
+            "eur_millions": 5650.0,
+            "yoy_growth_pct": 2.2,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 5776.8,
+            "yoy_growth_pct": 0.5,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 5805.3,
+            "yoy_growth_pct": 13.8,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 5101.2,
+            "yoy_growth_pct": 8.9,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 4683.0,
+            "yoy_growth_pct": 9.9,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 4263.0,
+            "yoy_growth_pct": 4.8,
+            "confidence": "Confirmed"
+          }
+        ],
+        "cagr_3yr_pct": 7.2,
+        "cagr_5yr_pct": 7.9,
+        "latest_revenue_eur_m": 5650.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": null,
+        "raw_metrics": {
+          "Operating Margin on Business Activity (2024)": "9.8% (EUR 564.7M)",
+          "Operating Margin on Business Activity (2023)": "9.4% (EUR 548.2M)",
+          "Operating Margin on Business Activity (2022)": "8.9% (EUR 453.1M)",
+          "Operating Margin on Business Activity (2021)": "~8.0%",
+          "Operating Margin on Business Activity (2020)": "7.0%",
+          "Net Profit from Continuing Ops (2024)": "EUR 309.3M (+68.4% YoY)",
+          "Net Profit (2023)": "EUR 183.7M",
+          "Net Profit (2022)": "EUR 247.8M",
+          "Net Profit (2020)": "EUR 106.8M",
+          "Free Cash Flow (2024)": "EUR 432.1M (7%+ of revenue)",
+          "Free Cash Flow (2023)": "EUR 390.2M (6.7% of revenue)",
+          "Free Cash Flow (2020)": "EUR 203.5M",
+          "Return on Capital Employed (2024)": "21.5% (before tax)",
+          "Net Financial Debt (2024)": "EUR 382.2M (reduced 59.6% YoY)",
+          "Net Financial Debt (2023)": "EUR 946.0M (post-acquisitions)",
+          "Net Financial Debt (2022)": "EUR 152.0M",
+          "Recurring Revenue %": "Not disclosed (services company)",
+          "SaaS Revenue %": "Not disclosed (cpX.Energy is SaaS but not reported separately)",
+          "Revenue per Employee (2024)": "EUR ~113K",
+          "Revenue per Employee (2023)": "EUR ~104K"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 113.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "2014",
+            "round": "Merger",
+            "amount": "Sopra + Steria merger",
+            "valuation": "N/A",
+            "lead_investors": "N/A"
+          },
+          {
+            "date": "Listed",
+            "round": "Euronext Paris",
+            "amount": "SOP (ISIN FR0000050809)",
+            "valuation": "Market cap ~EUR 2.89B (Jan 2026)",
+            "lead_investors": "N/A"
+          }
+        ],
+        "total_raised_text": "N/A -- publicly listed, self-funded through operations",
+        "latest_valuation_text": null,
+        "lead_investors": [],
+        "war_chest_signals": "Strong. EUR 432M free cash flow in 2024 (7%+ of revenue). Net debt reduced to EUR 382M from EUR 946M post-acquisitions. Significant acquisition capacity restored after digesting 2023 M&A wave. Proposed dividend EUR 4.65/share (unchanged), indicating confidence in cash generation. Axway share sale generated additional EUR 95.9M in 2024."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (proj.)",
+            "headcount": 46245.0
+          },
+          {
+            "year": "2025 (est.)",
+            "headcount": 50000.0
+          },
+          {
+            "year": "2024",
+            "headcount": 50988.0
+          },
+          {
+            "year": "2023",
+            "headcount": 56000.0
+          },
+          {
+            "year": "2022",
+            "headcount": 48741.0
+          },
+          {
+            "year": "2021",
+            "headcount": 47437.0
+          },
+          {
+            "year": "2020",
+            "headcount": 45960.0
+          },
+          {
+            "year": "2019",
+            "headcount": 46245.0
+          }
+        ],
+        "employee_cagr_pct": 2.6,
+        "latest_headcount": 46245.0,
+        "open_positions": null
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": 30
+      },
+      "saas": {
+        "deployment_model": "SaaS",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 1"
+    },
+    {
+      "company_name": "Brady Technologies",
+      "folder": "brady-technologies-powerdesk",
+      "data_availability": "Medium-High (former AIM-listed company with historical public filings 2004-2019; private since Jan 2020 under Hanover Investors PE ownership; Companies House balance sheet data available through Dec 2024; no disclosed turnover post-delisting)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 2.0,
+            "evidence": "Revenue declined from GBP 31M (2015 peak) to est. USD 8.2M energy-only (2024); net worth deteriorated by GBP 19M over 2022-2024; no disclosed growth in energy-only segment"
+          },
+          "Funding Momentum": {
+            "score": 4.0,
+            "evidence": "PE-backed (Hanover Fund II, GBP 15M take-private 2019); new Ashgrove Capital debt facility (Jun 2025) demonstrates ability to attract B2B software lending despite negative net worth; no new equity rounds"
+          },
+          "Employee Growth": {
+            "score": 3.0,
+            "evidence": "Slight growth from ~190 to ~210 over 2022-2026 (CAGR ~5%); stabilized after post-divestiture contraction; zero open LinkedIn positions in Feb 2026 dampens signal"
+          },
+          "Geographic Expansion": {
+            "score": 7.0,
+            "evidence": "Entered North America (US offices, ~17 employees), Canada (Ontario), and Western Australia in last 2-3 years; small presences added in Poland, Denmark, Finland; Brady ETRM 2025.1 added Euronext exchange connectivity"
+          },
+          "M&A Activity": {
+            "score": 5.0,
+            "evidence": "2 cloud-native acquisitions (CRisk, Igloo in 2021) + strategic commodities divestiture (2022); no M&A activity since 2022; consolidation phase"
+          },
+          "SaaS Maturity": {
+            "score": 7.0,
+            "evidence": "SaaS-first strategy since 2020; PowerDesk, Igloo, CRisk all cloud-native; estimated 65-80% recurring revenue; legacy ETRM still actively developed (2025.1 release); PowerDesk Edge algo trading expanding"
+          }
+        },
+        "composite_score": 4.7,
+        "classification": "Steady"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2015",
+            "eur_millions": 42.8,
+            "yoy_growth_pct": 5.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2016",
+            "eur_millions": 31.0,
+            "yoy_growth_pct": 18.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2017",
+            "eur_millions": 25.3,
+            "yoy_growth_pct": 13.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2018",
+            "eur_millions": 26.2,
+            "yoy_growth_pct": 4.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2019",
+            "eur_millions": 21.7,
+            "yoy_growth_pct": 18.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 3.7,
+            "yoy_growth_pct": 83.0,
+            "confidence": "Confirmed (anomalous)"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 14.0,
+            "yoy_growth_pct": 265.0,
+            "confidence": "Confirmed"
+          }
+        ],
+        "cagr_3yr_pct": null,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 42.8
+      },
+      "profitability": {
+        "recurring_revenue_pct": 60.0,
+        "raw_metrics": {
+          "EBITDA (2018)": "GBP 0.7M (3.0% margin)",
+          "EBITDA (2017)": "GBP -2.6M (-11.9% margin)",
+          "EBITDA (2016)": "GBP 1.9M (7.5% margin)",
+          "EBITDA (2019e)": "GBP -3.9M (-20.6% margin)",
+          "EBITDA (2015)": "~GBP 6.3M (~20% margin)",
+          "Net Profit / Loss (2021)": "GBP -0.41M",
+          "Net Profit / Loss (2020)": "GBP -4.76M",
+          "Net Profit / Loss (2018)": "GBP -1.8M (after exceptional costs)",
+          "Recurring Revenue % (2016)": "~60% (H1 2016: recurring + services)",
+          "Recurring Revenue % (2014)": "~51% (GBP 15.85M of GBP 31M)",
+          "Revenue per Employee (2024 est.)": "~EUR 36K (EUR 7.5M / ~210 employees)",
+          "Revenue per Employee (2015 peak)": "~EUR 143K-171K (EUR 42.8M / 250-300 employees)"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 36.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "2004",
+            "round": "IPO (AIM)",
+            "amount": "Unknown",
+            "valuation": "Unknown",
+            "lead_investors": "Public market"
+          },
+          {
+            "date": "Dec 2010",
+            "round": "Share Placing",
+            "amount": "GBP 15M (at 77p/share)",
+            "valuation": "~GBP 64M market cap implied",
+            "lead_investors": "Public shareholders"
+          },
+          {
+            "date": "Feb 2012",
+            "round": "Share Placing",
+            "amount": "GBP 18M (at 77p/share)",
+            "valuation": "~GBP 64M market cap implied",
+            "lead_investors": "Public shareholders"
+          },
+          {
+            "date": "Nov 2019",
+            "round": "PE Take-Private",
+            "amount": "GBP 15M (18p/share)",
+            "valuation": "GBP 15M (171% premium to share price)",
+            "lead_investors": "Hanover Investors (via Fund II)"
+          },
+          {
+            "date": "Nov 2019",
+            "round": "Debt Facility",
+            "amount": "GBP 5M (GBP 3M drawn)",
+            "valuation": "N/A",
+            "lead_investors": "Hanover Investors"
+          },
+          {
+            "date": "Jan 2020",
+            "round": "Delisting",
+            "amount": "N/A",
+            "valuation": "N/A",
+            "lead_investors": "N/A"
+          },
+          {
+            "date": "Jun 2025",
+            "round": "**Secured Lending Facility**",
+            "amount": "**Undisclosed**",
+            "valuation": "**N/A**",
+            "lead_investors": "**Ashgrove Capital LLP**"
+          }
+        ],
+        "total_raised_text": "~GBP 33M (GBP 15M + GBP 18M share placings)",
+        "latest_valuation_text": "GBP 15M at acquisition; current valuation unclear given -GBP 11.7M net worth but strategic value of PowerDesk platform",
+        "lead_investors": [
+          "**Ashgrove Capital LLP**",
+          "Hanover Investors",
+          "Hanover Investors (via Fund II)",
+          "Public market",
+          "Public shareholders"
+        ],
+        "war_chest_signals": "Hanover Investors historically achieved >40% IRR; raised GBP 150M toward a GBP 300M Fund III; 18 portfolio companies managed. The Ashgrove refinancing is a significant signal -- it demonstrates that (a) Brady can attract external B2B software lending despite negative net worth, likely based on recurring revenue and product quality; and (b) Hanover may be extending its hold period beyond the typical 5-7 year window (Dec 2019 + 7 = Dec 2026), possibly to allow PowerDesk to gain more market traction before exit."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 210.0
+          },
+          {
+            "year": "2025",
+            "headcount": 205.0
+          },
+          {
+            "year": "2024",
+            "headcount": 190.5
+          },
+          {
+            "year": "2023",
+            "headcount": 185.0
+          },
+          {
+            "year": "2022 (post-divestiture, Jul)",
+            "headcount": 190.0
+          },
+          {
+            "year": "2022 (pre-divestiture)",
+            "headcount": 280.0
+          },
+          {
+            "year": "2021 (post-acquisitions)",
+            "headcount": 280.0
+          },
+          {
+            "year": "2020",
+            "headcount": 215.0
+          },
+          {
+            "year": "2019",
+            "headcount": 200.0
+          },
+          {
+            "year": "2015 (peak era)",
+            "headcount": 275.0
+          }
+        ],
+        "employee_cagr_pct": 5.0,
+        "latest_headcount": 210.0,
+        "open_positions": null
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": null
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": 30.0
+      },
+      "tier": "Tier 1"
+    },
+    {
+      "company_name": "Engineering Ingegneria Informatica (Engineering Group)",
+      "folder": "engineering-group",
+      "data_availability": "Medium-High (PE-owned, previously public; annual results published via press releases; detailed segment-level breakdown not disclosed)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 5.0,
+            "evidence": "3yr CAGR 10.1%, but acquisition-inflated; organic growth ~5-8%; 2024 decelerated to +2.5%"
+          },
+          "Funding Momentum": {
+            "score": 6.0,
+            "evidence": "Significant PE backing (Bain Capital + NB Renaissance, $1.8B deal); EUR 605M bonds; IPO candidate"
+          },
+          "Employee Growth": {
+            "score": 4.0,
+            "evidence": "3yr CAGR ~5.3% (acquisition-driven); organic growth near flat; only 28 open roles for 14,000-person company"
+          },
+          "Geographic Expansion": {
+            "score": 3.0,
+            "evidence": "No new countries in 3 years; consolidating Italy, Spain, LatAm; Italy represents ~80%+ of revenue"
+          },
+          "M&A Activity": {
+            "score": 7.0,
+            "evidence": "3 acquisitions in 2022-2023; Be Shaping was transformative (EUR 235M revenue, delisted); now shifting to organic"
+          },
+          "SaaS Maturity": {
+            "score": 3.0,
+            "evidence": "On-premise dominant; no cloud revenue % disclosed; services-heavy DNA; SaaS modules emerging but small fraction"
+          }
+        },
+        "composite_score": 4.7,
+        "classification": "Steady"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2024",
+            "eur_millions": 1764.2,
+            "yoy_growth_pct": 2.5,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 1721.1,
+            "yoy_growth_pct": 17.9,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 1460.0,
+            "yoy_growth_pct": 10.5,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 1321.0,
+            "yoy_growth_pct": 6.4,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 1241.5,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated"
+          }
+        ],
+        "cagr_3yr_pct": 10.1,
+        "cagr_5yr_pct": 9.2,
+        "latest_revenue_eur_m": 1764.2
+      },
+      "profitability": {
+        "recurring_revenue_pct": null,
+        "raw_metrics": {
+          "EBITDA Adjusted (2024)": "EUR 276.2M",
+          "EBITDA Adjusted (2023)": "EUR 257.3M",
+          "EBITDA Adjusted (2022)": "EUR 208.6M",
+          "EBITDA Adjusted (2021)": "EUR 198.2M",
+          "EBITDA Margin (2024)": "15.6%",
+          "EBITDA Margin (2023)": "14.9%",
+          "EBITDA Margin (2022)": "14.3%",
+          "EBITDA Margin (2021)": "15.0%",
+          "Net Profit (2022)": "EUR 28.3M",
+          "Net Profit (2021)": "EUR 47.5M",
+          "Recurring Revenue %": "Not disclosed (services-heavy model)",
+          "SaaS Revenue %": "Not disclosed (emerging SaaS modules in Neta)",
+          "Revenue per Employee (2024)": "EUR ~126K",
+          "Revenue per Employee (2021)": "EUR ~110K"
+        },
+        "ebitda_margin_pct": 15.6,
+        "revenue_per_employee_eur_k": 126.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "Pre-2016",
+            "round": "Public (Borsa Italiana)",
+            "amount": "N/A",
+            "valuation": "Market cap varied",
+            "lead_investors": "Public market"
+          },
+          {
+            "date": "Feb 2016",
+            "round": "PE Buyout",
+            "amount": "~EUR 1.5B (est.)",
+            "valuation": "EUR 66/share (18.1% premium)",
+            "lead_investors": "Apax Partners (VIII) + NB Renaissance Partners"
+          },
+          {
+            "date": "Jul 2020",
+            "round": "PE Buyout",
+            "amount": "$1.8B (~EUR 1.6B)",
+            "valuation": "$1.8B",
+            "lead_investors": "Bain Capital + NB Renaissance Partners"
+          },
+          {
+            "date": "2020",
+            "round": "Senior Secured Notes",
+            "amount": "EUR 605M",
+            "valuation": "N/A",
+            "lead_investors": "N/A (bond market)"
+          },
+          {
+            "date": "2024",
+            "round": "Bond Issuance",
+            "amount": "Undisclosed",
+            "valuation": "N/A",
+            "lead_investors": "N/A (bond market)"
+          }
+        ],
+        "total_raised_text": "Not applicable (PE buyouts, not venture rounds; funded via leveraged buyouts + bond issuances)",
+        "latest_valuation_text": "$1.8B / ~EUR 1.6B (Jul 2020 acquisition price); current implied valuation likely higher given revenue growth",
+        "lead_investors": [
+          "Apax Partners (VIII) + NB Renaissance Partners",
+          "Bain Capital + NB Renaissance Partners",
+          "N/A (bond market)",
+          "Public market"
+        ],
+        "war_chest_signals": "EUR 605M bonds (2020) refinanced acquisition bridge facility; 2024 bond issuance for organic growth and tech investments. PE sponsors typically maintain additional dry powder for bolt-on acquisitions. Reuters notes Engineering as a \"potential listing candidate\" -- IPO would unlock further capital."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2024-2025",
+            "headcount": 14000.0
+          },
+          {
+            "year": "2023",
+            "headcount": 14000.0
+          },
+          {
+            "year": "2022",
+            "headcount": 13500.0
+          },
+          {
+            "year": "2021",
+            "headcount": 12000.0
+          },
+          {
+            "year": "2020",
+            "headcount": 11000.0
+          },
+          {
+            "year": "2017",
+            "headcount": 10300.0
+          }
+        ],
+        "employee_cagr_pct": 6.2,
+        "latest_headcount": 14000.0,
+        "open_positions": 28.0
+      },
+      "geographic": {
+        "international_revenue_pct": 80.0,
+        "countries_count": 14
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 1b"
+    },
+    {
+      "company_name": "Ferranti Computer Systems",
+      "folder": "ferranti",
+      "data_availability": "Medium-High (private company, but Belgian NBB mandatory filings provide 4 years of verified revenue/headcount data)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 6.0,
+            "evidence": "3yr CAGR 17.9%; exceptional +39% YoY in 2024; solidly in the 10-20% CAGR range with upward momentum"
+          },
+          "Funding Momentum": {
+            "score": 3.0,
+            "evidence": "Zero external funding; self-funded under Nijkerk Group; profitable bootstrap model"
+          },
+          "Employee Growth": {
+            "score": 5.0,
+            "evidence": "Belgian FTE CAGR 8.2% (3yr); 23 new hires in 2025; steady growth but no aggressive scaling"
+          },
+          "Geographic Expansion": {
+            "score": 5.0,
+            "evidence": "Switzerland (new partnership 2025/26), Germany (E-world 2026 push), UK/Nordic hires; partnership-led model"
+          },
+          "M&A Activity": {
+            "score": 1.0,
+            "evidence": "Zero acquisitions, zero divestitures, no M&A signals whatsoever; purely organic growth"
+          },
+          "SaaS Maturity": {
+            "score": 7.0,
+            "evidence": "Cloud-first since 2019, 100th release, 3-week cadence, Microsoft D365/Azure stack; on-prem still available"
+          }
+        },
+        "composite_score": 4.5,
+        "classification": "Steady"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2024",
+            "eur_millions": 36.3,
+            "yoy_growth_pct": 38.7,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 26.2,
+            "yoy_growth_pct": 5.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 24.9,
+            "yoy_growth_pct": 12.6,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 22.1,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2020",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          }
+        ],
+        "cagr_3yr_pct": 17.9,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 36.3
+      },
+      "profitability": {
+        "recurring_revenue_pct": null,
+        "raw_metrics": {
+          "EBITDA (current)": "Not separately disclosed",
+          "Gross Margin (2024)": "€21,551,635 (59.3%)",
+          "Gross Margin (2023)": "Not available in search results",
+          "Net Profit (2024)": "€2,882,132 (7.9% margin)",
+          "Net Profit (2023)": "~€524K est. (implied by 450% increase)",
+          "Equity (2024)": "€9,312,127 (+45% YoY)",
+          "Recurring Revenue %": "Not disclosed; SaaS subscription is primary model",
+          "SaaS Revenue %": "Not disclosed; cloud SaaS is primary deployment model since 2019",
+          "Revenue per Employee (Belgian entity)": "€238,650",
+          "Revenue per Employee (Global est.)": "~€145,000"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 238.7
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "1994",
+            "round": "Acquisition by Nijkerk Group",
+            "amount": "Unknown",
+            "valuation": "Unknown",
+            "lead_investors": "Nijkerk Ontwikkel Maatschappij"
+          },
+          {
+            "date": "1976",
+            "round": "Founding (Ferranti International plc subsidiary)",
+            "amount": "Unknown",
+            "valuation": "N/A",
+            "lead_investors": "Ferranti International plc"
+          }
+        ],
+        "total_raised_text": "€0 external funding (self-funded through operations under Nijkerk Group ownership)",
+        "latest_valuation_text": "N/A -- privately held, no external valuation events",
+        "lead_investors": [
+          "Ferranti International plc",
+          "Nijkerk Ontwikkel Maatschappij"
+        ],
+        "war_chest_signals": "Belgian entity equity of €9.3M. No external debt financing visible. Cash position not disclosed. Operating profitability provides self-funding capability for organic growth. No signals of PE interest, acquisition war chest, or external capital raising."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2025 (current)",
+            "headcount": null
+          },
+          {
+            "year": "2024",
+            "headcount": null
+          },
+          {
+            "year": "2023",
+            "headcount": null
+          },
+          {
+            "year": "2022",
+            "headcount": null
+          },
+          {
+            "year": "2021",
+            "headcount": null
+          }
+        ],
+        "employee_cagr_pct": 8.2,
+        "latest_headcount": null,
+        "open_positions": null
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": null
+      },
+      "saas": {
+        "deployment_model": "SaaS",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 1b"
+    },
+    {
+      "company_name": "Schleupen SE",
+      "folder": "schleupen",
+      "data_availability": "Medium (private company but publishes annual report / Geschäftsbericht with full P&L and balance sheet)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 6.0,
+            "evidence": "2yr CAGR 16.7% (2022-2024), 4yr CAGR 11.2% -- solid growth at high end of 10-20% band; 2024 was standout year at +19.6%"
+          },
+          "Funding Momentum": {
+            "score": 3.0,
+            "evidence": "Zero external funding, bootstrapped since 1970; profitable (9% EBIT margin) but no VC/PE/IPO signals; tiny cash reserves"
+          },
+          "Employee Growth": {
+            "score": 5.0,
+            "evidence": "4yr CAGR 6.2% (470 to 598), steady hiring to 630+ by 2026; no AI/ML roles; kununu Top Company"
+          },
+          "Geographic Expansion": {
+            "score": 1.0,
+            "evidence": "Germany-only focus for core EWW division; no new countries entered; no international expansion signals"
+          },
+          "M&A Activity": {
+            "score": 1.0,
+            "evidence": "Zero acquisitions in 5+ years; divested GIS unit in 2024; organic growth via partnerships only"
+          },
+          "SaaS Maturity": {
+            "score": 6.0,
+            "evidence": "59.3% recurring revenue, AWS SaaS deployment, Schleupen.CS 3.0 platform redesign; still hybrid with license + on-prem"
+          }
+        },
+        "composite_score": 3.7,
+        "classification": "Steady"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2025 (plan)",
+            "eur_millions": 106.0,
+            "yoy_growth_pct": 7.2,
+            "confidence": "Confirmed (guidance)"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 98.9,
+            "yoy_growth_pct": 19.6,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 82.7,
+            "yoy_growth_pct": 13.9,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 72.6,
+            "yoy_growth_pct": 12.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 68.0,
+            "yoy_growth_pct": 5.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 64.8,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2011",
+            "eur_millions": 60.0,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          }
+        ],
+        "cagr_3yr_pct": 3.9,
+        "cagr_5yr_pct": 11.2,
+        "latest_revenue_eur_m": 106.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": 59.3,
+        "raw_metrics": {
+          "EBIT (2024)": "EUR 8.9M",
+          "EBIT Margin (2024)": "9.0%",
+          "EBIT (2023)": "EUR 7.7M",
+          "EBIT Margin (2023)": "9.3%",
+          "Pre-Tax Profit (2024)": "EUR 9.1M",
+          "Pre-Tax Profit (2023)": "EUR 7.9M",
+          "Net Profit (2024)": "EUR 6.2M",
+          "Net Profit (2023)": "EUR 5.4M",
+          "Recurring Revenue % (2024)": "59.3%",
+          "SaaS/Cloud Revenue % (2024)": "14.7% (EUR 14.5M)",
+          "Revenue per Employee (2024)": "EUR 165K",
+          "Personnel Costs (2024)": "EUR 50.1M (50.6% of revenue)",
+          "Personnel Costs (2023)": "EUR 45.9M (55.5% of revenue)",
+          "Material Costs (2024)": "EUR 21.5M (21.7% of revenue)",
+          "Material Costs (2023)": "EUR 12.1M (14.6% of revenue)"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 165.0
+      },
+      "funding": {
+        "rounds": [],
+        "total_raised_text": "EUR 0 (bootstrapped since 1970)",
+        "latest_valuation_text": "N/A (private, no external investment)",
+        "lead_investors": [],
+        "war_chest_signals": "Very limited. Cash position is minimal (EUR 33.5K at year-end 2024, down from EUR 558.8K in 2023). Bank debt is EUR 10.6M. The company invests from operating cash flow, not from reserves. No acquisition war chest visible."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 630.0
+          },
+          {
+            "year": "2024 (year-end)",
+            "headcount": 598.0
+          },
+          {
+            "year": "2023",
+            "headcount": 560.0
+          },
+          {
+            "year": "2022",
+            "headcount": 520.0
+          },
+          {
+            "year": "2021",
+            "headcount": 480.0
+          },
+          {
+            "year": "2020",
+            "headcount": 470.0
+          },
+          {
+            "year": "2011",
+            "headcount": 430.0
+          }
+        ],
+        "employee_cagr_pct": 2.6,
+        "latest_headcount": 630.0,
+        "open_positions": null
+      },
+      "geographic": {
+        "international_revenue_pct": 5.0,
+        "countries_count": null
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 3"
+    },
+    {
+      "company_name": "Robotron Datenbank-Software GmbH",
+      "folder": "robotron",
+      "data_availability": "Low (private family-owned GmbH; limited public financial disclosures; revenue from company press information and Bundesanzeiger filings)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 4.0,
+            "evidence": "3yr CAGR ~7% (EUR 56.1M to EUR 68.7M); solid but modest single-digit growth"
+          },
+          "Funding Momentum": {
+            "score": 3.0,
+            "evidence": "Zero external funding; family bootstrap with profitability; EUR 1.5M in government research grants"
+          },
+          "Employee Growth": {
+            "score": 3.0,
+            "evidence": "Parent CAGR ~2.5% (3yr); group CAGR ~3.3% (5yr); stable but not aggressive hiring"
+          },
+          "Geographic Expansion": {
+            "score": 6.0,
+            "evidence": "NZ deepened significantly (Mercury, Lodestone, Pulse, 30 staff); Australia new entry 2025; active Oceanian push"
+          },
+          "M&A Activity": {
+            "score": 2.0,
+            "evidence": "One small tuck-in (VOCUS 2020) in 5+ years; no M&A pipeline signals; organic growth focus"
+          },
+          "SaaS Maturity": {
+            "score": 4.0,
+            "evidence": "Hybrid model with own data center; Oracle DB core (not cloud-native); OCI offerings growing; estimated <30% recurring"
+          }
+        },
+        "composite_score": 3.67,
+        "classification": "Steady"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "FY2024/25 (est.)",
+            "eur_millions": 73.5,
+            "yoy_growth_pct": 9.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "FY2023/24",
+            "eur_millions": 68.7,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "FY2022/23",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          },
+          {
+            "year": "FY2021/22",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          },
+          {
+            "year": "FY2020/21",
+            "eur_millions": 56.1,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "FY2019/20",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          }
+        ],
+        "cagr_3yr_pct": 7.0,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 73.5
+      },
+      "profitability": {
+        "recurring_revenue_pct": null,
+        "raw_metrics": {
+          "EBITDA (current)": "Unknown",
+          "EBITDA Margin": "Unknown",
+          "Net Profit / Loss": "Unknown (profitable implied by sustained growth, no funding, family dividend)",
+          "Recurring Revenue %": "Unknown",
+          "SaaS Revenue %": "Unknown",
+          "Revenue per Employee (parent)": "EUR 144,600",
+          "Revenue per Employee (group est.)": "EUR 106,000-115,000"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 144.6
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "1990",
+            "round": "Founding (MBO)",
+            "amount": "Unknown",
+            "valuation": "N/A",
+            "lead_investors": "Dr. Rolf Heinemann (Management Buy-Out from VEB Robotron)"
+          },
+          {
+            "date": "1993-2005",
+            "round": "Oracle stake",
+            "amount": "Unknown",
+            "valuation": "Unknown",
+            "lead_investors": "Oracle Corporation (minority stake)"
+          },
+          {
+            "date": "2005",
+            "round": "Oracle buyback",
+            "amount": "Unknown",
+            "valuation": "N/A",
+            "lead_investors": "Heinemann family (repurchased Oracle shares)"
+          }
+        ],
+        "total_raised_text": "EUR 0 (external). Self-funded since founding. Oracle had a stake from ~1993-2005 (likely from the Oracle partnership era), which was repurchased by the family in 2005.",
+        "latest_valuation_text": "Not applicable (private, no valuations)",
+        "lead_investors": [
+          "Dr. Rolf Heinemann (Management Buy-Out from VEB Robotron)",
+          "Heinemann family (repurchased Oracle shares)",
+          "Oracle Corporation (minority stake)"
+        ],
+        "war_chest_signals": "Unknown. No public balance sheet data. As a profitable company with no debt obligations visible, likely has moderate cash reserves. Conservative growth strategy suggests self-funding capacity for organic expansion."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2025 (current)",
+            "headcount": 650.0
+          },
+          {
+            "year": "FY2023/24",
+            "headcount": 475.0
+          },
+          {
+            "year": "FY2020/21",
+            "headcount": 441.0
+          },
+          {
+            "year": "2020",
+            "headcount": 554.0
+          },
+          {
+            "year": "2017/18",
+            "headcount": 560.0
+          },
+          {
+            "year": "2024 (NZ)",
+            "headcount": 30.0
+          },
+          {
+            "year": "2023 (NZ)",
+            "headcount": 12.0
+          },
+          {
+            "year": "1990",
+            "headcount": 26.0
+          }
+        ],
+        "employee_cagr_pct": 3.3,
+        "latest_headcount": 650.0,
+        "open_positions": null
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": 1
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 1b"
+    },
+    {
+      "company_name": "ALTEN Worldgrid",
+      "folder": "alten-worldgrid",
+      "data_availability": "Medium (Worldgrid-specific data limited; parent ALTEN SA is public on Euronext Paris: ATE with full financial disclosure. Worldgrid was a division of Atos, now a division of ALTEN -- neither parent breaks out Worldgrid revenue separately post-acquisition.)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 2.0,
+            "evidence": "ALTEN parent 3yr CAGR 2.7% (2022-2025), declining -1.1% in 2025; Worldgrid flat at EUR 170M with no multi-year data"
+          },
+          "Funding Momentum": {
+            "score": 5.0,
+            "evidence": "Public company (Euronext: ATE), market cap EUR 2.7B, EUR 270M self-funded acquisition of Worldgrid, EUR 297M net cash (2023)"
+          },
+          "Employee Growth": {
+            "score": 3.0,
+            "evidence": "ALTEN parent slowed from +28% (2022) to +1.2% (2024); Worldgrid plans 150 hires/yr (~14% growth) but from small base"
+          },
+          "Geographic Expansion": {
+            "score": 3.0,
+            "evidence": "ALTEN parent in 30+ countries but Worldgrid confined to FR/ES/DE; no new market entry signals for energy division"
+          },
+          "M&A Activity": {
+            "score": 7.0,
+            "evidence": "17+ acquisitions (2022-2025) including EUR 270M Worldgrid deal; serial acquirer with clear geographic/capability strategy"
+          },
+          "SaaS Maturity": {
+            "score": 1.0,
+            "evidence": "100% professional services; zero software products; no SaaS/cloud/recurring revenue. Structurally N/A for consulting firm"
+          }
+        },
+        "composite_score": 3.5,
+        "classification": "Steady"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2025",
+            "eur_millions": 170.0,
+            "yoy_growth_pct": 0.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 170.0,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 170.0,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2022",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          },
+          {
+            "year": "2021",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          }
+        ],
+        "cagr_3yr_pct": 2.7,
+        "cagr_5yr_pct": 8.8,
+        "latest_revenue_eur_m": 170.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": 0.0,
+        "raw_metrics": {
+          "EBITDA (2024)": "EUR 448.3M",
+          "EBITDA Margin (2024)": "10.8%",
+          "EBITDA (2023)": "EUR 454.5M",
+          "EBITDA Margin (2023)": "11.2%",
+          "Operating Profit on Activity (2022)": "EUR 419.6M (11.1% of revenue)",
+          "Operating Profit on Activity (2023)": "EUR 382.5M (9.4% of revenue)",
+          "Operating Margin (2024)": "8.6% (EUR 356.3M)",
+          "Operating Margin (2025 est.)": "8.0-8.1%",
+          "Net Income (2024)": "EUR 186.4M (4.5% margin)",
+          "Net Income (2023)": "EUR 233.2M (5.7% margin)",
+          "Net Income (2022)": "EUR 457.6M (12.1% margin, incl. exceptional gains)",
+          "Net Cash Position (2023)": "EUR 297.0M (gearing: -14.6%)",
+          "Recurring Revenue %": "~0% (professional services, T&M/fixed-price)",
+          "SaaS Revenue %": "0% (not a software company)",
+          "Revenue per Employee (ALTEN parent, 2024)": "EUR 71,800",
+          "Revenue per Employee (Worldgrid, 2023)": "EUR 154,500"
+        },
+        "ebitda_margin_pct": 10.8,
+        "revenue_per_employee_eur_k": 71.8
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "2000 (IPO)",
+            "round": "IPO",
+            "amount": "Euronext Paris listing",
+            "valuation": "EPA: ATE",
+            "lead_investors": "Public market"
+          },
+          {
+            "date": "Dec 2024",
+            "round": "Acquisition of Worldgrid",
+            "amount": "EUR 270M enterprise value",
+            "valuation": "N/A (division purchase)",
+            "lead_investors": "ALTEN SA (acquirer)"
+          },
+          {
+            "date": "2022-2025",
+            "round": "Serial acquisitions (17+ deals)",
+            "amount": "~EUR 500M+ cumulative (est.)",
+            "valuation": "N/A",
+            "lead_investors": "Self-funded"
+          }
+        ],
+        "total_raised_text": "N/A (public company since 2000; self-funded through operations)",
+        "latest_valuation_text": "Market cap ~EUR 2.7B (Feb 2026); EV ~EUR 2.34B",
+        "lead_investors": [
+          "ALTEN SA (acquirer)",
+          "Public market",
+          "Self-funded"
+        ],
+        "war_chest_signals": "Net cash position EUR 297M (2023); strong free cash flow generation; EUR 270M acquisition of Worldgrid funded from operations/debt without equity raise; stock trading at ~33-43% discount to analyst consensus (EUR 97.54 target vs ~EUR 75 market)"
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2025 (H1)",
+            "headcount": 58300.0
+          },
+          {
+            "year": "2024",
+            "headcount": 57705.0
+          },
+          {
+            "year": "2023",
+            "headcount": 57000.0
+          },
+          {
+            "year": "2022",
+            "headcount": 54100.0
+          },
+          {
+            "year": "2021",
+            "headcount": 42300.0
+          },
+          {
+            "year": "2020",
+            "headcount": 29400.0
+          }
+        ],
+        "employee_cagr_pct": 8.4,
+        "latest_headcount": 58300.0,
+        "open_positions": null
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": 7
+      },
+      "saas": {
+        "deployment_model": "N/A",
+        "cloud_revenue_pct": 0.0
+      },
+      "tier": "Tier 3"
+    },
+    {
+      "company_name": "MaxBill (LogNet Systems)",
+      "folder": "maxbill",
+      "data_availability": "Low (private Israeli company; no public financials, no disclosed funding rounds post-2007, no annual reports available)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 3.0,
+            "evidence": "Unknown CAGR; ~$10.6M after 28 years suggests slow historical growth; no disclosed revenue trajectory"
+          },
+          "Funding Momentum": {
+            "score": 2.0,
+            "evidence": "Single GBP 2M round in 2007; no funding in 17+ years; self-funded/bootstrapped since"
+          },
+          "Employee Growth": {
+            "score": 3.0,
+            "evidence": "Stable 51-200 range (Tracxn); minimal visible job openings; no hiring surge signals"
+          },
+          "Geographic Expansion": {
+            "score": 8.0,
+            "evidence": "Entered 4+ new markets in 2025 (Saudi Arabia, Singapore, SE Asia, Baltics, Poland deepening)"
+          },
+          "M&A Activity": {
+            "score": 1.0,
+            "evidence": "Zero acquisitions in 5+ years; no M&A pipeline signals; purely organic growth"
+          },
+          "SaaS Maturity": {
+            "score": 4.0,
+            "evidence": "Hybrid model; AI Billing is SaaS; enterprise on-prem still dominant; Java EE legacy stack"
+          }
+        },
+        "composite_score": 3.5,
+        "classification": "Steady"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2026 (est.)",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          },
+          {
+            "year": "2025",
+            "eur_millions": 11.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 9.7,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2023",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          },
+          {
+            "year": "2022",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          },
+          {
+            "year": "2021",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          }
+        ],
+        "cagr_3yr_pct": null,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 11.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": null,
+        "raw_metrics": {
+          "EBITDA (current)": "Unknown",
+          "EBITDA Margin": "Unknown",
+          "Net Profit / Loss": "Unknown (likely modest profit given 28yr survival with no funding)",
+          "Recurring Revenue %": "Unknown (SaaS + enterprise license mix)",
+          "SaaS Revenue %": "Unknown (growing with AI Billing SaaS push)",
+          "Revenue per Employee": "~EUR 53-97K (based on $10.6M / 100-200 employees)"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 75.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "Jul 2007",
+            "round": "Strategic Investment",
+            "amount": "GBP 2M (~EUR 2.9M at 2007 rates)",
+            "valuation": "Implied ~GBP 7.9M (25.4% stake)",
+            "lead_investors": "Eurovestech plc"
+          }
+        ],
+        "total_raised_text": "~EUR 2.9M (single round in 2007)",
+        "latest_valuation_text": "~GBP 7.9M implied from 2007 Eurovestech stake (18 years ago; not current)",
+        "lead_investors": [
+          "Eurovestech plc"
+        ],
+        "war_chest_signals": "None visible. No cash on balance sheet disclosed, no undrawn facilities, no PE dry powder. Company appears self-funded from operations since 2007."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 125.5
+          },
+          {
+            "year": "2025",
+            "headcount": 125.5
+          },
+          {
+            "year": "2024",
+            "headcount": 125.5
+          },
+          {
+            "year": "2023",
+            "headcount": null
+          },
+          {
+            "year": "2022",
+            "headcount": null
+          },
+          {
+            "year": "2021",
+            "headcount": null
+          }
+        ],
+        "employee_cagr_pct": null,
+        "latest_headcount": 125.5,
+        "open_positions": 2.0
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": null
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 1b"
+    },
+    {
+      "company_name": "Qualia Trading (Qualia Technologies Limited)",
+      "folder": "qualia-trading",
+      "data_availability": "Low (private UK limited company, bootstrapped/self-funded, no public filings beyond Companies House, no Crunchbase/PitchBook records)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 3.0,
+            "evidence": "No revenue data; early-stage with zero-upfront-cost model suggests slow initial ramp. Proxy estimates EUR 0.75-2.5M."
+          },
+          "Funding Momentum": {
+            "score": 2.0,
+            "evidence": "No external funding recorded; appears bootstrapped from founder capital (Tim Harrison's Igloo exit)."
+          },
+          "Employee Growth": {
+            "score": 3.0,
+            "evidence": "Estimated 5-15 employees from ~2 founders; no visible hiring activity or careers page."
+          },
+          "Geographic Expansion": {
+            "score": 2.0,
+            "evidence": "UK-only operations; global exchange connectivity is aspirational, not proven geographic expansion."
+          },
+          "M&A Activity": {
+            "score": 1.0,
+            "evidence": "No M&A activity; too early-stage for acquisitions."
+          },
+          "SaaS Maturity": {
+            "score": 9.0,
+            "evidence": "Cloud-native from founding, 100% SaaS, modular subscription pricing, same-day deployment."
+          }
+        },
+        "composite_score": 3.3,
+        "classification": "Steady"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2026 (est.)",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          },
+          {
+            "year": "2025",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          },
+          {
+            "year": "2024",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          }
+        ],
+        "cagr_3yr_pct": null,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": null
+      },
+      "profitability": {
+        "recurring_revenue_pct": 100.0,
+        "raw_metrics": {
+          "EBITDA (current)": "Unknown",
+          "EBITDA Margin": "Unknown",
+          "Net Profit / Loss": "Likely loss-making (early-stage startup)",
+          "Recurring Revenue %": "~100% (SaaS-only model)",
+          "SaaS Revenue %": "~100%",
+          "Revenue per Employee": "Unknown"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": null
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "N/A",
+            "round": "No recorded funding rounds",
+            "amount": "N/A",
+            "valuation": "N/A",
+            "lead_investors": "N/A"
+          }
+        ],
+        "total_raised_text": "No externally recorded funding",
+        "latest_valuation_text": "Unknown -- no valuation data available",
+        "lead_investors": [],
+        "war_chest_signals": "None visible"
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 10.0
+          },
+          {
+            "year": "2025",
+            "headcount": 6.0
+          },
+          {
+            "year": "2024",
+            "headcount": 1.5
+          }
+        ],
+        "employee_cagr_pct": null,
+        "latest_headcount": 10.0,
+        "open_positions": 0.0
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": null
+      },
+      "saas": {
+        "deployment_model": "SaaS",
+        "cloud_revenue_pct": 100.0
+      },
+      "tier": "Tier 2"
+    },
+    {
+      "company_name": "Arvato Systems (Bertelsmann)",
+      "folder": "arvato-systems",
+      "data_availability": "Low-Medium (private subsidiary within private conglomerate; Arvato Group segment reported in Bertelsmann annual reports, but Arvato Systems entity-level financials limited)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 3.0,
+            "evidence": "Arvato Systems stable at ~EUR 512M with estimated ~3-5% organic CAGR; Arvato Group CAGR distorted by Majorel sale; no explosive growth signals"
+          },
+          "Funding Momentum": {
+            "score": 3.0,
+            "evidence": "No external funding; Bertelsmann parent has EUR 8B Boost strategy but Arvato Systems energy is not a primary allocation target; SAP sovereign cloud partnership is strategic but modest"
+          },
+          "Employee Growth": {
+            "score": 3.0,
+            "evidence": "Headcount flat at ~3,400-3,500 for 3+ years; 88 open positions is moderate; no aggressive hiring or AI team scaling signals"
+          },
+          "Geographic Expansion": {
+            "score": 3.0,
+            "evidence": "Arvato Group expanding globally (US data centers, Gulf, ATC Ireland) but Arvato Systems energy remains Germany-only; TenneT NL bridge is theoretical only"
+          },
+          "M&A Activity": {
+            "score": 1.0,
+            "evidence": "Zero energy-sector acquisitions since NLI in 2017; Arvato Group M&A is supply chain focused; no capability-building M&A for IT services/energy"
+          },
+          "SaaS Maturity": {
+            "score": 6.0,
+            "evidence": "Energy products genuinely transitioning to SaaS on Azure (MaKo Cloud, GWA, DataHub, API WS, new EnerS4 billing, EnergySuite CRM); but overall Arvato Systems business remains services-heavy; no recurring revenue % disclosed"
+          }
+        },
+        "composite_score": 3.2,
+        "classification": "Steady"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2025 (9mo annualized)",
+            "eur_millions": 5400.0,
+            "yoy_growth_pct": 40.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 3871.0,
+            "yoy_growth_pct": 29.3,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 5476.0,
+            "yoy_growth_pct": 1.6,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 5564.0,
+            "yoy_growth_pct": 10.5,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 5035.0,
+            "yoy_growth_pct": 14.9,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 4382.0,
+            "yoy_growth_pct": 5.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2019",
+            "eur_millions": 4175.0,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          }
+        ],
+        "cagr_3yr_pct": 8.3,
+        "cagr_5yr_pct": 1.5,
+        "latest_revenue_eur_m": 5400.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": null,
+        "raw_metrics": {
+          "EBITDA (Arvato Group, 2024)": "EUR 641M",
+          "EBITDA Margin (2024)": "16.6%",
+          "EBITDA (Arvato Group, 2023)": "EUR 895M",
+          "EBITDA Margin (2023)": "16.3%",
+          "Invested Capital (2024)": "EUR 2,421M",
+          "Invested Capital (2023)": "EUR 2,383M",
+          "Net Profit / Loss": "Not separately reported",
+          "Recurring Revenue %": "Not disclosed",
+          "SaaS Revenue %": "Not disclosed (energy SaaS growing but small relative to group)",
+          "Revenue per Employee (Arvato Systems)": "~EUR 146K",
+          "Revenue per Employee (Arvato Group)": "~EUR 156K"
+        },
+        "ebitda_margin_pct": 16.6,
+        "revenue_per_employee_eur_k": 146.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "N/A",
+            "round": "Wholly-owned subsidiary",
+            "amount": "N/A",
+            "valuation": "N/A (private)",
+            "lead_investors": "Bertelsmann SE & Co. KGaA (100%)"
+          },
+          {
+            "date": "Feb 2022",
+            "round": "SAP Sovereign Cloud partnership",
+            "amount": "Undisclosed (equity stake)",
+            "valuation": "N/A",
+            "lead_investors": "Arvato Systems became co-shareholder with SAP"
+          }
+        ],
+        "total_raised_text": "N/A (internally funded by Bertelsmann)",
+        "latest_valuation_text": "Not applicable (private subsidiary of privately-held conglomerate)",
+        "lead_investors": [
+          "Arvato Systems became co-shareholder with SAP",
+          "Bertelsmann SE & Co. KGaA (100%)"
+        ],
+        "war_chest_signals": "Bertelsmann deploying EUR 8B in \"Boost\" investment strategy through end of 2026 (EUR 1.3B deployed in first 9 months of 2025). In H1 2025, Bertelsmann made ~EUR 1B in economic investments. Arvato Group invested capital EUR 2,421M (2024). Parent has significant resources but prioritizes Penguin Random House, RTL Group (Sky Deutschland acquisition), BMG, and Bertelsmann Education Group for growth investments. Arvato's Boost allocation focuses on supply chain / distribution center expansion and automation -- not IT services or energy specifically. Arvato Systems is not a primary capital allocation target within the Boost strategy."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 3450.0
+          },
+          {
+            "year": "2025",
+            "headcount": 3450.0
+          },
+          {
+            "year": "2024",
+            "headcount": 3500.0
+          },
+          {
+            "year": "2023",
+            "headcount": 3450.0
+          },
+          {
+            "year": "2022",
+            "headcount": 3350.0
+          },
+          {
+            "year": "2021",
+            "headcount": 3300.0
+          }
+        ],
+        "employee_cagr_pct": 2.0,
+        "latest_headcount": 3450.0,
+        "open_positions": 88.0
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": 1
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 3"
+    },
+    {
+      "company_name": "ION Commodities (ION Group)",
+      "folder": "ion-commodities-allegro",
+      "data_availability": "Low-Medium (ION Group is private; group-level EBITDA available via Bloomberg/S&P; commodities division financials not separately disclosed; proxy estimates required)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 3.0,
+            "evidence": "ION Commodities organic CAGR estimated ~3-5% (no acquisitions since 2019); ION Group growth is acquisition-driven (Italian holdings), not commodities"
+          },
+          "Funding Momentum": {
+            "score": 4.0,
+            "evidence": "No new equity funding; ION Group raises heavy debt ($15B total) but capital flows to Italy, not commodities. Deep pockets exist but are not deployed here"
+          },
+          "Employee Growth": {
+            "score": 3.0,
+            "evidence": "ION Group stable at ~13,000; growth entirely from acquisitions. Commodities division hiring flat. 181 open positions across entire group"
+          },
+          "Geographic Expansion": {
+            "score": 3.0,
+            "evidence": "Already global across 50+ offices; no new countries or markets entered by commodities division since 2019. Italian expansion is financial services only"
+          },
+          "M&A Activity": {
+            "score": 2.0,
+            "evidence": "Zero commodities acquisitions since Allegro (April 2019). All ION M&A capital (€6B+) directed at Italian financial infrastructure. CTRM market already consolidated"
+          },
+          "SaaS Maturity": {
+            "score": 3.0,
+            "evidence": "On-premise dominant for 4 of 5 core platforms. Aspect is cloud-native SaaS (growing). Incremental cloud additions (RightAngle Azure, Softmar SaaS). No unified cloud platform"
+          }
+        },
+        "composite_score": 3.0,
+        "classification": "Steady"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2025 (est.)",
+            "eur_millions": 5500.0,
+            "yoy_growth_pct": 10.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 5500.0,
+            "yoy_growth_pct": 15.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 4500.0,
+            "yoy_growth_pct": 20.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 4000.0,
+            "yoy_growth_pct": 35.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 3000.0,
+            "yoy_growth_pct": 25.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 2250.0,
+            "yoy_growth_pct": 5.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2019",
+            "eur_millions": 2250.0,
+            "yoy_growth_pct": 30.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2016",
+            "eur_millions": 1250.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          }
+        ],
+        "cagr_3yr_pct": 25.0,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 5500.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": null,
+        "raw_metrics": {
+          "EBITDA - ION Group (2024)": "~€2.2B",
+          "EBITDA - ION Group (2016)": ">€300M",
+          "EBITDA Margin (est.)": "~35-40%",
+          "Net Profit / Loss": "Unknown (private)",
+          "Recurring Revenue %": "Unknown for commodities",
+          "SaaS Revenue %": "Low (Aspect only is true SaaS)",
+          "Revenue per Employee - ION Group": "~€400-460K",
+          "Revenue per Employee - Commodities": "Unknown",
+          "Debt / EBITDA Leverage (2023)": "10x (incl. holdco debt); 8.3x (excl.)"
+        },
+        "ebitda_margin_pct": 40.0,
+        "revenue_per_employee_eur_k": 430.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "2004-06",
+            "round": "Strategic Investment",
+            "amount": "$44M (later $200M cumulative)",
+            "valuation": "Unknown",
+            "lead_investors": "TA Associates"
+          },
+          {
+            "date": "2016-05",
+            "round": "Secondary Sale (PE)",
+            "amount": "~€360M (~$400M) for 10% stake",
+            "valuation": "~€3.6B (~$4B) implied total",
+            "lead_investors": "The Carlyle Group (Carlyle Partners VI)"
+          },
+          {
+            "date": "2019-11",
+            "round": "Valuation Milestone",
+            "amount": "N/A (operational)",
+            "valuation": "£7B (~€8B) enterprise value",
+            "lead_investors": "N/A"
+          },
+          {
+            "date": "2020-12",
+            "round": "SPAC IPO",
+            "amount": "$500M raised",
+            "valuation": "N/A",
+            "lead_investors": "Public investors (ScION Tech Growth I & II on Nasdaq)"
+          },
+          {
+            "date": "2024-02",
+            "round": "Debt Financing",
+            "amount": "$276M (dividend recap + cash buffer)",
+            "valuation": "N/A",
+            "lead_investors": "HPS Investment Partners + public markets"
+          },
+          {
+            "date": "2024-04",
+            "round": "Bond Issuance",
+            "amount": "$720M ($400M USD + €300M EUR)",
+            "valuation": "N/A",
+            "lead_investors": "Public bond markets"
+          },
+          {
+            "date": "2024-09",
+            "round": "Leveraged Loan",
+            "amount": "$575M (upsized 9%)",
+            "valuation": "N/A",
+            "lead_investors": "Syndicated loan market"
+          }
+        ],
+        "total_raised_text": "~$600M+ (TA Associates $200M cumulative + Carlyle ~$400M + ScION SPAC $500M)",
+        "latest_valuation_text": "£7B / ~€8B (2019); current valuation likely €15-25B+ given €2.2B EBITDA and growth since 2019",
+        "lead_investors": [
+          "HPS Investment Partners + public markets",
+          "Public bond markets",
+          "Public investors (ScION Tech Growth I & II on Nasdaq)",
+          "Syndicated loan market",
+          "TA Associates",
+          "The Carlyle Group (Carlyle Partners VI)"
+        ],
+        "war_chest_signals": "Massive access to debt capital (raised ~$1.5B in debt in 2024 alone). HPS Investment Partners provides ~$3B in private credit. Pignataro's personal net worth $19.8-36.7B (Bloomberg/Forbes). However, high leverage (10x EBITDA) limits acquisition capacity without further debt. Capital allocation priority is clearly Italian financial infrastructure (€6B+ invested since 2021), not commodities."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 13000.0
+          },
+          {
+            "year": "2025",
+            "headcount": 13000.0
+          },
+          {
+            "year": "2024",
+            "headcount": 13000.0
+          },
+          {
+            "year": "2023",
+            "headcount": 13000.0
+          },
+          {
+            "year": "2022",
+            "headcount": 12000.0
+          },
+          {
+            "year": "2021",
+            "headcount": 11500.0
+          },
+          {
+            "year": "2020",
+            "headcount": 10000.0
+          },
+          {
+            "year": "2019",
+            "headcount": 10000.0
+          },
+          {
+            "year": "2018",
+            "headcount": 8500.0
+          },
+          {
+            "year": "2016",
+            "headcount": 5500.0
+          }
+        ],
+        "employee_cagr_pct": 12.0,
+        "latest_headcount": 13000.0,
+        "open_positions": 181.0
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": null
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": 20.0
+      },
+      "tier": "Tier 2"
+    },
+    {
+      "company_name": "SEEBURGER AG",
+      "folder": "seeburger",
+      "data_availability": "Low (private, family-owned, unfunded since founding; no public filings, no VC disclosures, limited third-party estimates)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 3.0,
+            "evidence": "Estimated ~4% CAGR (2020-2025); EUR 117M confirmed (2020), ~EUR 142M estimated (2025). Below 5% threshold but data quality is low."
+          },
+          "Funding Momentum": {
+            "score": 3.0,
+            "evidence": "Zero external funding in 40 years; bootstrap with sustained profitability. Self-financed all operations including global offices."
+          },
+          "Employee Growth": {
+            "score": 3.0,
+            "evidence": "~4.1% CAGR (2021-2025): 1,024 to ~1,200 employees. Stable, not accelerating. 28 open positions."
+          },
+          "Geographic Expansion": {
+            "score": 3.0,
+            "evidence": "50+ countries served from 26 offices, but no new offices or countries since 2015 (10 years). Growth within existing markets only."
+          },
+          "M&A Activity": {
+            "score": 1.0,
+            "evidence": "Zero acquisitions in 40-year history. Extreme outlier. Purely organic, no signals of change."
+          },
+          "SaaS Maturity": {
+            "score": 5.0,
+            "evidence": "Hybrid model since 2010; BIS Hub cloud-native iPaaS + BIS Server on-prem. Included in Gartner/IDC iPaaS assessments. No recurring revenue % disclosed."
+          }
+        },
+        "composite_score": 3.0,
+        "classification": "Steady"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2025 (est.)",
+            "eur_millions": 142.0,
+            "yoy_growth_pct": 4.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2024 (est.)",
+            "eur_millions": 137.0,
+            "yoy_growth_pct": 4.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2023 (est.)",
+            "eur_millions": 132.0,
+            "yoy_growth_pct": 4.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2022 (est.)",
+            "eur_millions": 127.0,
+            "yoy_growth_pct": 4.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2021 (est.)",
+            "eur_millions": 122.0,
+            "yoy_growth_pct": 4.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 117.0,
+            "yoy_growth_pct": null,
+            "confidence": "Confirmed"
+          }
+        ],
+        "cagr_3yr_pct": 3.8,
+        "cagr_5yr_pct": 3.9,
+        "latest_revenue_eur_m": 142.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": null,
+        "raw_metrics": {
+          "EBITDA (current)": "Unknown",
+          "EBITDA Margin": "Unknown",
+          "Net Profit / Loss": "Profitable (implied)",
+          "Recurring Revenue %": "Unknown",
+          "SaaS Revenue %": "Unknown",
+          "Revenue per Employee": "~EUR 118K (2025 est.)"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 118.0
+      },
+      "funding": {
+        "rounds": [],
+        "total_raised_text": "EUR 0 (unfunded since 1986 founding)",
+        "latest_valuation_text": "Unknown (private, no external investment to establish valuation)",
+        "lead_investors": [],
+        "war_chest_signals": "No visible war chest. Company is self-financed from operating cash flow. No PE backing, no venture debt, no credit facility disclosures. The 40-year track record of organic growth funded entirely from profits suggests the company generates sufficient cash flow for reinvestment, but has no external capital for aggressive expansion or acquisitions."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2025 (current)",
+            "headcount": 1200.0
+          },
+          {
+            "year": "2024 (est.)",
+            "headcount": 1150.0
+          },
+          {
+            "year": "2023 (est.)",
+            "headcount": 1100.0
+          },
+          {
+            "year": "2022 (est.)",
+            "headcount": 1050.0
+          },
+          {
+            "year": "2021",
+            "headcount": 1024.0
+          },
+          {
+            "year": "2020",
+            "headcount": 1000.0
+          },
+          {
+            "year": "2005",
+            "headcount": 475.0
+          }
+        ],
+        "employee_cagr_pct": 4.1,
+        "latest_headcount": 1200.0,
+        "open_positions": 28.0
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": 50
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 3"
+    },
+    {
+      "company_name": "KISTERS AG",
+      "folder": "kisters-belvis",
+      "data_availability": "Low (private family company; no public financials, no external funding rounds, no stock exchange filings)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 3.0,
+            "evidence": "No disclosed revenue data; 60-year organic-growth company; estimated <10% CAGR based on stable headcount and private company profile"
+          },
+          "Funding Momentum": {
+            "score": 3.0,
+            "evidence": "Zero external capital in 60+ years; self-funded through profitability; complete strategic independence but limited investment velocity"
+          },
+          "Employee Growth": {
+            "score": 3.0,
+            "evidence": "Stable at ~750 for multiple years; 13 open positions; ~0-5% estimated CAGR; no aggressive hiring signals"
+          },
+          "Geographic Expansion": {
+            "score": 3.0,
+            "evidence": "Already in 30+ countries but no NEW energy market entries in last 3yr; DACH core; partnerships for UK; BelVis+ PFM targets broader EU (future)"
+          },
+          "M&A Activity": {
+            "score": 1.0,
+            "evidence": "2 acquisitions in 60 years, both in water not energy; zero energy-domain M&A ever; organic-only growth model"
+          },
+          "SaaS Maturity": {
+            "score": 3.0,
+            "evidence": "On-premise dominant since 1999; BelVis+ PFM cloud launching June 2026; likely <10% cloud revenue; early transition stage"
+          }
+        },
+        "composite_score": 2.7,
+        "classification": "Dinosaur"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2026 (est.)",
+            "eur_millions": 100.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2025",
+            "eur_millions": 95.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 90.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 85.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 80.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 75.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated (proxy)"
+          }
+        ],
+        "cagr_3yr_pct": null,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 100.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": 30.0,
+        "raw_metrics": {
+          "EBITDA (current)": "Unknown",
+          "EBITDA Margin": "Unknown",
+          "Net Profit / Loss": "Profitable (implied)",
+          "Recurring Revenue %": "Unknown (<30% est.)",
+          "SaaS Revenue %": "Unknown (<10% est.)",
+          "Revenue per Employee": "EUR 61-160K (range)"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 110.5
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "1963",
+            "round": "Founding",
+            "amount": "Undisclosed",
+            "valuation": "N/A",
+            "lead_investors": "Klaus Kisters (founder)"
+          },
+          {
+            "date": "Never",
+            "round": "No external rounds",
+            "amount": "EUR 0",
+            "valuation": "N/A",
+            "lead_investors": "N/A"
+          }
+        ],
+        "total_raised_text": "EUR 0 (zero external capital in 60+ years)",
+        "latest_valuation_text": "Not applicable (private, never valued externally)",
+        "lead_investors": [
+          "Klaus Kisters (founder)"
+        ],
+        "war_chest_signals": "Unknown. As a profitable private company, KISTERS likely has retained earnings, but the scale of available capital for M&A or major investments is unknown. The self-funded BelVis+ PFM cloud rewrite suggests meaningful R&D budget, but nothing approaching the $75M tem raised in a single round."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 750.0
+          },
+          {
+            "year": "2025",
+            "headcount": 750.0
+          },
+          {
+            "year": "2024",
+            "headcount": 750.0
+          },
+          {
+            "year": "2023",
+            "headcount": 725.0
+          },
+          {
+            "year": "2022",
+            "headcount": 675.0
+          },
+          {
+            "year": "2021",
+            "headcount": 650.0
+          }
+        ],
+        "employee_cagr_pct": 5.0,
+        "latest_headcount": 750.0,
+        "open_positions": 13.0
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": 30
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": 10.0
+      },
+      "tier": "Tier 1"
+    },
+    {
+      "company_name": "SOPTIM AG",
+      "folder": "soptim",
+      "data_availability": "Low (private AG, bootstrapped, no VC backing, no public financial filings found)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 3.0,
+            "evidence": "~EUR 43M for 50+ year company; only single data point available; low revenue per employee (EUR 107K) suggests services-heavy; CAGR likely <5%"
+          },
+          "Funding Momentum": {
+            "score": 1.0,
+            "evidence": "Zero external funding ever; bootstrapped since 1971; EUR 1.17M share capital; no VC/PE signals"
+          },
+          "Employee Growth": {
+            "score": 3.0,
+            "evidence": "377 FTE (2023) to ~400+ (2025-2026); estimated CAGR ~3-4%; stable but not aggressive growth"
+          },
+          "Geographic Expansion": {
+            "score": 2.0,
+            "evidence": "Germany/DACH only; ENTSO-E project (2017) was technical not commercial expansion; jobs German-only; no new countries"
+          },
+          "M&A Activity": {
+            "score": 1.0,
+            "evidence": "Zero acquisitions in 50+ year history; organic growth only; partnership model; no M&A signals"
+          },
+          "SaaS Maturity": {
+            "score": 5.0,
+            "evidence": "SOPTIM Elements cloud SaaS is real; hybrid model transitioning; estimated 30-50% recurring; active product development"
+          }
+        },
+        "composite_score": 2.5,
+        "classification": "Dinosaur"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2026 (est.)",
+            "eur_millions": 45.0,
+            "yoy_growth_pct": 5.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2025",
+            "eur_millions": 43.5,
+            "yoy_growth_pct": 3.0,
+            "confidence": "Estimated (proxy)"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 43.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 43.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2022",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          },
+          {
+            "year": "2021",
+            "eur_millions": null,
+            "yoy_growth_pct": null,
+            "confidence": "Unknown"
+          }
+        ],
+        "cagr_3yr_pct": null,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 45.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": 50.0,
+        "raw_metrics": {
+          "EBITDA (current)": "Unknown",
+          "EBITDA Margin": "Unknown",
+          "Net Profit / Loss": "Unknown (likely profitable)",
+          "Recurring Revenue %": "Unknown (est. 30-50%)",
+          "SaaS Revenue %": "Unknown",
+          "Revenue per Employee": "~EUR 107,500"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 107.5
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "1971",
+            "round": "Founding",
+            "amount": "Unknown",
+            "valuation": "N/A",
+            "lead_investors": "Founders (incl. Dr. Wolfgang Thiele)"
+          },
+          {
+            "date": "N/A",
+            "round": "No external rounds",
+            "amount": "EUR 0",
+            "valuation": "N/A",
+            "lead_investors": "N/A"
+          }
+        ],
+        "total_raised_text": "EUR 0 (bootstrapped)",
+        "latest_valuation_text": "Not applicable (private, no funding rounds)",
+        "lead_investors": [
+          "Founders (incl. Dr. Wolfgang Thiele)"
+        ],
+        "war_chest_signals": "No visible cash reserves, undrawn facilities, or PE dry powder. Share capital is EUR 1,170,000. Self-funded growth model means acquisitions or major international expansion would require either debt, retained earnings, or bringing in external capital."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 410.0
+          },
+          {
+            "year": "2025",
+            "headcount": 400.0
+          },
+          {
+            "year": "2024",
+            "headcount": 390.0
+          },
+          {
+            "year": "2023",
+            "headcount": 377.0
+          },
+          {
+            "year": "2022",
+            "headcount": 360.0
+          },
+          {
+            "year": "2021",
+            "headcount": 345.0
+          }
+        ],
+        "employee_cagr_pct": 4.0,
+        "latest_headcount": 410.0,
+        "open_positions": null
+      },
+      "geographic": {
+        "international_revenue_pct": 5.0,
+        "countries_count": null
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": 35.0
+      },
+      "tier": "Tier 1"
+    },
+    {
+      "company_name": "Tietoevry (Tieto)",
+      "folder": "tietoevry",
+      "data_availability": "High (publicly listed on Nasdaq Helsinki, Stockholm, and Oslo -- annual reports, quarterly releases, and investor relations materials readily available)",
+      "scorecard": {
+        "dimensions": {
+          "Revenue Growth": {
+            "score": 2.0,
+            "evidence": "-2% organic CAGR over 2023-2025; flat-to-declining top line across all periods"
+          },
+          "Funding Momentum": {
+            "score": 3.0,
+            "evidence": "Public since 1984; no new capital raised; returning capital via EUR 150M buyback and dividends; market cap ~EUR 2.2B"
+          },
+          "Employee Growth": {
+            "score": 1.0,
+            "evidence": "Headcount declined from 24,320 (2022) to ~15,000 (2025); -35% in one year (divestitures + organic reductions)"
+          },
+          "Geographic Expansion": {
+            "score": 2.0,
+            "evidence": "Contracting: two major divestitures; no new country entries; \"selective expansion\" is 2027+ aspiration only"
+          },
+          "M&A Activity": {
+            "score": 3.0,
+            "evidence": "1 acquisition (MentorMate, 2023) vastly outweighed by 2 divestitures (Tech Services EUR 300M, Bekk EUR 150M); net portfolio shrinkage"
+          },
+          "SaaS Maturity": {
+            "score": 4.0,
+            "evidence": "Hybrid model; Banking/Care/Industry have SaaS but cloud revenue % undisclosed; Create is consulting-heavy; Azure-based modern stack"
+          }
+        },
+        "composite_score": 2.5,
+        "classification": "Dinosaur"
+      },
+      "revenue": {
+        "timeline": [
+          {
+            "year": "2025 (cont. ops)",
+            "eur_millions": 1852.0,
+            "yoy_growth_pct": 2.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2024",
+            "eur_millions": 2803.0,
+            "yoy_growth_pct": 2.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2023",
+            "eur_millions": 2861.0,
+            "yoy_growth_pct": 2.0,
+            "confidence": "Estimated"
+          },
+          {
+            "year": "2022",
+            "eur_millions": 2928.0,
+            "yoy_growth_pct": 4.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2021",
+            "eur_millions": 2823.0,
+            "yoy_growth_pct": 1.0,
+            "confidence": "Confirmed"
+          },
+          {
+            "year": "2020",
+            "eur_millions": 2800.0,
+            "yoy_growth_pct": null,
+            "confidence": "Estimated"
+          }
+        ],
+        "cagr_3yr_pct": 2.0,
+        "cagr_5yr_pct": null,
+        "latest_revenue_eur_m": 1852.0
+      },
+      "profitability": {
+        "recurring_revenue_pct": null,
+        "raw_metrics": {
+          "Adj. EBITA (2025 cont. ops)": "EUR 256M (13.8% margin)",
+          "Adj. EBITA (2024 total)": "EUR 345M (12.3% margin)",
+          "Adj. EBITA (2024 cont. restated)": "12.0% margin",
+          "Adj. EBITA (2023)": "12.6-13.0% margin",
+          "Adj. EBITA (2022)": "13.0% margin",
+          "Adj. EBITA (2021)": "13.0% margin",
+          "Net Profit (2024)": "EUR -62.8M (loss)",
+          "Net Profit (2023)": "EUR 172.2M",
+          "Operating Cash Flow (2025)": "EUR 296M",
+          "Operating Cash Flow (2024)": "EUR 326M",
+          "EPS (2024)": "EUR -0.53",
+          "EPS (2023)": "EUR 1.45",
+          "Net Debt / EBITDA (2024)": "2.2x",
+          "Recurring Revenue %": "Not disclosed",
+          "SaaS Revenue %": "Not disclosed",
+          "Revenue per Employee (2025 cont.)": "EUR 123K",
+          "Revenue per Employee (2024 total)": "EUR 122K"
+        },
+        "ebitda_margin_pct": null,
+        "revenue_per_employee_eur_k": 123.0
+      },
+      "funding": {
+        "rounds": [
+          {
+            "date": "1984",
+            "round": "IPO",
+            "amount": "N/A",
+            "valuation": "N/A",
+            "lead_investors": "Nasdaq Helsinki (Tieto)"
+          },
+          {
+            "date": "1999",
+            "round": "Parallel listing",
+            "amount": "N/A",
+            "valuation": "N/A",
+            "lead_investors": "Nasdaq Stockholm (Tieto)"
+          },
+          {
+            "date": "Dec 2019",
+            "round": "Merger (EVRY)",
+            "amount": "~44.3M new shares + NOK 5.28/sh cash",
+            "valuation": "Combined ~EUR 3-4B market cap",
+            "lead_investors": "Tieto + EVRY shareholders"
+          },
+          {
+            "date": "Dec 2019",
+            "round": "Parallel listing",
+            "amount": "N/A",
+            "valuation": "N/A",
+            "lead_investors": "Oslo Bors (TietoEVRY)"
+          },
+          {
+            "date": "Jun 2025",
+            "round": "Share buyback #1",
+            "amount": "Concluded",
+            "valuation": "N/A",
+            "lead_investors": "N/A"
+          },
+          {
+            "date": "Feb 2026",
+            "round": "Share buyback #2",
+            "amount": "EUR 150M (Feb 2026 - Mar 2027)",
+            "valuation": "N/A",
+            "lead_investors": "N/A"
+          }
+        ],
+        "total_raised_text": "N/A -- publicly listed since 1984; funded through operations, not venture rounds",
+        "latest_valuation_text": "~EUR 2.16-2.26B (Jan 2026), ~EUR 18.68/share",
+        "lead_investors": [
+          "Nasdaq Helsinki (Tieto)",
+          "Nasdaq Stockholm (Tieto)",
+          "Oslo Bors (TietoEVRY)",
+          "Tieto + EVRY shareholders"
+        ],
+        "war_chest_signals": "Tech Services divestment proceeds (EUR 300M + EUR 70M earn-out) used for debt reduction. Bekk Consulting proceeds (EUR 150M) funding the EUR 150M share buyback. Operating cash flow EUR 296M (2025). Dividend EUR 1.50/share (~EUR 178M payout). Net debt/EBITDA target <2x. No signs of building an acquisition war chest -- capital is being returned to shareholders."
+      },
+      "employees": {
+        "timeline": [
+          {
+            "year": "2026 (current)",
+            "headcount": 15000.0
+          },
+          {
+            "year": "2025 (post-divestments)",
+            "headcount": 15000.0
+          },
+          {
+            "year": "2024",
+            "headcount": 22941.0
+          },
+          {
+            "year": "2023",
+            "headcount": 24000.0
+          },
+          {
+            "year": "2022",
+            "headcount": 24320.0
+          },
+          {
+            "year": "2021",
+            "headcount": 24000.0
+          },
+          {
+            "year": "2020",
+            "headcount": 24000.0
+          }
+        ],
+        "employee_cagr_pct": null,
+        "latest_headcount": 15000.0,
+        "open_positions": 499.0
+      },
+      "geographic": {
+        "international_revenue_pct": null,
+        "countries_count": 90
+      },
+      "saas": {
+        "deployment_model": "Hybrid",
+        "cloud_revenue_pct": null
+      },
+      "tier": "Tier 1b"
+    }
+  ],
+  "missing_data": [],
+  "metadata": {
+    "total_folders": 29,
+    "with_financial_data": 29,
+    "without_financial_data": 0,
+    "source_directory": "e:\\WPG\\Git\\E21\\GitRepos\\tickets\\COMPETITION"
+  }
+}

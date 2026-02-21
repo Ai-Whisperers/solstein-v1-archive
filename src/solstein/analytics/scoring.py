@@ -4,8 +4,8 @@ Scoring algorithms for SolStein competitive intelligence.
 Calculates growth scores, financial health scores, and competitive positioning.
 """
 
-from typing import Any
 from datetime import datetime
+from typing import Any
 
 from loguru import logger
 
@@ -48,13 +48,28 @@ class GrowthScorer:
         financial_health_score, fin_expl = self._calculate_financial_health_score(
             profile.financials
         )
-        competitive_position_score, comp_expl = self._calculate_competitive_position_score(profile)
+        competitive_position_score, comp_expl = self._calculate_competitive_position_score(profile)  # noqa: E501
 
         # Update profile with scores
         profile.growth_score = growth_score
         profile.financial_health_score = financial_health_score
         profile.competitive_position_score = competitive_position_score
-        
+
+        # Calculate composite score (Weighted Average)
+        # 40% Growth, 30% Financial Health, 30% Competitive Position
+        if all(s is not None for s in [growth_score, financial_health_score, competitive_position_score]):  # noqa: E501
+            profile.composite_score = round(
+                (growth_score * 0.4) +
+                (financial_health_score * 0.3) +
+                (competitive_position_score * 0.3),
+                2
+            )
+        else:
+            profile.composite_score = growth_score # Fallback
+
+        # Apply classification
+        profile.classification = classify_company(profile.growth_score)
+
         # Add to breakdown
         profile.scoring_breakdown["growth"] = growth_expl
         profile.scoring_breakdown["financial"] = fin_expl
@@ -62,7 +77,7 @@ class GrowthScorer:
 
         return profile
 
-    def _calculate_growth_score(self, financials: FinancialMetric) -> tuple[float, ScoringExplanation]:
+    def _calculate_growth_score(self, financials: FinancialMetric) -> tuple[float, ScoringExplanation]:  # noqa: E501
         """Calculate growth score (0-10) with explanation."""
         cfg = self.config.growth
         score = cfg.base_score
@@ -78,8 +93,8 @@ class GrowthScorer:
             explanation.components.append(ScoreComponent(
                 name="Revenue Growth",
                 value=growth_factor,
-                formula=f"min({financials.growth_rate}% / {cfg.revenue_growth_divisor}, {cfg.revenue_growth_cap})",
-                reasoning=f"High growth rate of {financials.growth_rate}% identified." if financials.growth_rate > 15 else "Moderate growth rate identified."
+                formula=f"min({financials.growth_rate}% / {cfg.revenue_growth_divisor}, {cfg.revenue_growth_cap})",  # noqa: E501
+                reasoning=f"High growth rate of {financials.growth_rate}% identified." if financials.growth_rate > 15 else "Moderate growth rate identified."  # noqa: E501
             ))
 
         # Employee productivity (Revenue per Employee)
@@ -90,14 +105,14 @@ class GrowthScorer:
                 bonus = cfg.efficiency_high_bonus
             elif rev_per_emp > cfg.efficiency_med_threshold:
                 bonus = cfg.efficiency_med_bonus
-            
+
             if bonus > 0:
                 score += bonus
                 explanation.components.append(ScoreComponent(
                     name="Employee Efficiency",
                     value=bonus,
                     formula=f"rev_per_emp({rev_per_emp:,.0f} EUR) > threshold",
-                    reasoning=f"Revenue per employee is above efficiency benchmarks."
+                    reasoning="Revenue per employee is above efficiency benchmarks."
                 ))
 
         # Funding momentum
@@ -107,14 +122,14 @@ class GrowthScorer:
                 bonus = cfg.funding_high_bonus
             elif financials.funding_raised > cfg.funding_med_threshold:
                 bonus = cfg.funding_med_bonus
-            
+
             if bonus > 0:
                 score += bonus
                 explanation.components.append(ScoreComponent(
                     name="Funding Momentum",
                     value=bonus,
-                    formula=f"funding({financials.funding_raised:,.0f} EUR) > threshold",
-                    reasoning="Significant capital injection signals strong market confidence."
+                    formula=f"funding({financials.funding_raised:,.0f} EUR) > threshold",  # noqa: E501
+                    reasoning="Significant capital injection signals strong market confidence."  # noqa: E501
                 ))
 
         # Profitability growth
@@ -126,21 +141,21 @@ class GrowthScorer:
                 adj = cfg.margin_med_bonus
             elif financials.profit_margin < 0:
                 adj = cfg.margin_negative_penalty
-            
+
             if adj != 0:
                 score += adj
                 explanation.components.append(ScoreComponent(
                     name="Profitability Profile",
                     value=adj,
                     formula=f"margin({financials.profit_margin}%) -> adjustment",
-                    reasoning="Healthy margins contribute to growth score." if adj > 0 else "Negative margins penalize growth score."
+                    reasoning="Healthy margins contribute to growth score." if adj > 0 else "Negative margins penalize growth score."  # noqa: E501
                 ))
 
         final_score = max(0.0, min(score, 10.0))
         explanation.final_score = final_score
         return final_score, explanation
 
-    def _calculate_financial_health_score(self, financials: FinancialMetric) -> tuple[float, ScoringExplanation]:
+    def _calculate_financial_health_score(self, financials: FinancialMetric) -> tuple[float, ScoringExplanation]:  # noqa: E501
         """Calculate financial health score (0-10) with explanation."""
         cfg = self.config.financial
         score = cfg.base_score
@@ -155,7 +170,7 @@ class GrowthScorer:
                 adj = cfg.revenue_med_bonus
             elif financials.revenue < cfg.revenue_small_threshold:
                 adj = cfg.revenue_small_penalty
-            
+
             if adj != 0:
                 score += adj
                 explanation.components.append(ScoreComponent(
@@ -174,7 +189,7 @@ class GrowthScorer:
                 adj = cfg.margin_med_bonus
             elif financials.profit_margin < 0:
                 adj = cfg.margin_negative_penalty
-            
+
             if adj != 0:
                 score += adj
                 explanation.components.append(ScoreComponent(
@@ -194,7 +209,7 @@ class GrowthScorer:
                 adj = cfg.efficiency_good_bonus
             elif rev_per_emp < cfg.efficiency_low_threshold:
                 adj = cfg.efficiency_low_penalty
-            
+
             if adj != 0:
                 score += adj
                 explanation.components.append(ScoreComponent(
@@ -212,9 +227,9 @@ class GrowthScorer:
                 adj = cfg.cushion_high_bonus
             elif ratio > cfg.cushion_med_ratio:
                 adj = cfg.cushion_med_bonus
-            elif ratio < cfg.cushion_thin_ratio and financials.profit_margin is not None and financials.profit_margin < 5:
+            elif ratio < cfg.cushion_thin_ratio and financials.profit_margin is not None and financials.profit_margin < 5:  # noqa: E501
                 adj = cfg.cushion_thin_penalty
-            
+
             if adj != 0:
                 score += adj
                 explanation.components.append(ScoreComponent(
@@ -228,7 +243,7 @@ class GrowthScorer:
         explanation.final_score = final_score
         return final_score, explanation
 
-    def _calculate_competitive_position_score(self, profile: Company) -> tuple[float, ScoringExplanation]:
+    def _calculate_competitive_position_score(self, profile: Company) -> tuple[float, ScoringExplanation]:  # noqa: E501
         """Calculate competitive position score (0-10) with explanation."""
         cfg = self.config.competitive
         score = cfg.base_score
@@ -271,7 +286,7 @@ class GrowthScorer:
             explanation.components.append(ScoreComponent(
                 name="Geographic Footprint",
                 value=adj,
-                formula=f"regions({len(profile.geographic_presence)}) > {cfg.geo_global_count}",
+                formula=f"regions({len(profile.geographic_presence)}) > {cfg.geo_global_count}",  # noqa: E501
                 reasoning="Global presence identified."
             ))
         elif len(profile.geographic_presence) > cfg.geo_regional_count:
@@ -280,7 +295,7 @@ class GrowthScorer:
             explanation.components.append(ScoreComponent(
                 name="Geographic Footprint",
                 value=adj,
-                formula=f"regions({len(profile.geographic_presence)}) > {cfg.geo_regional_count}",
+                formula=f"regions({len(profile.geographic_presence)}) > {cfg.geo_regional_count}",  # noqa: E501
                 reasoning="Regional presence identified."
             ))
 
@@ -291,7 +306,7 @@ class GrowthScorer:
             explanation.components.append(ScoreComponent(
                 name="Stack Diversity",
                 value=adj,
-                formula=f"tech_count({len(profile.tech_stack)}) > {cfg.tech_diverse_count}",
+                formula=f"tech_count({len(profile.tech_stack)}) > {cfg.tech_diverse_count}",  # noqa: E501
                 reasoning="Diverse technical capabilities identified."
             ))
 
@@ -310,14 +325,14 @@ class MarketAnalyzer:
         # Calculate base metrics needed for return
         revenues = [p.financials.revenue for p in profiles if p.financials.revenue]
         market_size = sum(revenues) if revenues else 0.0
-        
+
         growth_rates = [
-            p.financials.growth_rate 
-            for p in profiles 
+            p.financials.growth_rate
+            for p in profiles
             if p.financials.growth_rate is not None
         ]
         avg_growth = sum(growth_rates) / len(growth_rates) if growth_rates else 0.0
-        
+
         # Calculate CR4
         cr4 = 0.0
         if revenues:
@@ -336,7 +351,7 @@ class MarketAnalyzer:
             concentration_ratio=cr4,
             barriers_to_entry=self._determine_barriers(profiles),
             key_trends=self._determine_trends(profiles),
-            regulatory_environment=["Industry Standard Compliance", "Data Privacy Regulations"],
+            regulatory_environment=["Industry Standard Compliance", "Data Privacy Regulations"],  # noqa: E501
             swot_analysis=self._calculate_swot(profiles),
             recommendations=self._generate_recommendations(profiles, avg_growth, cr4),
         )
@@ -357,13 +372,13 @@ class MarketAnalyzer:
             trends.append("Cloud-Native Infrastructure")
         return trends
 
-    def _generate_recommendations(self, profiles: list[Company], avg_growth: float, cr4: float) -> list[str]:
+    def _generate_recommendations(self, profiles: list[Company], avg_growth: float, cr4: float) -> list[str]:  # noqa: E501
         """Generate strategic recommendations based on market metrics."""
         recommendations = []
         if avg_growth > 15:
             recommendations.append("Aggressive expansion into high-growth verticals")
         if cr4 > 70:
-            recommendations.append("Focus on niche differentiation to compete with market leaders")
+            recommendations.append("Focus on niche differentiation to compete with market leaders")  # noqa: E501
         else:
             recommendations.append("Consolidation opportunities in a fragmented market")
         return recommendations
@@ -502,8 +517,8 @@ class MarketAnalyzer:
     def _calculate_swot(self, profiles: list[Company]) -> dict[str, list[str]]:
         """Generate basic SWOT analysis based on company data."""
         return {
-            "Strengths": ["Strong Growth"] if any(p.financials.growth_rate and p.financials.growth_rate > 20 for p in profiles) else ["Established Players"],
-            "Weaknesses": ["Fragmented Market"] if len(profiles) > 10 else ["Niche Market"],
+            "Strengths": ["Strong Growth"] if any(p.financials.growth_rate and p.financials.growth_rate > 20 for p in profiles) else ["Established Players"],  # noqa: E501
+            "Weaknesses": ["Fragmented Market"] if len(profiles) > 10 else ["Niche Market"],  # noqa: E501
             "Opportunities": ["AI Adoption", "Regional Expansion"],
             "Threats": ["High Barriers to Entry", "Regulatory Changes"],
         }
@@ -550,9 +565,6 @@ class CompetitiveOverlapCalculator:
         set1 = set(p1.geographic_presence)
         set2 = set(p2.geographic_presence)
 
-        if not set1 or not set2:
-            return 0.0
-
         intersection = len(set1.intersection(set2))
         union = len(set1.union(set2))
 
@@ -565,9 +577,6 @@ class CompetitiveOverlapCalculator:
 
         set1 = set(p1.tech_stack)
         set2 = set(p2.tech_stack)
-
-        if not set1 or not set2:
-            return 0.0
 
         intersection = len(set1.intersection(set2))
         union = len(set1.union(set2))

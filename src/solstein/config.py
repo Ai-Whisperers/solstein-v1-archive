@@ -128,11 +128,8 @@ class DataConfig(BaseModel):
     @classmethod
     def resolve_paths(cls, v: Any) -> Path:
         """Resolve paths to absolute."""
-        if isinstance(v, str):
-            v_path = Path(v)
-        else:
-            v_path = v
-            
+        v_path = Path(v) if isinstance(v, str) else v
+
         if v_path and not v_path.is_absolute():
             # Resolve relative to project root
             project_root = Path(__file__).parent.parent.parent
@@ -159,7 +156,7 @@ class Settings(BaseSettings):
     security: SecurityConfig = Field(default_factory=SecurityConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     data: DataConfig = Field(default_factory=DataConfig)
-    
+
     # New Intelligence Engine Backends
     supabase: SupabaseConfig = Field(default_factory=SupabaseConfig)
     temporal: TemporalConfig = Field(default_factory=TemporalConfig)
@@ -173,7 +170,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         env_nested_delimiter="__",
         extra="ignore",
-        case_sensitive=True,
+        case_sensitive=False,
     )
 
     @classmethod

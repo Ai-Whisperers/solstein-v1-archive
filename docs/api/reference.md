@@ -5,6 +5,37 @@
 
 > Interactive docs (Swagger UI) available at `http://localhost:8000/docs` when running locally.
 > ReDoc available at `http://localhost:8000/redoc`.
+> OpenAPI Schema: `http://localhost:8000/openapi.json`
+
+---
+
+## Quick Start
+
+### 1. Health Check
+
+```bash
+curl http://localhost:8000/health
+```
+
+### 2. List Companies
+
+```bash
+curl http://localhost:8000/companies?limit=10
+```
+
+### 3. Score a Company
+
+```bash
+curl -X POST http://localhost:8000/scoring/company/company-id/score
+```
+
+### 4. Export to Excel
+
+```bash
+curl -X POST http://localhost:8000/export/ \
+  -H "Content-Type: application/json" \
+  -d '{"format": "excel"}'
+```
 
 ---
 
@@ -16,7 +47,52 @@ All endpoints accept an optional Bearer token. **Authentication is currently per
 Authorization: Bearer <your-jwt-token>
 ```
 
+**Example:**
+```bash
+curl -H "Authorization: Bearer your_token_here" \
+  http://localhost:8000/companies
+```
+
 Public endpoints (no token required): `/health`
+
+---
+
+## HTTP Status Codes
+
+| Code | Meaning | When It Happens |
+|------|---------|-----------------|
+| **200** | OK | Request successful |
+| **201** | Created | Resource created (POST) |
+| **400** | Bad Request | Invalid request body or parameters |
+| **401** | Unauthorized | Missing/invalid authentication |
+| **404** | Not Found | Resource doesn't exist |
+| **422** | Unprocessable Entity | Schema validation failed |
+| **500** | Internal Server Error | Server error |
+| **503** | Service Unavailable | Database/Redis offline |
+
+---
+
+## Error Responses
+
+All error responses follow this format:
+
+```json
+{
+  "detail": "Company not found",
+  "error_code": "COMPANY_NOT_FOUND",
+  "timestamp": "2026-02-20T10:00:00Z",
+  "path": "/companies/nonexistent"
+}
+```
+
+**Common Errors:**
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `COMPANY_NOT_FOUND` | 404 | Check company ID |
+| `VALIDATION_ERROR` | 422 | Check request schema |
+| `DATABASE_ERROR` | 503 | Retry after database comes online |
+| `UNAUTHORIZED` | 401 | Add valid Bearer token |
 
 ---
 
@@ -25,6 +101,90 @@ Public endpoints (no token required): `/health`
 ```
 http://localhost:8000          # Local development
 https://api.solstein.io        # Production (when deployed)
+```
+
+---
+
+## Request/Response Examples
+
+### Content-Type
+
+All requests must include:
+```
+Content-Type: application/json
+```
+
+### Response Format
+
+All responses are JSON:
+```json
+{
+  "data": {...},
+  "meta": {
+    "timestamp": "2026-02-20T10:00:00Z",
+    "version": "1.0.0"
+  }
+}
+```
+
+---
+
+## Client Code Examples
+
+### Python
+
+```python
+import requests
+
+# Configuration
+BASE_URL = "http://localhost:8000"
+HEADERS = {"Content-Type": "application/json"}
+
+# 1. List companies
+response = requests.get(f"{BASE_URL}/companies", headers=HEADERS)
+companies = response.json()
+
+# 2. Score a company
+response = requests.post(
+    f"{BASE_URL}/scoring/company/company-1/score",
+    headers=HEADERS
+)
+scores = response.json()
+```
+
+### JavaScript
+
+```javascript
+const BASE_URL = "http://localhost:8000";
+
+// List companies
+fetch(`${BASE_URL}/companies`)
+  .then(r => r.json())
+  .then(companies => console.log(companies));
+
+// Score a company
+fetch(`${BASE_URL}/scoring/company/company-1/score`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" }
+})
+  .then(r => r.json())
+  .then(scores => console.log(scores));
+```
+
+### cURL
+
+```bash
+# List companies
+curl http://localhost:8000/companies
+
+# Score a company
+curl -X POST http://localhost:8000/scoring/company/company-1/score
+
+# With pagination
+curl "http://localhost:8000/companies?skip=0&limit=50"
+
+# With filtering
+curl "http://localhost:8000/companies?industry=Software&min_revenue=10"
 ```
 
 ---

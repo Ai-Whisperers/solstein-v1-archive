@@ -11,28 +11,10 @@ import click
 from loguru import logger
 
 from .analytics.scoring import GrowthScorer
-from .data.models import CompanyProfile, MarketAnalysis
-from .domain.models import Company, FinancialMetric
+from .domain.models import Company, FinancialMetric, MarketAnalysis
 from .exporters.excel_exporter import ExcelExporter
 from .extractors.markdown_extractor import BatchExtractor
 
-
-def _to_domain(profile: CompanyProfile) -> Company:
-    """Convert Pydantic profile to Domain entity."""
-    # Convert financials
-    fin_data = profile.financials.model_dump()
-    financials = FinancialMetric(**fin_data)
-
-    # Convert profile
-    data = profile.model_dump()
-    data.pop("financials")
-    
-    return Company(financials=financials, **data)
-
-
-def _to_dict(company: Company) -> dict[str, Any]:
-    """Convert Domain entity to dict."""
-    return asdict(company)
 
 
 @click.group()
@@ -58,7 +40,7 @@ def extract(input_dir: Path, output: Path | None, pattern: str) -> None:
     click.echo(f"🔍 Extracting data from {input_dir}")
 
     extractor = BatchExtractor()
-    profiles: list[CompanyProfile] = extractor.extract_directory(input_dir, pattern)
+    profiles: list[Company] = extractor.extract_directory(input_dir, pattern)
 
     if not profiles:
         click.echo("❌ No profiles extracted", err=True)
@@ -90,8 +72,7 @@ def export_excel(input_file: Path, output_file: Path, template: Path | None) -> 
     try:
         # Load profiles from JSON
         data = json.loads(input_file.read_text())
-        pydantic_profiles = [CompanyProfile(**item) for item in data]
-        domain_companies = [_to_domain(p) for p in pydantic_profiles]
+        domain_companies = [Company(**item) for item in data]
 
         # Create exporter and generate dashboard
         exporter = ExcelExporter(template_path=template)
@@ -115,8 +96,7 @@ def score(input_file: Path, output: Path | None) -> None:
     try:
         # Load profiles
         data = json.loads(input_file.read_text())
-        pydantic_profiles = [CompanyProfile(**item) for item in data]
-        domain_companies = [_to_domain(p) for p in pydantic_profiles]
+        domain_companies = [Company(**item) for item in data]
 
         # Calculate scores
         scorer = GrowthScorer()
@@ -132,7 +112,7 @@ def score(input_file: Path, output: Path | None) -> None:
             growth = scored_company.growth_score or 0.0
             health = scored_company.financial_health_score or 0.0
             pos = scored_company.competitive_position_score or 0.0
-            
+
             click.echo(f"    Growth: {growth:.1f}/10")
             click.echo(
                 f"    Financial Health: {health:.1f}/10"
@@ -144,7 +124,7 @@ def score(input_file: Path, output: Path | None) -> None:
 
         if output:
             # Save scored profiles
-            output_data = [_to_dict(c) for c in scored_companies]
+            output_data = [c.model_dump(mode="json") for c in scored_companies]
             output.write_text(json.dumps(output_data, indent=2, default=str))
             click.echo(f"💾 Saved scored profiles to {output}")
 
@@ -165,16 +145,10 @@ def analyze_market(input_file: Path, market_name: str) -> None:
     try:
         # Load profiles
         data = json.loads(input_file.read_text())
-        pydantic_profiles = [CompanyProfile(**item) for item in data]
-        domain_companies = [_to_domain(p) for p in pydantic_profiles]
-        
-        # Need to convert domain companies back to list for analysis if needed, 
-        # or use MarketAnalyzer directly.
-        # However, MarketAnalysis Pydantic model expects CompanyProfile (Pydantic).
-        # And cli.py seems to just print summary from the Pydantic model wrapper.
-        
-        # Re-using Pydantic profiles for MarketAnalysis Pydantic model
-        analysis = MarketAnalysis(market_name=market_name, companies=pydantic_profiles)
+        domain_companies = [Company(**item) for item in data]
+
+        # Re-using domain_companies for MarketAnalysis model
+        analysis = MarketAnalysis(market_name=market_name, companies=domain_companies)
 
         # Show analysis
         click.echo("📊 Market Analysis:")
@@ -203,7 +177,7 @@ def compare(profile1: str, profile2: str, input_file: Path) -> None:
     try:
         # Load profiles
         data = json.loads(input_file.read_text())
-        profiles = {p["id"]: CompanyProfile(**p) for p in data}
+        profiles = {p["id"]: Company(**p) for p in data}
 
         if profile1 not in profiles:
             click.echo(f"❌ Profile not found: {profile1}", err=True)

@@ -6,7 +6,6 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 
 from ...analytics.scoring import GrowthScorer
-from ...api.schemas import CompanyProfileSchema
 from ...config import get_settings
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...exporters.excel_exporter import ExcelExporter
@@ -18,7 +17,7 @@ growth_scorer = GrowthScorer()
 excel_exporter = ExcelExporter()
 
 
-def _run_excel_export(repo: CompanyRepository, filters: dict[str, Any], filename: str) -> None:
+def _run_excel_export(repo: CompanyRepository, filters: dict[str, Any], filename: str) -> None:  # noqa: E501
     """Background task to generate excel report."""
     company_filter = CompanyFilter(**filters) if filters else None
     companies = repo.get_all(filters=company_filter)
@@ -92,19 +91,9 @@ async def export_to_json(
         # Convert to dict with JSON serializable values
         companies_data = []
         for company in filtered_companies:
-            # Map Domain Entity -> Schema -> Dict
-            schema = CompanyProfileSchema.model_validate(company)
-            company_dict = schema.model_dump(mode="json")
-
-            # Add scores
+            # Score and map Domain Entity directly to Dict
             scored = growth_scorer.calculate_scores(company)
-            company_dict.update(
-                {
-                    "growth_score": scored.growth_score,
-                    "financial_health_score": scored.financial_health_score,
-                    "competitive_position_score": scored.competitive_position_score,
-                }
-            )
+            company_dict = scored.model_dump(mode="json")
             companies_data.append(company_dict)
 
         # Create output

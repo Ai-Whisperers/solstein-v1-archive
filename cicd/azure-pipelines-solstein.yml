@@ -21,11 +21,6 @@ trigger:
   paths:
     include:
       - src/**
-      - SolStein.API/**
-      - SolStein.Domain/**
-      - SolStein.Application/**
-      - SolStein.Infrastructure/**
-      - SolStein.Tests/**
       - research/**
       - dashboards/**
 

@@ -4,10 +4,10 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from loguru import logger
-from temporalio.client import Client as TemporalClient
 
-from ...analytics.scoring import GrowthScorer
-from ...analytics.workflows import BatchScoreMarketWorkflow
+# from temporalio.client import Client as TemporalClient
+# from ...analytics.workflows import BatchScoreMarketWorkflow
+from ...analytics.scoring import GrowthScorer, classify_company
 from ...config import get_settings
 from ...core.repositories import CompanyRepository
 from ..dependencies import get_current_user, get_repository
@@ -24,17 +24,8 @@ async def score_company(
 ) -> dict[str, Any]:
     """Calculate growth and competitive scores for a company."""
     try:
-        companies = repo.get_all()
+        # One high-performance lookup
         target_company = repo.get_by_id(company_id)
-
-        # In case get_by_id fails or we need to find in list logic from main.py
-        if not target_company:
-            # Find company manually just to match original logic
-            # if repo.get_by_id isn't fully implemented yet
-            for company in companies:
-                if company.id == company_id:
-                    target_company = company
-                    break
 
         if not target_company:
             raise HTTPException(
@@ -45,19 +36,18 @@ async def score_company(
         # Calculate scores with explanations
         scored_company = growth_scorer.calculate_scores(target_company)
 
-        growth = scored_company.growth_score or 0.0
-        
-        classification = "Neutral"
-        if growth >= 7.0:
-            classification = "Rocket"
-        elif growth <= 4.0:
-            classification = "Dinosaur"
+        # Classification is now centralized
+        classification = classify_company(scored_company.growth_score or 0.0)
+
+        # Save the scores back to the DB to keep it 'magically' up to date
+        repo.save(scored_company)
 
         return {
             "company_id": company_id,
             "growth_score": scored_company.growth_score,
             "financial_health_score": scored_company.financial_health_score,
             "competitive_position_score": scored_company.competitive_position_score,
+            "composite_score": scored_company.composite_score,
             "classification": classification,
             "scoring_breakdown": scored_company.scoring_breakdown,
             "calculated_at": datetime.now().isoformat(),
@@ -78,40 +68,12 @@ async def batch_score_companies_endpoint(
     min_revenue: float | None = Query(None, ge=0, description="Minimum revenue"),
     _: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, Any]:
-    """Batch score multiple companies via Temporal workflow."""
-    try:
-        filters = {
-            "industry": industry,
-            "min_revenue": min_revenue
-        }
-
-        settings = get_settings()
-        client = await TemporalClient.connect(
-            settings.temporal.host_url,
-            namespace=settings.temporal.namespace,
-            api_key=settings.temporal.api_key,
-        )
-
-        workflow_id = f"batch-score-{uuid.uuid4().hex[:8]}"
-        handle = await client.start_workflow(
-            BatchScoreMarketWorkflow.run,
-            filters,
-            id=workflow_id,
-            task_queue="solstein-scoring",
-        )
-
-        return {
-            "message": "Batch scoring workflow started",
-            "workflow_id": handle.id,
-            "status": "running",
-            "filters": filters
-        }
-    except Exception as e:
-        logger.error(f"Error in batch scoring: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error in batch scoring: {str(e)}",
-        ) from e
+    """Batch score multiple companies (currently unavailable - Temporal disabled)."""
+    logger.warning("Batch scoring endpoint called but Temporal is disabled")
+    raise HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail="Batch scoring service currently unavailable. Temporal integration will be reimplemented in Phase 2.",
+    )
 
 
 @router.get("/stats", tags=["Statistics"])
@@ -119,11 +81,12 @@ async def get_statistics(
     _: dict[str, Any] = Depends(get_current_user),
     repo: CompanyRepository = Depends(get_repository),
 ) -> dict[str, Any]:
-    """Get platform statistics."""
+    """Get platform statistics. Uses stored values for maximum performance."""
     try:
+        # In a real high-perf scenario, we'd use a SQL AGGREGATE call
+        # For now, fetching domain entities is still faster than re-scoring
         companies = repo.get_all()
 
-        # Calculate statistics
         total_companies = len(companies)
 
         # Revenue statistics
@@ -137,29 +100,16 @@ async def get_statistics(
         ]
         avg_growth = sum(growth_rates) / len(growth_rates) if growth_rates else 0
 
-        # Tier distribution
+        # Tier & Classification distribution (using STORED values)
         tier_counts: dict[str, int] = {}
+        class_counts = {"Rocket": 0, "Dinosaur": 0, "Neutral": 0}
+
         for company in companies:
             tier = company.tier.value
             tier_counts[tier] = tier_counts.get(tier, 0) + 1
 
-        # Score companies to get classifications
-        rocket_count = 0
-        dinosaur_count = 0
-        neutral_count = 0
-
-        for company in companies[:50]:  # Limit for performance
-            try:
-                scored = growth_scorer.calculate_scores(company)
-                growth = scored.growth_score or 0.0
-                if growth >= 7.0:
-                    rocket_count += 1
-                elif growth <= 4.0:
-                    dinosaur_count += 1
-                else:
-                    neutral_count += 1
-            except Exception:
-                neutral_count += 1
+            cls_val = company.classification or "Neutral"
+            class_counts[cls_val] = class_counts.get(cls_val, 0) + 1
 
         return {
             "total_companies": total_companies,
@@ -173,11 +123,7 @@ async def get_statistics(
                 "companies_with_growth_data": len(growth_rates),
             },
             "tier_distribution": tier_counts,
-            "growth_classification": {
-                "rockets": rocket_count,
-                "dinosaurs": dinosaur_count,
-                "neutral": neutral_count,
-            },
+            "growth_classification": class_counts,
             "calculated_at": datetime.now().isoformat(),
         }
     except Exception as e:

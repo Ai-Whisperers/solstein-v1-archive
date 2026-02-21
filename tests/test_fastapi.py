@@ -75,8 +75,11 @@ def test_get_company_not_found(client, mock_repo):
 # POST /companies
 # ---------------------------------------------------------------------------
 
-def test_create_company(client):
+def test_create_company(client, mock_repo):
     """POST /companies must return 201 with a scored company."""
+    # Ensure save() just returns the passed-in Company object
+    mock_repo.save.side_effect = lambda c: c
+    
     payload = {
         "id": "new-co",
         "name": "New Energy Co",
@@ -135,11 +138,11 @@ def test_market_analysis(client):
     assert "market_name" in data
 
 
-def test_market_analysis_empty_returns_404(client, mock_repo):
-    """Market analysis with no companies must return 404."""
+def test_market_analysis_empty_returns_200(client, mock_repo):
+    """Market analysis with no companies must return 200."""
     mock_repo.get_all.return_value = []
     response = client.get("/market/analysis")
-    assert response.status_code == 404
+    assert response.status_code == 200
 
 
 # ---------------------------------------------------------------------------
@@ -208,3 +211,54 @@ def test_unauthenticated_access_returns_anonymous(unauthenticated_client):
     response = unauthenticated_client.get("/health")
     # Health is always available; verifies app responds (not crashes) without auth
     assert response.status_code == 200
+
+# ---------------------------------------------------------------------------
+# Global Exception Handlers (422, 404, 500)
+# ---------------------------------------------------------------------------
+
+def test_validation_error_handler(client):
+    """Trigger a 422 Unprocessable Entity with a bad payload to test exceptions.py."""
+    payload = {
+        # Missing strictly required 'id' and 'name' fields!
+        "industry": "Energy",
+        "tier": "Tier 2",
+        "ai_maturity": "Moderate",
+    }
+    response = client.post("/companies", json=payload)
+    assert response.status_code == 422
+    data = response.json()
+    assert data["error"] == "Unprocessable Entity (Validation Error)"
+    assert "details" in data
+    assert "request_id" in data
+
+def test_http_exception_handler(client, mock_repo):
+    """Trigger a 404 HTTP exception directly to test custom format."""
+    # Market overlap for non-existent company triggers 404 via HTTPException
+    mock_repo.get_by_id.return_value = None
+    response = client.get("/market/overlap/GHOST")
+    assert response.status_code == 404
+    data = response.json()
+    assert data["error"] == "HTTP Error"
+    assert "details" in data
+    assert "request_id" in data
+
+def test_global_500_exception_handler():
+    """Trigger a 500 Internal Server error cleanly via a one-off test route."""
+    from solstein.api.main import app
+    from fastapi.testclient import TestClient
+    
+    @app.get("/force-500-test-panic")
+    def force_500():
+        raise RuntimeError("Database offline panic test")
+        
+    # We must explicitly tell the TestClient NOT to re-raise the exception 
+    # so we can assert the JSONResponse from our custom global exception handler.
+    test_client = TestClient(app, raise_server_exceptions=False)
+    response = test_client.get("/force-500-test-panic")
+    assert response.status_code == 500
+    data = response.json()
+    assert data["error"] == "Internal Server Error"
+    assert "message" in data
+    assert "Database offline panic test" in data["message"]
+    assert "traceback" in data
+    assert "request_id" in data

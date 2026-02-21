@@ -1,8 +1,6 @@
 aiohappyeyeballs==2.6.1
 aiohttp==3.13.3
 aiosignal==1.4.0
-alembic==1.18.4
-amqp==5.3.1
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.12.1
@@ -11,9 +9,7 @@ async-lru==2.1.0
 attrs==25.4.0
 babel==2.18.0
 beautifulsoup4==4.14.3
-billiard==4.2.4
 bleach==6.3.0
-celery==5.6.2
 certifi==2026.1.4
 cfgv==3.5.0
 charset-normalizer==3.4.4
@@ -55,7 +51,6 @@ jsonpatch==1.33
 jsonpointer==3.0.0
 jupyterlab_pygments==0.3.0
 jupyterlab_widgets==3.0.16
-kombu==5.6.2
 langchain==1.2.10
 langchain-core==1.2.13
 langgraph==1.0.8
@@ -111,7 +106,6 @@ prometheus_client==0.24.1
 prompt_toolkit==3.0.52
 propcache==0.4.1
 psutil==7.2.2
-psycopg2-binary==2.9.11
 ptyprocess==0.7.0
 pure_eval==0.2.3
 pycodestyle==2.14.0
@@ -129,7 +123,6 @@ pytokens==0.4.1
 pytz==2025.2
 PyYAML==6.0.3
 pyzmq==27.1.0
-redis==7.2.0
 regex==2026.1.15
 reportlab==4.4.10
 requests==2.32.5
@@ -148,7 +141,6 @@ shellingham==1.5.4
 six==1.17.0
 -e git+https://github.com/Ai-Whisperers/solstein.git@b70aebbe6ad76e012b77f5188ce0104e8bad6f03#egg=solstein
 soupsieve==2.8.3
-SQLAlchemy==2.0.46
 stack-data==0.6.3
 starlette==0.52.1
 structlog==25.5.0
@@ -176,7 +168,6 @@ urllib3==2.6.3
 uuid_utils==0.14.0
 uvicorn==0.41.0
 uvloop==0.22.1
-vine==5.1.0
 virtualenv==20.37.0
 watchfiles==1.1.1
 wcwidth==0.6.0

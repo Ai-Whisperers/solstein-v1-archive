@@ -3,17 +3,17 @@ Supabase client integration.
 Provides a singleton instance of the Supabase client for database operations.
 """
 
-from typing import Optional
+
 from loguru import logger
-from supabase import create_client, Client
+from supabase import Client, create_client
 
 from solstein.config import get_settings
 
 
 class SupabaseConnection:
     """Singleton wrapper for Supabase client."""
-    
-    _instance: Optional[Client] = None
+
+    _instance: Client | None = None
 
     @classmethod
     def get_client(cls) -> Client:
@@ -21,7 +21,7 @@ class SupabaseConnection:
         if cls._instance is None:
             settings = get_settings()
             if not settings.supabase.url or not settings.supabase.key:
-                logger.error("Supabase URL or Key not configured. Database operations will fail.")
+                logger.error("Supabase URL or Key not configured. Database operations will fail.")  # noqa: E501
                 raise ValueError("Missing Supabase configuration")
 
             logger.info("Initializing Supabase client connection.")

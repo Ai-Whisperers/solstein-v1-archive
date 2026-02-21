@@ -10,6 +10,7 @@ Production-ready REST API following Vete's architecture patterns:
 - Comprehensive error handling
 """
 
+from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any
 
@@ -20,9 +21,30 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from loguru import logger
 
 from ..config import Settings
+from .exceptions import setup_exception_handlers
+from .middleware import LoggingMiddleware
 
 # Import Routers
-from .routers import companies, export, jobs, market, scoring
+from .routers import companies, drill_down, export, jobs, market, scoring, simulation
+
+# Global instances (for startup logging)
+settings = Settings()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> Any:
+    """Lifecycle manager for startup and shutdown events."""
+    logger.info("Starting SolStein API server")
+    logger.info(f"Environment: {settings.environment}")
+    logger.info(f"Data directory: {settings.data.data_dir}")
+
+    # Create necessary directories
+    settings.data.ensure_dirs()
+    if settings.logging.file_path:
+        settings.logging.file_path.parent.mkdir(parents=True, exist_ok=True)
+    yield
+    logger.info("Shutting down SolStein API server")
+
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -32,6 +54,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    lifespan=lifespan,
 )
 
 # CORS middleware
@@ -43,9 +66,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global instances (for startup logging)
-settings = Settings()
+# Custom Logging Middleware (Request IDs and Timing)
+app.add_middleware(LoggingMiddleware)
 
+# Setup Global Exception Handlers
+setup_exception_handlers(app)
+
+# Global dependencies configured in lifespan
 
 # Include Routers
 app.include_router(companies.router)
@@ -53,6 +80,8 @@ app.include_router(scoring.router, prefix="/scoring")
 app.include_router(market.router, prefix="/market")
 app.include_router(export.router, prefix="/export")
 app.include_router(jobs.router, prefix="/jobs")
+app.include_router(drill_down.router)
+app.include_router(simulation.router, prefix="/simulation")
 
 
 # Health check endpoint
@@ -78,32 +107,11 @@ async def custom_swagger_ui_html() -> Any:
     )
 
 
-# Startup event
-@app.on_event("startup")
-async def startup_event() -> None:
-    """Initialize application on startup."""
-    logger.info("Starting SolStein API server")
-    logger.info(f"Environment: {settings.environment}")
-    logger.info(f"Data directory: {settings.data.data_dir}")
-
-    # Create necessary directories
-    settings.data.ensure_dirs()
-    if settings.logging.file_path:
-        settings.logging.file_path.parent.mkdir(parents=True, exist_ok=True)
-
-
 # Health check endpoint alias
 @app.get("/healthz", tags=["Health"], include_in_schema=False)
 async def health_check_alias() -> dict[str, Any]:
     """Health check alias for K8s."""
     return await health_check()
-
-
-# Shutdown event
-@app.on_event("shutdown")
-async def shutdown_event() -> None:
-    """Cleanup on shutdown."""
-    logger.info("Shutting down SolStein API server")
 
 
 # Main entry point

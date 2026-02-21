@@ -1,46 +1,12 @@
 version: '3.8'
 
 services:
-  # PostgreSQL database
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: solstein
-      POSTGRES_USER: solstein
-      POSTGRES_PASSWORD: solstein123
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U solstein"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Redis for caching and queues
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # SolStein API
   api:
     build: .
     ports:
       - "8000:8000"
     environment:
-      DATABASE__URL: postgresql://solstein:solstein123@postgres:5432/solstein
-      REDIS__URL: redis://redis:6379/0
       API__HOST: 0.0.0.0
       API__PORT: 8000
       API__DEBUG: "true"
@@ -48,57 +14,10 @@ services:
       - ./data:/app/data
       - ./exports:/app/exports
       - ./logs:/app/logs
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     command: >
       sh -c "
-        alembic upgrade head &&
         uvicorn solstein.api.main:app --host 0.0.0.0 --port 8000 --reload
       "
-
-  # Celery worker for async tasks
-  worker:
-    build: .
-    environment:
-      DATABASE__URL: postgresql://solstein:solstein123@postgres:5432/solstein
-      REDIS__URL: redis://redis:6379/0
-    volumes:
-      - ./data:/app/data
-      - ./exports:/app/exports
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    command: celery -A solstein.worker.celery_app worker --loglevel=info
-
-  # Celery beat for scheduled tasks
-  beat:
-    build: .
-    environment:
-      DATABASE__URL: postgresql://solstein:solstein123@postgres:5432/solstein
-      REDIS__URL: redis://redis:6379/0
-    volumes:
-      - ./data:/app/data
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    command: celery -A solstein.worker.celery_app beat --loglevel=info
-
-  # Frontend (to be added later)
-  # frontend:
-  #   build: ./frontend
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     REACT_APP_API_URL: http://localhost:8000/api/v1
-  #   depends_on:
-  #     - api
 
   # Monitoring stack
   prometheus:
@@ -129,7 +48,5 @@ services:
       - prometheus
 
 volumes:
-  postgres_data:
-  redis_data:
   prometheus_data:
   grafana_data:

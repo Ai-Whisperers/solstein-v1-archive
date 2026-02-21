@@ -1,0 +1,547 @@
+---
+id: rule.validation.compliance.v1
+kind: rule
+version: 1.0.0
+description: Comprehensive compliance validation rules for regulatory and organizational standards
+globs: "**/*.py", "**/**/*.ts", "**/*.js", "**/**/*.tsx", "**/*.java", "**/*.cpp", "**/*.c", "**/*.cs", "**/*.md", "**/*.yml", "**/*.yaml", "**/Dockerfile", "**/docker-compose.yml"
+governs: ""
+requires: ["rule.clean-code.v1", "rule.validation.security.v1", "rule.validation.code-quality.v1"]
+model_hints: { temp: 0.2, top_p: 0.9 }
+provenance: { owner: team-compliance, last_review: 2025-12-06 }
+alwaysApply: false
+---
+
+# Compliance Validation Rule
+
+## Purpose & Scope
+
+Defines comprehensive compliance validation standards for regulatory and organizational requirements. This rule ensures code, documentation, and infrastructure follow legal, regulatory, and organizational compliance standards across multiple domains.
+
+**Applies to**: All source code files, documentation, configuration files, and infrastructure before code review, merge, or deployment
+
+**Does not apply to**: Test data, build artifacts, or temporary files
+
+## Inputs (Contract)
+
+- Source code files in supported programming languages
+- Documentation files
+- Configuration files
+- Infrastructure files (Docker, Kubernetes, etc.)
+- Regulatory requirements and standards
+- Organizational policies
+- Compliance frameworks (GDPR, HIPAA, SOC2, etc.)
+
+## Outputs (Contract)
+
+- Compliance assessment report
+- Regulatory requirement coverage
+- Organizational policy compliance
+- Audit trail documentation
+- Compliance validation checklist
+- Remediation recommendations
+
+## Core Compliance Principles
+
+**COMPLIANCE IS NOT OPTIONAL - IT'S MANDATORY.**
+
+**PROACTIVE COMPLIANCE - Build compliance into development from the start.**
+
+**DOCUMENTATION IS KEY - Maintain proper audit trails.**
+
+**CONTINUOUS MONITORING - Compliance is ongoing, not one-time.**
+
+## Mandatory Compliance Gates
+
+### Gate 1: Data Protection and Privacy (CRITICAL)
+
+#### GDPR Compliance (if applicable)
+- [ ] Data minimization principles
+- [ ] Purpose limitation
+- [ ] Data accuracy
+- [ ] Storage limitation
+- [ ] Integrity and confidentiality
+- [ ] Accountability
+- [ ] Right to access
+- [ ] Right to erasure
+- [ ] Data portability
+- [ ] Privacy by design
+
+#### HIPAA Compliance (if applicable)
+- [ ] Protected Health Information (PHI) protection
+- [ ] Access controls
+- [ ] Audit trails
+- [ ] Encryption
+- [ ] Breach notification procedures
+- [ ] Business associate agreements
+
+#### CCPA/CPRA Compliance (if applicable)
+- [ ] Consumer rights
+- [ ] Data sale opt-out
+- [ ] Privacy notices
+- [ ] Data deletion requests
+- [ ] Data portability
+
+#### General Data Protection
+- [ ] Data classification
+- [ ] Data encryption
+- [ ] Access controls
+- [ ] Audit logging
+- [ ] Data retention policies
+
+### Gate 2: Security and Risk Management (CRITICAL)
+
+#### SOC2 Compliance (if applicable)
+- [ ] Security controls
+- [ ] Availability controls
+- [ ] Processing integrity
+- [ ] Confidentiality controls
+- [ ] Privacy controls
+
+#### ISO 27001 Compliance (if applicable)
+- [ ] Information security management
+- [ ] Risk assessment
+- [ ] Risk treatment
+- [ ] Security controls
+- [ ] Continuous improvement
+
+#### NIST Cybersecurity Framework (if applicable)
+- [ ] Identify
+- [ ] Protect
+- [ ] Detect
+- [ ] Respond
+- [ ] Recover
+
+#### Organizational Security Policies
+- [ ] Security policies
+- [ ] Risk management procedures
+- [ ] Incident response procedures
+- [ ] Business continuity
+- [ ] Disaster recovery
+
+### Gate 3: Quality and Process Compliance (HIGHLY RECOMMENDED)
+
+#### ISO 9001 Compliance (if applicable)
+- [ ] Quality management system
+- [ ] Process documentation
+- [ ] Quality objectives
+- [ ] Continuous improvement
+- [ ] Customer focus
+
+#### Organizational Development Processes
+- [ ] Software development lifecycle
+- [ ] Change management
+- [ ] Release management
+- [ ] Configuration management
+- [ ] Incident management
+
+#### Documentation Standards
+- [ ] Proper documentation
+- [ ] Version control
+- [ ] Change tracking
+- [ ] Audit trails
+- [ ] Record retention
+
+### Gate 4: Infrastructure and Operations Compliance (HIGHLY RECOMMENDED)
+
+#### Cloud Compliance (if applicable)
+- [ ] AWS compliance standards
+- [ ] Azure compliance standards
+- [ ] GCP compliance standards
+- [ ] Cloud security controls
+- [ ] Cloud governance
+
+#### Container Security (if applicable)
+- [ ] Docker security best practices
+- [ ] Kubernetes security
+- [ ] Container image scanning
+- [ ] Runtime security
+- [ ] Network policies
+
+#### Infrastructure as Code Compliance
+- [ ] Terraform security
+- [ ] CloudFormation security
+- [ ] ARM template security
+- [ ] Infrastructure validation
+- [ ] Configuration management
+
+## Domain-Specific Compliance Rules
+
+### Software Development Compliance
+
+#### Code Quality Compliance
+- [ ] Coding standards compliance
+- [ ] Code review requirements
+- [ ] Testing requirements
+- [ ] Documentation requirements
+- [ ] Version control policies
+
+#### Development Process Compliance
+- [ ] SDLC compliance
+- [ ] Agile methodology compliance
+- [ ] Project management compliance
+- [ ] Change management compliance
+- [ ] Release management compliance
+
+#### Technical Documentation Compliance
+- [ ] Architecture documentation
+- [ ] API documentation
+- [ ] User documentation
+- [ ] Technical specifications
+- [ ] Compliance documentation
+
+### Infrastructure Compliance
+
+#### Cloud Infrastructure Compliance
+- [ ] Resource tagging compliance
+- [ ] Cost management compliance
+- [ ] Security compliance
+- [ ] Backup compliance
+- [ ] Disaster recovery compliance
+
+#### Container Infrastructure Compliance
+- [ ] Container security compliance
+- [ ] Image scanning compliance
+- [ ] Runtime security compliance
+- [ ] Network security compliance
+- [ ] Storage security compliance
+
+#### Network Compliance
+- [ ] Network security policies
+- [ ] Firewall rules compliance
+- [ ] Network segmentation
+- [ ] VPN compliance
+- [ ] DNS security
+
+## Compliance Validation Checklist Templates
+
+### Quick Compliance Check (Pre-PR)
+
+Use this before submitting pull requests:
+
+```markdown
+## Compliance Validation - Quick Check
+
+### Data Protection and Privacy
+- [ ] GDPR compliance requirements met
+- [ ] HIPAA compliance requirements met (if applicable)
+- [ ] CCPA/CPRA compliance requirements met (if applicable)
+- [ ] Data encryption implemented
+- [ ] Access controls implemented
+
+### Security and Risk Management
+- [ ] SOC2 compliance requirements met (if applicable)
+- [ ] ISO 27001 compliance requirements met (if applicable)
+- [ ] NIST Cybersecurity Framework compliance (if applicable)
+- [ ] Security policies followed
+- [ ] Risk management procedures followed
+
+### Quality and Process Compliance
+- [ ] ISO 9001 compliance requirements met (if applicable)
+- [ ] Software development lifecycle followed
+- [ ] Change management procedures followed
+- [ ] Configuration management followed
+- [ ] Documentation standards met
+
+### Infrastructure and Operations Compliance
+- [ ] Cloud compliance requirements met (if applicable)
+- [ ] Container security compliance met (if applicable)
+- [ ] Network security compliance met
+- [ ] Backup compliance met
+- [ ] Disaster recovery compliance met
+
+### Evidence
+- Compliance assessment: [attach results]
+- Regulatory requirements coverage: [attach results]
+- Organizational policy compliance: [attach results]
+- Audit trail documentation: [attach results]
+```
+
+### Comprehensive Compliance Assessment (Pre-Merge)
+
+Use this for major changes or production code:
+
+```markdown
+## Compliance Assessment - Comprehensive
+
+### Data Protection and Privacy Compliance
+
+#### GDPR Compliance
+- [ ] Data minimization: [PASS/FAIL]
+- [ ] Purpose limitation: [PASS/FAIL]
+- [ ] Data accuracy: [PASS/FAIL]
+- [ ] Storage limitation: [PASS/FAIL]
+- [ ] Integrity and confidentiality: [PASS/FAIL]
+- [ ] Accountability: [PASS/FAIL]
+
+#### HIPAA Compliance
+- [ ] PHI protection: [PASS/FAIL]
+- [ ] Access controls: [PASS/FAIL]
+- [ ] Audit trails: [PASS/FAIL]
+- [ ] Encryption: [PASS/FAIL]
+- [ ] Breach notification: [PASS/FAIL]
+
+#### CCPA/CPRA Compliance
+- [ ] Consumer rights: [PASS/FAIL]
+- [ ] Data sale opt-out: [PASS/FAIL]
+- [ ] Privacy notices: [PASS/FAIL]
+- [ ] Data deletion requests: [PASS/FAIL]
+- [ ] Data portability: [PASS/FAIL]
+
+#### General Data Protection
+- [ ] Data classification: [PASS/FAIL]
+- [ ] Data encryption: [PASS/FAIL]
+- [ ] Access controls: [PASS/FAIL]
+- [ ] Audit logging: [PASS/FAIL]
+- [ ] Data retention: [PASS/FAIL]
+
+### Security and Risk Management Compliance
+
+#### SOC2 Compliance
+- [ ] Security controls: [PASS/FAIL]
+- [ ] Availability controls: [PASS/FAIL]
+- [ ] Processing integrity: [PASS/FAIL]
+- [ ] Confidentiality controls: [PASS/FAIL]
+- [ ] Privacy controls: [PASS/FAIL]
+
+#### ISO 27001 Compliance
+- [ ] Information security management: [PASS/FAIL]
+- [ ] Risk assessment: [PASS/FAIL]
+- [ ] Risk treatment: [PASS/FAIL]
+- [ ] Security controls: [PASS/FAIL]
+- [ ] Continuous improvement: [PASS/FAIL]
+
+#### NIST Cybersecurity Framework
+- [ ] Identify: [PASS/FAIL]
+- [ ] Protect: [PASS/FAIL]
+- [ ] Detect: [PASS/FAIL]
+- [ ] Respond: [PASS/FAIL]
+- [ ] Recover: [PASS/FAIL]
+
+#### Organizational Security Policies
+- [ ] Security policies: [PASS/FAIL]
+- [ ] Risk management procedures: [PASS/FAIL]
+- [ ] Incident response procedures: [PASS/FAIL]
+- [ ] Business continuity: [PASS/FAIL]
+- [ ] Disaster recovery: [PASS/FAIL]
+
+### Quality and Process Compliance
+
+#### ISO 9001 Compliance
+- [ ] Quality management system: [PASS/FAIL]
+- [ ] Process documentation: [PASS/FAIL]
+- [ ] Quality objectives: [PASS/FAIL]
+- [ ] Continuous improvement: [PASS/FAIL]
+- [ ] Customer focus: [PASS/FAIL]
+
+#### Organizational Development Processes
+- [ ] Software development lifecycle: [PASS/FAIL]
+- [ ] Change management: [PASS/FAIL]
+- [ ] Release management: [PASS/FAIL]
+- [ ] Configuration management: [PASS/FAIL]
+- [ ] Incident management: [PASS/FAIL]
+
+#### Documentation Standards
+- [ ] Proper documentation: [PASS/FAIL]
+- [ ] Version control: [PASS/FAIL]
+- [ ] Change tracking: [PASS/FAIL]
+- [ ] Audit trails: [PASS/FAIL]
+- [ ] Record retention: [PASS/FAIL]
+
+### Infrastructure and Operations Compliance
+
+#### Cloud Compliance
+- [ ] Resource tagging: [PASS/FAIL]
+- [ ] Cost management: [PASS/FAIL]
+- [ ] Security compliance: [PASS/FAIL]
+- [ ] Backup compliance: [PASS/FAIL]
+- [ ] Disaster recovery: [PASS/FAIL]
+
+#### Container Infrastructure Compliance
+- [ ] Container security: [PASS/FAIL]
+- [ ] Image scanning: [PASS/FAIL]
+- [ ] Runtime security: [PASS/FAIL]
+- [ ] Network security: [PASS/FAIL]
+- [ ] Storage security: [PASS/FAIL]
+
+#### Network Compliance
+- [ ] Network security policies: [PASS/FAIL]
+- [ ] Firewall rules: [PASS/FAIL]
+- [ ] Network segmentation: [PASS/FAIL]
+- [ ] VPN compliance: [PASS/FAIL]
+- [ ] DNS security: [PASS/FAIL]
+
+### Compliance Metrics
+- Regulatory requirements covered: [percentage]
+- Organizational policies met: [percentage]
+- Audit findings: [count]
+- Remediation items: [count]
+- Compliance score: [percentage]
+
+### Issues Found and Fixed
+- Issue 1: [description] - Fixed
+- Issue 2: [description] - Fixed
+- Issue 3: [description] - Fixed
+
+### Validation Evidence
+- Compliance assessment: [attach file]
+- Regulatory requirements coverage: [attach file]
+- Organizational policy compliance: [attach file]
+- Audit trail documentation: [attach file]
+```
+
+## Anti-Patterns and Common Compliance Issues
+
+### Anti-Pattern 1: "Compliance Later"
+[X] **Pattern**: Ignoring compliance until audit
+[X] **Instead**: Build compliance into development from start
+
+### Anti-Pattern 2: "Checkbox Compliance"
+[X] **Pattern**: Meeting minimum requirements only
+[X] **Instead**: Exceeding requirements and best practices
+
+### Anti-Pattern 3: "Documentation After"
+[X] **Pattern**: Creating documentation after implementation
+[X] **Instead**: Documentation as part of development process
+
+### Anti-Pattern 4: "Security as Afterthought"
+[X] **Pattern**: Adding security after development
+[X] **Instead**: Security by design from the beginning
+
+### Anti-Pattern 5: "Ignoring Updates"
+[X] **Pattern**: Not staying current with regulatory changes
+[X] **Instead**: Regular compliance reviews and updates
+
+## Deterministic Compliance Validation Steps
+
+Before merging or deploying code, execute in order:
+
+1. **Regulatory Requirements Review**
+   - Review applicable regulatory requirements
+   - Identify compliance obligations
+   - Map requirements to implementation
+
+2. **Organizational Policy Review**
+   - Review organizational policies
+   - Identify policy compliance requirements
+   - Map policies to implementation
+
+3. **Data Protection Assessment**
+   - Review data protection measures
+   - Verify encryption and access controls
+   - Check audit logging
+
+4. **Security Assessment**
+   - Review security controls
+   - Verify authentication and authorization
+   - Check incident response procedures
+
+5. **Quality Process Review**
+   - Review development processes
+   - Verify documentation standards
+   - Check change management procedures
+
+6. **Infrastructure Review**
+   - Review infrastructure compliance
+   - Verify cloud and container security
+   - Check network security
+
+7. **Documentation Review**
+   - Review compliance documentation
+   - Verify audit trails
+   - Check record retention
+
+8. **Validation Evidence Collection**
+   - Collect compliance evidence
+   - Document validation results
+   - Create compliance reports
+
+## Integration with Development Workflow
+
+### In CI/CD Pipeline
+- Compliance scanning on every commit
+- Regulatory requirement validation
+- Policy compliance checking
+- Automated compliance reporting
+
+### In Code Review
+- Compliance checklist for reviewers
+- Regulatory requirement validation
+- Policy compliance verification
+- Compliance evidence required
+
+### In Development Process
+- Compliance training for developers
+- Regulatory requirement reviews
+- Policy compliance monitoring
+- Compliance documentation
+
+## Success Criteria
+
+### Code is Compliant When:
+[X] All regulatory requirements met
+[X] Organizational policies followed
+[X] Data protection measures in place
+[X] Security controls implemented
+[X] Quality processes followed
+[X] Documentation complete
+[X] Audit trails maintained
+[X] Compliance monitoring in place
+
+### Warning Signs of Non-Compliance:
+[X] Regulatory requirements not met
+[X] Organizational policies violated
+[X] Data protection inadequate
+[X] Security controls missing
+[X] Quality processes not followed
+[X] Documentation incomplete
+[X] Audit trails missing
+[X] No compliance monitoring
+
+## Enforcement
+
+### Automated Tools
+- Compliance scanning tools
+- Regulatory requirement checkers
+- Policy compliance validators
+- Audit trail generators
+
+### Manual Review
+- Compliance code review
+- Regulatory requirement validation
+- Policy compliance verification
+- Compliance documentation review
+
+### Team Standards
+- Compliance training requirements
+- Regulatory requirement awareness
+- Policy compliance monitoring
+- Compliance incident response
+
+## OPSEC and Compliance Considerations
+
+When validating compliance:
+- NO production credentials in test data
+- NO sensitive information in compliance reports
+- NO customer data in compliance documentation
+- NO internal system details in regulatory submissions
+- Redact sensitive information in compliance documentation
+
+## Related Rules
+
+- `rule.validation.security.v1` - Security validation
+- `rule.validation.code-quality.v1` - Code quality validation
+- `rule.validation.performance.v1` - Performance validation
+- `rule.documentation.v1` - Documentation standards
+- `rule.process.v1` - Process compliance
+
+## FINAL COMPLIANCE VALIDATION CHECKLIST
+
+- [ ] Regulatory requirements met: [list requirements]
+- [ ] Organizational policies followed: [list policies]
+- [ ] Data protection measures in place: [list measures]
+- [ ] Security controls implemented: [list controls]
+- [ ] Quality processes followed: [list processes]
+- [ ] Documentation complete: [list documents]
+- [ ] Audit trails maintained: [list trails]
+- [ ] Compliance monitoring in place: [list monitoring]
+- [ ] Only after ALL pass: Code is compliant for deployment

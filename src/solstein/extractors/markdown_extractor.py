@@ -12,9 +12,9 @@ from typing import Any
 
 from loguru import logger
 
-from ..data.models import (
+from ..domain.models import (
     AIMaturity,
-    CompanyProfile,
+    Company,
     CompanyTier,
     ConfidenceLevel,
     FinancialMetric,
@@ -33,9 +33,9 @@ class MarkdownExtractor:
             "profit_margin": re.compile(r"Profit Margin:\s*([\d.,]+\s*%)"),
             "funding": re.compile(r"Funding Raised:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
             "valuation": re.compile(r"Valuation:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
-            "ai_maturity": re.compile(r"AI Maturity:\s*(\w+(?:\s+\w+)*)"),
+            "ai_maturity": re.compile(r"AI Maturity:\s*(\w+(?:[ \t]+\w+)*)"),
             "threat_level": re.compile(r"Threat Level:\s*(\w+)"),
-            "tier": re.compile(r"Tier:\s*(\w+(?:\s+\w+)*)"),
+            "tier": re.compile(r"Tier:\s*(\w+(?:[ \t]+\w+)*)"),
         }
 
     def extract_from_file(self, file_path: Path) -> dict[str, Any] | None:
@@ -63,7 +63,7 @@ class MarkdownExtractor:
             data["name"] = name_match.group(1).strip()
 
         # Extract description (first paragraph after title)
-        desc_match = re.search(r"#\s+.+\n\n(.+?)(?:\n\n|$)", content, re.DOTALL)
+        desc_match = re.search(r"#\s+[^\n]+\n\n(.+?)(?:\n\n|$)", content, re.DOTALL)
         if desc_match:
             data["description"] = desc_match.group(1).strip()
 
@@ -102,8 +102,8 @@ class MarkdownExtractor:
 
         return confidence
 
-    def to_company_profile(self, extracted_data: dict[str, Any]) -> CompanyProfile:
-        """Convert extracted data to CompanyProfile model."""
+    def to_company_profile(self, extracted_data: dict[str, Any]) -> Company:
+        """Convert extracted data to Company model."""
         # Generate ID from name
         company_id = (
             extracted_data.get("name", "unknown")
@@ -133,7 +133,7 @@ class MarkdownExtractor:
         )
 
         # Create company profile
-        profile = CompanyProfile(
+        profile = Company(
             id=company_id,
             name=extracted_data.get("name", "Unknown Company"),
             description=extracted_data.get("description"),
@@ -240,7 +240,7 @@ class MarkdownExtractor:
         confidence_data = data.get("confidence", {})
         val = confidence_data.get(metric, "Unknown")
         try:
-            return ConfidenceLevel(val.upper())
+            return ConfidenceLevel(val.capitalize())
         except ValueError:
             return ConfidenceLevel.UNKNOWN
 
@@ -254,11 +254,11 @@ class BatchExtractor:
     @classmethod
     async def process_file(
         cls, file_path: Path, extractor: "MarkdownExtractor | None" = None
-    ) -> CompanyProfile | None:
+    ) -> Company | None:
         """Process a single file asynchronously."""
         if extractor is None:
             extractor = MarkdownExtractor()
-        
+
         extracted = extractor.extract_from_file(file_path)
         if extracted:
             try:
@@ -269,9 +269,9 @@ class BatchExtractor:
 
     def extract_directory(
         self, directory: Path, pattern: str = "*.md"
-    ) -> list[CompanyProfile]:
+    ) -> list[Company]:
         """Extract data from all markdown files in a directory."""
-        profiles: list[CompanyProfile] = []
+        profiles: list[Company] = []
 
         if not directory.exists():
             logger.error(f"Directory does not exist: {directory}")
@@ -293,10 +293,10 @@ class BatchExtractor:
         logger.info(f"Successfully extracted {len(profiles)} profiles")
         return profiles
 
-    def save_to_json(self, profiles: list[CompanyProfile], output_path: Path) -> None:
+    def save_to_json(self, profiles: list[Company], output_path: Path) -> None:
         """Save profiles to JSON file."""
         try:
-            data = [profile.model_dump() for profile in profiles]
+            data = [profile.model_dump(mode="json") for profile in profiles]
             output_path.parent.mkdir(parents=True, exist_ok=True)
             output_path.write_text(
                 json.dumps(data, indent=2, default=str), encoding="utf-8"

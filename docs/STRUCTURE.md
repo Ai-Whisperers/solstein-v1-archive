@@ -14,9 +14,8 @@ solstein/
 ├── data/                ← Input data + export output
 ├── scripts/             ← Utility and setup scripts
 ├── docker/              ← Docker + compose files
-├── legacy/              ← Archived C# predecessor — do not develop here
 ├── pyproject.toml       ← Project metadata, dependencies, tool config
-└── Makefile             ← Common tasks (install, test, lint, docker)
+└── Makefile            ← Common tasks (install, test, lint, docker)
 ```
 
 ---
