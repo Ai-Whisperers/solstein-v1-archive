@@ -4,7 +4,7 @@ Unit tests for Market Simulation Engine.
 
 import pytest
 
-from solstein.analytics.simulation import SimulationEngine
+from solstein.analytics.simulation.market import SimulationEngine
 from solstein.domain.models import Company, FinancialMetric
 from solstein.domain.simulation import MarketCondition, MarketConditionType, Scenario
 

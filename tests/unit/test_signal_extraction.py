@@ -5,14 +5,14 @@ from various agent data sources.
 """
 
 
-from solstein.analytics.signal_extractors import (
+from solstein.analytics.signals.extractors import (
     AggregateSignalExtractor,
     CompaniesHouseSignalExtractor,
     FinancialSignalExtractor,
     GitHubSignalExtractor,
     WebSearchSignalExtractor,
 )
-from solstein.analytics.signals import (
+from solstein.analytics.signals.models import (
     Signal,
     SignalCategory,
     SignalDefinitions,

@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 from solstein.analytics.scoring import GrowthScorer
 from solstein.data.loaders import CompetitorDataLoader
 from solstein.domain.models import FinancialMetric
-from solstein.exporters.excel_exporter import ExcelExporter
+from solstein.exporters.excel import ExcelExporter
 from solstein.extractors.markdown_extractor import MarkdownExtractor
 
 # ---- Logging Intercept ----
@@ -84,13 +84,13 @@ def test_excel_exporter_none_active_sheet():
     """If wb.active is None, create_sheet should be called."""
     exporter = ExcelExporter()
 
-    with patch("solstein.exporters.excel_exporter.Workbook") as mock_wb_class:
+    with patch("solstein.exporters.excel.Workbook") as mock_wb_class:
         mock_wb = MagicMock()
         mock_wb.active = None
         mock_wb_class.return_value = mock_wb
 
         exporter.create_dashboard([], Path("/tmp/test_output.xlsx"))
-        mock_wb.create_sheet.assert_called_with("Competitive Dashboard")
+        mock_wb.create_sheet.assert_called_with("Executive Summary")
 
 
 def test_excel_auto_adjust_value_error():

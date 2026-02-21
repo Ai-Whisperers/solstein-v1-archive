@@ -10,8 +10,8 @@ from loguru import logger
 
 from .analytics.scoring import GrowthScorer
 from .domain.models import Company, MarketAnalysis
-from .exporters.excel_exporter import ExcelExporter
-from .exporters.report_generator import ClientReportGenerator
+from .exporters.excel import ExcelExporter
+from .exporters.markdown.generator import ClientReportGenerator
 from .extractors.markdown_extractor import BatchExtractor
 
 

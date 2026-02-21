@@ -5,7 +5,7 @@ Tests for the PE Valuation Analysis module.
 import pandas as pd
 import pytest
 
-from solstein.analytics.valuation import (
+from solstein.analytics.valuation.models import (
     GrowthAnalyzer,
     TTMEPSAnalyzer,
     ValuationAnalyzer,
@@ -129,7 +129,7 @@ def test_valuation_benchmark():
 
 def test_pe_insight_generation():
     """Test PE insight text generation."""
-    from solstein.analytics.valuation import create_pe_valuation_insight
+    from solstein.analytics.valuation.models import create_pe_valuation_insight
 
     insight = create_pe_valuation_insight(
         ticker="TEST",

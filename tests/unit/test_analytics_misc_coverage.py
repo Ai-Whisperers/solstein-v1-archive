@@ -6,7 +6,7 @@ from solstein.analytics.activities import (
     _get_repo,
     calculate_company_score,
 )
-from solstein.analytics.simulation import SimulationEngine
+from solstein.analytics.simulation.market import SimulationEngine
 from solstein.data.repositories import JsonFileRepository
 from solstein.domain.models import Company, FinancialMetric
 from solstein.domain.simulation import MarketCondition, MarketConditionType, Scenario

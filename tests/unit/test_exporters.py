@@ -13,7 +13,7 @@ from solstein.domain.models import (
     FinancialMetric,
     ThreatLevel,
 )
-from solstein.exporters.excel_exporter import ExcelExporter, TemplateExporter
+from solstein.exporters.excel import ExcelExporter, TemplateExporter
 
 
 @pytest.fixture

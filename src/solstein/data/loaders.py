@@ -120,8 +120,8 @@ class CompetitorDataLoader:
                         calculated_cagr_3yr = (
                             (current_rev / past_rev) ** (1 / years_back) - 1
                         ) * 100
-            except (ZeroDivisionError, ValueError):
-                pass
+            except (ZeroDivisionError, ValueError) as e:
+                logger.debug(f"Could not calculate 3-year CAGR from timeline: {e}")
 
         # Extract profitability
         profitability_data = raw_data.get("profitability", {})

@@ -8,7 +8,7 @@ from loguru import logger
 from ...analytics.scoring import GrowthScorer
 from ...config import get_settings
 from ...core.repositories import CompanyFilter, CompanyRepository
-from ...exporters.excel_exporter import ExcelExporter
+from ...exporters.excel import ExcelExporter
 from ..dependencies import get_current_user, get_repository
 
 router = APIRouter(tags=["Export"])
