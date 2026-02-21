@@ -18,14 +18,12 @@ Data Sources:
 - Web scraping (products, technology)
 """
 
-from datetime import datetime, date
+from datetime import datetime
 from typing import Any
 
-import pandas as pd
 import yfinance as yf
-from pydantic import BaseModel
-
 from loguru import logger
+from pydantic import BaseModel
 
 
 class CompanyLeadership(BaseModel):

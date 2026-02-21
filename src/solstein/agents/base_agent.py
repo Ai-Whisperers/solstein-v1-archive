@@ -10,7 +10,7 @@ from typing import Any
 from loguru import logger
 from pydantic import BaseModel, Field
 
-from ..domain.models import AggregatedFact, RawDataSource, DataSourceType
+from ..domain.models import AggregatedFact, DataSourceType, RawDataSource
 
 
 class AgentTaskResult(BaseModel):

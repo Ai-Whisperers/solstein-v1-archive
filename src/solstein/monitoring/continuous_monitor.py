@@ -5,13 +5,13 @@ and automatically updates company profiles when material events occur.
 """
 
 import asyncio
-from datetime import UTC, datetime, timedelta
-from typing import Callable
+from collections.abc import Callable
+from datetime import UTC, datetime
 
 from loguru import logger
 
-from ..domain.models import Company, GatheringBatch
 from ..agents import GitHubAgent, WebSearchAgent
+from ..domain.models import Company
 
 
 class ContinuousMonitor:

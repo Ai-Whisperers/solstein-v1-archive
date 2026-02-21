@@ -12,18 +12,18 @@ To use these, you need API keys:
 
 1. NEWS_API_KEY: Get from https://newsapi.org
 2. CRUNCHBASE_KEY: Get from https://crunchbase.api-docs.io
-3. PATENTSCORE_KEY: Get from https://patentscope.wipo.int
+3. PATENTSVIEW_API_KEY: Get from https://patentsview.org (free, 45 req/min)
 
 For LinkedIn, we use web scraping (no official API available).
 """
 
-from datetime import datetime, date, timedelta
+import json
+from datetime import date, datetime, timedelta
 from typing import Any
 
 import requests
-from pydantic import BaseModel
-
 from loguru import logger
+from pydantic import BaseModel
 
 
 class NewsArticle(BaseModel):
@@ -120,10 +120,19 @@ class AdditionalDataSources:
         """
         Get news coverage for a company.
 
-        Uses NewsAPI.org to fetch recent articles.
+        First tries NewsAPI.org, falls back to web search if API unavailable.
         """
+        if self.news_api_key:
+            result = self._get_news_from_api(company_name, days_back)
+            if result.total_articles > 0:
+                return result
+            logger.info("NewsAPI returned no results, trying web search fallback")
+
+        return self._get_news_from_web_search(company_name, days_back)
+
+    def _get_news_from_api(self, company_name: str, days_back: int) -> PressCoverage:
+        """Get news using NewsAPI.org."""
         if not self.news_api_key:
-            logger.warning("News API key not configured")
             return PressCoverage(
                 articles=[],
                 total_articles=0,
@@ -193,7 +202,112 @@ class AdditionalDataSources:
             )
 
         except Exception as e:
-            logger.error(f"Error fetching news: {e}")
+            logger.error(f"Error fetching news from API: {e}")
+            return PressCoverage(
+                articles=[],
+                total_articles=0,
+                positive_count=0,
+                negative_count=0,
+                neutral_count=0,
+                sentiment_score=None,
+            )
+
+    def _get_news_from_web_search(
+        self, company_name: str, days_back: int
+    ) -> PressCoverage:
+        """
+        Get news using web search as fallback.
+
+        This method is used when:
+        - NewsAPI key is not configured
+        - NewsAPI returns no results
+        - NewsAPI quota is exhausted
+
+        Uses Google search to find recent news articles.
+        """
+        from urllib.parse import quote
+
+        try:
+            search_url = (
+                f"https://www.google.com/search?q={quote(company_name)}+news&tbs=qdr:w"
+            )
+
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+
+            response = requests.get(search_url, headers=headers, timeout=15)
+            html = response.text
+
+            articles = []
+            positive = 0
+            negative = 0
+            neutral = 0
+
+            import re
+
+            news_pattern = re.compile(r'<a href="(https?://[^"]+)"[^>]*>([^<]+)</a>')
+            snippet_pattern = re.compile(
+                r'<span[^>]*class="[^"]*BNeawe[^"]*"[^>]*>([^<]+)</span>'
+            )
+
+            matches = news_pattern.findall(html)
+            seen_urls = set()
+
+            for url, title in matches[:20]:
+                if any(
+                    skip in url
+                    for skip in [
+                        "google",
+                        "youtube",
+                        "facebook",
+                        "twitter",
+                        "wikipedia",
+                    ]
+                ):
+                    continue
+                if url in seen_urls:
+                    continue
+                seen_urls.add(url)
+
+                sentiment = self._analyze_sentiment(title)
+                if sentiment == "positive":
+                    positive += 1
+                elif sentiment == "negative":
+                    negative += 1
+                else:
+                    neutral += 1
+
+                articles.append(
+                    NewsArticle(
+                        title=title[:200] if title else "No title",
+                        description=None,
+                        source=url.split("/")[2] if len(url.split("/")) > 2 else "Web",
+                        url=url,
+                        published_at=datetime.now(),
+                        sentiment=sentiment,
+                    )
+                )
+
+            total = len(articles)
+            sentiment_score = (positive - negative) / total if total > 0 else None
+
+            if total > 0:
+                logger.info(
+                    f"Found {total} news articles via web search for {company_name}"
+                )
+
+            return PressCoverage(
+                articles=articles,
+                total_articles=total,
+                positive_count=positive,
+                negative_count=negative,
+                neutral_count=neutral,
+                sentiment_score=sentiment_score,
+            )
+
+        except Exception as e:
+            logger.error(f"Error fetching news from web search: {e}")
             return PressCoverage(
                 articles=[],
                 total_articles=0,
@@ -420,21 +534,132 @@ class AdditionalDataSources:
         )
 
     # ====================
-    # PATENT DATA (WIPO PatentScope)
+    # PATENT DATA (PatentsView API)
     # ====================
 
     def get_patent_data(self, company_name: str) -> PatentData:
         """
-        Get patent data for a company.
+        Get patent data for a company using PatentsView API.
 
-        Uses WIPO PatentScope (free, requires API for bulk).
+        Uses the PatentsView PatentSearch API to fetch patent information.
+        API Docs: https://search.patentsview.org/docs/
+        Rate limit: 45 requests/minute
         """
-        # Simple search - for bulk, use PatentScope API
-        url = "https://patentscope.wipo.int/PSSearch"
-        params = {"q": company_name, "fl": "10"}
+        if not self.patentsview_api_key:
+            logger.warning("PatentsView API key not configured")
+            return PatentData(
+                company_name=company_name,
+                total_patents=0,
+                recent_patents=[],
+                ai_related_patents=0,
+                top_patent_categories=[],
+            )
+
+        ai_keywords = [
+            "artificial intelligence",
+            "machine learning",
+            "deep learning",
+            "neural network",
+            "natural language processing",
+            "computer vision",
+            "nlp",
+            "ml",
+            "ai",
+            "algorithm",
+            "predictive model",
+            "data science",
+            "automation",
+        ]
 
         try:
-            # This is a placeholder - actual implementation needs more complex setup
+            headers = {"X-Api-Key": self.patentsview_api_key}
+
+            query = {
+                "_text_any": {"assignee_organization": company_name},
+            }
+
+            params = {
+                "q": json.dumps(query),
+                "f": json.dumps(
+                    [
+                        "patent_id",
+                        "patent_title",
+                        "patent_date",
+                        "patent_abstract",
+                        "assignee_organization",
+                        "inventor_first_name",
+                        "inventor_last_name",
+                    ]
+                ),
+                "s": json.dumps([{"patent_date": "desc"}]),
+                "o": json.dumps({"size": 50}),
+            }
+
+            response = requests.get(
+                f"{self._patentsview_base_url}/patent",
+                headers=headers,
+                params=params,
+                timeout=30,
+            )
+
+            if response.status_code == 403:
+                logger.error("PatentsView API key invalid or forbidden")
+                return PatentData(
+                    company_name=company_name,
+                    total_patents=0,
+                    recent_patents=[],
+                    ai_related_patents=0,
+                    top_patent_categories=[],
+                )
+
+            if response.status_code != 200:
+                logger.error(f"PatentsView API error: {response.status_code}")
+                return PatentData(
+                    company_name=company_name,
+                    total_patents=0,
+                    recent_patents=[],
+                    ai_related_patents=0,
+                    top_patent_categories=[],
+                )
+
+            data = response.json()
+
+            total_patents = data.get("total_hits", 0)
+            patents = data.get("patents", [])
+
+            recent_patents = []
+            ai_related_count = 0
+
+            for patent in patents[:10]:
+                patent_title = patent.get("patent_title", "").lower()
+                patent_abstract = patent.get("patent_abstract", "").lower()
+
+                combined_text = patent_title + " " + patent_abstract
+                is_ai = any(ai_kw in combined_text for ai_kw in ai_keywords)
+                if is_ai:
+                    ai_related_count += 1
+
+                recent_patents.append(
+                    {
+                        "patent_id": patent.get("patent_id"),
+                        "title": patent.get("patent_title"),
+                        "date": patent.get("patent_date"),
+                        "abstract": patent.get("patent_abstract")[:200] + "..."
+                        if patent.get("patent_abstract")
+                        else None,
+                    }
+                )
+
+            return PatentData(
+                company_name=company_name,
+                total_patents=total_patents,
+                recent_patents=recent_patents,
+                ai_related_patents=ai_related_count,
+                top_patent_categories=[],
+            )
+
+        except requests.exceptions.Timeout:
+            logger.error("PatentsView API request timed out")
             return PatentData(
                 company_name=company_name,
                 total_patents=0,

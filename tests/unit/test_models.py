@@ -47,6 +47,8 @@ class TestFinancialMetric:
         assert metric.funding_raised is None
         assert metric.valuation is None
         assert metric.valuation is None
+
+
 class TestCompany:
     """Test Company model and computed properties."""
 
@@ -92,9 +94,9 @@ class TestCompany:
             ),
         )
 
-        assert profile.is_large_cap is True   # valuation=200M > 100M
+        assert profile.is_large_cap is True  # valuation=200M > 100M
         assert profile.is_high_growth is True  # growth=30% > 20%
-        assert profile.is_profitable is True   # margin=15% > 0
+        assert profile.is_profitable is True  # margin=15% > 0
 
     def test_is_large_cap_false_when_no_valuation(self):
         """is_large_cap must return False when valuation is None (not set)."""
@@ -121,37 +123,51 @@ class TestCompany:
 
     def test_is_high_growth_false_when_growth_rate_none(self):
         """is_high_growth must return False when growth_rate is None."""
-        profile = Company(id="x", name="X", financials=FinancialMetric(growth_rate=None))
+        profile = Company(
+            id="x", name="X", financials=FinancialMetric(growth_rate=None)
+        )
         assert profile.is_high_growth is False
 
     def test_is_high_growth_false_at_exactly_20(self):
         """is_high_growth boundary: growth_rate=20.0 is NOT high growth (must be > 20)."""
-        profile = Company(id="x", name="X", financials=FinancialMetric(growth_rate=20.0))
+        profile = Company(
+            id="x", name="X", financials=FinancialMetric(growth_rate=20.0)
+        )
         assert profile.is_high_growth is False
 
     def test_is_high_growth_true_above_20(self):
         """is_high_growth must return True only when growth_rate > 20."""
-        profile = Company(id="x", name="X", financials=FinancialMetric(growth_rate=20.1))
+        profile = Company(
+            id="x", name="X", financials=FinancialMetric(growth_rate=20.1)
+        )
         assert profile.is_high_growth is True
 
     def test_is_profitable_false_when_profit_margin_none(self):
         """is_profitable must return False when profit_margin is None."""
-        profile = Company(id="x", name="X", financials=FinancialMetric(profit_margin=None))
+        profile = Company(
+            id="x", name="X", financials=FinancialMetric(profit_margin=None)
+        )
         assert profile.is_profitable is False
 
     def test_is_profitable_false_at_zero(self):
         """is_profitable boundary: profit_margin=0 is NOT profitable (must be > 0)."""
-        profile = Company(id="x", name="X", financials=FinancialMetric(profit_margin=0.0))
+        profile = Company(
+            id="x", name="X", financials=FinancialMetric(profit_margin=0.0)
+        )
         assert profile.is_profitable is False
 
     def test_is_profitable_false_negative(self):
         """Negative profit margin must not be profitable."""
-        profile = Company(id="x", name="X", financials=FinancialMetric(profit_margin=-5.0))
+        profile = Company(
+            id="x", name="X", financials=FinancialMetric(profit_margin=-5.0)
+        )
         assert profile.is_profitable is False
 
     def test_is_profitable_true_positive(self):
         """Positive profit margin must be profitable."""
-        profile = Company(id="x", name="X", financials=FinancialMetric(profit_margin=0.1))
+        profile = Company(
+            id="x", name="X", financials=FinancialMetric(profit_margin=0.1)
+        )
         assert profile.is_profitable is True
 
     def test_company_with_empty_tech_stack(self):
@@ -245,7 +261,9 @@ class TestMarketAnalysis:
 
     def test_average_growth_rate_none_when_no_data(self):
         """average_growth_rate returns None when no companies have growth data."""
-        companies = [Company(id="co1", name="Co1", financials=FinancialMetric(growth_rate=None))]
+        companies = [
+            Company(id="co1", name="Co1", financials=FinancialMetric(growth_rate=None))
+        ]
         analysis = MarketAnalysis(market_name="Tech", companies=companies)
         assert analysis.average_growth_rate is None
 

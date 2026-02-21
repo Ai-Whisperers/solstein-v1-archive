@@ -8,11 +8,11 @@ Provides:
 - Data quality monitoring
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Optional, Dict, List, Any
-from enum import Enum
 import asyncio
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
+from enum import Enum
+from typing import Any
 
 from loguru import logger
 
@@ -39,9 +39,9 @@ class HealthCheck:
     name: str
     status: HealthStatus
     message: str
-    last_checked: datetime = field(default_factory=datetime.utcnow)
+    last_checked: datetime = field(default_factory=lambda: datetime.now(UTC))
     duration_ms: float = 0.0
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -70,7 +70,7 @@ class DataQualityMetrics:
     average_signal_count_per_company: float = 0.0
     average_confidence_score: float = 0.0
     signals_with_low_confidence: int = 0
-    last_update: datetime = field(default_factory=datetime.utcnow)
+    last_update: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 class HealthMonitor:
@@ -78,12 +78,12 @@ class HealthMonitor:
 
     def __init__(self):
         """Initialize health monitor."""
-        self.checks: Dict[str, HealthCheck] = {}
-        self.metrics = MetricsSnapshot(timestamp=datetime.utcnow())
+        self.checks: dict[str, HealthCheck] = {}
+        self.metrics = MetricsSnapshot(timestamp=datetime.now(UTC))
         self.data_quality = DataQualityMetrics()
-        self.startup_time = datetime.utcnow()
-        self.request_history: List[Dict[str, Any]] = []
-        self.error_history: List[Dict[str, Any]] = []
+        self.startup_time = datetime.now(UTC)
+        self.request_history: list[dict[str, Any]] = []
+        self.error_history: list[dict[str, Any]] = []
 
     async def check_database(self) -> HealthCheck:
         """Check database connectivity.
@@ -91,7 +91,7 @@ class HealthMonitor:
         Returns:
             HealthCheck result
         """
-        start = datetime.utcnow()
+        start = datetime.now(UTC)
         try:
             await asyncio.sleep(0.01)
 
@@ -99,7 +99,7 @@ class HealthMonitor:
                 name="database",
                 status=HealthStatus.HEALTHY,
                 message="Database connection successful",
-                duration_ms=(datetime.utcnow() - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
                 details={"connection": "postgresql", "pool_size": 20},
             )
             self.checks["database"] = check
@@ -109,7 +109,7 @@ class HealthMonitor:
                 name="database",
                 status=HealthStatus.UNHEALTHY,
                 message=f"Database connection failed: {str(e)}",
-                duration_ms=(datetime.utcnow() - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
                 details={"error": str(e)},
             )
             self.checks["database"] = check
@@ -122,7 +122,7 @@ class HealthMonitor:
         Returns:
             HealthCheck result
         """
-        start = datetime.utcnow()
+        start = datetime.now(UTC)
         try:
             await asyncio.sleep(0.01)
 
@@ -130,7 +130,7 @@ class HealthMonitor:
                 name="api",
                 status=HealthStatus.HEALTHY,
                 message="API is responsive",
-                duration_ms=(datetime.utcnow() - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
                 details={"endpoints_available": 14},
             )
             self.checks["api"] = check
@@ -140,7 +140,7 @@ class HealthMonitor:
                 name="api",
                 status=HealthStatus.UNHEALTHY,
                 message=f"API health check failed: {str(e)}",
-                duration_ms=(datetime.utcnow() - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
                 details={"error": str(e)},
             )
             self.checks["api"] = check
@@ -152,7 +152,7 @@ class HealthMonitor:
         Returns:
             HealthCheck result
         """
-        start = datetime.utcnow()
+        start = datetime.now(UTC)
         try:
             from ..config import Settings
 
@@ -162,7 +162,7 @@ class HealthMonitor:
                 name="configuration",
                 status=HealthStatus.HEALTHY,
                 message="Configuration is valid",
-                duration_ms=(datetime.utcnow() - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
                 details={
                     "environment": settings.environment,
                     "debug": settings.debug,
@@ -175,13 +175,13 @@ class HealthMonitor:
                 name="configuration",
                 status=HealthStatus.UNHEALTHY,
                 message=f"Configuration check failed: {str(e)}",
-                duration_ms=(datetime.utcnow() - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
                 details={"error": str(e)},
             )
             self.checks["configuration"] = check
             return check
 
-    async def run_all_checks(self) -> Dict[str, HealthCheck]:
+    async def run_all_checks(self) -> dict[str, HealthCheck]:
         """Run all health checks in parallel.
 
         Returns:
@@ -260,7 +260,7 @@ class HealthMonitor:
             self.metrics.failed_requests += 1
 
         request = {
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(UTC),
             "method": method,
             "path": path,
             "status_code": status_code,
@@ -275,7 +275,7 @@ class HealthMonitor:
         self,
         error_type: str,
         message: str,
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         """Record an error.
 
@@ -285,7 +285,7 @@ class HealthMonitor:
             details: Additional error details
         """
         error = {
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(UTC),
             "error_type": error_type,
             "message": message,
             "details": details or {},
@@ -297,7 +297,7 @@ class HealthMonitor:
 
     def update_metrics(self) -> None:
         """Update calculated metrics."""
-        self.metrics.timestamp = datetime.utcnow()
+        self.metrics.timestamp = datetime.now(UTC)
         self.metrics.uptime_seconds = int(
             (self.metrics.timestamp - self.startup_time).total_seconds()
         )
@@ -330,7 +330,7 @@ class HealthMonitor:
         """
         return self.data_quality
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert monitor state to dictionary.
 
         Returns:

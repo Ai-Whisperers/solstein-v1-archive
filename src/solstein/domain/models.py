@@ -121,6 +121,68 @@ class Company(BaseModel):
     scoring_breakdown: dict[str, Any] = Field(default_factory=dict)
     classification: str | None = None
 
+    revenue_timeline: list[dict[str, Any]] = Field(default_factory=list)
+    revenue_cagr_3yr: float | None = None
+    revenue_cagr_5yr: float | None = None
+
+    profit_margin: float | None = None
+    ebitda_margin: float | None = None
+    recurring_revenue_pct: float | None = None
+    revenue_per_employee_eur_k: float | None = None
+    profitability_raw_metrics: dict[str, Any] = Field(default_factory=dict)
+
+    funding_rounds: list[dict[str, Any]] = Field(default_factory=list)
+    total_funding_raised_eur: float | None = None
+    latest_valuation_eur: float | None = None
+    lead_investors: list[str] = Field(default_factory=list)
+    funding_war_chest: str | None = None
+
+    employee_count: int | None = None
+    employee_cagr_3yr: float | None = None
+    open_positions: int | None = None
+
+    ai_score: int | None = None
+    ai_signal_level: str | None = None
+    ai_key_capabilities: str | None = None
+    ai_in_production: bool | None = None
+
+    data_availability: str | None = None
+
+    @field_validator("ai_score")
+    @classmethod
+    def validate_ai_score(cls, v: int | None) -> int | None:
+        if v is not None and (v < 0 or v > 10):
+            raise ValueError("AI score must be between 0 and 10")
+        return v
+
+    @field_validator("saas_maturity")
+    @classmethod
+    def validate_saas_maturity(cls, v: int) -> int:
+        if v < 0 or v > 10:
+            raise ValueError("SaaS maturity must be between 0 and 10")
+        return v
+
+    @field_validator("revenue_cagr_3yr", "revenue_cagr_5yr")
+    @classmethod
+    def validate_cagr(cls, v: float | None) -> float | None:
+        if v is not None and v < -100:
+            raise ValueError("CAGR cannot be less than -100%")
+        return v
+
+    @field_validator("profit_margin", "ebitda_margin", "recurring_revenue_pct")
+    @classmethod
+    def validate_percentage(cls, v: float | None) -> float | None:
+        if v is not None and (v < -100 or v > 100):
+            raise ValueError("Percentage must be between -100 and 100")
+        return v
+
+    @field_validator("employee_count", "open_positions")
+    @classmethod
+    def validate_positive_int(cls, v: int | None) -> int | None:
+        if v is not None and v < 0:
+            raise ValueError("Employee count cannot be negative")
+        return v
+
     @property
     def is_large_cap(self) -> bool:
         """Domain logic: Check if company is large cap (valuation > €100M)."""
@@ -422,7 +484,7 @@ class CompanyAnalysisAuditTrail(BaseModel):
     growth_score: float | None = None
     financial_health_score: float | None = None
     competitive_position_score: float | None = None
-    classification: str | None = None  # "Rocket", "Neutral", "Dinosaur"
+    classification: str | None = None  # "Phoenix", "Salt", "Lead"
 
     # Breakdown showing signal sources
     scoring_breakdown: dict[str, Any] = Field(default_factory=dict)

@@ -2,15 +2,14 @@
 Tests for the PE Valuation Analysis module.
 """
 
-import pytest
 import pandas as pd
+import pytest
 
 from solstein.analytics.valuation import (
-    ValuationAnalyzer,
     GrowthAnalyzer,
     TTMEPSAnalyzer,
+    ValuationAnalyzer,
     ValuationBenchmark,
-    ValuationContext,
 )
 
 

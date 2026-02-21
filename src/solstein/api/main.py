@@ -10,9 +10,10 @@ Production-ready REST API following Vete's architecture patterns:
 - Comprehensive error handling
 """
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any, AsyncGenerator, Optional
+from typing import Any
 
 import uvicorn
 from fastapi import FastAPI
@@ -20,33 +21,32 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from loguru import logger
 
-from ..config import Settings, ConfigurationError
-from .exceptions import setup_exception_handlers
-from .middleware import LoggingMiddleware
+from ..config import ConfigurationError, Settings
 from ..core.production_hardening import (
     FeatureFlagManager,
-    ResponseCache,
     GracefulDegradation,
     GracefulShutdown,
+    ResponseCache,
 )
-
+from .exceptions import setup_exception_handlers
+from .middleware import LoggingMiddleware
 from .routers import (
     companies,
     drill_down,
     export,
+    health,
     jobs,
     market,
     scoring,
     simulation,
-    health,
 )
 
 settings = Settings()
 
-feature_flags: Optional[FeatureFlagManager] = None
-response_cache: Optional[ResponseCache] = None
-graceful_degradation: Optional[GracefulDegradation] = None
-graceful_shutdown: Optional[GracefulShutdown] = None
+feature_flags: FeatureFlagManager | None = None
+response_cache: ResponseCache | None = None
+graceful_degradation: GracefulDegradation | None = None
+graceful_shutdown: GracefulShutdown | None = None
 
 
 @asynccontextmanager
@@ -86,7 +86,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     logger.info("Production hardening components initialized")
     logger.info(f"Feature flags available: {len(feature_flags.flags)}")
-    logger.info(f"Response cache initialized with TTL support")
+    logger.info("Response cache initialized with TTL support")
 
     yield
 

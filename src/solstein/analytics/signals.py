@@ -12,8 +12,8 @@ Defines 50+ signals across 8 categories:
 """
 
 from dataclasses import dataclass
-from typing import Optional, Any, List
 from enum import Enum
+from typing import Any
 
 
 class SignalCategory(str, Enum):
@@ -36,11 +36,11 @@ class Signal:
     name: str
     category: SignalCategory
     description: str
-    value: Optional[float] = None
-    text: Optional[str] = None
-    source: Optional[str] = None
+    value: float | None = None
+    text: str | None = None
+    source: str | None = None
     confidence: float = 0.5
-    evidence: Optional[dict[str, Any]] = None
+    evidence: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert signal to dictionary."""
@@ -495,7 +495,7 @@ class SignalDefinitions:
     )
 
     @classmethod
-    def get_signals_by_category(cls, category: SignalCategory) -> List[Signal]:
+    def get_signals_by_category(cls, category: SignalCategory) -> list[Signal]:
         """Get all signals in a category."""
         return [s for s in cls.ALL_SIGNALS if s.category == category]
 

@@ -29,333 +29,257 @@ class ExcelExporter:
         self.styles: dict[str, Any] = self._create_styles()
 
     def _create_styles(self) -> dict[str, Any]:
-        """Create consistent styles for the dashboard."""
-        # Colors
+        """Create consistent master-grade styles for the intelligence report."""
+        # Solstein Alchemical Palette
         colors = {
-            "header": "366092",  # Dark blue
-            "subheader": "4F81BD",  # Medium blue
-            "data_even": "DCE6F1",  # Light blue
-            "data_odd": "FFFFFF",  # White
-            "positive": "C6EFCE",  # Green
-            "negative": "FFC7CE",  # Red
-            "warning": "FFEB9C",  # Yellow
+            "obsidian": "0A0A0F",  # Deep dark
+            "onyx": "12121A",      # Background
+            "gold": "D4A843",      # Accents
+            "gold_light": "F0D78C",# Highlight
+            "emerald": "2ECC71",   # Phoenix/Positive
+            "ruby": "E74C3C",      # Lead/Negative
+            "sapphire": "3498DB",  # Info
+            "slate": "1A1A2E",     # Borders/Subheaders
+            "text": "E8E8F0",      # Light text
+            "text_muted": "8888A0" # Dimmed text
         }
 
         # Borders
-        thin_border = Border(
-            left=Side(style="thin"),
-            right=Side(style="thin"),
-            top=Side(style="thin"),
-            bottom=Side(style="thin"),
+        standard_border = Border(
+            left=Side(style="thin", color=colors["slate"]),
+            right=Side(style="thin", color=colors["slate"]),
+            top=Side(style="thin", color=colors["slate"]),
+            bottom=Side(style="thin", color=colors["slate"]),
         )
 
+        thick_bottom = Border(bottom=Side(style="medium", color=colors["gold"]))
+
         return {
-            "header_font": Font(name="Calibri", size=14, bold=True, color="FFFFFF"),
-            "header_fill": PatternFill(
-                start_color=colors["header"],
-                end_color=colors["header"],
-                fill_type="solid",
-            ),
+            "title_font": Font(name="Calibri", size=18, bold=True, color="FFFFFF"),
+            "header_font": Font(name="Calibri", size=12, bold=True, color="FFFFFF"),
+            "header_fill": PatternFill(start_color=colors["obsidian"], end_color=colors["obsidian"], fill_type="solid"),
             "header_alignment": Alignment(horizontal="center", vertical="center"),
-            "subheader_font": Font(name="Calibri", size=12, bold=True, color="FFFFFF"),
-            "subheader_fill": PatternFill(
-                start_color=colors["subheader"],
-                end_color=colors["subheader"],
-                fill_type="solid",
-            ),
-            "subheader_alignment": Alignment(horizontal="center", vertical="center"),
-            "data_font": Font(name="Calibri", size=11),
-            "data_fill_even": PatternFill(
-                start_color=colors["data_even"],
-                end_color=colors["data_even"],
-                fill_type="solid",
-            ),
-            "data_fill_odd": PatternFill(
-                start_color=colors["data_odd"],
-                end_color=colors["data_odd"],
-                fill_type="solid",
-            ),
-            "data_alignment": Alignment(horizontal="left", vertical="center"),
-            "data_border": thin_border,
-            "number_font": Font(name="Calibri", size=11),
-            "number_alignment": Alignment(horizontal="right", vertical="center"),
-            "positive_fill": PatternFill(
-                start_color=colors["positive"],
-                end_color=colors["positive"],
-                fill_type="solid",
-            ),
-            "negative_fill": PatternFill(
-                start_color=colors["negative"],
-                end_color=colors["negative"],
-                fill_type="solid",
-            ),
-            "warning_fill": PatternFill(
-                start_color=colors["warning"],
-                end_color=colors["warning"],
-                fill_type="solid",
-            ),
+            "header_border": thick_bottom,
+            
+            "subheader_font": Font(name="Calibri", size=11, bold=True, color=colors["gold"]),
+            "subheader_fill": PatternFill(start_color=colors["slate"], end_color=colors["slate"], fill_type="solid"),
+            "subheader_alignment": Alignment(horizontal="left", vertical="center"),
+            
+            "data_font": Font(name="Calibri", size=10),
+            "data_fill_even": PatternFill(start_color="F9F9FB", end_color="F9F9FB", fill_type="solid"),
+            "data_fill_odd": PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid"),
+            "data_alignment": Alignment(horizontal="left", vertical="center", indent=1),
+            "data_border": standard_border,
+            
+            "number_alignment": Alignment(horizontal="right", vertical="center", indent=1),
+            
+            "phoenix_fill": PatternFill(start_color="D5F5E3", end_color="D5F5E3", fill_type="solid"), # Light Emerald
+            "lead_fill": PatternFill(start_color="FADBD8", end_color="FADBD8", fill_type="solid"),    # Light Ruby
+            "salt_fill": PatternFill(start_color="FEF9E7", end_color="FEF9E7", fill_type="solid"),    # Light Yellow
         }
 
     def create_dashboard(self, profiles: list[Company], output_path: Path) -> None:
-        """Create Excel dashboard from company profiles."""
-        logger.info(f"Creating dashboard with {len(profiles)} companies")
+        """Create a multi-sheet Professional Intelligence Report."""
+        logger.info(f"Aura | Generating Professional Glyph Report for {len(profiles)} companies")
 
         wb = Workbook()
-        ws = wb.active
-        if ws is None:
-            ws = wb.create_sheet("Competitive Dashboard")
-        else:
-            ws.title = "Competitive Dashboard"
+        
+        # 1. Executive Summary
+        ws_summary = wb.active
+        ws_summary.title = "Executive Summary"
+        self._add_executive_summary(ws_summary, profiles)
+        
+        # 2. Market Rankings (Attractiveness Board)
+        ws_rankings = wb.create_sheet("Market Rankings")
+        self._add_market_rankings(ws_rankings, profiles)
+        
+        # 3. Financial Intelligence
+        ws_financials = wb.create_sheet("Financial Intelligence")
+        self._add_financial_intelligence(ws_financials, profiles)
+        
+        # 4. Tech & AI Maturity
+        ws_tech = wb.create_sheet("Tech & AI Maturity")
+        self._add_tech_maturity(ws_tech, profiles)
 
-        # Add metadata
-        self._add_metadata(ws, len(profiles))
-
-        # Add summary table
-        self._add_summary_table(ws, profiles, start_row=5)
-
-        # Add detailed analysis
-        detail_start = len(profiles) + 8
-        self._add_detailed_analysis(ws, profiles, start_row=detail_start)
-
-        # Add charts
-        chart_start = detail_start + len(profiles) + 5
-        self._add_charts(ws, profiles, start_row=chart_start)
-
-        # Auto-adjust column widths
-        self._auto_adjust_columns(ws)
+        # Auto-adjust column widths for all sheets
+        for sheet in wb.worksheets:
+            self._auto_adjust_columns(sheet)
 
         # Save workbook
         output_path.parent.mkdir(parents=True, exist_ok=True)
         wb.save(output_path)
-        logger.info(f"Dashboard saved to {output_path}")
+        logger.info(f"Aura | Glyph Report saved to {output_path}")
 
-    def _add_metadata(self, ws: Any, company_count: int) -> None:
-        """Add metadata section to worksheet."""
-        ws["A1"] = "SolStein Competitive Intelligence Dashboard"
-        ws["A1"].font = self.styles["header_font"]
+    def _add_top_banner(self, ws: Any, title: str, subtitle: str) -> None:
+        """Add a professional Solstein banner to the top of a worksheet."""
+        # Main Title
+        ws["A1"] = f"SOLSTEIN | {title.upper()}"
+        ws["A1"].font = self.styles["title_font"]
         ws["A1"].fill = self.styles["header_fill"]
-        ws["A1"].alignment = self.styles["header_alignment"]
-        ws.merge_cells("A1:H1")
+        ws["A1"].alignment = Alignment(horizontal="left", vertical="center", indent=1)
+        ws.merge_cells("A1:G1")
+        ws.row_dimensions[1].height = 40
 
-        ws["A2"] = f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        ws["A2"].font = Font(name="Calibri", size=10, italic=True)
+        # Subtitle/Timestamp
+        ws["A2"] = f"{subtitle} | Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        ws["A2"].font = Font(name="Calibri", size=9, color="8888A0", italic=True)
+        ws.merge_cells("A2:G2")
 
-        ws["A3"] = f"Companies Analyzed: {company_count}"
-        ws["A3"].font = Font(name="Calibri", size=10, bold=True)
+    def _write_headers(self, ws: Any, headers: list[str], row: int) -> None:
+        """Helper to write standardized headers."""
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=row, column=col, value=header)
+            cell.font = self.styles["header_font"]
+            cell.fill = self.styles["header_fill"]
+            cell.alignment = self.styles["header_alignment"]
+            cell.border = self.styles["header_border"]
 
-    def _add_summary_table(self, ws: Any, profiles: list[Company], start_row: int) -> None:  # noqa: E501
-        """Add summary table to worksheet."""
-        # Table headers
+    def _add_executive_summary(self, ws: Any, profiles: list[Company]) -> None:
+        """Add high-level market metrics and distribution summary."""
+        self._add_top_banner(ws, "Executive Summary", "Market Composition & Growth Analytics")
+
+        # 1. Core KPIs
+        kpis = [
+            ("Total Portfolio Size", f"{len(profiles)} Companies"),
+            ("Market Leaders (Phoenix)", f"{len([p for p in profiles if p.classification == 'Phoenix'])}"),
+            ("Stable Assets (Salt)", f"{len([p for p in profiles if p.classification == 'Salt'])}"),
+            ("Underperformers (Lead)", f"{len([p for p in profiles if p.classification == 'Lead'])}"),
+            ("Avg Growth Score", f"{sum(p.growth_score or 0 for p in profiles) / len(profiles):.1f}" if profiles else "0.0"),
+        ]
+
+        row = 4
+        ws.cell(row=row, column=1, value="MARKET CORE KPIS").font = self.styles["subheader_font"]
+        row += 1
+        for label, value in kpis:
+            ws.cell(row=row, column=1, value=label).font = self.styles["data_font"]
+            ws.cell(row=row, column=2, value=value).font = Font(bold=True)
+            row += 1
+
+        # 2. Top Movers (Placeholder for chart or list)
+        row += 2
+        ws.cell(row=row, column=1, value="STRATEGIC RECOMMENDATIONS").font = self.styles["subheader_font"]
+        row += 1
+        recommendations = [
+            "• Immediate focus on Phoenix-tier entities for scale expansion.",
+            "• Strategic audit required for Lead-tier companies with high tech debt.",
+            "• Monitor Salt-tier players for directional growth signals.",
+        ]
+        for rec in recommendations:
+            ws.cell(row=row, column=1, value=rec).font = self.styles["data_font"]
+            ws.merge_cells(f"A{row}:D{row}")
+            row += 1
+
+    def _add_market_rankings(self, ws: Any, profiles: list[Company]) -> None:
+        """Add the primary ranked company list (The Attractiveness Board)."""
+        self._add_top_banner(ws, "Market Rankings", "Corporate Attractiveness Board")
+
         headers = [
-            "Company",
-            "Tier",
-            "Revenue (€M)",
-            "Growth Rate (%)",
-            "Employees",
-            "AI Maturity",
-            "Threat Level",
-            "Growth Score",
+            "Rank", "Company", "Classification", "Growth", "Financial", "Competitive", "Composite", "Tier", "Threat"
         ]
+        self._write_headers(ws, headers, row=4)
 
-        # Write headers
-        for col_idx, header in enumerate(headers, 1):
-            cell = ws.cell(row=start_row, column=col_idx, value=header)
-            cell.font = self.styles["subheader_font"]
-            cell.fill = self.styles["subheader_fill"]
-            cell.alignment = self.styles["subheader_alignment"]
-            cell.border = self.styles["data_border"]
+        sorted_profiles = sorted(profiles, key=lambda p: p.composite_score or 0, reverse=True)
 
-        # Write data rows
-        for row_idx, profile in enumerate(profiles, start_row + 1):
-            # Alternate row colors
-            fill = (
-                self.styles["data_fill_even"]
-                if row_idx % 2 == 0
-                else self.styles["data_fill_odd"]
-            )
-
-            # Format revenue in millions
-            revenue = profile.financials.revenue
-            revenue_str = f"{revenue / 1_000_000:.1f}" if revenue else "N/A"
-
-            # Format growth rate
-            growth = profile.financials.growth_rate
-            growth_str = f"{growth:.1f}%" if growth else "N/A"
-
-            # Format employees
-            employees = profile.financials.employees
-            employees_str = f"{employees:,}" if employees else "N/A"
-
-            # Data cells
-            data = [
-                profile.name,
-                profile.tier,
-                revenue_str,
-                growth_str,
-                employees_str,
-                profile.ai_maturity,
-                profile.threat_level,
-                profile.growth_score or "N/A",
-            ]
-
-            for col_idx, value in enumerate(data, 1):
-                cell = ws.cell(row=row_idx, column=col_idx, value=value)
-                cell.font = self.styles["data_font"]
-                cell.fill = fill
-                if col_idx == 1:
-                    cell.alignment = self.styles["data_alignment"]
-                else:
-                    cell.alignment = self.styles["number_alignment"]
-                cell.border = self.styles["data_border"]
-
-                # Conditional formatting for growth rate
-                if col_idx == 4 and growth:
-                    if growth > 20:
-                        cell.fill = self.styles["positive_fill"]
-                    elif growth < 0:
-                        cell.fill = self.styles["negative_fill"]
-
-                # Conditional formatting for threat level
-                if col_idx == 7:
-                    if profile.threat_level == "High":
-                        cell.fill = self.styles["negative_fill"]
-                    elif profile.threat_level == "Critical":
-                        cell.font = Font(
-                            name="Calibri", size=11, bold=True, color="FF0000"
-                        )
-
-    def _add_detailed_analysis(
-        self, ws: Any, profiles: list[Company], start_row: int
-    ) -> None:
-        """Add detailed analysis section."""
-        # Section header
-        ws.cell(row=start_row, column=1, value="Detailed Financial Analysis")
-        ws.cell(row=start_row, column=1).font = self.styles["subheader_font"]
-        ws.cell(row=start_row, column=1).fill = self.styles["subheader_fill"]
-        ws.merge_cells(f"A{start_row}:H{start_row}")
-
-        # Detailed headers
-        detail_headers = [
-            "Company",
-            "Revenue (€)",
-            "Profit Margin (%)",
-            "Funding Raised (€)",
-            "Valuation (€)",
-            "SaaS Maturity",
-            "Geographic Presence",
-            "Key Customers",
-        ]
-
-        detail_start = start_row + 1
-        for col_idx, header in enumerate(detail_headers, 1):
-            cell = ws.cell(row=detail_start, column=col_idx, value=header)
-            cell.font = self.styles["subheader_font"]
-            cell.fill = PatternFill(
-                start_color="95B3D7", end_color="95B3D7", fill_type="solid"
-            )
-            cell.alignment = self.styles["subheader_alignment"]
-            cell.border = self.styles["data_border"]
-
-        # Detailed data
-        for row_idx, profile in enumerate(profiles, detail_start + 1):
-            fill = (
-                self.styles["data_fill_even"]
-                if row_idx % 2 == 0
-                else self.styles["data_fill_odd"]
-            )
-
-            # Format large numbers with commas
-            revenue = profile.financials.revenue
-            revenue_str = f"€{revenue:,.0f}" if revenue else "N/A"
-
-            margin = profile.financials.profit_margin
-            margin_str = f"{margin:.1f}%" if margin else "N/A"
-
-            funding = profile.financials.funding_raised
-            funding_str = f"€{funding:,.0f}" if funding else "N/A"
-
-            valuation = profile.financials.valuation
-            valuation_str = f"€{valuation:,.0f}" if valuation else "N/A"
-
-            # Truncate geographic presence and customers
-            geo_presence = ", ".join(profile.geographic_presence[:3])
-            if len(profile.geographic_presence) > 3:
-                geo_presence += "..."
-
-            customers = ", ".join(profile.key_customers[:2])
-            if len(profile.key_customers) > 2:
-                customers += "..."
+        for i, p in enumerate(sorted_profiles, 5):
+            fill = self.styles["data_fill_even"] if i % 2 == 0 else self.styles["data_fill_odd"]
+            
+            # Apply classification highlight
+            if p.classification == "Phoenix":
+                fill = self.styles["phoenix_fill"]
+            elif p.classification == "Lead":
+                fill = self.styles["lead_fill"]
+            elif p.classification == "Salt":
+                fill = self.styles["salt_fill"]
 
             data = [
-                profile.name,
-                revenue_str,
-                margin_str,
-                funding_str,
-                valuation_str,
-                profile.saas_maturity,
-                geo_presence,
-                customers or "N/A",
+                i - 4,
+                p.name,
+                p.classification or "Salt",
+                f"{p.growth_score:.1f}" if p.growth_score else "N/A",
+                f"{p.financial_health_score:.1f}" if p.financial_health_score else "N/A",
+                f"{p.competitive_position_score:.1f}" if p.competitive_position_score else "N/A",
+                f"{p.composite_score:.1f}" if p.composite_score else "N/A",
+                p.tier.value if p.tier else "N/A",
+                p.threat_level.value if p.threat_level else "N/A"
             ]
 
-            for col_idx, value in enumerate(data, 1):
-                cell = ws.cell(row=row_idx, column=col_idx, value=value)
+            for col, val in enumerate(data, 1):
+                cell = ws.cell(row=i, column=col, value=val)
                 cell.font = self.styles["data_font"]
                 cell.fill = fill
-                if col_idx in [1, 7, 8]:
-                    cell.alignment = self.styles["data_alignment"]
-                else:
-                    cell.alignment = self.styles["number_alignment"]
                 cell.border = self.styles["data_border"]
+                cell.alignment = self.styles["number_alignment"] if col != 2 else self.styles["data_alignment"]
 
-    def _add_charts(self, ws: Any, profiles: list[Company], start_row: int) -> None:
-        """Add charts to the dashboard."""
-        # Revenue comparison chart
-        ws.cell(row=start_row, column=1, value="Revenue Comparison (Top 10)")
-        ws.cell(row=start_row, column=1).font = Font(name="Calibri", size=12, bold=True)
+    def _add_financial_intelligence(self, ws: Any, profiles: list[Company]) -> None:
+        """Detailed financial metrics and growth timelines."""
+        self._add_top_banner(ws, "Financial Intelligence", "Scalability & Capital Health Analysis")
 
-        # Sort by revenue and take top 10
-        sorted_profiles = sorted(
-            [p for p in profiles if p.financials.revenue],
-            key=lambda p: p.financials.revenue or 0,
-            reverse=True,
-        )[:10]
+        headers = [
+            "Company", "Revenue (€M)", "Growth (%)", "CAGR 3yr", "Margin (%)", "EBITDA (%)", "Recurring (%)", "Funding (€M)", "Valuation (€M)"
+        ]
+        self._write_headers(ws, headers, row=4)
 
-        if sorted_profiles:
-            # Prepare data for chart
-            chart_data_start = start_row + 2
-            for i, profile in enumerate(sorted_profiles):
-                ws.cell(row=chart_data_start + i, column=1, value=profile.name)
-                ws.cell(
-                    row=chart_data_start + i,
-                    column=2,
-                    value=profile.financials.revenue or 0,
-                )
+        for i, p in enumerate(profiles, 5):
+            fill = self.styles["data_fill_even"] if i % 2 == 0 else self.styles["data_fill_odd"]
+            
+            data = [
+                p.name,
+                f"{p.financials.revenue:.1f}" if p.financials.revenue else "N/A",
+                f"{p.financials.growth_rate:.1f}%" if p.financials.growth_rate else "N/A",
+                f"{p.revenue_cagr_3yr:.1f}%" if p.revenue_cagr_3yr else "N/A",
+                f"{p.profit_margin:.1f}%" if p.profit_margin else "N/A",
+                f"{p.ebitda_margin:.1f}%" if p.ebitda_margin else "N/A",
+                f"{p.recurring_revenue_pct:.0f}%" if p.recurring_revenue_pct is not None else "N/A",
+                f"{p.total_funding_raised_eur / 1e6:.1f}M" if p.total_funding_raised_eur else "Bootstrapped",
+                f"{p.latest_valuation_eur / 1e6:.1f}M" if p.latest_valuation_eur else "Undisclosed"
+            ]
 
-            # Create bar chart
-            chart = BarChart()
-            chart.type = "col"
-            chart.style = 10
-            chart.title = "Revenue Comparison"
-            chart.y_axis.title = "Revenue (€)"
-            chart.x_axis.title = "Company"
+            for col, val in enumerate(data, 1):
+                cell = ws.cell(row=i, column=col, value=val)
+                cell.font = self.styles["data_font"]
+                cell.fill = fill
+                cell.border = self.styles["data_border"]
+                cell.alignment = self.styles["number_alignment"] if col != 1 else self.styles["data_alignment"]
 
-            data = Reference(
-                ws,
-                min_col=2,
-                min_row=chart_data_start,
-                max_row=chart_data_start + len(sorted_profiles) - 1,
-            )
-            categories = Reference(
-                ws,
-                min_col=1,
-                min_row=chart_data_start,
-                max_row=chart_data_start + len(sorted_profiles) - 1,
-            )
+    def _add_tech_maturity(self, ws: Any, profiles: list[Company]) -> None:
+        """Deep dive into AI maturity and technology stack signal strength."""
+        self._add_top_banner(ws, "Tech & AI Maturity", "Intelligence Signaling & Architectural Moats")
 
-            chart.add_data(data, titles_from_data=False)
-            chart.set_categories(categories)
+        headers = [
+            "Company", "AI Score", "AI Signal", "In Production", "SaaS Maturity", "Key AI Capabilities", "Moat Strength"
+        ]
+        self._write_headers(ws, headers, row=4)
 
-            ws.add_chart(chart, f"D{start_row}")
+        for i, p in enumerate(profiles, 5):
+            fill = self.styles["data_fill_even"] if i % 2 == 0 else self.styles["data_fill_odd"]
+            
+            moat = "Low"
+            if p.ai_score and p.ai_score > 7:
+                moat = "Critical" if p.ai_in_production else "High"
+            elif p.saas_maturity > 8:
+                moat = "Medium"
+
+            data = [
+                p.name,
+                p.ai_score if p.ai_score is not None else "N/A",
+                p.ai_signal_level or "Unknown",
+                "YES" if p.ai_in_production else "NO",
+                p.saas_maturity,
+                p.ai_key_capabilities or "Generic SaaS",
+                moat
+            ]
+
+            for col, val in enumerate(data, 1):
+                cell = ws.cell(row=i, column=col, value=val)
+                cell.font = self.styles["data_font"]
+                cell.fill = fill
+                cell.border = self.styles["data_border"]
+                cell.alignment = Alignment(wrap_text=True) if col == 6 else self.styles["data_alignment"]
+                if col != 1 and col != 6:
+                    cell.alignment = self.styles["number_alignment"]
+
+        # Set column width for AI capabilities
+        ws.column_dimensions['F'].width = 40
 
     def _auto_adjust_columns(self, ws: Any) -> None:
         """Auto-adjust column widths based on content."""
@@ -363,12 +287,15 @@ class ExcelExporter:
             max_length = 0
             column_letter = get_column_letter(column[0].column)
 
+            # Skip F on Tech sheet as we set it manually
+            if ws.title == "Tech & AI Maturity" and column_letter == 'F':
+                continue
+
             for cell in column:
                 try:
                     if cell.value and len(str(cell.value)) > max_length:
                         max_length = len(str(cell.value))
-                except (ValueError, TypeError) as e:
-                    logger.warning(f"Error calculating column width for cell {cell.coordinate}: {e}")  # noqa: E501
+                except (ValueError, TypeError):
                     continue
 
             adjusted_width = min(max_length + 2, 50)  # Cap at 50

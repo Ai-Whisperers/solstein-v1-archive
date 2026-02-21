@@ -2,12 +2,14 @@
 Tests for JsonFileRepository.
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-from solstein.domain.models import Company, FinancialMetric, CompanyTier
+import pytest
+
 from solstein.core.repositories import CompanyFilter
 from solstein.data.repositories import JsonFileRepository
+from solstein.domain.models import Company, CompanyTier, FinancialMetric
+
 
 @pytest.fixture
 def mock_loader_companies():
@@ -16,16 +18,16 @@ def mock_loader_companies():
         name="Alpha",
         tier=CompanyTier.TIER_1,
         industry="Tech",
-        classification="Rocket",
-        financials=FinancialMetric(revenue=100.0)
+        classification="Phoenix",
+        financials=FinancialMetric(revenue=100.0),
     )
     c2 = Company(
         id="c2",
         name="Beta",
         tier=CompanyTier.TIER_2,
         industry="Finance",
-        classification="Neutral",
-        financials=FinancialMetric(revenue=20.0)
+        classification="Salt",
+        financials=FinancialMetric(revenue=20.0),
     )
     return [c1, c2]
 
@@ -36,33 +38,33 @@ def test_json_repo_get_all_no_filters(MockLoader, mock_loader_companies, tmp_pat
     mock_instance.load_companies.return_value = mock_loader_companies
 
     repo = JsonFileRepository(data_dir=tmp_path)
-    
+
     results = repo.get_all()
     assert len(results) == 2
 
 
 @patch("solstein.data.repositories.CompetitorDataLoader")
-def test_json_repo_get_all_with_filters_and_limit(MockLoader, mock_loader_companies, tmp_path):
+def test_json_repo_get_all_with_filters_and_limit(
+    MockLoader, mock_loader_companies, tmp_path
+):
     mock_instance = MockLoader.return_value
     mock_instance.load_companies.return_value = mock_loader_companies
 
     repo = JsonFileRepository(data_dir=tmp_path)
-    
+
     # Test filters that match c1
     filters = CompanyFilter(
         tier=CompanyTier.TIER_1,
         industry="Tech",
-        classification="Rocket",
-        min_revenue=50.0
+        classification="Phoenix",
+        min_revenue=50.0,
     )
     results = repo.get_all(filters=filters)
     assert len(results) == 1
     assert results[0].id == "c1"
-    
+
     # Test limit and offset
-    filters2 = CompanyFilter(
-        min_revenue=10.0
-    )
+    filters2 = CompanyFilter(min_revenue=10.0)
     results2 = repo.get_all(filters=filters2, limit=1, offset=1)
     assert len(results2) == 1
     assert results2[0].id == "c2"
@@ -74,7 +76,7 @@ def test_json_repo_get_by_id(MockLoader, mock_loader_companies, tmp_path):
     mock_instance.load_companies.return_value = mock_loader_companies
 
     repo = JsonFileRepository(data_dir=tmp_path)
-    
+
     assert repo.get_by_id("c1").name == "Alpha"
     assert repo.get_by_id("c3") is None
 
@@ -93,7 +95,7 @@ def test_json_repo_search(MockLoader, mock_loader_companies, tmp_path):
     mock_instance.load_companies.return_value = mock_loader_companies
 
     repo = JsonFileRepository(data_dir=tmp_path)
-    
+
     results = repo.search("alph")
     assert len(results) == 1
     assert results[0].name == "Alpha"

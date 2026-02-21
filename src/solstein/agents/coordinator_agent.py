@@ -44,21 +44,9 @@ class CoordinatorAgent:
         context: dict,
         enabled_sources: list[DataSourceType] | None = None,
     ) -> CompanyAnalysisAuditTrail:
-        """Analyze a single company using all enabled specialist agents.
-
-        Runs agents in parallel, aggregates results, detects contradictions,
-        and prepares for scoring engine.
-
-        Args:
-            company_name: Name of company to analyze
-            gathering_batch_id: Batch ID for tracking
-            context: Company context (known_github_org, industry, etc.)
-            enabled_sources: Which data sources to use (default: all)
-
-        Returns:
-            CompanyAnalysisAuditTrail with full analysis
-        """
+        """Analyze a single company using all enabled specialist agents."""
         start_time = datetime.now(UTC)
+        company_id = company_name.lower().replace(" ", "-")
 
         if enabled_sources is None:
             enabled_sources = [
@@ -67,71 +55,84 @@ class CoordinatorAgent:
                 DataSourceType.COMPANY_FILINGS,
             ]
 
-        self.logger.info(f"Starting analysis for {company_name}")
-
-        audit_trail = CompanyAnalysisAuditTrail(
-            company_id=company_name.lower().replace(" ", "-"),
-            gathering_batch_id=gathering_batch_id,
-            company_name=company_name,
-            analysis_started_at=start_time,
-        )
-
-        agent_tasks = []
-
-        if DataSourceType.GITHUB in enabled_sources:
-            agent_tasks.append(self.github_agent.gather(company_name, context))
-        if DataSourceType.NEWS in enabled_sources:
-            agent_tasks.append(self.web_search_agent.gather(company_name, context))
-        if DataSourceType.COMPANY_FILINGS in enabled_sources:
-            agent_tasks.append(self.companies_house_agent.gather(company_name, context))
-
-        self.logger.info(f"Running {len(agent_tasks)} specialist agents in parallel")
-
-        agent_results = await asyncio.gather(*agent_tasks, return_exceptions=True)
-
-        for result in agent_results:
-            if isinstance(result, Exception):
-                self.logger.warning(f"Agent error: {result}")
-                audit_trail.errors.append(str(result))
-                continue
-
-            if not isinstance(result, AgentTaskResult):
-                continue
-
+        # Use contextualize to bind metadata to all logs in this block
+        with logger.contextualize(company_id=company_id, batch_id=gathering_batch_id):
             self.logger.info(
-                f"{result.agent_name}: {len(result.raw_sources)} sources, "
-                f"{len(result.extracted_facts)} facts"
+                f"Aura | Entering Analysis Phase | Company: {company_name}"
             )
 
-        raw_records = self._create_raw_data_records(
-            agent_results, company_name, gathering_batch_id
-        )
-        audit_trail.raw_data = raw_records
+            audit_trail = CompanyAnalysisAuditTrail(
+                company_id=company_id,
+                gathering_batch_id=gathering_batch_id,
+                company_name=company_name,
+                analysis_started_at=start_time,
+            )
 
-        aggregated = self._aggregate_facts(raw_records)
-        audit_trail.aggregated_facts = aggregated
+            agent_tasks = []
+            if DataSourceType.GITHUB in enabled_sources:
+                agent_tasks.append(self.github_agent.gather(company_name, context))
+            if DataSourceType.NEWS in enabled_sources:
+                agent_tasks.append(self.web_search_agent.gather(company_name, context))
+            if DataSourceType.COMPANY_FILINGS in enabled_sources:
+                agent_tasks.append(
+                    self.companies_house_agent.gather(company_name, context)
+                )
 
-        signals = self._extract_signals(aggregated)
-        audit_trail.extracted_signals = signals
+            self.logger.info(
+                f"Aura | Stage: Gathering | Spawning {len(agent_tasks)} specialist agents"
+            )
+            agent_results = await asyncio.gather(*agent_tasks, return_exceptions=True)
 
-        audit_trail.analysis_completed_at = datetime.now(UTC)
-        audit_trail.analysis_duration_seconds = (
-            audit_trail.analysis_completed_at - start_time
-        ).total_seconds()
+            for result in agent_results:
+                if isinstance(result, Exception):
+                    self.logger.warning(f"Aura | Agent error: {result}")
+                    audit_trail.errors.append(str(result))
+                    continue
 
-        audit_trail.data_completeness = self._calculate_completeness(aggregated)
-        audit_trail.confidence_level = self._determine_confidence_level(aggregated)
+                if not isinstance(result, AgentTaskResult):
+                    continue
 
-        self.logger.info(
-            f"Analysis complete: {len(aggregated.facts)} aggregated facts, "
-            f"completeness: {audit_trail.data_completeness:.0%}, "
-            f"execution: {audit_trail.analysis_duration_seconds:.1f}s"
-        )
+                self.logger.info(
+                    f"Aura | {result.agent_name}: {len(result.raw_sources)} sources, "
+                    f"{len(result.extracted_facts)} facts"
+                )
 
-        drill_down_service = get_drill_down_service()
-        drill_down_service.store_audit_trail(audit_trail)
+            self.logger.info("Aura | Stage: Internal Processing | Creating raw records")
+            raw_records = self._create_raw_data_records(
+                agent_results, company_name, gathering_batch_id
+            )
+            audit_trail.raw_data = raw_records
 
-        return audit_trail
+            self.logger.info("Aura | Stage: Logic Fusion | Aggregating facts")
+            aggregated = self._aggregate_facts(raw_records)
+            audit_trail.aggregated_facts = aggregated
+
+            self.logger.info(
+                "Aura | Stage: Signal Extraction | Parsing business signals"
+            )
+            signals = self._extract_signals(aggregated)
+            audit_trail.extracted_signals = signals
+
+            audit_trail.analysis_completed_at = datetime.now(UTC)
+            audit_trail.analysis_duration_seconds = (
+                audit_trail.analysis_completed_at - start_time
+            ).total_seconds()
+
+            audit_trail.data_completeness = self._calculate_completeness(aggregated)
+            audit_trail.confidence_level = self._determine_confidence_level(aggregated)
+
+            self.logger.info(
+                f"Aura | Analysis Sequence Finalized | "
+                f"Facts: {len(aggregated.facts)} | "
+                f"Completeness: {audit_trail.data_completeness:.0%} | "
+                f"Duration: {audit_trail.analysis_duration_seconds:.1f}s"
+            )
+
+            self.logger.info("Aura | Transmuting to Persistence Layer")
+            drill_down_service = get_drill_down_service()
+            await drill_down_service.store_audit_trail(audit_trail)
+
+            return audit_trail
 
     def _create_raw_data_records(
         self,

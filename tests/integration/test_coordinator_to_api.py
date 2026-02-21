@@ -1,6 +1,5 @@
 """Integration test: Coordinator → API transparency endpoints."""
 
-import asyncio
 import pytest
 
 from solstein.agents import CoordinatorAgent
@@ -19,7 +18,7 @@ async def test_coordinator_stores_audit_trail():
     )
 
     service = get_drill_down_service()
-    retrieved = service.get_audit_trail(audit_trail.company_id)
+    retrieved = await service.get_audit_trail(audit_trail.company_id)
 
     assert retrieved is not None
     assert retrieved.company_name == "Test Company"
@@ -38,7 +37,7 @@ async def test_drill_down_signals_api():
     )
 
     service = get_drill_down_service()
-    signals = service.get_signals(audit_trail.company_id)
+    signals = await service.get_signals(audit_trail.company_id)
 
     if signals is not None:
         assert isinstance(signals, list)
@@ -56,7 +55,7 @@ async def test_drill_down_facts_api():
     )
 
     service = get_drill_down_service()
-    facts = service.get_facts(audit_trail.company_id)
+    facts = await service.get_facts(audit_trail.company_id)
 
     if facts is not None:
         assert isinstance(facts, list)
@@ -74,7 +73,7 @@ async def test_drill_down_data_quality_api():
     )
 
     service = get_drill_down_service()
-    metrics = service.get_data_quality(audit_trail.company_id)
+    metrics = await service.get_data_quality(audit_trail.company_id)
 
     assert metrics is not None
     assert "completeness" in metrics

@@ -9,24 +9,25 @@ Covers:
 """
 
 import pytest
+from tests.factories import make_company, make_lead_company, make_phoenix_company
+
 from solstein.analytics.scoring import (
     CompetitiveOverlapCalculator,
     GrowthScorer,
     MarketAnalyzer,
 )
-from solstein.core.scoring_config import ScoringSettings, GrowthScoringConfig
+from solstein.core.scoring_config import ScoringSettings
 from solstein.domain.models import (
     AIMaturity,
     Company,
     CompanyTier,
     FinancialMetric,
 )
-from tests.factories import make_company, make_rocket_company, make_dinosaur_company
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def scorer():
@@ -44,20 +45,21 @@ def overlap_calculator():
 
 
 @pytest.fixture
-def rocket_company():
-    return make_rocket_company()
+def phoenix_company():
+    return make_phoenix_company()
 
 
 @pytest.fixture
-def dinosaur_company():
-    return make_dinosaur_company()
+def lead_company():
+    return make_lead_company()
 
 
 # ---------------------------------------------------------------------------
 # GrowthScorer — exact score assertions
 # ---------------------------------------------------------------------------
 
-def test_calculate_growth_score_rocket(scorer, rocket_company):
+
+def test_calculate_growth_score_phoenix(scorer, phoenix_company):
     """
     Verify exact growth score for a high-growth company.
 
@@ -65,19 +67,19 @@ def test_calculate_growth_score_rocket(scorer, rocket_company):
         base(5.0) + growth(45/20=2.25) + margin_med_bonus(1.0) = 8.25
         (margin=15% hits margin_med_threshold=10.0, NOT margin_high_threshold=20.0)
     """
-    scored = scorer.calculate_scores(rocket_company)
+    scored = scorer.calculate_scores(phoenix_company)
     assert scored.growth_score == pytest.approx(8.25)
     assert scored.financial_health_score >= 6.0
 
 
-def test_calculate_growth_score_dinosaur(scorer, dinosaur_company):
+def test_calculate_growth_score_lead(scorer, lead_company):
     """
     Verify exact growth score for a declining company.
 
     Calculation:
         base(5.0) + growth(-5/20=-0.25) + margin_negative_penalty(-1.0) = 3.75
     """
-    scored = scorer.calculate_scores(dinosaur_company)
+    scored = scorer.calculate_scores(lead_company)
     assert scored.growth_score == pytest.approx(3.75)
     # financial_health: base(5.0) + revenue_small(10 < 100 → no large bonus) + margin_negative(-2.5) = 2.5
     assert scored.financial_health_score == pytest.approx(2.5)
@@ -95,18 +97,28 @@ def test_calculate_scores_returns_same_company_object(scorer):
 # GrowthScorer — parametrized boundary tests
 # ---------------------------------------------------------------------------
 
-@pytest.mark.parametrize("growth_rate,expected_min,expected_max", [
-    (0.0,    4.9,  5.1),    # Neutral: base=5.0, no growth contribution, no margin
-    (20.0,   5.9,  6.1),    # Exactly one divisor: 5.0 + 20/20=1.0 = 6.0
-    (45.0,   7.2,  7.3),    # 5.0 + 2.25 = 7.25 (no margin, no funding on bare company)
-    (400.0,  8.9,  9.1),    # 5.0 + cap(4.0) = 9.0 (revenue_growth_cap=4.0, no extras)
-    (-10.0,  4.4,  4.6),    # 5.0 + (-10/20=-0.5) = 4.5 (no negative margin penalty)
-    (-40.0,  2.9,  3.1),    # 5.0 + cap(-2.0) = 3.0 (growth capped at -20/20=-1.0 each div)
-])
+
+@pytest.mark.parametrize(
+    "growth_rate,expected_min,expected_max",
+    [
+        (0.0, 4.9, 5.1),  # Neutral: base=5.0, no growth contribution, no margin
+        (20.0, 5.9, 6.1),  # Exactly one divisor: 5.0 + 20/20=1.0 = 6.0
+        (45.0, 7.2, 7.3),  # 5.0 + 2.25 = 7.25 (no margin, no funding on bare company)
+        (400.0, 8.9, 9.1),  # 5.0 + cap(4.0) = 9.0 (revenue_growth_cap=4.0, no extras)
+        (-10.0, 4.4, 4.6),  # 5.0 + (-10/20=-0.5) = 4.5 (no negative margin penalty)
+        (
+            -40.0,
+            2.9,
+            3.1,
+        ),  # 5.0 + cap(-2.0) = 3.0 (growth capped at -20/20=-1.0 each div)
+    ],
+)
 def test_growth_score_ranges(scorer, growth_rate, expected_min, expected_max):
     """Growth score stays within predicted range for each zone (bare company, no extras)."""
     # Use bare Company (no tech_stack, no geo, no margin) to isolate growth_rate effect
-    company = Company(id="x", name="X", financials=FinancialMetric(growth_rate=growth_rate))
+    company = Company(
+        id="x", name="X", financials=FinancialMetric(growth_rate=growth_rate)
+    )
     scored = scorer.calculate_scores(company)
     assert expected_min <= scored.growth_score <= expected_max, (
         f"growth_rate={growth_rate}: expected [{expected_min}, {expected_max}], "
@@ -132,7 +144,7 @@ def test_financial_health_score_clamped(scorer):
     """Financial health score is always in [0, 10]."""
     company = make_company(
         financials=FinancialMetric(
-            revenue=0.001,       # extreme small → penalty
+            revenue=0.001,  # extreme small → penalty
             profit_margin=-99.0,  # huge negative margin
         )
     )
@@ -143,6 +155,7 @@ def test_financial_health_score_clamped(scorer):
 # ---------------------------------------------------------------------------
 # GrowthScorer — competitive position score
 # ---------------------------------------------------------------------------
+
 
 def test_competitive_position_score_tier1_very_strong_ai(scorer):
     """Tier 1 + Very Strong AI should yield a high competitive score."""
@@ -173,6 +186,7 @@ def test_competitive_position_score_tier4_no_ai(scorer):
 # GrowthScorer — custom config
 # ---------------------------------------------------------------------------
 
+
 def test_custom_scoring_config_is_respected():
     """Custom ScoringSettings should change scoring behavior."""
     default_scorer = GrowthScorer()
@@ -200,9 +214,10 @@ def test_custom_scoring_config_is_respected():
 # MarketAnalyzer
 # ---------------------------------------------------------------------------
 
-def test_market_analysis_swot(analyzer, rocket_company, dinosaur_company):
+
+def test_market_analysis_swot(analyzer, phoenix_company, lead_company):
     """Verify SWOT analysis logic in MarketAnalyzer."""
-    companies = [rocket_company, dinosaur_company]
+    companies = [phoenix_company, lead_company]
     analysis = analyzer.analyze_market(companies)
 
     assert analysis.total_market_size == pytest.approx(510.0)  # 500 + 10
@@ -213,9 +228,9 @@ def test_market_analysis_swot(analyzer, rocket_company, dinosaur_company):
     assert "growth" in strengths.lower()
 
 
-def test_determine_barriers_few_companies(analyzer, rocket_company):
+def test_determine_barriers_few_companies(analyzer, phoenix_company):
     """With ≤5 companies, 'High Competitive Rivalry' should NOT be a barrier."""
-    analysis = analyzer.analyze_market([rocket_company])
+    analysis = analyzer.analyze_market([phoenix_company])
     assert "Capital Intensity" in analysis.barriers_to_entry
     assert "High Competitive Rivalry" not in analysis.barriers_to_entry
 
@@ -227,9 +242,9 @@ def test_determine_barriers_many_companies(analyzer):
     assert "High Competitive Rivalry" in analysis.barriers_to_entry
 
 
-def test_market_analysis_average_growth(analyzer, rocket_company, dinosaur_company):
+def test_market_analysis_average_growth(analyzer, phoenix_company, lead_company):
     """Market average growth is the mean of all company growth rates."""
-    analysis = analyzer.analyze_market([rocket_company, dinosaur_company])
+    analysis = analyzer.analyze_market([phoenix_company, lead_company])
     # (45.0 + (-5.0)) / 2 = 20.0
     assert analysis.growth_rate == pytest.approx(20.0)
 
@@ -237,6 +252,7 @@ def test_market_analysis_average_growth(analyzer, rocket_company, dinosaur_compa
 # ---------------------------------------------------------------------------
 # CompetitiveOverlapCalculator
 # ---------------------------------------------------------------------------
+
 
 def test_overlap_same_industry_same_tier(overlap_calculator):
     """Companies in the same industry and tier have a higher overlap score."""
@@ -248,10 +264,22 @@ def test_overlap_same_industry_same_tier(overlap_calculator):
 
 def test_overlap_different_industry(overlap_calculator):
     """Companies in different industries AND different tiers have a lower overlap score."""
-    p1 = Company(id="a", name="A", industry="Technology", tier=CompanyTier.TIER_1,
-                 tech_stack=["Python"], geographic_presence=["US"])
-    p2 = Company(id="b", name="B", industry="Energy", tier=CompanyTier.TIER_4,
-                 tech_stack=["Java"], geographic_presence=["DE"])
+    p1 = Company(
+        id="a",
+        name="A",
+        industry="Technology",
+        tier=CompanyTier.TIER_1,
+        tech_stack=["Python"],
+        geographic_presence=["US"],
+    )
+    p2 = Company(
+        id="b",
+        name="B",
+        industry="Energy",
+        tier=CompanyTier.TIER_4,
+        tech_stack=["Java"],
+        geographic_presence=["DE"],
+    )
     score = overlap_calculator.calculate_overlap(p1, p2)
     # industry mismatch=0.0, geo=0.0, tech=0.0, tier=(4-1)/3=1, proximity=0.0 → avg ≈ 0.0
     assert score < 0.3

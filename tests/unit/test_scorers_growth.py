@@ -1,9 +1,10 @@
 """Tests for GrowthMomentumScorer."""
 
 import pytest
+
 from solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
-from solstein.domain.models import FinancialMetric
 from solstein.core.scoring_config import ScoringSettings
+from solstein.domain.models import FinancialMetric
 
 
 class TestGrowthMomentumScorer:

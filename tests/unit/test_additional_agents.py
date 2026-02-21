@@ -7,14 +7,14 @@ extract appropriate data, and handle errors gracefully.
 import pytest
 
 from solstein.agents.additional_agents import (
-    LinkedInAgent,
-    SECEdgarAgent,
-    PatentsAgent,
-    NewsAgent,
+    AgentOrchestrator,
     JobsAgent,
+    LinkedInAgent,
+    NewsAgent,
+    PatentsAgent,
+    SECEdgarAgent,
     TechTrendsAgent,
     WebsiteAgent,
-    AgentOrchestrator,
 )
 
 

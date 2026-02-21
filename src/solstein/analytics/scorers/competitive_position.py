@@ -1,7 +1,7 @@
 """Competitive position scorer: market tier, AI maturity, SaaS adoption, geographic footprint."""
 
-from solstein.domain.models import Company, ScoreComponent, ScoringExplanation
-from solstein.core.scoring_config import ScoringSettings
+from ...core.scoring_config import ScoringSettings
+from ...domain.models import Company, ScoreComponent, ScoringExplanation
 
 
 class CompetitivePositionScorer:

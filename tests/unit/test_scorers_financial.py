@@ -1,9 +1,10 @@
 """Tests for FinancialHealthScorer."""
 
 import pytest
+
 from solstein.analytics.scorers.financial_health import FinancialHealthScorer
-from solstein.domain.models import FinancialMetric
 from solstein.core.scoring_config import ScoringSettings
+from solstein.domain.models import FinancialMetric
 
 
 class TestFinancialHealthScorer:

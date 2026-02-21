@@ -4,16 +4,14 @@ Integration tests for the SolStein FastAPI layer.
 Covers: health check, company CRUD, scoring, market analysis, search,
 statistics, missing-entity 404s, filter parameters, and schema contracts.
 """
-import pytest
-from unittest.mock import MagicMock
 
-from solstein.domain.models import CompanyTier
-from tests.factories import make_company
+
 
 
 # ---------------------------------------------------------------------------
 # Health
 # ---------------------------------------------------------------------------
+
 
 def test_health(client):
     """Verify health endpoint is reachable."""
@@ -25,6 +23,7 @@ def test_health(client):
 # ---------------------------------------------------------------------------
 # GET /companies
 # ---------------------------------------------------------------------------
+
 
 def test_get_companies(client):
     """Verify companies endpoint returns mocked data."""
@@ -57,6 +56,7 @@ def test_get_companies_filter_by_tier(client, mock_repo):
 # GET /companies/{id}
 # ---------------------------------------------------------------------------
 
+
 def test_get_company_by_id(client):
     """Verify single company retrieval by ID."""
     response = client.get("/companies/test-company")
@@ -75,11 +75,12 @@ def test_get_company_not_found(client, mock_repo):
 # POST /companies
 # ---------------------------------------------------------------------------
 
+
 def test_create_company(client, mock_repo):
     """POST /companies must return 201 with a scored company."""
     # Ensure save() just returns the passed-in Company object
     mock_repo.save.side_effect = lambda c: c
-    
+
     payload = {
         "id": "new-co",
         "name": "New Energy Co",
@@ -104,6 +105,7 @@ def test_create_company(client, mock_repo):
 # ---------------------------------------------------------------------------
 # POST /scoring/company/{id}/score
 # ---------------------------------------------------------------------------
+
 
 def test_scoring_endpoint(client):
     """Verify scoring endpoint returns classification for the mock company (growth=15%)."""
@@ -130,6 +132,7 @@ def test_scoring_endpoint_not_found(client, mock_repo):
 # GET /market/analysis
 # ---------------------------------------------------------------------------
 
+
 def test_market_analysis(client):
     """Verify market analysis endpoint returns a valid response."""
     response = client.get("/market/analysis")
@@ -149,6 +152,7 @@ def test_market_analysis_empty_returns_200(client, mock_repo):
 # GET /market/overlap/{id}
 # ---------------------------------------------------------------------------
 
+
 def test_market_overlap_endpoint(client):
     """GET /market/overlap/{id} must return a list (possibly empty)."""
     response = client.get("/market/overlap/test-company")
@@ -167,6 +171,7 @@ def test_market_overlap_not_found(client, mock_repo):
 # ---------------------------------------------------------------------------
 # GET /market/search
 # ---------------------------------------------------------------------------
+
 
 def test_search_endpoint(client):
     """Verify search functionality returns matched results."""
@@ -188,6 +193,7 @@ def test_search_endpoint_no_match(client):
 # GET /scoring/stats
 # ---------------------------------------------------------------------------
 
+
 def test_stats_endpoint(client):
     """Verify statistics calculation includes expected keys."""
     response = client.get("/scoring/stats")
@@ -203,6 +209,7 @@ def test_stats_endpoint(client):
 # Auth design: unauthenticated access
 # ---------------------------------------------------------------------------
 
+
 def test_unauthenticated_access_returns_anonymous(unauthenticated_client):
     """
     The app uses auto_error=False — unauthenticated requests receive an
@@ -212,9 +219,11 @@ def test_unauthenticated_access_returns_anonymous(unauthenticated_client):
     # Health is always available; verifies app responds (not crashes) without auth
     assert response.status_code == 200
 
+
 # ---------------------------------------------------------------------------
 # Global Exception Handlers (422, 404, 500)
 # ---------------------------------------------------------------------------
+
 
 def test_validation_error_handler(client):
     """Trigger a 422 Unprocessable Entity with a bad payload to test exceptions.py."""
@@ -231,6 +240,7 @@ def test_validation_error_handler(client):
     assert "details" in data
     assert "request_id" in data
 
+
 def test_http_exception_handler(client, mock_repo):
     """Trigger a 404 HTTP exception directly to test custom format."""
     # Market overlap for non-existent company triggers 404 via HTTPException
@@ -242,16 +252,18 @@ def test_http_exception_handler(client, mock_repo):
     assert "details" in data
     assert "request_id" in data
 
+
 def test_global_500_exception_handler():
     """Trigger a 500 Internal Server error cleanly via a one-off test route."""
-    from solstein.api.main import app
     from fastapi.testclient import TestClient
-    
+
+    from solstein.api.main import app
+
     @app.get("/force-500-test-panic")
     def force_500():
         raise RuntimeError("Database offline panic test")
-        
-    # We must explicitly tell the TestClient NOT to re-raise the exception 
+
+    # We must explicitly tell the TestClient NOT to re-raise the exception
     # so we can assert the JSONResponse from our custom global exception handler.
     test_client = TestClient(app, raise_server_exceptions=False)
     response = test_client.get("/force-500-test-panic")

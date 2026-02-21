@@ -4,16 +4,15 @@ Extractors know how to pull specific signals from agent results
 and convert them into Signal objects with confidence scores.
 """
 
-from typing import Optional, List, Any
-import re
+from typing import Any
 
-from .signals import Signal, SignalCategory, SignalDefinitions
+from .signals import Signal, SignalCategory
 
 
 class SignalExtractor:
     """Base class for signal extraction from agent data."""
 
-    def extract(self, data: dict[str, Any]) -> List[Signal]:
+    def extract(self, data: dict[str, Any]) -> list[Signal]:
         """Extract signals from agent data.
 
         Args:
@@ -28,7 +27,7 @@ class SignalExtractor:
 class GitHubSignalExtractor(SignalExtractor):
     """Extract signals from GitHub agent results."""
 
-    def extract(self, data: dict[str, Any]) -> List[Signal]:
+    def extract(self, data: dict[str, Any]) -> list[Signal]:
         """Extract GitHub signals."""
         signals = []
 
@@ -90,7 +89,7 @@ class GitHubSignalExtractor(SignalExtractor):
 class FinancialSignalExtractor(SignalExtractor):
     """Extract signals from financial/funding data."""
 
-    def extract(self, data: dict[str, Any]) -> List[Signal]:
+    def extract(self, data: dict[str, Any]) -> list[Signal]:
         """Extract financial signals."""
         signals = []
 
@@ -148,7 +147,7 @@ class FinancialSignalExtractor(SignalExtractor):
 class CompaniesHouseSignalExtractor(SignalExtractor):
     """Extract signals from Companies House data."""
 
-    def extract(self, data: dict[str, Any]) -> List[Signal]:
+    def extract(self, data: dict[str, Any]) -> list[Signal]:
         """Extract company operational signals."""
         signals = []
 
@@ -206,7 +205,7 @@ class CompaniesHouseSignalExtractor(SignalExtractor):
 class WebSearchSignalExtractor(SignalExtractor):
     """Extract signals from web search/news data."""
 
-    def extract(self, data: dict[str, Any]) -> List[Signal]:
+    def extract(self, data: dict[str, Any]) -> list[Signal]:
         """Extract market and strategic signals."""
         signals = []
 
@@ -276,7 +275,7 @@ class AggregateSignalExtractor:
             "web_search": WebSearchSignalExtractor(),
         }
 
-    def extract_all(self, agent_results: dict[str, dict[str, Any]]) -> List[Signal]:
+    def extract_all(self, agent_results: dict[str, dict[str, Any]]) -> list[Signal]:
         """Extract all signals from all agent results.
 
         Args:
@@ -297,7 +296,7 @@ class AggregateSignalExtractor:
 
     def extract_by_agent(
         self, agent_name: str, results: dict[str, Any]
-    ) -> List[Signal]:
+    ) -> list[Signal]:
         """Extract signals from a single agent.
 
         Args:

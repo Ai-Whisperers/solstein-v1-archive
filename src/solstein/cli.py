@@ -3,18 +3,16 @@ Command-line interface for SolStein.
 """
 
 import json
-from dataclasses import asdict
 from pathlib import Path
-from typing import Any
 
 import click
 from loguru import logger
 
 from .analytics.scoring import GrowthScorer
-from .domain.models import Company, FinancialMetric, MarketAnalysis
+from .domain.models import Company, MarketAnalysis
 from .exporters.excel_exporter import ExcelExporter
+from .exporters.report_generator import ClientReportGenerator
 from .extractors.markdown_extractor import BatchExtractor
-
 
 
 @click.group()
@@ -114,13 +112,8 @@ def score(input_file: Path, output: Path | None) -> None:
             pos = scored_company.competitive_position_score or 0.0
 
             click.echo(f"    Growth: {growth:.1f}/10")
-            click.echo(
-                f"    Financial Health: {health:.1f}/10"
-            )
-            click.echo(
-                f"    Competitive Position: "
-                f"{pos:.1f}/10"
-            )
+            click.echo(f"    Financial Health: {health:.1f}/10")
+            click.echo(f"    Competitive Position: {pos:.1f}/10")
 
         if output:
             # Save scored profiles
@@ -209,6 +202,166 @@ def compare(profile1: str, profile2: str, input_file: Path) -> None:
 
     except Exception as e:
         click.echo(f"❌ Failed to compare profiles: {e}", err=True)
+        raise click.Abort() from e
+
+
+@cli.command()
+@click.argument("company_name", type=str)
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    help="Output directory for reports",
+)
+def generate_report(company_name: str, output: Path | None) -> None:
+    """Generate intelligence report for a company."""
+    from .data.loaders import CompetitorDataLoader
+
+    click.echo(f"📊 Generating reports for: {company_name}")
+
+    try:
+        loader = CompetitorDataLoader()
+        companies = loader.load_companies()
+
+        scorer = GrowthScorer()
+        scored_companies = []
+        for company in companies:
+            scored = scorer.calculate_scores(company)
+            scored_companies.append(scored)
+
+        # Find target company
+        target = None
+        for c in scored_companies:
+            if company_name.lower() in c.name.lower():
+                target = c
+                break
+
+        if not target:
+            click.echo(f"❌ Company not found: {company_name}", err=True)
+            click.echo(
+                f"Available companies: {', '.join([c.name for c in scored_companies[:10]])}..."
+            )
+            return
+
+        # Get competitors (all other companies)
+        competitors = [c for c in scored_companies if c.id != target.id]
+
+        # Generate reports
+        output_dir = output or Path(f"data/output/reports/{target.id}")
+        generator = ClientReportGenerator(output_dir=output_dir)
+
+        reports = generator.generate_client_report(target, competitors)
+
+        click.echo(f"✅ Reports generated in: {output_dir}")
+        click.echo(f"   - corporate-history.md")
+        click.echo(f"   - deep-analysis.md")
+        click.echo(f"   - financial-growth.md")
+        click.echo(f"   - competitive-analysis.md")
+        click.echo(f"   - market-overview.md")
+
+    except Exception as e:
+        click.echo(f"❌ Failed to generate report: {e}", err=True)
+        raise click.Abort() from e
+
+
+@cli.command()
+@click.argument("company_name", type=str)
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    help="Output directory for reports",
+)
+@click.option("--no-llm", is_flag=True, help="Disable LLM enhancements")
+def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) -> None:
+    """Generate LLM-enhanced intelligence report for a company."""
+    from .data.loaders import CompetitorDataLoader
+
+    click.echo(f"🤖 Generating LLM-enhanced reports for: {company_name}")
+
+    try:
+        loader = CompetitorDataLoader()
+        companies = loader.load_companies()
+
+        scorer = GrowthScorer()
+        scored_companies = []
+        for company in companies:
+            scored = scorer.calculate_scores(company)
+            scored_companies.append(scored)
+
+        target = None
+        for c in scored_companies:
+            if company_name.lower() in c.name.lower():
+                target = c
+                break
+
+        if not target:
+            click.echo(f"❌ Company not found: {company_name}", err=True)
+            click.echo(
+                f"Available: {', '.join([c.name for c in scored_companies[:10]])}..."
+            )
+            return
+
+        competitors = [c for c in scored_companies if c.id != target.id]
+
+        output_dir = output or Path(f"data/output/reports/llm/{target.id}")
+
+        if no_llm:
+            from .exporters.report_generator import ClientReportGenerator
+
+            generator = ClientReportGenerator(output_dir=output_dir, use_llm=False)
+            reports = generator.generate_client_report(target, competitors)
+        else:
+            from .exporters.report_generator import LLMEnhancedReportGenerator
+            import asyncio
+
+            generator = LLMEnhancedReportGenerator(output_dir=output_dir, use_llm=True)
+            reports = asyncio.run(
+                generator.generate_llm_enhanced_report(target, competitors)
+            )
+
+        click.echo(f"✅ LLM-enhanced reports generated in: {output_dir}")
+        for name in reports:
+            click.echo(f"   - {name}")
+
+    except Exception as e:
+        click.echo(f"❌ Failed to generate LLM report: {e}", err=True)
+        raise click.Abort() from e
+
+
+@cli.command()
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    help="Output directory for reports",
+)
+def generate_all_reports(output: Path | None) -> None:
+    """Generate reports for all companies."""
+    from .data.loaders import CompetitorDataLoader
+
+    click.echo("📊 Generating reports for all companies...")
+
+    try:
+        loader = CompetitorDataLoader()
+        companies = loader.load_companies()
+
+        scorer = GrowthScorer()
+        scored_companies = []
+        for company in companies:
+            scored = scorer.calculate_scores(company)
+            scored_companies.append(scored)
+
+        output_dir = output or Path("data/output/reports/all_companies")
+        generator = ClientReportGenerator(output_dir=output_dir)
+
+        generated = generator.generate_all_reports(scored_companies)
+
+        click.echo(f"✅ Generated reports for {len(generated)} companies")
+        click.echo(f"   Output directory: {output_dir}")
+
+    except Exception as e:
+        click.echo(f"❌ Failed to generate reports: {e}", err=True)
         raise click.Abort() from e
 
 

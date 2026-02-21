@@ -5,7 +5,7 @@ from loguru import logger
 
 from ...analytics.scoring import CompetitiveOverlapCalculator, MarketAnalyzer
 from ...core.repositories import CompanyFilter, CompanyRepository
-from ...domain.models import Company, CompetitiveOverlap, MarketAnalysis
+from ...domain.models import CompetitiveOverlap, MarketAnalysis
 from ..dependencies import get_current_user, get_repository
 
 router = APIRouter(tags=["Market Analysis"])
@@ -27,7 +27,11 @@ async def analyze_market(
         companies = repo.get_all(filters=filters)
 
         if region:
-            companies = [c for c in companies if region.lower() in [p.lower() for p in c.geographic_presence]]  # noqa: E501
+            companies = [
+                c
+                for c in companies
+                if region.lower() in [p.lower() for p in c.geographic_presence]
+            ]  # noqa: E501
 
         if not companies:
             return MarketAnalysis(
@@ -60,7 +64,7 @@ async def get_competitive_overlap(
         if not target:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Company {company_id} not found"
+                detail=f"Company {company_id} not found",
             )
 
         # Get peers (same industry)
@@ -81,9 +85,13 @@ async def get_competitive_overlap(
                     company_a_id=target.id,
                     company_b_id=peer.id,
                     overlap_score=score,
-                    overlap_areas=[target.industry] if target.industry and peer.industry and target.industry.lower() == peer.industry.lower() else [],  # noqa: E501
+                    overlap_areas=[target.industry]
+                    if target.industry
+                    and peer.industry
+                    and target.industry.lower() == peer.industry.lower()
+                    else [],  # noqa: E501
                     competitive_intensity="Medium",
-                    notes=None
+                    notes=None,
                 )
             )
 

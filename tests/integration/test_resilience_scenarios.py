@@ -4,14 +4,14 @@ Tests verify that the system handles transient failures, rate limits,
 circuit breaker conditions, and graceful degradation correctly.
 """
 
-import pytest
-from unittest.mock import AsyncMock, patch
 import asyncio
 import time
 
+import pytest
+
 from solstein.agents.resilience import (
-    ExponentialBackoff,
     CircuitBreaker,
+    ExponentialBackoff,
     RetryConfig,
     call_with_retry,
 )

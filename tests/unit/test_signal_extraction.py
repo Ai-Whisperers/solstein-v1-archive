@@ -4,19 +4,18 @@ Tests verify that signals are correctly defined, categorized, and extracted
 from various agent data sources.
 """
 
-import pytest
 
+from solstein.analytics.signal_extractors import (
+    AggregateSignalExtractor,
+    CompaniesHouseSignalExtractor,
+    FinancialSignalExtractor,
+    GitHubSignalExtractor,
+    WebSearchSignalExtractor,
+)
 from solstein.analytics.signals import (
     Signal,
     SignalCategory,
     SignalDefinitions,
-)
-from solstein.analytics.signal_extractors import (
-    GitHubSignalExtractor,
-    FinancialSignalExtractor,
-    CompaniesHouseSignalExtractor,
-    WebSearchSignalExtractor,
-    AggregateSignalExtractor,
 )
 
 

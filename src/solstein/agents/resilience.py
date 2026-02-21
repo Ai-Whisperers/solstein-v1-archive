@@ -12,11 +12,12 @@ Key Components:
 
 import asyncio
 import logging
-from dataclasses import dataclass
-from enum import Enum
-from typing import Any, Callable, Optional, TypeVar
-from datetime import datetime, timedelta
 import random
+from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from enum import Enum
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -139,7 +140,7 @@ class CircuitBreaker:
 
         self.state = CircuitBreakerState.CLOSED
         self.failure_count = 0
-        self.last_failure_time: Optional[datetime] = None
+        self.last_failure_time: datetime | None = None
         self.success_count = 0
 
     def can_execute(self) -> bool:
@@ -173,7 +174,7 @@ class CircuitBreaker:
     def record_failure(self) -> None:
         """Record failed call, may open circuit."""
         self.failure_count += 1
-        self.last_failure_time = datetime.now()
+        self.last_failure_time = datetime.now(UTC)
 
         if self.state == CircuitBreakerState.HALF_OPEN:
             self.state = CircuitBreakerState.OPEN
@@ -192,7 +193,7 @@ class CircuitBreaker:
         """Check if enough time has passed to retry in HALF_OPEN state."""
         if not self.last_failure_time:
             return False
-        elapsed = (datetime.now() - self.last_failure_time).total_seconds()
+        elapsed = (datetime.now(UTC) - self.last_failure_time).total_seconds()
         return elapsed >= self.recovery_timeout
 
     def get_state(self) -> str:
@@ -203,8 +204,8 @@ class CircuitBreaker:
 async def call_with_retry(
     func: Callable[..., Any],
     *args: Any,
-    retry_config: Optional[RetryConfig] = None,
-    circuit_breaker: Optional[CircuitBreaker] = None,
+    retry_config: RetryConfig | None = None,
+    circuit_breaker: CircuitBreaker | None = None,
     retryable_exceptions: tuple = (Exception,),
     non_retryable_exceptions: tuple = (),
     name: str = "call",
@@ -238,7 +239,7 @@ async def call_with_retry(
             f"[{name}] Circuit breaker OPEN (service unavailable, try again later)"
         )
 
-    last_exception: Optional[Exception] = None
+    last_exception: Exception | None = None
 
     for attempt in range(retry_config.max_attempts):
         try:
@@ -262,7 +263,7 @@ async def call_with_retry(
             logger.error(f"[{name}] Non-retryable exception: {type(e).__name__}: {e}")
             raise
 
-        except asyncio.TimeoutError as e:
+        except TimeoutError as e:
             # Timeout: retryable
             last_exception = e
             logger.warning(f"[{name}] Timeout on attempt {attempt + 1}")

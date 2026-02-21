@@ -86,9 +86,9 @@ def upgrade() -> None:
         sa.Column("average_growth_score", sa.Float(), nullable=False),
         sa.Column("average_financial_score", sa.Float(), nullable=False),
         sa.Column("average_competitive_score", sa.Float(), nullable=False),
-        sa.Column("rocket_count", sa.Integer(), nullable=False),
-        sa.Column("neutral_count", sa.Integer(), nullable=False),
-        sa.Column("dinosaur_count", sa.Integer(), nullable=False),
+        sa.Column("phoenix_count", sa.Integer(), nullable=False),
+        sa.Column("salt_count", sa.Integer(), nullable=False),
+        sa.Column("lead_count", sa.Integer(), nullable=False),
         sa.Column("market_metadata", sa.JSON(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )

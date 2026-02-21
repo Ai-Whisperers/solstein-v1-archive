@@ -20,7 +20,7 @@ def test_batch_scoring_endpoint_temporal_success(mock_connect, client):
     mock_client.start_workflow.return_value = mock_handle
 
     response = client.get("/scoring/batch?industry=Energy")
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["message"] == "Batch scoring workflow started via Temporal"
@@ -28,7 +28,11 @@ def test_batch_scoring_endpoint_temporal_success(mock_connect, client):
     assert data["status"] == "running"
     assert data["filters"]["industry"] == "Energy"
 
-@patch("solstein.api.routers.scoring.TemporalClient.connect", side_effect=Exception("Connection failed"))
+
+@patch(
+    "solstein.api.routers.scoring.TemporalClient.connect",
+    side_effect=Exception("Connection failed"),
+)
 @patch("solstein.analytics.activities.fetch_market_company_ids", new_callable=AsyncMock)
 @patch("solstein.analytics.activities.calculate_company_score", new_callable=AsyncMock)
 def test_batch_scoring_endpoint_fallback(mock_calc, mock_fetch, mock_connect, client):
@@ -64,9 +68,9 @@ def test_run_simulation_endpoint(client, mock_repo):
                 "name": "Tech Crash",
                 "impact_factor": -0.2,
                 "description": "Tech stocks drop 20%",
-                "affected_industries": ["Energy"]
+                "affected_industries": ["Energy"],
             }
-        ]
+        ],
     }
 
     response = client.post("/simulation/run", json=payload)
@@ -74,6 +78,7 @@ def test_run_simulation_endpoint(client, mock_repo):
     data = response.json()
     assert len(data) == 1
     assert data[0]["company_id"] == mock_company.id
+
 
 def test_run_simulation_endpoint_no_companies(client, mock_repo):
     """Test simulation when no companies match the filter."""
@@ -83,7 +88,7 @@ def test_run_simulation_endpoint_no_companies(client, mock_repo):
         "id": "scenario-2",
         "name": "Empty Market",
         "description": "No companies",
-        "conditions": []
+        "conditions": [],
     }
 
     response = client.post("/simulation/run", json=payload)

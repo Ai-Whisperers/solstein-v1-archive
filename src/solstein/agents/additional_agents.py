@@ -10,11 +10,9 @@ Agents:
 7. WebsiteAgent - Website tech stack, traffic estimates
 """
 
-from typing import Optional, Dict, List, Any
-from abc import ABC, abstractmethod
 import logging
-
-from .resilience import call_with_retry
+from abc import ABC, abstractmethod
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +30,7 @@ class AdditionalAgent(ABC):
         self.retry_config = {"max_retries": 3, "base_delay": 2.0, "max_delay": 30.0}
 
     @abstractmethod
-    async def analyze(self) -> Dict[str, Any]:
+    async def analyze(self) -> dict[str, Any]:
         """Analyze company data.
 
         Returns:
@@ -44,7 +42,7 @@ class AdditionalAgent(ABC):
 class LinkedInAgent(AdditionalAgent):
     """Extract company intelligence from LinkedIn."""
 
-    async def analyze(self) -> Dict[str, Any]:
+    async def analyze(self) -> dict[str, Any]:
         """Analyze LinkedIn company profile.
 
         Returns:
@@ -66,7 +64,7 @@ class LinkedInAgent(AdditionalAgent):
 class SECEdgarAgent(AdditionalAgent):
     """Extract financial intelligence from SEC EDGAR filings."""
 
-    async def analyze(self) -> Dict[str, Any]:
+    async def analyze(self) -> dict[str, Any]:
         """Analyze SEC EDGAR filings for financial data.
 
         Returns:
@@ -92,7 +90,7 @@ class SECEdgarAgent(AdditionalAgent):
 class PatentsAgent(AdditionalAgent):
     """Extract innovation metrics from patent filings."""
 
-    async def analyze(self) -> Dict[str, Any]:
+    async def analyze(self) -> dict[str, Any]:
         """Analyze patent filings for innovation signals.
 
         Returns:
@@ -117,7 +115,7 @@ class PatentsAgent(AdditionalAgent):
 class NewsAgent(AdditionalAgent):
     """Extract brand and market intelligence from news sources."""
 
-    async def analyze(self) -> Dict[str, Any]:
+    async def analyze(self) -> dict[str, Any]:
         """Analyze news coverage and brand mentions.
 
         Returns:
@@ -142,7 +140,7 @@ class NewsAgent(AdditionalAgent):
 class JobsAgent(AdditionalAgent):
     """Extract hiring and team growth signals from job postings."""
 
-    async def analyze(self) -> Dict[str, Any]:
+    async def analyze(self) -> dict[str, Any]:
         """Analyze job postings for hiring activity.
 
         Returns:
@@ -169,7 +167,7 @@ class JobsAgent(AdditionalAgent):
 class TechTrendsAgent(AdditionalAgent):
     """Extract technology adoption and trends signals."""
 
-    async def analyze(self) -> Dict[str, Any]:
+    async def analyze(self) -> dict[str, Any]:
         """Analyze technology adoption and stack modernization.
 
         Returns:
@@ -191,7 +189,7 @@ class TechTrendsAgent(AdditionalAgent):
 class WebsiteAgent(AdditionalAgent):
     """Extract intelligence from company website and web presence."""
 
-    async def analyze(self) -> Dict[str, Any]:
+    async def analyze(self) -> dict[str, Any]:
         """Analyze website tech stack and traffic.
 
         Returns:
@@ -235,13 +233,12 @@ class AgentOrchestrator:
             "website": WebsiteAgent(company_name),
         }
 
-    async def analyze_all(self) -> Dict[str, Any]:
+    async def analyze_all(self) -> dict[str, Any]:
         """Run all agents in parallel.
 
         Returns:
             Dictionary of all agent results
         """
-        import asyncio
 
         results = {}
         tasks = [(name, agent.analyze()) for name, agent in self.agents.items()]
@@ -255,7 +252,7 @@ class AgentOrchestrator:
 
         return results
 
-    async def analyze_agent(self, agent_name: str) -> Dict[str, Any]:
+    async def analyze_agent(self, agent_name: str) -> dict[str, Any]:
         """Run a single agent.
 
         Args:

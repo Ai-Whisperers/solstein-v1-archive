@@ -6,11 +6,12 @@ when critical configuration is missing.
 """
 
 import os
-import pytest
 from unittest.mock import patch
+
+import pytest
 from loguru import logger
 
-from solstein.config import Settings, ConfigurationError
+from solstein.config import ConfigurationError, Settings
 
 
 class TestConfigurationValidation:

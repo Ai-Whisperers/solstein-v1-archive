@@ -1,33 +1,83 @@
 """Service for managing drill-down data and audit trail retrieval."""
 
-from solstein.domain.models import CompanyAnalysisAuditTrail
+
+from ...domain.models import (
+    AggregatedDataRecord,
+    CompanyAnalysisAuditTrail,
+    RawDataRecord,
+    SignalExtractionRecord,
+)
+from ...infrastructure.database_service import DatabaseService
+
+# Shared in-memory storage for non-persistent mode, ensuring consistency across instances
+_shared_audit_trails: dict[str, CompanyAnalysisAuditTrail] = {}
 
 
 class DrillDownService:
     """Service for managing and retrieving audit trails for transparency."""
 
-    def __init__(self):
-        """Initialize drill-down service with in-memory storage."""
-        self._audit_trails: dict[str, CompanyAnalysisAuditTrail] = {}
+    def __init__(self, db_service: DatabaseService | None = None):
+        """Initialize drill-down service with database or in-memory storage."""
+        self.db_service = db_service
+        self._audit_trails = _shared_audit_trails
 
-    def store_audit_trail(self, audit_trail: CompanyAnalysisAuditTrail) -> None:
+    async def store_audit_trail(self, audit_trail: CompanyAnalysisAuditTrail) -> None:
         """Store an audit trail for a company."""
-        self._audit_trails[audit_trail.company_id] = audit_trail
+        if self.db_service:
+            await self.db_service.save_audit_trail(audit_trail)
+            await self.db_service.commit()
+        else:
+            self._audit_trails[audit_trail.company_id] = audit_trail
 
-    def get_audit_trail(self, company_id: str) -> CompanyAnalysisAuditTrail | None:
+    async def get_audit_trail(
+        self, company_id: str
+    ) -> CompanyAnalysisAuditTrail | None:
         """Retrieve an audit trail for a company."""
+        if self.db_service:
+            record = await self.db_service.get_audit_trail(company_id)
+            if not record:
+                return None
+
+            # Reconstruct domain model from database record
+            return CompanyAnalysisAuditTrail(
+                company_id=record.company_id,
+                gathering_batch_id=record.gathering_batch_id,
+                company_name=record.company_name,
+                raw_data=RawDataRecord(**record.raw_data) if record.raw_data else None,
+                aggregated_facts=AggregatedDataRecord(**record.aggregated_facts)
+                if record.aggregated_facts
+                else None,
+                extracted_signals=SignalExtractionRecord(**record.extracted_signals)
+                if record.extracted_signals
+                else None,
+                growth_score=record.growth_score,
+                financial_health_score=record.financial_health_score,
+                competitive_position_score=record.competitive_position_score,
+                classification=record.classification,
+                scoring_breakdown=record.scoring_breakdown or {},
+                analysis_started_at=record.analysis_started_at,
+                analysis_completed_at=record.analysis_completed_at,
+                analysis_duration_seconds=record.analysis_duration_seconds,
+                data_completeness=record.data_completeness,
+                confidence_level=record.confidence_level,
+                errors=record.errors or [],
+                warnings=record.warnings or [],
+            )
+
         return self._audit_trails.get(company_id)
 
-    def get_signals(self, company_id: str) -> list | None:
+    async def get_signals(self, company_id: str) -> list | None:
         """Get extracted signals for a company."""
-        audit_trail = self.get_audit_trail(company_id)
+        audit_trail = await self.get_audit_trail(company_id)
         if not audit_trail or not audit_trail.extracted_signals:
             return None
         return audit_trail.extracted_signals.signals
 
-    def get_facts(self, company_id: str, min_confidence: float = 0.0) -> list | None:
+    async def get_facts(
+        self, company_id: str, min_confidence: float = 0.0
+    ) -> list | None:
         """Get aggregated facts for a company, filtered by confidence."""
-        audit_trail = self.get_audit_trail(company_id)
+        audit_trail = await self.get_audit_trail(company_id)
         if not audit_trail or not audit_trail.aggregated_facts:
             return None
         return [
@@ -36,9 +86,11 @@ class DrillDownService:
             if f.confidence >= min_confidence
         ]
 
-    def get_sources(self, company_id: str, fact_type: str | None = None) -> list | None:
+    async def get_sources(
+        self, company_id: str, fact_type: str | None = None
+    ) -> list | None:
         """Get raw sources for a company, optionally filtered by fact type."""
-        audit_trail = self.get_audit_trail(company_id)
+        audit_trail = await self.get_audit_trail(company_id)
         if not audit_trail or not audit_trail.raw_data:
             return None
 
@@ -55,9 +107,9 @@ class DrillDownService:
 
         return sources
 
-    def get_source_details(self, company_id: str, source_id: str) -> dict | None:
+    async def get_source_details(self, company_id: str, source_id: str) -> dict | None:
         """Get details about a specific source."""
-        audit_trail = self.get_audit_trail(company_id)
+        audit_trail = await self.get_audit_trail(company_id)
         if not audit_trail or not audit_trail.raw_data:
             return None
 
@@ -78,11 +130,11 @@ class DrillDownService:
                 }
         return None
 
-    def get_fact_details(
+    async def get_fact_details(
         self, company_id: str, fact_type: str, value: str
     ) -> dict | None:
         """Get details about a specific aggregated fact."""
-        audit_trail = self.get_audit_trail(company_id)
+        audit_trail = await self.get_audit_trail(company_id)
         if not audit_trail or not audit_trail.aggregated_facts:
             return None
 
@@ -97,9 +149,9 @@ class DrillDownService:
                 }
         return None
 
-    def get_contradictions(self, company_id: str) -> list | None:
+    async def get_contradictions(self, company_id: str) -> list | None:
         """Get detected contradictions for a company."""
-        audit_trail = self.get_audit_trail(company_id)
+        audit_trail = await self.get_audit_trail(company_id)
         if not audit_trail or not audit_trail.aggregated_facts:
             return None
 
@@ -115,9 +167,9 @@ class DrillDownService:
                 )
         return contradictions
 
-    def get_data_quality(self, company_id: str) -> dict | None:
+    async def get_data_quality(self, company_id: str) -> dict | None:
         """Get data quality metrics for a company."""
-        audit_trail = self.get_audit_trail(company_id)
+        audit_trail = await self.get_audit_trail(company_id)
         if not audit_trail:
             return None
 
@@ -136,10 +188,7 @@ class DrillDownService:
         }
 
 
-# Global instance for now (will be dependency-injected later)
-_drill_down_service = DrillDownService()
-
-
+# Helper for non-API components (e.g. agents, workers)
 def get_drill_down_service() -> DrillDownService:
-    """Get the drill-down service instance."""
-    return _drill_down_service
+    """Get a default drill-down service instance."""
+    return DrillDownService()

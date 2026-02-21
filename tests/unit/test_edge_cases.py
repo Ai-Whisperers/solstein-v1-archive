@@ -2,20 +2,19 @@
 Edge case tests to cover remaining uncovered branches after the Pydantic refactor.
 These tests target specific code paths that require special setup to exercise.
 """
+
 import logging
 from pathlib import Path
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, patch
 
-import pytest
-
-from solstein.data.loaders import CompetitorDataLoader
-from solstein.extractors.markdown_extractor import MarkdownExtractor
-from solstein.exporters.excel_exporter import ExcelExporter
 from solstein.analytics.scoring import GrowthScorer
+from solstein.data.loaders import CompetitorDataLoader
 from solstein.domain.models import FinancialMetric
-
+from solstein.exporters.excel_exporter import ExcelExporter
+from solstein.extractors.markdown_extractor import MarkdownExtractor
 
 # ---- Logging Intercept ----
+
 
 def test_logger_intercept_frame_walk():
     """Trigger the InterceptHandler while-loop frame walk in setup_logging."""
@@ -25,13 +24,16 @@ def test_logger_intercept_frame_walk():
 
 # ---- CLI entrypoint ----
 
+
 def test_cli_main_import():
     """Ensure cli.main() can be imported and is callable."""
     from solstein.cli import main
+
     assert callable(main)
 
 
 # ---- Data Loader Fallbacks ----
+
 
 def test_determine_tier_very_low_revenue():
     """Revenue < 10 → TIER_4."""
@@ -48,6 +50,7 @@ def test_convert_confidence_fallback():
 
 
 # ---- Markdown Extractor Fallbacks ----
+
 
 def test_parse_threat_high_variant():
     """'EXTREMELY HIGH RISK' string → ThreatLevel.HIGH."""
@@ -76,6 +79,7 @@ def test_get_confidence_bad_value():
 
 # ---- Excel Exporter Branches ----
 
+
 def test_excel_exporter_none_active_sheet():
     """If wb.active is None, create_sheet should be called."""
     exporter = ExcelExporter()
@@ -102,6 +106,7 @@ def test_excel_auto_adjust_value_error():
             class Exploder(str):
                 def __len__(self):
                     raise ValueError("boom")
+
             return Exploder("x")
 
     mock_ws = MagicMock()
@@ -111,6 +116,7 @@ def test_excel_auto_adjust_value_error():
 
 
 # ---- Scoring Cushion Penalty ----
+
 
 def test_financial_score_cushion_thin_penalty():
     """funding/revenue < thin ratio and profit_margin < 5 → cushion thin penalty."""

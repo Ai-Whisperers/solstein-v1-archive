@@ -1,15 +1,24 @@
 import { Badge } from "@tremor/react";
 
 export function ClassificationBadge({ classification }) {
-    const isRocket = classification === "Rocket";
-    const isDino = classification === "Dinosaur";
+    const isPhoenix = classification === "Phoenix";
+    const isLead = classification === "Lead";
+    const isSalt = classification === "Salt";
 
-    const color = isRocket ? "emerald" : isDino ? "rose" : "blue";
-    const icon = isRocket ? "🚀" : isDino ? "🦕" : "⚖️";
+    const className = isPhoenix
+        ? "badge-phoenix"
+        : isLead
+            ? "badge-lead"
+            : isSalt
+                ? "badge-salt"
+                : "";
+
+    const icon = isPhoenix ? "🔥" : isLead ? "⚖️" : "🧂";
 
     return (
-        <Badge color={color} size="sm" className="font-semibold tracking-wider uppercase">
-            {icon} {classification}
-        </Badge>
+        <span className={`${className} inline-flex items-center gap-1 shadow-lg shadow-black/20`}>
+            <span>{icon}</span>
+            <span>{classification}</span>
+        </span>
     );
 }

@@ -12,7 +12,7 @@ import requests
 
 from ..domain.models import DataSourceType
 from .base_agent import AgentTaskResult, BaseDataGatheringAgent
-from .resilience import call_with_retry, CircuitBreaker, GITHUB_RETRY_CONFIG
+from .resilience import GITHUB_RETRY_CONFIG, CircuitBreaker, call_with_retry
 
 
 class GitHubAgent(BaseDataGatheringAgent):

@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
     /* Solstein Premium Color Palette */
@@ -54,8 +56,8 @@ body {
 }
 
 /* Classification badges */
-.badge-rocket {
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
+.badge-phoenix {
+    background: linear-gradient(135deg, var(--solstein-amber), var(--solstein-gold));
     color: #ffffff;
     padding: 4px 12px;
     border-radius: 20px;
@@ -65,7 +67,7 @@ body {
     text-transform: uppercase;
 }
 
-.badge-neutral {
+.badge-salt {
     background: linear-gradient(135deg, #3498db, #2980b9);
     color: #ffffff;
     padding: 4px 12px;
@@ -76,8 +78,8 @@ body {
     text-transform: uppercase;
 }
 
-.badge-dinosaur {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
+.badge-lead {
+    background: linear-gradient(135deg, #515e72, #2f3640);
     color: #ffffff;
     padding: 4px 12px;
     border-radius: 20px;

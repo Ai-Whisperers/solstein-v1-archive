@@ -11,20 +11,20 @@ Tests cover:
 """
 
 import asyncio
+from unittest.mock import AsyncMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock
 
 from solstein.agents.resilience import (
-    ExponentialBackoff,
+    COMPANIES_HOUSE_RETRY_CONFIG,
+    GITHUB_RETRY_CONFIG,
+    WEB_SEARCH_RETRY_CONFIG,
     CircuitBreaker,
     CircuitBreakerState,
+    ExponentialBackoff,
     RetryConfig,
     call_with_retry,
-    GITHUB_RETRY_CONFIG,
-    COMPANIES_HOUSE_RETRY_CONFIG,
-    WEB_SEARCH_RETRY_CONFIG,
 )
-
 
 # ============================================================================
 # Tests: ExponentialBackoff

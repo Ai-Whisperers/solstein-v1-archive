@@ -109,7 +109,7 @@ export function CompanyTable({ companies, selectedCompany, onSelect }) {
                                     </div>
                                 </td>
                                 <td style={{ padding: "16px" }}>
-                                    <ClassificationBadge classification={company.classification || "Neutral"} />
+                                    <ClassificationBadge classification={company.classification || "Salt"} />
                                 </td>
                             </tr>
                         ))}

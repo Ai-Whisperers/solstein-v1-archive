@@ -7,25 +7,21 @@ Fetches real-time data from:
 - Currency conversion support
 """
 
-from datetime import datetime, date
+from datetime import date, datetime
 from typing import Any
 
 import pandas as pd
 import yfinance as yf
-from pydantic import BaseModel
-
 from loguru import logger
 
 from .markets import (
-    Currency,
-    MarketIndex,
     MARKET_INDICES,
-    StockExchange,
     STOCK_EXCHANGES,
+    Currency,
+    CurrencyConverter,
     GlobalStockData,
     IndexData,
-    CurrencyConverter,
-    format_price,
+    StockExchange,
 )
 
 

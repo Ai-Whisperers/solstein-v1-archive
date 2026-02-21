@@ -17,11 +17,25 @@ growth_scorer = GrowthScorer()
 excel_exporter = ExcelExporter()
 
 
-def _run_excel_export(repo: CompanyRepository, filters: dict[str, Any], filename: str) -> None:  # noqa: E501
+def _run_excel_export(
+    repo: CompanyRepository, filters: dict[str, Any], filename: str
+) -> None:  # noqa: E501
     """Background task to generate excel report."""
     company_filter = CompanyFilter(**filters) if filters else None
     companies = repo.get_all(filters=company_filter)
+
+    # Apply scoring to all companies before export
     if companies:
+        scored_companies = []
+        for company in companies:
+            try:
+                scored = growth_scorer.calculate_scores(company)
+                scored_companies.append(scored)
+            except Exception as e:
+                logger.warning(f"Failed to score company {company.name}: {e}")
+                scored_companies.append(company)
+        companies = scored_companies
+
         output_path = settings.data.export_dir / filename
         excel_exporter.create_dashboard(companies, output_path)
         logger.info(f"Excel report generated at {output_path}")
@@ -111,4 +125,75 @@ async def export_to_json(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error exporting to JSON: {str(e)}",
+        ) from e
+
+
+@router.get("/search/llm")
+async def search_with_llm(
+    criteria: str = Query(
+        ...,
+        description="Natural language search criteria (e.g., 'tech companies', 'fast growing SaaS')",
+    ),
+    limit: int | None = Query(None, description="Maximum number of results"),
+    include_reasoning: bool = Query(
+        True, description="Include LLM reasoning in response"
+    ),
+    _: dict[str, Any] = Depends(get_current_user),
+    repo: CompanyRepository = Depends(get_repository),
+) -> JSONResponse:
+    """Search and filter companies using natural language criteria via LLM.
+
+    This endpoint uses AI to understand natural language criteria and match
+    companies based on their full profile, not just keyword matching.
+    """
+    try:
+        from ...data.repositories import JsonFileRepository
+
+        if not isinstance(repo, JsonFileRepository):
+            return JSONResponse(
+                content={
+                    "error": "LLM filtering is only available for JSON repository"
+                },
+                status_code=400,
+            )
+
+        companies, filter_metadata = await repo.get_all_llm_filtered(
+            criteria=criteria,
+            limit=limit,
+        )
+
+        if not companies:
+            return JSONResponse(
+                content={
+                    "criteria": criteria,
+                    "total_matched": 0,
+                    "companies": [],
+                    "message": "No companies matched the criteria",
+                }
+            )
+
+        scored_companies = []
+        for company in companies:
+            scored = growth_scorer.calculate_scores(company)
+            scored_companies.append(scored)
+
+        companies_data = [c.model_dump(mode="json") for c in scored_companies]
+
+        response = {
+            "criteria": criteria,
+            "total_matched": filter_metadata["total_matched"],
+            "total_checked": filter_metadata["total_checked"],
+            "companies": companies_data,
+        }
+
+        if include_reasoning:
+            response["filter_reasoning"] = filter_metadata["reasoning"]
+
+        return JSONResponse(content=response)
+
+    except Exception as e:
+        logger.error(f"Error in LLM search: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error in LLM search: {str(e)}",
         ) from e

@@ -9,10 +9,11 @@ Provides Kubernetes-compatible health checks:
 - /metrics/data-quality - Data quality metrics
 """
 
-from fastapi import APIRouter, HTTPException
 from datetime import datetime
 
-from ...core.monitoring import health_monitor, ReadinessStatus
+from fastapi import APIRouter, HTTPException
+
+from ...core.monitoring import health_monitor
 
 router = APIRouter(prefix="/health", tags=["health"])
 

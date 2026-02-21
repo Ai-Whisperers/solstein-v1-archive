@@ -43,9 +43,9 @@ Every company in a market is scored and classified:
 
 | Classification | Growth Score | What It Means |
 |---|---|---|
-| 🚀 **Rocket** | ≥ 7.0 | High-growth, AI-native or rapidly adopting. Act now. |
-| ⚖️ **Neutral** | 4.0 – 7.0 | Stable players. Watch for directional signals. |
-| 🦕 **Dinosaur** | ≤ 4.0 | Legacy weight. Hidden diamonds or dead weight. Assess the people. |
+| 🔥 **Phoenix** | ≥ 7.0 | High-growth, AI-native or rapidly adopting. Act now. |
+| 🧂 **Salt** | 4.0 – 7.0 | Stable players. Watch for directional signals. |
+| ⚖️ **Lead** | ≤ 4.0 | Legacy weight. Hidden diamonds or dead weight. Assess the people. |
 
 The score is calculated across three dimensions:
 - **Growth Score** — Revenue trajectory, margin health
@@ -60,22 +60,19 @@ The score is calculated across three dimensions:
 solstein/
 ├── src/solstein/
 │   ├── api/              ← FastAPI application & routers
-│   ├── analytics/        ← GrowthScorer, MarketAnalyzer
-│   ├── core/             ← Scoring config, repository interfaces
-│   ├── data/             ← JSON loaders, data repositories
-│   ├── domain/           ← Pure domain models (Company, FinancialMetric)
-│   ├── exporters/        ← Excel report generation
-│   └── tasks.py          ← Celery background workers
+│   ├── infrastructure/   ← Stone Layer: PostgreSQL, SQLAlchemy, Services
+│   ├── analytics/        ← Logic Fusion: Scoring, Market Analysis
+│   ├── agents/           ← Specialized AIs (Coordinator, GitHub, News)
+│   ├── domain/           ← Pure domain models
+│   ├── utils/            ← Aura Layer: Logging, Traceability
+│   └── worker.py         ← Celery worker & Temporal workflows
+├── dashboard/            ← Sunstone Layer: Next.js + React.js UI
 ├── tests/
 │   ├── unit/             ← Domain models & scoring logic
 │   ├── integration/      ← API endpoints & worker tasks
 │   └── data_quality/     ← Golden dataset regression tests
-├── docs/
-│   ├── LORE/             ← The origin story & strategic narrative
-│   ├── PITCH/            ← Investor & client-facing materials
-│   ├── guides/           ← Developer & operator guides
-│   ├── api/              ← API reference
-│   └── architecture/     ← Architecture decision records
+├── docs/                 ← Technical Grimoire
+├── graveyard/            ← Archived legacy spells (SolStein_original)
 └── data/                 ← Market intelligence datasets
 ```
 

@@ -1,9 +1,13 @@
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
-from solstein.analytics.activities import calculate_company_score, fetch_market_company_ids, _get_repo
+import pytest
 from tests.factories import make_company
-from solstein.config import Settings
+
+from solstein.analytics.activities import (
+    _get_repo,
+    calculate_company_score,
+    fetch_market_company_ids,
+)
 
 
 @patch("solstein.analytics.activities.get_settings")
@@ -12,10 +16,12 @@ def test_get_repo_fallback(mock_get_settings):
     mock_settings = MagicMock()
     mock_settings.supabase.url = None
     mock_get_settings.return_value = mock_settings
-    
+
     repo = _get_repo()
     from solstein.data.repositories import JsonFileRepository
+
     assert isinstance(repo, JsonFileRepository)
+
 
 @pytest.mark.asyncio
 @patch("solstein.analytics.activities._get_repo")
@@ -24,7 +30,7 @@ async def test_calculate_company_score(mock_get_repo):
     mock_repo = MagicMock()
     mock_company = make_company()
     mock_repo.get_by_id.return_value = mock_company
-    
+
     # We must mock `repo.save` as synchronous because `asyncio.to_thread` wraps it
     mock_repo.save.return_value = mock_company
     mock_get_repo.return_value = mock_repo
@@ -33,7 +39,7 @@ async def test_calculate_company_score(mock_get_repo):
     assert result["company_id"] == mock_company.id
     assert "classification" in result
     assert "growth_score" in result
-    
+
     mock_repo.get_by_id.assert_called_once_with(mock_company.id)
     mock_repo.save.assert_called_once()
 

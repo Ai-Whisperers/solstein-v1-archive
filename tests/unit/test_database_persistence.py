@@ -4,14 +4,13 @@ Tests verify that scoring records, signals, and market snapshots
 are correctly stored and retrieved from PostgreSQL.
 """
 
+
 import pytest
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from datetime import datetime
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from solstein.core.database import Base
-from solstein.core.database_models import ScoringRecord, SignalRecord, MarketSnapshot
-from solstein.core.database_service import DatabaseService
+from solstein.infrastructure.database import Base
+from solstein.infrastructure.database_service import DatabaseService
 
 
 @pytest_asyncio.fixture
@@ -51,7 +50,7 @@ class TestScoringRecordPersistence:
             financial_health_score=7.2,
             competitive_position_score=8.1,
             overall_score=7.9,
-            classification="Rocket",
+            classification="Phoenix",
         )
         await db_service.commit()
 
@@ -59,7 +58,7 @@ class TestScoringRecordPersistence:
         assert record.company_id == "tech-corp-001"
         assert record.company_name == "TechCorp Inc"
         assert record.overall_score == 7.9
-        assert record.classification == "Rocket"
+        assert record.classification == "Phoenix"
 
     @pytest.mark.asyncio
     async def test_save_record_with_data_sources(self, db_service):
@@ -76,7 +75,7 @@ class TestScoringRecordPersistence:
             financial_health_score=6.0,
             competitive_position_score=7.0,
             overall_score=6.8,
-            classification="Neutral",
+            classification="Salt",
             data_sources_used=data_sources,
         )
         await db_service.commit()
@@ -95,7 +94,7 @@ class TestScoringRecordPersistence:
             financial_health_score=5.0,
             competitive_position_score=5.0,
             overall_score=5.0,
-            classification="Neutral",
+            classification="Salt",
         )
         await db_service.commit()
 
@@ -106,7 +105,7 @@ class TestScoringRecordPersistence:
             financial_health_score=6.0,
             competitive_position_score=6.0,
             overall_score=6.0,
-            classification="Neutral",
+            classification="Salt",
         )
         await db_service.commit()
 
@@ -128,7 +127,7 @@ class TestScoringRecordPersistence:
             financial_health_score=3.0,
             competitive_position_score=3.0,
             overall_score=3.0,
-            classification="Dinosaur",
+            classification="Lead",
         )
         await db_service.commit()
 
@@ -139,7 +138,7 @@ class TestScoringRecordPersistence:
             financial_health_score=4.5,
             competitive_position_score=4.5,
             overall_score=4.5,
-            classification="Neutral",
+            classification="Salt",
         )
         await db_service.commit()
 
@@ -147,7 +146,7 @@ class TestScoringRecordPersistence:
 
         assert latest is not None
         assert latest.overall_score == 4.5
-        assert latest.classification == "Neutral"
+        assert latest.classification == "Salt"
 
     @pytest.mark.asyncio
     async def test_get_company_scores_with_limit(self, db_service):
@@ -162,7 +161,7 @@ class TestScoringRecordPersistence:
                 financial_health_score=float(i),
                 competitive_position_score=float(i),
                 overall_score=float(i),
-                classification="Neutral",
+                classification="Salt",
             )
             await db_service.commit()
 
@@ -184,7 +183,7 @@ class TestSignalPersistence:
             financial_health_score=7.0,
             competitive_position_score=7.0,
             overall_score=7.0,
-            classification="Rocket",
+            classification="Phoenix",
         )
         await db_service.commit()
 
@@ -214,7 +213,7 @@ class TestSignalPersistence:
             financial_health_score=7.5,
             competitive_position_score=7.5,
             overall_score=7.5,
-            classification="Rocket",
+            classification="Phoenix",
         )
         await db_service.commit()
 
@@ -243,7 +242,7 @@ class TestSignalPersistence:
             financial_health_score=6.0,
             competitive_position_score=6.0,
             overall_score=6.0,
-            classification="Neutral",
+            classification="Salt",
         )
         await db_service.commit()
 
@@ -275,15 +274,15 @@ class TestMarketSnapshotPersistence:
             average_growth_score=6.5,
             average_financial_score=6.0,
             average_competitive_score=6.3,
-            rocket_count=25,
-            neutral_count=50,
-            dinosaur_count=25,
+            phoenix_count=25,
+            salt_count=50,
+            lead_count=25,
         )
         await db_service.commit()
 
         assert snapshot.id is not None
         assert snapshot.total_companies_scored == 100
-        assert snapshot.rocket_count == 25
+        assert snapshot.phoenix_count == 25
 
     @pytest.mark.asyncio
     async def test_market_snapshot_with_metadata(self, db_service):
@@ -299,9 +298,9 @@ class TestMarketSnapshotPersistence:
             average_growth_score=7.0,
             average_financial_score=7.0,
             average_competitive_score=7.0,
-            rocket_count=15,
-            neutral_count=25,
-            dinosaur_count=10,
+            phoenix_count=15,
+            salt_count=25,
+            lead_count=10,
             market_metadata=metadata,
         )
         await db_service.commit()
@@ -317,9 +316,9 @@ class TestMarketSnapshotPersistence:
                 average_growth_score=6.0 + float(i) * 0.5,
                 average_financial_score=6.0,
                 average_competitive_score=6.0,
-                rocket_count=20,
-                neutral_count=50,
-                dinosaur_count=30,
+                phoenix_count=20,
+                salt_count=50,
+                lead_count=30,
             )
             await db_service.commit()
 
@@ -343,7 +342,7 @@ class TestTransactionManagement:
             financial_health_score=5.0,
             competitive_position_score=5.0,
             overall_score=5.0,
-            classification="Neutral",
+            classification="Salt",
         )
         await db_service.commit()
 
@@ -361,7 +360,7 @@ class TestTransactionManagement:
             financial_health_score=5.0,
             competitive_position_score=5.0,
             overall_score=5.0,
-            classification="Neutral",
+            classification="Salt",
         )
         await db_service.rollback()
 
@@ -375,7 +374,7 @@ class TestDataIntegrity:
     @pytest.mark.asyncio
     async def test_classification_values_preserved(self, db_service):
         """Verify that classification values are correctly stored and retrieved."""
-        classifications = ["Rocket", "Neutral", "Dinosaur"]
+        classifications = ["Phoenix", "Salt", "Lead"]
 
         for i, classification in enumerate(classifications):
             await db_service.save_scoring_record(
@@ -406,7 +405,7 @@ class TestDataIntegrity:
                 financial_health_score=score,
                 competitive_position_score=score,
                 overall_score=score,
-                classification="Neutral",
+                classification="Salt",
             )
             await db_service.commit()
 

@@ -1,14 +1,16 @@
 import os
+from unittest.mock import MagicMock
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
 
 os.environ.setdefault("GITHUB_TOKEN", "test-github-token-12345")
 
-from solstein.api.main import app
-from solstein.api.dependencies import get_current_user, get_repository
-from solstein.core.repositories import CompanyRepository
 from tests.factories import make_company
+
+from solstein.api.dependencies import get_current_user, get_repository
+from solstein.api.main import app
+from solstein.core.repositories import CompanyRepository
 
 
 @pytest.fixture

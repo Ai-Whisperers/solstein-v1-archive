@@ -11,7 +11,7 @@ import requests
 
 from ..domain.models import DataSourceType
 from .base_agent import AgentTaskResult, BaseDataGatheringAgent
-from .resilience import call_with_retry, CircuitBreaker, WEB_SEARCH_RETRY_CONFIG
+from .resilience import WEB_SEARCH_RETRY_CONFIG, CircuitBreaker, call_with_retry
 
 
 class WebSearchAgent(BaseDataGatheringAgent):

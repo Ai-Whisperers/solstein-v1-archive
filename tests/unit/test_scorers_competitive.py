@@ -1,9 +1,10 @@
 """Tests for CompetitivePositionScorer."""
 
 import pytest
+
 from solstein.analytics.scorers.competitive_position import CompetitivePositionScorer
-from solstein.domain.models import Company
 from solstein.core.scoring_config import ScoringSettings
+from solstein.domain.models import Company
 
 
 class TestCompetitivePositionScorer:

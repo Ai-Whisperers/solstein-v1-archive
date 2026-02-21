@@ -2,12 +2,17 @@
 Unit tests for SolStein exporters.
 """
 
-from pathlib import Path
 
 import pytest
 from openpyxl import load_workbook
 
-from solstein.domain.models import Company, FinancialMetric, CompanyTier, ThreatLevel, AIMaturity
+from solstein.domain.models import (
+    AIMaturity,
+    Company,
+    CompanyTier,
+    FinancialMetric,
+    ThreatLevel,
+)
 from solstein.exporters.excel_exporter import ExcelExporter, TemplateExporter
 
 
@@ -31,7 +36,7 @@ def sample_profiles():
                 funding_raised=20_000_000.0,
                 valuation=250_000_000.0,
                 employees=200,
-            )
+            ),
         ),
         Company(
             id="c2",
@@ -50,45 +55,49 @@ def sample_profiles():
                 funding_raised=2_000_000.0,
                 valuation=15_000_000.0,
                 employees=30,
-            )
+            ),
         ),
     ]
+
 
 class TestExcelExporter:
     def test_create_styles(self):
         exporter = ExcelExporter()
         styles = exporter._create_styles()
+        assert "title_font" in styles
         assert "header_font" in styles
         assert "data_fill_even" in styles
-        assert "positive_fill" in styles
+        assert "phoenix_fill" in styles
 
     def test_create_dashboard(self, sample_profiles, tmp_path):
-        output_file = tmp_path / "dashboard.xlsx"
+        output_file = tmp_path / "glyph_report.xlsx"
         exporter = ExcelExporter()
 
         exporter.create_dashboard(sample_profiles, output_file)
 
         assert output_file.exists()
-        
+
         # Verify content
         wb = load_workbook(output_file)
-        assert "Competitive Dashboard" in wb.sheetnames
-        ws = wb["Competitive Dashboard"]
+        expected_sheets = ["Executive Summary", "Market Rankings", "Financial Intelligence", "Tech & AI Maturity"]
+        for sheet in expected_sheets:
+            assert sheet in wb.sheetnames
+
+        ws_summary = wb["Executive Summary"]
+        # Banner check
+        assert "SOLSTEIN | EXECUTIVE SUMMARY" in ws_summary["A1"].value
         
-        # Metadata check
-        assert ws["A1"].value == "SolStein Competitive Intelligence Dashboard"
-        assert f"Companies Analyzed: {len(sample_profiles)}" in ws["A3"].value
-        
-        # Summary Table check
-        assert ws["A5"].value == "Company"
-        assert ws["H5"].value == "Growth Score"
-        
-        # Detail Analysis check
-        detail_header_row = 5 + len(sample_profiles) + 3
-        assert ws[f"A{detail_header_row}"].value == "Detailed Financial Analysis"
-        
+        # KPI check
+        assert "Total Portfolio Size" in str(ws_summary["A5"].value)
+        assert str(len(sample_profiles)) in str(ws_summary["B5"].value)
+
+        # Rankings check
+        ws_rankings = wb["Market Rankings"]
+        assert ws_rankings["B4"].value == "Company"
+        assert ws_rankings["B5"].value == "Alpha Corp"
+
         wb.close()
-        
+
     def test_create_dashboard_empty(self, tmp_path):
         output_file = tmp_path / "empty_dashboard.xlsx"
         exporter = ExcelExporter()
@@ -102,6 +111,6 @@ class TestTemplateExporter:
     def test_create_dashboard_not_implemented(self, sample_profiles, tmp_path):
         output_file = tmp_path / "template.xlsx"
         exporter = TemplateExporter()
-        
+
         with pytest.raises(NotImplementedError):
             exporter.create_dashboard(sample_profiles, output_file)

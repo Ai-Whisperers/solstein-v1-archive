@@ -53,18 +53,18 @@
 ## 🎯 The 7 Issues Roasted
 
 ### ❌ Issue 1: Nomenclature Schizophrenia
-**Problem:** Marketing says "Phoenix/Salt/Lead" but code says "Rocket/Dinosaur/Neutral"
-**Fix:** Phase 1 - Unified terminology everywhere
+**Problem:** Marketing says "Phoenix/Salt/Lead" but code used to say "Rocket/Dinosaur/Neutral"
+**Fix:** Phase 1 - Unified terminology everywhere (COMPLETED)
 **Impact:** Investor credibility, client clarity
 
 ### ❌ Issue 2: Fake Frontend Versions
-**Problem:** package.json claims Next.js 16.1.6 and React 19.2.3 (don't exist)
-**Fix:** Phase 1 - Update to realistic versions (Next.js 15, React 18)
+**Problem:** package.json claimed Next.js 16.1.6 and React 19.2.3 (don't exist)
+**Fix:** Phase 1 - Update to stable versions (Next.js 15, React 19) (COMPLETED)
 **Impact:** Dashboard won't build, security vulnerabilities
 
 ### ❌ Issue 3: Bloated Repository
 **Problem:** 46 directories, 4.8MB graveyard (SolStein_original), 3 dead UI templates
-**Fix:** Phase 1 - Delete 4.8MB+ of abandoned code
+**Fix:** Phase 1 - Archived legacy code into `graveyard/` (COMPLETED)
 **Impact:** Clarity, focus, repo health
 
 ### ❌ Issue 4: Abandoned Features

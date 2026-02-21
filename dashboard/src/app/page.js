@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { api } from "@/../lib/api";
 
 import { KPICards } from "@/components/KPICards";
 import { CompanyTable } from "@/components/CompanyTable";
@@ -12,31 +12,29 @@ export default function Dashboard() {
     const [companies, setCompanies] = useState([]);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         async function fetchCompanies() {
-            // Fetch 50 records primarily for the initial dashboard render
-            const { data, error } = await supabase
-                .from("companies")
-                .select("*")
-                .order("growth_score", { ascending: false })
-                .limit(50);
-
-            if (error) {
-                console.error("Error fetching companies:", error);
-            } else {
-                // Hydrate JSONB fields if they are strings. Supabase JS usually parses them automatically.
+            try {
+                setLoading(true);
+                const { data } = await api.get('/companies');
                 setCompanies(data || []);
+                setError(null);
+            } catch (err) {
+                console.error("Aura | Dashboard Fetch Failed:", err);
+                setError(err.message || "Failed to consult the Oracle.");
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         }
 
         fetchCompanies();
     }, []);
 
-    const rockets = companies.filter(c => c.classification === "Rocket");
-    const neutrals = companies.filter(c => c.classification === "Neutral");
-    const dinosaurs = companies.filter(c => c.classification === "Dinosaur");
+    const phoenixes = companies.filter(c => c.tier === "Phoenix" || c.classification === "Phoenix");
+    const salts = companies.filter(c => c.tier === "Salt" || c.classification === "Salt");
+    const leads = companies.filter(c => c.tier === "Lead" || c.classification === "Lead");
 
     return (
         <div>
@@ -74,21 +72,21 @@ export default function Dashboard() {
                     {/* Classification Distribution */}
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginTop: "32px" }}>
                         <div className="glass-card animate-in animate-in-delay-1" style={{ padding: "20px", textAlign: "center" }}>
-                            <p style={{ fontSize: "2.5rem", marginBottom: "4px" }}>🚀</p>
-                            <p className="gold-text" style={{ fontSize: "2rem", fontWeight: 700 }}>{rockets.length}</p>
-                            <p style={{ color: "var(--solstein-text-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>Rockets</p>
+                            <p style={{ fontSize: "2.5rem", marginBottom: "4px" }}>🔥</p>
+                            <p className="gold-text" style={{ fontSize: "2rem", fontWeight: 700 }}>{phoenixes.length}</p>
+                            <p style={{ color: "var(--solstein-text-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>Phoenixes</p>
                             <p style={{ color: "var(--solstein-text-muted)", fontSize: "0.7rem", marginTop: "4px" }}>Act now. High-growth targets.</p>
                         </div>
                         <div className="glass-card animate-in animate-in-delay-2" style={{ padding: "20px", textAlign: "center" }}>
-                            <p style={{ fontSize: "2.5rem", marginBottom: "4px" }}>⚖️</p>
-                            <p className="gold-text" style={{ fontSize: "2rem", fontWeight: 700 }}>{neutrals.length}</p>
-                            <p style={{ color: "var(--solstein-text-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>Neutrals</p>
+                            <p style={{ fontSize: "2.5rem", marginBottom: "4px" }}>🧂</p>
+                            <p className="gold-text" style={{ fontSize: "2rem", fontWeight: 700 }}>{salts.length}</p>
+                            <p style={{ color: "var(--solstein-text-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>Salts</p>
                             <p style={{ color: "var(--solstein-text-muted)", fontSize: "0.7rem", marginTop: "4px" }}>Watch for directional signals.</p>
                         </div>
                         <div className="glass-card animate-in animate-in-delay-3" style={{ padding: "20px", textAlign: "center" }}>
-                            <p style={{ fontSize: "2.5rem", marginBottom: "4px" }}>🦕</p>
-                            <p className="gold-text" style={{ fontSize: "2rem", fontWeight: 700 }}>{dinosaurs.length}</p>
-                            <p style={{ color: "var(--solstein-text-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>Dinosaurs</p>
+                            <p style={{ fontSize: "2.5rem", marginBottom: "4px" }}>⚖️</p>
+                            <p className="gold-text" style={{ fontSize: "2rem", fontWeight: 700 }}>{leads.length}</p>
+                            <p style={{ color: "var(--solstein-text-muted)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>Leads</p>
                             <p style={{ color: "var(--solstein-text-muted)", fontSize: "0.7rem", marginTop: "4px" }}>Assess the people. Hidden diamonds?</p>
                         </div>
                     </div>

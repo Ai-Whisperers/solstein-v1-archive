@@ -5,7 +5,6 @@ Handles environment variables, configuration files, and settings.
 """
 
 import os
-import sys
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -176,6 +175,10 @@ class Settings(BaseSettings):
     news_api_key: str | None = Field(default=None)
     patentsview_api_key: str | None = Field(default=None)
 
+    # LLM APIs
+    groq_api_key: str | None = Field(default=None)
+    fireworks_api_key: str | None = Field(default=None)
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -277,37 +280,15 @@ def get_settings() -> "Settings":
 
 def configure_logging(settings: Settings) -> None:
     """Configure logging based on settings."""
-    from loguru import logger
+    from .utils.logging import setup_logging
 
-    # Remove default handler
-    logger.remove()
-
-    # Add console handler
-    logger.add(
-        sys.stderr,
-        format=(
-            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-            "<level>{level: <8}</level> | "
-            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
-            "<level>{message}</level>"
-        ),
+    setup_logging(
         level=settings.logging.level,
-        colorize=True,
+        json_format=settings.logging.format.lower() == "json",
+        log_file=settings.logging.file_path,
+        rotation=settings.logging.rotation,
+        retention=settings.logging.retention,
     )
-
-    # Add file handler if configured
-    if settings.logging.file_path:
-        settings.logging.file_path.parent.mkdir(parents=True, exist_ok=True)
-        logger.add(
-            str(settings.logging.file_path),
-            rotation=settings.logging.rotation,
-            retention=settings.logging.retention,
-            level=settings.logging.level,
-            format=settings.logging.format,
-            compression="zip",
-        )
-
-    logger.info(f"Logging configured at level {settings.logging.level}")
 
 
 # Template for .env file

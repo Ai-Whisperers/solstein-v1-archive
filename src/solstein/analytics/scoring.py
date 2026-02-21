@@ -17,20 +17,20 @@ from ..domain.models import (
     ScoreComponent,
     ScoringExplanation,
 )
-from .scorers.growth_momentum import GrowthMomentumScorer
-from .scorers.financial_health import FinancialHealthScorer
 from .scorers.competitive_position import CompetitivePositionScorer
+from .scorers.financial_health import FinancialHealthScorer
+from .scorers.growth_momentum import GrowthMomentumScorer
 
 
 def classify_company(growth_score: float | None) -> str:
     """Central logic to classify a company based on its growth score."""
     if growth_score is None:
-        return "Neutral"
+        return "Salt"
     if growth_score >= 7.0:
-        return "Rocket"
+        return "Phoenix"
     elif growth_score <= 4.0:
-        return "Dinosaur"
-    return "Neutral"
+        return "Lead"
+    return "Salt"
 
 
 class GrowthScorer:
@@ -75,7 +75,9 @@ class GrowthScorer:
         else:
             profile.composite_score = growth_score
 
-        profile.classification = classify_company(profile.growth_score)
+        # Preserve classification from JSON if it exists, otherwise calculate
+        if profile.classification is None:
+            profile.classification = classify_company(profile.growth_score)
 
         profile.scoring_breakdown["growth"] = growth_expl
         profile.scoring_breakdown["financial"] = fin_expl

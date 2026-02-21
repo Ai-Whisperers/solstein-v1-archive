@@ -1,17 +1,17 @@
-import pytest
 from unittest.mock import patch
+
 from solstein.analytics.scoring import (
-    classify_company,
+    CompetitiveOverlapCalculator,
     GrowthScorer,
     MarketAnalyzer,
-    CompetitiveOverlapCalculator,
+    classify_company,
 )
 from solstein.domain.models import (
-    Company,
-    FinancialMetric,
     AIMaturity,
-    ThreatLevel,
+    Company,
     CompanyTier,
+    FinancialMetric,
+    ThreatLevel,
 )
 
 
@@ -35,7 +35,7 @@ def make_company(**kwargs):
 
 
 def test_classify_company_none():
-    assert classify_company(None) == "Neutral"
+    assert classify_company(None) == "Salt"
 
 
 def test_growth_scorer_fallback():

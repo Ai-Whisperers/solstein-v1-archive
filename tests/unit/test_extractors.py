@@ -2,12 +2,14 @@
 Tests for Markdown Extractor.
 """
 
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-from solstein.extractors.markdown_extractor import MarkdownExtractor, BatchExtractor
-from solstein.domain.models import AIMaturity, ThreatLevel, CompanyTier, ConfidenceLevel
+import pytest
+
+from solstein.domain.models import AIMaturity, CompanyTier, ThreatLevel
+from solstein.extractors.markdown_extractor import BatchExtractor, MarkdownExtractor
+
 
 @pytest.fixture
 def sample_markdown():
@@ -31,10 +33,11 @@ Tech Stack: Python, React, AWS
 (Estimated) for Valuation
 """
 
+
 def test_markdown_extractor_parse_content(sample_markdown):
     extractor = MarkdownExtractor()
     data = extractor._parse_content(sample_markdown, "test.md")
-    
+
     assert data["name"] == "Acme Corp"
     # description logic is flaky against raw string literals in tests
     assert data["revenue"] == "$100M"
@@ -49,11 +52,12 @@ def test_markdown_extractor_parse_content(sample_markdown):
     assert "US" in data["geographic_presence"]
     assert "Python" in data["tech_stack"]
 
+
 def test_markdown_extractor_to_profile(sample_markdown):
     extractor = MarkdownExtractor()
     data = extractor._parse_content(sample_markdown, "test.md")
     profile = extractor.to_company_profile(data)
-    
+
     assert profile.name == "Acme Corp"
     assert profile.financials.revenue == 100_000_000.0
     assert profile.financials.growth_rate == 20.0
@@ -64,27 +68,30 @@ def test_markdown_extractor_to_profile(sample_markdown):
     assert profile.threat_level == ThreatLevel.HIGH
     assert profile.tier == CompanyTier.TIER_1
 
+
 def test_markdown_extractor_extract_from_file(tmp_path, sample_markdown):
     test_file = tmp_path / "acme.md"
     test_file.write_text(sample_markdown)
-    
+
     extractor = MarkdownExtractor()
     data = extractor.extract_from_file(test_file)
     assert data is not None
     assert data["name"] == "Acme Corp"
-    
+
+
 def test_markdown_extractor_extract_file_fail(tmp_path):
     test_file = tmp_path / "missing.md"
     extractor = MarkdownExtractor()
     data = extractor.extract_from_file(test_file)
     assert data is None
 
+
 @patch("solstein.extractors.markdown_extractor.MarkdownExtractor")
 def test_batch_extractor_extract_directory(MockExtractor, tmp_path):
     # Setup mock
     mock_extractor = MockExtractor.return_value
     mock_extractor.extract_from_file.return_value = {"name": "Test"}
-    
+
     mock_profile = MagicMock()
     mock_profile.name = "Test"
     mock_extractor.to_company_profile.return_value = mock_profile
@@ -97,14 +104,16 @@ def test_batch_extractor_extract_directory(MockExtractor, tmp_path):
 
     batch = BatchExtractor(extractor=mock_extractor)
     profiles = batch.extract_directory(dir_path)
-    
+
     assert len(profiles) == 2
     assert mock_extractor.extract_from_file.call_count == 2
-    
+
+
 def test_batch_extractor_extract_directory_missing():
     batch = BatchExtractor()
     profiles = batch.extract_directory(Path("/nonexistent/directory"))
     assert len(profiles) == 0
+
 
 def test_parse_numeric():
     extractor = MarkdownExtractor()
@@ -116,17 +125,20 @@ def test_parse_numeric():
     assert extractor._parse_numeric("invalid") is None
     assert extractor._parse_numeric(None) is None
 
+
 def test_parse_percentage():
     extractor = MarkdownExtractor()
     assert extractor._parse_percentage("25.5%") == 25.5
     assert extractor._parse_percentage("invalid") is None
     assert extractor._parse_percentage(None) is None
 
+
 def test_parse_ai_maturity():
     extractor = MarkdownExtractor()
     assert extractor._parse_ai_maturity("Very Strong") == AIMaturity.VERY_STRONG
     assert extractor._parse_ai_maturity("moderate") == AIMaturity.MODERATE
     assert extractor._parse_ai_maturity("unknown") == AIMaturity.NONE
+
 
 def test_parse_threat_level():
     extractor = MarkdownExtractor()
@@ -135,9 +147,9 @@ def test_parse_threat_level():
     assert extractor._parse_threat_level("Low") == ThreatLevel.LOW
     assert extractor._parse_threat_level("unknown") == ThreatLevel.MEDIUM
 
+
 def test_parse_tier():
     extractor = MarkdownExtractor()
     assert extractor._parse_tier("Tier 2") == CompanyTier.TIER_2
     assert extractor._parse_tier("Tier 4") == CompanyTier.TIER_4
     assert extractor._parse_tier("unknown") == CompanyTier.TIER_3
-

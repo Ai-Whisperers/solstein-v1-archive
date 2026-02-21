@@ -22,7 +22,7 @@ async def seed_supabase() -> None:
         logger.info(f"Found {len(companies)} companies in JSON source.")
 
         for i, company in enumerate(companies):
-            logger.info(f"Processing company {i+1}/{len(companies)}: {company.name}")
+            logger.info(f"Processing company {i + 1}/{len(companies)}: {company.name}")
 
             # Re-calculate scores to ensure they are fresh and include composite score
             scored_company = scorer.calculate_scores(company)
@@ -35,6 +35,7 @@ async def seed_supabase() -> None:
     except Exception as e:
         logger.error(f"Seeding failed: {e}")
         raise
+
 
 if __name__ == "__main__":
     asyncio.run(seed_supabase())

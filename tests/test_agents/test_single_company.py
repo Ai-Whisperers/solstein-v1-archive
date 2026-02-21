@@ -6,7 +6,6 @@ and compares results to the manual analysis in the competitor data.
 
 import asyncio
 import os
-from pathlib import Path
 
 import pytest
 

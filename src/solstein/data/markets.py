@@ -11,12 +11,9 @@ Comprehensive market data covering:
 
 from datetime import date, datetime
 from enum import Enum
-from typing import Any
-
-import pandas as pd
-from pydantic import BaseModel
 
 from loguru import logger
+from pydantic import BaseModel
 
 
 class Currency(str, Enum):

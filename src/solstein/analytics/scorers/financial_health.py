@@ -1,11 +1,11 @@
 """Financial health scorer: revenue scale, profitability, efficiency, funding cushion."""
 
-from solstein.domain.models import (
+from ...core.scoring_config import ScoringSettings
+from ...domain.models import (
     FinancialMetric,
     ScoreComponent,
     ScoringExplanation,
 )
-from solstein.core.scoring_config import ScoringSettings
 
 
 class FinancialHealthScorer:

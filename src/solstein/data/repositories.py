@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -25,6 +24,44 @@ class JsonFileRepository(CompanyRepository):
         """Helper to ensure domain entity is returned (currently redundant for JSON loader but good for consistency)."""  # noqa: E501
         return raw_company
 
+    async def get_all_llm_filtered(
+        self,
+        criteria: str,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> tuple[list[Company], dict[str, Any]]:
+        """Filter companies using natural language criteria via LLM.
+
+        Args:
+            criteria: Natural language filter criteria (e.g., "tech companies", "fast growing SaaS")
+            limit: Maximum number of results
+            offset: Pagination offset
+
+        Returns:
+            Tuple of (filtered companies, filter metadata)
+        """
+        from ..analytics.llm_filter import llm_filter
+
+        all_companies = self._loader.load_companies()
+        matched_companies = []
+        filter_metadata = {
+            "criteria": criteria,
+            "total_checked": len(all_companies),
+            "reasoning": {},
+        }
+
+        for company in all_companies:
+            matches, reasoning = await llm_filter.matches_criteria(company, criteria)
+            filter_metadata["reasoning"][company.id] = reasoning
+            if matches:
+                matched_companies.append(company)
+
+        filter_metadata["total_matched"] = len(matched_companies)
+
+        return matched_companies[
+            offset : (offset + limit) if limit else None
+        ], filter_metadata
+
     def get_all(
         self,
         limit: int | None = None,
@@ -41,18 +78,22 @@ class JsonFileRepository(CompanyRepository):
                 match = True
                 if filters.tier and company.tier != filters.tier:
                     match = False
-                if (
-                    filters.industry
-                    and company.industry
-                    and filters.industry.lower() not in company.industry.lower()
-                ):
-                    match = False
+                if filters.industry and company.industry:
+                    # Check if any word in company.industry matches filters.industry
+                    company_words = set(company.industry.lower().split())
+                    filter_words = set(filters.industry.lower().split())
+                    # Match if ANY word matches (e.g., "energy" in "Energy Software")
+                    if not company_words.intersection(filter_words):
+                        match = False
                 if filters.min_revenue and (
                     not company.financials.revenue
                     or company.financials.revenue < filters.min_revenue
                 ):
                     match = False
-                if filters.classification and company.classification != filters.classification:  # noqa: E501
+                if (
+                    filters.classification
+                    and company.classification != filters.classification
+                ):  # noqa: E501
                     match = False
 
                 if match:
@@ -99,6 +140,7 @@ class SupabaseRepository(CompanyRepository):
 
     def __init__(self) -> None:
         from ..core.supabase_client import get_supabase
+
         self.client = get_supabase()
         self.table_name = "companies"
 
@@ -109,9 +151,16 @@ class SupabaseRepository(CompanyRepository):
         # Combine flat columns and JSONB legacy data
         fin_data = data.pop("financials", {}) or {}
         if isinstance(fin_data, str):
-            fin_data = {} # Failsafe
+            fin_data = {}  # Failsafe
 
-        for key in ["revenue", "growth_rate", "profit_margin", "valuation", "employees", "funding_raised"]:  # noqa: E501
+        for key in [
+            "revenue",
+            "growth_rate",
+            "profit_margin",
+            "valuation",
+            "employees",
+            "funding_raised",
+        ]:  # noqa: E501
             if key in data:
                 val = data.pop(key)
                 if val is not None:
@@ -125,7 +174,14 @@ class SupabaseRepository(CompanyRepository):
 
         # Extract financials to flat competitive columns for Supabase
         fin_data = data.get("financials", {})
-        for key in ["revenue", "growth_rate", "profit_margin", "valuation", "employees", "funding_raised"]:  # noqa: E501
+        for key in [
+            "revenue",
+            "growth_rate",
+            "profit_margin",
+            "valuation",
+            "employees",
+            "funding_raised",
+        ]:  # noqa: E501
             if key in fin_data:
                 data[key] = fin_data[key]
 
@@ -150,11 +206,13 @@ class SupabaseRepository(CompanyRepository):
             if isinstance(obj, datetime):
                 return obj.isoformat()
             from enum import Enum
+
             if isinstance(obj, Enum):
                 return obj.value
             return obj
 
         from typing import cast
+
         return cast("dict[str, Any]", json_safe(data))
 
     def get_all(
@@ -175,7 +233,9 @@ class SupabaseRepository(CompanyRepository):
                 query = query.eq("classification", filters.classification)
             if filters.min_revenue:
                 # Proper cast for JSONB field
-                query = query.filter("financials->>revenue", "gte", str(filters.min_revenue))  # noqa: E501
+                query = query.filter(
+                    "financials->>revenue", "gte", str(filters.min_revenue)
+                )  # noqa: E501
             if filters.min_growth_score:
                 query = query.gte("growth_score", filters.min_growth_score)
             if filters.max_growth_score:
@@ -185,18 +245,27 @@ class SupabaseRepository(CompanyRepository):
         if limit is not None:
             query = query.range(offset, offset + limit - 1)
         else:
-            query = query.range(offset, offset + 1000) # Default safety  # noqa: E501
+            query = query.range(offset, offset + 1000)  # Default safety  # noqa: E501
 
         response = query.execute()
         from typing import cast
-        return [self._to_domain(cast("dict[str, Any]", record)) for record in response.data]  # noqa: E501
+
+        return [
+            self._to_domain(cast("dict[str, Any]", record)) for record in response.data
+        ]  # noqa: E501
 
     def get_by_id(self, company_id: str) -> Company | None:
         """Retrieve a specific company by ID."""
-        response = self.client.table(self.table_name).select("*").eq("id", company_id).execute()  # noqa: E501
+        response = (
+            self.client.table(self.table_name)
+            .select("*")
+            .eq("id", company_id)
+            .execute()
+        )  # noqa: E501
         if not response.data:
             return None
         from typing import cast
+
         return self._to_domain(cast("dict[str, Any]", response.data[0]))
 
     def save(self, company: Company) -> Company:
@@ -208,12 +277,22 @@ class SupabaseRepository(CompanyRepository):
 
     def delete(self, company_id: str) -> bool:
         """Delete a company from Supabase."""
-        response = self.client.table(self.table_name).delete().eq("id", company_id).execute()  # noqa: E501
+        response = (
+            self.client.table(self.table_name).delete().eq("id", company_id).execute()
+        )  # noqa: E501
         logger.info(f"Deleted company {company_id} from Supabase")
         return len(response.data) > 0
 
     def search(self, query: str, field: str = "name") -> list[Company]:
         """Search companies using Supabase ilike."""
-        response = self.client.table(self.table_name).select("*").ilike(field, f"%{query}%").execute()  # noqa: E501
+        response = (
+            self.client.table(self.table_name)
+            .select("*")
+            .ilike(field, f"%{query}%")
+            .execute()
+        )  # noqa: E501
         from typing import cast
-        return [self._to_domain(cast("dict[str, Any]", record)) for record in response.data]  # noqa: E501
+
+        return [
+            self._to_domain(cast("dict[str, Any]", record)) for record in response.data
+        ]  # noqa: E501

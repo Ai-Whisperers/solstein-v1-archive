@@ -3,9 +3,6 @@
 Tests the full pipeline: coordinator + all agents + comparison to manual data.
 """
 
-import asyncio
-import json
-import os
 from pathlib import Path
 
 import pytest
@@ -115,7 +112,7 @@ async def test_all_29_companies_quick(coordinator, manual_data):
         for r in results.values()
     )
 
-    print(f"\nAggregate Results:")
+    print("\nAggregate Results:")
     print(f"  Total sources gathered: {total_sources}")
     print(f"  Total facts extracted: {total_facts}")
     print(f"  Average sources per company: {total_sources / len(results):.1f}")
