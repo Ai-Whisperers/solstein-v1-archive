@@ -1,0 +1,89 @@
+"""Competitive position scorer: market tier, AI maturity, SaaS adoption, geographic footprint."""
+
+from solstein.domain.models import Company, ScoreComponent, ScoringExplanation
+from solstein.core.scoring_config import ScoringSettings
+
+
+class CompetitivePositionScorer:
+    """Score company competitive position (0-10)."""
+
+    def __init__(self, config: ScoringSettings | None = None):
+        self.config = config or ScoringSettings()
+
+    def score(self, profile: Company) -> tuple[float, ScoringExplanation]:
+        """Calculate competitive position score (0-10) with explanation."""
+        cfg = self.config.competitive
+        score = cfg.base_score
+        explanation = ScoringExplanation(base_score=score)
+
+        tier_adj = cfg.tier_scores.get(profile.tier, 0.0)
+        score += tier_adj
+        explanation.components.append(
+            ScoreComponent(
+                name="Market Tier",
+                value=tier_adj,
+                formula=f"tier({profile.tier})",
+                reasoning=f"Positioned as a {profile.tier} player in the market.",
+            )
+        )
+
+        ai_adj = cfg.ai_maturity_scores.get(profile.ai_maturity, 0.0)
+        score += ai_adj
+        explanation.components.append(
+            ScoreComponent(
+                name="AI Maturity",
+                value=ai_adj,
+                formula=f"ai_maturity({profile.ai_maturity})",
+                reasoning=f"Technological advantage: AI maturity is {profile.ai_maturity}.",
+            )
+        )
+
+        saas_adj = (profile.saas_maturity - 1) / 9 * 2.0
+        score += saas_adj
+        explanation.components.append(
+            ScoreComponent(
+                name="SaaS Maturity",
+                value=saas_adj,
+                formula=f"({profile.saas_maturity}-1)/9 * 2.0",
+                reasoning=f"SaaS transformation index: {profile.saas_maturity}/10.",
+            )
+        )
+
+        if len(profile.geographic_presence) > cfg.geo_global_count:
+            adj = cfg.geo_global_bonus
+            score += adj
+            explanation.components.append(
+                ScoreComponent(
+                    name="Geographic Footprint",
+                    value=adj,
+                    formula=f"regions({len(profile.geographic_presence)}) > {cfg.geo_global_count}",
+                    reasoning="Global presence identified.",
+                )
+            )
+        elif len(profile.geographic_presence) > cfg.geo_regional_count:
+            adj = cfg.geo_regional_bonus
+            score += adj
+            explanation.components.append(
+                ScoreComponent(
+                    name="Geographic Footprint",
+                    value=adj,
+                    formula=f"regions({len(profile.geographic_presence)}) > {cfg.geo_regional_count}",
+                    reasoning="Regional presence identified.",
+                )
+            )
+
+        if len(profile.tech_stack) > cfg.tech_diverse_count:
+            adj = cfg.tech_diverse_bonus
+            score += adj
+            explanation.components.append(
+                ScoreComponent(
+                    name="Stack Diversity",
+                    value=adj,
+                    formula=f"tech_count({len(profile.tech_stack)}) > {cfg.tech_diverse_count}",
+                    reasoning="Diverse technical capabilities identified.",
+                )
+            )
+
+        final_score = max(0.0, min(score, 10.0))
+        explanation.final_score = final_score
+        return final_score, explanation
