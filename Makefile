@@ -1,41 +1,59 @@
-.PHONY: install run test lint docker-build docker-run clean
+# Solstein Command Center
+
+.PHONY: install run dashboard test lint format docs-serve check-all clean
 
 # Variables
 PYTHON = python3
-VENV = venv
+VENV = .venv
 BIN = $(VENV)/bin
 
 # Default target
 all: install
 
-# Install dependencies
+# Install dependencies for both Backend and Dashboard
 install:
 	$(PYTHON) -m venv $(VENV)
 	$(BIN)/pip install -e .[dev]
+	cd dashboard && npm install
 
-# Run API locally
+# Run API locally (FastAPI + Aura Logging)
 run:
 	$(BIN)/uvicorn solstein.api.main:app --reload
 
-# Run tests
+# Run Dashboard locally (Next.js Sunstone Interface)
+dashboard:
+	cd dashboard && npm run dev
+
+# Run all tests (Unit, Integration, Data Quality)
 test:
-	$(BIN)/pytest
+	$(BIN)/pytest tests/unit tests/integration tests/data_quality --cov=src
 
-# Lint code
+# Combined Linting (Python + JS)
 lint:
-	$(BIN)/ruff check .
-	$(BIN)/mypy .
+	$(BIN)/ruff check src tests
+	$(BIN)/mypy src
+	cd dashboard && npm run lint
 
-# Build Docker image
-docker-build:
-	docker build -f docker/Dockerfile -t solstein-api .
+# Combined Formatting
+format:
+	$(BIN)/ruff format src tests
+	$(BIN)/ruff check --fix src tests
 
-# Run Docker container
-docker-run:
-	docker run -p 8000:8000 solstein-api
+# Serve Documentation (Ancient Grimoire Style)
+docs-serve:
+	$(BIN)/mkdocs serve
 
-# Clean build artifacts
+# Unified Quality Pipeline (The Craft Layer)
+check-all: lint test
+	@echo "✨ Solstein | Repository Integrity Verified."
+
+# Clean all build artifacts and temporary files
 clean:
 	rm -rf $(VENV)
+	rm -rf dashboard/.next
+	rm -rf dashboard/node_modules
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
+	find . -type d -name ".pytest_cache" -exec rm -rf {} +
+	find . -type d -name ".ruff_cache" -exec rm -rf {} +
+	find . -type f -name ".coverage" -delete

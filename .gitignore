@@ -156,3 +156,15 @@ data/output/logs/
 *.xlsx
 !data/input/
 !data/input/competitor_data.json
+
+# Reports and temporary artifacts
+reports/
+*.log
+*.tmp
+
+# Agent & IDE specifics
+.antigravity/
+.claude/
+.gemini/
+.cursor/run.json
+.cursor/state.json
