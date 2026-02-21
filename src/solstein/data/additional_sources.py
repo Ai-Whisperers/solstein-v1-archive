@@ -105,11 +105,12 @@ class AdditionalDataSources:
         self,
         news_api_key: str | None = None,
         crunchbase_key: str | None = None,
-        patentscope_key: str | None = None,
+        patentsview_api_key: str | None = None,
     ):
         self.news_api_key = news_api_key
         self.crunchbase_key = crunchbase_key
-        self.patentscope_key = patentscope_key
+        self.patentsview_api_key = patentsview_api_key
+        self._patentsview_base_url = "https://search.patentsview.org/api/v1"
 
     # ====================
     # NEWS API

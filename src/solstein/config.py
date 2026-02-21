@@ -172,6 +172,10 @@ class Settings(BaseSettings):
     openai_api_key: str | None = Field(default=None)
     perplexity_api_key: str | None = Field(default=None)
 
+    # News & Patent APIs
+    news_api_key: str | None = Field(default=None)
+    patentsview_api_key: str | None = Field(default=None)
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
