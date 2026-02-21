@@ -15,6 +15,14 @@ from typing import Any
 
 from loguru import logger
 
+from .exceptions import (
+    SolsteinError,
+    DataLoadError,
+    ValidationError,
+    LLMAvailabilityError,
+)
+from .constants import ScoringWeights, Thresholds
+
 # Configure logging
 logger.remove()
 logger.add(
@@ -32,17 +40,15 @@ logger.add(
 # Intercept standard logging
 class InterceptHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
-        # Get corresponding Loguru level if it exists
         level: str | int
         try:
             level = logger.level(record.levelname).name
         except ValueError:
             level = record.levelno
 
-        # Find caller from where originated the logged message
         frame: Any = logging.currentframe()
         depth = 2
-        while frame and frame.f_code.co_filename == logging.__file__:  # noqa: E501
+        while frame and frame.f_code.co_filename == logging.__file__:
             frame = frame.f_back
             depth += 1
 
@@ -52,3 +58,19 @@ class InterceptHandler(logging.Handler):
 
 
 logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
+
+
+__all__ = [
+    # Version
+    "__version__",
+    # Exceptions
+    "SolsteinError",
+    "DataLoadError",
+    "ValidationError",
+    "LLMAvailabilityError",
+    # Constants
+    "ScoringWeights",
+    "Thresholds",
+    # Legacy exports for backward compatibility
+    "logger",
+]
