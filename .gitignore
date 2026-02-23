@@ -159,6 +159,7 @@ data/output/logs/
 
 # Reports and temporary artifacts
 reports/
+coverage_report.txt
 *.log
 *.tmp
 
@@ -168,3 +169,9 @@ reports/
 .gemini/
 .cursor/run.json
 .cursor/state.json
+
+# OpenCode/Claude MCP local overrides
+.mcp.local.json
+
+# Local Sisyphus work area
+.sisyphus/
