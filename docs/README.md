@@ -26,6 +26,7 @@ Navigate using the tabs above.
 | ⚔️ [Full Proposal](PITCH/full-proposal.md) | Deal teams | The five incantations, the proof, the commercial structure |
 | ⚔️ [Case Study](PITCH/case-study.md) | Skeptics | 29 companies, 3 days, full classification — live cast |
 | ⚙️ [Developer Guide](guides/developer.md) | Engineers | Setup, testing, code structure, contribution patterns |
+| ⚙️ [OpenCode Tooling](guides/opencode-tooling.md) | Engineers | MCP setup for OpenCode-compatible clients |
 | ⚙️ [API Reference](api/reference.md) | Integrators | All REST endpoints, schemas, and error codes |
 | 🏛️ [Decision Records](architecture/decisions.md) | Architects | Why FastAPI, Celery, JSON files, and the 4-layer test pyramid |
 

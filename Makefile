@@ -1,6 +1,6 @@
 # Solstein Command Center
 
-.PHONY: install run dashboard test lint format docs-serve check-all clean
+.PHONY: install run dashboard test lint format docs-serve check-all mcp-check clean
 
 # Variables
 PYTHON = python3
@@ -46,6 +46,11 @@ docs-serve:
 # Unified Quality Pipeline (The Craft Layer)
 check-all: lint test
 	@echo "✨ Solstein | Repository Integrity Verified."
+
+# OpenCode MCP health checks
+mcp-check:
+	./scripts/opencode-mcp-doctor.sh
+	./scripts/opencode-mcp-smoke-test.sh
 
 # Clean all build artifacts and temporary files
 clean:
