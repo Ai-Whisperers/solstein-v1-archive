@@ -28,9 +28,7 @@ class DrillDownService:
         else:
             self._audit_trails[audit_trail.company_id] = audit_trail
 
-    async def get_audit_trail(
-        self, company_id: str
-    ) -> CompanyAnalysisAuditTrail | None:
+    async def get_audit_trail(self, company_id: str) -> CompanyAnalysisAuditTrail | None:
         """Retrieve an audit trail for a company."""
         if self.db_service:
             record = await self.db_service.get_audit_trail(company_id)
@@ -43,9 +41,7 @@ class DrillDownService:
                 gathering_batch_id=record.gathering_batch_id,
                 company_name=record.company_name,
                 raw_data=RawDataRecord(**record.raw_data) if record.raw_data else None,
-                aggregated_facts=AggregatedDataRecord(**record.aggregated_facts)
-                if record.aggregated_facts
-                else None,
+                aggregated_facts=AggregatedDataRecord(**record.aggregated_facts) if record.aggregated_facts else None,
                 extracted_signals=SignalExtractionRecord(**record.extracted_signals)
                 if record.extracted_signals
                 else None,
@@ -72,22 +68,14 @@ class DrillDownService:
             return None
         return audit_trail.extracted_signals.signals
 
-    async def get_facts(
-        self, company_id: str, min_confidence: float = 0.0
-    ) -> list | None:
+    async def get_facts(self, company_id: str, min_confidence: float = 0.0) -> list | None:
         """Get aggregated facts for a company, filtered by confidence."""
         audit_trail = await self.get_audit_trail(company_id)
         if not audit_trail or not audit_trail.aggregated_facts:
             return None
-        return [
-            f
-            for f in audit_trail.aggregated_facts.facts
-            if f.confidence >= min_confidence
-        ]
+        return [f for f in audit_trail.aggregated_facts.facts if f.confidence >= min_confidence]
 
-    async def get_sources(
-        self, company_id: str, fact_type: str | None = None
-    ) -> list | None:
+    async def get_sources(self, company_id: str, fact_type: str | None = None) -> list | None:
         """Get raw sources for a company, optionally filtered by fact type."""
         audit_trail = await self.get_audit_trail(company_id)
         if not audit_trail or not audit_trail.raw_data:
@@ -123,15 +111,11 @@ class DrillDownService:
                     "retrieval_timestamp": source.retrieval_timestamp,
                     "raw_content": source.raw_content,
                     "metadata": source.metadata,
-                    "facts": source.metadata.get("facts", [])
-                    if source.metadata
-                    else [],
+                    "facts": source.metadata.get("facts", []) if source.metadata else [],
                 }
         return None
 
-    async def get_fact_details(
-        self, company_id: str, fact_type: str, value: str
-    ) -> dict | None:
+    async def get_fact_details(self, company_id: str, fact_type: str, value: str) -> dict | None:
         """Get details about a specific aggregated fact."""
         audit_trail = await self.get_audit_trail(company_id)
         if not audit_trail or not audit_trail.aggregated_facts:
@@ -175,13 +159,9 @@ class DrillDownService:
         return {
             "completeness": audit_trail.data_completeness,
             "average_confidence": (
-                audit_trail.aggregated_facts.average_confidence
-                if audit_trail.aggregated_facts
-                else 0.0
+                audit_trail.aggregated_facts.average_confidence if audit_trail.aggregated_facts else 0.0
             ),
-            "sources_count": len(audit_trail.raw_data.sources)
-            if audit_trail.raw_data
-            else 0,
+            "sources_count": len(audit_trail.raw_data.sources) if audit_trail.raw_data else 0,
             "confidence_level": audit_trail.confidence_level,
             "coverage_gaps": getattr(audit_trail, "coverage_gaps", []),
         }

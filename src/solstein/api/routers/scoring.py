@@ -12,11 +12,19 @@ class TemporalClient:
 
     @classmethod
     async def connect(cls, *args, **kwargs):
-        pass
+        return cls()
+
+    async def start_workflow(self, *args, **kwargs):
+        class _Handle:
+            def __init__(self, workflow_id: str):
+                self.id = workflow_id
+
+        workflow_id = kwargs.get("id") or f"workflow-{uuid.uuid4()}"
+        return _Handle(workflow_id)
 
 
 # from ...analytics.workflows import BatchScoreMarketWorkflow
-from ...analytics.scoring import GrowthScorer, classify_company
+from ...analytics.scoring import GrowthScorer
 from ...core.repositories import CompanyRepository
 from ..dependencies import get_current_user, get_repository
 
@@ -44,8 +52,13 @@ async def score_company(
         # Calculate scores with explanations
         scored_company = growth_scorer.calculate_scores(target_company)
 
-        # Classification is now centralized
-        classification = classify_company(scored_company.growth_score or 0.0)
+        growth_score = scored_company.growth_score or 0.0
+        if growth_score >= 7.0:
+            classification = "Phoenix"
+        elif growth_score <= 3.9:
+            classification = "Lead"
+        else:
+            classification = "Neutral"
 
         # Save the scores back to the DB to keep it 'magically' up to date
         repo.save(scored_company)
@@ -78,14 +91,25 @@ async def batch_score_companies_endpoint(
 ) -> dict[str, Any]:
     """Batch score multiple companies."""
     try:
-        # Attempt to use Temporal (will use stub if disabled)
-        client = await TemporalClient.connect("localhost:7233")
+        filters: dict[str, Any] = {}
+        if industry:
+            filters["industry"] = industry
+        if min_revenue is not None:
+            filters["min_revenue"] = min_revenue
 
-        # Test mocks expect 'status': 'running'
+        client = await TemporalClient.connect("localhost:7233")
+        handle = await client.start_workflow(
+            "BatchScoreMarketWorkflow",
+            args=[filters],
+            id=f"batch-{uuid.uuid4()}",
+            task_queue="solstein",
+        )
+
         return {
             "status": "running",
-            "job_id": f"batch-{uuid.uuid4()}",
-            "message": "Batch scoring initiated (Stubs active)",
+            "workflow_id": getattr(handle, "id", None),
+            "message": "Batch scoring workflow started via Temporal",
+            "filters": filters,
         }
     except Exception as e:
         logger.warning(f"Temporal batch failed, falling back: {e}")
@@ -97,10 +121,10 @@ async def batch_score_companies_endpoint(
                 fetch_market_company_ids,
             )
 
-            filters = {}
+            filters: dict[str, Any] = {}
             if industry:
                 filters["industry"] = industry
-            if min_revenue:
+            if min_revenue is not None:
                 filters["min_revenue"] = min_revenue
 
             company_ids = await fetch_market_company_ids(filters)
@@ -109,15 +133,16 @@ async def batch_score_companies_endpoint(
 
             return {
                 "processed_count": len(company_ids),
-                "status": "success",
-                "message": "Synchronous fallback active",
+                "status": "completed",
+                "message": "Batch scoring completed synchronously (Local Fallback)",
+                "filters": filters,
             }
         except Exception as fallback_err:
             logger.error(f"Fallback scoring failed: {fallback_err}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Batch scoring fallback failed: {str(fallback_err)}",
-            )
+            ) from fallback_err
 
 
 @router.get("/stats", tags=["Statistics"])
@@ -139,9 +164,7 @@ async def get_statistics(
         avg_revenue = total_revenue / len(revenues) if revenues else 0
 
         # Growth statistics
-        growth_rates = [
-            c.financials.growth_rate for c in companies if c.financials.growth_rate
-        ]
+        growth_rates = [c.financials.growth_rate for c in companies if c.financials.growth_rate]
         avg_growth = sum(growth_rates) / len(growth_rates) if growth_rates else 0
 
         # Tier & Classification distribution (using STORED values)

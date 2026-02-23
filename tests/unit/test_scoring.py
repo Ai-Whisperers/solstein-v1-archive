@@ -116,13 +116,10 @@ def test_calculate_scores_returns_same_company_object(scorer):
 def test_growth_score_ranges(scorer, growth_rate, expected_min, expected_max):
     """Growth score stays within predicted range for each zone (bare company, no extras)."""
     # Use bare Company (no tech_stack, no geo, no margin) to isolate growth_rate effect
-    company = Company(
-        id="x", name="X", financials=FinancialMetric(growth_rate=growth_rate)
-    )
+    company = Company(id="x", name="X", financials=FinancialMetric(growth_rate=growth_rate))
     scored = scorer.calculate_scores(company)
     assert expected_min <= scored.growth_score <= expected_max, (
-        f"growth_rate={growth_rate}: expected [{expected_min}, {expected_max}], "
-        f"got {scored.growth_score}"
+        f"growth_rate={growth_rate}: expected [{expected_min}, {expected_max}], got {scored.growth_score}"
     )
 
 

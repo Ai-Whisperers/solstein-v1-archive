@@ -105,9 +105,7 @@ def test_supabase_repo_get_all(mock_get_sb):
     for method in ["eq", "ilike", "filter", "gte", "lte", "range"]:
         setattr(mock_query, method, MagicMock(return_value=mock_query))
 
-    mock_query.execute.return_value.data = [
-        {"id": "1", "name": "SB_Company", "revenue": 100.0, "financials": {}}
-    ]
+    mock_query.execute.return_value.data = [{"id": "1", "name": "SB_Company", "revenue": 100.0, "financials": {}}]
 
     repo = SupabaseRepository()
 
@@ -146,9 +144,7 @@ def test_supabase_repo_methods(mock_get_sb):
     assert repo.get_by_id("2") is None
 
     # save
-    c = Company(
-        id="1", name="Test", last_updated=datetime.now(), tier=CompanyTier.TIER_1
-    )
+    c = Company(id="1", name="Test", last_updated=datetime.now(), tier=CompanyTier.TIER_1)
     mock_client.table().upsert().execute = MagicMock()
     repo.save(c)
     mock_client.table().upsert.assert_called()
@@ -158,9 +154,7 @@ def test_supabase_repo_methods(mock_get_sb):
     assert repo.delete("1") is True
 
     # search
-    mock_client.table().select().ilike().execute.return_value.data = [
-        {"id": "1", "name": "Test"}
-    ]
+    mock_client.table().select().ilike().execute.return_value.data = [{"id": "1", "name": "Test"}]
     assert len(repo.search("Test")) == 1
 
 

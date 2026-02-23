@@ -57,9 +57,7 @@ def test_cli_analyze_market(tmp_path):
     input_file.write_text(json.dumps(data))
 
     runner = CliRunner()
-    result = runner.invoke(
-        cli, ["analyze-market", str(input_file), "-n", "Test Market"]
-    )
+    result = runner.invoke(cli, ["analyze-market", str(input_file), "-n", "Test Market"])
     assert result.exit_code == 0
     assert "Analyzing market: Test Market" in result.output
     assert "Companies: 1" in result.output

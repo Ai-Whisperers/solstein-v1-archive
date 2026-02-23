@@ -37,9 +37,7 @@ class TestConfigurationValidation:
                 settings = Settings()
                 settings.check_configuration()
 
-                assert any(
-                    "Configuration validation passed" in log for log in captured_logs
-                )
+                assert any("Configuration validation passed" in log for log in captured_logs)
             finally:
                 logger.remove(handler_id)
 
@@ -50,9 +48,7 @@ class TestConfigurationValidation:
             with pytest.raises(ConfigurationError) as exc_info:
                 settings.check_configuration()
 
-            assert "GITHUB_TOKEN environment variable is required" in str(
-                exc_info.value
-            )
+            assert "GITHUB_TOKEN environment variable is required" in str(exc_info.value)
             assert "https://github.com/settings/tokens" in str(exc_info.value)
 
     def test_check_configuration_warns_missing_companies_house_key(self):
@@ -72,10 +68,7 @@ class TestConfigurationValidation:
                 settings = Settings()
                 settings.check_configuration()
 
-                assert any(
-                    "COMPANIES_HOUSE_API_KEY not configured" in log
-                    for log in captured_logs
-                )
+                assert any("COMPANIES_HOUSE_API_KEY not configured" in log for log in captured_logs)
             finally:
                 logger.remove(handler_id)
 
@@ -96,9 +89,7 @@ class TestConfigurationValidation:
                 settings = Settings()
                 settings.check_configuration()
 
-                assert any(
-                    "GOOGLE_API_KEY not configured" in log for log in captured_logs
-                )
+                assert any("GOOGLE_API_KEY not configured" in log for log in captured_logs)
             finally:
                 logger.remove(handler_id)
 
@@ -137,9 +128,7 @@ class TestConfigurationValidation:
             with pytest.raises(ConfigurationError) as exc_info:
                 settings.check_configuration()
 
-            assert "GITHUB_TOKEN environment variable is required" in str(
-                exc_info.value
-            )
+            assert "GITHUB_TOKEN environment variable is required" in str(exc_info.value)
 
     def test_check_configuration_github_token_whitespace_only(self):
         """Verify that whitespace-only GITHUB_TOKEN is treated as valid.
@@ -162,9 +151,7 @@ class TestConfigurationValidation:
                 settings = Settings()
                 settings.check_configuration()
 
-                assert any(
-                    "Configuration validation passed" in log for log in captured_logs
-                )
+                assert any("Configuration validation passed" in log for log in captured_logs)
             finally:
                 logger.remove(handler_id)
 
@@ -190,11 +177,7 @@ class TestConfigurationValidation:
                 settings.check_configuration()
                 settings.check_configuration()
 
-                passed_count = sum(
-                    1
-                    for log in captured_logs
-                    if "Configuration validation passed" in log
-                )
+                passed_count = sum(1 for log in captured_logs if "Configuration validation passed" in log)
                 assert passed_count == 3
             finally:
                 logger.remove(handler_id)
@@ -260,9 +243,7 @@ class TestConfigurationValidation:
                 settings = Settings()
                 settings.check_configuration()
 
-                assert any(
-                    "Configuration validation passed" in log for log in captured_logs
-                )
+                assert any("Configuration validation passed" in log for log in captured_logs)
             finally:
                 logger.remove(handler_id)
 

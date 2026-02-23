@@ -204,9 +204,7 @@ def test_batch_score_temporal_success(mock_connect, client):
 )
 @patch("solstein.analytics.activities.fetch_market_company_ids", new_callable=AsyncMock)
 @patch("solstein.analytics.activities.calculate_company_score", new_callable=AsyncMock)
-def test_batch_score_temporal_fallback(
-    mock_calc, mock_fetch, mock_connect, client, mock_repo
-):
+def test_batch_score_temporal_fallback(mock_calc, mock_fetch, mock_connect, client, mock_repo):
     mock_fetch.return_value = ["c1"]
     mock_calc.return_value = {"company_id": "c1"}
 
@@ -312,9 +310,7 @@ def test_get_job_status_result_error(mock_connect, client):
     assert "Workflow failed" in resp.json()["error"]
 
 
-@patch(
-    "solstein.api.routers.jobs.TemporalClient.connect", side_effect=Exception("Job Err")
-)
+@patch("solstein.api.routers.jobs.TemporalClient.connect", side_effect=Exception("Job Err"))
 def test_get_job_status_error(mock_connect, client):
     resp = client.get("/jobs/wf_123")
     assert resp.status_code == 500

@@ -61,9 +61,7 @@ class TestExponentialBackoff:
 
         for i in range(20):
             delay = backoff.get_delay(i)
-            assert delay <= 10.0, (
-                f"Delay {delay} exceeded max_delay 10.0 at attempt {i}"
-            )
+            assert delay <= 10.0, f"Delay {delay} exceeded max_delay 10.0 at attempt {i}"
 
 
 class TestCircuitBreaker:

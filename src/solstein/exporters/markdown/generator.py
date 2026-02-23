@@ -30,9 +30,7 @@ class ReportGenerator:
             except Exception as e:
                 logger.warning(f"LLM enhancer not available: {e}")
 
-    def generate_all_reports(
-        self, companies: list[Company], output_subdir: str | None = None
-    ) -> dict[str, Path]:
+    def generate_all_reports(self, companies: list[Company], output_subdir: str | None = None) -> dict[str, Path]:
         """Generate all report types for all companies."""
         if output_subdir:
             report_dir = self.output_dir / output_subdir
@@ -54,9 +52,7 @@ class ReportGenerator:
         logger.info(f"Generated {len(generated)} report sets in {report_dir}")
         return generated
 
-    def generate_company_reports(
-        self, company: Company, output_dir: Path | None = None
-    ) -> dict[str, Path]:
+    def generate_company_reports(self, company: Company, output_dir: Path | None = None) -> dict[str, Path]:
         """Generate all report types for a single company."""
         output_dir = output_dir or self.output_dir
 
@@ -433,14 +429,10 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
         output_path.write_text(report)
         return output_path
 
-    def generate_market_overview(
-        self, companies: list[Company], output_dir: Path
-    ) -> Path:
+    def generate_market_overview(self, companies: list[Company], output_dir: Path) -> Path:
         """Generate market overview report with all companies."""
         # Sort by composite score
-        sorted_companies = sorted(
-            companies, key=lambda c: c.composite_score or 0, reverse=True
-        )
+        sorted_companies = sorted(companies, key=lambda c: c.composite_score or 0, reverse=True)
 
         phoenixes = [c for c in sorted_companies if c.classification == "Phoenix"]
         salts = [c for c in sorted_companies if c.classification == "Salt"]
@@ -526,9 +518,7 @@ revenue growth, funding, technology maturity, and market positioning.
 |---|---|---|---|
 """
         for i, c in enumerate(ai_sorted[:15], 1):
-            report += (
-                f"| {i} | {c.name} | {c.ai_score}/10 | {c.classification or 'N/A'} |\n"
-            )
+            report += f"| {i} | {c.name} | {c.ai_score}/10 | {c.classification or 'N/A'} |\n"
 
         report += f"""
 
@@ -621,9 +611,7 @@ revenue growth, funding, technology maturity, and market positioning.
         if company.ai_score and company.ai_score >= 5:
             strengths.append(f"AI capabilities: {company.ai_score}/10")
         if company.geographic_presence and len(company.geographic_presence) > 2:
-            strengths.append(
-                f"Geographic expansion: {len(company.geographic_presence)} countries"
-            )
+            strengths.append(f"Geographic expansion: {len(company.geographic_presence)} countries")
 
         return (
             "\n".join([f"{i + 1}. {s}" for i, s in enumerate(strengths)])
@@ -695,18 +683,11 @@ revenue growth, funding, technology maturity, and market positioning.
 
     def _score_funding(self, company: Company) -> int:
         """Calculate funding score."""
-        if (
-            company.total_funding_raised_eur
-            and company.total_funding_raised_eur > 100e6
-        ):
+        if company.total_funding_raised_eur and company.total_funding_raised_eur > 100e6:
             return 10
-        elif (
-            company.total_funding_raised_eur and company.total_funding_raised_eur > 50e6
-        ):
+        elif company.total_funding_raised_eur and company.total_funding_raised_eur > 50e6:
             return 8
-        elif (
-            company.total_funding_raised_eur and company.total_funding_raised_eur > 10e6
-        ):
+        elif company.total_funding_raised_eur and company.total_funding_raised_eur > 10e6:
             return 6
         elif company.funding_rounds:
             return 4
@@ -729,9 +710,7 @@ revenue growth, funding, technology maturity, and market positioning.
 
     def _score_geographic(self, company: Company) -> int:
         """Calculate geographic expansion score."""
-        countries = (
-            len(company.geographic_presence) if company.geographic_presence else 0
-        )
+        countries = len(company.geographic_presence) if company.geographic_presence else 0
         if countries >= 10:
             return 10
         elif countries >= 5:
@@ -832,9 +811,7 @@ class ClientReportGenerator(ReportGenerator):
         output_dir: Path | None = None,
     ) -> dict[str, Path]:
         """Generate complete client report with competitive analysis."""
-        output_dir = output_dir or self.output_dir / self._sanitize_filename(
-            client_company.name
-        )
+        output_dir = output_dir or self.output_dir / self._sanitize_filename(client_company.name)
         output_dir.mkdir(parents=True, exist_ok=True)
 
         generated = {}
@@ -843,41 +820,25 @@ class ClientReportGenerator(ReportGenerator):
         generated.update(self.generate_company_reports(client_company, output_dir))
 
         # Generate competitive analysis
-        generated["competitive_analysis"] = self._generate_competitive_analysis(
-            client_company, competitors, output_dir
-        )
+        generated["competitive_analysis"] = self._generate_competitive_analysis(client_company, competitors, output_dir)
 
         # Generate market overview for this client's market
-        generated["market_overview"] = self.generate_market_overview(
-            competitors + [client_company], output_dir
-        )
+        generated["market_overview"] = self.generate_market_overview(competitors + [client_company], output_dir)
 
-        logger.info(
-            f"Generated client report for {client_company.name} in {output_dir}"
-        )
+        logger.info(f"Generated client report for {client_company.name} in {output_dir}")
         return generated
 
-    def _generate_competitive_analysis(
-        self, client: Company, competitors: list[Company], output_dir: Path
-    ) -> Path:
+    def _generate_competitive_analysis(self, client: Company, competitors: list[Company], output_dir: Path) -> Path:
         """Generate competitive analysis report."""
 
         # Sort competitors by score
-        sorted_comp = sorted(
-            competitors, key=lambda c: c.composite_score or 0, reverse=True
-        )
+        sorted_comp = sorted(competitors, key=lambda c: c.composite_score or 0, reverse=True)
 
         # Find direct competitors (similar tier/score)
-        direct = [
-            c for c in sorted_comp if c.tier == client.tier and c.id != client.id
-        ][:5]
+        direct = [c for c in sorted_comp if c.tier == client.tier and c.id != client.id][:5]
 
         # Find threats (higher score competitors)
-        threats = [
-            c
-            for c in sorted_comp
-            if (c.composite_score or 0) > (client.composite_score or 0)
-        ][:5]
+        threats = [c for c in sorted_comp if (c.composite_score or 0) > (client.composite_score or 0)][:5]
 
         report = f"""# Competitive Analysis - {client.name}
 
@@ -1002,9 +963,7 @@ Companies with superior composite scores that could disrupt market position:
             key=lambda c: c.financials.revenue or 0,
             reverse=True,
         )
-        rank = next(
-            (i + 1 for i, c in enumerate(sorted_comp) if c.id == client.id), "N/A"
-        )
+        rank = next((i + 1 for i, c in enumerate(sorted_comp) if c.id == client.id), "N/A")
         return f"{rank}/{len(sorted_comp)}"
 
     def _rank_growth(self, client: Company, competitors: list[Company]) -> str:
@@ -1015,9 +974,7 @@ Companies with superior composite scores that could disrupt market position:
             key=lambda c: c.revenue_cagr_3yr or 0,
             reverse=True,
         )
-        rank = next(
-            (i + 1 for i, c in enumerate(sorted_comp) if c.id == client.id), "N/A"
-        )
+        rank = next((i + 1 for i, c in enumerate(sorted_comp) if c.id == client.id), "N/A")
         return f"{rank}/{len(sorted_comp)}"
 
     def _rank_score(self, client: Company, competitors: list[Company]) -> str:
@@ -1028,9 +985,7 @@ Companies with superior composite scores that could disrupt market position:
             key=lambda c: c.composite_score or 0,
             reverse=True,
         )
-        rank = next(
-            (i + 1 for i, c in enumerate(sorted_comp) if c.id == client.id), "N/A"
-        )
+        rank = next((i + 1 for i, c in enumerate(sorted_comp) if c.id == client.id), "N/A")
         return f"{rank}/{len(sorted_comp)}"
 
     def _rank_ai(self, client: Company, competitors: list[Company]) -> str:
@@ -1041,9 +996,7 @@ Companies with superior composite scores that could disrupt market position:
             key=lambda c: c.ai_score or 0,
             reverse=True,
         )
-        rank = next(
-            (i + 1 for i, c in enumerate(sorted_comp) if c.id == client.id), "N/A"
-        )
+        rank = next((i + 1 for i, c in enumerate(sorted_comp) if c.id == client.id), "N/A")
         return f"{rank}/{len(sorted_comp)}"
 
     def _rank_saas(self, client: Company, competitors: list[Company]) -> str:
@@ -1054,84 +1007,48 @@ Companies with superior composite scores that could disrupt market position:
             key=lambda c: c.saas_maturity or 0,
             reverse=True,
         )
-        rank = next(
-            (i + 1 for i, c in enumerate(sorted_comp) if c.id == client.id), "N/A"
-        )
+        rank = next((i + 1 for i, c in enumerate(sorted_comp) if c.id == client.id), "N/A")
         return f"{rank}/{len(sorted_comp)}"
 
-    def _generate_client_strengths(
-        self, client: Company, competitors: list[Company]
-    ) -> str:
+    def _generate_client_strengths(self, client: Company, competitors: list[Company]) -> str:
         """Generate client strengths."""
         client_score = client.composite_score or 0
-        market_avg = self._avg(
-            [c.composite_score for c in competitors if c.composite_score]
-        )
+        market_avg = self._avg([c.composite_score for c in competitors if c.composite_score])
 
         strengths = []
         if client_score > market_avg + 1:
-            strengths.append(
-                f"Superior composite score ({client_score:.1f} vs {market_avg:.1f} market avg)"
-            )
+            strengths.append(f"Superior composite score ({client_score:.1f} vs {market_avg:.1f} market avg)")
 
         if client.saas_maturity:
-            avg_saas = self._avg(
-                [c.saas_maturity for c in competitors if c.saas_maturity]
-            )
+            avg_saas = self._avg([c.saas_maturity for c in competitors if c.saas_maturity])
             if client.saas_maturity > avg_saas + 1:
-                strengths.append(
-                    f"Advanced SaaS maturity ({client.saas_maturity} vs {avg_saas:.1f} avg)"
-                )
+                strengths.append(f"Advanced SaaS maturity ({client.saas_maturity} vs {avg_saas:.1f} avg)")
 
         if client.ai_score:
-            avg_ai = self._avg(
-                [c.ai_score for c in competitors if c.ai_score is not None]
-            )
+            avg_ai = self._avg([c.ai_score for c in competitors if c.ai_score is not None])
             if client.ai_score > avg_ai:
-                strengths.append(
-                    f"Strong AI position ({client.ai_score}/10 vs {avg_ai:.1f} avg)"
-                )
+                strengths.append(f"Strong AI position ({client.ai_score}/10 vs {avg_ai:.1f} avg)")
 
-        return (
-            "\n".join([f"- {s}" for s in strengths])
-            if strengths
-            else "- No significant strengths identified"
-        )
+        return "\n".join([f"- {s}" for s in strengths]) if strengths else "- No significant strengths identified"
 
-    def _generate_client_weaknesses(
-        self, client: Company, competitors: list[Company]
-    ) -> str:
+    def _generate_client_weaknesses(self, client: Company, competitors: list[Company]) -> str:
         """Generate client weaknesses."""
         weaknesses = []
 
         if client.ai_score is not None:
-            avg_ai = self._avg(
-                [c.ai_score for c in competitors if c.ai_score is not None]
-            )
+            avg_ai = self._avg([c.ai_score for c in competitors if c.ai_score is not None])
             if client.ai_score < avg_ai - 1:
-                weaknesses.append(
-                    f"AI gap ({client.ai_score}/10 vs {avg_ai:.1f} market avg)"
-                )
+                weaknesses.append(f"AI gap ({client.ai_score}/10 vs {avg_ai:.1f} market avg)")
 
         if client.saas_maturity:
-            avg_saas = self._avg(
-                [c.saas_maturity for c in competitors if c.saas_maturity]
-            )
+            avg_saas = self._avg([c.saas_maturity for c in competitors if c.saas_maturity])
             if client.saas_maturity < avg_saas - 1:
-                weaknesses.append(
-                    f"SaaS maturity gap ({client.saas_maturity} vs {avg_saas:.1f} avg)"
-                )
+                weaknesses.append(f"SaaS maturity gap ({client.saas_maturity} vs {avg_saas:.1f} avg)")
 
         if not client.latest_valuation_eur:
-            weaknesses.append(
-                "No disclosed valuation (competitors have clearer market positioning)"
-            )
+            weaknesses.append("No disclosed valuation (competitors have clearer market positioning)")
 
-        return (
-            "\n".join([f"- {w}" for w in weaknesses])
-            if weaknesses
-            else "- No significant weaknesses identified"
-        )
+        return "\n".join([f"- {w}" for w in weaknesses]) if weaknesses else "- No significant weaknesses identified"
 
 
 class LLMEnhancedReportGenerator(ClientReportGenerator):
@@ -1144,9 +1061,7 @@ class LLMEnhancedReportGenerator(ClientReportGenerator):
         output_dir: Path | None = None,
     ) -> dict[str, Path]:
         """Generate complete LLM-enhanced client report."""
-        output_dir = output_dir or self.output_dir / self._sanitize_filename(
-            client_company.name
-        )
+        output_dir = output_dir or self.output_dir / self._sanitize_filename(client_company.name)
         output_dir.mkdir(parents=True, exist_ok=True)
 
         generated = {}
@@ -1154,46 +1069,28 @@ class LLMEnhancedReportGenerator(ClientReportGenerator):
         if self._llm_enhancer and self._llm_enhancer.is_available():
             logger.info(f"Generating LLM-enhanced reports for {client_company.name}")
 
-            exec_summary = await self._llm_enhancer.generate_executive_summary(
-                client_company, competitors
-            )
-            generated["executive_summary"] = self._save_llm_content(
-                "executive-summary.md", exec_summary, output_dir
-            )
+            exec_summary = await self._llm_enhancer.generate_executive_summary(client_company, competitors)
+            generated["executive_summary"] = self._save_llm_content("executive-summary.md", exec_summary, output_dir)
 
-            swot = await self._llm_enhancer.generate_swot_analysis(
-                client_company, competitors
-            )
+            swot = await self._llm_enhancer.generate_swot_analysis(client_company, competitors)
             swot_path = self._save_swot_report(swot, output_dir)
             generated["swot_analysis"] = swot_path
 
-            recommendations = (
-                await self._llm_enhancer.generate_strategic_recommendations(
-                    client_company, competitors
-                )
-            )
+            recommendations = await self._llm_enhancer.generate_strategic_recommendations(client_company, competitors)
             rec_path = self._save_recommendations(recommendations, output_dir)
             generated["recommendations"] = rec_path
 
-            narrative = await self._llm_enhancer.generate_competitive_narrative(
-                client_company, competitors
-            )
+            narrative = await self._llm_enhancer.generate_competitive_narrative(client_company, competitors)
             generated["competitive_narrative"] = self._save_llm_content(
                 "competitive-narrative.md", narrative, output_dir
             )
 
-            market_insights = await self._llm_enhancer.generate_market_insights(
-                competitors + [client_company]
-            )
-            generated["market_insights"] = self._save_llm_content(
-                "market-insights.md", market_insights, output_dir
-            )
+            market_insights = await self._llm_enhancer.generate_market_insights(competitors + [client_company])
+            generated["market_insights"] = self._save_llm_content("market-insights.md", market_insights, output_dir)
         else:
             logger.warning("LLM not available, generating standard reports")
 
-        generated.update(
-            self.generate_client_report(client_company, competitors, output_dir)
-        )
+        generated.update(self.generate_client_report(client_company, competitors, output_dir))
 
         logger.info(f"Generated LLM-enhanced report for {client_company.name}")
         return generated
@@ -1284,12 +1181,8 @@ def generate_enhanced_report(
     competitors = [c for c in scored if c.id != target.id]
 
     if use_llm:
-        generator = LLMEnhancedReportGenerator(
-            output_dir=Path(output_dir) if output_dir else None
-        )
+        generator = LLMEnhancedReportGenerator(output_dir=Path(output_dir) if output_dir else None)
         return asyncio.run(generator.generate_llm_enhanced_report(target, competitors))
     else:
-        generator = ClientReportGenerator(
-            output_dir=Path(output_dir) if output_dir else None, use_llm=False
-        )
+        generator = ClientReportGenerator(output_dir=Path(output_dir) if output_dir else None, use_llm=False)
         return generator.generate_client_report(target, competitors)

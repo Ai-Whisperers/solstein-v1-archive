@@ -34,72 +34,56 @@ class TestSignalDefinitions:
 
     def test_growth_signals(self):
         """Verify growth signals are defined."""
-        growth_signals = SignalDefinitions.get_signals_by_category(
-            SignalCategory.GROWTH
-        )
+        growth_signals = SignalDefinitions.get_signals_by_category(SignalCategory.GROWTH)
         assert len(growth_signals) >= 10
         assert any("Revenue" in s.name for s in growth_signals)
         assert any("User" in s.name for s in growth_signals)
 
     def test_financial_signals(self):
         """Verify financial signals are defined."""
-        financial_signals = SignalDefinitions.get_signals_by_category(
-            SignalCategory.FINANCIAL
-        )
+        financial_signals = SignalDefinitions.get_signals_by_category(SignalCategory.FINANCIAL)
         assert len(financial_signals) >= 10
         assert any("Funding" in s.name for s in financial_signals)
         assert any("Burn" in s.name for s in financial_signals)
 
     def test_technical_signals(self):
         """Verify technical signals are defined."""
-        technical_signals = SignalDefinitions.get_signals_by_category(
-            SignalCategory.TECHNICAL
-        )
+        technical_signals = SignalDefinitions.get_signals_by_category(SignalCategory.TECHNICAL)
         assert len(technical_signals) >= 10
         assert any("AI" in s.name for s in technical_signals)
         assert any("Architecture" in s.name for s in technical_signals)
 
     def test_hiring_signals(self):
         """Verify hiring signals are defined."""
-        hiring_signals = SignalDefinitions.get_signals_by_category(
-            SignalCategory.HIRING
-        )
+        hiring_signals = SignalDefinitions.get_signals_by_category(SignalCategory.HIRING)
         assert len(hiring_signals) >= 10
         assert any("Headcount" in s.name for s in hiring_signals)
         assert any("Leadership" in s.name for s in hiring_signals)
 
     def test_product_signals(self):
         """Verify product signals are defined."""
-        product_signals = SignalDefinitions.get_signals_by_category(
-            SignalCategory.PRODUCT
-        )
+        product_signals = SignalDefinitions.get_signals_by_category(SignalCategory.PRODUCT)
         assert len(product_signals) >= 10
         assert any("Feature" in s.name for s in product_signals)
         assert any("User" in s.name for s in product_signals)
 
     def test_market_signals(self):
         """Verify market signals are defined."""
-        market_signals = SignalDefinitions.get_signals_by_category(
-            SignalCategory.MARKET
-        )
+        market_signals = SignalDefinitions.get_signals_by_category(SignalCategory.MARKET)
         assert len(market_signals) >= 10
         assert any("Market" in s.name for s in market_signals)
         assert any("Competitor" in s.name for s in market_signals)
 
     def test_operational_signals(self):
         """Verify operational signals are defined."""
-        operational_signals = SignalDefinitions.get_signals_by_category(
-            SignalCategory.OPERATIONAL
-        )
+        operational_signals = SignalDefinitions.get_signals_by_category(SignalCategory.OPERATIONAL)
         assert len(operational_signals) >= 10
         assert any("Compliance" in s.name for s in operational_signals)
         assert any("Uptime" in s.name for s in operational_signals)
 
     def test_strategic_signals(self):
         """Verify strategic signals are defined."""
-        strategic_signals = SignalDefinitions.get_signals_by_category(
-            SignalCategory.STRATEGIC
-        )
+        strategic_signals = SignalDefinitions.get_signals_by_category(SignalCategory.STRATEGIC)
         assert len(strategic_signals) >= 10
         assert any("Partnership" in s.name for s in strategic_signals)
         assert any("Series" in s.name for s in strategic_signals)

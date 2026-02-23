@@ -13,9 +13,7 @@ from typing import Any
 from loguru import logger
 
 
-def search_company_news(
-    company_name: str, max_results: int = 20
-) -> list[dict[str, Any]]:
+def search_company_news(company_name: str, max_results: int = 20) -> list[dict[str, Any]]:
     """
     Search for company news using web search.
 
@@ -45,16 +43,12 @@ def search_company_news(
                     "snippet": result.text[:500] if result.text else "",
                     "url": result.url,
                     "date": result.published_date,
-                    "source": result.url.split("/")[2]
-                    if len(result.url.split("/")) > 2
-                    else "Web",
+                    "source": result.url.split("/")[2] if len(result.url.split("/")) > 2 else "Web",
                 }
             )
 
         if news_items:
-            logger.info(
-                f"Found {len(news_items)} news articles via Exa for {company_name}"
-            )
+            logger.info(f"Found {len(news_items)} news articles via Exa for {company_name}")
             return news_items
 
     except ImportError:
@@ -65,9 +59,7 @@ def search_company_news(
     return _google_search_fallback(company_name, max_results)
 
 
-def _google_search_fallback(
-    company_name: str, max_results: int = 20
-) -> list[dict[str, Any]]:
+def _google_search_fallback(company_name: str, max_results: int = 20) -> list[dict[str, Any]]:
     """
     Fallback using Google Search if Exa is unavailable.
     """
@@ -85,16 +77,12 @@ def _google_search_fallback(
                     "snippet": result.get("snippet", "")[:500],
                     "url": result.get("url", ""),
                     "date": None,
-                    "source": result.get("url", "").split("/")[2]
-                    if "url" in result
-                    else "Web",
+                    "source": result.get("url", "").split("/")[2] if "url" in result else "Web",
                 }
             )
 
         if news_items:
-            logger.info(
-                f"Found {len(news_items)} news articles via Google for {company_name}"
-            )
+            logger.info(f"Found {len(news_items)} news articles via Google for {company_name}")
         return news_items
 
     except ImportError:
@@ -105,9 +93,7 @@ def _google_search_fallback(
     return []
 
 
-def search_company_info(
-    company_name: str, query_type: str = "general"
-) -> list[dict[str, Any]]:
+def search_company_info(company_name: str, query_type: str = "general") -> list[dict[str, Any]]:
     """
     Search for general company information.
 

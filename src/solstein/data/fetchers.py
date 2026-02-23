@@ -110,11 +110,7 @@ class YahooFinanceFetcher:
             if previous_close is None:
                 previous_close = current_value
 
-            change_pct = (
-                ((current_value - previous_close) / previous_close * 100)
-                if previous_close
-                else 0
-            )
+            change_pct = ((current_value - previous_close) / previous_close * 100) if previous_close else 0
 
             return IndexData(
                 index_symbol=index.symbol,
@@ -139,9 +135,7 @@ class CurrencyRateFetcher:
         self._cached_rates: dict[str, float] = {}
         self._last_fetch: datetime | None = None
 
-    def fetch_all_rates(
-        self, base_currency: Currency = Currency.USD
-    ) -> dict[tuple[Currency, Currency], float]:
+    def fetch_all_rates(self, base_currency: Currency = Currency.USD) -> dict[tuple[Currency, Currency], float]:
         """Fetch all exchange rates relative to base currency."""
         rates = {}
 
@@ -173,9 +167,7 @@ class CurrencyRateFetcher:
 
         return rates
 
-    def get_live_rate(
-        self, from_currency: Currency, to_currency: Currency
-    ) -> float | None:
+    def get_live_rate(self, from_currency: Currency, to_currency: Currency) -> float | None:
         """Get live rate between two currencies."""
         if from_currency == to_currency:
             return 1.0
@@ -196,9 +188,7 @@ class CurrencyRateFetcher:
 
         return None
 
-    def convert(
-        self, amount: float, from_currency: Currency, to_currency: Currency
-    ) -> float:
+    def convert(self, amount: float, from_currency: Currency, to_currency: Currency) -> float:
         rate = self.get_live_rate(from_currency, to_currency)
         return amount * rate if rate else amount
 

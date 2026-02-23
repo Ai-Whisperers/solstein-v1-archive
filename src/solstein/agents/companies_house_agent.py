@@ -5,6 +5,7 @@ for UK-registered companies and their subsidiaries.
 """
 
 import asyncio
+import os
 from datetime import UTC, datetime
 
 import requests
@@ -20,12 +21,11 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
     def __init__(self):
         """Initialize Companies House agent."""
         super().__init__("CompaniesHouseAgent", DataSourceType.COMPANY_FILINGS)
+        self.api_key = os.getenv("COMPANIES_HOUSE_API_KEY")
         self.api_base = "https://api.company-information.service.gov.uk"
         self.headers = {"User-Agent": "Solstein-AI"}
 
-        self.circuit_breaker = CircuitBreaker(
-            failure_threshold=4, recovery_timeout=90.0, name="CompaniesHouseAPI"
-        )
+        self.circuit_breaker = CircuitBreaker(failure_threshold=4, recovery_timeout=90.0, name="CompaniesHouseAPI")
 
     async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
         """Gather Companies House data for a company."""
@@ -39,29 +39,29 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
         try:
             self.log_info(f"Starting Companies House research for {company_name}")
 
+            if not self.api_key:
+                self.log_warning("Companies House API not configured")
+                result.coverage_gaps.append("Companies House API not configured")
+                result.success = False
+                result.error_message = "Companies House API not configured"
+                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+                return result
+
             company_num = await self._search_company_by_name(company_name)
             if not company_num:
-                self.log_warning(
-                    f"Company not found in Companies House: {company_name}"
-                )
+                self.log_warning(f"Company not found in Companies House: {company_name}")
                 result.coverage_gaps.append("Company not found in Companies House")
                 result.success = False
                 result.error_message = "Company not found in Companies House"
-                result.execution_time_seconds = (
-                    datetime.now(UTC) - start_time
-                ).total_seconds()
+                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
                 return result
 
             company_data = await self._fetch_company_details(company_num)
             if not company_data:
                 result.coverage_gaps.append("Could not fetch company details")
                 result.success = False
-                result.error_message = (
-                    "Could not fetch company details from Companies House"
-                )
-                result.execution_time_seconds = (
-                    datetime.now(UTC) - start_time
-                ).total_seconds()
+                result.error_message = "Could not fetch company details from Companies House"
+                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
                 return result
 
             raw_source = self._create_raw_source(
@@ -89,14 +89,10 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 )
                 result.raw_sources.append(raw_source)
 
-            result.extracted_facts.extend(
-                self._extract_facts_from_company_data(company_data, financials_data)
-            )
+            result.extracted_facts.extend(self._extract_facts_from_company_data(company_data, financials_data))
 
             result.success = True
-            self.log_info(
-                f"Successfully gathered Companies House data for {company_name}"
-            )
+            self.log_info(f"Successfully gathered Companies House data for {company_name}")
 
         except Exception as e:
             self.log_error(f"Error gathering Companies House data: {e}")
@@ -104,9 +100,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             result.success = False
 
         finally:
-            result.execution_time_seconds = (
-                datetime.now(UTC) - start_time
-            ).total_seconds()
+            result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
 
         return result
 
@@ -139,7 +133,13 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 "items_per_page": 10,
             }
 
-            resp = requests.get(url, headers=self.headers, params=params, timeout=10)
+            resp = requests.get(
+                url,
+                headers=self.headers,
+                params=params,
+                timeout=10,
+                auth=(self.api_key or "", ""),
+            )
             if resp.status_code == 200:
                 data = resp.json()
                 items = data.get("items", [])
@@ -177,7 +177,12 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
         try:
             url = f"{self.api_base}/company/{company_num}"
 
-            resp = requests.get(url, headers=self.headers, timeout=10)
+            resp = requests.get(
+                url,
+                headers=self.headers,
+                timeout=10,
+                auth=(self.api_key or "", ""),
+            )
             if resp.status_code == 200:
                 return resp.json()
             else:
@@ -214,7 +219,13 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 "items_per_page": 5,
             }
 
-            resp = requests.get(url, headers=self.headers, params=params, timeout=10)
+            resp = requests.get(
+                url,
+                headers=self.headers,
+                params=params,
+                timeout=10,
+                auth=(self.api_key or "", ""),
+            )
             if resp.status_code == 200:
                 data = resp.json()
                 items = data.get("items", [])
@@ -230,9 +241,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
 
         return None
 
-    def _extract_facts_from_company_data(
-        self, company_data: dict, financials_data: dict | None
-    ) -> list:
+    def _extract_facts_from_company_data(self, company_data: dict, financials_data: dict | None) -> list:
         """Extract facts from Companies House data."""
         facts = []
 

@@ -38,23 +38,17 @@ def search_company_patents(company_name: str) -> PatentResult:
     """
     result = _search_uspto_peds(company_name)
     if result.total_patents > 0:
-        logger.info(
-            f"Found {result.total_patents} patents via USPTO for {company_name}"
-        )
+        logger.info(f"Found {result.total_patents} patents via USPTO for {company_name}")
         return result
 
     result = _search_google_patents(company_name)
     if result.total_patents > 0:
-        logger.info(
-            f"Found {result.total_patents} patents via Google Patents for {company_name}"
-        )
+        logger.info(f"Found {result.total_patents} patents via Google Patents for {company_name}")
         return result
 
     result = _search_duckduckgo(company_name)
     if result.total_patents > 0:
-        logger.info(
-            f"Found {result.total_patents} patents via DuckDuckGo for {company_name}"
-        )
+        logger.info(f"Found {result.total_patents} patents via DuckDuckGo for {company_name}")
         return result
 
     return PatentResult(source="none")
@@ -122,9 +116,7 @@ def _search_uspto_peds(company_name: str) -> PatentResult:
                     "patent_id": doc.get("application_number_text", ""),
                     "title": title,
                     "date": doc.get("filing_date", ""),
-                    "abstract": doc.get("abstract_text", "")[:200]
-                    if doc.get("abstract_text")
-                    else None,
+                    "abstract": doc.get("abstract_text", "")[:200] if doc.get("abstract_text") else None,
                 }
             )
 
@@ -150,9 +142,7 @@ def _search_google_patents(company_name: str) -> PatentResult:
     query = company_name.replace(" ", "+")
     url = f"https://patents.google.com/?q={query}&num=20"
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
     try:
         response = httpx.get(url, headers=headers, timeout=15)
@@ -181,11 +171,7 @@ def _search_google_patents(company_name: str) -> PatentResult:
                 "neural",
                 "patent",
             ]
-            ai_count = sum(
-                1
-                for r in results
-                if any(kw in r.get("title", "").lower() for kw in ai_keywords)
-            )
+            ai_count = sum(1 for r in results if any(kw in r.get("title", "").lower() for kw in ai_keywords))
 
             return PatentResult(
                 total_patents=len(results) * 5,
@@ -210,9 +196,7 @@ def _search_duckduckgo(company_name: str) -> PatentResult:
     query = company_name.replace(" ", "+")
     url = f"https://html.duckduckgo.com/html/?q={query}+patents"
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
     try:
         response = httpx.get(url, headers=headers, timeout=15)
@@ -239,11 +223,7 @@ def _search_duckduckgo(company_name: str) -> PatentResult:
                 "neural",
                 "patent",
             ]
-            ai_count = sum(
-                1
-                for r in results
-                if any(kw in r.get("title", "").lower() for kw in ai_keywords)
-            )
+            ai_count = sum(1 for r in results if any(kw in r.get("title", "").lower() for kw in ai_keywords))
 
             return PatentResult(
                 total_patents=len(results) * 3,

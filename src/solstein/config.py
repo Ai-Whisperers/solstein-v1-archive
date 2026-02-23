@@ -179,6 +179,16 @@ class Settings(BaseSettings):
     groq_api_key: str | None = Field(default=None)
     fireworks_api_key: str | None = Field(default=None)
 
+    llm_provider: str = Field(
+        default="auto",
+        description="LLM provider selection: auto|ollama|fireworks|openai|groq|none",
+    )
+    ollama_url: str = Field(default="http://localhost:11434")
+    ollama_model: str = Field(default="llama3.2:latest")
+    openai_model: str = Field(default="gpt-4o-mini")
+    groq_model: str = Field(default="llama-3.3-70b-versatile")
+    fireworks_model: str = Field(default="qwen2-72b-instruct")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -241,17 +251,11 @@ class Settings(BaseSettings):
 
         companies_house_key = os.getenv("COMPANIES_HOUSE_API_KEY")
         if not companies_house_key:
-            logger.warning(
-                "COMPANIES_HOUSE_API_KEY not configured. "
-                "Companies House data gathering will be disabled."
-            )
+            logger.warning("COMPANIES_HOUSE_API_KEY not configured. Companies House data gathering will be disabled.")
 
         google_api_key = os.getenv("GOOGLE_API_KEY")
         if not google_api_key:
-            logger.warning(
-                "GOOGLE_API_KEY not configured. "
-                "Web search data gathering will be disabled."
-            )
+            logger.warning("GOOGLE_API_KEY not configured. Web search data gathering will be disabled.")
 
         logger.info("Configuration validation passed")
 
@@ -340,7 +344,17 @@ DATA__EXPORT_DIR=exports
 
 # External APIs (optional)
 # OPENAI_API_KEY=sk-...
-# PERPLEXITY_API_KEY=pplx-...
+# GROQ_API_KEY=gsk_...
+# FIREWORKS_API_KEY=fw_...
+# PERPLEXITY_API_KEY=pplx-...  # (currently unused)
+
+# LLM Runtime (optional)
+# LLM_PROVIDER=auto  # auto|ollama|fireworks|openai|groq|none
+# OLLAMA_URL=http://localhost:11434
+# OLLAMA_MODEL=llama3.2:latest
+# OPENAI_MODEL=gpt-4o-mini
+# GROQ_MODEL=llama-3.3-70b-versatile
+# FIREWORKS_MODEL=qwen2-72b-instruct
 """
 
 

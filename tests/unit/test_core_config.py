@@ -97,7 +97,7 @@ def test_api_config_base_url():
 
 @patch("solstein.config.logger.warning")
 def test_security_config_default_warning(mock_warning):
-    config = SecurityConfig(secret_key="change-me-in-production")
+    SecurityConfig(secret_key="change-me-in-production")
     mock_warning.assert_called_with("Using default secret key - change in production!")
 
 
@@ -126,21 +126,15 @@ def test_data_config_resolve_paths():
 @patch("solstein.config.Path.exists")
 def test_settings_load_no_env(mock_exists, mock_warning):
     mock_exists.return_value = False
-    settings = Settings.load()
+    Settings.load()
     mock_warning.assert_called_with("No .env file found, using defaults")
 
 
 def test_settings_get_database_url():
     settings = Settings()
     settings.database.url = "postgresql://user:pass@localhost:5432/solstein"
-    assert (
-        settings.get_database_url(test=False)
-        == "postgresql://user:pass@localhost:5432/solstein"
-    )
-    assert (
-        settings.get_database_url(test=True)
-        == "postgresql://user:pass@localhost:5432_test/solstein"
-    )
+    assert settings.get_database_url(test=False) == "postgresql://user:pass@localhost:5432/solstein"
+    assert settings.get_database_url(test=True) == "postgresql://user:pass@localhost:5432_test/solstein"
 
 
 @patch("solstein.config.logger.warning")
@@ -150,7 +144,7 @@ def test_get_settings_no_env(mock_exists, mock_load, mock_warning):
     mock_exists.return_value = False
     mock_load.return_value = Settings()
     get_settings.cache_clear()
-    settings = get_settings()
+    get_settings()
     mock_warning.assert_called_with("No .env file found, using defaults")
 
 

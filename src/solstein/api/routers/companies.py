@@ -15,14 +15,10 @@ growth_scorer = GrowthScorer()
 @router.get("/companies", response_model=list[Company])
 async def get_companies(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(
-        100, ge=1, le=1000, description="Maximum number of records to return"
-    ),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     tier: CompanyTier | None = Query(None, description="Filter by company tier"),
     industry: str | None = Query(None, description="Filter by industry"),
-    min_revenue: float | None = Query(
-        None, ge=0, description="Minimum revenue in EUR millions"
-    ),
+    min_revenue: float | None = Query(None, ge=0, description="Minimum revenue in EUR millions"),
     _: dict[str, Any] = Depends(get_current_user),
     repo: CompanyRepository = Depends(get_repository),
 ) -> list[Company]:

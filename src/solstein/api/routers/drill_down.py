@@ -18,9 +18,7 @@ async def why_signal(
     signals = await service.get_signals(company_id)
 
     if not signals:
-        raise HTTPException(
-            status_code=404, detail=f"No analysis found for {company_id}"
-        )
+        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
 
     for signal in signals:
         if signal.signal_name == signal_name:
@@ -34,9 +32,7 @@ async def why_signal(
                 "calculation_method": signal.calculation_method,
             }
 
-    raise HTTPException(
-        status_code=404, detail=f"Signal {signal_name} not found for {company_id}"
-    )
+    raise HTTPException(status_code=404, detail=f"Signal {signal_name} not found for {company_id}")
 
 
 @router.get("/company/{company_id}/sources")
@@ -49,9 +45,7 @@ async def list_sources(
     sources = await service.get_sources(company_id, fact_type)
 
     if sources is None:
-        raise HTTPException(
-            status_code=404, detail=f"No analysis found for {company_id}"
-        )
+        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
 
     return {
         "company_id": company_id,
@@ -97,9 +91,7 @@ async def list_facts(
     facts = await service.get_facts(company_id, min_confidence)
 
     if facts is None:
-        raise HTTPException(
-            status_code=404, detail=f"No analysis found for {company_id}"
-        )
+        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
 
     contradictions = await service.get_contradictions(company_id) or []
 
@@ -150,9 +142,7 @@ async def audit_trail(
     trail = await service.get_audit_trail(company_id)
 
     if not trail:
-        raise HTTPException(
-            status_code=404, detail=f"No analysis found for {company_id}"
-        )
+        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
 
     return trail
 
@@ -166,9 +156,7 @@ async def list_signals(
     signals = await service.get_signals(company_id)
 
     if signals is None:
-        raise HTTPException(
-            status_code=404, detail=f"No analysis found for {company_id}"
-        )
+        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
 
     return {
         "company_id": company_id,
@@ -210,9 +198,7 @@ async def data_quality(
     metrics = await service.get_data_quality(company_id)
 
     if not metrics:
-        raise HTTPException(
-            status_code=404, detail=f"No analysis found for {company_id}"
-        )
+        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
 
     return {
         "company_id": company_id,
@@ -229,20 +215,12 @@ async def analysis_timeline(
     trail = await service.get_audit_trail(company_id)
 
     if not trail:
-        raise HTTPException(
-            status_code=404, detail=f"No analysis found for {company_id}"
-        )
+        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
 
     return {
         "company_id": company_id,
-        "started_at": (
-            trail.analysis_started_at.isoformat() if trail.analysis_started_at else None
-        ),
-        "completed_at": (
-            trail.analysis_completed_at.isoformat()
-            if trail.analysis_completed_at
-            else None
-        ),
+        "started_at": (trail.analysis_started_at.isoformat() if trail.analysis_started_at else None),
+        "completed_at": (trail.analysis_completed_at.isoformat() if trail.analysis_completed_at else None),
         "duration_seconds": trail.analysis_duration_seconds,
         "batch_id": trail.gathering_batch_id,
     }

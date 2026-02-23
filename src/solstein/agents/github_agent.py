@@ -34,9 +34,30 @@ class GitHubAgent(BaseDataGatheringAgent):
         if self.github_token:
             self.headers["Authorization"] = f"token {self.github_token}"
 
-        self.circuit_breaker = CircuitBreaker(
-            failure_threshold=5, recovery_timeout=60.0, name="GitHubAPI"
-        )
+        self.circuit_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60.0, name="GitHubAPI")
+
+    def _request_headers(self, unauthenticated: bool = False) -> dict[str, str]:
+        headers = dict(self.headers)
+        if unauthenticated:
+            headers.pop("Authorization", None)
+        return headers
+
+    def _get(
+        self,
+        url: str,
+        *,
+        params: dict[str, str | int | float] | None = None,
+        timeout: float = 15,
+    ) -> requests.Response:
+        resp = requests.get(url, headers=self._request_headers(), params=params, timeout=timeout)
+        if resp.status_code == 401 and "Authorization" in self.headers:
+            resp = requests.get(
+                url,
+                headers=self._request_headers(unauthenticated=True),
+                params=params,
+                timeout=timeout,
+            )
+        return resp
 
     async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
         """Gather GitHub data for a company."""
@@ -58,9 +79,7 @@ class GitHubAgent(BaseDataGatheringAgent):
                     result.coverage_gaps.append("GitHub organization not found")
                     result.success = False
                     result.error_message = "No GitHub organization found"
-                    result.execution_time_seconds = (
-                        datetime.now(UTC) - start_time
-                    ).total_seconds()
+                    result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
                     return result
 
             repos = await self._fetch_org_repos(github_org)
@@ -69,14 +88,10 @@ class GitHubAgent(BaseDataGatheringAgent):
                 result.coverage_gaps.append("No public repositories available")
                 result.success = False
                 result.error_message = f"No repositories found in {github_org}"
-                result.execution_time_seconds = (
-                    datetime.now(UTC) - start_time
-                ).total_seconds()
+                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
                 return result
 
-            primary_repos = sorted(
-                repos, key=lambda r: r.get("stargazers_count", 0), reverse=True
-            )[:5]
+            primary_repos = sorted(repos, key=lambda r: r.get("stargazers_count", 0), reverse=True)[:5]
             self.log_info(f"Analyzing {len(primary_repos)} repos for {company_name}")
 
             for repo in primary_repos:
@@ -100,9 +115,7 @@ class GitHubAgent(BaseDataGatheringAgent):
                     fact_type="tech_stack",
                     value=tech_stack,
                     confidence=0.90,
-                    sources_used=[
-                        f"GitHub: {repo.get('full_name')}" for repo in primary_repos
-                    ],
+                    sources_used=[f"GitHub: {repo.get('full_name')}" for repo in primary_repos],
                 )
             )
 
@@ -135,9 +148,7 @@ class GitHubAgent(BaseDataGatheringAgent):
                         fact_type="ai_signals",
                         value=ai_signal,
                         confidence=0.82,
-                        sources_used=[
-                            f"GitHub: {repo.get('full_name')}" for repo in primary_repos
-                        ],
+                        sources_used=[f"GitHub: {repo.get('full_name')}" for repo in primary_repos],
                     )
                 )
 
@@ -150,9 +161,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             result.success = False
 
         finally:
-            result.execution_time_seconds = (
-                datetime.now(UTC) - start_time
-            ).total_seconds()
+            result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
 
         return result
 
@@ -189,7 +198,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             url = f"{self.api_base}/search/users"
             params = {"q": f"{query} type:org", "per_page": 5}
 
-            resp = requests.get(url, headers=self.headers, params=params, timeout=10)
+            resp = self._get(url, params=params, timeout=10)
             if resp.status_code == 200:
                 data = resp.json()
                 items = data.get("items", [])
@@ -199,6 +208,8 @@ class GitHubAgent(BaseDataGatheringAgent):
                     return org_login
             elif resp.status_code == 403:
                 self.log_warning("GitHub API rate limited")
+            elif resp.status_code == 401:
+                self.log_warning("GitHub API unauthorized")
         except requests.Timeout:
             self.log_warning(f"Timeout searching for org: {query}")
         except Exception as e:
@@ -235,7 +246,7 @@ class GitHubAgent(BaseDataGatheringAgent):
                 "direction": "desc",
             }
 
-            resp = requests.get(url, headers=self.headers, params=params, timeout=15)
+            resp = self._get(url, params=params, timeout=15)
             if resp.status_code == 200:
                 return resp.json()
             elif resp.status_code == 404:
@@ -280,9 +291,7 @@ class GitHubAgent(BaseDataGatheringAgent):
                     "per_page": 100,
                 }
 
-                resp = requests.get(
-                    url, headers=self.headers, params=params, timeout=10
-                )
+                resp = self._get(url, params=params, timeout=10)
                 if resp.status_code == 200:
                     commits = resp.json()
                     total_commits += len(commits)
@@ -320,9 +329,7 @@ class GitHubAgent(BaseDataGatheringAgent):
                 url = f"{self.api_base}/repos/{org_name}/{repo['name']}/contributors"
                 params = {"per_page": 100}
 
-                resp = requests.get(
-                    url, headers=self.headers, params=params, timeout=10
-                )
+                resp = self._get(url, params=params, timeout=10)
                 if resp.status_code == 200:
                     contributors = resp.json()
                     for contrib in contributors:
@@ -343,8 +350,6 @@ class GitHubAgent(BaseDataGatheringAgent):
     def _analyze_ai_signals(self, repos: list[dict]) -> dict | None:
         """Analyze repos for AI/ML signals."""
         return {
-            "has_ml_languages": any(
-                repo.get("language") in ["Python", "Rust", "Go"] for repo in repos
-            ),
+            "has_ml_languages": any(repo.get("language") in ["Python", "Rust", "Go"] for repo in repos),
             "active_development": True,
         }

@@ -186,25 +186,17 @@ class Company(BaseModel):
     @property
     def is_large_cap(self) -> bool:
         """Domain logic: Check if company is large cap (valuation > €100M)."""
-        return (
-            self.financials.valuation is not None
-            and self.financials.valuation > 100_000_000
-        )
+        return self.financials.valuation is not None and self.financials.valuation > 100_000_000
 
     @property
     def is_high_growth(self) -> bool:
         """Domain logic: Check if company is high growth."""
-        return (
-            self.financials.growth_rate is not None and self.financials.growth_rate > 20
-        )
+        return self.financials.growth_rate is not None and self.financials.growth_rate > 20
 
     @property
     def is_profitable(self) -> bool:
         """Domain logic: Check if company is profitable."""
-        return (
-            self.financials.profit_margin is not None
-            and self.financials.profit_margin > 0
-        )
+        return self.financials.profit_margin is not None and self.financials.profit_margin > 0
 
 
 class MarketAnalysis(BaseModel):
@@ -238,11 +230,7 @@ class MarketAnalysis(BaseModel):
 
     @property
     def average_growth_rate(self) -> float | None:
-        growth_rates = [
-            c.financials.growth_rate
-            for c in self.companies
-            if c.financials.growth_rate is not None
-        ]
+        growth_rates = [c.financials.growth_rate for c in self.companies if c.financials.growth_rate is not None]
         if not growth_rates:
             return None
         return sum(growth_rates) / len(growth_rates)
@@ -317,9 +305,7 @@ class RawDataSource(BaseModel):
     publication_date: datetime | None = None  # When source was published
     confidence: float = Field(default=0.5, ge=0, le=1)  # Initial confidence in source
     relevance_score: float = Field(default=0.5, ge=0, le=1)  # How relevant to company
-    metadata: dict[str, Any] = Field(
-        default_factory=dict
-    )  # Extra info (author, category, etc.)
+    metadata: dict[str, Any] = Field(default_factory=dict)  # Extra info (author, category, etc.)
     extraction_method: str | None = None  # How we got this (API, scrape, manual, etc.)
     notes: str | None = None
 
@@ -392,9 +378,7 @@ class AggregatedDataRecord(BaseModel):
         self.total_facts = len(self.facts)
         self.verified_facts = sum(1 for f in self.facts if f.is_verified)
         if self.facts:
-            self.average_confidence = sum(f.confidence for f in self.facts) / len(
-                self.facts
-            )
+            self.average_confidence = sum(f.confidence for f in self.facts) / len(self.facts)
 
 
 class SignalExtraction(BaseModel):
@@ -409,9 +393,7 @@ class SignalExtraction(BaseModel):
     # Calculation details
     source_facts: list[str] = Field(default_factory=list)  # Which facts went into this
     calculation_method: str  # "average", "max", "enum_classification", etc.
-    calculation_formula: str | None = (
-        None  # e.g., "(revenue_fy24 - revenue_fy23) / revenue_fy23"
-    )
+    calculation_formula: str | None = None  # e.g., "(revenue_fy24 - revenue_fy23) / revenue_fy23"
 
     # Reasoning
     reasoning: str | None = None  # Human-readable explanation
@@ -455,9 +437,7 @@ class GatheringBatch(BaseModel):
 
     # Configuration
     confidence_threshold: float = 0.5  # Min confidence to include facts
-    api_keys_used: dict[str, bool] = Field(
-        default_factory=dict
-    )  # Which APIs were enabled
+    api_keys_used: dict[str, bool] = Field(default_factory=dict)  # Which APIs were enabled
 
     # Results summary
     total_sources_gathered: int = 0

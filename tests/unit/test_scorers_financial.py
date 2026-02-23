@@ -169,10 +169,7 @@ class TestFinancialHealthScorer:
     def test_medium_revenue_threshold(self, scorer):
         """Test medium revenue threshold scoring."""
         config = scorer.config
-        mid_point = (
-            config.financial.revenue_med_threshold
-            + config.financial.revenue_large_threshold
-        ) / 2
+        mid_point = (config.financial.revenue_med_threshold + config.financial.revenue_large_threshold) / 2
         financials = FinancialMetric(revenue=mid_point)
         score, _ = scorer.score(financials)
         assert 0.0 <= score <= 10.0

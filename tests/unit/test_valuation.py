@@ -62,9 +62,7 @@ def test_valuation_classification():
             bond_yield=4.0,
             current_price=current_price,
         )
-        assert context.valuation_classification == expected_class, (
-            f"Failed for ratio {price_ratio}"
-        )
+        assert context.valuation_classification == expected_class, f"Failed for ratio {price_ratio}"
 
 
 def test_growth_analyzer():

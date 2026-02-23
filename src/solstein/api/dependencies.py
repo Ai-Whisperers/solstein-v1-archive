@@ -20,9 +20,7 @@ def get_repository() -> CompanyRepository:
     settings = get_settings()
 
     if not settings.supabase.url or "your-project" in settings.supabase.url:
-        logger.warning(
-            "Supabase URL not configured. Falling back to local JSON repository."
-        )  # noqa: E501
+        logger.warning("Supabase URL not configured. Falling back to local JSON repository.")  # noqa: E501
         return JsonFileRepository()
 
     try:

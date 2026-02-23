@@ -41,9 +41,7 @@ def test_classify_company_none():
 def test_growth_scorer_fallback():
     scorer = GrowthScorer()
     company = make_company()
-    with patch.object(
-        scorer.financial_health_scorer, "score", return_value=(None, None)
-    ):
+    with patch.object(scorer.financial_health_scorer, "score", return_value=(None, None)):
         scorer.calculate_scores(company)
         assert company.composite_score == company.growth_score
 
@@ -101,9 +99,7 @@ def test_financial_health_funding_cushion():
     scorer.calculate_scores(company)
 
     # Thin ratio penalty
-    fin = FinancialMetric(
-        revenue=1_000_000.0, funding_raised=100_000.0, profit_margin=2.0
-    )  # < 0.5 and <5% margin
+    fin = FinancialMetric(revenue=1_000_000.0, funding_raised=100_000.0, profit_margin=2.0)  # < 0.5 and <5% margin
     company = make_company(financials=fin)
     scorer.calculate_scores(company)
 
@@ -178,12 +174,8 @@ def test_market_analyzer_technology_metrics():
 
     assert analyzer._calculate_technology_metrics([])["unique_technologies"] == 0
 
-    c1 = make_company(
-        ai_maturity=AIMaturity.STRONG, tech_stack=["Python", "Cloud"], saas_maturity=5
-    )
-    c2 = make_company(
-        ai_maturity=AIMaturity.NONE, tech_stack=["Python", "Java"], saas_maturity=3
-    )
+    c1 = make_company(ai_maturity=AIMaturity.STRONG, tech_stack=["Python", "Cloud"], saas_maturity=5)
+    c2 = make_company(ai_maturity=AIMaturity.NONE, tech_stack=["Python", "Java"], saas_maturity=3)
 
     metrics = analyzer._calculate_technology_metrics([c1, c2])
     assert metrics["ai_adoption"]["Strong"] == 1
@@ -207,12 +199,8 @@ def test_market_analyzer_competitive_intensity():
     # Empty
     assert analyzer._calculate_competitive_intensity([])["hhi"] == 0.0
 
-    c1 = make_company(
-        threat_level=ThreatLevel.HIGH, financials=FinancialMetric(revenue=100.0)
-    )
-    c2 = make_company(
-        threat_level=ThreatLevel.LOW, financials=FinancialMetric(revenue=100.0)
-    )
+    c1 = make_company(threat_level=ThreatLevel.HIGH, financials=FinancialMetric(revenue=100.0))
+    c2 = make_company(threat_level=ThreatLevel.LOW, financials=FinancialMetric(revenue=100.0))
 
     metrics = analyzer._calculate_competitive_intensity([c1, c2])
     assert metrics["threat_distribution"]["High"] == 1
@@ -250,9 +238,4 @@ def test_competitive_overlap_customer_overlap():
         )
         == 0.0
     )
-    assert (
-        calc._calculate_technology_overlap(
-            make_company(tech_stack=["Python"]), make_company(tech_stack=[])
-        )
-        == 0.0
-    )
+    assert calc._calculate_technology_overlap(make_company(tech_stack=["Python"]), make_company(tech_stack=[])) == 0.0

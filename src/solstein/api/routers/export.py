@@ -17,9 +17,7 @@ growth_scorer = GrowthScorer()
 excel_exporter = ExcelExporter()
 
 
-def _run_excel_export(
-    repo: CompanyRepository, filters: dict[str, Any], filename: str
-) -> None:  # noqa: E501
+def _run_excel_export(repo: CompanyRepository, filters: dict[str, Any], filename: str) -> None:  # noqa: E501
     """Background task to generate excel report."""
     company_filter = CompanyFilter(**filters) if filters else None
     companies = repo.get_all(filters=company_filter)
@@ -91,9 +89,7 @@ async def export_to_json(
         # Filter by industry if specified (manual check to be safe)
         if industry:
             filtered_companies = [
-                c
-                for c in filtered_companies
-                if c.industry and industry.lower() in c.industry.lower()
+                c for c in filtered_companies if c.industry and industry.lower() in c.industry.lower()
             ]
 
         if not filtered_companies:
@@ -135,9 +131,7 @@ async def search_with_llm(
         description="Natural language search criteria (e.g., 'tech companies', 'fast growing SaaS')",
     ),
     limit: int | None = Query(None, description="Maximum number of results"),
-    include_reasoning: bool = Query(
-        True, description="Include LLM reasoning in response"
-    ),
+    include_reasoning: bool = Query(True, description="Include LLM reasoning in response"),
     _: dict[str, Any] = Depends(get_current_user),
     repo: CompanyRepository = Depends(get_repository),
 ) -> JSONResponse:
@@ -151,9 +145,7 @@ async def search_with_llm(
 
         if not isinstance(repo, JsonFileRepository):
             return JSONResponse(
-                content={
-                    "error": "LLM filtering is only available for JSON repository"
-                },
+                content={"error": "LLM filtering is only available for JSON repository"},
                 status_code=400,
             )
 

@@ -47,9 +47,7 @@ def test_golden_phoenix_classification(scorer):
     assert scored.growth_score == pytest.approx(8.25), (
         "Verified Phoenix must score exactly 8.25 (base + growth_factor + med_margin_bonus)"
     )
-    assert scored.growth_score >= 7.0, (
-        "Phoenix must be above the classification threshold"
-    )
+    assert scored.growth_score >= 7.0, "Phoenix must be above the classification threshold"
 
 
 def test_golden_lead_classification(scorer):
@@ -94,9 +92,7 @@ def test_golden_high_margin_hits_high_bonus(scorer):
         ),
     )
     scored = scorer.calculate_scores(company)
-    assert scored.growth_score == pytest.approx(8.0), (
-        "25% margin must trigger margin_high_bonus=2.0, not 1.0"
-    )
+    assert scored.growth_score == pytest.approx(8.0), "25% margin must trigger margin_high_bonus=2.0, not 1.0"
 
 
 # ---------------------------------------------------------------------------
@@ -118,12 +114,8 @@ def test_ai_maturity_impact(scorer):
     scored_low = scorer.calculate_scores(low_ai)
     scored_high = scorer.calculate_scores(high_ai)
 
-    diff = (
-        scored_high.competitive_position_score - scored_low.competitive_position_score
-    )
-    assert diff >= 3.0, (
-        f"AI Maturity gap should be ≥ 3.0 (Very Strong=+2.5, None=-1.0 → 3.5). Got: {diff}"
-    )
+    diff = scored_high.competitive_position_score - scored_low.competitive_position_score
+    assert diff >= 3.0, f"AI Maturity gap should be ≥ 3.0 (Very Strong=+2.5, None=-1.0 → 3.5). Got: {diff}"
 
 
 # ---------------------------------------------------------------------------
@@ -172,12 +164,8 @@ def test_saas_maturity_extremes(scorer):
 
     # saas_score = (saas_maturity - 1) / 9 * 2.0
     # saas=1 → 0.0, saas=10 → 2.0 → diff should be 2.0
-    diff = (
-        scored_high.competitive_position_score - scored_low.competitive_position_score
-    )
-    assert diff == pytest.approx(2.0), (
-        f"SaaS maturity 1→10 should produce exactly 2.0 point diff. Got: {diff}"
-    )
+    diff = scored_high.competitive_position_score - scored_low.competitive_position_score
+    assert diff == pytest.approx(2.0), f"SaaS maturity 1→10 should produce exactly 2.0 point diff. Got: {diff}"
 
 
 # ---------------------------------------------------------------------------
@@ -215,10 +203,5 @@ def test_global_presence_bonus(scorer):
     scored_global = scorer.calculate_scores(global_company)
 
     # Actual logic might assign diff=1.5
-    diff = (
-        scored_global.competitive_position_score
-        - scored_single.competitive_position_score
-    )
-    assert diff == pytest.approx(1.5), (
-        f"Global presence should produce +1.5 vs single-region. Got: {diff}"
-    )
+    diff = scored_global.competitive_position_score - scored_single.competitive_position_score
+    assert diff == pytest.approx(1.5), f"Global presence should produce +1.5 vs single-region. Got: {diff}"

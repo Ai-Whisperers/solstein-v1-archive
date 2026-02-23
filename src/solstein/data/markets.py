@@ -81,9 +81,7 @@ STOCK_EXCHANGES = {
         currency=Currency.GBP,
         suffix=".L",
     ),
-    "EURONEXT": StockExchange(
-        code="ENX", name="Euronext", region=MarketRegion.EUROPE, currency=Currency.EUR
-    ),
+    "EURONEXT": StockExchange(code="ENX", name="Euronext", region=MarketRegion.EUROPE, currency=Currency.EUR),
     "XETRA": StockExchange(
         code="XETRA",
         name="Xetra (Germany)",
@@ -414,9 +412,7 @@ class GlobalStockData(BaseModel):
     discount_to_intrinsic_pct: float | None = None
     valuation_classification: str | None = None
 
-    def convert_currency(
-        self, converter: CurrencyConverter, target: Currency
-    ) -> "GlobalStockData":
+    def convert_currency(self, converter: CurrencyConverter, target: Currency) -> "GlobalStockData":
         if self.source_currency == target:
             return self
 
@@ -470,8 +466,6 @@ class IndexData(BaseModel):
 
 def get_exchange_for_ticker(ticker: str) -> StockExchange:
     """Determine stock exchange from ticker."""
-    ticker_upper = ticker.upper()
-
     if "." in ticker:
         suffix = ticker.split(".")[-1].upper()
         for exchange in STOCK_EXCHANGES.values():

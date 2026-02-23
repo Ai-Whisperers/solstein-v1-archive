@@ -27,11 +27,7 @@ async def analyze_market(
         companies = repo.get_all(filters=filters)
 
         if region:
-            companies = [
-                c
-                for c in companies
-                if region.lower() in [p.lower() for p in c.geographic_presence]
-            ]  # noqa: E501
+            companies = [c for c in companies if region.lower() in [p.lower() for p in c.geographic_presence]]  # noqa: E501
 
         if not companies:
             return MarketAnalysis(
@@ -86,9 +82,7 @@ async def get_competitive_overlap(
                     company_b_id=peer.id,
                     overlap_score=score,
                     overlap_areas=[target.industry]
-                    if target.industry
-                    and peer.industry
-                    and target.industry.lower() == peer.industry.lower()
+                    if target.industry and peer.industry and target.industry.lower() == peer.industry.lower()
                     else [],  # noqa: E501
                     competitive_intensity="Medium",
                     notes=None,
@@ -115,9 +109,7 @@ async def get_competitive_overlap(
 @router.get("/search", tags=["Search"])
 async def search_companies(
     query: str = Query(..., min_length=2, description="Search query"),
-    field: str = Query(
-        "name", description="Field to search (name, industry, description)"
-    ),
+    field: str = Query("name", description="Field to search (name, industry, description)"),
     _: dict[str, Any] = Depends(get_current_user),
     repo: CompanyRepository = Depends(get_repository),
 ) -> dict[str, Any]:

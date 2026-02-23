@@ -167,9 +167,7 @@ class AdditionalDataSources:
                 if published:
                     published = datetime.fromisoformat(published.replace("Z", "+00:00"))
 
-                sentiment = self._analyze_sentiment(
-                    article.get("title", "") + " " + (article.get("description") or "")
-                )
+                sentiment = self._analyze_sentiment(article.get("title", "") + " " + (article.get("description") or ""))
 
                 if sentiment == "positive":
                     positive += 1
@@ -212,9 +210,7 @@ class AdditionalDataSources:
                 sentiment_score=None,
             )
 
-    def _get_news_from_web_search(
-        self, company_name: str, days_back: int
-    ) -> PressCoverage:
+    def _get_news_from_web_search(self, company_name: str, days_back: int) -> PressCoverage:
         """
         Get news using web search as fallback.
 
@@ -228,9 +224,7 @@ class AdditionalDataSources:
         from urllib.parse import quote
 
         try:
-            search_url = (
-                f"https://www.google.com/search?q={quote(company_name)}+news&tbs=qdr:w"
-            )
+            search_url = f"https://www.google.com/search?q={quote(company_name)}+news&tbs=qdr:w"
 
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -247,10 +241,6 @@ class AdditionalDataSources:
             import re
 
             news_pattern = re.compile(r'<a href="(https?://[^"]+)"[^>]*>([^<]+)</a>')
-            snippet_pattern = re.compile(
-                r'<span[^>]*class="[^"]*BNeawe[^"]*"[^>]*>([^<]+)</span>'
-            )
-
             matches = news_pattern.findall(html)
             seen_urls = set()
 
@@ -293,9 +283,7 @@ class AdditionalDataSources:
             sentiment_score = (positive - negative) / total if total > 0 else None
 
             if total > 0:
-                logger.info(
-                    f"Found {total} news articles via web search for {company_name}"
-                )
+                logger.info(f"Found {total} news articles via web search for {company_name}")
 
             return PressCoverage(
                 articles=articles,

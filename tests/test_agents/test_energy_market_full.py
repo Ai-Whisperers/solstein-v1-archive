@@ -95,22 +95,15 @@ async def test_all_29_companies_quick(coordinator, manual_data):
             continue
 
     success_rate = len(results) / len(companies)
-    print(
-        f"\nSuccess rate: {success_rate:.0%} ({len(results)}/{len(companies)} companies)"
-    )
+    print(f"\nSuccess rate: {success_rate:.0%} ({len(results)}/{len(companies)} companies)")
 
     if errors:
         print(f"\nErrors ({len(errors)}):")
         for company_id, error in errors[:5]:
             print(f"  - {company_id}: {error}")
 
-    total_sources = sum(
-        len(r.raw_data.sources) if r.raw_data else 0 for r in results.values()
-    )
-    total_facts = sum(
-        len(r.aggregated_facts.facts) if r.aggregated_facts else 0
-        for r in results.values()
-    )
+    total_sources = sum(len(r.raw_data.sources) if r.raw_data else 0 for r in results.values())
+    total_facts = sum(len(r.aggregated_facts.facts) if r.aggregated_facts else 0 for r in results.values())
 
     print("\nAggregate Results:")
     print(f"  Total sources gathered: {total_sources}")
@@ -151,21 +144,9 @@ async def test_comparison_to_manual(coordinator, manual_data):
         print(f"  Manual AI maturity: {company_data.ai_maturity}")
 
         if audit_trail.aggregated_facts:
-            revenue_facts = [
-                f
-                for f in audit_trail.aggregated_facts.facts
-                if "revenue" in f.fact_type.lower()
-            ]
-            growth_facts = [
-                f
-                for f in audit_trail.aggregated_facts.facts
-                if "growth" in f.fact_type.lower()
-            ]
-            ai_facts = [
-                f
-                for f in audit_trail.aggregated_facts.facts
-                if "ai" in f.fact_type.lower()
-            ]
+            revenue_facts = [f for f in audit_trail.aggregated_facts.facts if "revenue" in f.fact_type.lower()]
+            growth_facts = [f for f in audit_trail.aggregated_facts.facts if "growth" in f.fact_type.lower()]
+            ai_facts = [f for f in audit_trail.aggregated_facts.facts if "ai" in f.fact_type.lower()]
 
             if revenue_facts:
                 print(f"  AI revenue facts: {len(revenue_facts)} found")

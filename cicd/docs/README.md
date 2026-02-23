@@ -1,5 +1,7 @@
 # CI/CD Documentation
 
+> Archived/legacy reference: the canonical Solstein CI/CD documentation is now `docs/guides/ci-cd.md` and active workflow definitions in `.github/workflows/`.
+
 **Repository:** eneve.domain  
 **Last Updated:** 2025-12-04  
 **Status:** Phase 1 Week 1 Complete

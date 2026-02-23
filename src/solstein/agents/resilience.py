@@ -178,16 +178,12 @@ class CircuitBreaker:
 
         if self.state == CircuitBreakerState.HALF_OPEN:
             self.state = CircuitBreakerState.OPEN
-            logger.warning(
-                f"[{self.name}] Circuit breaker OPEN (failed during recovery)"
-            )
+            logger.warning(f"[{self.name}] Circuit breaker OPEN (failed during recovery)")
             return
 
         if self.failure_count >= self.failure_threshold:
             self.state = CircuitBreakerState.OPEN
-            logger.error(
-                f"[{self.name}] Circuit breaker OPEN (threshold {self.failure_threshold} reached)"
-            )
+            logger.error(f"[{self.name}] Circuit breaker OPEN (threshold {self.failure_threshold} reached)")
 
     def _should_attempt_recovery(self) -> bool:
         """Check if enough time has passed to retry in HALF_OPEN state."""
@@ -235,9 +231,7 @@ async def call_with_retry(
 
     # Check circuit breaker first
     if circuit_breaker and not circuit_breaker.can_execute():
-        raise RuntimeError(
-            f"[{name}] Circuit breaker OPEN (service unavailable, try again later)"
-        )
+        raise RuntimeError(f"[{name}] Circuit breaker OPEN (service unavailable, try again later)")
 
     last_exception: Exception | None = None
 
@@ -246,9 +240,7 @@ async def call_with_retry(
             logger.debug(f"[{name}] Attempt {attempt + 1}/{retry_config.max_attempts}")
 
             # Execute with timeout
-            result = await asyncio.wait_for(
-                func(*args, **kwargs), timeout=retry_config.timeout
-            )
+            result = await asyncio.wait_for(func(*args, **kwargs), timeout=retry_config.timeout)
 
             # Success: record and return
             if circuit_breaker:
@@ -281,10 +273,7 @@ async def call_with_retry(
         except retryable_exceptions as e:
             # Retryable: log and retry if attempts remain
             last_exception = e
-            logger.warning(
-                f"[{name}] Retryable exception on attempt {attempt + 1}: "
-                f"{type(e).__name__}: {e}"
-            )
+            logger.warning(f"[{name}] Retryable exception on attempt {attempt + 1}: {type(e).__name__}: {e}")
 
             if attempt < retry_config.max_attempts - 1:
                 backoff = ExponentialBackoff(
@@ -312,15 +301,11 @@ async def call_with_retry(
         )
         raise last_exception
 
-    raise RuntimeError(
-        f"[{name}] Unknown failure after {retry_config.max_attempts} attempts"
-    )
+    raise RuntimeError(f"[{name}] Unknown failure after {retry_config.max_attempts} attempts")
 
 
 # Preset configurations for common services
-GITHUB_RETRY_CONFIG = RetryConfig(
-    max_attempts=4, base_delay=2.0, exponential_base=2.0, max_delay=30.0, timeout=15.0
-)
+GITHUB_RETRY_CONFIG = RetryConfig(max_attempts=4, base_delay=2.0, exponential_base=2.0, max_delay=30.0, timeout=15.0)
 
 COMPANIES_HOUSE_RETRY_CONFIG = RetryConfig(
     max_attempts=3, base_delay=3.0, exponential_base=2.0, max_delay=30.0, timeout=20.0

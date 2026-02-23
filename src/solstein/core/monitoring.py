@@ -201,7 +201,8 @@ class HealthMonitor:
                 if enhancer._check_ollama():
                     backends.append("ollama")
                 if enhancer._has_valid_api_key():
-                    backends.append("cloud_api")
+                    cloud = enhancer._get_cloud_provider()
+                    backends.append(cloud or "cloud_api")
 
                 check = HealthCheck(
                     name="llm_services",
@@ -239,7 +240,7 @@ class HealthMonitor:
         Returns:
             Dictionary of check results
         """
-        results = await asyncio.gather(
+        await asyncio.gather(
             self.check_database(),
             self.check_api_responsiveness(),
             self.check_configuration(),
@@ -351,19 +352,13 @@ class HealthMonitor:
     def update_metrics(self) -> None:
         """Update calculated metrics."""
         self.metrics.timestamp = datetime.now(UTC)
-        self.metrics.uptime_seconds = int(
-            (self.metrics.timestamp - self.startup_time).total_seconds()
-        )
+        self.metrics.uptime_seconds = int((self.metrics.timestamp - self.startup_time).total_seconds())
 
         if self.metrics.total_requests > 0:
-            self.metrics.error_rate = (
-                self.metrics.failed_requests / self.metrics.total_requests
-            )
+            self.metrics.error_rate = self.metrics.failed_requests / self.metrics.total_requests
 
             if self.request_history:
-                avg_duration = sum(
-                    r["duration_ms"] for r in self.request_history
-                ) / len(self.request_history)
+                avg_duration = sum(r["duration_ms"] for r in self.request_history) / len(self.request_history)
                 self.metrics.avg_response_time_ms = avg_duration
 
     def get_metrics(self) -> MetricsSnapshot:
@@ -417,12 +412,8 @@ class HealthMonitor:
                 "total_companies_scored": self.data_quality.total_companies_scored,
                 "companies_with_all_signals": self.data_quality.companies_with_all_signals,
                 "companies_missing_critical_signals": self.data_quality.companies_missing_critical_signals,
-                "average_signal_count_per_company": round(
-                    self.data_quality.average_signal_count_per_company, 2
-                ),
-                "average_confidence_score": round(
-                    self.data_quality.average_confidence_score, 3
-                ),
+                "average_signal_count_per_company": round(self.data_quality.average_signal_count_per_company, 2),
+                "average_confidence_score": round(self.data_quality.average_confidence_score, 3),
             },
         }
 

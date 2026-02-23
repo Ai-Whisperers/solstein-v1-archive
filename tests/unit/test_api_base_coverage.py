@@ -35,9 +35,7 @@ def test_get_repository_supabase_success(mock_supa, mock_settings):
 
 
 @patch("solstein.api.dependencies.get_settings")
-@patch(
-    "solstein.api.dependencies.SupabaseRepository", side_effect=Exception("DB Error")
-)
+@patch("solstein.api.dependencies.SupabaseRepository", side_effect=Exception("DB Error"))
 def test_get_repository_supabase_exception(mock_supa, mock_settings, caplog):
     m_set = MagicMock()
     m_set.supabase.url = "https://valid.supabase.co"

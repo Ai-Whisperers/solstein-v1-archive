@@ -80,10 +80,7 @@ class TestCompetitivePositionScorer:
             geographic_presence=["US", "EU", "APAC", "LATAM", "MENA"],
         )
         score, expl = scorer.score(company)
-        if (
-            len(company.geographic_presence)
-            > scorer.config.competitive.geo_global_count
-        ):
+        if len(company.geographic_presence) > scorer.config.competitive.geo_global_count:
             assert any(c.name == "Geographic Footprint" for c in expl.components)
 
     def test_regional_geographic_presence(self, scorer):
@@ -95,10 +92,7 @@ class TestCompetitivePositionScorer:
             geographic_presence=["US", "EU"],
         )
         score, expl = scorer.score(company)
-        if (
-            len(company.geographic_presence)
-            > scorer.config.competitive.geo_regional_count
-        ):
+        if len(company.geographic_presence) > scorer.config.competitive.geo_regional_count:
             assert any(c.name == "Geographic Footprint" for c in expl.components)
 
     def test_tech_stack_diversity(self, scorer):

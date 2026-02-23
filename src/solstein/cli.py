@@ -29,9 +29,7 @@ def cli(verbose: bool) -> None:
 
 @cli.command()
 @click.argument("input_dir", type=click.Path(exists=True, path_type=Path))
-@click.option(
-    "--output", "-o", type=click.Path(path_type=Path), help="Output JSON file"
-)
+@click.option("--output", "-o", type=click.Path(path_type=Path), help="Output JSON file")
 @click.option("--pattern", "-p", default="*.md", help="File pattern to match")
 def extract(input_dir: Path, output: Path | None, pattern: str) -> None:
     """Extract data from markdown files."""
@@ -60,9 +58,7 @@ def extract(input_dir: Path, output: Path | None, pattern: str) -> None:
 @cli.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.argument("output_file", type=click.Path(path_type=Path))
-@click.option(
-    "--template", "-t", type=click.Path(exists=True), help="Excel template file"
-)
+@click.option("--template", "-t", type=click.Path(exists=True), help="Excel template file")
 def export_excel(input_file: Path, output_file: Path, template: Path | None) -> None:
     """Export data to Excel dashboard."""
     click.echo(f"📊 Exporting to Excel: {output_file}")
@@ -84,9 +80,7 @@ def export_excel(input_file: Path, output_file: Path, template: Path | None) -> 
 
 @cli.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
-@click.option(
-    "--output", "-o", type=click.Path(path_type=Path), help="Output file for scores"
-)
+@click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for scores")
 def score(input_file: Path, output: Path | None) -> None:
     """Calculate growth and competitive scores."""
     click.echo("📈 Calculating scores...")
@@ -128,9 +122,7 @@ def score(input_file: Path, output: Path | None) -> None:
 
 @cli.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
-@click.option(
-    "--market-name", "-n", default="Competitive Landscape", help="Market name"
-)
+@click.option("--market-name", "-n", default="Competitive Landscape", help="Market name")
 def analyze_market(input_file: Path, market_name: str) -> None:
     """Create market-level analysis."""
     click.echo(f"🌍 Analyzing market: {market_name}")
@@ -238,9 +230,7 @@ def generate_report(company_name: str, output: Path | None) -> None:
 
         if not target:
             click.echo(f"❌ Company not found: {company_name}", err=True)
-            click.echo(
-                f"Available companies: {', '.join([c.name for c in scored_companies[:10]])}..."
-            )
+            click.echo(f"Available companies: {', '.join([c.name for c in scored_companies[:10]])}...")
             return
 
         # Get competitors (all other companies)
@@ -250,7 +240,7 @@ def generate_report(company_name: str, output: Path | None) -> None:
         output_dir = output or Path(f"data/output/reports/{target.id}")
         generator = ClientReportGenerator(output_dir=output_dir)
 
-        reports = generator.generate_client_report(target, competitors)
+        generator.generate_client_report(target, competitors)
 
         click.echo(f"✅ Reports generated in: {output_dir}")
         click.echo("   - corporate-history.md")
@@ -297,9 +287,7 @@ def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) ->
 
         if not target:
             click.echo(f"❌ Company not found: {company_name}", err=True)
-            click.echo(
-                f"Available: {', '.join([c.name for c in scored_companies[:10]])}..."
-            )
+            click.echo(f"Available: {', '.join([c.name for c in scored_companies[:10]])}...")
             return
 
         competitors = [c for c in scored_companies if c.id != target.id]
@@ -317,9 +305,7 @@ def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) ->
             from .exporters.report_generator import LLMEnhancedReportGenerator
 
             generator = LLMEnhancedReportGenerator(output_dir=output_dir, use_llm=True)
-            reports = asyncio.run(
-                generator.generate_llm_enhanced_report(target, competitors)
-            )
+            reports = asyncio.run(generator.generate_llm_enhanced_report(target, competitors))
 
         click.echo(f"✅ LLM-enhanced reports generated in: {output_dir}")
         for name in reports:

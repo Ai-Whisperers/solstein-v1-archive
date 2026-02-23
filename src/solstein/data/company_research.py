@@ -187,9 +187,7 @@ class CompanyResearcher:
             exchange=info.get("exchange", "Unknown"),
             description=info.get("longBusinessSummary"),
             founded=info.get("foundedDate"),
-            headquarters=info.get("city") + ", " + info.get("country")
-            if info.get("city")
-            else None,
+            headquarters=info.get("city") + ", " + info.get("country") if info.get("city") else None,
             website=info.get("website"),
             employees=info.get("fullTimeEmployees"),
             market_cap=info.get("marketCap"),
@@ -374,9 +372,7 @@ class CompanyResearcher:
 
         # Innovation (based on sector and AI)
         industry = (info.get("industry") or "").lower()
-        if any(
-            t in industry for t in ["technology", "software", "ai", "semiconductor"]
-        ):
+        if any(t in industry for t in ["technology", "software", "ai", "semiconductor"]):
             scores["Innovation"] = 9
         elif any(t in industry for t in ["pharma", "biotech", "health"]):
             scores["Innovation"] = 8

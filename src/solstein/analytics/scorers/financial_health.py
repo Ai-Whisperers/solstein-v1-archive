@@ -88,9 +88,7 @@ class FinancialHealthScorer:
                 adj = cfg.cushion_high_bonus
             elif ratio > cfg.cushion_med_ratio:
                 adj = cfg.cushion_med_bonus
-            elif ratio < cfg.cushion_thin_ratio and (
-                financials.profit_margin is None or financials.profit_margin < 5
-            ):
+            elif ratio < cfg.cushion_thin_ratio and (financials.profit_margin is None or financials.profit_margin < 5):
                 adj = cfg.cushion_thin_penalty
 
             if adj != 0:

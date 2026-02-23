@@ -20,9 +20,7 @@ async def test_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    SessionLocal = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with SessionLocal() as session:
         yield session
@@ -334,7 +332,7 @@ class TestTransactionManagement:
     @pytest.mark.asyncio
     async def test_commit_persists_data(self, db_service):
         """Verify that commit persists data to database."""
-        record = await db_service.save_scoring_record(
+        await db_service.save_scoring_record(
             company_id="commit-test",
             company_name="Commit Test Corp",
             growth_score=5.0,

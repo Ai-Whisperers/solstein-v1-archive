@@ -36,9 +36,7 @@ class TestExponentialBackoff:
 
     def test_basic_exponential_sequence_no_jitter(self):
         """Test deterministic exponential sequence without jitter."""
-        backoff = ExponentialBackoff(
-            base_delay=1.0, exponential_base=2.0, max_delay=60.0, jitter=False
-        )
+        backoff = ExponentialBackoff(base_delay=1.0, exponential_base=2.0, max_delay=60.0, jitter=False)
 
         assert backoff.get_delay(0) == 1.0  # 1 * 2^0
         assert backoff.get_delay(1) == 2.0  # 1 * 2^1
@@ -48,9 +46,7 @@ class TestExponentialBackoff:
 
     def test_max_delay_cap(self):
         """Test that delay is capped at max_delay."""
-        backoff = ExponentialBackoff(
-            base_delay=1.0, exponential_base=2.0, max_delay=10.0, jitter=False
-        )
+        backoff = ExponentialBackoff(base_delay=1.0, exponential_base=2.0, max_delay=10.0, jitter=False)
 
         assert backoff.get_delay(0) == 1.0
         assert backoff.get_delay(1) == 2.0
@@ -61,9 +57,7 @@ class TestExponentialBackoff:
 
     def test_jitter_within_bounds(self):
         """Test that jitter keeps delays within ±20% of base."""
-        backoff = ExponentialBackoff(
-            base_delay=1.0, exponential_base=2.0, max_delay=60.0, jitter=True
-        )
+        backoff = ExponentialBackoff(base_delay=1.0, exponential_base=2.0, max_delay=60.0, jitter=True)
 
         for attempt in range(5):
             delay = backoff.get_delay(attempt)
@@ -80,9 +74,7 @@ class TestExponentialBackoff:
 
     def test_custom_exponential_base(self):
         """Test different exponential base (e.g., 3.0)."""
-        backoff = ExponentialBackoff(
-            base_delay=1.0, exponential_base=3.0, max_delay=100.0, jitter=False
-        )
+        backoff = ExponentialBackoff(base_delay=1.0, exponential_base=3.0, max_delay=100.0, jitter=False)
 
         assert backoff.get_delay(0) == 1.0  # 1 * 3^0
         assert backoff.get_delay(1) == 3.0  # 1 * 3^1
@@ -235,13 +227,9 @@ class TestCallWithRetry:
     @pytest.mark.asyncio
     async def test_retry_on_failure_then_success(self):
         """Test retry after transient failure."""
-        mock_func = AsyncMock(
-            side_effect=[Exception("fail"), Exception("fail"), "success"]
-        )
+        mock_func = AsyncMock(side_effect=[Exception("fail"), Exception("fail"), "success"])
 
-        result = await call_with_retry(
-            mock_func, retry_config=RetryConfig(max_attempts=3, base_delay=0.01)
-        )
+        result = await call_with_retry(mock_func, retry_config=RetryConfig(max_attempts=3, base_delay=0.01))
 
         assert result == "success"
         assert mock_func.call_count == 3
@@ -252,9 +240,7 @@ class TestCallWithRetry:
         mock_func = AsyncMock(side_effect=Exception("always fails"))
 
         with pytest.raises(Exception, match="always fails"):
-            await call_with_retry(
-                mock_func, retry_config=RetryConfig(max_attempts=3, base_delay=0.01)
-            )
+            await call_with_retry(mock_func, retry_config=RetryConfig(max_attempts=3, base_delay=0.01))
 
         assert mock_func.call_count == 3
 
@@ -323,14 +309,10 @@ class TestCallWithRetry:
         """Test that args and kwargs are passed to function."""
         mock_func = AsyncMock(return_value="success")
 
-        result = await call_with_retry(
-            mock_func, "arg1", "arg2", kwarg1="value1", kwarg2="value2"
-        )
+        result = await call_with_retry(mock_func, "arg1", "arg2", kwarg1="value1", kwarg2="value2")
 
         assert result == "success"
-        mock_func.assert_called_once_with(
-            "arg1", "arg2", kwarg1="value1", kwarg2="value2"
-        )
+        mock_func.assert_called_once_with("arg1", "arg2", kwarg1="value1", kwarg2="value2")
 
     @pytest.mark.asyncio
     async def test_retry_config_validation(self):
@@ -417,9 +399,7 @@ class TestIntegrationScenarios:
         with pytest.raises(Exception, match="service down"):
             await call_with_retry(
                 failing_service,
-                retry_config=RetryConfig(
-                    max_attempts=2, base_delay=0.001, jitter=False
-                ),
+                retry_config=RetryConfig(max_attempts=2, base_delay=0.001, jitter=False),
                 circuit_breaker=cb,
             )
 
@@ -447,12 +427,9 @@ class TestIntegrationScenarios:
                 raise Exception("retry")
             return "success"
 
-        start = time.time()
         result = await call_with_retry(
             track_time,
-            retry_config=RetryConfig(
-                max_attempts=3, base_delay=0.1, exponential_base=2.0, jitter=False
-            ),
+            retry_config=RetryConfig(max_attempts=3, base_delay=0.1, exponential_base=2.0, jitter=False),
         )
 
         assert result == "success"

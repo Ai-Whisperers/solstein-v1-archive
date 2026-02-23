@@ -48,28 +48,17 @@ class GrowthScorer:
 
         profile.scoring_breakdown = {}
 
-        growth_score, growth_expl = self.growth_momentum_scorer.score(
-            profile.financials
-        )
-        financial_health_score, fin_expl = self.financial_health_scorer.score(
-            profile.financials
-        )
-        competitive_position_score, comp_expl = self.competitive_position_scorer.score(
-            profile
-        )
+        growth_score, growth_expl = self.growth_momentum_scorer.score(profile.financials)
+        financial_health_score, fin_expl = self.financial_health_scorer.score(profile.financials)
+        competitive_position_score, comp_expl = self.competitive_position_scorer.score(profile)
 
         profile.growth_score = growth_score
         profile.financial_health_score = financial_health_score
         profile.competitive_position_score = competitive_position_score
 
-        if all(
-            s is not None
-            for s in [growth_score, financial_health_score, competitive_position_score]
-        ):
+        if all(s is not None for s in [growth_score, financial_health_score, competitive_position_score]):
             profile.composite_score = round(
-                (growth_score * 0.4)
-                + (financial_health_score * 0.3)
-                + (competitive_position_score * 0.3),
+                (growth_score * 0.4) + (financial_health_score * 0.3) + (competitive_position_score * 0.3),
                 2,
             )
         else:
@@ -84,9 +73,7 @@ class GrowthScorer:
 
         return profile
 
-    def _calculate_growth_score(
-        self, financials: FinancialMetric
-    ) -> tuple[float, ScoringExplanation]:  # noqa: E501
+    def _calculate_growth_score(self, financials: FinancialMetric) -> tuple[float, ScoringExplanation]:  # noqa: E501
         """Calculate growth score (0-10) with explanation."""
         cfg = self.config.growth
         score = cfg.base_score
@@ -176,9 +163,7 @@ class GrowthScorer:
         explanation.final_score = final_score
         return final_score, explanation
 
-    def _calculate_financial_health_score(
-        self, financials: FinancialMetric
-    ) -> tuple[float, ScoringExplanation]:  # noqa: E501
+    def _calculate_financial_health_score(self, financials: FinancialMetric) -> tuple[float, ScoringExplanation]:  # noqa: E501
         """Calculate financial health score (0-10) with explanation."""
         cfg = self.config.financial
         score = cfg.base_score
@@ -257,9 +242,7 @@ class GrowthScorer:
             elif ratio > cfg.cushion_med_ratio:
                 adj = cfg.cushion_med_bonus
             elif (
-                ratio < cfg.cushion_thin_ratio
-                and financials.profit_margin is not None
-                and financials.profit_margin < 5
+                ratio < cfg.cushion_thin_ratio and financials.profit_margin is not None and financials.profit_margin < 5
             ):  # noqa: E501
                 adj = cfg.cushion_thin_penalty
 
@@ -278,9 +261,7 @@ class GrowthScorer:
         explanation.final_score = final_score
         return final_score, explanation
 
-    def _calculate_competitive_position_score(
-        self, profile: Company
-    ) -> tuple[float, ScoringExplanation]:  # noqa: E501
+    def _calculate_competitive_position_score(self, profile: Company) -> tuple[float, ScoringExplanation]:  # noqa: E501
         """Calculate competitive position score (0-10) with explanation."""
         cfg = self.config.competitive
         score = cfg.base_score
@@ -375,11 +356,7 @@ class MarketAnalyzer:
         revenues = [p.financials.revenue for p in profiles if p.financials.revenue]
         market_size = sum(revenues) if revenues else 0.0
 
-        growth_rates = [
-            p.financials.growth_rate
-            for p in profiles
-            if p.financials.growth_rate is not None
-        ]
+        growth_rates = [p.financials.growth_rate for p in profiles if p.financials.growth_rate is not None]
         avg_growth = sum(growth_rates) / len(growth_rates) if growth_rates else 0.0
 
         # Calculate CR4
@@ -424,17 +401,13 @@ class MarketAnalyzer:
             trends.append("Cloud-Native Infrastructure")
         return trends
 
-    def _generate_recommendations(
-        self, profiles: list[Company], avg_growth: float, cr4: float
-    ) -> list[str]:  # noqa: E501
+    def _generate_recommendations(self, profiles: list[Company], avg_growth: float, cr4: float) -> list[str]:  # noqa: E501
         """Generate strategic recommendations based on market metrics."""
         recommendations = []
         if avg_growth > 15:
             recommendations.append("Aggressive expansion into high-growth verticals")
         if cr4 > 70:
-            recommendations.append(
-                "Focus on niche differentiation to compete with market leaders"
-            )  # noqa: E501
+            recommendations.append("Focus on niche differentiation to compete with market leaders")  # noqa: E501
         else:
             recommendations.append("Consolidation opportunities in a fragmented market")
         return recommendations
@@ -450,11 +423,7 @@ class MarketAnalyzer:
 
     def _calculate_growth_metrics(self, profiles: list[Company]) -> dict[str, float]:
         """Calculate market growth metrics."""
-        growth_rates = [
-            p.financials.growth_rate
-            for p in profiles
-            if p.financials.growth_rate is not None
-        ]
+        growth_rates = [p.financials.growth_rate for p in profiles if p.financials.growth_rate is not None]
 
         if not growth_rates:
             return {"average": 0.0, "median": 0.0, "high_growth_count": 0}
@@ -464,9 +433,7 @@ class MarketAnalyzer:
 
         return {
             "average": sum(growth_rates) / n,
-            "median": sorted_rates[n // 2]
-            if n % 2 == 1
-            else (sorted_rates[n // 2 - 1] + sorted_rates[n // 2]) / 2,
+            "median": sorted_rates[n // 2] if n % 2 == 1 else (sorted_rates[n // 2 - 1] + sorted_rates[n // 2]) / 2,
             "high_growth_count": len([r for r in growth_rates if r > 20]),
             "declining_count": len([r for r in growth_rates if r < 0]),
         }
@@ -474,11 +441,7 @@ class MarketAnalyzer:
     def _calculate_financial_metrics(self, profiles: list[Company]) -> dict[str, Any]:
         """Calculate market financial metrics."""
         revenues = [p.financials.revenue for p in profiles if p.financials.revenue]
-        profits = [
-            p.financials.profit_margin
-            for p in profiles
-            if p.financials.profit_margin is not None
-        ]
+        profits = [p.financials.profit_margin for p in profiles if p.financials.profit_margin is not None]
 
         metrics = {
             "total_revenue": sum(revenues) if revenues else 0,
@@ -511,16 +474,12 @@ class MarketAnalyzer:
 
         return {
             "ai_adoption": ai_counts,
-            "average_saas_maturity": sum(saas_scores) / len(saas_scores)
-            if saas_scores
-            else 0,
+            "average_saas_maturity": sum(saas_scores) / len(saas_scores) if saas_scores else 0,
             "unique_technologies": len(all_tech),
             "most_common_technologies": self._most_common_tech(profiles),
         }
 
-    def _most_common_tech(
-        self, profiles: list[Company], top_n: int = 5
-    ) -> list[tuple[str, int]]:
+    def _most_common_tech(self, profiles: list[Company], top_n: int = 5) -> list[tuple[str, int]]:
         """Find most common technologies in the market."""
         tech_counts: dict[str, int] = {}
 
@@ -530,16 +489,12 @@ class MarketAnalyzer:
 
         return sorted(tech_counts.items(), key=lambda x: x[1], reverse=True)[:top_n]
 
-    def _calculate_competitive_intensity(
-        self, profiles: list[Company]
-    ) -> dict[str, Any]:
+    def _calculate_competitive_intensity(self, profiles: list[Company]) -> dict[str, Any]:
         """Calculate competitive intensity metrics."""
         threat_counts = {"Low": 0, "Medium": 0, "High": 0, "Critical": 0}
 
         for profile in profiles:
-            threat_counts[profile.threat_level] = (
-                threat_counts.get(profile.threat_level, 0) + 1
-            )
+            threat_counts[profile.threat_level] = threat_counts.get(profile.threat_level, 0) + 1
 
         # Calculate Herfindahl-Hirschman Index (HHI) approximation
         revenues = [p.financials.revenue for p in profiles if p.financials.revenue]
@@ -554,9 +509,7 @@ class MarketAnalyzer:
             "threat_distribution": threat_counts,
             "hhi": hhi,
             "market_concentration": self._interpret_hhi(hhi),
-            "direct_competitors": len(
-                [p for p in profiles if p.threat_level in ["High", "Critical"]]
-            ),
+            "direct_competitors": len([p for p in profiles if p.threat_level in ["High", "Critical"]]),
         }
 
     def _interpret_hhi(self, hhi: float) -> str:
@@ -574,14 +527,9 @@ class MarketAnalyzer:
         """Generate basic SWOT analysis based on company data."""
         return {
             "Strengths": ["Strong Growth"]
-            if any(
-                p.financials.growth_rate and p.financials.growth_rate > 20
-                for p in profiles
-            )
+            if any(p.financials.growth_rate and p.financials.growth_rate > 20 for p in profiles)
             else ["Established Players"],  # noqa: E501
-            "Weaknesses": ["Fragmented Market"]
-            if len(profiles) > 10
-            else ["Niche Market"],  # noqa: E501
+            "Weaknesses": ["Fragmented Market"] if len(profiles) > 10 else ["Niche Market"],  # noqa: E501
             "Opportunities": ["AI Adoption", "Regional Expansion"],
             "Threats": ["High Barriers to Entry", "Regulatory Changes"],
         }

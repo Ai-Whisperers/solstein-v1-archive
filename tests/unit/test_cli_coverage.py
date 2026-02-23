@@ -57,9 +57,7 @@ def test_verbose_logger(runner: CliRunner) -> None:
 
 
 @patch("solstein.cli.BatchExtractor")
-def test_extract_command(
-    mock_batch_cls: MagicMock, runner: CliRunner, tmp_path: Path
-) -> None:
+def test_extract_command(mock_batch_cls: MagicMock, runner: CliRunner, tmp_path: Path) -> None:
     mock_batch = MagicMock()
     mock_batch_cls.return_value = mock_batch
 
@@ -107,9 +105,7 @@ def test_export_excel_command(
 
 
 @patch("solstein.cli.GrowthScorer")
-def test_score_command(
-    mock_scorer_cls: MagicMock, runner: CliRunner, mock_profiles: Path, tmp_path: Path
-) -> None:
+def test_score_command(mock_scorer_cls: MagicMock, runner: CliRunner, mock_profiles: Path, tmp_path: Path) -> None:
     mock_scorer = MagicMock()
     mock_scorer_cls.return_value = mock_scorer
 
@@ -137,12 +133,8 @@ def test_score_command(
     assert "Failed to calculate scores" in res.output
 
 
-def test_analyze_market_command(
-    runner: CliRunner, mock_profiles: Path, tmp_path: Path
-) -> None:
-    res = runner.invoke(
-        cli, ["analyze-market", str(mock_profiles), "-n", "Test Market"]
-    )
+def test_analyze_market_command(runner: CliRunner, mock_profiles: Path, tmp_path: Path) -> None:
+    res = runner.invoke(cli, ["analyze-market", str(mock_profiles), "-n", "Test Market"])
     assert res.exit_code == 0
     assert "Market Analysis:" in res.output
     assert "Companies: 2" in res.output
@@ -155,9 +147,7 @@ def test_analyze_market_command(
     assert "Failed to analyze market" in res.output
 
 
-def test_compare_command(
-    runner: CliRunner, mock_profiles: Path, tmp_path: Path
-) -> None:
+def test_compare_command(runner: CliRunner, mock_profiles: Path, tmp_path: Path) -> None:
     res = runner.invoke(cli, ["compare", "c1", "c2", str(mock_profiles)])
     assert res.exit_code == 0
     assert "Comparing c1 vs c2" in res.output

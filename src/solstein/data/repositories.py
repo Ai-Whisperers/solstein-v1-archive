@@ -58,9 +58,7 @@ class JsonFileRepository(CompanyRepository):
 
         filter_metadata["total_matched"] = len(matched_companies)
 
-        return matched_companies[
-            offset : (offset + limit) if limit else None
-        ], filter_metadata
+        return matched_companies[offset : (offset + limit) if limit else None], filter_metadata
 
     def get_all(
         self,
@@ -86,14 +84,10 @@ class JsonFileRepository(CompanyRepository):
                     if not company_words.intersection(filter_words):
                         match = False
                 if filters.min_revenue and (
-                    not company.financials.revenue
-                    or company.financials.revenue < filters.min_revenue
+                    not company.financials.revenue or company.financials.revenue < filters.min_revenue
                 ):
                     match = False
-                if (
-                    filters.classification
-                    and company.classification != filters.classification
-                ):  # noqa: E501
+                if filters.classification and company.classification != filters.classification:  # noqa: E501
                     match = False
 
                 if match:
@@ -233,9 +227,7 @@ class SupabaseRepository(CompanyRepository):
                 query = query.eq("classification", filters.classification)
             if filters.min_revenue:
                 # Proper cast for JSONB field
-                query = query.filter(
-                    "financials->>revenue", "gte", str(filters.min_revenue)
-                )  # noqa: E501
+                query = query.filter("financials->>revenue", "gte", str(filters.min_revenue))  # noqa: E501
             if filters.min_growth_score:
                 query = query.gte("growth_score", filters.min_growth_score)
             if filters.max_growth_score:
@@ -250,18 +242,11 @@ class SupabaseRepository(CompanyRepository):
         response = query.execute()
         from typing import cast
 
-        return [
-            self._to_domain(cast("dict[str, Any]", record)) for record in response.data
-        ]  # noqa: E501
+        return [self._to_domain(cast("dict[str, Any]", record)) for record in response.data]  # noqa: E501
 
     def get_by_id(self, company_id: str) -> Company | None:
         """Retrieve a specific company by ID."""
-        response = (
-            self.client.table(self.table_name)
-            .select("*")
-            .eq("id", company_id)
-            .execute()
-        )  # noqa: E501
+        response = self.client.table(self.table_name).select("*").eq("id", company_id).execute()  # noqa: E501
         if not response.data:
             return None
         from typing import cast
@@ -277,22 +262,13 @@ class SupabaseRepository(CompanyRepository):
 
     def delete(self, company_id: str) -> bool:
         """Delete a company from Supabase."""
-        response = (
-            self.client.table(self.table_name).delete().eq("id", company_id).execute()
-        )  # noqa: E501
+        response = self.client.table(self.table_name).delete().eq("id", company_id).execute()  # noqa: E501
         logger.info(f"Deleted company {company_id} from Supabase")
         return len(response.data) > 0
 
     def search(self, query: str, field: str = "name") -> list[Company]:
         """Search companies using Supabase ilike."""
-        response = (
-            self.client.table(self.table_name)
-            .select("*")
-            .ilike(field, f"%{query}%")
-            .execute()
-        )  # noqa: E501
+        response = self.client.table(self.table_name).select("*").ilike(field, f"%{query}%").execute()  # noqa: E501
         from typing import cast
 
-        return [
-            self._to_domain(cast("dict[str, Any]", record)) for record in response.data
-        ]  # noqa: E501
+        return [self._to_domain(cast("dict[str, Any]", record)) for record in response.data]  # noqa: E501

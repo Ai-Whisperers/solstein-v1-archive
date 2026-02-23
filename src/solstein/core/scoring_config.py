@@ -117,6 +117,4 @@ class ScoringSettings(BaseModel):
 
     growth: GrowthScoringConfig = Field(default_factory=GrowthScoringConfig)
     financial: FinancialHealthConfig = Field(default_factory=FinancialHealthConfig)
-    competitive: CompetitivePositionConfig = Field(
-        default_factory=CompetitivePositionConfig
-    )
+    competitive: CompetitivePositionConfig = Field(default_factory=CompetitivePositionConfig)

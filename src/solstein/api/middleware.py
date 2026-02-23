@@ -12,9 +12,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     Middleware that injects a unique X-Request-ID and tracks request execution time.
     """
 
-    async def dispatch(
-        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
-    ) -> Response:  # noqa: E501
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:  # noqa: E501
         request_id = str(uuid.uuid4())
         request.state.request_id = request_id  # Ensure visibility in exception handlers
 
@@ -26,9 +24,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # Capture metadata for detailed debugging
             query_params = dict(request.query_params)
 
-            logger.info(
-                f"Aura | {request.method} {request.url.path} | Client: {client_host} | Params: {query_params}"
-            )
+            logger.info(f"Aura | {request.method} {request.url.path} | Client: {client_host} | Params: {query_params}")
 
             try:
                 response = await call_next(request)

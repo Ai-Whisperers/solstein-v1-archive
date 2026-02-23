@@ -148,9 +148,7 @@ class CompanyRecord(Base):
             "competitive_position_score": self.competitive_position_score,
             "composite_score": self.composite_score,
             "scoring_breakdown": self.scoring_breakdown,
-            "last_updated": self.last_updated.isoformat()
-            if self.last_updated
-            else None,
+            "last_updated": self.last_updated.isoformat() if self.last_updated else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
@@ -174,9 +172,7 @@ class ScoringRecord(Base):
     scored_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
     data_sources_used = Column(JSON, nullable=True)
 
-    signals = relationship(
-        "SignalRecord", back_populates="scoring_record", cascade="all, delete-orphan"
-    )
+    signals = relationship("SignalRecord", back_populates="scoring_record", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_company_scored_at", "company_id", "scored_at"),
@@ -210,9 +206,7 @@ class SignalRecord(Base):
     __tablename__ = "signal_records"
 
     id = Column(Integer, primary_key=True, index=True)
-    scoring_record_id = Column(
-        Integer, ForeignKey("scoring_records.id"), nullable=False, index=True
-    )
+    scoring_record_id = Column(Integer, ForeignKey("scoring_records.id"), nullable=False, index=True)
 
     signal_name = Column(String(255), nullable=False, index=True)
     signal_category = Column(String(50), nullable=False)
@@ -228,9 +222,7 @@ class SignalRecord(Base):
 
     scoring_record = relationship("ScoringRecord", back_populates="signals")
 
-    __table_args__ = (
-        Index("ix_signal_name_category", "signal_name", "signal_category"),
-    )
+    __table_args__ = (Index("ix_signal_name_category", "signal_name", "signal_category"),)
 
     def to_dict(self) -> dict:
         """Convert to dictionary representation."""
@@ -243,9 +235,7 @@ class SignalRecord(Base):
             "source_agent": self.source_agent,
             "evidence": self.evidence,
             "confidence": self.confidence,
-            "extracted_at": self.extracted_at.isoformat()
-            if self.extracted_at
-            else None,
+            "extracted_at": self.extracted_at.isoformat() if self.extracted_at else None,
         }
 
 
@@ -258,9 +248,7 @@ class MarketSnapshot(Base):
     __tablename__ = "market_snapshots"
 
     id = Column(Integer, primary_key=True, index=True)
-    snapshot_date = Column(
-        DateTime, nullable=False, index=True, default=lambda: datetime.now(UTC)
-    )
+    snapshot_date = Column(DateTime, nullable=False, index=True, default=lambda: datetime.now(UTC))
 
     total_companies_scored = Column(Integer, nullable=False)
     average_growth_score = Column(Float, nullable=False)
@@ -279,9 +267,7 @@ class MarketSnapshot(Base):
         """Convert to dictionary representation."""
         return {
             "id": self.id,
-            "snapshot_date": self.snapshot_date.isoformat()
-            if self.snapshot_date
-            else None,
+            "snapshot_date": self.snapshot_date.isoformat() if self.snapshot_date else None,
             "total_companies_scored": self.total_companies_scored,
             "average_growth_score": self.average_growth_score,
             "average_financial_score": self.average_financial_score,
@@ -327,9 +313,7 @@ class AuditTrailRecord(Base):
 
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
 
-    __table_args__ = (
-        Index("ix_audit_company_batch", "company_id", "gathering_batch_id"),
-    )
+    __table_args__ = (Index("ix_audit_company_batch", "company_id", "gathering_batch_id"),)
 
     def to_dict(self) -> dict:
         """Convert to dictionary representation."""
@@ -345,12 +329,8 @@ class AuditTrailRecord(Base):
             "financial_health_score": self.financial_health_score,
             "competitive_position_score": self.competitive_position_score,
             "classification": self.classification,
-            "analysis_started_at": self.analysis_started_at.isoformat()
-            if self.analysis_started_at
-            else None,
-            "analysis_completed_at": self.analysis_completed_at.isoformat()
-            if self.analysis_completed_at
-            else None,
+            "analysis_started_at": self.analysis_started_at.isoformat() if self.analysis_started_at else None,
+            "analysis_completed_at": self.analysis_completed_at.isoformat() if self.analysis_completed_at else None,
             "data_completeness": self.data_completeness,
             "confidence_level": self.confidence_level,
             "created_at": self.created_at.isoformat() if self.created_at else None,

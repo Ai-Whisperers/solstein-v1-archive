@@ -67,6 +67,21 @@ nav:
     - "Case Study | Portfolio Analysis": "PITCH/case-study.md"
     - "Commercial Architecture | Finance": "PITCH/business-model.md"
 
+  - "Guides":
+    - "Developer Guide": "guides/developer.md"
+    - "Operator Guide": "guides/operator.md"
+    - "CI/CD Guide": "guides/ci-cd.md"
+    - "Database Guide": "guides/database.md"
+    - "Code Conventions": "guides/code-conventions.md"
+    - "Troubleshooting": "guides/troubleshooting.md"
+    - "Extending Solstein": "guides/extending-solstein.md"
+
+  - "Reference":
+    - "API Reference": "api/reference.md"
+    - "Architecture Decisions": "architecture/decisions.md"
+    - "Architecture Modules": "architecture/modules.md"
+    - "Layer Boundaries": "architecture/layer-boundaries.md"
+
 
 extra:
   social:

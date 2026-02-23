@@ -44,9 +44,7 @@ def test_json_repo_get_all_no_filters(MockLoader, mock_loader_companies, tmp_pat
 
 
 @patch("solstein.data.repositories.CompetitorDataLoader")
-def test_json_repo_get_all_with_filters_and_limit(
-    MockLoader, mock_loader_companies, tmp_path
-):
+def test_json_repo_get_all_with_filters_and_limit(MockLoader, mock_loader_companies, tmp_path):
     mock_instance = MockLoader.return_value
     mock_instance.load_companies.return_value = mock_loader_companies
 

@@ -1,10 +1,10 @@
 """LLM-powered report enhancement module for SolStein."""
 
-import os
-from typing import Any
+from typing import Any, TypeVar
 
 from loguru import logger
 from pydantic import BaseModel, Field
+
 
 class SWOTAnalysis(BaseModel):
     strengths: list[str] = Field(description="Key strengths")
@@ -12,10 +12,14 @@ class SWOTAnalysis(BaseModel):
     opportunities: list[str] = Field(description="Market opportunities")
     threats: list[str] = Field(description="Competitive threats")
 
+
 class StrategicRecommendations(BaseModel):
     recommendations: list[str] = Field(description="Specific actionable recommendations")
 
+
 from ..config import get_settings
+
+TBaseModel = TypeVar("TBaseModel", bound=BaseModel)
 
 
 class LLMReportEnhancer:
@@ -33,8 +37,12 @@ class LLMReportEnhancer:
         self.groq_api_key = settings.groq_api_key
         self.openai_api_key = settings.openai_api_key
         self.fireworks_api_key = settings.fireworks_api_key
-        self.ollama_url = os.environ.get("OLLAMA_URL", "http://localhost:11434")
-        self.ollama_model = os.environ.get("OLLAMA_MODEL", "llama3.2:latest")
+        self.llm_provider = settings.llm_provider
+        self.ollama_url = settings.ollama_url
+        self.ollama_model = settings.ollama_model
+        self.openai_model = settings.openai_model
+        self.groq_model = settings.groq_model
+        self.fireworks_model = settings.fireworks_model
         self._client = None
         self._use_ollama = None
 
@@ -47,6 +55,10 @@ class LLMReportEnhancer:
         return False
 
     def _check_ollama(self) -> bool:
+        provider = self._normalize_provider()
+        if provider not in {"auto", "ollama"}:
+            self._use_ollama = False
+            return False
         if self._use_ollama is not None:
             return self._use_ollama
         try:
@@ -59,11 +71,46 @@ class LLMReportEnhancer:
         return self._use_ollama
 
     def _has_valid_api_key(self) -> bool:
+        provider = self._normalize_provider()
+        if provider == "none":
+            return False
+        if provider == "openai":
+            return bool(self.openai_api_key)
+        if provider == "groq":
+            return bool(self.groq_api_key)
+        if provider == "fireworks":
+            return bool(self.fireworks_api_key)
         return bool(self.groq_api_key or self.openai_api_key or self.fireworks_api_key)
 
-    async def generate_executive_summary(
-        self, company: Any, competitors: list[Any]
-    ) -> str:
+    def _normalize_provider(self) -> str:
+        provider = (self.llm_provider or "auto").strip().lower()
+        allowed = {"auto", "ollama", "fireworks", "openai", "groq", "none"}
+        if provider in allowed:
+            return provider
+        logger.warning(f"Unknown LLM provider '{self.llm_provider}', using 'auto'")
+        return "auto"
+
+    def _get_cloud_provider(self) -> str | None:
+        provider = self._normalize_provider()
+
+        if provider == "none":
+            return None
+        if provider == "openai":
+            return "openai" if self.openai_api_key else None
+        if provider == "groq":
+            return "groq" if self.groq_api_key else None
+        if provider == "fireworks":
+            return "fireworks" if self.fireworks_api_key else None
+
+        if self.fireworks_api_key:
+            return "fireworks"
+        if self.openai_api_key:
+            return "openai"
+        if self.groq_api_key:
+            return "groq"
+        return None
+
+    async def generate_executive_summary(self, company: Any, competitors: list[Any]) -> str:
         """Generate LLM-powered executive summary."""
         company_info = self._format_company(company)
         comp_summary = self._format_competitors(competitors[:10])
@@ -87,9 +134,7 @@ Write in professional, investor-ready language."""
         result = await self._generate(prompt)
         return result or self._fallback_summary(company)
 
-    async def generate_swot_analysis(
-        self, company: Any, competitors: list[Any]
-    ) -> dict[str, list[str]]:
+    async def generate_swot_analysis(self, company: Any, competitors: list[Any]) -> dict[str, list[str]]:
         """Generate LLM-powered SWOT analysis."""
         company_info = self._format_company(company)
         market_context = self._format_competitors(competitors[:5])
@@ -117,9 +162,7 @@ Each list should have 4-6 items. Be specific and data-driven."""
             return result.model_dump()
         return self._fallback_swot(company)
 
-    async def generate_strategic_recommendations(
-        self, company: Any, competitors: list[Any]
-    ) -> list[str]:
+    async def generate_strategic_recommendations(self, company: Any, competitors: list[Any]) -> list[str]:
         """Generate strategic recommendations based on competitive analysis."""
         company_info = self._format_company(company)
         top_threats = self._format_competitors(competitors[:5], format="brief")
@@ -141,13 +184,11 @@ Recommendations should be:
 Return as JSON: {{"recommendations": ["...", "..."]}}"""
 
         result = await self._generate_structured(prompt, StrategicRecommendations)
-        if result:
+        if isinstance(result, StrategicRecommendations):
             return result.recommendations
         return self._fallback_recommendations(company)
 
-    async def generate_competitive_narrative(
-        self, company: Any, competitors: list[Any]
-    ) -> str:
+    async def generate_competitive_narrative(self, company: Any, competitors: list[Any]) -> str:
         """Generate a narrative competitive analysis."""
         company_info = self._format_company(company)
         all_competitors = self._format_competitors(competitors, format="table")
@@ -191,7 +232,7 @@ Write for institutional investors."""
         result = await self._generate(prompt)
         return result or self._fallback_market_insights(companies)
 
-    async def _generate(self, prompt: str, system_prompt: str = None) -> str | None:
+    async def _generate(self, prompt: str, system_prompt: str | None = None) -> str | None:
         """Generate text using available LLM backend."""
         if self._check_ollama():
             return await self._query_ollama(prompt, system_prompt)
@@ -199,10 +240,12 @@ Write for institutional investors."""
             return await self._query_api(prompt, system_prompt)
         return None
 
-    async def _generate_structured(self, prompt: str, schema: type[BaseModel]) -> BaseModel | None:
+    async def _generate_structured(self, prompt: str, schema: type[TBaseModel]) -> TBaseModel | None:
         """Generate structured Pydantic output using available LLM backend."""
-        json_prompt = f"{prompt}\n\nIMPORTANT: Respond ONLY with valid JSON matching this schema: {schema.model_json_schema()}"
-        
+        json_prompt = (
+            f"{prompt}\n\nIMPORTANT: Respond ONLY with valid JSON matching this schema: {schema.model_json_schema()}"
+        )
+
         if self._check_ollama():
             return await self._query_ollama(json_prompt, None, schema)
         if self._has_valid_api_key():
@@ -210,7 +253,10 @@ Write for institutional investors."""
         return None
 
     async def _query_ollama(
-        self, prompt: str, system_prompt: str = None, schema: type[BaseModel] | None = None
+        self,
+        prompt: str,
+        system_prompt: str | None = None,
+        schema: type[BaseModel] | None = None,
     ) -> Any | None:
         """Query local Ollama instance."""
         try:
@@ -220,7 +266,7 @@ Write for institutional investors."""
                 system_prompt
                 or "You are an expert business analyst specializing in technology companies and private equity. Provide concise, data-driven insights."
             )
-            
+
             payload = {
                 "model": self.ollama_model,
                 "messages": [
@@ -233,17 +279,21 @@ Write for institutional investors."""
             if schema:
                 payload["format"] = schema.model_json_schema()
 
-            async with aiohttp.ClientSession() as session, session.post(
-                f"{self.ollama_url}/api/chat",
-                json=payload,
-                timeout=aiohttp.ClientTimeout(total=60),
-            ) as response:
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
+                    f"{self.ollama_url}/api/chat",
+                    json=payload,
+                    timeout=aiohttp.ClientTimeout(total=60),
+                ) as response,
+            ):
                 if response.status == 200:
                     data = await response.json()
                     content = data.get("message", {}).get("content", "")
                     if schema:
                         try:
-                            if "```json" in content: content = content.split("```json")[-1].split("```")[0].strip()
+                            if "```json" in content:
+                                content = content.split("```json")[-1].split("```")[0].strip()
                             return schema.model_validate_json(content)
                         except Exception as e:
                             logger.warning(f"Ollama Pydantic validation failed: {e}")
@@ -253,35 +303,70 @@ Write for institutional investors."""
             logger.warning(f"Ollama query failed: {e}")
         return None
 
-    async def _query_api(self, prompt: str, system_prompt: str = None, schema: type[BaseModel] | None = None) -> Any | None:
+    async def _query_api(
+        self,
+        prompt: str,
+        system_prompt: str | None = None,
+        schema: type[BaseModel] | None = None,
+    ) -> Any | None:
         """Query cloud LLM API."""
         try:
             client = self._get_client()
             if not client:
                 return None
 
+            cloud_provider = self._get_cloud_provider()
+            if not cloud_provider:
+                return None
+
             system = (
                 system_prompt
                 or "You are an expert business analyst specializing in technology companies and private equity. Provide concise, data-driven insights."
             )
-            model="llama-3.1-70b-instruct"
+            if cloud_provider == "fireworks":
+                model = self.fireworks_model
+            elif cloud_provider == "openai":
+                model = self.openai_model
+            else:
+                model = self.groq_model
+
+            def _clean_json(text: str) -> str:
+                if "```json" in text:
+                    return text.split("```json")[-1].split("```")[0].strip()
+                if "```" in text:
+                    return text.split("```")[-2].strip()
+                return text.strip()
 
             if hasattr(client, "chat"):
-                if schema and hasattr(client.chat.completions, "parse") and (self.openai_api_key or model.startswith("gpt")):
+                use_parse = (
+                    schema is not None
+                    and cloud_provider == "openai"
+                    and hasattr(client, "beta")
+                    and hasattr(client.beta, "chat")
+                    and hasattr(client.beta.chat.completions, "parse")
+                )
+
+                if use_parse:
+                    if schema is None:
+                        raise RuntimeError("Schema required for parse")
+                    schema_model: type[BaseModel] = schema
                     response = await client.beta.chat.completions.parse(
                         model=model,
-                        messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-                        temperature=0.3, max_tokens=2000, response_format=schema
+                        messages=[
+                            {"role": "system", "content": system},
+                            {"role": "user", "content": prompt},
+                        ],
+                        temperature=0.3,
+                        max_tokens=2000,
+                        response_format=schema_model,
                     )
                     return response.choices[0].message.parsed
-                elif schema:
-                    response = await client.chat.completions.create(
-                        model=model,
-                        messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-                        temperature=0.3, max_tokens=2000, response_format={"type": "json_object"}
-                    )
-                    return schema.model_validate_json(response.choices[0].message.content)
-                else:
+
+                if schema:
+                    create_kwargs: dict[str, Any] = {}
+                    if cloud_provider in {"openai", "fireworks"}:
+                        create_kwargs["response_format"] = {"type": "json_object"}
+
                     response = await client.chat.completions.create(
                         model=model,
                         messages=[
@@ -290,8 +375,23 @@ Write for institutional investors."""
                         ],
                         temperature=0.3,
                         max_tokens=2000,
+                        **create_kwargs,
                     )
-                    return response.choices[0].message.content
+                    content = response.choices[0].message.content
+                    if not content:
+                        raise RuntimeError("Empty response content")
+                    return schema.model_validate_json(_clean_json(content))
+
+                response = await client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": prompt},
+                    ],
+                    temperature=0.3,
+                    max_tokens=2000,
+                )
+                return response.choices[0].message.content
         except Exception as e:
             logger.warning(f"API query failed: {e}")
         return None
@@ -301,7 +401,8 @@ Write for institutional investors."""
         if self._client:
             return self._client
 
-        if self.fireworks_api_key:
+        provider = self._get_cloud_provider()
+        if provider == "fireworks":
             try:
                 from openai import AsyncOpenAI
 
@@ -312,7 +413,7 @@ Write for institutional investors."""
             except ImportError:
                 pass
 
-        elif self.openai_api_key:
+        elif provider == "openai":
             try:
                 from openai import AsyncOpenAI
 
@@ -320,12 +421,14 @@ Write for institutional investors."""
             except ImportError:
                 pass
 
-        elif self.groq_api_key:
+        elif provider == "groq":
             try:
-                from groq import AsyncGroq
+                import importlib
 
-                self._client = AsyncGroq(api_key=self.groq_api_key)
-            except ImportError:
+                groq_mod = importlib.import_module("groq")
+                async_groq = groq_mod.AsyncGroq
+                self._client = async_groq(api_key=self.groq_api_key)
+            except Exception:
                 pass
 
         return self._client
@@ -417,9 +520,7 @@ expanding market presence in adjacent segments."""
             strengths.append(f"Solid revenue scale: €{company.financials.revenue:.1f}M")
 
         if company.revenue_cagr_3yr and company.revenue_cagr_3yr > 20:
-            strengths.append(
-                f"Strong growth trajectory: {company.revenue_cagr_3yr}% CAGR"
-            )
+            strengths.append(f"Strong growth trajectory: {company.revenue_cagr_3yr}% CAGR")
 
         if company.ai_score is not None and company.ai_score < 3:
             weaknesses.append(f"Limited AI capabilities: {company.ai_score}/10")

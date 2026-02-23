@@ -52,9 +52,7 @@ class CompetitorDataLoader:
         self._cache[cache_key] = companies
         return companies
 
-    def _load_from_json(
-        self, json_path: Path, limit: int | None = None
-    ) -> list[Company]:
+    def _load_from_json(self, json_path: Path, limit: int | None = None) -> list[Company]:
         """Load companies from JSON file."""
         try:
             with open(json_path) as f:
@@ -80,9 +78,7 @@ class CompetitorDataLoader:
             logger.error(f"Error loading JSON from {json_path}: {e}")
             return []
 
-    def _convert_to_domain_company(
-        self, raw_data: dict[str, Any], index: int
-    ) -> Company:
+    def _convert_to_domain_company(self, raw_data: dict[str, Any], index: int) -> Company:
         """Convert raw JSON data to Company domain entity."""
         company_name = raw_data.get("company_name", f"Company {index}")
         folder = raw_data.get("folder", f"company-{index}")
@@ -93,14 +89,12 @@ class CompetitorDataLoader:
 
         latest_revenue = None
         latest_growth = None
-        latest_year = None
         revenue_confidence = ConfidenceLevel.UNKNOWN
 
         if timeline:
             latest = timeline[0]
             latest_revenue = latest.get("eur_millions")
             latest_growth = latest.get("yoy_growth_pct")
-            latest_year = latest.get("year")
             revenue_confidence = self._convert_confidence(latest.get("confidence"))
 
         # Get CAGR from data
@@ -117,9 +111,7 @@ class CompetitorDataLoader:
                     current_rev = timeline[0].get("eur_millions", 0)
                     past_rev = timeline[years_back - 1].get("eur_millions", 0)
                     if current_rev and past_rev and past_rev > 0:
-                        calculated_cagr_3yr = (
-                            (current_rev / past_rev) ** (1 / years_back) - 1
-                        ) * 100
+                        calculated_cagr_3yr = ((current_rev / past_rev) ** (1 / years_back) - 1) * 100
             except (ZeroDivisionError, ValueError) as e:
                 logger.debug(f"Could not calculate 3-year CAGR from timeline: {e}")
 
@@ -166,10 +158,7 @@ class CompetitorDataLoader:
                         net_profit = raw_metrics[key]
                         # Try to find corresponding revenue
                         for rev_key in raw_metrics.keys():
-                            if (
-                                "revenue" in rev_key.lower()
-                                or "sales" in rev_key.lower()
-                            ):
+                            if "revenue" in rev_key.lower() or "sales" in rev_key.lower():
                                 net_revenue_key = rev_key
                                 break
                         break
@@ -187,9 +176,7 @@ class CompetitorDataLoader:
                                 np_val *= 1.18
 
                             # Parse revenue
-                            rev_match = re.search(
-                                r"([\d.]+)", str(raw_metrics[net_revenue_key])
-                            )
+                            rev_match = re.search(r"([\d.]+)", str(raw_metrics[net_revenue_key]))
                             if rev_match:
                                 rev_val = float(rev_match.group(1))
                                 if "dkk" in str(raw_metrics[net_revenue_key]).lower():
@@ -216,7 +203,6 @@ class CompetitorDataLoader:
 
         # Extract employees
         employees_data = raw_data.get("employees", {})
-        employee_timeline = employees_data.get("timeline", [])
         employee_count_raw = employees_data.get("latest_headcount")
         employee_count = int(employee_count_raw) if employee_count_raw else None
         employee_cagr = employees_data.get("employee_cagr_pct")
@@ -265,25 +251,15 @@ class CompetitorDataLoader:
             revenue=latest_revenue,
             revenue_confidence=revenue_confidence,
             growth_rate=latest_growth,
-            growth_confidence=ConfidenceLevel.ESTIMATED
-            if latest_growth
-            else ConfidenceLevel.UNKNOWN,
+            growth_confidence=ConfidenceLevel.ESTIMATED if latest_growth else ConfidenceLevel.UNKNOWN,
             employees=employee_count,
-            employees_confidence=ConfidenceLevel.CONFIRMED
-            if employee_count
-            else ConfidenceLevel.UNKNOWN,
+            employees_confidence=ConfidenceLevel.CONFIRMED if employee_count else ConfidenceLevel.UNKNOWN,
             profit_margin=profit_margin,
-            margin_confidence=ConfidenceLevel.CONFIRMED
-            if profit_margin
-            else ConfidenceLevel.UNKNOWN,
+            margin_confidence=ConfidenceLevel.CONFIRMED if profit_margin else ConfidenceLevel.UNKNOWN,
             funding_raised=total_funding_eur,
-            funding_confidence=ConfidenceLevel.ESTIMATED
-            if total_funding_eur
-            else ConfidenceLevel.UNKNOWN,
+            funding_confidence=ConfidenceLevel.ESTIMATED if total_funding_eur else ConfidenceLevel.UNKNOWN,
             valuation=latest_valuation_eur,
-            valuation_confidence=ConfidenceLevel.ESTIMATED
-            if latest_valuation_eur
-            else ConfidenceLevel.UNKNOWN,
+            valuation_confidence=ConfidenceLevel.ESTIMATED if latest_valuation_eur else ConfidenceLevel.UNKNOWN,
         )
 
         # Determine tier based on revenue
@@ -294,9 +270,7 @@ class CompetitorDataLoader:
             id=folder.lower().replace(" ", "-").replace("/", "-"),
             name=company_name,
             industry="Energy Software",
-            description=raw_data.get(
-                "description", "Competitor in energy software market"
-            ),
+            description=raw_data.get("description", "Competitor in energy software market"),
             website=None,
             headquarters=self._estimate_headquarters(folder),
             founded_year=None,
@@ -434,9 +408,7 @@ class CompetitorDataLoader:
             return None
 
         # Handle ranges like "EUR 30-60M" - use midpoint
-        range_match = re.search(
-            r"(EUR|\$|USD|GBP)\s*([\d.]+)\s*[-–]\s*([\d.]+)\s*(M|B)", text
-        )
+        range_match = re.search(r"(EUR|\$|USD|GBP)\s*([\d.]+)\s*[-–]\s*([\d.]+)\s*(M|B)", text)
         if range_match:
             try:
                 curr = range_match.group(1)
@@ -464,13 +436,7 @@ class CompetitorDataLoader:
                         amount = float(match.group(2))
                         mag = match.group(3)
                         mult = 1_000_000 if mag.startswith("M") else 1_000_000_000
-                        rate = (
-                            1.0
-                            if curr in ["EUR", "$", "USD"]
-                            else 1.18
-                            if curr in ["GBP", "£"]
-                            else 0.60
-                        )
+                        rate = 1.0 if curr in ["EUR", "$", "USD"] else 1.18 if curr in ["GBP", "£"] else 0.60
                         return amount * mult * rate
                     except (ValueError, TypeError, AttributeError) as e:
                         logger.debug(f"Could not parse market cap: {e}")
@@ -613,9 +579,7 @@ class BondYieldData:
 class BondYieldLoader:
     """Loader for 10-year US Treasury bond yields."""
 
-    DEFAULT_DATA_PATH = (
-        Path(__file__).parent.parent.parent.parent / "data" / "bond_yield.csv"
-    )
+    DEFAULT_DATA_PATH = Path(__file__).parent.parent.parent.parent / "data" / "bond_yield.csv"
 
     def __init__(self, data_path: Path | None = None):
         self.data_path = data_path or self.DEFAULT_DATA_PATH
@@ -663,11 +627,7 @@ class SP500MembershipData:
 class SP500MembershipLoader:
     """Loader for S&P 500 membership history."""
 
-    DEFAULT_DATA_PATH = (
-        Path(__file__).parent.parent.parent.parent
-        / "data"
-        / "snp_500_add_removal_dates.csv"
-    )
+    DEFAULT_DATA_PATH = Path(__file__).parent.parent.parent.parent / "data" / "snp_500_add_removal_dates.csv"
 
     def __init__(self, data_path: Path | None = None):
         self.data_path = data_path or self.DEFAULT_DATA_PATH
@@ -690,10 +650,7 @@ class SP500MembershipLoader:
                 date_added = pd.to_datetime(row["Date_Added"]).item().date()
 
             date_removed = None
-            if (
-                pd.notna(row["Date_Removed"]).item()
-                and str(row["Date_Removed"]) != "NA"
-            ):
+            if pd.notna(row["Date_Removed"]).item() and str(row["Date_Removed"]) != "NA":
                 date_removed = pd.to_datetime(row["Date_Removed"]).item().date()
 
             memberships[ticker] = {

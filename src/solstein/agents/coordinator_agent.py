@@ -10,9 +10,9 @@ import operator
 from datetime import UTC, datetime
 from typing import Annotated, Any
 
+from langgraph.graph import END, START, StateGraph
 from loguru import logger
 from typing_extensions import TypedDict
-from langgraph.graph import StateGraph, START, END
 
 from ..api.services.drill_down_service import get_drill_down_service
 from ..domain.models import (
@@ -42,6 +42,7 @@ class AgentState(TypedDict):
     aggregated: AggregatedDataRecord | None
     signals: SignalExtractionRecord | None
 
+
 class CoordinatorAgent:
     """Coordinates specialist agents and aggregates results via LangGraph."""
 
@@ -67,7 +68,7 @@ class CoordinatorAgent:
 
             self.logger.info(f"Aura | Stage: Gathering | Spawning {len(agent_tasks)} specialist agents")
             results = await asyncio.gather(*agent_tasks, return_exceptions=True)
-            
+
             valid_results = []
             errors = []
             for r in results:
@@ -76,8 +77,7 @@ class CoordinatorAgent:
                     errors.append(str(r))
                 elif isinstance(r, AgentTaskResult):
                     self.logger.info(
-                        f"Aura | {r.agent_name}: {len(r.raw_sources)} sources, "
-                        f"{len(r.extracted_facts)} facts"
+                        f"Aura | {r.agent_name}: {len(r.raw_sources)} sources, {len(r.extracted_facts)} facts"
                     )
                     valid_results.append(r)
             return {"agent_results": valid_results, "errors": errors}
@@ -90,13 +90,15 @@ class CoordinatorAgent:
             return {"raw_records": raw_records}
 
         async def logic_fusion(state: AgentState):
-            if not state.get("raw_records"): return {}
+            if not state.get("raw_records"):
+                return {}
             self.logger.info("Aura | Stage: Logic Fusion | Aggregating facts")
             aggregated = self._aggregate_facts(state["raw_records"])
             return {"aggregated": aggregated}
 
         async def extract_signals_node(state: AgentState):
-            if not state.get("aggregated"): return {}
+            if not state.get("aggregated"):
+                return {}
             self.logger.info("Aura | Stage: Signal Extraction | Parsing business signals")
             signals = self._extract_signals(state["aggregated"])
             return {"signals": signals}
@@ -166,9 +168,7 @@ class CoordinatorAgent:
                 audit_trail.data_completeness = self._calculate_completeness(audit_trail.aggregated_facts)
                 audit_trail.confidence_level = self._determine_confidence_level(audit_trail.aggregated_facts)
 
-            audit_trail.analysis_duration_seconds = (
-                audit_trail.analysis_completed_at - start_time
-            ).total_seconds()
+            audit_trail.analysis_duration_seconds = (audit_trail.analysis_completed_at - start_time).total_seconds()
 
             self.logger.info(
                 f"Aura | Analysis Sequence Finalized | "
@@ -246,9 +246,7 @@ class CoordinatorAgent:
             source_agreement = len(sources_found) / max(1, len(raw_record.sources) / 3)
             source_agreement = min(1.0, source_agreement)
 
-            avg_credibility = sum(s["credibility"] for s in sources_found) / len(
-                sources_found
-            )
+            avg_credibility = sum(s["credibility"] for s in sources_found) / len(sources_found)
 
             confidence = source_agreement * 0.5 + avg_credibility * 0.5
 
@@ -264,9 +262,7 @@ class CoordinatorAgent:
         aggregated.update_quality_metrics()
         return aggregated
 
-    def _extract_signals(
-        self, aggregated: AggregatedDataRecord
-    ) -> SignalExtractionRecord:
+    def _extract_signals(self, aggregated: AggregatedDataRecord) -> SignalExtractionRecord:
         """Extract business signals from aggregated facts."""
         signals = SignalExtractionRecord(
             company_id=aggregated.company_id,
@@ -297,9 +293,7 @@ class CoordinatorAgent:
                 )
             )
 
-        contributor_facts = [
-            f for f in aggregated.facts if "contributor" in f.fact_type
-        ]
+        contributor_facts = [f for f in aggregated.facts if "contributor" in f.fact_type]
         if contributor_facts:
             signals.signals.append(
                 SignalExtraction(

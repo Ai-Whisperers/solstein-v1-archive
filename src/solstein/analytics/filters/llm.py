@@ -1,11 +1,10 @@
 """LLM-based company filtering using natural language criteria."""
 
-import json
-import os
 from typing import Any
 
 from loguru import logger
 from pydantic import BaseModel, Field
+
 
 class FilterResponse(BaseModel):
     matches: bool = Field(description="Whether the company matches the criteria")
@@ -108,13 +107,49 @@ class LLMFilter:
         self.groq_api_key = settings.groq_api_key
         self.openai_api_key = settings.openai_api_key
         self.fireworks_api_key = settings.fireworks_api_key
-        self.ollama_url = os.environ.get("OLLAMA_URL", "http://localhost:11434")
-        self.ollama_model = os.environ.get("OLLAMA_MODEL", "llama3.2:latest")
+        self.llm_provider = settings.llm_provider
+        self.ollama_url = settings.ollama_url
+        self.ollama_model = settings.ollama_model
+        self.openai_model = settings.openai_model
+        self.groq_model = settings.groq_model
+        self.fireworks_model = settings.fireworks_model
         self._client = None
         self._keyword_filter = KeywordFilter()
         self._use_ollama = None
 
+    def _normalize_provider(self) -> str:
+        provider = (self.llm_provider or "auto").strip().lower()
+        allowed = {"auto", "ollama", "fireworks", "openai", "groq", "none"}
+        if provider in allowed:
+            return provider
+        logger.warning(f"Unknown LLM provider '{self.llm_provider}', using 'auto'")
+        return "auto"
+
+    def _get_cloud_provider(self) -> str | None:
+        provider = self._normalize_provider()
+
+        if provider == "none":
+            return None
+        if provider == "openai":
+            return "openai" if self.openai_api_key else None
+        if provider == "groq":
+            return "groq" if self.groq_api_key else None
+        if provider == "fireworks":
+            return "fireworks" if self.fireworks_api_key else None
+
+        if self.fireworks_api_key:
+            return "fireworks"
+        if self.openai_api_key:
+            return "openai"
+        if self.groq_api_key:
+            return "groq"
+        return None
+
     def _check_ollama(self) -> bool:
+        provider = self._normalize_provider()
+        if provider not in {"auto", "ollama"}:
+            self._use_ollama = False
+            return False
         if self._use_ollama is not None:
             return self._use_ollama
         try:
@@ -128,21 +163,33 @@ class LLMFilter:
 
     def _get_client(self):
         if self._client is None:
-            if self.fireworks_api_key:
-                from openai import AsyncOpenAI
+            provider = self._get_cloud_provider()
+            if provider == "fireworks":
+                try:
+                    from openai import AsyncOpenAI
 
-                self._client = AsyncOpenAI(
-                    api_key=self.fireworks_api_key,
-                    base_url="https://api.fireworks.ai/inference/v1",
-                )
-            elif self.openai_api_key:
-                from openai import AsyncOpenAI
+                    self._client = AsyncOpenAI(
+                        api_key=self.fireworks_api_key,
+                        base_url="https://api.fireworks.ai/inference/v1",
+                    )
+                except Exception:
+                    self._client = None
+            elif provider == "openai":
+                try:
+                    from openai import AsyncOpenAI
 
-                self._client = AsyncOpenAI(api_key=self.openai_api_key)
-            elif self.groq_api_key:
-                from groq import AsyncGroq
+                    self._client = AsyncOpenAI(api_key=self.openai_api_key)
+                except Exception:
+                    self._client = None
+            elif provider == "groq":
+                try:
+                    import importlib
 
-                self._client = AsyncGroq(api_key=self.groq_api_key)
+                    groq_mod = importlib.import_module("groq")
+                    async_groq = groq_mod.AsyncGroq
+                    self._client = async_groq(api_key=self.groq_api_key)
+                except Exception:
+                    self._client = None
         return self._client
 
     async def matches_criteria(self, company: Any, criteria: str) -> tuple[bool, str]:
@@ -173,13 +220,16 @@ class LLMFilter:
         return self._keyword_filter.matches_criteria(company, criteria)
 
     def _has_valid_api_key(self) -> bool:
-        if self.groq_api_key:
-            return True
-        if self.openai_api_key:
-            return True
-        if self.fireworks_api_key:
-            return True
-        return False
+        provider = self._normalize_provider()
+        if provider == "none":
+            return False
+        if provider == "openai":
+            return bool(self.openai_api_key)
+        if provider == "groq":
+            return bool(self.groq_api_key)
+        if provider == "fireworks":
+            return bool(self.fireworks_api_key)
+        return bool(self.groq_api_key or self.openai_api_key or self.fireworks_api_key)
 
     async def _query_ollama(self, company: Any, criteria: str) -> tuple[bool, str]:
         """Query local Ollama instance."""
@@ -241,6 +291,10 @@ Does this company match? JSON only."""
         if not client:
             return self._keyword_filter.matches_criteria(company, criteria)
 
+        provider = self._get_cloud_provider()
+        if not provider:
+            return self._keyword_filter.matches_criteria(company, criteria)
+
         company_info = self._format_company_info(company)
 
         system_prompt = """You are a company analysis assistant. Given a company profile and a filter criteria, determine if the company matches. Respond ONLY with JSON: {"matches": true/false, "reasoning": "..."}"""
@@ -253,16 +307,21 @@ Filter Criteria: "{criteria}"
 Does this company match? JSON only."""
 
         try:
-            if self.fireworks_api_key:
-                model = "qwen2-72b-instruct"
-            elif self.openai_api_key:
-                model = "gpt-4o-mini"
-            elif self.groq_api_key:
-                model = "llama-3.3-70b-versatile"
+            if provider == "fireworks":
+                model = self.fireworks_model
+            elif provider == "openai":
+                model = self.openai_model
             else:
-                model = "gpt-4o-mini"
+                model = self.groq_model
 
-            if hasattr(client.chat.completions, "parse") and (self.openai_api_key or model.startswith("gpt")):
+            use_parse = (
+                provider == "openai"
+                and hasattr(client, "beta")
+                and hasattr(client.beta, "chat")
+                and hasattr(client.beta.chat.completions, "parse")
+            )
+
+            if use_parse:
                 response = await client.beta.chat.completions.parse(
                     model=model,
                     messages=[
@@ -276,21 +335,27 @@ Does this company match? JSON only."""
                 result = response.choices[0].message.parsed
                 if result:
                     return result.matches, result.reasoning
-                raise Exception("Empty parsed response")
-            else:
-                response = await client.chat.completions.create(
-                    model=model,
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                    ],
-                    temperature=0.1,
-                    max_tokens=200,
-                    response_format={"type": "json_object"},
-                )
-                result_text = response.choices[0].message.content
-                result = FilterResponse.model_validate_json(result_text)
-                return result.matches, result.reasoning
+                raise RuntimeError("Empty parsed response")
+
+            create_kwargs = {}
+            if provider in {"openai", "fireworks"}:
+                create_kwargs["response_format"] = {"type": "json_object"}
+
+            response = await client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=0.1,
+                max_tokens=200,
+                **create_kwargs,
+            )
+            result_text = response.choices[0].message.content
+            if not result_text:
+                raise RuntimeError("Empty response content")
+            result = FilterResponse.model_validate_json(result_text)
+            return result.matches, result.reasoning
 
         except Exception as e:
             logger.warning(f"LLM API error: {e}, falling back to keyword")
@@ -320,9 +385,7 @@ Does this company match? JSON only."""
             parts.append(f"SaaS Maturity: {company.saas_maturity}/10")
 
         if company.geographic_presence:
-            parts.append(
-                f"Geographic Presence: {', '.join(company.geographic_presence)}"
-            )
+            parts.append(f"Geographic Presence: {', '.join(company.geographic_presence)}")
 
         return "\n".join(parts)
 

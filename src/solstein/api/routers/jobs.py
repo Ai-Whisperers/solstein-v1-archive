@@ -58,4 +58,4 @@ async def get_job_status(workflow_id: str) -> dict[str, Any]:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error retrieving job status: {str(e)}",
-        )
+        ) from e

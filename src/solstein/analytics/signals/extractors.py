@@ -244,9 +244,7 @@ class WebSearchSignalExtractor(SignalExtractor):
 
         product_reviews = data.get("product_reviews", [])
         if product_reviews:
-            avg_rating = sum(r.get("rating", 5) for r in product_reviews) / len(
-                product_reviews
-            )
+            avg_rating = sum(r.get("rating", 5) for r in product_reviews) / len(product_reviews)
             signals.append(
                 Signal(
                     name="Product Review Average",
@@ -294,9 +292,7 @@ class AggregateSignalExtractor:
 
         return all_signals
 
-    def extract_by_agent(
-        self, agent_name: str, results: dict[str, Any]
-    ) -> list[Signal]:
+    def extract_by_agent(self, agent_name: str, results: dict[str, Any]) -> list[Signal]:
         """Extract signals from a single agent.
 
         Args:

@@ -11,6 +11,12 @@ import pytest
 
 from solstein.agents import CompaniesHouseAgent, GitHubAgent, WebSearchAgent
 
+if os.getenv("RUN_LIVE_AGENT_TESTS") != "1":
+    pytest.skip(
+        "Live agent tests require external APIs; set RUN_LIVE_AGENT_TESTS=1 to enable",
+        allow_module_level=True,
+    )
+
 
 @pytest.mark.asyncio
 async def test_github_agent_octopus_energy():
@@ -98,26 +104,18 @@ async def test_all_agents_together():
     }
 
     github_result = await github_agent.gather("Octopus Energy", context)
-    companies_house_result = await companies_house_agent.gather(
-        "Octopus Energy Group Limited", context
-    )
+    companies_house_result = await companies_house_agent.gather("Octopus Energy Group Limited", context)
 
     assert github_result.success
     assert companies_house_result.success
 
-    total_sources = len(github_result.raw_sources) + len(
-        companies_house_result.raw_sources
-    )
-    total_facts = len(github_result.extracted_facts) + len(
-        companies_house_result.extracted_facts
-    )
+    total_sources = len(github_result.raw_sources) + len(companies_house_result.raw_sources)
+    total_facts = len(github_result.extracted_facts) + len(companies_house_result.extracted_facts)
 
     print(f"\nTotal sources gathered: {total_sources}")
     print(f"Total facts extracted: {total_facts}")
     print(f"GitHub execution time: {github_result.execution_time_seconds:.2f}s")
-    print(
-        f"Companies House execution time: {companies_house_result.execution_time_seconds:.2f}s"
-    )
+    print(f"Companies House execution time: {companies_house_result.execution_time_seconds:.2f}s")
 
     assert total_sources > 0, "Should gather sources from multiple agents"
     assert total_facts > 0, "Should extract facts from multiple agents"

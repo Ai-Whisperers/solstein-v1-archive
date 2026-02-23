@@ -104,23 +104,15 @@ class DatabaseService:
         await self.session.flush()
         return snapshot
 
-    async def save_audit_trail(
-        self, audit_trail: CompanyAnalysisAuditTrail
-    ) -> AuditTrailRecord:
+    async def save_audit_trail(self, audit_trail: CompanyAnalysisAuditTrail) -> AuditTrailRecord:
         """Save a complete company analysis audit trail."""
         record = AuditTrailRecord(
             company_id=audit_trail.company_id,
             gathering_batch_id=audit_trail.gathering_batch_id,
             company_name=audit_trail.company_name,
-            raw_data=audit_trail.raw_data.model_dump()
-            if audit_trail.raw_data
-            else None,
-            aggregated_facts=audit_trail.aggregated_facts.model_dump()
-            if audit_trail.aggregated_facts
-            else None,
-            extracted_signals=audit_trail.extracted_signals.model_dump()
-            if audit_trail.extracted_signals
-            else None,
+            raw_data=audit_trail.raw_data.model_dump() if audit_trail.raw_data else None,
+            aggregated_facts=audit_trail.aggregated_facts.model_dump() if audit_trail.aggregated_facts else None,
+            extracted_signals=audit_trail.extracted_signals.model_dump() if audit_trail.extracted_signals else None,
             growth_score=audit_trail.growth_score,
             financial_health_score=audit_trail.financial_health_score,
             competitive_position_score=audit_trail.competitive_position_score,
@@ -150,9 +142,7 @@ class DatabaseService:
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_company_scores(
-        self, company_id: str, limit: int = 10
-    ) -> list[ScoringRecord]:
+    async def get_company_scores(self, company_id: str, limit: int = 10) -> list[ScoringRecord]:
         """Get historical scores for a company."""
         query = (
             select(ScoringRecord)
@@ -176,19 +166,13 @@ class DatabaseService:
 
     async def get_signals_for_score(self, scoring_record_id: int) -> list[SignalRecord]:
         """Get all signals for a scoring record."""
-        query = select(SignalRecord).where(
-            SignalRecord.scoring_record_id == scoring_record_id
-        )
+        query = select(SignalRecord).where(SignalRecord.scoring_record_id == scoring_record_id)
         result = await self.session.execute(query)
         return result.scalars().all()
 
     async def get_market_snapshots(self, limit: int = 10) -> list[MarketSnapshot]:
         """Get recent market snapshots."""
-        query = (
-            select(MarketSnapshot)
-            .order_by(desc(MarketSnapshot.snapshot_date))
-            .limit(limit)
-        )
+        query = select(MarketSnapshot).order_by(desc(MarketSnapshot.snapshot_date)).limit(limit)
         result = await self.session.execute(query)
         return result.scalars().all()
 

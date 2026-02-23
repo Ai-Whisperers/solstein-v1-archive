@@ -17,9 +17,7 @@ from .resilience import WEB_SEARCH_RETRY_CONFIG, CircuitBreaker, call_with_retry
 class WebSearchAgent(BaseDataGatheringAgent):
     """Agent for gathering data from web search and news."""
 
-    def __init__(
-        self, google_api_key: str | None = None, search_engine_id: str | None = None
-    ):
+    def __init__(self, google_api_key: str | None = None, search_engine_id: str | None = None):
         """Initialize web search agent.
 
         Args:
@@ -31,9 +29,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
         self.search_engine_id = search_engine_id
         self.search_base = "https://www.googleapis.com/customsearch/v1"
 
-        self.circuit_breaker = CircuitBreaker(
-            failure_threshold=3, recovery_timeout=45.0, name="GoogleSearchAPI"
-        )
+        self.circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=45.0, name="GoogleSearchAPI")
 
     async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
         """Gather web search data for a company."""
@@ -52,9 +48,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
                 result.coverage_gaps.append("Web search API not configured")
                 result.success = False
                 result.error_message = "Web search API not configured"
-                result.execution_time_seconds = (
-                    datetime.now(UTC) - start_time
-                ).total_seconds()
+                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
                 return result
 
             search_queries = self._generate_search_queries(company_name, context)
@@ -95,14 +89,10 @@ class WebSearchAgent(BaseDataGatheringAgent):
                     self.log_warning(f"Error searching {query_name}: {e}")
 
             if result.raw_sources:
-                result.extracted_facts.extend(
-                    self._extract_facts_from_sources(result.raw_sources, company_name)
-                )
+                result.extracted_facts.extend(self._extract_facts_from_sources(result.raw_sources, company_name))
 
             result.success = True
-            self.log_info(
-                f"Successfully gathered {len(result.raw_sources)} web sources"
-            )
+            self.log_info(f"Successfully gathered {len(result.raw_sources)} web sources")
 
         except Exception as e:
             self.log_error(f"Error gathering web search data: {e}")
@@ -110,15 +100,11 @@ class WebSearchAgent(BaseDataGatheringAgent):
             result.success = False
 
         finally:
-            result.execution_time_seconds = (
-                datetime.now(UTC) - start_time
-            ).total_seconds()
+            result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
 
         return result
 
-    def _generate_search_queries(
-        self, company_name: str, context: dict
-    ) -> list[tuple[str, str]]:
+    def _generate_search_queries(self, company_name: str, context: dict) -> list[tuple[str, str]]:
         """Generate relevant search queries."""
         industry = context.get("industry", "company")
 
@@ -162,9 +148,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
         """Extract facts from web search sources."""
         facts = []
 
-        funding_mentions = [
-            s for s in raw_sources if "funding" in s.metadata.get("query", "").lower()
-        ]
+        funding_mentions = [s for s in raw_sources if "funding" in s.metadata.get("query", "").lower()]
         if funding_mentions:
             facts.append(
                 self._create_fact(
@@ -175,9 +159,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
                 )
             )
 
-        hiring_mentions = [
-            s for s in raw_sources if "hiring" in s.metadata.get("query", "").lower()
-        ]
+        hiring_mentions = [s for s in raw_sources if "hiring" in s.metadata.get("query", "").lower()]
         if hiring_mentions:
             facts.append(
                 self._create_fact(
@@ -188,9 +170,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
                 )
             )
 
-        product_mentions = [
-            s for s in raw_sources if "product" in s.metadata.get("query", "").lower()
-        ]
+        product_mentions = [s for s in raw_sources if "product" in s.metadata.get("query", "").lower()]
         if product_mentions:
             facts.append(
                 self._create_fact(

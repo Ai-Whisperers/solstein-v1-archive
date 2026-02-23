@@ -41,10 +41,7 @@ class ContinuousMonitor:
             companies: List of companies to monitor
             check_interval_hours: Hours between checks per company
         """
-        self.logger.info(
-            f"Starting monitoring of {len(companies)} companies "
-            f"(check interval: {check_interval_hours}h)"
-        )
+        self.logger.info(f"Starting monitoring of {len(companies)} companies (check interval: {check_interval_hours}h)")
         self.is_running = True
 
         while self.is_running:
@@ -62,18 +59,14 @@ class ContinuousMonitor:
         """Check a single company for updates."""
         last_check = self.last_checks.get(company.id)
 
-        if last_check and (datetime.now(UTC) - last_check).total_seconds() < (
-            check_interval_hours * 3600
-        ):
+        if last_check and (datetime.now(UTC) - last_check).total_seconds() < (check_interval_hours * 3600):
             return
 
         try:
             signals = await self._detect_critical_signals(company)
 
             if signals:
-                self.logger.warning(
-                    f"Critical signals detected for {company.name}: {signals}"
-                )
+                self.logger.warning(f"Critical signals detected for {company.name}: {signals}")
                 if self.on_signal_callback:
                     await self.on_signal_callback(company, signals)
 
@@ -156,9 +149,7 @@ class ContinuousMonitor:
 
         result = await self.web_search_agent.gather(
             company_name,
-            context={
-                "include_queries": ["hiring", "jobs", "careers", "expanding team"]
-            },
+            context={"include_queries": ["hiring", "jobs", "careers", "expanding team"]},
         )
 
         if result.success and len(result.raw_sources) > 10:

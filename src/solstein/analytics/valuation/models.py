@@ -105,9 +105,7 @@ class ValuationAnalyzer:
             ratio = current_price / context.graham_intrinsic_value
             context.price_to_intrinsic_ratio = ratio
             context.discount_to_intrinsic_pct = (1 - ratio) * 100
-            context.valuation_classification = self._classify_valuation(
-                context.discount_to_intrinsic_pct
-            )
+            context.valuation_classification = self._classify_valuation(context.discount_to_intrinsic_pct)
 
         return context
 
@@ -189,18 +187,12 @@ class ValuationBenchmark:
             )
             results.append(context)
 
-        return sorted(
-            results, key=lambda x: x.discount_to_intrinsic_pct or 0, reverse=True
-        )
+        return sorted(results, key=lambda x: x.discount_to_intrinsic_pct or 0, reverse=True)
 
-    def get_undervalued(
-        self, valuations: list[ValuationContext]
-    ) -> list[ValuationContext]:
+    def get_undervalued(self, valuations: list[ValuationContext]) -> list[ValuationContext]:
         return [v for v in valuations if v.is_undervalued]
 
-    def get_overvalued(
-        self, valuations: list[ValuationContext]
-    ) -> list[ValuationContext]:
+    def get_overvalued(self, valuations: list[ValuationContext]) -> list[ValuationContext]:
         return [v for v in valuations if v.is_overvalued]
 
 

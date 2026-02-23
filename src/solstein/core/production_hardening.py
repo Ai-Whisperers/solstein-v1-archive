@@ -168,18 +168,13 @@ class GracefulDegradation:
             return result
         except Exception as e:
             self.agent_failures[agent_name] = self.agent_failures.get(agent_name, 0) + 1
-            logger.warning(
-                f"Agent {agent_name} failed: {str(e)} "
-                f"(failure #{self.agent_failures[agent_name]})"
-            )
+            logger.warning(f"Agent {agent_name} failed: {str(e)} (failure #{self.agent_failures[agent_name]})")
 
             if fallback_func:
                 try:
                     return await fallback_func()
                 except Exception as fallback_error:
-                    logger.error(
-                        f"Fallback for {agent_name} also failed: {fallback_error}"
-                    )
+                    logger.error(f"Fallback for {agent_name} also failed: {fallback_error}")
                     return {"error": f"Agent {agent_name} failed"}
             else:
                 return {"error": f"Agent {agent_name} failed"}
