@@ -79,8 +79,78 @@ class MarkdownExtractor:
 
         # Extract confidence levels
         data["confidence"] = self._extract_confidence(content)
+        data["source_links"] = self._extract_source_links(content)
+        data["metric_sources"] = self._extract_metric_sources(content)
+        data["metric_justifications"] = self._extract_metric_justifications(content)
 
         return data
+
+    def _extract_source_links(self, content: str) -> list[str]:
+        url_pattern = re.compile(r"https?://[^\s)\]>\"']+")
+        seen: set[str] = set()
+        urls: list[str] = []
+        for match in url_pattern.findall(content):
+            url = match.rstrip(".,")
+            if url not in seen:
+                seen.add(url)
+                urls.append(url)
+        return urls
+
+    def _extract_metric_sources(self, content: str) -> dict[str, list[str]]:
+        result: dict[str, list[str]] = {}
+        lines = content.splitlines()
+        in_section = False
+
+        for line in lines:
+            stripped = line.strip()
+            if stripped.lower() in {
+                "## metric sources",
+                "### metric sources",
+                "metric sources:",
+            }:
+                in_section = True
+                continue
+
+            if in_section and stripped.startswith("#"):
+                break
+
+            if in_section and stripped.startswith("-") and ":" in stripped:
+                body = stripped.lstrip("- ")
+                metric, raw_urls = body.split(":", 1)
+                metric_key = metric.strip().lower()
+                urls = [u.strip() for u in raw_urls.split(",") if u.strip().startswith("http")]
+                if urls:
+                    result[metric_key] = urls
+
+        return result
+
+    def _extract_metric_justifications(self, content: str) -> dict[str, str]:
+        result: dict[str, str] = {}
+        lines = content.splitlines()
+        in_section = False
+
+        for line in lines:
+            stripped = line.strip()
+            if stripped.lower() in {
+                "## estimation notes",
+                "### estimation notes",
+                "estimation notes:",
+            }:
+                in_section = True
+                continue
+
+            if in_section and stripped.startswith("#"):
+                break
+
+            if in_section and stripped.startswith("-") and ":" in stripped:
+                body = stripped.lstrip("- ")
+                metric, note = body.split(":", 1)
+                metric_key = metric.strip().lower()
+                note_val = note.strip()
+                if note_val:
+                    result[metric_key] = note_val
+
+        return result
 
     def _extract_confidence(self, content: str) -> dict[str, str]:
         """Extract confidence levels from content."""
@@ -136,6 +206,9 @@ class MarkdownExtractor:
             geographic_presence=extracted_data.get("geographic_presence", []),
             tech_stack=extracted_data.get("tech_stack", []),
             data_source=extracted_data.get("source"),
+            source_links=extracted_data.get("source_links", []),
+            metric_sources=extracted_data.get("metric_sources", {}),
+            metric_justifications=extracted_data.get("metric_justifications", {}),
         )
 
         return profile

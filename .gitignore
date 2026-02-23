@@ -115,6 +115,8 @@ celerybeat.pid
 
 # Environments
 .env
+.env.*
+!.env.example
 .venv
 env/
 venv/
@@ -163,9 +165,23 @@ coverage_report.txt
 *.log
 *.tmp
 
+# OS junk
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor/IDE junk
+.idea/
+.vscode/
+*.iml
+
+# Security (never commit private keys)
+*.pem
+*.key
+*.p12
+*.pfx
+
 # Agent & IDE specifics
-.antigravity/
-.claude/
 .gemini/
 .cursor/run.json
 .cursor/state.json

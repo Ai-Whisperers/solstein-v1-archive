@@ -840,6 +840,41 @@ class ClientReportGenerator(ReportGenerator):
         # Find threats (higher score competitors)
         threats = [c for c in sorted_comp if (c.composite_score or 0) > (client.composite_score or 0)][:5]
 
+        def _fmt_float(value: float | None) -> str:
+            if value is None:
+                return "N/A"
+            return f"{value:.1f}"
+
+        ai_market_avg = self._avg([c.ai_score for c in competitors if c.ai_score is not None]) if competitors else None
+
+        growth_market_avg = (
+            self._avg([c.growth_score for c in competitors if c.growth_score is not None]) if competitors else None
+        )
+        growth_top = max([c.growth_score or 0 for c in competitors], default=None) if competitors else None
+
+        health_market_avg = (
+            self._avg([c.financial_health_score for c in competitors if c.financial_health_score is not None])
+            if competitors
+            else None
+        )
+        health_top = max([c.financial_health_score or 0 for c in competitors], default=None) if competitors else None
+
+        position_market_avg = (
+            self._avg([c.competitive_position_score for c in competitors if c.competitive_position_score is not None])
+            if competitors
+            else None
+        )
+        position_top = (
+            max([c.competitive_position_score or 0 for c in competitors], default=None) if competitors else None
+        )
+
+        composite_market_avg = (
+            self._avg([c.composite_score for c in competitors if c.composite_score is not None])
+            if competitors
+            else None
+        )
+        composite_top = max([c.composite_score or 0 for c in competitors], default=None) if competitors else None
+
         report = f"""# Competitive Analysis - {client.name}
 
 **Report Date**: {datetime.now().strftime("%B %Y")}
@@ -858,7 +893,7 @@ companies in the {client.industry or "energy software"} market.
 - **Current Position**: {client.classification or "N/A"} ({client.composite_score or "N/A"}/10)
 - **Revenue**: €{client.financials.revenue or 0:.1f}M (CAGR: {client.revenue_cagr_3yr or "N/A"}%)
 - **Competitive Threats**: {len(threats)} companies with higher composite scores
-- **AI Gap**: {client.ai_score or 0}/10 (Market avg: {self._avg([c.ai_score for c in competitors if c.ai_score is not None]):.1f})
+- **AI Gap**: {client.ai_score or 0}/10 (Market avg: {_fmt_float(ai_market_avg)})
 
 ---
 
@@ -880,10 +915,10 @@ companies in the {client.industry or "energy software"} market.
 
 | Dimension | {client.name} | Market Avg | Top Performer |
 |---|---|---|---|
-| Growth Score | {client.growth_score or "N/A"} | {self._avg([c.growth_score for c in competitors if c.growth_score]):.1f} | {max([c.growth_score or 0 for c in competitors]):.1f} |
-| Financial Health | {client.financial_health_score or "N/A"} | {self._avg([c.financial_health_score for c in competitors if c.financial_health_score]):.1f} | {max([c.financial_health_score or 0 for c in competitors]):.1f} |
-| Competitive Position | {client.competitive_position_score or "N/A"} | {self._avg([c.competitive_position_score for c in competitors if c.competitive_position_score]):.1f} | {max([c.competitive_position_score or 0 for c in competitors]):.1f} |
-| Composite | {client.composite_score or "N/A"} | {self._avg([c.composite_score for c in competitors if c.composite_score]):.1f} | {max([c.composite_score or 0 for c in competitors]):.1f} |
+| Growth Score | {client.growth_score or "N/A"} | {_fmt_float(growth_market_avg)} | {_fmt_float(growth_top)} |
+| Financial Health | {client.financial_health_score or "N/A"} | {_fmt_float(health_market_avg)} | {_fmt_float(health_top)} |
+| Competitive Position | {client.competitive_position_score or "N/A"} | {_fmt_float(position_market_avg)} | {_fmt_float(position_top)} |
+| Composite | {client.composite_score or "N/A"} | {_fmt_float(composite_market_avg)} | {_fmt_float(composite_top)} |
 
 ---
 

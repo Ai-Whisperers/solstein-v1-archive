@@ -27,7 +27,9 @@ from ..domain.models import (
 from .base_agent import AgentTaskResult
 from .companies_house_agent import CompaniesHouseAgent
 from .github_agent import GitHubAgent
+from .seed_markdown_agent import SeedMarkdownAgent
 from .web_search_agent import WebSearchAgent
+from .website_agent import WebsiteAgent
 
 
 class AgentState(TypedDict):
@@ -52,6 +54,8 @@ class CoordinatorAgent:
         self.github_agent = GitHubAgent()
         self.web_search_agent = WebSearchAgent()
         self.companies_house_agent = CompaniesHouseAgent()
+        self.seed_markdown_agent = SeedMarkdownAgent()
+        self.website_agent = WebsiteAgent()
         self.workflow = self._build_graph()
 
     def _build_graph(self):
@@ -65,6 +69,10 @@ class CoordinatorAgent:
                 agent_tasks.append(self.web_search_agent.gather(state["company_name"], state["context"]))
             if DataSourceType.COMPANY_FILINGS in state["enabled_sources"]:
                 agent_tasks.append(self.companies_house_agent.gather(state["company_name"], state["context"]))
+            if DataSourceType.PRESS_RELEASE in state["enabled_sources"]:
+                agent_tasks.append(self.seed_markdown_agent.gather(state["company_name"], state["context"]))
+            if DataSourceType.WEBSITE in state["enabled_sources"]:
+                agent_tasks.append(self.website_agent.gather(state["company_name"], state["context"]))
 
             self.logger.info(f"Aura | Stage: Gathering | Spawning {len(agent_tasks)} specialist agents")
             results = await asyncio.gather(*agent_tasks, return_exceptions=True)
@@ -90,17 +98,19 @@ class CoordinatorAgent:
             return {"raw_records": raw_records}
 
         async def logic_fusion(state: AgentState):
-            if not state.get("raw_records"):
+            raw_records = state.get("raw_records")
+            if raw_records is None:
                 return {}
             self.logger.info("Aura | Stage: Logic Fusion | Aggregating facts")
-            aggregated = self._aggregate_facts(state["raw_records"])
+            aggregated = self._aggregate_facts(raw_records)
             return {"aggregated": aggregated}
 
         async def extract_signals_node(state: AgentState):
-            if not state.get("aggregated"):
+            aggregated = state.get("aggregated")
+            if aggregated is None:
                 return {}
             self.logger.info("Aura | Stage: Signal Extraction | Parsing business signals")
-            signals = self._extract_signals(state["aggregated"])
+            signals = self._extract_signals(aggregated)
             return {"signals": signals}
 
         workflow.add_node("gather_sources", gather_sources)
@@ -137,7 +147,7 @@ class CoordinatorAgent:
         with logger.contextualize(company_id=company_id, batch_id=gathering_batch_id):
             self.logger.info(f"Aura | Entering Analysis Phase via LangGraph | Company: {company_name}")
 
-            initial_state = {
+            initial_state: AgentState = {
                 "company_name": company_name,
                 "gathering_batch_id": gathering_batch_id,
                 "company_id": company_id,
@@ -152,12 +162,14 @@ class CoordinatorAgent:
 
             final_state = await self.workflow.ainvoke(initial_state)
 
+            completed_at = datetime.now(UTC)
+
             audit_trail = CompanyAnalysisAuditTrail(
                 company_id=company_id,
                 gathering_batch_id=gathering_batch_id,
                 company_name=company_name,
                 analysis_started_at=start_time,
-                analysis_completed_at=datetime.now(UTC),
+                analysis_completed_at=completed_at,
                 raw_data=final_state.get("raw_records"),
                 aggregated_facts=final_state.get("aggregated"),
                 extracted_signals=final_state.get("signals"),
@@ -168,7 +180,7 @@ class CoordinatorAgent:
                 audit_trail.data_completeness = self._calculate_completeness(audit_trail.aggregated_facts)
                 audit_trail.confidence_level = self._determine_confidence_level(audit_trail.aggregated_facts)
 
-            audit_trail.analysis_duration_seconds = (audit_trail.analysis_completed_at - start_time).total_seconds()
+            audit_trail.analysis_duration_seconds = (completed_at - start_time).total_seconds()
 
             self.logger.info(
                 f"Aura | Analysis Sequence Finalized | "

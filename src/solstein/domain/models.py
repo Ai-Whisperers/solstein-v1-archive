@@ -112,6 +112,9 @@ class Company(BaseModel):
     last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))
     data_source: str | None = None
     notes: str | None = None
+    source_links: list[str] = Field(default_factory=list)
+    metric_sources: dict[str, list[str]] = Field(default_factory=dict)
+    metric_justifications: dict[str, str] = Field(default_factory=dict)
 
     # Scores (Calculated)
     growth_score: float | None = None
