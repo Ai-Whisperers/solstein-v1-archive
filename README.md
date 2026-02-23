@@ -145,6 +145,8 @@ The API will be available at **http://localhost:8000** with interactive docs at 
 | 📜 [`docs/api/reference.md`](docs/api/reference.md) | Full API reference |
 | 📜 [`docs/architecture/decisions.md`](docs/architecture/decisions.md) | Architecture decision records |
 
+Historical/internal planning docs that used to live in the repo root are archived in `docs/archive/root-docs/`.
+
 ---
 
 ## 🧪 Testing Philosophy

@@ -62,6 +62,23 @@ The commercial architecture for those who wield capital:
 
 ---
 
+## Engineering & Operations
+
+For implementation and operations workflows:
+
+→ [**Developer Guide**](guides/developer.md)
+→ [**Operator Guide**](guides/operator.md)
+→ [**CI/CD Guide**](guides/ci-cd.md)
+→ [**API Reference**](api/reference.md)
+→ [**Architecture Decisions**](architecture/decisions.md)
+→ [**Layer Boundaries & Compatibility Policy**](architecture/layer-boundaries.md)
+
+## Documentation Scope
+
+Primary docs are curated in navigation. Historical and proposal material is retained for context under `docs/archive/proposals/` and `docs/archive/plans/` but is intentionally not part of the primary docs flow.
+
+---
+
 <div align="center">
 
 *Powered by* **[AI Whisperers](https://www.ai-whisperers.org/)** *— finding the diamonds nobody knew were there.*
