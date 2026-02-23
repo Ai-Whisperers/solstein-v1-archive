@@ -21,6 +21,15 @@ from ..domain.models import (
     ThreatLevel,
 )
 
+REQUIRED_PROVENANCE_METRICS = [
+    "revenue",
+    "growth_rate",
+    "employees",
+    "profit_margin",
+    "funding",
+    "valuation",
+]
+
 
 class MarkdownExtractor:
     """Extract structured data from markdown files."""
@@ -364,3 +373,29 @@ class BatchExtractor:
         except Exception as e:
             logger.error(f"Failed to save to JSON: {e}")
             raise
+
+    def validate_profile_provenance(self, profile: Company) -> list[str]:
+        violations: list[str] = []
+
+        if not profile.source_links:
+            violations.append("Missing source_links")
+
+        for metric in REQUIRED_PROVENANCE_METRICS:
+            sources = profile.metric_sources.get(metric, [])
+            justification = profile.metric_justifications.get(metric, "").strip()
+            if not sources and not justification:
+                violations.append(
+                    f"Metric '{metric}' has neither metric_sources nor metric_justification"
+                )
+
+        return violations
+
+    def validate_profiles_provenance(
+        self, profiles: list[Company]
+    ) -> dict[str, list[str]]:
+        report: dict[str, list[str]] = {}
+        for profile in profiles:
+            violations = self.validate_profile_provenance(profile)
+            if violations:
+                report[profile.id] = violations
+        return report

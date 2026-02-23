@@ -31,7 +31,23 @@ def cli(verbose: bool) -> None:
 @click.argument("input_dir", type=click.Path(exists=True, path_type=Path))
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output JSON file")
 @click.option("--pattern", "-p", default="*.md", help="File pattern to match")
-def extract(input_dir: Path, output: Path | None, pattern: str) -> None:
+@click.option(
+    "--strict-provenance/--no-strict-provenance",
+    default=False,
+    help="Require per-company provenance coverage before writing output",
+)
+@click.option(
+    "--provenance-report",
+    type=click.Path(path_type=Path),
+    help="Optional path for provenance validation report JSON",
+)
+def extract(
+    input_dir: Path,
+    output: Path | None,
+    pattern: str,
+    strict_provenance: bool,
+    provenance_report: Path | None,
+) -> None:
     """Extract data from markdown files."""
     click.echo(f"🔍 Extracting data from {input_dir}")
 
@@ -41,6 +57,26 @@ def extract(input_dir: Path, output: Path | None, pattern: str) -> None:
     if not profiles:
         click.echo("❌ No profiles extracted", err=True)
         return
+
+    if strict_provenance:
+        violations = extractor.validate_profiles_provenance(profiles)
+        if provenance_report:
+            provenance_report.parent.mkdir(parents=True, exist_ok=True)
+            provenance_report.write_text(
+                json.dumps(violations, indent=2),
+                encoding="utf-8",
+            )
+
+        if violations:
+            click.echo(
+                f"❌ Provenance validation failed for {len(violations)} profiles",
+                err=True,
+            )
+            for company_id, issues in list(violations.items())[:10]:
+                click.echo(f"  • {company_id}: {'; '.join(issues)}", err=True)
+            raise click.Abort()
+
+        click.echo("✅ Provenance validation passed")
 
     click.echo(f"✅ Extracted {len(profiles)} profiles")
 

@@ -115,6 +115,7 @@ class Company(BaseModel):
     source_links: list[str] = Field(default_factory=list)
     metric_sources: dict[str, list[str]] = Field(default_factory=dict)
     metric_justifications: dict[str, str] = Field(default_factory=dict)
+    metric_observations: dict[str, list[dict[str, Any]]] = Field(default_factory=dict)
 
     # Scores (Calculated)
     growth_score: float | None = None
