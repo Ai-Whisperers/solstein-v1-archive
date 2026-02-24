@@ -25,8 +25,8 @@ Navigate using the tabs above.
 | ⚔️ [Executive Brief](PITCH/executive-brief.md) | PE Partners | One page — the old ritual is dead, the spell is here |
 | ⚔️ [Full Proposal](PITCH/full-proposal.md) | Deal teams | The five incantations, the proof, the commercial structure |
 | ⚔️ [Case Study](PITCH/case-study.md) | Skeptics | 29 companies, 3 days, full classification — live cast |
-| ⚙️ [Developer Guide](guides/developer.md) | Engineers | Setup, testing, code structure, contribution patterns |
-| ⚙️ [OpenCode Tooling](guides/opencode-tooling.md) | Engineers | MCP setup for OpenCode-compatible clients |
+| ⚙️ [Operator Guide](guides/operator.md) | DevOps | Deployment, monitoring, and operations |
+| ⚙️ [API Reference](api/reference.md) | Integrators | All REST endpoints, schemas, and error codes |
 | ⚙️ [API Reference](api/reference.md) | Integrators | All REST endpoints, schemas, and error codes |
 | 🏛️ [Decision Records](architecture/decisions.md) | Architects | Why FastAPI, Celery, JSON files, and the 4-layer test pyramid |
 

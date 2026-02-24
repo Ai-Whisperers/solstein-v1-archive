@@ -1350,7 +1350,7 @@ Three new module-level constructs:
    - Full pipeline: artifact production (1), audit report generation (1)
    - Adapter health smoke: all registered adapters respond (1)
 
-7. **`docs/audit/.gitkeep`** — Output directory for automated audit reports.
+  7. **`docs/audits/.gitkeep`** — Output directory for automated audit reports.
 
 **Test results:** 16 passed, 3 skipped (API-gated: EXA, NEWS, CRUNCHBASE keys not set) in 36s. Full pipeline runs end-to-end with real adapters producing all 9 artifacts + audit report.
 

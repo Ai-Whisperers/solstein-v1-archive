@@ -143,17 +143,17 @@ New guides created during comprehensive documentation audit:
 | File | Purpose | Owner | Status |
 |------|---------|-------|--------|
 | **developer.md** | Setup, testing, architecture | Engineering Lead | ✅ Complete |
-| **operator.md** | Deployment, Docker, monitoring | DevOps Lead | ⚠️ Needs Updates |
+| **operator.md** | Deployment, Docker, monitoring | DevOps Lead | ✅ Complete |
 | **database.md** | Database setup & config | Data Engineer | ✅ NEW |
-| **code-conventions.md** | Style guide & patterns | Tech Lead | ⏳ TODO |
-| **troubleshooting.md** | Common issues & solutions | Support Lead | ⏳ TODO |
-| **extending-solstein.md** | Custom dimensions, plugins | Tech Lead | ⏳ TODO |
+| **code-conventions.md** | Style guide & patterns | Tech Lead | ✅ Complete |
+| **troubleshooting.md** | Common issues & solutions | Support Lead | ✅ Complete |
+| **extending-solstein.md** | Custom dimensions, plugins | Tech Lead | ✅ Complete |
 
 ### Reference Documentation (`docs/api/`, `docs/architecture/`)
 
 | File | Purpose | Owner | Status |
 |------|---------|-------|--------|
-| **api/reference.md** | REST API endpoints & schemas | API Lead | ⚠️ 70% Complete |
+| **api/reference.md** | REST API endpoints & schemas | API Lead | ✅ Complete |
 | **architecture/decisions.md** | 8 key ADRs | Tech Lead | ✅ Complete |
 
 ### Utility Documentation
