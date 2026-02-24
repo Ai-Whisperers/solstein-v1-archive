@@ -1,8 +1,14 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from loguru import logger
 
 from solstein.data.loaders import CompetitorDataLoader
+
+if TYPE_CHECKING:
+    from solstein.adapters.registry import SourceRegistry
 
 
 @dataclass
@@ -462,12 +468,115 @@ def _catalog_for_market(market: str) -> list[dict[str, object]]:
     ]
 
 
+def _score_candidate(
+    candidate: DiscoveryCandidate,
+    seed_company: str,
+    market: str,
+    extra_keywords: list[str] | None = None,
+) -> DiscoveryCandidate:
+    """Apply relevance scoring to a candidate based on seed/market/keywords."""
+    keywords = [k.lower() for k in (extra_keywords or [])]
+    seed_tokens = [tok for tok in seed_company.lower().replace("/", " ").split() if tok]
+    tags = [t.lower() for t in candidate.tags]
+
+    score = candidate.seed_relevance  # preserve any pre-existing score
+    reasons: list[str] = []
+
+    if any(tok in candidate.name.lower() for tok in seed_tokens):
+        score += 3.0
+        reasons.append("name similarity with seed")
+
+    overlap = len(set(tags) & set(keywords))
+    if overlap:
+        score += float(overlap)
+        reasons.append("keyword tag overlap")
+
+    if "latam" in market.lower() and "latam" in candidate.region.lower():
+        score += 1.0
+        reasons.append("market region match")
+
+    if any(k in tags for k in ["energy", "bank", "fintech", "payments", "software"]):
+        score += 0.5
+
+    candidate.seed_relevance = score
+    if reasons:
+        candidate.discovery_reason = ", ".join(reasons)
+    return candidate
+
+
+def _deduplicate_candidates(
+    candidates: list[DiscoveryCandidate],
+) -> list[DiscoveryCandidate]:
+    """Deduplicate candidates by company_id, keeping highest relevance."""
+    best: dict[str, DiscoveryCandidate] = {}
+    for c in candidates:
+        existing = best.get(c.company_id)
+        if existing is None or c.seed_relevance > existing.seed_relevance:
+            best[c.company_id] = c
+    return list(best.values())
+
+
 def discover_companies(
     seed_company: str,
     market: str,
     max_companies: int = 25,
     extra_keywords: list[str] | None = None,
+    registry: SourceRegistry | None = None,
 ) -> list[DiscoveryCandidate]:
+    if registry is not None:
+        return _discover_via_registry(
+            seed_company, market, max_companies, extra_keywords, registry
+        )
+    return _discover_legacy(seed_company, market, max_companies, extra_keywords)
+
+
+def _discover_via_registry(
+    seed_company: str,
+    market: str,
+    max_companies: int,
+    extra_keywords: list[str] | None,
+    registry: SourceRegistry,
+) -> list[DiscoveryCandidate]:
+    """New path: iterate all DiscoverySource adapters from the registry."""
+    all_candidates: list[DiscoveryCandidate] = []
+    for source in registry.discovery_sources:
+        try:
+            candidates = source.discover(
+                market=market,
+                seed_company=seed_company,
+                max_results=max_companies * 2,  # over-fetch to allow dedup
+                extra_keywords=extra_keywords,
+            )
+            logger.info(
+                "Discovery source '{}' returned {} candidates",
+                source.source_name,
+                len(candidates),
+            )
+            all_candidates.extend(candidates)
+        except Exception as exc:
+            logger.warning(
+                "Discovery source '{}' failed: {}",
+                source.source_name,
+                exc,
+            )
+
+    deduped = _deduplicate_candidates(all_candidates)
+
+    # Apply relevance scoring
+    for candidate in deduped:
+        _score_candidate(candidate, seed_company, market, extra_keywords)
+
+    deduped.sort(key=lambda c: (c.seed_relevance, c.name), reverse=True)
+    return deduped[:max_companies]
+
+
+def _discover_legacy(
+    seed_company: str,
+    market: str,
+    max_companies: int,
+    extra_keywords: list[str] | None,
+) -> list[DiscoveryCandidate]:
+    """Legacy path: hardcoded catalog + CompetitorDataLoader expansion."""
     keywords = [k.lower() for k in (extra_keywords or [])]
     seed_tokens = [tok for tok in seed_company.lower().replace("/", " ").split() if tok]
     catalog = _catalog_for_market(market)

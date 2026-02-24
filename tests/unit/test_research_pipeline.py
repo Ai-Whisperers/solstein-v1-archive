@@ -44,7 +44,7 @@ def test_build_company_profile_without_ticker_is_explainable() -> None:
 def test_run_market_intelligence_writes_artifacts(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def _fake_profile(candidate) -> Company:
+    def _fake_enrich(candidate, registry, batch_id) -> Company:
         return Company(
             id=candidate.company_id,
             name=candidate.name,
@@ -60,7 +60,8 @@ def test_run_market_intelligence_writes_artifacts(
             },
         )
 
-    monkeypatch.setattr(research_pipeline, "build_company_profile", _fake_profile)
+    monkeypatch.setattr(research_pipeline, "enrich_company", _fake_enrich)
+    # Registry is built normally; only enrich_company is mocked above
 
     summary = run_market_intelligence(
         seed_company="ueno",
@@ -89,7 +90,7 @@ def test_run_market_intelligence_writes_artifacts(
 def test_run_market_intelligence_source_volume_gate_fails(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def _fake_profile(candidate) -> Company:
+    def _fake_enrich(candidate, registry, batch_id) -> Company:
         return Company(
             id=candidate.company_id,
             name=candidate.name,
@@ -105,7 +106,8 @@ def test_run_market_intelligence_source_volume_gate_fails(
             },
         )
 
-    monkeypatch.setattr(research_pipeline, "build_company_profile", _fake_profile)
+    monkeypatch.setattr(research_pipeline, "enrich_company", _fake_enrich)
+    # Registry is built normally; only enrich_company is mocked above
 
     with pytest.raises(RuntimeError, match="Source volume gate failed"):
         run_market_intelligence(
@@ -169,7 +171,7 @@ def test_run_market_intelligence_dual_write_sqlite(tmp_path: Path, monkeypatch) 
     db_path = tmp_path / "research_test.db"
     monkeypatch.setenv("SUPABASE__DB_URL", f"sqlite:///{db_path}")
 
-    def _fake_profile(candidate) -> Company:
+    def _fake_enrich(candidate, registry, batch_id) -> Company:
         return Company(
             id=candidate.company_id,
             name=candidate.name,
@@ -188,7 +190,8 @@ def test_run_market_intelligence_dual_write_sqlite(tmp_path: Path, monkeypatch) 
             },
         )
 
-    monkeypatch.setattr(research_pipeline, "build_company_profile", _fake_profile)
+    monkeypatch.setattr(research_pipeline, "enrich_company", _fake_enrich)
+    # Registry is built normally; only enrich_company is mocked above
 
     run_market_intelligence(
         seed_company="ueno",

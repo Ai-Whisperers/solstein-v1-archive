@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+from loguru import logger
 
 from solstein.domain.models import (
     AggregatedDataRecord,
@@ -11,12 +13,16 @@ from solstein.domain.models import (
     CompanyTier,
     ConfidenceLevel,
     FinancialMetric,
+    RawDataRecord,
     SignalExtraction,
     SignalExtractionRecord,
     ThreatLevel,
 )
 
 from .discovery import DiscoveryCandidate
+
+if TYPE_CHECKING:
+    from solstein.adapters.registry import SourceRegistry
 
 
 def _get_yfinance():
@@ -318,6 +324,67 @@ def build_company_profile(candidate: DiscoveryCandidate) -> Company:
         metric_observations=metric_observations,
         last_updated=now,
     )
+
+
+# ---------------------------------------------------------------------------
+# Multi-source enrichment flow (Phase 4)
+# ---------------------------------------------------------------------------
+
+
+def enrich_company(
+    candidate: DiscoveryCandidate,
+    registry: SourceRegistry,
+    batch_id: str,
+) -> Company:
+    """Enrich a candidate via multi-source adapters, aggregation, and signal extraction.
+
+    This is the Phase 4 replacement for ``build_company_profile()``.
+    It iterates all registered enrichment sources, aggregates facts
+    across sources, extracts business signals, and builds the Company
+    model with full provenance.
+
+    If all enrichment sources fail, falls back to ``build_company_profile()``.
+    """
+    from .aggregate import DefaultFactAggregator
+    from .signals import extract_signals
+
+    raw_sources = []
+    for source in registry.enrichment_sources:
+        try:
+            raw = source.enrich(
+                company_id=candidate.company_id,
+                company_name=candidate.name,
+                ticker=candidate.ticker,
+                website=None,
+            )
+            raw_sources.append(raw)
+        except Exception as exc:
+            logger.debug(
+                "Enrichment source '{}' skipped for {}: {}",
+                source.source_name,
+                candidate.name,
+                exc,
+            )
+
+    if not raw_sources:
+        logger.warning(
+            "No enrichment sources succeeded for {}; using legacy profile",
+            candidate.name,
+        )
+        return build_company_profile(candidate)
+
+    raw_record = RawDataRecord(
+        company_id=candidate.company_id,
+        gathering_batch_id=batch_id,
+        sources=raw_sources,
+        total_sources_found=len(raw_sources),
+    )
+
+    aggregator = DefaultFactAggregator()
+    aggregated = aggregator.aggregate(candidate.company_id, raw_record)
+    signal_record = extract_signals(aggregated, batch_id=batch_id)
+
+    return build_company_from_signals(candidate, signal_record, aggregated)
 
 
 # ---------------------------------------------------------------------------

@@ -1060,8 +1060,74 @@ Helper functions added:
 
 ### What Remains (Phase 4: Pipeline Integration)
 
-- Refactor `discover_companies()` to iterate `DiscoverySource` adapters from registry
-- Refactor `build_company_profile()` call site in `pipeline.py` to use enrichment loop + `build_company_from_signals()`
-- Wire `SourceRegistry` into `run_market_intelligence()` (build once, pass through)
-- Enhance quality gates to use `RawDataSource` counts per company
-- Enhance scoring to weight by `SignalExtraction.signal_confidence`
+- ~~Refactor `discover_companies()` to iterate `DiscoverySource` adapters from registry~~ ✅
+- ~~Refactor `build_company_profile()` call site in `pipeline.py` to use enrichment loop + `build_company_from_signals()`~~ ✅
+- ~~Wire `SourceRegistry` into `run_market_intelligence()` (build once, pass through)~~ ✅
+- Enhance quality gates to use `RawDataSource` counts per company (P3 — future)
+- Enhance scoring to weight by `SignalExtraction.signal_confidence` (P3 — future)
+
+---
+
+## Appendix E — Phase 4 Implementation Log
+
+**Committed:** Phase 4 — Pipeline integration
+
+### discover_companies() Refactoring (`research/discovery.py`)
+
+Added registry-aware discovery path alongside preserved legacy path:
+
+- **New parameter:** `registry: SourceRegistry | None = None` (optional, backward-compatible)
+- **`_discover_via_registry()`** — Iterates `registry.discovery_sources`, calls `discover()` on each adapter, deduplicates by `company_id`, applies relevance scoring
+- **`_discover_legacy()`** — Original hardcoded static catalog + competitor JSON logic (preserved intact)
+- **`_score_candidate()`** — Computes relevance score based on market/industry/keyword overlap
+- **`_deduplicate_candidates()`** — Keeps highest-scored candidate per `company_id`
+- Routing: if `registry` is provided → `_discover_via_registry()`, else → `_discover_legacy()`
+
+### enrich_company() (`research/gather.py`)
+
+New function replacing `build_company_profile()` as the pipeline's enrichment entry point:
+
+```
+enrich_company(candidate, registry, batch_id) → Company
+```
+
+Flow:
+1. Iterates `registry.enrichment_sources`, calls `enrich()` on each adapter
+2. Collects `RawDataSource` results into `RawDataRecord`
+3. Passes to `DefaultFactAggregator.aggregate()` → `AggregatedDataRecord`
+4. Passes to `extract_signals()` → `SignalExtractionRecord`
+5. Passes to `build_company_from_signals()` → `Company`
+6. Falls back to `build_company_profile(candidate)` if all enrichment sources fail
+
+### run_market_intelligence() Refactoring (`research/pipeline.py`)
+
+Key changes:
+- **Registry construction:** Builds `SourceRegistry` via `build_default_registry(Settings.load())` at function start
+- **Batch ID:** Generates `uuid.uuid4().hex[:12]` batch ID per pipeline run
+- **Discovery:** Passes `registry=registry` to `discover_companies()` (adapter-driven discovery)
+- **Enrichment:** Replaced `build_company_profile(candidate)` with `enrich_company(candidate, registry, batch_id)` (multi-source aggregation)
+- **Pipeline version:** Updated from `research.v1` to `research.v2` in dual-write stable run ID
+- **Lazy import:** `build_default_registry` imported inside function body to avoid circular dependency (pipeline → adapters → protocols → research → pipeline)
+
+### Test Updates (`tests/unit/test_research_pipeline.py`)
+
+Updated 3 tests that monkeypatched `build_company_profile`:
+- Monkeypatch target changed from `research_pipeline.build_company_profile` to `research_pipeline.enrich_company`
+- Fake function signatures updated to accept `(candidate, registry, batch_id)` instead of just `(candidate)`
+- Registry builds normally from Settings (no mocking needed for registry)
+
+### Verification
+
+- All 7 pipeline tests pass (7/7)
+- 295 existing unit tests pass with zero regressions
+- Pre-existing failures unchanged (async tests, langgraph dependency, supabase client)
+
+### Circular Import Resolution
+
+The import chain `pipeline.py → adapters.registry → adapters.__init__ → adapters.protocols → research.discovery → research.__init__ → pipeline.py` created a circular dependency. Resolved by making the `build_default_registry` import lazy (inside `run_market_intelligence()` function body instead of module level).
+
+### What Remains (Future Work)
+
+- **P3:** Enhance scoring to weight by `SignalExtraction.signal_confidence` — `GrowthScorer.calculate_scores()` currently reads Company fields directly; could multiply scores by confidence
+- **P3:** Enhance quality gates to use per-company `RawDataSource` counts for minimum source volume checks
+- **P3:** Add integration tests that exercise the full adapter→aggregate→signal→Company flow with real (mocked) adapters

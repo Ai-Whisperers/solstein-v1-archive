@@ -1,6 +1,9 @@
 import hashlib
 import json
+import uuid
 from pathlib import Path
+
+from loguru import logger
 
 from solstein.analytics.scoring import GrowthScorer
 from solstein.config import Settings
@@ -12,7 +15,7 @@ from solstein.infrastructure.research_dual_write import persist_research_run
 
 from .discovery import DiscoveryCandidate, discover_companies
 from .evidence import evaluate_market_evidence
-from .gather import build_company_profile
+from .gather import build_company_profile, enrich_company
 from .reconcile import detect_market_contradictions
 from .sources import canonicalize_url
 
@@ -31,6 +34,15 @@ def run_market_intelligence(
 ) -> dict[str, object]:
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Build adapter registry from settings (lazy import to avoid circular dependency)
+    from solstein.adapters.registry import build_default_registry
+
+    settings = Settings.load()
+    registry = build_default_registry(settings)
+    batch_id = uuid.uuid4().hex[:12]
+    logger.info("Pipeline run batch_id={}, registry has {} discovery + {} enrichment sources",
+                batch_id, len(registry.discovery_sources), len(registry.enrichment_sources))
+
     stages: list[dict[str, object]] = []
     stage_report: dict[str, object] = {
         "market": market,
@@ -43,6 +55,7 @@ def run_market_intelligence(
         market=market,
         max_companies=max_companies,
         extra_keywords=extra_keywords,
+        registry=registry,
     )
 
     discovery_payload = [
@@ -73,7 +86,7 @@ def run_market_intelligence(
     )
 
     companies: list[Company] = [
-        build_company_profile(candidate) for candidate in candidates
+        enrich_company(candidate, registry, batch_id) for candidate in candidates
     ]
 
     extracted_path = output_dir / "extracted.json"
@@ -249,7 +262,6 @@ def run_market_intelligence(
     }
 
     if db_dual_write:
-        settings = Settings.load()
         db_manager.settings = settings
         db_manager.init_sync()
         session = db_manager.get_sync_session()
@@ -271,7 +283,7 @@ def run_market_intelligence(
                     "min_readiness_score": min_readiness_score,
                     "max_contradictions": max_contradictions,
                     "min_total_sources": min_total_sources,
-                    "pipeline": "research.v1",
+                    "pipeline": "research.v2",
                 },
                 sort_keys=True,
             ).encode("utf-8")
