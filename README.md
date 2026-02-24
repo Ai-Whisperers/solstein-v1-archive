@@ -72,7 +72,6 @@ solstein/
 │   ├── integration/      ← API endpoints & worker tasks
 │   └── data_quality/     ← Golden dataset regression tests
 ├── docs/                 ← Technical Grimoire
-├── graveyard/            ← Archived legacy spells (SolStein_original)
 └── data/                 ← Market intelligence datasets
 ```
 
