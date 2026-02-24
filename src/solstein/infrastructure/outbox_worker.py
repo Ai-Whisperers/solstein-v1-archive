@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
@@ -35,7 +35,7 @@ def _load_required_payload(payload: object) -> dict[str, JsonValue]:
 
 
 def _process_outbox_record(*, session: Session, record: OutboxRecord) -> None:
-    in_progress_time = datetime.now(UTC)
+    in_progress_time = datetime.now(timezone.utc)
     record.status = "in_progress"
     record.attempt_count = (record.attempt_count or 0) + 1
     record.updated_at = in_progress_time
@@ -78,26 +78,14 @@ def _process_outbox_record(*, session: Session, record: OutboxRecord) -> None:
         market=market,
         seed_company=seed_company,
         strict_provenance=strict_provenance,
-        min_readiness_score=(
-            float(min_readiness_score)
-            if isinstance(min_readiness_score, (int, float))
-            else None
-        ),
-        max_contradictions=(
-            int(max_contradictions)
-            if isinstance(max_contradictions, (int, float))
-            else None
-        ),
-        min_total_sources=(
-            int(min_total_sources)
-            if isinstance(min_total_sources, (int, float))
-            else None
-        ),
+        min_readiness_score=(float(min_readiness_score) if isinstance(min_readiness_score, (int, float)) else None),
+        max_contradictions=(int(max_contradictions) if isinstance(max_contradictions, (int, float)) else None),
+        min_total_sources=(int(min_total_sources) if isinstance(min_total_sources, (int, float)) else None),
         stage_report=stage_report,
         artifacts=artifacts,
     )
 
-    success_time = datetime.now(UTC)
+    success_time = datetime.now(timezone.utc)
     record.status = "succeeded"
     record.updated_at = success_time
     record.available_at = success_time
@@ -120,7 +108,7 @@ def process_outbox_records(*, limit: int = 25) -> int:
 
 
 def process_outbox_records_with_session(*, session: Session, limit: int = 25) -> int:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     records = (
         session.execute(
             select(OutboxRecord)

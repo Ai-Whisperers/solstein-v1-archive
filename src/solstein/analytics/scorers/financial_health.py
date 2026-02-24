@@ -47,9 +47,7 @@ class FinancialHealthScorer:
 
         # Merge facts from repository if available
         if fact_repo and company_id:
-            financials = self._merge_facts_into_financials(
-                financials, fact_repo, company_id
-            )
+            financials = self._merge_facts_into_financials(financials, fact_repo, company_id)
 
         if financials.revenue:
             adj = 0.0

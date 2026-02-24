@@ -6,7 +6,7 @@
 # pyright: reportUnusedCallResult=false
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import cast
 
@@ -53,9 +53,7 @@ def test_build_company_profile_without_ticker_is_explainable() -> None:
     assert profile.metric_justifications["revenue"]
 
 
-def test_run_market_intelligence_writes_artifacts(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_run_market_intelligence_writes_artifacts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     def _fake_enrich(candidate, registry, batch_id) -> Company:
         return Company(
             id=candidate.company_id,
@@ -132,9 +130,7 @@ def test_run_market_intelligence_writes_artifacts(
     assert artifact_hashes_b == artifact_hashes_a
 
 
-def test_run_market_intelligence_source_volume_gate_fails(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_run_market_intelligence_source_volume_gate_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     def _fake_enrich(candidate, registry, batch_id) -> Company:
         return Company(
             id=candidate.company_id,
@@ -223,9 +219,7 @@ def test_data_quality_tier_classification() -> None:
     assert _data_quality_tier(10) == "well-sourced"
 
 
-def test_per_company_source_gate_filters_low_source_companies(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_per_company_source_gate_filters_low_source_companies(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Companies below min_sources_per_company are filtered out."""
     call_count = {"n": 0}
 
@@ -274,9 +268,7 @@ def test_per_company_source_gate_filters_low_source_companies(
     assert summary["profiles"] < 5  # some were filtered
 
 
-def test_per_company_source_gate_removes_all_raises(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_per_company_source_gate_removes_all_raises(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """When all companies are below the threshold, a RuntimeError is raised."""
 
     def _fake_enrich(candidate, registry, batch_id) -> Company:
@@ -313,9 +305,7 @@ def test_per_company_source_gate_removes_all_raises(
     assert (tmp_path / "stage_report.json").exists()
 
 
-def test_gather_stage_reports_source_quality_breakdown(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_gather_stage_reports_source_quality_breakdown(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Gather stage includes per-company source counts and quality tiers."""
     import json
 
@@ -406,9 +396,7 @@ def test_run_market_intelligence_dual_write_sqlite(tmp_path: Path, monkeypatch) 
         assert outbox_record.event_key.endswith(":research_run_persist")
 
 
-def test_outbox_worker_replays_pending_records(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_outbox_worker_replays_pending_records(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     db_path = tmp_path / "research_outbox.db"
     monkeypatch.setenv("SUPABASE__DB_URL", f"sqlite:///{db_path}")
 
@@ -443,9 +431,7 @@ def test_outbox_worker_replays_pending_records(
         strict_provenance=False,
         db_dual_write=False,
     )
-    (output_dir / "run_summary.json").write_text(
-        json.dumps(run_summary, indent=2), encoding="utf-8"
-    )
+    (output_dir / "run_summary.json").write_text(json.dumps(run_summary, indent=2), encoding="utf-8")
 
     run_id = "test-run-outbox-001"
     event_key = f"{run_id}:research_run_persist"
@@ -471,9 +457,9 @@ def test_outbox_worker_replays_pending_records(
                 status="pending",
                 payload=payload,
                 attempt_count=0,
-                available_at=datetime.now(UTC),
-                created_at=datetime.now(UTC),
-                updated_at=datetime.now(UTC),
+                available_at=datetime.now(timezone.utc),
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc),
                 last_error=None,
             )
         )
@@ -486,9 +472,5 @@ def test_outbox_worker_replays_pending_records(
         outbox_record = session.query(OutboxRecord).one()
         assert outbox_record.status == "succeeded"
         assert outbox_record.attempt_count == 1
-        run_record = (
-            session.query(ResearchRunRecord)
-            .filter(ResearchRunRecord.run_id == run_id)
-            .one()
-        )
+        run_record = session.query(ResearchRunRecord).filter(ResearchRunRecord.run_id == run_id).one()
         assert run_record.summary is not None

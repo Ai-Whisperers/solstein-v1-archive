@@ -5,11 +5,19 @@ Pure Python objects representing the core business concepts,
 now powered directly by Pydantic for end-to-end validation.
 """
 
-from datetime import UTC, datetime
-from enum import StrEnum
+import sys
+from datetime import datetime, timezone
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+if sys.version_info >= (3, 11):  # noqa: UP036
+    from enum import StrEnum
+else:
+    from enum import Enum
+
+    class StrEnum(str, Enum):
+        pass
 
 
 class ConfidenceLevel(StrEnum):
@@ -109,7 +117,7 @@ class Company(BaseModel):
     acquisitions: list[dict[str, Any]] = Field(default_factory=list)
 
     # Metadata
-    last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     data_source: str | None = None
     notes: str | None = None
     source_links: list[str] = Field(default_factory=list)
@@ -212,7 +220,7 @@ class MarketAnalysis(BaseModel):
     model_config = ConfigDict(validate_assignment=True)
 
     market_name: str
-    analysis_date: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    analysis_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     companies: list[Company] = Field(default_factory=list)
 
     # Market metrics
@@ -317,7 +325,7 @@ class RawDataSource(BaseModel):
     source_name: str  # e.g., "TechCrunch", "Companies House", "GitHub"
     raw_content: str | dict[str, Any]  # Original content (article text, JSON, etc.)
     url: str | None = None  # Where we got this from
-    retrieval_timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    retrieval_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     publication_date: datetime | None = None  # When source was published
     confidence: float = Field(default=0.5, ge=0, le=1)  # Initial confidence in source
     relevance_score: float = Field(default=0.5, ge=0, le=1)  # How relevant to company
@@ -333,7 +341,7 @@ class RawDataRecord(BaseModel):
 
     company_id: str
     gathering_batch_id: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     sources: list[RawDataSource] = Field(default_factory=list)
     total_sources_found: int = 0
     notes: str | None = None
@@ -367,8 +375,8 @@ class AggregatedFact(BaseModel):
     contradiction_notes: str | None = None
 
     # Metadata
-    extracted_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    extracted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     is_verified: bool = False  # Human verification flag
     verification_notes: str | None = None
 
@@ -380,7 +388,7 @@ class AggregatedDataRecord(BaseModel):
 
     company_id: str
     gathering_batch_id: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     facts: list[AggregatedFact] = Field(default_factory=list)
 
     # Quality metrics
@@ -416,7 +424,7 @@ class SignalExtraction(BaseModel):
     why_it_matters: str | None = None  # Business context
 
     # Extracted at
-    extracted_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    extracted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class SignalExtractionRecord(BaseModel):
@@ -426,7 +434,7 @@ class SignalExtractionRecord(BaseModel):
 
     company_id: str
     gathering_batch_id: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     signals: list[SignalExtraction] = Field(default_factory=list)
 
 

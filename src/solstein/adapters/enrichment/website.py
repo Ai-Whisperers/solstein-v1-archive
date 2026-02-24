@@ -6,7 +6,7 @@ mentions.  Requires a ``website`` URL to be provided.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from solstein.domain.models import DataSourceType, RawDataSource
 
@@ -42,7 +42,7 @@ class WebsiteEnrichment:
             source_name=f"Website scrape ({website})",
             raw_content=info.model_dump(mode="json"),
             url=website,
-            retrieval_timestamp=datetime.now(UTC),
+            retrieval_timestamp=datetime.now(timezone.utc),
             confidence=0.5,
             relevance_score=0.7,
             metadata={

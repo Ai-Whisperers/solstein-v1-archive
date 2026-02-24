@@ -7,7 +7,7 @@ variable, and Google is a scraping fallback.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from solstein.domain.models import DataSourceType, RawDataSource
 
@@ -39,7 +39,7 @@ class WebSearchNewsEnrichment:
             source_name="Exa/Google news search",
             raw_content=articles,
             url=None,
-            retrieval_timestamp=datetime.now(UTC),
+            retrieval_timestamp=datetime.now(timezone.utc),
             confidence=0.5,
             relevance_score=0.7,
             metadata={"article_count": len(articles)},

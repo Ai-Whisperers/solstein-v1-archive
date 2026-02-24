@@ -10,7 +10,7 @@ import json
 import os
 import re
 from collections.abc import Mapping
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import requests
 
@@ -65,7 +65,7 @@ class GitHubAgent(BaseDataGatheringAgent):
 
     async def gather(self, company_name: str, context: dict[str, object]) -> AgentTaskResult:
         """Gather GitHub data for a company."""
-        start_time = datetime.now(UTC)
+        start_time = datetime.now(timezone.utc)
         result = AgentTaskResult(
             agent_name=self.agent_name,
             source_type=self.source_type,
@@ -84,7 +84,7 @@ class GitHubAgent(BaseDataGatheringAgent):
                     result.coverage_gaps.append("GitHub organization not found")
                     result.success = False
                     result.error_message = "No GitHub organization found"
-                    result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+                    result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
                     return result
 
             repos = await self._fetch_org_repos(github_org)
@@ -93,7 +93,7 @@ class GitHubAgent(BaseDataGatheringAgent):
                 result.coverage_gaps.append("No public repositories available")
                 result.success = False
                 result.error_message = f"No repositories found in {github_org}"
-                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+                result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
                 return result
 
             def _stars(repo: dict[str, object]) -> int:
@@ -193,7 +193,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             result.success = False
 
         finally:
-            result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+            result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
 
         return result
 
@@ -487,11 +487,11 @@ class GitHubAgent(BaseDataGatheringAgent):
 
     def _is_outdated(self, current: str, latest: str) -> bool:
         c = self._parse_semver(current)
-        l = self._parse_semver(latest)
-        if not c or not l:
+        lat = self._parse_semver(latest)
+        if not c or not lat:
             return False
         cmaj, cmin, _ = c
-        lmaj, lmin, _ = l
+        lmaj, lmin, _ = lat
         if lmaj != cmaj:
             return True
         return (lmin - cmin) > 3
@@ -627,7 +627,7 @@ class GitHubAgent(BaseDataGatheringAgent):
     def _api_count_commits(self, org_name: str, repos: list[dict[str, object]]) -> int | None:
         """API call to count commits."""
         total_commits = 0
-        thirty_days_ago = (datetime.now(UTC) - timedelta(days=30)).isoformat()
+        thirty_days_ago = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
 
         for repo in repos:
             try:
@@ -666,7 +666,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             return None
 
     def _api_commit_velocity_trend(self, org_name: str, repos: list[dict[str, object]]) -> dict[str, object] | None:
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         recent_since = (now - timedelta(days=14)).isoformat()
         prev_since = (now - timedelta(days=28)).isoformat()
         prev_until = (now - timedelta(days=14)).isoformat()
@@ -704,9 +704,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             trend_ratio = (recent_count - prev_count) / prev_count
 
         direction = "flat"
-        if prev_count == 0 and recent_count > 0:
-            direction = "up"
-        elif prev_count > 0 and recent_count > prev_count:
+        if prev_count == 0 and recent_count > 0 or prev_count > 0 and recent_count > prev_count:
             direction = "up"
         elif prev_count > 0 and recent_count < prev_count:
             direction = "down"

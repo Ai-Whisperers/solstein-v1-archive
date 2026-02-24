@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from solstein.adapters.protocols import DiscoverySource, EnrichmentSource
@@ -30,7 +30,7 @@ class AdapterHealthRecord:
     confidence: float = 0.0
     company_id: str | None = None
     company_name: str | None = None
-    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class InstrumentedEnrichmentSource:

@@ -10,10 +10,9 @@ actual counts.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from solstein.domain.models import DataSourceType, RawDataSource
-
 
 _SOURCE_TYPE_MAP = {
     "uspto_peds": DataSourceType.USPTO,
@@ -60,7 +59,7 @@ class PatentEnrichment:
                 "source_backend": result.source,
             },
             url=None,
-            retrieval_timestamp=datetime.now(UTC),
+            retrieval_timestamp=datetime.now(timezone.utc),
             confidence=confidence,
             relevance_score=0.6,
             metadata={

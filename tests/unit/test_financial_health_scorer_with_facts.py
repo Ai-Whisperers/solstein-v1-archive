@@ -13,7 +13,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from solstein.analytics.scorers.financial_health import FinancialHealthScorer
-from solstein.core.scoring_config import ScoringSettings
 from solstein.domain.facts import Fact
 from solstein.domain.models import ConfidenceLevel, FinancialMetric
 

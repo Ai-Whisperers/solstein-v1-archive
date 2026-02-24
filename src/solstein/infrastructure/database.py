@@ -59,9 +59,7 @@ class DatabaseManager:
             poolclass=QueuePool,
         )
 
-        self.session_factory = async_sessionmaker(
-            self.engine, class_=AsyncSession, expire_on_commit=False
-        )
+        self.session_factory = async_sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
 
     def init_sync(self):
         """Initialize sync engine and session factory for Alembic migrations."""

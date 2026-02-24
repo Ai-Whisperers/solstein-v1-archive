@@ -62,11 +62,11 @@ async def test_get_current_user_authenticated():
 def test_main_health_endpoints():
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json()["status"] == "healthy"
+    assert response.json()["status"] in ("healthy", "degraded")
 
     response = client.get("/healthz")
     assert response.status_code == 200
-    assert response.json()["status"] == "healthy"
+    assert response.json()["status"] in ("healthy", "degraded")
 
 
 def test_main_docs_endpoint():

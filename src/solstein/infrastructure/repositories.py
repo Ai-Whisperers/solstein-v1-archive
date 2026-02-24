@@ -5,11 +5,6 @@ Repositories abstract the database layer and provide a clean interface for
 business logic.
 """
 
-from typing import List, Optional
-from uuid import UUID
-
-from sqlalchemy.orm import Session
-
 from solstein.domain.facts import Fact, FactSource, GatheringBatch
 from solstein.infrastructure.database import DatabaseManager
 
@@ -29,9 +24,7 @@ class FactRepository:
         """
         self.db_manager = db_manager
 
-    def create_batch(
-        self, company_id: str, status: str = "in_progress"
-    ) -> GatheringBatch:
+    def create_batch(self, company_id: str, status: str = "in_progress") -> GatheringBatch:
         """Create a new gathering batch.
 
         Args:
@@ -88,7 +81,7 @@ class FactRepository:
         finally:
             session.close()
 
-    def store_batch(self, facts: List[Fact], batch: GatheringBatch) -> List[str]:
+    def store_batch(self, facts: list[Fact], batch: GatheringBatch) -> list[str]:
         """Store multiple facts in a single batch.
 
         Args:
@@ -128,7 +121,7 @@ class FactRepository:
         finally:
             session.close()
 
-    def get_company_facts(self, company_id: str) -> List[Fact]:
+    def get_company_facts(self, company_id: str) -> list[Fact]:
         """Fetch all facts for a company.
 
         Args:
@@ -145,19 +138,12 @@ class FactRepository:
 
         session = self.db_manager.get_session()
         try:
-            facts = (
-                session.query(Fact)
-                .filter_by(company_id=company_id)
-                .order_by(Fact.extracted_at.desc())
-                .all()
-            )
+            facts = session.query(Fact).filter_by(company_id=company_id).order_by(Fact.extracted_at.desc()).all()
             return facts
         finally:
             session.close()
 
-    def get_facts_by_type(
-        self, company_id: str, fact_type: str
-    ) -> List[Fact]:
+    def get_facts_by_type(self, company_id: str, fact_type: str) -> list[Fact]:
         """Fetch facts of a specific type for a company.
 
         Args:
@@ -187,7 +173,7 @@ class FactRepository:
         finally:
             session.close()
 
-    def get_fact_by_id(self, fact_id: str) -> Optional[Fact]:
+    def get_fact_by_id(self, fact_id: str) -> Fact | None:
         """Fetch a single fact by ID.
 
         Args:
@@ -213,8 +199,8 @@ class FactRepository:
         self,
         fact_id: str,
         source_type: str,
-        source_url: Optional[str] = None,
-        raw_content: Optional[str] = None,
+        source_url: str | None = None,
+        raw_content: str | None = None,
     ) -> FactSource:
         """Add a source record to a fact.
 
@@ -259,7 +245,7 @@ class FactRepository:
         finally:
             session.close()
 
-    def get_batch(self, batch_id: str) -> Optional[GatheringBatch]:
+    def get_batch(self, batch_id: str) -> GatheringBatch | None:
         """Fetch a gathering batch by ID.
 
         Args:

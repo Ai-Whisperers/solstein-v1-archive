@@ -524,9 +524,7 @@ def discover_companies(
     registry: SourceRegistry | None = None,
 ) -> list[DiscoveryCandidate]:
     if registry is not None:
-        return _discover_via_registry(
-            seed_company, market, max_companies, extra_keywords, registry
-        )
+        return _discover_via_registry(seed_company, market, max_companies, extra_keywords, registry)
     return _discover_legacy(seed_company, market, max_companies, extra_keywords)
 
 
@@ -582,9 +580,7 @@ def _discover_legacy(
     catalog = _catalog_for_market(market)
 
     if (
-        "dutch" in market.lower()
-        or "netherlands" in market.lower()
-        or "energy" in market.lower()
+        "dutch" in market.lower() or "netherlands" in market.lower() or "energy" in market.lower()
     ) and max_companies > len(catalog):
         try:
             loader = CompetitorDataLoader()
@@ -598,16 +594,8 @@ def _discover_legacy(
                         "name": company.name,
                         "ticker": None,
                         "industry": company.industry,
-                        "region": (
-                            ", ".join(company.geographic_presence)
-                            if company.geographic_presence
-                            else "NL/EU"
-                        ),
-                        "tags": (
-                            company.tech_stack[:3]
-                            if company.tech_stack
-                            else ["energy", "software"]
-                        ),
+                        "region": (", ".join(company.geographic_presence) if company.geographic_presence else "NL/EU"),
+                        "tags": (company.tech_stack[:3] if company.tech_stack else ["energy", "software"]),
                         "sources": [source_primary],
                     }
                 )
@@ -640,16 +628,11 @@ def _discover_legacy(
             score += float(overlap)
             reasons.append("keyword tag overlap")
 
-        if (
-            "latam" in market.lower()
-            and str(item.get("region", "")).lower().find("latam") >= 0
-        ):
+        if "latam" in market.lower() and str(item.get("region", "")).lower().find("latam") >= 0:
             score += 1.0
             reasons.append("market region match")
 
-        if any(
-            k in tags for k in ["energy", "bank", "fintech", "payments", "software"]
-        ):
+        if any(k in tags for k in ["energy", "bank", "fintech", "payments", "software"]):
             score += 0.5
 
         candidate = DiscoveryCandidate(

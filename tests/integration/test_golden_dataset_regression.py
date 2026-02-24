@@ -12,15 +12,12 @@ Golden Dataset:
 """
 
 import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
 from solstein.analytics.scorers.financial_health import FinancialHealthScorer
 from solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
-from solstein.data.connectors.companies_house_connector import CompaniesHouseConnector
-from solstein.data.connectors.news_signal_detector import NewsSignalDetector
-from solstein.data.connectors.sec_edgar_connector import SECEdgarConnector
 from solstein.domain.facts import Fact
 from solstein.domain.models import FinancialMetric
 

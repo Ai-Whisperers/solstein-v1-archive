@@ -7,10 +7,15 @@ for the main scoring engine.
 
 import asyncio
 import operator
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Annotated, Any
 
-from langgraph.graph import END, START, StateGraph
+try:
+    from langgraph.graph import END, START, StateGraph
+except ImportError:
+    StateGraph = None  # type: ignore[assignment, misc]
+    START = "start"  # type: ignore[assignment]
+    END = "end"  # type: ignore[assignment]
 from loguru import logger
 from typing_extensions import TypedDict
 
@@ -36,9 +41,9 @@ class AgentState(TypedDict):
     company_name: str
     gathering_batch_id: str
     company_id: str
-    context: dict[str, Any]
+    context: dict
     enabled_sources: list[DataSourceType]
-    agent_results: Annotated[list[AgentTaskResult], operator.add]
+    agent_results: Annotated[list, operator.add]
     errors: Annotated[list[str], operator.add]
     raw_records: RawDataRecord | None
     aggregated: AggregatedDataRecord | None
@@ -134,7 +139,7 @@ class CoordinatorAgent:
         enabled_sources: list[DataSourceType] | None = None,
     ) -> CompanyAnalysisAuditTrail:
         """Analyze a single company using LangGraph StateMachine."""
-        start_time = datetime.now(UTC)
+        start_time = datetime.now(timezone.utc)
         company_id = company_name.lower().replace(" ", "-")
 
         if enabled_sources is None:
@@ -162,7 +167,7 @@ class CoordinatorAgent:
 
             final_state = await self.workflow.ainvoke(initial_state)
 
-            completed_at = datetime.now(UTC)
+            completed_at = datetime.now(timezone.utc)
 
             audit_trail = CompanyAnalysisAuditTrail(
                 company_id=company_id,

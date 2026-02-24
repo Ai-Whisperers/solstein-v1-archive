@@ -75,9 +75,7 @@ class NewsSignalDetector:
         """
         self.api_key = api_key or os.getenv("NEWSAPI_KEY")
         if not self.api_key:
-            raise ValueError(
-                "NewsAPI key required. Set NEWSAPI_KEY env var or pass api_key parameter."
-            )
+            raise ValueError("NewsAPI key required. Set NEWSAPI_KEY env var or pass api_key parameter.")
 
         self.base_url = "https://newsapi.org/v2"
         self.daily_query_limit = 100
@@ -100,15 +98,11 @@ class NewsSignalDetector:
         self._reset_daily_counter()
 
         if self.queries_today >= self.daily_query_limit:
-            logger.error(
-                f"Daily query limit reached: {self.queries_today}/{self.daily_query_limit}"
-            )
+            logger.error(f"Daily query limit reached: {self.queries_today}/{self.daily_query_limit}")
             raise RuntimeError("NewsAPI daily query limit exceeded (100/day)")
 
         if self.queries_today >= 90:
-            logger.warning(
-                f"Approaching daily limit: {self.queries_today}/{self.daily_query_limit}"
-            )
+            logger.warning(f"Approaching daily limit: {self.queries_today}/{self.daily_query_limit}")
 
     def _search_news(self, query: str) -> list[dict[str, Any]]:
         """
@@ -146,9 +140,7 @@ class NewsSignalDetector:
                 raise RuntimeError("NewsAPI rate limit exceeded")
 
             if response.status_code != 200:
-                logger.error(
-                    f"NewsAPI error {response.status_code}: {response.text}"
-                )
+                logger.error(f"NewsAPI error {response.status_code}: {response.text}")
                 raise RuntimeError(f"NewsAPI error: {response.status_code}")
 
             data = response.json()
@@ -157,18 +149,14 @@ class NewsSignalDetector:
                 raise RuntimeError(f"NewsAPI error: {data.get('message')}")
 
             articles = data.get("articles", [])
-            logger.info(
-                f"Found {len(articles)} articles for query: {query}"
-            )
+            logger.info(f"Found {len(articles)} articles for query: {query}")
             return articles
 
         except requests.RequestException as e:
             logger.error(f"Request error searching news: {e}")
             raise RuntimeError(f"Failed to search news: {e}") from e
 
-    def _match_patterns(
-        self, text: str, patterns: list[str]
-    ) -> bool:
+    def _match_patterns(self, text: str, patterns: list[str]) -> bool:
         """
         Check if text matches any pattern (case-insensitive).
 
@@ -180,10 +168,7 @@ class NewsSignalDetector:
             True if any pattern matches
         """
         text_lower = text.lower()
-        for pattern in patterns:
-            if re.search(pattern, text_lower, re.IGNORECASE):
-                return True
-        return False
+        return any(re.search(pattern, text_lower, re.IGNORECASE) for pattern in patterns)
 
     def _extract_signals(
         self,
@@ -225,18 +210,14 @@ class NewsSignalDetector:
 
             # Parse date
             try:
-                signal_date = datetime.fromisoformat(
-                    published_at.replace("Z", "+00:00")
-                ).date()
+                signal_date = datetime.fromisoformat(published_at.replace("Z", "+00:00")).date()
             except (ValueError, AttributeError):
                 signal_date = datetime.now().date()
 
             # Create deduplication key
             dedup_key = (company_name.lower(), signal_type, str(signal_date))
             if dedup_key in self.seen_signals:
-                logger.debug(
-                    f"Skipping duplicate signal: {company_name} {signal_type} {signal_date}"
-                )
+                logger.debug(f"Skipping duplicate signal: {company_name} {signal_type} {signal_date}")
                 continue
 
             self.seen_signals.add(dedup_key)
@@ -255,15 +236,11 @@ class NewsSignalDetector:
             }
 
             signals.append(signal)
-            logger.info(
-                f"Detected {signal_type} signal for {company_name}: {title[:60]}..."
-            )
+            logger.info(f"Detected {signal_type} signal for {company_name}: {title[:60]}...")
 
         return signals
 
-    def detect_funding_signal(
-        self, company_name: str
-    ) -> list[dict[str, Any]]:
+    def detect_funding_signal(self, company_name: str) -> list[dict[str, Any]]:
         """
         Detect funding round announcements for a company.
 
@@ -293,9 +270,7 @@ class NewsSignalDetector:
             logger.error(f"Failed to detect funding signals: {e}")
             raise
 
-    def detect_partnership_signal(
-        self, company_name: str
-    ) -> list[dict[str, Any]]:
+    def detect_partnership_signal(self, company_name: str) -> list[dict[str, Any]]:
         """
         Detect partnership announcements for a company.
 
@@ -325,9 +300,7 @@ class NewsSignalDetector:
             logger.error(f"Failed to detect partnership signals: {e}")
             raise
 
-    def detect_key_hire_signal(
-        self, company_name: str
-    ) -> list[dict[str, Any]]:
+    def detect_key_hire_signal(self, company_name: str) -> list[dict[str, Any]]:
         """
         Detect key hire announcements for a company.
 
@@ -367,10 +340,7 @@ class NewsSignalDetector:
         self._reset_daily_counter()
 
         remaining = max(0, self.daily_query_limit - self.queries_today)
-        reset_time = (
-            datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-            + timedelta(days=1)
-        )
+        reset_time = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
 
         return {
             "queries_used": self.queries_today,

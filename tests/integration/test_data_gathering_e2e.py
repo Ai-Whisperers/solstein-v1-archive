@@ -36,8 +36,9 @@ class TestDataGatheringE2E:
     def fact_repo(self):
         """Create a FactRepository instance with mocked db_manager."""
         from unittest.mock import MagicMock
+
         from solstein.infrastructure.database import DatabaseManager
-        
+
         db_manager = MagicMock(spec=DatabaseManager)
         return FactRepository(db_manager)
 
@@ -161,7 +162,7 @@ class TestDataGatheringE2E:
         ]
 
         # Store facts
-        batch = GatheringBatch(
+        _batch = GatheringBatch(
             batch_id=batch_id,
             company_id=company_id,
         )

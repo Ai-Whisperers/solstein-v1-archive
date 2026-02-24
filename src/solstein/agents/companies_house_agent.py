@@ -6,8 +6,7 @@ for UK-registered companies and their subsidiaries.
 
 import asyncio
 import os
-from datetime import UTC, datetime
-from typing import Any
+from datetime import datetime, timezone
 
 import requests
 
@@ -28,9 +27,9 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
 
         self.circuit_breaker = CircuitBreaker(failure_threshold=4, recovery_timeout=90.0, name="CompaniesHouseAPI")
 
-    async def gather(self, company_name: str, context: dict[str, Any]) -> AgentTaskResult:
+    async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
         """Gather Companies House data for a company."""
-        start_time = datetime.now(UTC)
+        start_time = datetime.now(timezone.utc)
         result = AgentTaskResult(
             agent_name=self.agent_name,
             source_type=self.source_type,
@@ -45,7 +44,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 result.coverage_gaps.append("Companies House API not configured")
                 result.success = False
                 result.error_message = "Companies House API not configured"
-                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+                result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
                 return result
 
             company_num = await self._search_company_by_name(company_name)
@@ -54,7 +53,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 result.coverage_gaps.append("Company not found in Companies House")
                 result.success = False
                 result.error_message = "Company not found in Companies House"
-                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+                result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
                 return result
 
             company_data = await self._fetch_company_details(company_num)
@@ -62,7 +61,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 result.coverage_gaps.append("Could not fetch company details")
                 result.success = False
                 result.error_message = "Could not fetch company details from Companies House"
-                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+                result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
                 return result
 
             raw_source = self._create_raw_source(
@@ -101,7 +100,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             result.success = False
 
         finally:
-            result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+            result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
 
         return result
 
@@ -155,7 +154,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
 
         return None
 
-    async def _fetch_company_details(self, company_num: str) -> dict[str, Any] | None:
+    async def _fetch_company_details(self, company_num: str) -> dict | None:
         """Fetch company details from Companies House."""
         self.log_info(f"Fetching company details: {company_num}")
 
@@ -173,7 +172,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             self.log_error(f"Error fetching company details: {e}")
             return None
 
-    def _api_get_company(self, company_num: str) -> dict[str, Any] | None:
+    def _api_get_company(self, company_num: str) -> dict | None:
         """API call to get company details."""
         try:
             url = f"{self.api_base}/company/{company_num}"
@@ -193,7 +192,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
 
         return None
 
-    async def _fetch_latest_financials(self, company_num: str) -> dict[str, Any] | None:
+    async def _fetch_latest_financials(self, company_num: str) -> dict | None:
         """Fetch latest financial filing."""
         self.log_info(f"Fetching financials for: {company_num}")
 
@@ -211,7 +210,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             self.log_error(f"Error fetching financials: {e}")
             return None
 
-    def _api_get_financials(self, company_num: str) -> dict[str, Any] | None:
+    def _api_get_financials(self, company_num: str) -> dict | None:
         """API call to get financial filing."""
         try:
             url = f"{self.api_base}/company/{company_num}/filing-history"
@@ -242,9 +241,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
 
         return None
 
-    def _extract_facts_from_company_data(
-        self, company_data: dict[str, Any], financials_data: dict[str, Any] | None
-    ) -> list[Any]:
+    def _extract_facts_from_company_data(self, company_data: dict, financials_data: dict | None) -> list:
         """Extract facts from Companies House data."""
         facts = []
 

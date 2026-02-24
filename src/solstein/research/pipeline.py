@@ -2,7 +2,7 @@ import hashlib
 import json
 import time
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from loguru import logger
@@ -18,7 +18,7 @@ from solstein.infrastructure.research_dual_write import persist_research_run
 from .contracts import StageName, build_config_hash, build_stage_artifact
 from .discovery import DiscoveryCandidate, discover_companies
 from .evidence import evaluate_market_evidence
-from .gather import build_company_profile, enrich_company
+from .gather import enrich_company
 from .hashing import sha256_canonical_json
 from .reconcile import detect_market_contradictions
 from .sources import canonicalize_url
@@ -45,8 +45,12 @@ def run_market_intelligence(
     settings = Settings.load()
     registry = build_default_registry(settings)
     batch_id = uuid.uuid4().hex[:12]
-    logger.info("Pipeline run batch_id={}, registry has {} discovery + {} enrichment sources",
-                batch_id, len(registry.discovery_sources), len(registry.enrichment_sources))
+    logger.info(
+        "Pipeline run batch_id={}, registry has {} discovery + {} enrichment sources",
+        batch_id,
+        len(registry.discovery_sources),
+        len(registry.enrichment_sources),
+    )
 
     stages: list[dict[str, object]] = []
     artifact_hashes: dict[str, str] = {}
@@ -75,7 +79,7 @@ def run_market_intelligence(
     prompt_version = "research.pipeline.v2"
 
     def _start_stage_timer() -> tuple[str, float]:
-        return datetime.now(UTC).isoformat(), time.monotonic()
+        return datetime.now(timezone.utc).isoformat(), time.monotonic()
 
     def _append_stage_artifact(
         *,
@@ -88,7 +92,7 @@ def run_market_intelligence(
         error_class: str | None = None,
     ) -> None:
         stage_start_iso, stage_start_monotonic = stage_start
-        stage_end_iso = datetime.now(UTC).isoformat()
+        stage_end_iso = datetime.now(timezone.utc).isoformat()
         duration_ms = int((time.monotonic() - stage_start_monotonic) * 1000)
         stage_payload = dict(payload or {})
         stage_payload.update(
@@ -175,14 +179,10 @@ def run_market_intelligence(
 
     # ---- Gather / Enrich ----
     gather_stage_start = _start_stage_timer()
-    companies: list[Company] = [
-        enrich_company(candidate, registry, batch_id) for candidate in candidates
-    ]
+    companies: list[Company] = [enrich_company(candidate, registry, batch_id) for candidate in candidates]
 
     extracted_payload = [company.model_dump(mode="json") for company in companies]
-    artifact_hashes["extracted"] = sha256_canonical_json(
-        _strip_volatile_fields(extracted_payload)
-    )
+    artifact_hashes["extracted"] = sha256_canonical_json(_strip_volatile_fields(extracted_payload))
     extracted_path = output_dir / "extracted.json"
     extracted_path.write_text(
         json.dumps(extracted_payload, indent=2),
@@ -202,12 +202,14 @@ def run_market_intelligence(
     for company in companies:
         tier = company.data_quality_tier
         quality_counts[tier] = quality_counts.get(tier, 0) + 1
-        per_company_sources.append({
-            "company_id": company.id,
-            "name": company.name,
-            "enrichment_source_count": company.enrichment_source_count,
-            "data_quality_tier": tier,
-        })
+        per_company_sources.append(
+            {
+                "company_id": company.id,
+                "name": company.name,
+                "enrichment_source_count": company.enrichment_source_count,
+                "data_quality_tier": tier,
+            }
+        )
 
     _append_stage_artifact(
         stage="gather",
@@ -226,14 +228,14 @@ def run_market_intelligence(
     # ---- Per-company source volume gate ----
     if min_sources_per_company is not None:
         per_company_gate_start = _start_stage_timer()
-        under_threshold = [
-            c for c in companies if c.enrichment_source_count < min_sources_per_company
-        ]
+        under_threshold = [c for c in companies if c.enrichment_source_count < min_sources_per_company]
         if under_threshold:
             companies = [c for c in companies if c.enrichment_source_count >= min_sources_per_company]
             logger.info(
                 "Per-company source gate: filtered {} companies below {} sources, {} remain",
-                len(under_threshold), min_sources_per_company, len(companies),
+                len(under_threshold),
+                min_sources_per_company,
+                len(companies),
             )
             _append_stage_artifact(
                 stage="per_company_source_gate",
@@ -252,7 +254,8 @@ def run_market_intelligence(
             )
             if not companies:
                 (output_dir / "stage_report.json").write_text(
-                    json.dumps(stage_report, indent=2), encoding="utf-8",
+                    json.dumps(stage_report, indent=2),
+                    encoding="utf-8",
                 )
                 raise RuntimeError(
                     f"Per-company source gate removed all companies (threshold={min_sources_per_company})"
@@ -277,9 +280,7 @@ def run_market_intelligence(
             json.dumps(stage_report, indent=2),
             encoding="utf-8",
         )
-        raise RuntimeError(
-            f"Source volume gate failed: observed {total_sources}, required {min_total_sources}"
-        )
+        raise RuntimeError(f"Source volume gate failed: observed {total_sources}, required {min_total_sources}")
 
     # ---- Provenance validation ----
     provenance_stage_start = _start_stage_timer()
@@ -304,16 +305,12 @@ def run_market_intelligence(
     )
 
     if strict_provenance and has_provenance_violations:
-        raise RuntimeError(
-            f"Provenance validation failed for {len(violations)} companies"
-        )
+        raise RuntimeError(f"Provenance validation failed for {len(violations)} companies")
 
     # ---- Contradiction detection ----
     contradiction_stage_start = _start_stage_timer()
     contradiction_report = detect_market_contradictions(companies)
-    artifact_hashes["contradictions_report"] = sha256_canonical_json(
-        contradiction_report
-    )
+    artifact_hashes["contradictions_report"] = sha256_canonical_json(contradiction_report)
     artifact_hashes["contradictions"] = artifact_hashes["contradictions_report"]
     (output_dir / "contradictions_report.json").write_text(
         json.dumps(contradiction_report, indent=2),
@@ -321,19 +318,11 @@ def run_market_intelligence(
     )
 
     if max_contradictions is not None:
-        total_contradictions = sum(
-            len(items)
-            for items in contradiction_report.values()
-            if isinstance(items, list)
-        )
+        total_contradictions = sum(len(items) for items in contradiction_report.values() if isinstance(items, list))
         if total_contradictions > max_contradictions:
-            raise RuntimeError(
-                f"Detected {total_contradictions} contradictions, above threshold {max_contradictions}"
-            )
+            raise RuntimeError(f"Detected {total_contradictions} contradictions, above threshold {max_contradictions}")
 
-    total_contradictions = sum(
-        len(items) for items in contradiction_report.values() if isinstance(items, list)
-    )
+    total_contradictions = sum(len(items) for items in contradiction_report.values() if isinstance(items, list))
     _append_stage_artifact(
         stage="contradiction_detection",
         stage_start=contradiction_stage_start,
@@ -375,9 +364,7 @@ def run_market_intelligence(
         payload={
             "average_readiness_score": evidence_report["average_readiness_score"],
             "investment_ready_count": evidence_report["investment_ready_count"],
-            "decision_support_ready_count": evidence_report[
-                "decision_support_ready_count"
-            ],
+            "decision_support_ready_count": evidence_report["decision_support_ready_count"],
             "needs_more_evidence_count": evidence_report["needs_more_evidence_count"],
         },
     )
@@ -387,9 +374,7 @@ def run_market_intelligence(
     scorer = GrowthScorer()
     scored = [scorer.calculate_scores(company) for company in companies]
     scored_payload = [company.model_dump(mode="json") for company in scored]
-    artifact_hashes["scored"] = sha256_canonical_json(
-        _strip_volatile_fields(scored_payload)
-    )
+    artifact_hashes["scored"] = sha256_canonical_json(_strip_volatile_fields(scored_payload))
     (output_dir / "scored.json").write_text(
         json.dumps(scored_payload, indent=2),
         encoding="utf-8",
@@ -406,9 +391,7 @@ def run_market_intelligence(
     analysis_stage_start = _start_stage_timer()
     analysis = MarketAnalysis(market_name=market, companies=scored)
     market_analysis_payload = analysis.model_dump(mode="json")
-    artifact_hashes["market_analysis"] = sha256_canonical_json(
-        _strip_volatile_fields(market_analysis_payload)
-    )
+    artifact_hashes["market_analysis"] = sha256_canonical_json(_strip_volatile_fields(market_analysis_payload))
     (output_dir / "market_analysis.json").write_text(
         json.dumps(market_analysis_payload, indent=2),
         encoding="utf-8",
@@ -451,12 +434,7 @@ def run_market_intelligence(
     }
     artifact_hashes["run_summary"] = sha256_canonical_json(run_summary)
     stable_stages = [
-        {
-            k: v
-            for k, v in stage.items()
-            if k not in {"stage_start", "stage_end", "duration_ms"}
-        }
-        for stage in stages
+        {k: v for k, v in stage.items() if k not in {"stage_start", "stage_end", "duration_ms"}} for stage in stages
     ]
     stage_report_base = {
         "market": market,
@@ -538,12 +516,7 @@ def run_market_intelligence(
         )
 
     stable_stages = [
-        {
-            k: v
-            for k, v in stage.items()
-            if k not in {"stage_start", "stage_end", "duration_ms"}
-        }
-        for stage in stages
+        {k: v for k, v in stage.items() if k not in {"stage_start", "stage_end", "duration_ms"}} for stage in stages
     ]
     stage_report_base = {
         "market": market,

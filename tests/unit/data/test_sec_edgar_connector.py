@@ -4,7 +4,7 @@ from solstein.data.connectors.sec_edgar_connector import SECEdgarConnector
 
 
 def test_sec_edgar_connector_default_confidence():
-    assert SECEdgarConnector.DEFAULT_CONFIDENCE == pytest.approx(0.95)
+    assert pytest.approx(0.95) == SECEdgarConnector.DEFAULT_CONFIDENCE
 
 
 def test_sec_edgar_connector_user_agent_from_env(monkeypatch: pytest.MonkeyPatch):
@@ -105,9 +105,10 @@ def test_extract_minimal_metrics_from_fake_statements():
 
 
 def test_fetch_filing_retries_on_transient_error(monkeypatch: pytest.MonkeyPatch):
+    from datetime import date
+
     import edgar
     import pandas as pd
-    from datetime import date
 
     income_df = pd.DataFrame(
         [
@@ -187,10 +188,11 @@ def test_fetch_filing_retries_on_transient_error(monkeypatch: pytest.MonkeyPatch
 
 
 def test_fetch_filing_retries_on_rate_limit(monkeypatch: pytest.MonkeyPatch):
-    import edgar
-    import pandas as pd
     from datetime import date
     from types import SimpleNamespace
+
+    import edgar
+    import pandas as pd
 
     income_df = pd.DataFrame(
         [

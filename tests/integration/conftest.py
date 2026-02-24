@@ -12,7 +12,6 @@ import pytest
 
 from solstein.config import Settings
 
-
 # Known test companies from the static catalog
 TEST_COMPANY_ID = "accenture"
 TEST_COMPANY_NAME = "Accenture"
@@ -46,7 +45,5 @@ def instrumented_registry(real_settings):
     """Build an instrumented registry that records adapter health."""
     from solstein.adapters.instrumented import build_instrumented_registry
 
-    registry, enrichment_wrappers, discovery_wrappers = build_instrumented_registry(
-        real_settings
-    )
+    registry, enrichment_wrappers, discovery_wrappers = build_instrumented_registry(real_settings)
     return registry, enrichment_wrappers, discovery_wrappers

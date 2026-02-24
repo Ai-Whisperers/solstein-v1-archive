@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 from loguru import logger
@@ -79,15 +79,9 @@ def _as_percent(value: float | None) -> float | None:
 
 
 def build_company_profile(candidate: DiscoveryCandidate) -> Company:
-    now = datetime.now(UTC)
-    ticker_url = (
-        f"https://finance.yahoo.com/quote/{candidate.ticker}/"
-        if candidate.ticker
-        else None
-    )
-    source_links = list(
-        dict.fromkeys(candidate.source_links + ([ticker_url] if ticker_url else []))
-    )
+    now = datetime.now(timezone.utc)
+    ticker_url = f"https://finance.yahoo.com/quote/{candidate.ticker}/" if candidate.ticker else None
+    source_links = list(dict.fromkeys(candidate.source_links + ([ticker_url] if ticker_url else [])))
 
     metric_sources = {
         "revenue": [ticker_url] if ticker_url else [],
@@ -206,94 +200,45 @@ def build_company_profile(candidate: DiscoveryCandidate) -> Company:
     employees = info.get("fullTimeEmployees")
     margin = _as_percent(info.get("profitMargins"))
     market_cap = info.get("marketCap")
-    description = (
-        info.get("longBusinessSummary")
-        or f"Discovered candidate in {candidate.market}."
-    )
+    description = info.get("longBusinessSummary") or f"Discovered candidate in {candidate.market}."
 
     metric_observations = {
-        "revenue": (
-            [{"source": ticker_url, "value": revenue}]
-            if revenue is not None and ticker_url
-            else []
-        ),
-        "growth_rate": (
-            [{"source": ticker_url, "value": growth}]
-            if growth is not None and ticker_url
-            else []
-        ),
-        "employees": (
-            [{"source": ticker_url, "value": employees}]
-            if employees is not None and ticker_url
-            else []
-        ),
-        "profit_margin": (
-            [{"source": ticker_url, "value": margin}]
-            if margin is not None and ticker_url
-            else []
-        ),
+        "revenue": ([{"source": ticker_url, "value": revenue}] if revenue is not None and ticker_url else []),
+        "growth_rate": ([{"source": ticker_url, "value": growth}] if growth is not None and ticker_url else []),
+        "employees": ([{"source": ticker_url, "value": employees}] if employees is not None and ticker_url else []),
+        "profit_margin": ([{"source": ticker_url, "value": margin}] if margin is not None and ticker_url else []),
         "funding": [],
-        "valuation": (
-            [{"source": ticker_url, "value": market_cap}]
-            if market_cap is not None and ticker_url
-            else []
-        ),
+        "valuation": ([{"source": ticker_url, "value": market_cap}] if market_cap is not None and ticker_url else []),
     }
 
     if revenue is None:
-        metric_justifications["revenue"] = (
-            "Revenue not published in ticker profile metadata."
-        )
+        metric_justifications["revenue"] = "Revenue not published in ticker profile metadata."
     if growth is None:
-        metric_justifications["growth_rate"] = (
-            "Growth rate not published in ticker profile metadata."
-        )
+        metric_justifications["growth_rate"] = "Growth rate not published in ticker profile metadata."
     if employees is None:
-        metric_justifications["employees"] = (
-            "Employee count not published in ticker profile metadata."
-        )
+        metric_justifications["employees"] = "Employee count not published in ticker profile metadata."
     if margin is None:
-        metric_justifications["profit_margin"] = (
-            "Profit margin not published in ticker profile metadata."
-        )
+        metric_justifications["profit_margin"] = "Profit margin not published in ticker profile metadata."
 
     metric_justifications["funding"] = (
         "Funding rounds are typically unavailable in ticker metadata; needs private round sources."
     )
     if market_cap is None:
-        metric_justifications["valuation"] = (
-            "Market cap/valuation not available in ticker metadata at retrieval time."
-        )
+        metric_justifications["valuation"] = "Market cap/valuation not available in ticker metadata at retrieval time."
 
     financials = FinancialMetric(
         revenue=float(revenue) if revenue is not None else None,
-        revenue_confidence=(
-            ConfidenceLevel.CONFIRMED
-            if revenue is not None
-            else ConfidenceLevel.UNKNOWN
-        ),
+        revenue_confidence=(ConfidenceLevel.CONFIRMED if revenue is not None else ConfidenceLevel.UNKNOWN),
         growth_rate=float(growth) if growth is not None else None,
-        growth_confidence=(
-            ConfidenceLevel.ESTIMATED if growth is not None else ConfidenceLevel.UNKNOWN
-        ),
+        growth_confidence=(ConfidenceLevel.ESTIMATED if growth is not None else ConfidenceLevel.UNKNOWN),
         employees=int(employees) if employees is not None else None,
-        employees_confidence=(
-            ConfidenceLevel.ESTIMATED
-            if employees is not None
-            else ConfidenceLevel.UNKNOWN
-        ),
+        employees_confidence=(ConfidenceLevel.ESTIMATED if employees is not None else ConfidenceLevel.UNKNOWN),
         profit_margin=float(margin) if margin is not None else None,
-        margin_confidence=(
-            ConfidenceLevel.ESTIMATED if margin is not None else ConfidenceLevel.UNKNOWN
-        ),
+        margin_confidence=(ConfidenceLevel.ESTIMATED if margin is not None else ConfidenceLevel.UNKNOWN),
         funding_raised=None,
         funding_confidence=ConfidenceLevel.UNKNOWN,
         valuation=float(market_cap) if market_cap is not None else None,
-        valuation_confidence=(
-            ConfidenceLevel.ESTIMATED
-            if market_cap is not None
-            else ConfidenceLevel.UNKNOWN
-        ),
+        valuation_confidence=(ConfidenceLevel.ESTIMATED if market_cap is not None else ConfidenceLevel.UNKNOWN),
     )
 
     region = info.get("country") or candidate.region
@@ -308,9 +253,7 @@ def build_company_profile(candidate: DiscoveryCandidate) -> Company:
         website=info.get("website"),
         headquarters=region,
         founded_year=info.get("foundedDate"),
-        tier=_tier_from_market_cap(
-            float(market_cap) if market_cap is not None else None
-        ),
+        tier=_tier_from_market_cap(float(market_cap) if market_cap is not None else None),
         threat_level=_threat_from_growth(float(growth) if growth is not None else None),
         ai_maturity=_ai_maturity_from_text(str(description)),
         saas_maturity=5,
@@ -545,8 +488,7 @@ def _build_metric_justifications(
                 result[metric_name] = f"No data available for {metric_name} from any source."
             else:
                 result[metric_name] = (
-                    f"{metric_name} from {len(fact.sources_used)} source(s), "
-                    f"confidence {fact.confidence:.0%}"
+                    f"{metric_name} from {len(fact.sources_used)} source(s), confidence {fact.confidence:.0%}"
                 )
     return result
 
@@ -572,7 +514,7 @@ def build_company_from_signals(
     aggregated:
         The aggregated fact record with cross-referenced source data.
     """
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     signals = {s.signal_name: s for s in signal_record.signals}
     facts = {f.fact_type: f for f in aggregated.facts}
 
@@ -595,39 +537,27 @@ def build_company_from_signals(
 
     financials = FinancialMetric(
         revenue=revenue,
-        revenue_confidence=_confidence_from_signal(
-            signals["revenue_level"].signal_confidence
-        )
+        revenue_confidence=_confidence_from_signal(signals["revenue_level"].signal_confidence)
         if "revenue_level" in signals
         else ConfidenceLevel.UNKNOWN,
         growth_rate=growth,
-        growth_confidence=_confidence_from_signal(
-            signals["growth_rate"].signal_confidence
-        )
+        growth_confidence=_confidence_from_signal(signals["growth_rate"].signal_confidence)
         if "growth_rate" in signals
         else ConfidenceLevel.UNKNOWN,
         employees=employees,
-        employees_confidence=_confidence_from_signal(
-            facts["employee_count"].confidence
-        )
+        employees_confidence=_confidence_from_signal(facts["employee_count"].confidence)
         if "employee_count" in facts
         else ConfidenceLevel.UNKNOWN,
         profit_margin=margin,
-        margin_confidence=_confidence_from_signal(
-            signals["profitability"].signal_confidence
-        )
+        margin_confidence=_confidence_from_signal(signals["profitability"].signal_confidence)
         if "profitability" in signals
         else ConfidenceLevel.UNKNOWN,
         funding_raised=funding_raised,
-        funding_confidence=_confidence_from_signal(
-            signals["funding"].signal_confidence
-        )
+        funding_confidence=_confidence_from_signal(signals["funding"].signal_confidence)
         if "funding" in signals
         else ConfidenceLevel.UNKNOWN,
         valuation=valuation,
-        valuation_confidence=_confidence_from_signal(
-            signals["valuation"].signal_confidence
-        )
+        valuation_confidence=_confidence_from_signal(signals["valuation"].signal_confidence)
         if "valuation" in signals
         else ConfidenceLevel.UNKNOWN,
     )
@@ -662,17 +592,17 @@ def build_company_from_signals(
         ai_maturity = AIMaturity.NONE
 
     # -- Innovation / Patents --
-    total_patents_val = _get_fact_value(facts, "total_patents")
-    ai_related_patents_val = _get_fact_value(facts, "ai_related_patents")
+    _get_fact_value(facts, "total_patents")
+    _get_fact_value(facts, "ai_related_patents")
 
     # -- Hiring / Employment --
-    employee_growth = _get_signal_numeric(signals, "hiring_velocity")
+    _get_signal_numeric(signals, "hiring_velocity")
     open_positions_val = _get_fact_value(facts, "open_positions")
 
     # -- Funding --
     investors = _get_fact_value(facts, "investors")
     lead_investors = list(investors) if isinstance(investors, list) else []
-    last_round_stage = _get_fact_value(facts, "last_round_stage")
+    _get_fact_value(facts, "last_round_stage")
 
     # -- Name: prefer enriched name from facts --
     name = _get_fact_value(facts, "name") or candidate.name
@@ -685,8 +615,7 @@ def build_company_from_signals(
     # -- Data source description --
     source_count = len(aggregated.facts)
     data_source = (
-        f"Multi-source aggregation ({source_count} facts, "
-        f"{aggregated.data_completeness_percentage:.0%} completeness)"
+        f"Multi-source aggregation ({source_count} facts, {aggregated.data_completeness_percentage:.0%} completeness)"
     )
 
     return Company(
@@ -713,8 +642,6 @@ def build_company_from_signals(
         metric_sources=metric_sources,
         metric_justifications=metric_justifications,
         metric_observations=metric_observations,
-        signal_confidences={
-            s.signal_name: s.signal_confidence for s in signal_record.signals
-        },
+        signal_confidences={s.signal_name: s.signal_confidence for s in signal_record.signals},
         last_updated=now,
     )

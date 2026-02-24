@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import requests
 from loguru import logger
@@ -15,14 +15,14 @@ class WebsiteAgent(BaseDataGatheringAgent):
         super().__init__("WebsiteAgent", DataSourceType.WEBSITE)
 
     async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
-        start = datetime.now(UTC)
+        start = datetime.now(timezone.utc)
         result = AgentTaskResult(agent_name=self.agent_name, source_type=self.source_type, success=False)
 
         url = context.get("website") or context.get("company_website")
         if not url:
             result.coverage_gaps.append("website missing")
             result.error_message = "website missing"
-            result.execution_time_seconds = (datetime.now(UTC) - start).total_seconds()
+            result.execution_time_seconds = (datetime.now(timezone.utc) - start).total_seconds()
             return result
 
         try:
@@ -97,4 +97,4 @@ class WebsiteAgent(BaseDataGatheringAgent):
             return result
 
         finally:
-            result.execution_time_seconds = (datetime.now(UTC) - start).total_seconds()
+            result.execution_time_seconds = (datetime.now(timezone.utc) - start).total_seconds()

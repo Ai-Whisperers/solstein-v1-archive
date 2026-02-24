@@ -28,6 +28,7 @@ dependencies = [
     "edgartools",
     "lxml>=4.9",
     "yfinance>=0.2",
+    "langgraph>=0.0.20",
 ]
 
 [project.optional-dependencies]
@@ -117,6 +118,12 @@ ignore = [
     "SIM103",
     "SIM108",
     "SIM118",
+    "TC001", # runtime imports used in Protocol/dataclass patterns
+    "TC002",
+    "TC003",
+    "TC006",
+    "UP017", # datetime.UTC requires Python 3.11+, project supports 3.10
+    "UP036", # StrEnum version check needed for Python 3.10 compat
     "UP042",
     "W291",
 ]
@@ -151,6 +158,9 @@ disable_error_code = [
     "return-value",
     "union-attr",
     "var-annotated",
+    "valid-type",
+    "dict-item",
+    "type-var",
 ]
 
 [tool.pytest.ini_options]

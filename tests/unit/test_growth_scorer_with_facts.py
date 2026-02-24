@@ -13,7 +13,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
-from solstein.core.scoring_config import ScoringSettings
 from solstein.domain.facts import Fact
 from solstein.domain.models import ConfidenceLevel, FinancialMetric
 
@@ -50,9 +49,7 @@ class TestGrowthScorerWithFacts:
         """Test scoring with facts parameter but no repo provided."""
         financials = FinancialMetric(revenue=1000000)
 
-        score, explanation = scorer.score(
-            financials, fact_repo=None, company_id="test-company"
-        )
+        score, explanation = scorer.score(financials, fact_repo=None, company_id="test-company")
 
         assert 0 <= score <= 10
 
@@ -60,9 +57,7 @@ class TestGrowthScorerWithFacts:
         """Test scoring with repo but no company_id."""
         financials = FinancialMetric(revenue=1000000)
 
-        score, explanation = scorer.score(
-            financials, fact_repo=mock_fact_repo, company_id=None
-        )
+        score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id=None)
 
         assert 0 <= score <= 10
         mock_fact_repo.get_company_facts.assert_not_called()
@@ -84,9 +79,7 @@ class TestGrowthScorerWithFacts:
 
         financials = FinancialMetric(growth_rate=10)  # Original: 10%
 
-        score, explanation = scorer.score(
-            financials, fact_repo=mock_fact_repo, company_id="test-company"
-        )
+        score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
         # Score should reflect 30% growth (from fact), not 10%
         assert score > 5.0  # 30% growth should give strong score
@@ -132,9 +125,7 @@ class TestGrowthScorerWithFacts:
 
         financials = FinancialMetric()
 
-        score, explanation = scorer.score(
-            financials, fact_repo=mock_fact_repo, company_id="test-company"
-        )
+        score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
         # Score should incorporate all facts
         assert score > 6.0  # Strong company with growth + profitability
@@ -145,9 +136,7 @@ class TestGrowthScorerWithFacts:
 
         financials = FinancialMetric(revenue=1000000, growth_rate=15)
 
-        score, explanation = scorer.score(
-            financials, fact_repo=mock_fact_repo, company_id="test-company"
-        )
+        score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
         # Should still score based on original financials
         assert 0 <= score <= 10
@@ -198,9 +187,7 @@ class TestGrowthScorerWithFacts:
 
         financials = FinancialMetric()
 
-        score, explanation = scorer.score(
-            financials, fact_repo=mock_fact_repo, company_id="test-company"
-        )
+        score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
         # 30% growth should result in strong score
         assert score > 5.0
@@ -224,9 +211,7 @@ class TestGrowthScorerWithFacts:
 
         financials = FinancialMetric()
 
-        score, explanation = scorer.score(
-            financials, fact_repo=mock_fact_repo, company_id="test-company"
-        )
+        score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
         # High profitability should boost score
         assert score > 4.0
@@ -250,9 +235,7 @@ class TestGrowthScorerWithFacts:
 
         financials = FinancialMetric()
 
-        score, explanation = scorer.score(
-            financials, fact_repo=mock_fact_repo, company_id="test-company"
-        )
+        score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
         # Significant funding should boost score
         assert score > 4.0
@@ -284,9 +267,7 @@ class TestGrowthScorerWithFacts:
 
         financials = FinancialMetric()
 
-        score, explanation = scorer.score(
-            financials, fact_repo=mock_fact_repo, company_id="test-company"
-        )
+        score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
         # EUR 100K per employee is high efficiency
         assert score > 4.0
@@ -310,9 +291,7 @@ class TestGrowthScorerWithFacts:
 
         financials = FinancialMetric()
 
-        score, explanation = scorer.score(
-            financials, fact_repo=mock_fact_repo, company_id="test-company"
-        )
+        score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
         # Should score without error, ignoring unknown fact
         assert 0 <= score <= 10
@@ -334,9 +313,7 @@ class TestGrowthScorerWithFacts:
 
         financials = FinancialMetric(growth_rate=15)
 
-        score, explanation = scorer.score(
-            financials, fact_repo=mock_fact_repo, company_id="test-company"
-        )
+        score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
         # Should use original growth_rate (15%), not null fact
         assert 0 <= score <= 10

@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 import sqlalchemy as sa
-from sqlalchemy.exc import IntegrityError
 from alembic import command
 from alembic.config import Config
+from sqlalchemy.exc import IntegrityError
 
 
 def _alembic_config(repo_root: Path) -> Config:
@@ -52,9 +52,7 @@ def test_facts_migration_smoke(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
             )
 
         batch_id = str(uuid.uuid4())
-        conn.execute(
-            gathering_batches.insert().values(batch_id=batch_id, company_id=company_id)
-        )
+        conn.execute(gathering_batches.insert().values(batch_id=batch_id, company_id=company_id))
 
         fact_id = str(uuid.uuid4())
         conn.execute(

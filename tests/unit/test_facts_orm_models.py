@@ -10,7 +10,7 @@ Tests cover:
 """
 
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import pytest
 
@@ -37,7 +37,7 @@ class TestGatheringBatchModel:
 
     def test_batch_created_at_default(self):
         """Test batch created_at can be set explicitly."""
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         batch = GatheringBatch(company_id="test-company", created_at=now)
         assert batch.created_at == now
         assert isinstance(batch.created_at, datetime)
@@ -98,7 +98,7 @@ class TestFactModel:
     def test_create_fact_with_date_value(self):
         """Test creating a Fact with date value."""
         batch_id = uuid.uuid4()
-        date_val = datetime(2024, 1, 15, tzinfo=UTC)
+        date_val = datetime(2024, 1, 15, tzinfo=timezone.utc)
         fact = Fact(
             company_id="test-company",
             batch_id=batch_id,
@@ -182,7 +182,7 @@ class TestFactModel:
     def test_fact_extracted_at_default(self):
         """Test fact extracted_at can be set explicitly."""
         batch_id = uuid.uuid4()
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         fact = Fact(
             company_id="test-company",
             batch_id=batch_id,
@@ -240,7 +240,7 @@ class TestFactSourceModel:
     def test_source_extraction_timestamp_default(self):
         """Test source extraction_timestamp can be set explicitly."""
         fact_id = uuid.uuid4()
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         source = FactSource(
             fact_id=fact_id,
             source_type="newsapi",
@@ -264,6 +264,7 @@ class TestFactRepositoryValidation:
     def test_repository_store_validates_confidence(self):
         """Test repository store() validates confidence range."""
         from unittest.mock import MagicMock
+
         db_manager = MagicMock(spec=DatabaseManager)
         repo = FactRepository(db_manager)
 
@@ -281,6 +282,7 @@ class TestFactRepositoryValidation:
     def test_repository_store_validates_fact_type(self):
         """Test repository store() validates fact_type is not empty."""
         from unittest.mock import MagicMock
+
         db_manager = MagicMock(spec=DatabaseManager)
         repo = FactRepository(db_manager)
 
@@ -298,6 +300,7 @@ class TestFactRepositoryValidation:
     def test_repository_get_company_facts_requires_company_id(self):
         """Test get_company_facts() requires company_id."""
         from unittest.mock import MagicMock
+
         db_manager = MagicMock(spec=DatabaseManager)
         repo = FactRepository(db_manager)
 
@@ -307,6 +310,7 @@ class TestFactRepositoryValidation:
     def test_repository_get_facts_by_type_requires_company_id(self):
         """Test get_facts_by_type() requires company_id."""
         from unittest.mock import MagicMock
+
         db_manager = MagicMock(spec=DatabaseManager)
         repo = FactRepository(db_manager)
 
@@ -316,6 +320,7 @@ class TestFactRepositoryValidation:
     def test_repository_get_facts_by_type_requires_fact_type(self):
         """Test get_facts_by_type() requires fact_type."""
         from unittest.mock import MagicMock
+
         db_manager = MagicMock(spec=DatabaseManager)
         repo = FactRepository(db_manager)
 
@@ -325,6 +330,7 @@ class TestFactRepositoryValidation:
     def test_repository_create_batch_requires_company_id(self):
         """Test create_batch() requires company_id."""
         from unittest.mock import MagicMock
+
         db_manager = MagicMock(spec=DatabaseManager)
         repo = FactRepository(db_manager)
 
@@ -334,6 +340,7 @@ class TestFactRepositoryValidation:
     def test_repository_add_source_requires_fact_id(self):
         """Test add_source() requires fact_id."""
         from unittest.mock import MagicMock
+
         db_manager = MagicMock(spec=DatabaseManager)
         repo = FactRepository(db_manager)
 
@@ -343,6 +350,7 @@ class TestFactRepositoryValidation:
     def test_repository_add_source_requires_source_type(self):
         """Test add_source() requires source_type."""
         from unittest.mock import MagicMock
+
         db_manager = MagicMock(spec=DatabaseManager)
         repo = FactRepository(db_manager)
 
@@ -352,6 +360,7 @@ class TestFactRepositoryValidation:
     def test_repository_get_batch_requires_batch_id(self):
         """Test get_batch() requires batch_id."""
         from unittest.mock import MagicMock
+
         db_manager = MagicMock(spec=DatabaseManager)
         repo = FactRepository(db_manager)
 
@@ -361,6 +370,7 @@ class TestFactRepositoryValidation:
     def test_repository_update_batch_status_requires_batch_id(self):
         """Test update_batch_status() requires batch_id."""
         from unittest.mock import MagicMock
+
         db_manager = MagicMock(spec=DatabaseManager)
         repo = FactRepository(db_manager)
 
@@ -370,6 +380,7 @@ class TestFactRepositoryValidation:
     def test_repository_update_batch_status_requires_status(self):
         """Test update_batch_status() requires status."""
         from unittest.mock import MagicMock
+
         db_manager = MagicMock(spec=DatabaseManager)
         repo = FactRepository(db_manager)
 
@@ -413,7 +424,7 @@ class TestFactModelSerialization:
     def test_fact_datetime_serialization(self):
         """Test fact datetime fields serialize correctly."""
         batch_id = uuid.uuid4()
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         fact = Fact(
             company_id="test-company",
             batch_id=batch_id,
@@ -426,7 +437,7 @@ class TestFactModelSerialization:
 
     def test_batch_datetime_serialization(self):
         """Test batch datetime fields serialize correctly."""
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         batch = GatheringBatch(company_id="test-company", created_at=now)
         assert batch.created_at == now
         assert isinstance(batch.created_at, datetime)
@@ -434,7 +445,7 @@ class TestFactModelSerialization:
     def test_source_datetime_serialization(self):
         """Test source datetime fields serialize correctly."""
         fact_id = uuid.uuid4()
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         source = FactSource(
             fact_id=fact_id,
             source_type="sec_edgar",

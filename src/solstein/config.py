@@ -252,15 +252,11 @@ class Settings(BaseSettings):
 
         companies_house_key = os.getenv("COMPANIES_HOUSE_API_KEY")
         if not companies_house_key:
-            logger.warning(
-                "COMPANIES_HOUSE_API_KEY not configured. Companies House data gathering will be disabled."
-            )
+            logger.warning("COMPANIES_HOUSE_API_KEY not configured. Companies House data gathering will be disabled.")
 
         google_api_key = os.getenv("GOOGLE_API_KEY")
         if not google_api_key:
-            logger.warning(
-                "GOOGLE_API_KEY not configured. Web search data gathering will be disabled."
-            )
+            logger.warning("GOOGLE_API_KEY not configured. Web search data gathering will be disabled.")
 
         logger.info("Configuration validation passed")
 

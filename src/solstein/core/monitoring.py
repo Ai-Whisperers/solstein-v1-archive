@@ -10,7 +10,7 @@ Provides:
 
 import asyncio
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
@@ -39,7 +39,7 @@ class HealthCheck:
     name: str
     status: HealthStatus
     message: str
-    last_checked: datetime = field(default_factory=lambda: datetime.now(UTC))
+    last_checked: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     duration_ms: float = 0.0
     details: dict[str, Any] = field(default_factory=dict)
 
@@ -70,7 +70,7 @@ class DataQualityMetrics:
     average_signal_count_per_company: float = 0.0
     average_confidence_score: float = 0.0
     signals_with_low_confidence: int = 0
-    last_update: datetime = field(default_factory=lambda: datetime.now(UTC))
+    last_update: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class HealthMonitor:
@@ -79,9 +79,9 @@ class HealthMonitor:
     def __init__(self):
         """Initialize health monitor."""
         self.checks: dict[str, HealthCheck] = {}
-        self.metrics = MetricsSnapshot(timestamp=datetime.now(UTC))
+        self.metrics = MetricsSnapshot(timestamp=datetime.now(timezone.utc))
         self.data_quality = DataQualityMetrics()
-        self.startup_time = datetime.now(UTC)
+        self.startup_time = datetime.now(timezone.utc)
         self.request_history: list[dict[str, Any]] = []
         self.error_history: list[dict[str, Any]] = []
 
@@ -91,7 +91,7 @@ class HealthMonitor:
         Returns:
             HealthCheck result
         """
-        start = datetime.now(UTC)
+        start = datetime.now(timezone.utc)
         try:
             await asyncio.sleep(0.01)
 
@@ -99,7 +99,7 @@ class HealthMonitor:
                 name="database",
                 status=HealthStatus.HEALTHY,
                 message="Database connection successful",
-                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
                 details={"connection": "postgresql", "pool_size": 20},
             )
             self.checks["database"] = check
@@ -109,7 +109,7 @@ class HealthMonitor:
                 name="database",
                 status=HealthStatus.UNHEALTHY,
                 message=f"Database connection failed: {str(e)}",
-                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
                 details={"error": str(e)},
             )
             self.checks["database"] = check
@@ -122,7 +122,7 @@ class HealthMonitor:
         Returns:
             HealthCheck result
         """
-        start = datetime.now(UTC)
+        start = datetime.now(timezone.utc)
         try:
             await asyncio.sleep(0.01)
 
@@ -130,7 +130,7 @@ class HealthMonitor:
                 name="api",
                 status=HealthStatus.HEALTHY,
                 message="API is responsive",
-                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
                 details={"endpoints_available": 14},
             )
             self.checks["api"] = check
@@ -140,7 +140,7 @@ class HealthMonitor:
                 name="api",
                 status=HealthStatus.UNHEALTHY,
                 message=f"API health check failed: {str(e)}",
-                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
                 details={"error": str(e)},
             )
             self.checks["api"] = check
@@ -152,7 +152,7 @@ class HealthMonitor:
         Returns:
             HealthCheck result
         """
-        start = datetime.now(UTC)
+        start = datetime.now(timezone.utc)
         try:
             from ..config import Settings
 
@@ -162,7 +162,7 @@ class HealthMonitor:
                 name="configuration",
                 status=HealthStatus.HEALTHY,
                 message="Configuration is valid",
-                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
                 details={
                     "environment": settings.environment,
                     "debug": settings.debug,
@@ -175,7 +175,7 @@ class HealthMonitor:
                 name="configuration",
                 status=HealthStatus.UNHEALTHY,
                 message=f"Configuration check failed: {str(e)}",
-                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
                 details={"error": str(e)},
             )
             self.checks["configuration"] = check
@@ -187,7 +187,7 @@ class HealthMonitor:
         Returns:
             HealthCheck result
         """
-        start = datetime.now(UTC)
+        start = datetime.now(timezone.utc)
         try:
             from ..exporters.llm import LLMReportEnhancer
 
@@ -208,7 +208,7 @@ class HealthMonitor:
                     name="llm_services",
                     status=HealthStatus.HEALTHY,
                     message="LLM services available",
-                    duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
+                    duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
                     details={"backends": backends},
                 )
             else:
@@ -216,7 +216,7 @@ class HealthMonitor:
                     name="llm_services",
                     status=HealthStatus.DEGRADED,
                     message="No LLM backends available, using fallbacks",
-                    duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
+                    duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
                     details={"fallback": "keyword_and_template_based"},
                 )
 
@@ -227,7 +227,7 @@ class HealthMonitor:
                 name="llm_services",
                 status=HealthStatus.DEGRADED,
                 message=f"LLM health check failed: {str(e)}",
-                duration_ms=(datetime.now(UTC) - start).total_seconds() * 1000,
+                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
                 details={"error": str(e), "fallback": "active"},
             )
             self.checks["llm_services"] = check
@@ -314,7 +314,7 @@ class HealthMonitor:
             self.metrics.failed_requests += 1
 
         request = {
-            "timestamp": datetime.now(UTC),
+            "timestamp": datetime.now(timezone.utc),
             "method": method,
             "path": path,
             "status_code": status_code,
@@ -339,7 +339,7 @@ class HealthMonitor:
             details: Additional error details
         """
         error = {
-            "timestamp": datetime.now(UTC),
+            "timestamp": datetime.now(timezone.utc),
             "error_type": error_type,
             "message": message,
             "details": details or {},
@@ -351,7 +351,7 @@ class HealthMonitor:
 
     def update_metrics(self) -> None:
         """Update calculated metrics."""
-        self.metrics.timestamp = datetime.now(UTC)
+        self.metrics.timestamp = datetime.now(timezone.utc)
         self.metrics.uptime_seconds = int((self.metrics.timestamp - self.startup_time).total_seconds())
 
         if self.metrics.total_requests > 0:

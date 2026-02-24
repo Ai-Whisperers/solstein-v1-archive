@@ -32,9 +32,7 @@ class StaticCatalogSource:
             raw_tags = item.get("tags", [])
             tags_list = raw_tags if isinstance(raw_tags, list) else []
             sources_obj = item.get("sources")
-            src_links = (
-                [str(s) for s in sources_obj] if isinstance(sources_obj, list) else []
-            )
+            src_links = [str(s) for s in sources_obj] if isinstance(sources_obj, list) else []
             candidates.append(
                 DiscoveryCandidate(
                     company_id=_slugify(name),

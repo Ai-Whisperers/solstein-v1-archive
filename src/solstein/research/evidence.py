@@ -31,9 +31,7 @@ def evaluate_company_evidence(company: Company) -> dict[str, object]:
     metric_sources = company.metric_sources or {}
     metric_justifications = company.metric_justifications or {}
 
-    evidence_sources = set(
-        canonicalize_url(link) for link in source_links if isinstance(link, str)
-    )
+    evidence_sources = set(canonicalize_url(link) for link in source_links if isinstance(link, str))
     for sources in metric_sources.values():
         if not isinstance(sources, list):
             continue
@@ -66,9 +64,7 @@ def evaluate_company_evidence(company: Company) -> dict[str, object]:
 
     total_required = len(REQUIRED_METRICS)
     metric_source_coverage = metric_with_sources / total_required
-    metric_explainability = (
-        metric_with_sources + metric_with_justification
-    ) / total_required
+    metric_explainability = (metric_with_sources + metric_with_justification) / total_required
     domain_count = len(_domains(list(evidence_sources)))
     source_count = len(evidence_sources)
 
@@ -79,10 +75,7 @@ def evaluate_company_evidence(company: Company) -> dict[str, object]:
     unsupported_penalty = unsupported_metrics / total_required
 
     readiness_score = (
-        source_count_score * 0.20
-        + domain_diversity_score * 0.20
-        + coverage_score * 0.35
-        + explainability_score * 0.25
+        source_count_score * 0.20 + domain_diversity_score * 0.20 + coverage_score * 0.35 + explainability_score * 0.25
     ) * 100
     readiness_score -= unsupported_penalty * 40
     readiness_score = max(0.0, min(100.0, readiness_score))
@@ -138,16 +131,8 @@ def evaluate_market_evidence(companies: list[Company]) -> dict[str, object]:
     return {
         "company_reports": reports,
         "average_readiness_score": round(avg_score, 2),
-        "investment_ready_count": sum(
-            1 for level in levels if level == "investment_ready"
-        ),
-        "decision_support_ready_count": sum(
-            1 for level in levels if level == "decision_support_ready"
-        ),
-        "needs_more_evidence_count": sum(
-            1 for level in levels if level == "needs_more_evidence"
-        ),
-        "insufficient_evidence_count": sum(
-            1 for level in levels if level == "insufficient_evidence"
-        ),
+        "investment_ready_count": sum(1 for level in levels if level == "investment_ready"),
+        "decision_support_ready_count": sum(1 for level in levels if level == "decision_support_ready"),
+        "needs_more_evidence_count": sum(1 for level in levels if level == "needs_more_evidence"),
+        "insufficient_evidence_count": sum(1 for level in levels if level == "insufficient_evidence"),
     }

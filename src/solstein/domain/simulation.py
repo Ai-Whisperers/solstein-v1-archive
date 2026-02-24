@@ -2,8 +2,17 @@
 Domain models for market simulation.
 """
 
-from datetime import UTC, datetime
-from enum import StrEnum
+import sys
+from datetime import datetime, timezone
+
+if sys.version_info >= (3, 11):  # noqa: UP036
+    from enum import StrEnum
+else:
+    from enum import Enum
+
+    class StrEnum(str, Enum):
+        pass
+
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -39,7 +48,7 @@ class Scenario(BaseModel):
     name: str
     description: str
     conditions: list[MarketCondition]
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class SimulationResult(BaseModel):

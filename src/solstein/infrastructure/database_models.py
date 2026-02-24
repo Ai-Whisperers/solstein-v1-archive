@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     JSON,
@@ -96,8 +96,8 @@ class CompanyRecord(Base):
     scoring_breakdown = Column(JSON, nullable=True)
 
     # Metadata
-    last_updated = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+    last_updated = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         Index("ix_company_name", "name"),
@@ -152,12 +152,8 @@ class CompanyRecord(Base):
             "competitive_position_score": self.competitive_position_score,
             "composite_score": self.composite_score,
             "scoring_breakdown": self.scoring_breakdown,
-            "last_updated": (
-                self.last_updated.isoformat() if self.last_updated is not None else None
-            ),
-            "created_at": (
-                self.created_at.isoformat() if self.created_at is not None else None
-            ),
+            "last_updated": (self.last_updated.isoformat() if self.last_updated is not None else None),
+            "created_at": (self.created_at.isoformat() if self.created_at is not None else None),
         }
 
 
@@ -177,12 +173,10 @@ class ScoringRecord(Base):
 
     classification = Column(String(50), nullable=False)
 
-    scored_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+    scored_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     data_sources_used = Column(JSON, nullable=True)
 
-    signals = relationship(
-        "SignalRecord", back_populates="scoring_record", cascade="all, delete-orphan"
-    )
+    signals = relationship("SignalRecord", back_populates="scoring_record", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_company_scored_at", "company_id", "scored_at"),
@@ -201,9 +195,7 @@ class ScoringRecord(Base):
             "competitive_position_score": self.competitive_position_score,
             "overall_score": self.overall_score,
             "classification": self.classification,
-            "scored_at": (
-                self.scored_at.isoformat() if self.scored_at is not None else None
-            ),
+            "scored_at": (self.scored_at.isoformat() if self.scored_at is not None else None),
             "data_sources_used": self.data_sources_used,
             "signals_count": len(self.signals) if self.signals else 0,
         }
@@ -218,9 +210,7 @@ class SignalRecord(Base):
     __tablename__ = "signal_records"
 
     id = Column(Integer, primary_key=True, index=True)
-    scoring_record_id = Column(
-        Integer, ForeignKey("scoring_records.id"), nullable=False, index=True
-    )
+    scoring_record_id = Column(Integer, ForeignKey("scoring_records.id"), nullable=False, index=True)
 
     signal_name = Column(String(255), nullable=False, index=True)
     signal_category = Column(String(50), nullable=False)
@@ -232,13 +222,11 @@ class SignalRecord(Base):
 
     confidence = Column(Float, nullable=False)
 
-    extracted_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+    extracted_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     scoring_record = relationship("ScoringRecord", back_populates="signals")
 
-    __table_args__ = (
-        Index("ix_signal_name_category", "signal_name", "signal_category"),
-    )
+    __table_args__ = (Index("ix_signal_name_category", "signal_name", "signal_category"),)
 
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary representation."""
@@ -251,9 +239,7 @@ class SignalRecord(Base):
             "source_agent": self.source_agent,
             "evidence": self.evidence,
             "confidence": self.confidence,
-            "extracted_at": (
-                self.extracted_at.isoformat() if self.extracted_at is not None else None
-            ),
+            "extracted_at": (self.extracted_at.isoformat() if self.extracted_at is not None else None),
         }
 
 
@@ -266,9 +252,7 @@ class MarketSnapshot(Base):
     __tablename__ = "market_snapshots"
 
     id = Column(Integer, primary_key=True, index=True)
-    snapshot_date = Column(
-        DateTime, nullable=False, index=True, default=lambda: datetime.now(UTC)
-    )
+    snapshot_date = Column(DateTime, nullable=False, index=True, default=lambda: datetime.now(timezone.utc))
 
     total_companies_scored = Column(Integer, nullable=False)
     average_growth_score = Column(Float, nullable=False)
@@ -287,11 +271,7 @@ class MarketSnapshot(Base):
         """Convert to dictionary representation."""
         return {
             "id": self.id,
-            "snapshot_date": (
-                self.snapshot_date.isoformat()
-                if self.snapshot_date is not None
-                else None
-            ),
+            "snapshot_date": (self.snapshot_date.isoformat() if self.snapshot_date is not None else None),
             "total_companies_scored": self.total_companies_scored,
             "average_growth_score": self.average_growth_score,
             "average_financial_score": self.average_financial_score,
@@ -335,11 +315,9 @@ class AuditTrailRecord(Base):
     errors = Column(JSON, default=list)
     warnings = Column(JSON, default=list)
 
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
-    __table_args__ = (
-        Index("ix_audit_company_batch", "company_id", "gathering_batch_id"),
-    )
+    __table_args__ = (Index("ix_audit_company_batch", "company_id", "gathering_batch_id"),)
 
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary representation."""
@@ -356,47 +334,33 @@ class AuditTrailRecord(Base):
             "competitive_position_score": self.competitive_position_score,
             "classification": self.classification,
             "analysis_started_at": (
-                self.analysis_started_at.isoformat()
-                if self.analysis_started_at is not None
-                else None
+                self.analysis_started_at.isoformat() if self.analysis_started_at is not None else None
             ),
             "analysis_completed_at": (
-                self.analysis_completed_at.isoformat()
-                if self.analysis_completed_at is not None
-                else None
+                self.analysis_completed_at.isoformat() if self.analysis_completed_at is not None else None
             ),
             "data_completeness": self.data_completeness,
             "confidence_level": self.confidence_level,
-            "created_at": (
-                self.created_at.isoformat() if self.created_at is not None else None
-            ),
+            "created_at": (self.created_at.isoformat() if self.created_at is not None else None),
         }
 
 
 class ResearchRunRecord(Base):
     __tablename__ = "research_runs"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
-    run_id: Mapped[str] = mapped_column(
-        String(255), unique=True, index=True, nullable=False
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    run_id: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     market: Mapped[str] = mapped_column(String(255), nullable=False)
     seed_company: Mapped[str] = mapped_column(String(500), nullable=False)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="completed")
 
-    strict_provenance: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True
-    )
+    strict_provenance: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     min_readiness_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     max_contradictions: Mapped[int | None] = mapped_column(Integer, nullable=True)
     min_total_sources: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     summary: Mapped[object | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     stages: Mapped[list["ResearchStageRecord"]] = relationship(
         "ResearchStageRecord", back_populates="run", cascade="all, delete-orphan"
@@ -412,27 +376,17 @@ class ResearchRunRecord(Base):
 class OutboxRecord(Base):
     __tablename__ = "outbox_records"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
-    event_key: Mapped[str] = mapped_column(
-        String(255), unique=True, nullable=False, index=True
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    event_key: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     event_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
-    status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="pending", index=True
-    )
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending", index=True)
     payload: Mapped[object] = mapped_column(JSON, nullable=False)
     attempt_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     available_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC), index=True
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), index=True
     )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     last_error: Mapped[object | None] = mapped_column(JSON, nullable=True)
 
     __table_args__ = (Index("ix_outbox_status_available_at", "status", "available_at"),)
@@ -441,9 +395,7 @@ class OutboxRecord(Base):
 class ResearchStageRecord(Base):
     __tablename__ = "research_stages"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     run_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True),
         ForeignKey("research_runs.id"),
@@ -454,13 +406,9 @@ class ResearchStageRecord(Base):
     stage_order: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str | None] = mapped_column(String(50), nullable=True)
     metrics: Mapped[object | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
-    run: Mapped["ResearchRunRecord"] = relationship(
-        "ResearchRunRecord", back_populates="stages"
-    )
+    run: Mapped["ResearchRunRecord"] = relationship("ResearchRunRecord", back_populates="stages")
 
     __table_args__ = (
         UniqueConstraint("run_id", "stage_name", name="uq_research_stage_run_name"),
@@ -471,9 +419,7 @@ class ResearchStageRecord(Base):
 class ResearchArtifactRecord(Base):
     __tablename__ = "research_artifacts"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     run_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True),
         ForeignKey("research_runs.id"),
@@ -483,13 +429,9 @@ class ResearchArtifactRecord(Base):
     artifact_name: Mapped[str] = mapped_column(String(255), nullable=False)
     artifact_path: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     payload: Mapped[object | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
-    run: Mapped["ResearchRunRecord"] = relationship(
-        "ResearchRunRecord", back_populates="artifacts"
-    )
+    run: Mapped["ResearchRunRecord"] = relationship("ResearchRunRecord", back_populates="artifacts")
 
     __table_args__ = (
         UniqueConstraint(
@@ -503,9 +445,7 @@ class ResearchArtifactRecord(Base):
 class SourceDocumentRecord(Base):
     __tablename__ = "source_documents"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     run_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True),
         ForeignKey("research_runs.id"),
@@ -514,23 +454,15 @@ class SourceDocumentRecord(Base):
     )
     company_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     source_url: Mapped[str] = mapped_column(String(2000), nullable=False)
-    source_domain: Mapped[str | None] = mapped_column(
-        String(255), nullable=True, index=True
-    )
-    source_type: Mapped[str | None] = mapped_column(
-        String(100), nullable=True, index=True
-    )
-    observed_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
-    )
+    source_domain: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    source_type: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    observed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="observed")
     fetched_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     content_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
     extract_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
-    run: Mapped["ResearchRunRecord"] = relationship(
-        "ResearchRunRecord", back_populates="sources"
-    )
+    run: Mapped["ResearchRunRecord"] = relationship("ResearchRunRecord", back_populates="sources")
 
     __table_args__ = (
         UniqueConstraint(
@@ -545,9 +477,7 @@ class SourceDocumentRecord(Base):
 class MetricObservationRecord(Base):
     __tablename__ = "metric_observations"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     run_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True),
         ForeignKey("research_runs.id"),
@@ -559,9 +489,7 @@ class MetricObservationRecord(Base):
     metric_value: Mapped[float | None] = mapped_column(Float, nullable=True)
     metric_value_raw: Mapped[object | None] = mapped_column(JSON, nullable=True)
     source_url: Mapped[str | None] = mapped_column(String(2000), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         UniqueConstraint(
@@ -583,9 +511,7 @@ class MetricObservationRecord(Base):
 class EvidenceReadinessRecord(Base):
     __tablename__ = "evidence_readiness"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     run_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True),
         ForeignKey("research_runs.id"),
@@ -595,21 +521,13 @@ class EvidenceReadinessRecord(Base):
     company_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     company_name: Mapped[str] = mapped_column(String(500), nullable=False)
     readiness_score: Mapped[float] = mapped_column(Float, nullable=False)
-    readiness_level: Mapped[str] = mapped_column(
-        String(100), nullable=False, index=True
-    )
+    readiness_level: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     source_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     source_domain_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    metric_source_coverage: Mapped[float] = mapped_column(
-        Float, nullable=False, default=0.0
-    )
-    metric_explainability: Mapped[float] = mapped_column(
-        Float, nullable=False, default=0.0
-    )
+    metric_source_coverage: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    metric_explainability: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     unsupported_metrics: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         UniqueConstraint(
@@ -623,9 +541,7 @@ class EvidenceReadinessRecord(Base):
 class ContradictionRecord(Base):
     __tablename__ = "research_contradictions"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     run_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True),
         ForeignKey("research_runs.id"),
@@ -637,14 +553,10 @@ class ContradictionRecord(Base):
     contradiction_type: Mapped[str] = mapped_column(String(100), nullable=False)
     details: Mapped[object | None] = mapped_column(JSON, nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="open")
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     ignored_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     transitions: Mapped[list["ContradictionTransitionRecord"]] = relationship(
         "ContradictionTransitionRecord",
@@ -666,9 +578,7 @@ class ContradictionRecord(Base):
 class ContradictionTransitionRecord(Base):
     __tablename__ = "research_contradiction_transitions"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     contradiction_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True),
         ForeignKey("research_contradictions.id"),
@@ -677,12 +587,8 @@ class ContradictionTransitionRecord(Base):
     )
     from_status: Mapped[str] = mapped_column(String(50), nullable=False)
     to_status: Mapped[str] = mapped_column(String(50), nullable=False)
-    changed_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
-    )
+    changed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     changed_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    contradiction: Mapped["ContradictionRecord"] = relationship(
-        "ContradictionRecord", back_populates="transitions"
-    )
+    contradiction: Mapped["ContradictionRecord"] = relationship("ContradictionRecord", back_populates="transitions")

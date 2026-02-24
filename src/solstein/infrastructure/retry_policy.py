@@ -42,11 +42,7 @@ class RetryPolicy:
 
     @staticmethod
     def classify_failure(*, retryable: bool) -> FailureClassification:
-        return (
-            FailureClassification.RETRYABLE
-            if retryable
-            else FailureClassification.TERMINAL
-        )
+        return FailureClassification.RETRYABLE if retryable else FailureClassification.TERMINAL
 
     def next_delay_seconds(self, *, attempt: int, key: str) -> float:
         if attempt < 1:
@@ -71,9 +67,7 @@ class RetryPolicy:
             raise ValueError("attempt must be >= 1")
 
         should_retry = classification.is_retryable and attempt < self.max_attempts
-        delay_seconds = (
-            self.next_delay_seconds(attempt=attempt, key=key) if should_retry else 0.0
-        )
+        delay_seconds = self.next_delay_seconds(attempt=attempt, key=key) if should_retry else 0.0
         return RetryDecision(
             attempt=attempt,
             classification=classification,

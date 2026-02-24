@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import os
+import time
 from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date
-import time
 from typing import Protocol, cast, runtime_checkable
 
 import pandas as pd
@@ -203,7 +203,7 @@ class SECEdgarConnector:
         if not candidates:
             return None
 
-        candidates.sort(key=lambda f: (f.filing_date.toordinal() if f.filing_date is not None else 0))
+        candidates.sort(key=lambda f: f.filing_date.toordinal() if f.filing_date is not None else 0)
         return candidates[-1]
 
     def _extract_minimal_metrics(
