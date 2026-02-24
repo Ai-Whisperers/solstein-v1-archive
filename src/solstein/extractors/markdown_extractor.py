@@ -79,7 +79,9 @@ class MarkdownExtractor:
         # Extract geographic presence
         geo_match = re.search(r"Geographic Presence:\s*(.+)", content)
         if geo_match:
-            data["geographic_presence"] = [g.strip() for g in geo_match.group(1).split(",")]
+            data["geographic_presence"] = [
+                g.strip() for g in geo_match.group(1).split(",")
+            ]
 
         # Extract tech stack
         tech_match = re.search(r"Tech Stack:\s*(.+)", content)
@@ -127,7 +129,11 @@ class MarkdownExtractor:
                 body = stripped.lstrip("- ")
                 metric, raw_urls = body.split(":", 1)
                 metric_key = metric.strip().lower()
-                urls = [u.strip() for u in raw_urls.split(",") if u.strip().startswith("http")]
+                urls = [
+                    u.strip()
+                    for u in raw_urls.split(",")
+                    if u.strip().startswith("http")
+                ]
                 if urls:
                     result[metric_key] = urls
 
@@ -182,7 +188,13 @@ class MarkdownExtractor:
     def to_company_profile(self, extracted_data: dict[str, Any]) -> Company:
         """Convert extracted data to Company model."""
         # Generate ID from name
-        company_id = extracted_data.get("name", "unknown").lower().replace(" ", "-").replace(".", "").replace(",", "")
+        company_id = (
+            extracted_data.get("name", "unknown")
+            .lower()
+            .replace(" ", "-")
+            .replace(".", "")
+            .replace(",", "")
+        )
 
         # Create financial metrics
         employees_val = self._parse_numeric(extracted_data.get("employees"))
@@ -204,6 +216,28 @@ class MarkdownExtractor:
         )
 
         # Create company profile
+        metric_values = {
+            "revenue": financials.revenue,
+            "growth_rate": financials.growth_rate,
+            "employees": financials.employees,
+            "profit_margin": financials.profit_margin,
+            "funding": financials.funding_raised,
+            "valuation": financials.valuation,
+        }
+        metric_sources = extracted_data.get("metric_sources", {})
+        metric_observations: dict[str, list[dict[str, Any]]] = {}
+        for metric, value in metric_values.items():
+            metric_observations[metric] = []
+            sources = metric_sources.get(metric, [])
+            if value is not None and isinstance(sources, list):
+                for source in sources:
+                    metric_observations[metric].append(
+                        {
+                            "source": source,
+                            "value": value,
+                        }
+                    )
+
         profile = Company(
             id=company_id,
             name=extracted_data.get("name", "Unknown Company"),
@@ -216,8 +250,9 @@ class MarkdownExtractor:
             tech_stack=extracted_data.get("tech_stack", []),
             data_source=extracted_data.get("source"),
             source_links=extracted_data.get("source_links", []),
-            metric_sources=extracted_data.get("metric_sources", {}),
+            metric_sources=metric_sources,
             metric_justifications=extracted_data.get("metric_justifications", {}),
+            metric_observations=metric_observations,
         )
 
         return profile
@@ -326,7 +361,9 @@ class BatchExtractor:
         self.extractor = extractor or MarkdownExtractor()
 
     @classmethod
-    async def process_file(cls, file_path: Path, extractor: "MarkdownExtractor | None" = None) -> Company | None:
+    async def process_file(
+        cls, file_path: Path, extractor: "MarkdownExtractor | None" = None
+    ) -> Company | None:
         """Process a single file asynchronously."""
         if extractor is None:
             extractor = MarkdownExtractor()
@@ -339,7 +376,9 @@ class BatchExtractor:
                 logger.error(f"Failed to create profile from {file_path}: {e}")
         return None
 
-    def extract_directory(self, directory: Path, pattern: str = "*.md") -> list[Company]:
+    def extract_directory(
+        self, directory: Path, pattern: str = "*.md"
+    ) -> list[Company]:
         """Extract data from all markdown files in a directory."""
         profiles: list[Company] = []
 
@@ -368,7 +407,9 @@ class BatchExtractor:
         try:
             data = [profile.model_dump(mode="json") for profile in profiles]
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            output_path.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
+            output_path.write_text(
+                json.dumps(data, indent=2, default=str), encoding="utf-8"
+            )
             logger.info(f"Saved {len(profiles)} profiles to {output_path}")
         except Exception as e:
             logger.error(f"Failed to save to JSON: {e}")

@@ -22,6 +22,23 @@ Valuation: €5T
 AI Maturity: Very Strong
 Threat Level: Critical
 Tier: Tier 1
+
+## Sources
+
+- https://example.com/company
+- https://finance.yahoo.com/quote/ACME/
+
+## Metric Sources
+
+- revenue: https://finance.yahoo.com/quote/ACME/
+- growth_rate: https://finance.yahoo.com/quote/ACME/
+- employees: https://example.com/company
+
+## Estimation Notes
+
+- profit_margin: Derived from latest available estimate.
+- funding: Private rounds not fully disclosed.
+- valuation: Estimated from market comps.
 """
 
 
@@ -31,6 +48,7 @@ def test_markdown_extractor_parse(sample_markdown, tmp_path):
 
     extractor = MarkdownExtractor()
     extracted = extractor.extract_from_file(md_file)
+    assert extracted is not None
 
     assert extracted["name"] == "Acme Corp"
     assert "provider of widgets" in extracted["description"]
@@ -38,6 +56,8 @@ def test_markdown_extractor_parse(sample_markdown, tmp_path):
     assert extracted["geographic_presence"] == ["US", "UK", "DE"]
     assert extracted["tech_stack"] == ["Python", "React", "PostgreSQL"]
     assert extracted["confidence"]["revenue"] == "Estimated"
+    assert extracted["source_links"]
+    assert extracted["metric_sources"]["revenue"]
 
     profile = extractor.to_company_profile(extracted)
     assert profile.name == "Acme Corp"
@@ -51,6 +71,9 @@ def test_markdown_extractor_parse(sample_markdown, tmp_path):
     assert profile.ai_maturity == AIMaturity.VERY_STRONG
     assert profile.threat_level == ThreatLevel.CRITICAL
     assert profile.tier == CompanyTier.TIER_1
+    assert profile.metric_observations["revenue"]
+    assert profile.metric_observations["growth_rate"]
+    assert profile.metric_justifications["valuation"]
 
 
 def test_markdown_extractor_parse_numeric():
@@ -126,7 +149,7 @@ async def test_batch_extractor_errors(tmp_path):
 
     # force extractor to fail by mocking
     class BadExtractor(MarkdownExtractor):
-        def extract_from_file(self, path):
+        def extract_from_file(self, file_path):
             # Normal extract works
             return {"name": "dummy"}
 
