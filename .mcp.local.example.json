@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "--package=github-mcp-server",
+        "github-mcp-server-mcp"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "<set-in-local-env-not-in-git>"
+      }
+    }
+  }
+}

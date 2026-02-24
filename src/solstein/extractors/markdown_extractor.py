@@ -5,19 +5,37 @@ Extracts structured data from markdown files following SolStein's format.
 Replaces the monolithic extract_competitor_data.py script.
 """
 
-import re
 import json
+import re
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any
+
 from loguru import logger
 
-from ..data.models import CompanyProfile, FinancialMetric, ConfidenceLevel
+from ..domain.models import (
+    AIMaturity,
+    Company,
+    CompanyTier,
+    ConfidenceLevel,
+    FinancialMetric,
+    ThreatLevel,
+)
+from ..research.sources import canonicalize_url, is_probably_url
+
+REQUIRED_PROVENANCE_METRICS = [
+    "revenue",
+    "growth_rate",
+    "employees",
+    "profit_margin",
+    "funding",
+    "valuation",
+]
 
 
 class MarkdownExtractor:
     """Extract structured data from markdown files."""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.patterns = {
             "revenue": re.compile(r"Revenue:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
             "growth_rate": re.compile(r"Growth Rate:\s*([\d.,]+\s*%)"),
@@ -25,12 +43,12 @@ class MarkdownExtractor:
             "profit_margin": re.compile(r"Profit Margin:\s*([\d.,]+\s*%)"),
             "funding": re.compile(r"Funding Raised:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
             "valuation": re.compile(r"Valuation:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
-            "ai_maturity": re.compile(r"AI Maturity:\s*(\w+(?:\s+\w+)*)"),
+            "ai_maturity": re.compile(r"AI Maturity:\s*(\w+(?:[ \t]+\w+)*)"),
             "threat_level": re.compile(r"Threat Level:\s*(\w+)"),
-            "tier": re.compile(r"Tier:\s*(\w+(?:\s+\w+)*)"),
+            "tier": re.compile(r"Tier:\s*(\w+(?:[ \t]+\w+)*)"),
         }
-        
-    def extract_from_file(self, file_path: Path) -> Optional[Dict[str, Any]]:
+
+    def extract_from_file(self, file_path: Path) -> dict[str, Any] | None:
         """Extract data from a single markdown file."""
         try:
             content = file_path.read_text(encoding="utf-8")
@@ -38,54 +56,126 @@ class MarkdownExtractor:
         except Exception as e:
             logger.error(f"Failed to extract from {file_path}: {e}")
             return None
-    
-    def _parse_content(self, content: str, source: str) -> Dict[str, Any]:
+
+    def _parse_content(self, content: str, source: str) -> dict[str, Any]:
         """Parse markdown content and extract structured data."""
-        data = {"source": source}
-        
+        data: dict[str, Any] = {"source": source}
+
         # Extract basic metrics
         for key, pattern in self.patterns.items():
             match = pattern.search(content)
             if match:
                 data[key] = match.group(1).strip()
-        
+
         # Extract company name from filename or content
         name_match = re.search(r"#\s+(.+)", content)
         if name_match:
             data["name"] = name_match.group(1).strip()
-        
+
         # Extract description (first paragraph after title)
-        desc_match = re.search(r"#\s+.+\n\n(.+?)(?:\n\n|$)", content, re.DOTALL)
+        desc_match = re.search(r"#\s+[^\n]+\n\n(.+?)(?:\n\n|$)", content, re.DOTALL)
         if desc_match:
             data["description"] = desc_match.group(1).strip()
-        
+
         # Extract geographic presence
         geo_match = re.search(r"Geographic Presence:\s*(.+)", content)
         if geo_match:
             data["geographic_presence"] = [
                 g.strip() for g in geo_match.group(1).split(",")
             ]
-        
+
         # Extract tech stack
         tech_match = re.search(r"Tech Stack:\s*(.+)", content)
         if tech_match:
-            data["tech_stack"] = [
-                t.strip() for t in tech_match.group(1).split(",")
-            ]
-        
+            data["tech_stack"] = [t.strip() for t in tech_match.group(1).split(",")]
+
         # Extract confidence levels
         data["confidence"] = self._extract_confidence(content)
-        
+        data["source_links"] = self._extract_source_links(content)
+        data["metric_sources"] = self._extract_metric_sources(content)
+        data["metric_justifications"] = self._extract_metric_justifications(content)
+
         return data
-    
-    def _extract_confidence(self, content: str) -> Dict[str, str]:
+
+    def _extract_source_links(self, content: str) -> list[str]:
+        url_pattern = re.compile(r"https?://[^\s)\]>\"']+")
+        seen: set[str] = set()
+        urls: list[str] = []
+        for match in url_pattern.findall(content):
+            url = match.rstrip(".,")
+            if url not in seen:
+                seen.add(url)
+                urls.append(url)
+        return urls
+
+    def _extract_metric_sources(self, content: str) -> dict[str, list[str]]:
+        result: dict[str, list[str]] = {}
+        lines = content.splitlines()
+        in_section = False
+
+        for line in lines:
+            stripped = line.strip()
+            if stripped.lower() in {
+                "## metric sources",
+                "### metric sources",
+                "metric sources:",
+            }:
+                in_section = True
+                continue
+
+            if in_section and stripped.startswith("#"):
+                break
+
+            if in_section and stripped.startswith("-") and ":" in stripped:
+                body = stripped.lstrip("- ")
+                metric, raw_urls = body.split(":", 1)
+                metric_key = metric.strip().lower()
+                urls = [
+                    u.strip()
+                    for u in raw_urls.split(",")
+                    if u.strip().startswith("http")
+                ]
+                if urls:
+                    result[metric_key] = urls
+
+        return result
+
+    def _extract_metric_justifications(self, content: str) -> dict[str, str]:
+        result: dict[str, str] = {}
+        lines = content.splitlines()
+        in_section = False
+
+        for line in lines:
+            stripped = line.strip()
+            if stripped.lower() in {
+                "## estimation notes",
+                "### estimation notes",
+                "estimation notes:",
+            }:
+                in_section = True
+                continue
+
+            if in_section and stripped.startswith("#"):
+                break
+
+            if in_section and stripped.startswith("-") and ":" in stripped:
+                body = stripped.lstrip("- ")
+                metric, note = body.split(":", 1)
+                metric_key = metric.strip().lower()
+                note_val = note.strip()
+                if note_val:
+                    result[metric_key] = note_val
+
+        return result
+
+    def _extract_confidence(self, content: str) -> dict[str, str]:
         """Extract confidence levels from content."""
         confidence = {}
-        
+
         # Look for confidence annotations
         conf_pattern = re.compile(r"\(([Cc]onfirmed|[Ee]stimated|[Uu]nknown)\)")
         lines = content.split("\n")
-        
+
         for line in lines:
             if "(" in line and ")" in line:
                 matches = conf_pattern.findall(line)
@@ -93,11 +183,11 @@ class MarkdownExtractor:
                     # Get the metric name from the line
                     metric = line.split(":")[0].strip().lower()
                     confidence[metric] = matches[0].capitalize()
-        
+
         return confidence
-    
-    def to_company_profile(self, extracted_data: Dict[str, Any]) -> CompanyProfile:
-        """Convert extracted data to CompanyProfile model."""
+
+    def to_company_profile(self, extracted_data: dict[str, Any]) -> Company:
+        """Convert extracted data to Company model."""
         # Generate ID from name
         company_id = (
             extracted_data.get("name", "unknown")
@@ -106,14 +196,17 @@ class MarkdownExtractor:
             .replace(".", "")
             .replace(",", "")
         )
-        
+
         # Create financial metrics
+        employees_val = self._parse_numeric(extracted_data.get("employees"))
+        employees = int(employees_val) if employees_val is not None else None
+
         financials = FinancialMetric(
             revenue=self._parse_numeric(extracted_data.get("revenue")),
             revenue_confidence=self._get_confidence(extracted_data, "revenue"),
             growth_rate=self._parse_percentage(extracted_data.get("growth_rate")),
             growth_confidence=self._get_confidence(extracted_data, "growth_rate"),
-            employees=self._parse_numeric(extracted_data.get("employees")),
+            employees=employees,
             employees_confidence=self._get_confidence(extracted_data, "employees"),
             profit_margin=self._parse_percentage(extracted_data.get("profit_margin")),
             margin_confidence=self._get_confidence(extracted_data, "profit_margin"),
@@ -122,9 +215,31 @@ class MarkdownExtractor:
             valuation=self._parse_numeric(extracted_data.get("valuation")),
             valuation_confidence=self._get_confidence(extracted_data, "valuation"),
         )
-        
+
         # Create company profile
-        profile = CompanyProfile(
+        metric_values = {
+            "revenue": financials.revenue,
+            "growth_rate": financials.growth_rate,
+            "employees": financials.employees,
+            "profit_margin": financials.profit_margin,
+            "funding": financials.funding_raised,
+            "valuation": financials.valuation,
+        }
+        metric_sources = extracted_data.get("metric_sources", {})
+        metric_observations: dict[str, list[dict[str, Any]]] = {}
+        for metric, value in metric_values.items():
+            metric_observations[metric] = []
+            sources = metric_sources.get(metric, [])
+            if value is not None and isinstance(sources, list):
+                for source in sources:
+                    metric_observations[metric].append(
+                        {
+                            "source": source,
+                            "value": value,
+                        }
+                    )
+
+        profile = Company(
             id=company_id,
             name=extracted_data.get("name", "Unknown Company"),
             description=extracted_data.get("description"),
@@ -135,19 +250,23 @@ class MarkdownExtractor:
             geographic_presence=extracted_data.get("geographic_presence", []),
             tech_stack=extracted_data.get("tech_stack", []),
             data_source=extracted_data.get("source"),
+            source_links=extracted_data.get("source_links", []),
+            metric_sources=metric_sources,
+            metric_justifications=extracted_data.get("metric_justifications", {}),
+            metric_observations=metric_observations,
         )
-        
+
         return profile
-    
-    def _parse_numeric(self, value: Optional[str]) -> Optional[float]:
+
+    def _parse_numeric(self, value: str | None) -> float | None:
         """Parse numeric values with suffixes (K, M, B, T)."""
         if not value:
             return None
-        
+
         try:
             # Remove currency symbols and whitespace
             value = value.strip().replace("€", "").replace("$", "").replace(",", "")
-            
+
             # Handle suffixes
             if value.endswith("T"):
                 return float(value[:-1]) * 1_000_000_000_000
@@ -162,85 +281,115 @@ class MarkdownExtractor:
         except (ValueError, AttributeError):
             logger.warning(f"Failed to parse numeric value: {value}")
             return None
-    
-    def _parse_percentage(self, value: Optional[str]) -> Optional[float]:
+
+    def _parse_percentage(self, value: str | None) -> float | None:
         """Parse percentage values."""
         if not value:
             return None
-        
+
         try:
             value = value.strip().replace("%", "").replace(",", "")
             return float(value)
         except (ValueError, AttributeError):
             logger.warning(f"Failed to parse percentage: {value}")
             return None
-    
-    def _parse_ai_maturity(self, value: Optional[str]) -> str:
+
+    def _parse_ai_maturity(self, value: str | None) -> AIMaturity:
         """Parse AI maturity level."""
         if not value:
-            return "None"
-        
+            return AIMaturity.NONE
+
         value = value.strip().lower()
         if "very strong" in value:
-            return "Very Strong"
+            return AIMaturity.VERY_STRONG
         elif "strong" in value:
-            return "Strong"
+            return AIMaturity.STRONG
         elif "moderate" in value:
-            return "Moderate"
+            return AIMaturity.MODERATE
         elif "low" in value:
-            return "Low"
+            return AIMaturity.LOW
         else:
-            return "None"
-    
-    def _parse_threat_level(self, value: Optional[str]) -> str:
+            return AIMaturity.NONE
+
+    def _parse_threat_level(self, value: str | None) -> ThreatLevel:
         """Parse threat level."""
         if not value:
-            return "Medium"
-        
-        value = value.strip().capitalize()
-        if value in ["Low", "Medium", "High", "Critical"]:
-            return value
-        return "Medium"
-    
-    def _parse_tier(self, value: Optional[str]) -> str:
+            return ThreatLevel.MEDIUM
+
+        value = value.strip().upper()
+        try:
+            return ThreatLevel(value.capitalize())
+        except ValueError:
+            # Try to map common variations
+            if "HIGH" in value:
+                return ThreatLevel.HIGH
+            elif "CRITICAL" in value:
+                return ThreatLevel.CRITICAL
+            elif "LOW" in value:
+                return ThreatLevel.LOW
+            return ThreatLevel.MEDIUM
+
+    def _parse_tier(self, value: str | None) -> CompanyTier:
         """Parse company tier."""
         if not value:
-            return "Tier 3"
-        
+            return CompanyTier.TIER_3
+
         value = value.strip()
         if "Tier 1" in value:
-            return "Tier 1"
+            return CompanyTier.TIER_1
         elif "Tier 2" in value:
-            return "Tier 2"
+            return CompanyTier.TIER_2
         elif "Tier 3" in value:
-            return "Tier 3"
+            return CompanyTier.TIER_3
         elif "Tier 4" in value:
-            return "Tier 4"
-        return "Tier 3"
-    
-    def _get_confidence(self, data: Dict[str, Any], metric: str) -> str:
+            return CompanyTier.TIER_4
+        return CompanyTier.TIER_3
+
+    def _get_confidence(self, data: dict[str, Any], metric: str) -> ConfidenceLevel:
         """Get confidence level for a metric."""
         confidence_data = data.get("confidence", {})
-        return confidence_data.get(metric, "Unknown")
+        val = confidence_data.get(metric, "Unknown")
+        try:
+            return ConfidenceLevel(val.capitalize())
+        except ValueError:
+            return ConfidenceLevel.UNKNOWN
 
 
 class BatchExtractor:
     """Batch extraction from multiple files."""
-    
-    def __init__(self, extractor: MarkdownExtractor = None):
+
+    def __init__(self, extractor: MarkdownExtractor | None = None):
         self.extractor = extractor or MarkdownExtractor()
-    
-    def extract_directory(self, directory: Path, pattern: str = "*.md") -> List[CompanyProfile]:
+
+    @classmethod
+    async def process_file(
+        cls, file_path: Path, extractor: "MarkdownExtractor | None" = None
+    ) -> Company | None:
+        """Process a single file asynchronously."""
+        if extractor is None:
+            extractor = MarkdownExtractor()
+
+        extracted = extractor.extract_from_file(file_path)
+        if extracted:
+            try:
+                return extractor.to_company_profile(extracted)
+            except Exception as e:
+                logger.error(f"Failed to create profile from {file_path}: {e}")
+        return None
+
+    def extract_directory(
+        self, directory: Path, pattern: str = "*.md"
+    ) -> list[Company]:
         """Extract data from all markdown files in a directory."""
-        profiles = []
-        
+        profiles: list[Company] = []
+
         if not directory.exists():
             logger.error(f"Directory does not exist: {directory}")
             return profiles
-        
+
         md_files = list(directory.rglob(pattern))
         logger.info(f"Found {len(md_files)} markdown files in {directory}")
-        
+
         for md_file in md_files:
             logger.debug(f"Processing {md_file}")
             extracted = self.extractor.extract_from_file(md_file)
@@ -250,17 +399,107 @@ class BatchExtractor:
                     profiles.append(profile)
                 except Exception as e:
                     logger.error(f"Failed to create profile from {md_file}: {e}")
-        
+
         logger.info(f"Successfully extracted {len(profiles)} profiles")
         return profiles
-    
-    def save_to_json(self, profiles: List[CompanyProfile], output_path: Path) -> None:
+
+    def save_to_json(self, profiles: list[Company], output_path: Path) -> None:
         """Save profiles to JSON file."""
         try:
-            data = [profile.model_dump() for profile in profiles]
+            data = [profile.model_dump(mode="json") for profile in profiles]
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            output_path.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
+            output_path.write_text(
+                json.dumps(data, indent=2, default=str), encoding="utf-8"
+            )
             logger.info(f"Saved {len(profiles)} profiles to {output_path}")
         except Exception as e:
             logger.error(f"Failed to save to JSON: {e}")
             raise
+
+    def validate_profile_provenance(self, profile: Company) -> list[str]:
+        violations: list[str] = []
+
+        if not profile.source_links:
+            violations.append("Missing source_links")
+
+        canonical_sources = {
+            canonicalize_url(link)
+            for link in (profile.source_links or [])
+            if isinstance(link, str) and link.strip()
+        }
+
+        for metric in REQUIRED_PROVENANCE_METRICS:
+            sources = profile.metric_sources.get(metric, [])
+            justification = profile.metric_justifications.get(metric, "").strip()
+
+            if isinstance(sources, list):
+                bad_urls = [
+                    s
+                    for s in sources
+                    if not isinstance(s, str) or not is_probably_url(s)
+                ]
+                if bad_urls:
+                    violations.append(
+                        f"Metric '{metric}' contains non-url metric_sources entries: {bad_urls[:3]}"
+                    )
+
+                missing_from_sources = [
+                    s
+                    for s in sources
+                    if isinstance(s, str)
+                    and s.strip()
+                    and canonicalize_url(s) not in canonical_sources
+                ]
+                if missing_from_sources:
+                    violations.append(
+                        f"Metric '{metric}' has metric_sources not present in source_links: {missing_from_sources[:3]}"
+                    )
+
+            if not sources and not justification:
+                violations.append(
+                    f"Metric '{metric}' has neither metric_sources nor metric_justification"
+                )
+
+            observations = (profile.metric_observations or {}).get(metric, [])
+            if isinstance(observations, list):
+                expected = {
+                    canonicalize_url(s)
+                    for s in sources
+                    if isinstance(s, str) and s.strip()
+                }
+                for obs in observations:
+                    if not isinstance(obs, dict):
+                        violations.append(
+                            f"Metric '{metric}' has a non-dict metric_observation entry"
+                        )
+                        continue
+
+                    if "source" not in obs or "value" not in obs:
+                        violations.append(
+                            f"Metric '{metric}' observation missing 'source' or 'value'"
+                        )
+                        continue
+
+                    src = obs.get("source")
+                    if isinstance(src, str) and src.strip():
+                        canon = canonicalize_url(src)
+                        if canon not in canonical_sources:
+                            violations.append(
+                                f"Metric '{metric}' observation source not present in source_links: {src}"
+                            )
+                        if expected and canon not in expected:
+                            violations.append(
+                                f"Metric '{metric}' observation source not present in metric_sources: {src}"
+                            )
+
+        return violations
+
+    def validate_profiles_provenance(
+        self, profiles: list[Company]
+    ) -> dict[str, list[str]]:
+        report: dict[str, list[str]] = {}
+        for profile in profiles:
+            violations = self.validate_profile_provenance(profile)
+            if violations:
+                report[profile.id] = violations
+        return report

@@ -1,0 +1,567 @@
+---
+id: rule.validation.security.v1
+kind: rule
+version: 1.0.0
+description: Comprehensive security validation rules for application code
+globs: "**/*.py", "**/*.js", "**/**/*.ts", "**/*.tsx", "**/*.java", "**/*.cpp", "**/*.c", "**/*.cs"
+governs: ""
+requires: ["rule.clean-code.v1"]
+model_hints: { temp: 0.2, top_p: 0.9 }
+provenance: { owner: team-security, last_review: 2025-12-06 }
+alwaysApply: false
+---
+
+# Security Validation Rule
+
+## Purpose & Scope
+
+Defines comprehensive security validation standards for application code. This rule ensures code follows security best practices, prevents common vulnerabilities, and protects against known attack vectors across multiple programming languages.
+
+**Applies to**: All source code files before code review, merge, or deployment
+
+**Does not apply to**: Configuration files, documentation, test data, or build artifacts
+
+## Inputs (Contract)
+
+- Source code files in supported programming languages
+- Security scanning tools (Bandit, SonarQube, ESLint security plugins, etc.)
+- OWASP Top 10 knowledge base
+- Input validation libraries
+- Authentication/authorization frameworks
+
+## Outputs (Contract)
+
+- Security vulnerability assessment
+- OWASP Top 10 compliance report
+- Input validation coverage report
+- Authentication/authorization audit
+- Data protection assessment
+- Security validation checklist with specific issues and remediation steps
+
+## Core Security Principles
+
+**SECURITY IS NOT OPTIONAL - IT'S MANDATORY.**
+
+**DEFENSE IN DEPTH - Multiple layers of security controls.**
+
+**LEAST PRIVILEGE - Users and systems have minimum necessary permissions.**
+
+**SECURITY BY DEFAULT - Secure configuration by default.**
+
+## Mandatory Security Gates
+
+### Gate 1: Input Validation and Sanitization (CRITICAL)
+
+#### OWASP Top 10: A01 - Broken Access Control
+- [ ] All user inputs validated and sanitized
+- [ ] Parameterized queries used (SQL injection prevention)
+- [ ] Proper output encoding (XSS prevention)
+- [ ] Path traversal prevention
+- [ ] Command injection prevention
+
+#### OWASP Top 10: A02 - Cryptographic Failures
+- [ ] No hardcoded credentials or secrets
+- [ ] Proper encryption for sensitive data
+- [ ] Secure random number generation
+- [ ] Proper key management
+- [ ] HTTPS/TLS for all communications
+
+#### OWASP Top 10: A03 - Injection
+- [ ] SQL injection prevention (ORM or parameterized queries)
+- [ ] NoSQL injection prevention
+- [ ] Command injection prevention
+- [ ] LDAP injection prevention
+- [ ] XPath injection prevention
+
+#### OWASP Top 10: A04 - Insecure Design
+- [ ] Proper authentication mechanisms
+- [ ] Role-based access control
+- [ ] Session management secure
+- [ ] Proper error handling without information leakage
+- [ ] Security headers implemented
+
+### Gate 2: Authentication and Authorization (CRITICAL)
+
+#### Authentication
+- [ ] Multi-factor authentication where appropriate
+- [ ] Secure password storage (bcrypt, argon2, PBKDF2)
+- [ ] Password complexity requirements
+- [ ] Account lockout after failed attempts
+- [ ] Secure session management
+
+#### Authorization
+- [ ] Role-based access control (RBAC)
+- [ ] Attribute-based access control (ABAC)
+- [ ] Principle of least privilege
+- [ ] Proper permission checks
+- [ ] Audit logging for access control
+
+#### Session Management
+- [ ] Secure session tokens
+- [ ] Session timeout implemented
+- [ ] Session invalidation on logout
+- [ ] Secure cookie settings
+- [ ] Session fixation prevention
+
+### Gate 3: Data Protection (CRITICAL)
+
+#### Data Classification
+- [ ] Sensitive data identified and classified
+- [ ] Data encryption at rest and in transit
+- [ ] Proper key management
+- [ ] Data retention policies
+- [ ] Data minimization principles
+
+#### Privacy Protection
+- [ ] GDPR compliance (if applicable)
+- [ ] Data anonymization where appropriate
+- [ ] User consent management
+- [ ] Right to be forgotten implementation
+- [ ] Data breach notification procedures
+
+#### Logging and Monitoring
+- [ ] Security event logging
+- [ ] Audit trails for sensitive operations
+- [ ] Real-time monitoring
+- [ ] Alerting for suspicious activities
+- [ ] Log retention policies
+
+### Gate 4: Application Security (HIGHLY RECOMMENDED)
+
+#### Code Security
+- [ ] No hardcoded secrets or credentials
+- [ ] Proper error handling without information leakage
+- [ ] Security headers implemented
+- [ ] Content Security Policy (CSP)
+- [ ] Cross-Origin Resource Sharing (CORS) properly configured
+
+#### Dependency Security
+- [ ] Regular dependency updates
+- [ ] Vulnerability scanning of dependencies
+- [ ] No known vulnerable libraries
+- [ ] Proper version pinning
+- [ ] Supply chain security
+
+#### Infrastructure Security
+- [ ] Secure configuration management
+- [ ] Network segmentation
+- [ ] Proper firewall rules
+- [ ] Secure deployment practices
+- [ ] Infrastructure as Code security
+
+## Language-Specific Security Rules
+
+### Python Specific Security Rules
+
+#### Django Security
+- [ ] CSRF protection enabled
+- [ ] SQL injection prevention (ORM)
+- [ ] XSS prevention (auto-escaping)
+- [ ] Clickjacking prevention (X-Frame-Options)
+- [ ] Secure cookie settings
+
+#### Flask Security
+- [ ] CSRF protection implemented
+- [ ] SQL injection prevention (parameterized queries)
+- [ ] XSS prevention (proper escaping)
+- [ ] Secure cookie settings
+- [ ] Rate limiting implemented
+
+#### General Python Security
+- [ ] No eval() or exec() with user input
+- [ ] Proper input validation
+- [ ] Secure file handling
+- [ ] No pickle with untrusted data
+- [ ] Proper exception handling
+
+### JavaScript/TypeScript Specific Security Rules
+
+#### Node.js Security
+- [ ] Helmet.js for security headers
+- [ ] Rate limiting implemented
+- [ ] CORS properly configured
+- [ ] Input validation
+- [ ] No eval() with user input
+
+#### React Security
+- [ ] XSS prevention (React auto-escaping)
+- [ ] Proper state management
+- [ ] No direct DOM manipulation
+- [ ] Secure routing
+- [ ] Proper authentication checks
+
+#### Frontend Security
+- [ ] Content Security Policy (CSP)
+- [ ] Secure cookie settings
+- [ ] No sensitive data in localStorage
+- [ ] Proper HTTPS implementation
+- [ ] Secure third-party scripts
+
+### Java Specific Security Rules
+
+#### Spring Security
+- [ ] Proper authentication configuration
+- [ ] Authorization rules defined
+- [ ] CSRF protection enabled
+- [ ] Session management secure
+- [ ] Security headers configured
+
+#### Java EE Security
+- [ ] Proper authentication mechanisms
+- [ ] Authorization constraints
+- [ ] Secure communication
+- [ ] Input validation
+- [ ] Proper error handling
+
+#### General Java Security
+- [ ] No hardcoded credentials
+- [ ] Proper encryption
+- [ ] Secure random number generation
+- [ ] Proper resource management
+- [ ] No information leakage
+
+### C/C++ Specific Security Rules
+
+#### Memory Safety
+- [ ] No buffer overflows
+- [ ] Proper null pointer checks
+- [ ] No use-after-free
+- [ ] Proper memory allocation/deallocation
+- [ ] Secure string handling
+
+#### Input Validation
+- [ ] Proper bounds checking
+- [ ] No format string vulnerabilities
+- [ ] Proper integer overflow checks
+- [ ] Secure file handling
+- [ ] No command injection
+
+## Security Validation Checklist Templates
+
+### Quick Security Check (Pre-PR)
+
+Use this before submitting pull requests:
+
+```markdown
+## Security Validation - Quick Check
+
+### Input Validation
+- [ ] All user inputs validated and sanitized
+- [ ] SQL injection prevention implemented
+- [ ] XSS prevention implemented
+- [ ] Path traversal prevention implemented
+- [ ] Command injection prevention implemented
+
+### Authentication & Authorization
+- [ ] Multi-factor authentication where appropriate
+- [ ] Secure password storage implemented
+- [ ] Role-based access control implemented
+- [ ] Session management secure
+- [ ] Proper permission checks
+
+### Data Protection
+- [ ] No hardcoded credentials
+- [ ] Sensitive data encrypted
+- [ ] Secure random number generation
+- [ ] Proper key management
+- [ ] HTTPS/TLS for all communications
+
+### Application Security
+- [ ] No eval() or exec() with user input
+- [ ] Proper error handling without information leakage
+- [ ] Security headers implemented
+- [ ] Content Security Policy (CSP)
+- [ ] Cross-Origin Resource Sharing (CORS) properly configured
+
+### Evidence
+- Security scan output: [attach output]
+- Vulnerability assessment: [attach results]
+- Authentication test: [attach results]
+- Data protection audit: [attach results]
+```
+
+### Comprehensive Security Assessment (Pre-Merge)
+
+Use this for major changes or production code:
+
+```markdown
+## Security Assessment - Comprehensive
+
+### OWASP Top 10 Compliance
+
+#### A01 - Broken Access Control
+- [ ] Proper authentication mechanisms
+- [ ] Role-based access control
+- [ ] Session management secure
+- [ ] Proper permission checks
+- [ ] Audit logging for access control
+
+#### A02 - Cryptographic Failures
+- [ ] No hardcoded credentials
+- [ ] Proper encryption for sensitive data
+- [ ] Secure random number generation
+- [ ] Proper key management
+- [ ] HTTPS/TLS for all communications
+
+#### A03 - Injection
+- [ ] SQL injection prevention (ORM or parameterized queries)
+- [ ] NoSQL injection prevention
+- [ ] Command injection prevention
+- [ ] LDAP injection prevention
+- [ ] XPath injection prevention
+
+#### A04 - Insecure Design
+- [ ] Proper authentication mechanisms
+- [ ] Authorization rules defined
+- [ ] Session management secure
+- [ ] Proper error handling without information leakage
+- [ ] Security headers implemented
+
+#### A05 - Security Misconfiguration
+- [ ] Secure configuration management
+- [ ] Network segmentation
+- [ ] Proper firewall rules
+- [ ] Secure deployment practices
+- [ ] Infrastructure as Code security
+
+#### A06 - Vulnerable Components
+- [ ] Regular dependency updates
+- [ ] Vulnerability scanning of dependencies
+- [ ] No known vulnerable libraries
+- [ ] Proper version pinning
+- [ ] Supply chain security
+
+#### A07 - Identification and Authentication Failures
+- [ ] Multi-factor authentication where appropriate
+- [ ] Secure password storage
+- [ ] Password complexity requirements
+- [ ] Account lockout after failed attempts
+- [ ] Secure session management
+
+#### A08 - Data Integrity Failures
+- [ ] Data classification and encryption
+- [ ] Proper key management
+- [ ] Data retention policies
+- [ ] Data minimization principles
+- [ ] Data breach notification procedures
+
+#### A09 - Security Logging and Monitoring Failures
+- [ ] Security event logging
+- [ ] Audit trails for sensitive operations
+- [ ] Real-time monitoring
+- [ ] Alerting for suspicious activities
+- [ ] Log retention policies
+
+#### A10 - Server-Side Request Forgery (SSRF)
+- [ ] SSRF prevention mechanisms
+- [ ] Proper URL validation
+- [ ] Network access controls
+- [ ] Request sanitization
+- [ ] Monitoring for suspicious requests
+
+### Language-Specific Security Validation
+
+#### Python Security
+- [ ] Django/Flask security configurations
+- [ ] No eval() or exec() with user input
+- [ ] Proper input validation
+- [ ] Secure file handling
+- [ ] No pickle with untrusted data
+
+#### JavaScript/TypeScript Security
+- [ ] Node.js security configurations
+- [ ] React security best practices
+- [ ] Content Security Policy (CSP)
+- [ ] Secure cookie settings
+- [ ] No sensitive data in localStorage
+
+#### Java Security
+- [ ] Spring Security configurations
+- [ ] Proper authentication mechanisms
+- [ ] Authorization constraints
+- [ ] Secure communication
+- [ ] Input validation
+
+#### C/C++ Security
+- [ ] Memory safety checks
+- [ ] Input validation
+- [ ] No buffer overflows
+- [ ] Proper null pointer checks
+- [ ] Secure string handling
+
+### Security Metrics
+- Vulnerabilities found: [count]
+- High severity issues: [count]
+- Medium severity issues: [count]
+- Low severity issues: [count]
+- Security scan score: [percentage]
+
+### Issues Found and Fixed
+- Issue 1: [description] - Fixed
+- Issue 2: [description] - Fixed
+- Issue 3: [description] - Fixed
+
+### Validation Evidence
+- Security scan output: [attach file]
+- Vulnerability assessment: [attach file]
+- Penetration test results: [attach file]
+- Security audit report: [attach file]
+```
+
+## Anti-Patterns and Common Security Issues
+
+### Anti-Pattern 1: "Security Through Obscurity"
+[X] **Pattern**: Relying on hidden implementation for security
+[X] **Instead**: Proper security measures and validation
+
+### Anti-Pattern 2: "It Works, Ship It"
+[X] **Pattern**: No security testing before deployment
+[X] **Instead**: Security testing as part of development process
+
+### Anti-Pattern 3: "Copy-Paste Security"
+[X] **Pattern**: Copying security code without understanding
+[X] **Instead**: Proper security implementation with understanding
+
+### Anti-Pattern 4: "Password in Code"
+[X] **Pattern**: Hardcoding credentials in source code
+[X] **Instead**: Use environment variables or secret management
+
+### Anti-Pattern 5: "Trust All Input"
+[X] **Pattern**: No input validation
+[X] **Instead**: Validate and sanitize all user inputs
+
+## Deterministic Security Validation Steps
+
+Before merging or deploying code, execute in order:
+
+1. **Security Scanning**
+   - Run automated security scanner (Bandit, SonarQube, etc.)
+   - Fix all security vulnerabilities
+   - Verify no high-severity issues remain
+
+2. **Input Validation Review**
+   - Review all user input handling
+   - Verify validation and sanitization
+   - Check for injection vulnerabilities
+
+3. **Authentication/Authorization Review**
+   - Review authentication mechanisms
+   - Verify authorization rules
+   - Check session management
+
+4. **Data Protection Review**
+   - Review data encryption
+   - Verify key management
+   - Check data retention policies
+
+5. **Dependency Security Review**
+   - Check for vulnerable dependencies
+   - Verify dependency updates
+   - Review supply chain security
+
+6. **Code Review for Security**
+   - Manual security code review
+   - Check for common vulnerabilities
+   - Verify security best practices
+
+7. **Testing Security**
+   - Run security tests
+   - Perform penetration testing
+   - Verify security controls work
+
+8. **Documentation Review**
+   - Review security documentation
+   - Verify security procedures
+   - Check compliance requirements
+
+## Integration with Development Workflow
+
+### In CI/CD Pipeline
+- Automated security scanning on every commit
+- Security gate before merge
+- Dependency vulnerability scanning
+- Security test execution
+
+### In Code Review
+- Security checklist for reviewers
+- Automated security checks
+- Manual security review for sensitive code
+- Security evidence required
+
+### In Development Process
+- Security training for developers
+- Security design reviews
+- Continuous security monitoring
+- Security incident response procedures
+
+## Success Criteria
+
+### Code is Secure When:
+[X] No security vulnerabilities detected
+[X] All OWASP Top 10 controls implemented
+[X] Input validation and sanitization complete
+[X] Authentication and authorization secure
+[X] Data protection measures in place
+[X] Security documentation complete
+[X] Security testing passed
+[X] Security monitoring implemented
+
+### Warning Signs of Poor Security:
+[X] Security vulnerabilities present
+[X] OWASP Top 10 controls missing
+[X] No input validation
+[X] Weak authentication
+[X] Poor data protection
+[X] Inadequate security documentation
+[X] Security testing not performed
+[X] No security monitoring
+
+## Enforcement
+
+### Automated Tools
+- Pre-commit security hooks
+- CI/CD security gates
+- Automated vulnerability scanning
+- Dependency security checking
+
+### Manual Review
+- Security code review
+- Threat modeling
+- Security architecture review
+- Penetration testing
+
+### Team Standards
+- Security training requirements
+- Security champion program
+- Regular security assessments
+- Security incident response plan
+
+## OPSEC and Security Considerations
+
+When validating security:
+- NO production credentials in test data
+- NO sensitive information in error messages
+- NO customer data in test cases
+- NO security keys in source control
+- Redact sensitive information in security reports
+
+## Related Rules
+
+- `rule.clean-code.v1` - Basic code quality standards
+- `rule.validation.code-quality.v1` - Code quality validation
+- `rule.performance.v1` - Performance optimization
+- `rule.documentation.v1` - Documentation standards
+- `rule.compliance.v1` - Compliance requirements
+
+## FINAL SECURITY VALIDATION CHECKLIST
+
+- [ ] OWASP Top 10 controls implemented
+- [ ] Input validation and sanitization complete
+- [ ] Authentication and authorization secure
+- [ ] Data protection measures in place
+- [ ] No hardcoded credentials
+- [ ] Security headers implemented
+- [ ] Dependency security verified
+- [ ] Security testing passed
+- [ ] Security documentation complete
+- [ ] Only after ALL pass: Code is secure for deployment

@@ -1,0 +1,542 @@
+---
+id: rule.validation.performance.v1
+kind: rule
+version: 1.0.0
+description: Comprehensive performance validation rules for application code
+globs: "**/*.py", "**/**/*.ts", "**/*.js", "**/**/*.tsx", "**/*.java", "**/*.cpp", "**/*.c", "**/*.cs"
+governs: ""
+requires: ["rule.clean-code.v1"]
+model_hints: { temp: 0.2, top_p: 0.9 }
+provenance: { owner: team-performance, last_review: 2025-12-06 }
+alwaysApply: false
+---
+
+# Performance Validation Rule
+
+## Purpose & Scope
+
+Defines comprehensive performance validation standards for application code. This rule ensures code follows performance best practices, meets performance requirements, and is optimized for production environments across multiple programming languages.
+
+**Applies to**: All source code files before code review, merge, or deployment
+
+**Does not apply to**: Configuration files, documentation, test data, or build artifacts
+
+## Inputs (Contract)
+
+- Source code files in supported programming languages
+- Performance testing tools and frameworks
+- Benchmarking tools
+- Profiling tools
+- Performance requirements and SLAs
+
+## Outputs (Contract)
+
+- Performance metrics and benchmarks
+- Profiling results and analysis
+- Performance validation checklist
+- Bottleneck identification and recommendations
+- Performance regression detection
+- Performance validation evidence
+
+## Core Performance Principles
+
+**PERFORMANCE IS A FEATURE, NOT AN AFTERTHOUGHT.**
+
+**MEASURE BEFORE OPTIMIZING - Don't optimize without data.**
+
+**PREMATURE OPTIMIZATION IS THE ROOT OF ALL EVIL - Focus on critical paths.**
+
+**SCALABILITY IS KEY - Code must handle growth gracefully.**
+
+## Mandatory Performance Gates
+
+### Gate 1: Algorithmic Efficiency (CRITICAL)
+
+#### Time Complexity Analysis
+- [ ] No O(n²) algorithms where O(n) exists
+- [ ] Proper data structures used
+- [ ] Efficient sorting algorithms
+- [ ] Optimal search algorithms
+- [ ] Proper caching strategies
+
+#### Space Complexity Analysis
+- [ ] Memory usage within acceptable limits
+- [ ] No memory leaks detected
+- [ ] Proper resource management
+- [ ] Efficient data structures
+- [ ] Proper garbage collection
+
+#### Algorithmic Best Practices
+- [ ] No unnecessary computations
+- [ ] Early exits in loops
+- [ ] Proper memoization
+- [ ] Efficient string operations
+- [ ] Proper use of built-in functions
+
+### Gate 2: Database and I/O Performance (CRITICAL)
+
+#### Database Optimization
+- [ ] Proper indexing strategies
+- [ ] Efficient query patterns
+- [ ] No N+1 query problems
+- [ ] Proper connection pooling
+- [ ] Database query optimization
+
+#### I/O Operations
+- [ ] Efficient file operations
+- [ ] Proper buffering strategies
+- [ ] Asynchronous I/O where appropriate
+- [ ] Network request optimization
+- [ ] Proper error handling in I/O
+
+#### Caching Strategies
+- [ ] Appropriate caching levels
+- [ ] Cache invalidation strategies
+- [ ] Cache size management
+- [ ] Cache hit ratio monitoring
+- [ ] Distributed caching where needed
+
+### Gate 3: Code and Architecture Performance (HIGHLY RECOMMENDED)
+
+#### Code Optimization
+- [ ] No unnecessary computations
+- [ ] Proper use of language features
+- [ ] Efficient data structures
+- [ ] Proper algorithm selection
+- [ ] Code refactoring for performance
+
+#### Architecture Performance
+- [ ] Proper service boundaries
+- [ ] Efficient communication patterns
+- [ ] Proper load balancing
+- [ ] Scalable design patterns
+- [ ] Performance monitoring
+
+#### Concurrency and Parallelism
+- [ ] Proper thread safety
+- [ ] Efficient locking mechanisms
+- [ ] Proper use of async/await
+- [ ] Concurrent processing where appropriate
+- [ ] Race condition prevention
+
+### Gate 4: System and Infrastructure Performance (HIGHLY RECOMMENDED)
+
+#### Resource Management
+- [ ] Proper memory management
+- [ ] Efficient CPU usage
+- [ ] Network bandwidth optimization
+- [ ] Disk I/O optimization
+- [ ] Proper resource cleanup
+
+#### Scalability Considerations
+- [ ] Horizontal scaling support
+- [ ] Vertical scaling optimization
+- [ ] Load balancing strategies
+- [ ] Failover mechanisms
+- [ ] Auto-scaling capabilities
+
+#### Monitoring and Observability
+- [ ] Performance metrics collection
+- [ ] Application Performance Monitoring (APM)
+- [ ] Logging performance data
+- [ ] Alerting for performance issues
+- [ ] Performance trend analysis
+
+## Language-Specific Performance Rules
+
+### Python Specific Performance Rules
+
+#### CPython Performance
+- [ ] Proper use of built-in functions
+- [ ] Efficient list comprehensions
+- [ ] Proper use of generators
+- [ ] No unnecessary object creation
+- [ ] Efficient string operations
+
+#### Database Performance
+- [ ] Proper use of ORM (Django/SQLAlchemy)
+- [ ] Efficient query patterns
+- [ ] Proper indexing
+- [ ] No N+1 query problems
+- [ ] Database connection pooling
+
+#### Concurrency Performance
+- [ ] Proper use of asyncio
+- [ ] Efficient threading
+- [ ] Proper use of multiprocessing
+- [ ] No GIL-related bottlenecks
+- [ ] Efficient parallel processing
+
+### JavaScript/TypeScript Specific Performance Rules
+
+#### Browser Performance
+- [ ] Efficient DOM manipulation
+- [ ] Proper event handling
+- [ ] No memory leaks
+- [ ] Efficient rendering
+- [ ] Proper use of requestAnimationFrame
+
+#### Node.js Performance
+- [ ] Efficient event loop usage
+- [ ] Proper use of streams
+- [ ] Efficient I/O operations
+- [ ] Proper error handling
+- [ ] Efficient memory management
+
+#### Frontend Performance
+- [ ] Efficient bundling
+- [ ] Proper code splitting
+- [ ] Lazy loading
+- [ ] Efficient asset loading
+- [ ] Proper caching strategies
+
+### Java Specific Performance Rules
+
+#### JVM Performance
+- [ ] Proper garbage collection tuning
+- [ ] Efficient memory management
+- [ ] Proper use of JVM features
+- [ ] Efficient class loading
+- [ ] Proper thread management
+
+#### Database Performance
+- [ ] Proper use of JDBC
+- [ ] Efficient query patterns
+- [ ] Proper connection pooling
+- [ ] Database indexing
+- [ ] No N+1 query problems
+
+#### Concurrency Performance
+- [ ] Proper use of threads
+- [ ] Efficient synchronization
+- [ ] Proper use of concurrent collections
+- [ ] No deadlocks
+- [ ] Proper use of locks
+
+### C/C++ Specific Performance Rules
+
+#### Memory Performance
+- [ ] Efficient memory allocation
+- [ ] No memory leaks
+- [ ] Proper memory alignment
+- [ ] Efficient data structures
+- [ ] Proper use of pointers
+
+#### CPU Performance
+- [ ] Efficient algorithms
+- [ ] Proper use of CPU features
+- [ ] No unnecessary computations
+- [ ] Efficient loops
+- [ ] Proper use of registers
+
+#### I/O Performance
+- [ ] Efficient file operations
+- [ ] Proper buffering
+- [ ] Efficient network operations
+- [ ] Proper error handling
+- [ ] Efficient system calls
+
+## Performance Validation Checklist Templates
+
+### Quick Performance Check (Pre-PR)
+
+Use this before submitting pull requests:
+
+```markdown
+## Performance Validation - Quick Check
+
+### Algorithmic Efficiency
+- [ ] No O(n²) algorithms where O(n) exists
+- [ ] Proper data structures used
+- [ ] Efficient sorting algorithms
+- [ ] Optimal search algorithms
+- [ ] Proper caching strategies
+
+### Database and I/O Performance
+- [ ] Proper indexing strategies
+- [ ] Efficient query patterns
+- [ ] No N+1 query problems
+- [ ] Proper connection pooling
+- [ ] Database query optimization
+
+### Code and Architecture Performance
+- [ ] No unnecessary computations
+- [ ] Proper use of language features
+- [ ] Efficient data structures
+- [ ] Proper algorithm selection
+- [ ] Code refactoring for performance
+
+### Evidence
+- Performance benchmarks: [attach results]
+- Profiling data: [attach results]
+- Complexity analysis: [attach results]
+- Database query plans: [attach results]
+```
+
+### Comprehensive Performance Assessment (Pre-Merge)
+
+Use this for major changes or production code:
+
+```markdown
+## Performance Assessment - Comprehensive
+
+### Algorithmic Performance
+
+#### Time Complexity
+- [ ] O(n) algorithms used where appropriate
+- [ ] O(log n) algorithms used for search
+- [ ] O(1) algorithms used for lookup
+- [ ] No O(n²) algorithms in critical paths
+- [ ] Proper algorithm selection documented
+
+#### Space Complexity
+- [ ] Memory usage within acceptable limits
+- [ ] No memory leaks detected
+- [ ] Proper resource management
+- [ ] Efficient data structures
+- [ ] Proper garbage collection
+
+#### Performance Metrics
+- Execution time: [value] ms
+- Memory usage: [value] MB
+- CPU usage: [value] %
+- Database queries: [count]
+- Network requests: [count]
+
+### Database and I/O Performance
+
+#### Database Optimization
+- [ ] Proper indexing strategies
+- [ ] Efficient query patterns
+- [ ] No N+1 query problems
+- [ ] Proper connection pooling
+- [ ] Database query optimization
+
+#### I/O Operations
+- [ ] Efficient file operations
+- [ ] Proper buffering strategies
+- [ ] Asynchronous I/O where appropriate
+- [ ] Network request optimization
+- [ ] Proper error handling in I/O
+
+#### Caching Strategies
+- [ ] Appropriate caching levels
+- [ ] Cache invalidation strategies
+- [ ] Cache size management
+- [ ] Cache hit ratio monitoring
+- [ ] Distributed caching where needed
+
+### Code and Architecture Performance
+
+#### Code Optimization
+- [ ] No unnecessary computations
+- [ ] Proper use of language features
+- [ ] Efficient data structures
+- [ ] Proper algorithm selection
+- [ ] Code refactoring for performance
+
+#### Architecture Performance
+- [ ] Proper service boundaries
+- [ ] Efficient communication patterns
+- [ ] Proper load balancing
+- [ ] Scalable design patterns
+- [ ] Performance monitoring
+
+#### Concurrency and Parallelism
+- [ ] Proper thread safety
+- [ ] Efficient locking mechanisms
+- [ ] Proper use of async/await
+- [ ] Concurrent processing where appropriate
+- [ ] Race condition prevention
+
+### System and Infrastructure Performance
+
+#### Resource Management
+- [ ] Proper memory management
+- [ ] Efficient CPU usage
+- [ ] Network bandwidth optimization
+- [ ] Disk I/O optimization
+- [ ] Proper resource cleanup
+
+#### Scalability Considerations
+- [ ] Horizontal scaling support
+- [ ] Vertical scaling optimization
+- [ ] Load balancing strategies
+- [ ] Failover mechanisms
+- [ ] Auto-scaling capabilities
+
+#### Monitoring and Observability
+- [ ] Performance metrics collection
+- [ ] Application Performance Monitoring (APM)
+- [ ] Logging performance data
+- [ ] Alerting for performance issues
+- [ ] Performance trend analysis
+
+### Performance Issues Found and Fixed
+- Issue 1: [description] - Fixed
+- Issue 2: [description] - Fixed
+- Issue 3: [description] - Fixed
+
+### Validation Evidence
+- Performance benchmarks: [attach file]
+- Profiling data: [attach file]
+- Complexity analysis: [attach file]
+- Database query plans: [attach file]
+- Load testing results: [attach file]
+```
+
+## Anti-Patterns and Common Performance Issues
+
+### Anti-Pattern 1: "Premature Optimization"
+[X] **Pattern**: Optimizing code without measuring
+[X] **Instead**: Measure first, optimize second
+
+### Anti-Pattern 2: "N+1 Queries"
+[X] **Pattern**: Multiple database queries instead of joins
+[X] **Instead**: Use proper database joins and eager loading
+
+### Anti-Pattern 3: "Memory Leaks"
+[X] **Pattern**: Holding references unnecessarily
+[X] **Instead**: Proper resource cleanup and management
+
+### Anti-Pattern 4: "Inefficient Algorithms"
+[X] **Pattern**: Using O(n²) when O(n) exists
+[X] **Instead**: Choose optimal algorithms for the problem
+
+### Anti-Pattern 5: "Blocking I/O"
+[X] **Pattern**: Synchronous operations blocking threads
+[X] **Instead**: Use asynchronous I/O where appropriate
+
+## Deterministic Performance Validation Steps
+
+Before merging or deploying code, execute in order:
+
+1. **Performance Benchmarking**
+   - Run performance benchmarks
+   - Compare against baseline
+   - Verify performance requirements met
+
+2. **Profiling Analysis**
+   - Profile code execution
+   - Identify bottlenecks
+   - Analyze resource usage
+
+3. **Complexity Analysis**
+   - Measure algorithmic complexity
+   - Analyze time and space complexity
+   - Verify optimal algorithms used
+
+4. **Database Performance Review**
+   - Review database queries
+   - Analyze query performance
+   - Check for N+1 problems
+
+5. **Code Optimization Review**
+   - Review code for performance issues
+   - Check for unnecessary computations
+   - Verify efficient data structures
+
+6. **Architecture Review**
+   - Review system architecture
+   - Check for scalability issues
+   - Verify performance monitoring
+
+7. **Load Testing**
+   - Run load tests
+   - Verify system handles expected load
+   - Check for performance degradation
+
+8. **Performance Documentation**
+   - Document performance requirements
+   - Record performance metrics
+   - Create performance baseline
+
+## Integration with Development Workflow
+
+### In CI/CD Pipeline
+- Performance benchmarks on every commit
+- Performance regression detection
+- Automated profiling
+- Load testing in staging
+
+### In Code Review
+- Performance checklist for reviewers
+- Performance metrics presented
+- Automated performance checks
+- Performance evidence required
+
+### In Development Process
+- Performance training for developers
+- Performance design reviews
+- Continuous performance monitoring
+- Performance optimization culture
+
+## Success Criteria
+
+### Code is Performance-Optimized When:
+[X] Performance benchmarks meet requirements
+[X] No algorithmic bottlenecks
+[X] Database queries optimized
+[X] Code is efficient and maintainable
+[X] System scales as expected
+[X] Performance monitoring in place
+[X] Performance regression testing passed
+
+### Warning Signs of Poor Performance:
+[X] Performance benchmarks fail
+[X] Algorithmic bottlenecks present
+[X] Database performance issues
+[X] Inefficient code
+[X] Poor scalability
+[X] No performance monitoring
+[X] Performance regression detected
+
+## Enforcement
+
+### Automated Tools
+- Performance benchmarking tools
+- Profiling tools
+- Load testing tools
+- Performance monitoring tools
+
+### Manual Review
+- Performance code review
+- Architecture performance review
+- Load testing by QA
+- Performance optimization review
+
+### Team Standards
+- Performance requirements documentation
+- Performance testing culture
+- Performance optimization training
+- Performance metrics dashboard
+
+## OPSEC and Performance Considerations
+
+When validating performance:
+- NO production credentials in test data
+- NO sensitive information in performance reports
+- NO customer data in performance tests
+- NO internal system details in benchmarks
+- Redact sensitive information in performance documentation
+
+## Related Rules
+
+- `rule.clean-code.v1` - Basic code quality standards
+- `rule.validation.code-quality.v1` - Code quality validation
+- `rule.validation.security.v1` - Security validation
+- `rule.documentation.v1` - Documentation standards
+- `rule.compliance.v1` - Compliance requirements
+
+## FINAL PERFORMANCE VALIDATION CHECKLIST
+
+- [ ] Algorithmic efficiency: Optimal solutions used
+- [ ] Database performance: Queries optimized
+- [ ] Code optimization: No unnecessary computations
+- [ ] Architecture performance: Scalable design
+- [ ] System performance: Resource management efficient
+- [ ] Performance benchmarks: Meet requirements
+- [ ] Performance monitoring: In place and working
+- [ ] Performance regression: No regressions detected
+- [ ] Performance evidence: Documented and validated
+- [ ] Only after ALL pass: Code is performance-optimized

@@ -1,0 +1,559 @@
+---
+id: rule.validation.process.v1
+kind: rule
+version: 1.0.0
+description: Comprehensive process validation rules for software development workflows
+globs: "**/*.md", "**/*.yml", "**/*.yaml", "**/Dockerfile", "**/docker-compose.yml", "**/*.py", "**/**/*.ts", "**/*.js", "**/**/*.tsx"
+governs: ""
+requires: ["rule.clean-code.v1", "rule.validation.compliance.v1"]
+model_hints: { temp: 0.2, top_p: 0.9 }
+provenance: { owner: team-process, last_review: 2025-12-06 }
+alwaysApply: false
+---
+
+# Process Validation Rule
+
+## Purpose & Scope
+
+Defines comprehensive process validation standards for software development workflows. This rule ensures development processes follow best practices, maintain quality, and meet organizational standards across the entire software development lifecycle.
+
+**Applies to**: All development processes, workflows, and documentation before code review, merge, or deployment
+
+**Does not apply to**: Individual code implementations (covered by other validation rules)
+
+## Inputs (Contract)
+
+- Development process documentation
+- Workflow configurations
+- CI/CD pipeline definitions
+- Project management artifacts
+- Quality assurance procedures
+- Release management processes
+
+## Outputs (Contract)
+
+- Process validation report
+- Workflow efficiency analysis
+- Quality gate compliance
+- Process improvement recommendations
+- Process validation checklist
+- Process documentation audit
+
+## Core Process Principles
+
+**PROCESS IS THE FOUNDATION OF QUALITY - Good processes lead to good outcomes.**
+
+**CONTINUOUS IMPROVEMENT - Processes should evolve based on feedback.**
+
+**TRANSPARENCY AND TRACEABILITY - Every action should be documented and traceable.**
+
+**COLLABORATION AND COMMUNICATION - Processes should facilitate teamwork.**
+
+## Mandatory Process Gates
+
+### Gate 1: Development Process Compliance (CRITICAL)
+
+#### Software Development Lifecycle (SDLC)
+- [ ] SDLC phases properly defined
+- [ ] Requirements gathering complete
+- [ ] Design specifications complete
+- [ ] Implementation follows standards
+- [ ] Testing comprehensive
+- [ ] Deployment procedures defined
+
+#### Agile Methodology Compliance
+- [ ] Sprint planning completed
+- [ ] User stories properly defined
+- [ ] Backlog management effective
+- [ ] Daily standups conducted
+- [ ] Sprint reviews completed
+- [ ] Retrospectives conducted
+
+#### Project Management Compliance
+- [ ] Project plans complete
+- [ ] Resource allocation proper
+- [ ] Timeline management effective
+- [ ] Risk management implemented
+- [ ] Stakeholder communication maintained
+
+### Gate 2: Quality Assurance and Testing (CRITICAL)
+
+#### Testing Strategy
+- [ ] Unit testing implemented
+- [ ] Integration testing complete
+- [ ] System testing performed
+- [ ] User acceptance testing complete
+- [ ] Performance testing conducted
+
+#### Quality Gates
+- [ ] Code review requirements met
+- [ ] Test coverage requirements met
+- [ ] Security testing completed
+- [ ] Performance testing completed
+- [ ] Documentation complete
+
+#### Quality Metrics
+- [ ] Defect density within acceptable limits
+- [ ] Test pass rate meets requirements
+- [ ] Code coverage meets requirements
+- [ ] Performance benchmarks met
+- [ ] Security scan clean
+
+### Gate 3: CI/CD and Automation (HIGHLY RECOMMENDED)
+
+#### Continuous Integration
+- [ ] Automated builds implemented
+- [ ] Automated testing in CI
+- [ ] Code quality checks automated
+- [ ] Security scanning automated
+- [ ] Build artifacts properly managed
+
+#### Continuous Deployment
+- [ ] Automated deployment pipelines
+- [ ] Environment promotion proper
+- [ ] Rollback procedures defined
+- [ ] Monitoring implemented
+- [ ] Alerting configured
+
+#### Infrastructure as Code
+- [ ] Infrastructure defined in code
+- [ ] Configuration management proper
+- [ ] Environment consistency maintained
+- [ ] Infrastructure testing implemented
+- [ ] Infrastructure monitoring configured
+
+### Gate 4: Documentation and Communication (HIGHLY RECOMMENDED)
+
+#### Process Documentation
+- [ ] Process documentation complete
+- [ ] Workflow documentation proper
+- [ ] Decision tracking implemented
+- [ ] Knowledge sharing effective
+- [ ] Documentation updated regularly
+
+#### Communication Channels
+- [ ] Team communication effective
+- [ ] Stakeholder communication proper
+- [ ] Documentation accessible
+- [ ] Information sharing efficient
+- [ ] Feedback loops established
+
+#### Collaboration Tools
+- [ ] Project management tools used
+- [ ] Version control proper
+- [ ] Documentation tools effective
+- [ ] Communication tools integrated
+- [ ] Collaboration processes defined
+
+## Process-Specific Validation Rules
+
+### Development Process Validation
+
+#### Requirements Management
+- [ ] Requirements properly documented
+- [ ] Requirements prioritized
+- [ ] Requirements traceable
+- [ ] Requirements validated
+- [ ] Requirements maintained
+
+#### Design Process
+- [ ] Design specifications complete
+- [ ] Architecture properly documented
+- [ ] Design reviews conducted
+- [ ] Design validated
+- [ ] Design maintained
+
+#### Implementation Process
+- [ ] Coding standards followed
+- [ ] Code reviews conducted
+- [ ] Testing implemented
+- [ ] Documentation updated
+- [ ] Code quality maintained
+
+#### Testing Process
+- [ ] Test plans complete
+- [ ] Test cases defined
+- [ ] Test execution proper
+- [ ] Defect tracking implemented
+- [ ] Test results documented
+
+### Quality Assurance Process Validation
+
+#### Quality Planning
+- [ ] Quality objectives defined
+- [ ] Quality metrics established
+- [ ] Quality standards defined
+- [ ] Quality tools selected
+- [ ] Quality training provided
+
+#### Quality Control
+- [ ] Quality checks implemented
+- [ ] Quality gates defined
+- [ ] Quality monitoring proper
+- [ ] Quality reporting effective
+- [ ] Quality improvement continuous
+
+#### Quality Assurance
+- [ ] Quality audits conducted
+- [ ] Process compliance verified
+- [ ] Quality improvements identified
+- [ ] Quality issues resolved
+- [ ] Quality lessons learned captured
+
+### Release Management Process Validation
+
+#### Release Planning
+- [ ] Release scope defined
+- [ ] Release timeline established
+- [ ] Release resources allocated
+- [ ] Release risks assessed
+- [ ] Release communication planned
+
+#### Release Preparation
+- [ ] Release testing complete
+- [ ] Release documentation ready
+- [ ] Release artifacts prepared
+- [ ] Release rollback planned
+- [ ] Release monitoring configured
+
+#### Release Execution
+- [ ] Release deployed properly
+- [ ] Release validation complete
+- [ ] Release monitoring active
+- [ ] Release issues resolved
+- [ ] Release communication complete
+
+#### Release Post-Mortem
+- [ ] Release review conducted
+- [ ] Release lessons learned captured
+- [ ] Release improvements identified
+- [ ] Release documentation updated
+- [ ] Release process improved
+
+## Process Validation Checklist Templates
+
+### Quick Process Check (Pre-PR)
+
+Use this before submitting pull requests:
+
+```markdown
+## Process Validation - Quick Check
+
+### Development Process Compliance
+- [ ] SDLC phases properly defined
+- [ ] Requirements gathering complete
+- [ ] Design specifications complete
+- [ ] Implementation follows standards
+- [ ] Testing comprehensive
+
+### Quality Assurance and Testing
+- [ ] Testing strategy implemented
+- [ ] Quality gates defined
+- [ ] Quality metrics within limits
+- [ ] Code review requirements met
+- [ ] Documentation complete
+
+### CI/CD and Automation
+- [ ] Automated builds implemented
+- [ ] Automated testing in CI
+- [ ] Code quality checks automated
+- [ ] Security scanning automated
+- [ ] Build artifacts properly managed
+
+### Documentation and Communication
+- [ ] Process documentation complete
+- [ ] Communication channels effective
+- [ ] Collaboration tools used
+- [ ] Information sharing efficient
+- [ ] Feedback loops established
+
+### Evidence
+- Process documentation: [attach results]
+- Quality metrics: [attach results]
+- CI/CD pipeline: [attach results]
+- Communication audit: [attach results]
+```
+
+### Comprehensive Process Assessment (Pre-Merge)
+
+Use this for major changes or production code:
+
+```markdown
+## Process Assessment - Comprehensive
+
+### Development Process Compliance
+
+#### SDLC Compliance
+- [ ] Requirements management: [PASS/FAIL]
+- [ ] Design process: [PASS/FAIL]
+- [ ] Implementation process: [PASS/FAIL]
+- [ ] Testing process: [PASS/FAIL]
+- [ ] Deployment process: [PASS/FAIL]
+
+#### Agile Methodology Compliance
+- [ ] Sprint planning: [PASS/FAIL]
+- [ ] User stories: [PASS/FAIL]
+- [ ] Backlog management: [PASS/FAIL]
+- [ ] Daily standups: [PASS/FAIL]
+- [ ] Sprint reviews: [PASS/FAIL]
+
+#### Project Management Compliance
+- [ ] Project planning: [PASS/FAIL]
+- [ ] Resource allocation: [PASS/FAIL]
+- [ ] Timeline management: [PASS/FAIL]
+- [ ] Risk management: [PASS/FAIL]
+- [ ] Stakeholder communication: [PASS/FAIL]
+
+### Quality Assurance and Testing Compliance
+
+#### Testing Strategy
+- [ ] Unit testing: [PASS/FAIL]
+- [ ] Integration testing: [PASS/FAIL]
+- [ ] System testing: [PASS/FAIL]
+- [ ] User acceptance testing: [PASS/FAIL]
+- [ ] Performance testing: [PASS/FAIL]
+
+#### Quality Gates
+- [ ] Code review requirements: [PASS/FAIL]
+- [ ] Test coverage requirements: [PASS/FAIL]
+- [ ] Security testing: [PASS/FAIL]
+- [ ] Performance testing: [PASS/FAIL]
+- [ ] Documentation requirements: [PASS/FAIL]
+
+#### Quality Metrics
+- [ ] Defect density: [value]
+- [ ] Test pass rate: [value]
+- [ ] Code coverage: [value]
+- [ ] Performance benchmarks: [value]
+- [ ] Security scan results: [value]
+
+### CI/CD and Automation Compliance
+
+#### Continuous Integration
+- [ ] Automated builds: [PASS/FAIL]
+- [ ] Automated testing: [PASS/FAIL]
+- [ ] Code quality checks: [PASS/FAIL]
+- [ ] Security scanning: [PASS/FAIL]
+- [ ] Build artifacts: [PASS/FAIL]
+
+#### Continuous Deployment
+- [ ] Automated deployment: [PASS/FAIL]
+- [ ] Environment promotion: [PASS/FAIL]
+- [ ] Rollback procedures: [PASS/FAIL]
+- [ ] Monitoring: [PASS/FAIL]
+- [ ] Alerting: [PASS/FAIL]
+
+#### Infrastructure as Code
+- [ ] Infrastructure defined in code: [PASS/FAIL]
+- [ ] Configuration management: [PASS/FAIL]
+- [ ] Environment consistency: [PASS/FAIL]
+- [ ] Infrastructure testing: [PASS/FAIL]
+- [ ] Infrastructure monitoring: [PASS/FAIL]
+
+### Documentation and Communication Compliance
+
+#### Process Documentation
+- [ ] Process documentation: [PASS/FAIL]
+- [ ] Workflow documentation: [PASS/FAIL]
+- [ ] Decision tracking: [PASS/FAIL]
+- [ ] Knowledge sharing: [PASS/FAIL]
+- [ ] Documentation updates: [PASS/FAIL]
+
+#### Communication Channels
+- [ ] Team communication: [PASS/FAIL]
+- [ ] Stakeholder communication: [PASS/FAIL]
+- [ ] Documentation accessibility: [PASS/FAIL]
+- [ ] Information sharing: [PASS/FAIL]
+- [ ] Feedback loops: [PASS/FAIL]
+
+#### Collaboration Tools
+- [ ] Project management tools: [PASS/FAIL]
+- [ ] Version control: [PASS/FAIL]
+- [ ] Documentation tools: [PASS/FAIL]
+- [ ] Communication tools: [PASS/FAIL]
+- [ ] Collaboration processes: [PASS/FAIL]
+
+### Process Issues Found and Fixed
+- Issue 1: [description] - Fixed
+- Issue 2: [description] - Fixed
+- Issue 3: [description] - Fixed
+
+### Validation Evidence
+- Process documentation: [attach file]
+- Quality metrics: [attach file]
+- CI/CD pipeline: [attach file]
+- Communication audit: [attach file]
+- Process improvement plan: [attach file]
+```
+
+## Anti-Patterns and Common Process Issues
+
+### Anti-Pattern 1: "Process for Process Sake"
+[X] **Pattern**: Following processes without understanding
+[X] **Instead**: Understand and improve processes continuously
+
+### Anti-Pattern 2: "Documentation After"
+[X] **Pattern**: Creating documentation after implementation
+[X] **Instead**: Documentation as part of development process
+
+### Anti-Pattern 3: "Communication Silos"
+[X] **Pattern**: Poor communication between teams
+[X] **Instead**: Effective communication and collaboration
+
+### Anti-Pattern 4: "Quality Gates Ignored"
+[X] **Pattern**: Skipping quality gates to save time
+[X] **Instead**: Follow quality gates consistently
+
+### Anti-Pattern 5: "Manual Everything"
+[X] **Pattern**: No automation in processes
+[X] **Instead**: Automate repetitive tasks
+
+## Deterministic Process Validation Steps
+
+Before merging or deploying code, execute in order:
+
+1. **Development Process Review**
+   - Review SDLC compliance
+   - Verify requirements management
+   - Check design process
+   - Review implementation process
+   - Verify testing process
+
+2. **Quality Assurance Review**
+   - Review testing strategy
+   - Verify quality gates
+   - Check quality metrics
+   - Review code review process
+   - Verify documentation requirements
+
+3. **CI/CD Pipeline Review**
+   - Review automated builds
+   - Verify automated testing
+   - Check code quality checks
+   - Review security scanning
+   - Verify build artifact management
+
+4. **Documentation Review**
+   - Review process documentation
+   - Verify workflow documentation
+   - Check decision tracking
+   - Review knowledge sharing
+   - Verify documentation updates
+
+5. **Communication Review**
+   - Review team communication
+   - Verify stakeholder communication
+   - Check documentation accessibility
+   - Review information sharing
+   - Verify feedback loops
+
+6. **Collaboration Review**
+   - Review project management tools
+   - Verify version control
+   - Check documentation tools
+   - Review communication tools
+   - Verify collaboration processes
+
+7. **Process Improvement Review**
+   - Review process improvements
+   - Verify lessons learned
+   - Check continuous improvement
+   - Review process metrics
+   - Verify process optimization
+
+## Integration with Development Workflow
+
+### In CI/CD Pipeline
+- Process validation in CI
+- Quality gate enforcement
+- Automated process checks
+- Process documentation validation
+- Process improvement tracking
+
+### In Code Review
+- Process checklist for reviewers
+- Process compliance verification
+- Process improvement suggestions
+- Process documentation review
+- Process evidence required
+
+### In Development Process
+- Process training for developers
+- Process compliance monitoring
+- Process improvement initiatives
+- Process metrics tracking
+- Process optimization culture
+
+## Success Criteria
+
+### Process is Effective When:
+[X] SDLC phases properly defined and followed
+[X] Quality gates consistently met
+[X] CI/CD pipelines automated and effective
+[X] Documentation complete and current
+[X] Communication effective and efficient
+[X] Collaboration tools properly used
+[X] Process improvements continuous
+[X] Process metrics within acceptable limits
+
+### Warning Signs of Poor Process:
+[X] SDLC phases not properly defined
+[X] Quality gates frequently missed
+[X] CI/CD pipelines not automated
+[X] Documentation incomplete or outdated
+[X] Communication ineffective
+[X] Collaboration tools not used properly
+[X] No process improvements
+[X] Process metrics outside acceptable limits
+
+## Enforcement
+
+### Automated Tools
+- Process validation tools
+- Quality gate automation
+- CI/CD pipeline automation
+- Documentation validation
+- Process monitoring tools
+
+### Manual Review
+- Process code review
+- Process compliance verification
+- Process improvement reviews
+- Process documentation review
+- Process training and education
+
+### Team Standards
+- Process training requirements
+- Process compliance monitoring
+- Process improvement initiatives
+- Process metrics tracking
+- Process optimization culture
+
+## OPSEC and Process Considerations
+
+When validating processes:
+- NO production credentials in process documentation
+- NO sensitive information in process audits
+- NO customer data in process reviews
+- NO internal system details in process documentation
+- Redact sensitive information in process reports
+
+## Related Rules
+
+- `rule.validation.compliance.v1` - Compliance validation
+- `rule.validation.security.v1` - Security validation
+- `rule.validation.code-quality.v1` - Code quality validation
+- `rule.validation.performance.v1` - Performance validation
+- `rule.documentation.v1` - Documentation standards
+
+## FINAL PROCESS VALIDATION CHECKLIST
+
+- [ ] SDLC phases properly defined and followed
+- [ ] Quality gates consistently met
+- [ ] CI/CD pipelines automated and effective
+- [ ] Documentation complete and current
+- [ ] Communication effective and efficient
+- [ ] Collaboration tools properly used
+- [ ] Process improvements continuous
+- [ ] Process metrics within acceptable limits
+- [ ] Only after ALL pass: Process is effective for development

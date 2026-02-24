@@ -1,0 +1,14 @@
+{
+  "include": ["src", "tests", ".claude/validation/checker.py"],
+  "exclude": [
+    "**/.venv",
+    "**/__pycache__",
+    "alembic",
+    "scripts",
+    "data",
+    "dist",
+    "build",
+    ".claude/commands",
+    ".claude/validation/test_*.py"
+  ]
+}

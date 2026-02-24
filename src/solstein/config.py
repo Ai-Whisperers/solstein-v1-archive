@@ -5,21 +5,31 @@ Handles environment variables, configuration files, and settings.
 """
 
 import os
+from functools import lru_cache
 from pathlib import Path
-from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field, validator
-from pydantic_settings import BaseSettings
+from typing import Any
+
 from loguru import logger
+from pydantic import BaseModel, Field, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class ConfigurationError(Exception):
+    """Raised when configuration is invalid or incomplete."""
+
+    pass
 
 
 class DatabaseConfig(BaseModel):
     """Database configuration."""
+
     url: str = Field(default="postgresql://postgres:postgres@localhost:5432/solstein")
     pool_size: int = Field(default=20, ge=1, le=100)
     echo: bool = Field(default=False)
-    
-    @validator("url")
-    def validate_url(cls, v):
+
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v: str) -> str:
         """Validate database URL."""
         if not v:
             raise ValueError("Database URL cannot be empty")
@@ -28,15 +38,16 @@ class DatabaseConfig(BaseModel):
 
 class RedisConfig(BaseModel):
     """Redis configuration for caching and job queues."""
+
     url: str = Field(default="redis://localhost:6379/0")
     cache_ttl: int = Field(default=3600, ge=60, description="Cache TTL in seconds")
-    
+
     @property
     def host(self) -> str:
         """Extract host from URL."""
         parts = self.url.split("://")[1].split(":")
         return parts[0]
-    
+
     @property
     def port(self) -> int:
         """Extract port from URL."""
@@ -46,14 +57,32 @@ class RedisConfig(BaseModel):
         return 6379
 
 
+class SupabaseConfig(BaseModel):
+    """Supabase configuration."""
+
+    url: str = Field(default="")
+    key: str = Field(default="")
+    anon_key: str = Field(default="")
+    db_url: str = Field(default="")
+
+
+class TemporalConfig(BaseModel):
+    """Temporal orchestration configuration."""
+
+    host_url: str = Field(default="localhost:7233")
+    namespace: str = Field(default="default")
+    api_key: str | None = Field(default=None)
+
+
 class APIConfig(BaseModel):
     """API configuration."""
-    host: str = Field(default="0.0.0.0")
+
+    host: str = Field(default="127.0.0.1")
     port: int = Field(default=8000, ge=1, le=65535)
     debug: bool = Field(default=False)
     cors_origins: list[str] = Field(default=["http://localhost:3000"])
     api_prefix: str = Field(default="/api/v1")
-    
+
     @property
     def base_url(self) -> str:
         """Get base URL for API."""
@@ -62,12 +91,14 @@ class APIConfig(BaseModel):
 
 class SecurityConfig(BaseModel):
     """Security configuration."""
+
     secret_key: str = Field(default="change-me-in-production")
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30, ge=1)
-    
-    @validator("secret_key")
-    def validate_secret_key(cls, v):
+
+    @field_validator("secret_key")
+    @classmethod
+    def validate_secret_key(cls, v: str) -> str:
         """Validate secret key."""
         if v == "change-me-in-production":
             logger.warning("Using default secret key - change in production!")
@@ -76,14 +107,16 @@ class SecurityConfig(BaseModel):
 
 class LoggingConfig(BaseModel):
     """Logging configuration."""
+
     level: str = Field(default="INFO")
     format: str = Field(default="json")
-    file_path: Optional[Path] = Field(default=None)
+    file_path: Path | None = Field(default=None)
     rotation: str = Field(default="500 MB")
     retention: str = Field(default="30 days")
-    
-    @validator("level")
-    def validate_level(cls, v):
+
+    @field_validator("level")
+    @classmethod
+    def validate_level(cls, v: str) -> str:
         """Validate log level."""
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         if v.upper() not in valid_levels:
@@ -93,21 +126,23 @@ class LoggingConfig(BaseModel):
 
 class DataConfig(BaseModel):
     """Data configuration."""
-    data_dir: Path = Field(default=Path("data"))
-    cache_dir: Path = Field(default=Path(".cache"))
-    export_dir: Path = Field(default=Path("exports"))
-    
-    @validator("data_dir", "cache_dir", "export_dir", pre=True)
-    def resolve_paths(cls, v):
+
+    data_dir: Path = Field(default=Path("data/input"))
+    cache_dir: Path = Field(default=Path("data/cache"))
+    export_dir: Path = Field(default=Path("data/output/exports"))
+
+    @field_validator("data_dir", "cache_dir", "export_dir", mode="before")
+    @classmethod
+    def resolve_paths(cls, v: Any) -> Path:
         """Resolve paths to absolute."""
-        if isinstance(v, str):
-            v = Path(v)
-        if v and not v.is_absolute():
+        v_path = Path(v) if isinstance(v, str) else v
+
+        if v_path and not v_path.is_absolute():
             # Resolve relative to project root
             project_root = Path(__file__).parent.parent.parent
-            v = project_root / v
-        return v
-    
+            v_path = project_root / v_path
+        return v_path
+
     def ensure_dirs(self) -> None:
         """Ensure all directories exist."""
         self.data_dir.mkdir(parents=True, exist_ok=True)
@@ -117,29 +152,54 @@ class DataConfig(BaseModel):
 
 class Settings(BaseSettings):
     """Main settings class that loads from environment variables."""
-    
+
     # Environment
     environment: str = Field(default="development")
     debug: bool = Field(default=False)
-    
+
     # Components
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
-    redis: RedisConfig = Field(default_factory=RedisConfig)
     api: APIConfig = Field(default_factory=APIConfig)
     security: SecurityConfig = Field(default_factory=SecurityConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     data: DataConfig = Field(default_factory=DataConfig)
-    
+
+    # New Intelligence Engine Backends
+    supabase: SupabaseConfig = Field(default_factory=SupabaseConfig)
+    temporal: TemporalConfig = Field(default_factory=TemporalConfig)
+
     # External APIs (optional)
-    openai_api_key: Optional[str] = Field(default=None)
-    perplexity_api_key: Optional[str] = Field(default=None)
-    
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        env_nested_delimiter = "__"
-        case_sensitive = False
-    
+    openai_api_key: str | None = Field(default=None)
+    perplexity_api_key: str | None = Field(default=None)
+
+    # Data source APIs
+    exa_api_key: str | None = Field(default=None)
+    crunchbase_api_key: str | None = Field(default=None)
+    news_api_key: str | None = Field(default=None)
+    patentsview_api_key: str | None = Field(default=None)
+
+    # LLM APIs
+    groq_api_key: str | None = Field(default=None)
+    fireworks_api_key: str | None = Field(default=None)
+
+    llm_provider: str = Field(
+        default="auto",
+        description="LLM provider selection: auto|ollama|fireworks|openai|groq|none",
+    )
+    ollama_url: str = Field(default="http://localhost:11434")
+    ollama_model: str = Field(default="llama3.2:latest")
+    openai_model: str = Field(default="gpt-4o-mini")
+    groq_model: str = Field(default="llama-3.3-70b-versatile")
+    fireworks_model: str = Field(default="qwen2-72b-instruct")
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_nested_delimiter="__",
+        extra="ignore",
+        case_sensitive=False,
+    )
+
     @classmethod
     def load(cls) -> "Settings":
         """Load settings with environment variable overrides."""
@@ -149,68 +209,91 @@ class Settings(BaseSettings):
             logger.info(f"Loading configuration from {env_file}")
         else:
             logger.warning("No .env file found, using defaults")
-        
+
         settings = cls()
         settings.data.ensure_dirs()
-        
+
         # Log configuration summary
         logger.info(f"Environment: {settings.environment}")
         logger.info(f"Debug mode: {settings.debug}")
         logger.info(f"Data directory: {settings.data.data_dir}")
-        
+
         return settings
-    
+
     def get_database_url(self, test: bool = False) -> str:
         """Get database URL, optionally for tests."""
-        url = self.database.url
-        if test and "test" not in url:
-            # Append _test to database name
-            if "/" in url:
-                parts = url.rsplit("/", 1)
-                url = f"{parts[0]}_test/{parts[1]}"
+        url = self.supabase.db_url or self.database.url
+        if test and "test" not in url and "/" in url:
+            parts = url.rsplit("/", 1)
+            url = f"{parts[0]}_test/{parts[1]}"
         return url
 
+    def check_configuration(self) -> None:
+        """Check required configuration at startup.
 
-# Global settings instance
-_settings: Optional[Settings] = None
+        Validates that required API keys are set. Raises ConfigurationError
+        if critical keys are missing. Warns if optional keys are missing.
+
+        Optional (warns if missing):
+            GITHUB_TOKEN - Used for GitHub API calls
+            COMPANIES_HOUSE_API_KEY - For Companies House data extraction
+            GOOGLE_API_KEY - For web search data extraction
+        """
+        github_token = os.getenv("GITHUB_TOKEN")
+        if github_token is None or github_token == "":
+            raise ConfigurationError(
+                "GITHUB_TOKEN environment variable is required. "
+                "Get a token from: https://github.com/settings/tokens and set it before starting."
+            )
+
+        companies_house_key = os.getenv("COMPANIES_HOUSE_API_KEY")
+        if not companies_house_key:
+            logger.warning(
+                "COMPANIES_HOUSE_API_KEY not configured. Companies House data gathering will be disabled."
+            )
+
+        google_api_key = os.getenv("GOOGLE_API_KEY")
+        if not google_api_key:
+            logger.warning(
+                "GOOGLE_API_KEY not configured. Web search data gathering will be disabled."
+            )
+
+        logger.info("Configuration validation passed")
 
 
-def get_settings() -> Settings:
-    """Get or create settings instance."""
-    global _settings
-    if _settings is None:
-        _settings = Settings.load()
-    return _settings
+@lru_cache
+def get_settings() -> "Settings":
+    """Get cached settings instance."""
+    settings = Settings.load()
+
+    # Try to load from .env file
+    env_file = Path(".env")
+    if env_file.exists():
+        logger.info(f"Loading configuration from {env_file}")
+    else:
+        logger.warning("No .env file found, using defaults")
+
+    settings.data.ensure_dirs()
+
+    # Log configuration summary
+    logger.info(f"Environment: {settings.environment}")
+    logger.info(f"Debug mode: {settings.debug}")
+    logger.info(f"Data directory: {settings.data.data_dir}")
+
+    return settings
 
 
 def configure_logging(settings: Settings) -> None:
     """Configure logging based on settings."""
-    from loguru import logger
-    
-    # Remove default handler
-    logger.remove()
-    
-    # Add console handler
-    logger.add(
-        lambda msg: print(msg, end=""),
-        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+    from .utils.logging import setup_logging
+
+    setup_logging(
         level=settings.logging.level,
-        colorize=True,
+        json_format=settings.logging.format.lower() == "json",
+        log_file=settings.logging.file_path,
+        rotation=settings.logging.rotation,
+        retention=settings.logging.retention,
     )
-    
-    # Add file handler if configured
-    if settings.logging.file_path:
-        settings.logging.file_path.parent.mkdir(parents=True, exist_ok=True)
-        logger.add(
-            str(settings.logging.file_path),
-            rotation=settings.logging.rotation,
-            retention=settings.logging.retention,
-            level=settings.logging.level,
-            format=settings.logging.format,
-            compression="zip",
-        )
-    
-    logger.info(f"Logging configured at level {settings.logging.level}")
 
 
 # Template for .env file
@@ -221,14 +304,21 @@ ENV_TEMPLATE = """# SolStein Configuration
 ENVIRONMENT=development
 DEBUG=true
 
-# Database
+# Database (legacy, kept for SQLAlchemy compatibility)
 DATABASE__URL=postgresql://postgres:postgres@localhost:5432/solstein
 DATABASE__POOL_SIZE=20
 DATABASE__ECHO=false
 
-# Redis
-REDIS__URL=redis://localhost:6379/0
-REDIS__CACHE_TTL=3600
+# Supabase
+SUPABASE__URL=https://your-project.supabase.co
+SUPABASE__KEY=sb_secret_your_key
+SUPABASE__ANON_KEY=sb_publishable_your_key
+SUPABASE__DB_URL=postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres
+
+# Temporal
+TEMPORAL__HOST_URL=localhost:7233
+TEMPORAL__NAMESPACE=default
+TEMPORAL__API_KEY=
 
 # API
 API__HOST=0.0.0.0
@@ -245,7 +335,7 @@ SECURITY__ACCESS_TOKEN_EXPIRE_MINUTES=30
 # Logging
 LOGGING__LEVEL=INFO
 LOGGING__FORMAT=json
-LOGGING__FILE_PATH=logs/solstein.log
+LOGGING__FILE_PATH=data/output/logs/solstein.log
 LOGGING__ROTATION="500 MB"
 LOGGING__RETENTION="30 days"
 
@@ -256,7 +346,17 @@ DATA__EXPORT_DIR=exports
 
 # External APIs (optional)
 # OPENAI_API_KEY=sk-...
-# PERPLEXITY_API_KEY=pplx-...
+# GROQ_API_KEY=gsk_...
+# FIREWORKS_API_KEY=fw_...
+# PERPLEXITY_API_KEY=pplx-...  # (currently unused)
+
+# LLM Runtime (optional)
+# LLM_PROVIDER=auto  # auto|ollama|fireworks|openai|groq|none
+# OLLAMA_URL=http://localhost:11434
+# OLLAMA_MODEL=llama3.2:latest
+# OPENAI_MODEL=gpt-4o-mini
+# GROQ_MODEL=llama-3.3-70b-versatile
+# FIREWORKS_MODEL=qwen2-72b-instruct
 """
 
 

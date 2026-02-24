@@ -1,0 +1,95 @@
+site_name: "⚗️ Solstein — The Sunstone"
+site_description: "AI-Powered Competitive Intelligence for Private Equity. The sunstone that reads the market fog."
+site_author: "AI Whisperers"
+site_url: "https://ai-whisperers.github.io/solstein/"
+
+repo_name: "AI-Whisperers/solstein"
+repo_url: "https://github.com/Ai-Whisperers/solstein"
+edit_uri: ""
+
+docs_dir: docs
+theme:
+  name: material
+  language: en
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+  font:
+    text: "Cinzel"
+    code: "Fira Code"
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - toc.follow
+    - content.code.copy
+  icon:
+    logo: material/crystal-ball
+    repo: fontawesome/brands/github
+  logo: assets/images/logo.png
+
+extra_css:
+  - assets/stylesheets/scroll.css
+
+extra_javascript:
+  - assets/javascripts/scroll.js
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - tables
+  - toc:
+      permalink: true
+      title: "On this scroll"
+
+nav:
+  - "Home": "index.md"
+
+  - "The Lore | Foundation":
+    - "The Origin | Vision": "LORE/origin.md"
+    - "The Three-Entity Flywheel | Strategy": "LORE/the-play.md"
+    - "The Grimoire | Methodology": "LORE/grimoire.md"
+
+  - "The Pitch | Investment":
+    - "Executive Brief": "PITCH/executive-brief.md"
+    - "Full Proposal": "PITCH/full-proposal.md"
+    - "Case Study | Portfolio Analysis": "PITCH/case-study.md"
+    - "Commercial Architecture | Finance": "PITCH/business-model.md"
+
+  - "Guides":
+    - "Developer Guide": "guides/developer.md"
+    - "Operator Guide": "guides/operator.md"
+    - "CI/CD Guide": "guides/ci-cd.md"
+    - "Data Gathering Stages": "guides/data-gathering-stages.md"
+    - "Database Guide": "guides/database.md"
+    - "Code Conventions": "guides/code-conventions.md"
+    - "Troubleshooting": "guides/troubleshooting.md"
+    - "Extending Solstein": "guides/extending-solstein.md"
+
+  - "Reference":
+    - "API Reference": "api/reference.md"
+    - "Architecture Decisions": "architecture/decisions.md"
+    - "Architecture Modules": "architecture/modules.md"
+    - "Layer Boundaries": "architecture/layer-boundaries.md"
+    - "JSON to Database Roadmap": "architecture/json-to-database-roadmap.md"
+
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Ai-Whisperers/solstein
+      name: "AI Whisperers on GitHub"
+  generator: false
+
+copyright: "⚗️ <a href='https://www.ai-whisperers.org/'>AI Whisperers</a> — The wizards who find the diamonds nobody knew were there."

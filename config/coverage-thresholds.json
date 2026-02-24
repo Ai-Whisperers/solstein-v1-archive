@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "thresholds": {
+    "main": {
+      "line_coverage": 80,
+      "branch_coverage": 75,
+      "mutation_score": 75,
+      "description": "Production - highest standards"
+    },
+    "release": {
+      "line_coverage": 80,
+      "branch_coverage": 75,
+      "mutation_score": 75,
+      "description": "Release branches - production standard"
+    },
+    "develop": {
+      "line_coverage": 75,
+      "branch_coverage": 70,
+      "mutation_score": 70,
+      "description": "Integration - near-production quality"
+    },
+    "hotfix": {
+      "line_coverage": 75,
+      "branch_coverage": 70,
+      "mutation_score": 70,
+      "description": "Hotfix - near-production quality"
+    },
+    "feature": {
+      "line_coverage": 70,
+      "branch_coverage": 65,
+      "mutation_score": 0,
+      "description": "Feature branches - minimal gate (optional mutation)"
+    }
+  },
+  "enforcement": {
+    "fail_below_threshold": true,
+    "allow_waiver": false,
+    "comment_on_pr": true
+  }
+}

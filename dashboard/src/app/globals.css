@@ -1,0 +1,175 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    /* Solstein Premium Color Palette */
+    --solstein-obsidian: #0a0a0f;
+    --solstein-onyx: #12121a;
+    --solstein-slate: #1a1a2e;
+    --solstein-charcoal: #252540;
+    --solstein-gold: #d4a843;
+    --solstein-gold-light: #f0d78c;
+    --solstein-amber: #c68e17;
+    --solstein-emerald: #2ecc71;
+    --solstein-ruby: #e74c3c;
+    --solstein-sapphire: #3498db;
+    --solstein-text: #e8e8f0;
+    --solstein-text-muted: #8888a0;
+    --solstein-border: #2a2a45;
+    --solstein-glass: rgba(18, 18, 26, 0.85);
+    --solstein-glow: rgba(212, 168, 67, 0.15);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: var(--solstein-obsidian);
+    color: var(--solstein-text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Premium glassmorphism card */
+.glass-card {
+    background: var(--solstein-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--solstein-border);
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    border-color: var(--solstein-gold);
+    box-shadow: 0 0 30px var(--solstein-glow);
+    transform: translateY(-2px);
+}
+
+/* Classification badges */
+.badge-phoenix {
+    background: linear-gradient(135deg, var(--solstein-amber), var(--solstein-gold));
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.badge-salt {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.badge-lead {
+    background: linear-gradient(135deg, #515e72, #2f3640);
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* Gold gradient text */
+.gold-text {
+    background: linear-gradient(135deg, var(--solstein-gold), var(--solstein-gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Subtle grid background */
+.grid-bg {
+    background-image:
+        linear-gradient(rgba(42, 42, 69, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42, 42, 69, 0.3) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* Score bar */
+.score-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--solstein-charcoal);
+    overflow: hidden;
+}
+
+.score-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth entrance animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-in-delay-1 {
+    animation-delay: 0.1s;
+    opacity: 0;
+}
+
+.animate-in-delay-2 {
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.animate-in-delay-3 {
+    animation-delay: 0.3s;
+    opacity: 0;
+}
+
+.animate-in-delay-4 {
+    animation-delay: 0.4s;
+    opacity: 0;
+}
+
+/* Premium scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--solstein-obsidian);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--solstein-charcoal);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--solstein-gold);
+}
