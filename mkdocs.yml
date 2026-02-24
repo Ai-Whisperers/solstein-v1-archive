@@ -71,6 +71,7 @@ nav:
     - "Developer Guide": "guides/developer.md"
     - "Operator Guide": "guides/operator.md"
     - "CI/CD Guide": "guides/ci-cd.md"
+    - "Data Gathering Stages": "guides/data-gathering-stages.md"
     - "Database Guide": "guides/database.md"
     - "Code Conventions": "guides/code-conventions.md"
     - "Troubleshooting": "guides/troubleshooting.md"
@@ -81,6 +82,7 @@ nav:
     - "Architecture Decisions": "architecture/decisions.md"
     - "Architecture Modules": "architecture/modules.md"
     - "Layer Boundaries": "architecture/layer-boundaries.md"
+    - "JSON to Database Roadmap": "architecture/json-to-database-roadmap.md"
 
 
 extra:
