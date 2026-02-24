@@ -6,7 +6,7 @@ NewsAPI (primary) or Google web search (fallback).
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 
 from solstein.domain.models import DataSourceType, RawDataSource
 
@@ -44,7 +44,7 @@ class NewsEnrichment:
             source_name="NewsAPI" if self._news_api_key else "Google News Search",
             raw_content=coverage.model_dump(mode="json"),
             url=None,
-            retrieval_timestamp=datetime.now(UTC),
+            retrieval_timestamp=datetime.now(timezone.utc),
             confidence=0.6 if self._news_api_key else 0.4,
             relevance_score=0.7,
             metadata={

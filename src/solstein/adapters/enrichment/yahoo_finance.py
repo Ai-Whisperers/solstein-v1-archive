@@ -7,7 +7,7 @@ structured ``RawDataSource`` output.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 
 from loguru import logger
 
@@ -47,7 +47,7 @@ class YahooFinanceEnrichment:
             source_name="Yahoo Finance",
             raw_content=profile.model_dump(mode="json"),
             url=url,
-            retrieval_timestamp=datetime.now(UTC),
+            retrieval_timestamp=datetime.now(timezone.utc),
             confidence=0.8,
             relevance_score=0.9,
             metadata={"ticker": ticker, "exchange": profile.exchange},

@@ -6,7 +6,7 @@ and automatically updates company profiles when material events occur.
 
 import asyncio
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 
 from loguru import logger
 
@@ -59,7 +59,7 @@ class ContinuousMonitor:
         """Check a single company for updates."""
         last_check = self.last_checks.get(company.id)
 
-        if last_check and (datetime.now(UTC) - last_check).total_seconds() < (check_interval_hours * 3600):
+        if last_check and (datetime.now(timezone.utc) - last_check).total_seconds() < (check_interval_hours * 3600):
             return
 
         try:
@@ -70,7 +70,7 @@ class ContinuousMonitor:
                 if self.on_signal_callback:
                     await self.on_signal_callback(company, signals)
 
-            self.last_checks[company.id] = datetime.now(UTC)
+            self.last_checks[company.id] = datetime.now(timezone.utc)
 
         except Exception as e:
             self.logger.error(f"Error monitoring {company.name}: {e}")
@@ -226,12 +226,12 @@ class ScheduledRefresh:
         """
         last = self.last_refresh.get(company_id)
 
-        if last and (datetime.now(UTC) - last).days < self.refresh_interval_days:
+        if last and (datetime.now(timezone.utc) - last).days < self.refresh_interval_days:
             return False
 
         self.logger.info(f"Performing scheduled refresh for {company_id}")
         await refresh_func(company_id)
-        self.last_refresh[company_id] = datetime.now(UTC)
+        self.last_refresh[company_id] = datetime.now(timezone.utc)
         return True
 
     async def refresh_all(

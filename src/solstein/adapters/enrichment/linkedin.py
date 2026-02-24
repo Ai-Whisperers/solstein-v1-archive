@@ -7,7 +7,7 @@ accordingly.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 
 from solstein.domain.models import DataSourceType, RawDataSource
 
@@ -43,7 +43,7 @@ class LinkedInEnrichment:
             source_name="LinkedIn (news-derived)",
             raw_content=data.model_dump(mode="json"),
             url=None,
-            retrieval_timestamp=datetime.now(UTC),
+            retrieval_timestamp=datetime.now(timezone.utc),
             confidence=0.3,
             relevance_score=0.5,
             metadata={

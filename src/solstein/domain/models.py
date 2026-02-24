@@ -5,7 +5,20 @@ Pure Python objects representing the core business concepts,
 now powered directly by Pydantic for end-to-end validation.
 """
 
+import sys
+
 from datetime import timezone, datetime
+
+if sys.version_info >= (3, 11):
+    from enum import StrEnum
+else:
+    from enum import Enum
+
+    class StrEnum(str, Enum):
+        pass
+
+
+from typing import Any
 from enum import StrEnum
 from typing import Any
 

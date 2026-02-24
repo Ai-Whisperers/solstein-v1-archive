@@ -6,7 +6,7 @@ or falls back to news-based funding detection.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 
 from solstein.domain.models import DataSourceType, RawDataSource
 
@@ -46,7 +46,7 @@ class FundingEnrichment:
             source_name="Crunchbase" if self._crunchbase_key else "News-based funding detection",
             raw_content=funding.model_dump(mode="json"),
             url=None,
-            retrieval_timestamp=datetime.now(UTC),
+            retrieval_timestamp=datetime.now(timezone.utc),
             confidence=0.7 if self._crunchbase_key else 0.3,
             relevance_score=0.8,
             metadata={
