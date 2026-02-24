@@ -1,19 +1,20 @@
 # Build stage
-FROM python:3.10-slim as builder
+FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install python dependencies
-COPY requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt
+COPY pyproject.toml README.md ./
+COPY src ./src
+RUN pip install --user --no-cache-dir .
 
 # Final stage
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -25,10 +26,7 @@ COPY --from=builder /root/.local /home/appuser/.local
 ENV PATH=/home/appuser/.local/bin:$PATH
 
 # Copy application code
-COPY . .
-
-# Set ownership
-RUN chown -R appuser:appuser /app
+COPY --chown=appuser:appuser . .
 
 # Switch to non-root user
 USER appuser
