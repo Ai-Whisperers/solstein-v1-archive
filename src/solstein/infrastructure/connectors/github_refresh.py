@@ -1,11 +1,10 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from loguru import logger
-
 from solstein.data.connectors.github_connector import GitHubConnector
 
-
+from solstein.infrastructure.database import DatabaseManager
 from solstein.infrastructure.refresh import BaseRefreshConnector
 
 
@@ -23,10 +22,10 @@ class GitHubRefreshConnector(BaseRefreshConnector):
 
     async def fetch_facts(
         self,
-        company_ids: List[str],
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-    ) -> List[Dict[str, Any]]:
+        company_ids: list[str],
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> list[dict[str, Any]]:
         """Fetch technical facts from GitHub repositories."""
         logger.info(f"Fetching GitHub facts for {len(company_ids)} companies")
         facts = []
@@ -69,7 +68,7 @@ class GitHubRefreshConnector(BaseRefreshConnector):
 
         return facts
 
-    def _convert_repo_to_fact(self, repo: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_repo_to_fact(self, repo: dict[str, Any]) -> dict[str, Any]:
         """Convert GitHub repository data to fact dictionary."""
         # Extract repository metrics
         repo_metrics = {
@@ -108,7 +107,7 @@ class GitHubRefreshConnector(BaseRefreshConnector):
 
         return fact_data
 
-    def _convert_commit_to_fact(self, commit: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_commit_to_fact(self, commit: dict[str, Any]) -> dict[str, Any]:
         """Convert GitHub commit data to fact dictionary."""
         # Extract commit metrics
         commit_metrics = {
@@ -142,7 +141,7 @@ class GitHubRefreshConnector(BaseRefreshConnector):
 
         return fact_data
 
-    def _convert_activity_to_fact(self, activity: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_activity_to_fact(self, activity: dict[str, Any]) -> dict[str, Any]:
         """Convert GitHub activity data to fact dictionary."""
         # Extract activity metrics
         activity_metrics = {
@@ -174,7 +173,7 @@ class GitHubRefreshConnector(BaseRefreshConnector):
 
         return fact_data
 
-    async def _filter_delta(self, facts: List[Dict[str, Any]], since: datetime) -> List[Dict[str, Any]]:
+    async def _filter_delta(self, facts: list[dict[str, Any]], since: datetime) -> list[dict[str, Any]]:
         """Filter GitHub facts to only return changed data since last refresh."""
         filtered_facts = []
 
