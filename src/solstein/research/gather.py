@@ -694,5 +694,8 @@ def build_company_from_signals(
         metric_sources=metric_sources,
         metric_justifications=metric_justifications,
         metric_observations=metric_observations,
+        signal_confidences={
+            s.signal_name: s.signal_confidence for s in signal_record.signals
+        },
         last_updated=now,
     )

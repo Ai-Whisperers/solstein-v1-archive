@@ -21,6 +21,64 @@ from .scorers.competitive_position import CompetitivePositionScorer
 from .scorers.financial_health import FinancialHealthScorer
 from .scorers.growth_momentum import GrowthMomentumScorer
 
+# ---------------------------------------------------------------------------
+# Signal → scoring component mapping for confidence weighting
+# ---------------------------------------------------------------------------
+
+_COMPONENT_SIGNAL_MAP: dict[str, list[str]] = {
+    "Revenue Growth": ["growth_rate"],
+    "Employee Efficiency": ["revenue_level", "company_size"],
+    "Funding Momentum": ["funding"],
+    "Profitability Profile": ["profitability"],
+    "Revenue Scale": ["revenue_level"],
+    "Profitability Health": ["profitability"],
+    "Operating Efficiency": ["revenue_level", "company_size"],
+    "Funding Cushion": ["funding", "revenue_level"],
+    "Market Tier": ["company_size", "valuation"],
+    "AI Maturity": ["ai_maturity"],
+    "SaaS Maturity": [],
+    "Geographic Footprint": [],
+    "Stack Diversity": [],
+}
+
+
+def _confidence_weight(
+    component_name: str,
+    signal_confidences: dict[str, float],
+) -> float:
+    """Look up the average signal confidence for a scoring component.
+
+    Returns 1.0 when the component has no mapped signals or none of the
+    mapped signals have confidence data (preserves original score).
+    """
+    signal_names = _COMPONENT_SIGNAL_MAP.get(component_name, [])
+    if not signal_names:
+        return 1.0
+    confidences = [signal_confidences[s] for s in signal_names if s in signal_confidences]
+    if not confidences:
+        return 1.0
+    return sum(confidences) / len(confidences)
+
+
+def _apply_confidence_weights(
+    explanation: ScoringExplanation,
+    signal_confidences: dict[str, float],
+) -> tuple[float, ScoringExplanation]:
+    """Re-weight score components by signal confidence.
+
+    Each component's value is multiplied by the average confidence of
+    the signals that inform it.  The base score is left untouched.
+    """
+    score = explanation.base_score
+    for component in explanation.components:
+        weight = _confidence_weight(component.name, signal_confidences)
+        component.confidence_weight = weight
+        component.value = round(component.value * weight, 4)
+        score += component.value
+    final = max(0.0, min(score, 10.0))
+    explanation.final_score = final
+    return final, explanation
+
 
 def classify_company(score: float | None) -> str:
     """Central logic to classify a company based on its composite or growth score."""
@@ -51,6 +109,12 @@ class GrowthScorer:
         growth_score, growth_expl = self.growth_momentum_scorer.score(profile.financials)
         financial_health_score, fin_expl = self.financial_health_scorer.score(profile.financials)
         competitive_position_score, comp_expl = self.competitive_position_scorer.score(profile)
+
+        # Apply confidence weighting when signal confidences are available
+        if profile.signal_confidences:
+            growth_score, growth_expl = _apply_confidence_weights(growth_expl, profile.signal_confidences)
+            financial_health_score, fin_expl = _apply_confidence_weights(fin_expl, profile.signal_confidences)
+            competitive_position_score, comp_expl = _apply_confidence_weights(comp_expl, profile.signal_confidences)
 
         profile.growth_score = growth_score
         profile.financial_health_score = financial_health_score

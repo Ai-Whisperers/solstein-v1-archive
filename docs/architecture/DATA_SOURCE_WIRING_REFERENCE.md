@@ -1134,25 +1134,76 @@ See below.
 
 ## Phase 5 — Confidence-Weighted Scoring
 
-**Status:** Planned
+**Status:** Implemented ✅
 
 **Goal:** `GrowthScorer.calculate_scores()` currently reads Company fields directly with no awareness of how confident we are in each value. This phase multiplies raw scores by `SignalExtraction.signal_confidence` so that low-confidence data points contribute less to the final score.
 
-**Scope:**
-- Thread `SignalExtractionRecord` through to the scoring layer (currently only `Company` is passed)
-- For each scored dimension (revenue, growth, profitability, etc.), look up the corresponding signal's confidence
-- Apply confidence as a multiplier: `weighted_score = raw_score × signal_confidence`
-- Expose per-dimension confidence in the scored output so dashboards/reports can flag "low confidence" scores
-- Update `MarketAnalysis` to include aggregate confidence metrics per company
+### Implementation
 
-**Key files:**
-- `src/solstein/analytics/scoring.py` — `GrowthScorer.calculate_scores()`
-- `src/solstein/research/pipeline.py` — needs to pass signal records alongside companies
-- `src/solstein/domain/models.py` — may need a `scored_confidence` field on Company or a parallel structure
+#### Model changes (`domain/models.py`)
 
-**Risks:**
-- Changing the scoring signature is a breaking change for any callers of `calculate_scores()`
-- Confidence multiplier may dramatically change existing score rankings — needs before/after comparison
+- **`Company.signal_confidences: dict[str, float]`** — Maps signal names to 0-1 confidence values. Populated during `build_company_from_signals()`. Default empty dict preserves backward compatibility for legacy Company objects.
+- **`ScoreComponent.confidence_weight: float = 1.0`** — Records the confidence multiplier applied to each scoring component. Visible in the scoring breakdown for dashboards/audit.
+
+#### Signal propagation (`research/gather.py`)
+
+`build_company_from_signals()` now populates `signal_confidences` from the `SignalExtractionRecord`:
+```python
+signal_confidences={s.signal_name: s.signal_confidence for s in signal_record.signals}
+```
+
+This preserves the original 0-1 float values (previously lost when converting to the coarse CONFIRMED/ESTIMATED/UNKNOWN enum).
+
+#### Confidence-weighting engine (`analytics/scoring.py`)
+
+Three new module-level constructs:
+
+1. **`_COMPONENT_SIGNAL_MAP`** — Maps each ScoreComponent name to the signal(s) that inform it:
+
+| Component | Signals |
+|-----------|---------|
+| Revenue Growth | growth_rate |
+| Employee Efficiency | revenue_level, company_size |
+| Funding Momentum | funding |
+| Profitability Profile | profitability |
+| Revenue Scale | revenue_level |
+| Profitability Health | profitability |
+| Operating Efficiency | revenue_level, company_size |
+| Funding Cushion | funding, revenue_level |
+| Market Tier | company_size, valuation |
+| AI Maturity | ai_maturity |
+| SaaS Maturity | _(none — weight 1.0)_ |
+| Geographic Footprint | _(none — weight 1.0)_ |
+| Stack Diversity | _(none — weight 1.0)_ |
+
+2. **`_confidence_weight(component_name, signal_confidences)`** — Returns the average confidence of mapped signals (or 1.0 if no signals mapped).
+
+3. **`_apply_confidence_weights(explanation, signal_confidences)`** — Post-processes a `ScoringExplanation`: multiplies each component's value by its confidence weight, records the weight on `component.confidence_weight`, and recalculates `final_score`.
+
+#### Scoring integration
+
+`GrowthScorer.calculate_scores()` applies `_apply_confidence_weights()` after all three sub-scorers return, **only when `profile.signal_confidences` is non-empty**. This means:
+- Sub-scorer interfaces unchanged (no signature changes)
+- All existing sub-scorer unit tests pass without modification
+- Legacy Company objects (no signal_confidences) score identically to before
+
+### Design Decisions
+
+1. **Post-processing, not inline** — Confidence weighting happens after sub-scorers return, not inside them. Sub-scorer interfaces stay unchanged.
+2. **Multiplicative** — `adjusted_value = raw_value × confidence`. Full confidence (1.0) = no change.
+3. **Base score unaffected** — Only component adjustments are weighted, not the base score (5.0).
+4. **Graceful fallback** — Empty `signal_confidences` → weight=1.0 on all components.
+5. **Average confidence for multi-signal components** — Components like "Employee Efficiency" that depend on both revenue and employee count use the average confidence of both signals.
+
+### Verification
+
+- 121 tests pass (34 scoring + 22 growth + 21 financial + 21 competitive + 7 pipeline + 16 coverage)
+- 5 new confidence-weighting tests:
+  - `test_confidence_weighting_full_confidence_matches_unweighted` — 1.0 confidence = same scores
+  - `test_confidence_weighting_half_confidence_reduces_scores` — 0.5 confidence = lower scores
+  - `test_confidence_weighting_no_confidences_unchanged` — empty dict = legacy behavior
+  - `test_confidence_weight_populates_score_components` — confidence_weight visible in breakdown
+  - `test_confidence_weighting_scores_still_clamped` — scores remain in [0, 10]
 
 ---
 

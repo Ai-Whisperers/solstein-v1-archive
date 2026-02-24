@@ -346,3 +346,184 @@ def test_tier_proximity_adjacent(overlap_calculator):
     p2 = make_company(id="b", name="B", tier=CompanyTier.TIER_2)
     score = overlap_calculator._calculate_tier_proximity(p1, p2)
     assert score == pytest.approx(2 / 3)
+
+
+# ---------------------------------------------------------------------------
+# Confidence-Weighted Scoring (Phase 5)
+# ---------------------------------------------------------------------------
+
+
+def test_confidence_weighting_full_confidence_matches_unweighted():
+    """Companies with all signal_confidences=1.0 should score identically to unweighted."""
+    financials = FinancialMetric(
+        revenue=500_000_000,
+        growth_rate=25.0,
+        employees=2000,
+        profit_margin=15.0,
+        funding_raised=100_000_000,
+    )
+    base = Company(
+        id="no-conf",
+        name="No Confidence",
+        industry="Software",
+        financials=financials,
+    )
+    full_conf = Company(
+        id="full-conf",
+        name="Full Confidence",
+        industry="Software",
+        financials=financials,
+        signal_confidences={
+            "revenue_level": 1.0,
+            "growth_rate": 1.0,
+            "profitability": 1.0,
+            "company_size": 1.0,
+            "valuation": 1.0,
+            "funding": 1.0,
+            "ai_maturity": 1.0,
+        },
+    )
+
+    scorer = GrowthScorer()
+    scorer.calculate_scores(base)
+    scorer.calculate_scores(full_conf)
+
+    assert base.growth_score == pytest.approx(full_conf.growth_score)
+    assert base.financial_health_score == pytest.approx(full_conf.financial_health_score)
+    assert base.competitive_position_score == pytest.approx(full_conf.competitive_position_score)
+    assert base.composite_score == pytest.approx(full_conf.composite_score)
+
+
+def test_confidence_weighting_half_confidence_reduces_scores():
+    """Companies with signal_confidences=0.5 should have lower scores than unweighted."""
+    financials = FinancialMetric(
+        revenue=500_000_000,
+        growth_rate=25.0,
+        employees=2000,
+        profit_margin=15.0,
+        funding_raised=100_000_000,
+    )
+    base = Company(
+        id="no-conf",
+        name="No Confidence",
+        industry="Software",
+        financials=financials,
+    )
+    half_conf = Company(
+        id="half-conf",
+        name="Half Confidence",
+        industry="Software",
+        financials=financials,
+        signal_confidences={
+            "revenue_level": 0.5,
+            "growth_rate": 0.5,
+            "profitability": 0.5,
+            "company_size": 0.5,
+            "valuation": 0.5,
+            "funding": 0.5,
+            "ai_maturity": 0.5,
+        },
+    )
+
+    scorer = GrowthScorer()
+    scorer.calculate_scores(base)
+    scorer.calculate_scores(half_conf)
+
+    # Growth and financial scores should be lower with half confidence
+    assert half_conf.growth_score < base.growth_score
+    assert half_conf.financial_health_score < base.financial_health_score
+
+
+def test_confidence_weighting_no_confidences_unchanged():
+    """Companies with empty signal_confidences (legacy) should score normally."""
+    financials = FinancialMetric(
+        revenue=500_000_000,
+        growth_rate=25.0,
+        employees=2000,
+        profit_margin=15.0,
+    )
+    legacy = Company(
+        id="legacy",
+        name="Legacy Company",
+        industry="Software",
+        financials=financials,
+        signal_confidences={},  # Empty — legacy path
+    )
+    no_field = Company(
+        id="no-field",
+        name="No Field",
+        industry="Software",
+        financials=financials,
+        # signal_confidences defaults to {}
+    )
+
+    scorer = GrowthScorer()
+    scorer.calculate_scores(legacy)
+    scorer.calculate_scores(no_field)
+
+    assert legacy.growth_score == pytest.approx(no_field.growth_score)
+    assert legacy.financial_health_score == pytest.approx(no_field.financial_health_score)
+
+
+def test_confidence_weight_populates_score_components():
+    """ScoreComponent.confidence_weight should be populated in breakdown."""
+    financials = FinancialMetric(
+        revenue=500_000_000,
+        growth_rate=25.0,
+        employees=2000,
+        profit_margin=15.0,
+        funding_raised=100_000_000,
+    )
+    company = Company(
+        id="conf-check",
+        name="Confidence Check",
+        industry="Software",
+        financials=financials,
+        signal_confidences={
+            "revenue_level": 0.8,
+            "growth_rate": 0.6,
+            "profitability": 0.9,
+            "funding": 0.7,
+            "company_size": 0.5,
+        },
+    )
+
+    scorer = GrowthScorer()
+    scorer.calculate_scores(company)
+
+    # Check that growth breakdown has confidence_weight on components
+    growth_expl = company.scoring_breakdown["growth"]
+    for component in growth_expl.components:
+        assert hasattr(component, "confidence_weight")
+        assert 0.0 < component.confidence_weight <= 1.0
+
+
+def test_confidence_weighting_scores_still_clamped():
+    """Confidence-weighted scores should still be in [0, 10]."""
+    financials = FinancialMetric(
+        revenue=10_000_000_000,
+        growth_rate=200.0,
+        employees=100,
+        profit_margin=50.0,
+        funding_raised=5_000_000_000,
+    )
+    company = Company(
+        id="extreme",
+        name="Extreme",
+        industry="Software",
+        financials=financials,
+        signal_confidences={
+            "revenue_level": 0.3,
+            "growth_rate": 0.3,
+            "profitability": 0.3,
+            "funding": 0.3,
+            "company_size": 0.3,
+        },
+    )
+
+    scorer = GrowthScorer()
+    scorer.calculate_scores(company)
+
+    assert 0.0 <= company.growth_score <= 10.0
+    assert 0.0 <= company.financial_health_score <= 10.0
+    assert 0.0 <= company.competitive_position_score <= 10.0

@@ -116,6 +116,7 @@ class Company(BaseModel):
     metric_sources: dict[str, list[str]] = Field(default_factory=dict)
     metric_justifications: dict[str, str] = Field(default_factory=dict)
     metric_observations: dict[str, list[dict[str, Any]]] = Field(default_factory=dict)
+    signal_confidences: dict[str, float] = Field(default_factory=dict)
 
     # Scores (Calculated)
     growth_score: float | None = None
@@ -253,6 +254,7 @@ class ScoreComponent(BaseModel):
     value: float
     formula: str
     reasoning: str
+    confidence_weight: float = 1.0
 
 
 class ScoringExplanation(BaseModel):
