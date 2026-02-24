@@ -1,11 +1,23 @@
+# pyright: reportMissingTypeStubs=false
+# pyright: reportUnknownParameterType=false
+# pyright: reportMissingParameterType=false
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnusedCallResult=false
+
+import json
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import cast
 
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from solstein.domain.models import Company
-from solstein.infrastructure.database_models import ResearchRunRecord
+from solstein.infrastructure.database import Base as BaseImported  # type: ignore
+from solstein.infrastructure.database_models import OutboxRecord, ResearchRunRecord
+from solstein.infrastructure.outbox_worker import process_outbox_records
 from solstein.research import pipeline as research_pipeline
 from solstein.research.discovery import discover_companies
 from solstein.research.evidence import evaluate_company_evidence
@@ -62,14 +74,17 @@ def test_run_market_intelligence_writes_artifacts(
 
     monkeypatch.setattr(research_pipeline, "build_company_profile", _fake_profile)
 
-    summary = run_market_intelligence(
-        seed_company="ueno",
-        market="LATAM Financial Services",
-        output_dir=tmp_path,
-        max_companies=5,
-        extra_keywords=["bank", "fintech"],
-        strict_provenance=False,
-    )
+    def _run() -> dict[str, object]:
+        return run_market_intelligence(
+            seed_company="ueno",
+            market="LATAM Financial Services",
+            output_dir=tmp_path,
+            max_companies=5,
+            extra_keywords=["bank", "fintech"],
+            strict_provenance=False,
+        )
+
+    summary = _run()
 
     assert summary["discovered"] == 5
     for expected in [
@@ -84,6 +99,36 @@ def test_run_market_intelligence_writes_artifacts(
         "dashboard.xlsx",
     ]:
         assert (tmp_path / expected).exists()
+
+    stage_report_a = cast(
+        "dict[str, object]",
+        json.loads((tmp_path / "stage_report.json").read_text(encoding="utf-8")),
+    )
+    artifact_hashes_a = cast("dict[str, str]", stage_report_a.get("artifact_hashes"))
+    assert isinstance(artifact_hashes_a, dict)
+    for key in [
+        "discovery_candidates",
+        "extracted",
+        "provenance_report",
+        "contradictions_report",
+        "evidence_readiness",
+        "scored",
+        "market_analysis",
+        "stage_report",
+        "run_summary",
+    ]:
+        assert key in artifact_hashes_a
+        assert isinstance(artifact_hashes_a[key], str)
+        assert len(artifact_hashes_a[key]) == 64
+
+    _run()
+
+    stage_report_b = cast(
+        "dict[str, object]",
+        json.loads((tmp_path / "stage_report.json").read_text(encoding="utf-8")),
+    )
+    artifact_hashes_b = cast("dict[str, str]", stage_report_b.get("artifact_hashes"))
+    assert artifact_hashes_b == artifact_hashes_a
 
 
 def test_run_market_intelligence_source_volume_gate_fails(
@@ -204,3 +249,95 @@ def test_run_market_intelligence_dual_write_sqlite(tmp_path: Path, monkeypatch) 
     with Session(engine) as session:
         count = session.query(ResearchRunRecord).count()
         assert count >= 1
+        outbox_record = session.query(OutboxRecord).one()
+        assert outbox_record.status == "succeeded"
+        assert outbox_record.attempt_count >= 1
+        assert outbox_record.event_key.endswith(":research_run_persist")
+
+
+def test_outbox_worker_replays_pending_records(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db_path = tmp_path / "research_outbox.db"
+    monkeypatch.setenv("SUPABASE__DB_URL", f"sqlite:///{db_path}")
+
+    def _fake_profile(candidate) -> Company:
+        return Company(
+            id=candidate.company_id,
+            name=candidate.name,
+            industry=candidate.industry,
+            source_links=[
+                "https://example.com/source-a",
+                "https://example.com/source-b",
+            ],
+            metric_sources={
+                "revenue": ["https://example.com/source-a"],
+                "growth_rate": ["https://example.com/source-a"],
+                "employees": ["https://example.com/source-b"],
+                "profit_margin": ["https://example.com/source-b"],
+                "funding": ["https://example.com/source-a"],
+                "valuation": ["https://example.com/source-a"],
+            },
+        )
+
+    monkeypatch.setattr(research_pipeline, "build_company_profile", _fake_profile)
+
+    output_dir = tmp_path / "outbox"
+    run_summary = run_market_intelligence(
+        seed_company="ueno",
+        market="LATAM Financial Services",
+        output_dir=output_dir,
+        max_companies=5,
+        extra_keywords=["bank", "fintech"],
+        strict_provenance=False,
+        db_dual_write=False,
+    )
+    (output_dir / "run_summary.json").write_text(
+        json.dumps(run_summary, indent=2), encoding="utf-8"
+    )
+
+    run_id = "test-run-outbox-001"
+    event_key = f"{run_id}:research_run_persist"
+    payload = {
+        "run_id": run_id,
+        "event_type": "research_run_persist",
+        "market": run_summary["market"],
+        "seed_company": run_summary["seed_company"],
+        "strict_provenance": False,
+        "min_readiness_score": None,
+        "max_contradictions": None,
+        "min_total_sources": None,
+        "output_dir": str(output_dir),
+    }
+
+    engine = create_engine(f"sqlite:///{db_path}")
+    BaseImported.metadata.create_all(bind=engine)  # type: ignore
+    with Session(engine) as session:
+        session.add(
+            OutboxRecord(
+                event_key=event_key,
+                event_type="research_run_persist",
+                status="pending",
+                payload=payload,
+                attempt_count=0,
+                available_at=datetime.now(UTC),
+                created_at=datetime.now(UTC),
+                updated_at=datetime.now(UTC),
+                last_error=None,
+            )
+        )
+        session.commit()
+
+    processed = process_outbox_records(limit=5)
+    assert processed == 1
+
+    with Session(engine) as session:
+        outbox_record = session.query(OutboxRecord).one()
+        assert outbox_record.status == "succeeded"
+        assert outbox_record.attempt_count == 1
+        run_record = (
+            session.query(ResearchRunRecord)
+            .filter(ResearchRunRecord.run_id == run_id)
+            .one()
+        )
+        assert run_record.summary is not None

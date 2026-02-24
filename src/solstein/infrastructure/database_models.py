@@ -409,6 +409,35 @@ class ResearchRunRecord(Base):
     )
 
 
+class OutboxRecord(Base):
+    __tablename__ = "outbox_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    event_key: Mapped[str] = mapped_column(
+        String(255), unique=True, nullable=False, index=True
+    )
+    event_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    status: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="pending", index=True
+    )
+    payload: Mapped[object] = mapped_column(JSON, nullable=False)
+    attempt_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    available_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=lambda: datetime.now(UTC), index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+    )
+    last_error: Mapped[object | None] = mapped_column(JSON, nullable=True)
+
+    __table_args__ = (Index("ix_outbox_status_available_at", "status", "available_at"),)
+
+
 class ResearchStageRecord(Base):
     __tablename__ = "research_stages"
 
@@ -494,6 +523,10 @@ class SourceDocumentRecord(Base):
     observed_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=lambda: datetime.now(UTC)
     )
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="observed")
+    fetched_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    content_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    extract_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
     run: Mapped["ResearchRunRecord"] = relationship(
         "ResearchRunRecord", back_populates="sources"
@@ -603,8 +636,20 @@ class ContradictionRecord(Base):
     metric_key: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     contradiction_type: Mapped[str] = mapped_column(String(100), nullable=False)
     details: Mapped[object | None] = mapped_column(JSON, nullable=True)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="open")
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+    )
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    ignored_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=lambda: datetime.now(UTC)
+    )
+
+    transitions: Mapped[list["ContradictionTransitionRecord"]] = relationship(
+        "ContradictionTransitionRecord",
+        back_populates="contradiction",
+        cascade="all, delete-orphan",
     )
 
     __table_args__ = (
@@ -615,4 +660,29 @@ class ContradictionRecord(Base):
             "contradiction_type",
             name="uq_contradiction_run_company_metric_type",
         ),
+    )
+
+
+class ContradictionTransitionRecord(Base):
+    __tablename__ = "research_contradiction_transitions"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    contradiction_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("research_contradictions.id"),
+        nullable=False,
+        index=True,
+    )
+    from_status: Mapped[str] = mapped_column(String(50), nullable=False)
+    to_status: Mapped[str] = mapped_column(String(50), nullable=False)
+    changed_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+    )
+    changed_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    contradiction: Mapped["ContradictionRecord"] = relationship(
+        "ContradictionRecord", back_populates="transitions"
     )

@@ -20,16 +20,18 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.orm import Session, declarative_base
+from sqlalchemy.orm import DeclarativeMeta, Session, declarative_base
 from sqlalchemy.pool import QueuePool
 
 from ..config import Settings
 
-Base = declarative_base()
+Base: DeclarativeMeta = declarative_base()
 
 
 class DatabaseManager:
     """Manages database engine and session lifecycle."""
+
+    settings: Settings
 
     def __init__(self, settings: Settings):
         """Initialize database manager.
