@@ -158,7 +158,7 @@ CREATE TABLE companies (
   competitive_position_score DECIMAL, -- 0–10
   
   -- Classification
-  classification VARCHAR,            -- "Rocket", "Neutral", "Dinosaur"
+  classification VARCHAR,            -- "Phoenix", "Salt", "Lead"
   
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()

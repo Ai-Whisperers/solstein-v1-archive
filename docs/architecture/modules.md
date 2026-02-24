@@ -61,7 +61,7 @@ class Company:
     financial_health_score: float | None # 0-10
     competitive_position_score: float | None # 0-10
     composite_score: float | None        # Weighted average
-    classification: str                  # Rocket/Neutral/Dinosaur
+    classification: str                  # Phoenix/Salt/Lead
     scoring_breakdown: dict[str, Any]    # Detailed scoring explanation
 ```
 
@@ -183,7 +183,7 @@ class CompanyFilter:
     market: str | None = None
     tier: CompanyTier | None = None
     min_revenue: float | None = None  # Millions
-    classification: str | None = None  # Rocket/Neutral/Dinosaur
+    classification: str | None = None  # Phoenix/Salt/Lead
     skip: int = 0
     limit: int = 100
 ```

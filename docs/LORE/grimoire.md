@@ -10,8 +10,8 @@ The foundational frame: identifying underutilized assets and applying technical 
 
 | Business Concept | Methodology Analogy |
 |---|---|
-| A "Dinosaur" company | **Lead** — heavy, inert, full of unrealized potential |
-| A "Rocket" company | **Gold** — already transmuted, already achieving escape velocity |
+| A "Lead" company | **Lead** — heavy, inert, full of unrealized potential |
+| A "Phoenix" company | **Gold** — already transmuted, already achieving escape velocity |
 | The SolStein methodology | **The Philosopher's Stone** — the repeatable process that enables transformation |
 | McKinsey reports | **Perfume on coal** — aesthetic presentation without structural transformation |
 | Our participation | **Applying pressure** — value creation requires time *and* calibrated force |
@@ -48,7 +48,7 @@ Inspired by the *solarsteinn* crystals used for navigation: revealing the headin
 | Market Opacity | **The Veil** — the noise that makes standard due diligence a guessing game |
 | Scoring Engine | **The Calibration** — it doesn't create data; it finds the signal in what is already there |
 | Company Data Signals | **Polarized Light** — invisible to the naked eye, legible to the trained instrument |
-| Target Classification | **The Heading** — clear identification of Rockets, Neutrals, and Dinosaurs |
+| Target Classification | **The Heading** — clear identification of Phoenixes, Salts, and Leads |
 
 ---
 

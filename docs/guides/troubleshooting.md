@@ -392,7 +392,7 @@ psql -d solstein -c "SELECT id, name, growth_rate, revenue FROM companies LIMIT 
 
 **Symptoms:**
 - Bonus scores not appearing in breakdown
-- Company should be Rocket but is Neutral
+- Company should be Phoenix but is Salt
 
 **Diagnosis:**
 
@@ -452,8 +452,8 @@ scored = scorer.calculate_scores(company)
 ### Root Cause 5: Golden Dataset Boundary Drift
 
 **Symptoms:**
-- Company classified as Dinosaur should be Neutral
-- Test failures: `expected Rocket but got Neutral`
+- Company classified as Lead should be Salt
+- Test failures: `expected Phoenix but got Salt`
 
 **Diagnosis:**
 

@@ -48,9 +48,9 @@ Every company receives its classification — not as a label, but as a verdict:
 
 | Classification | Score | What It Means — and What It Opens |
 |---------------|-------|-----------------------------------|
-| Rocket | ≥ 7.0 | High-growth, AI-native or rapidly becoming so. Acquisition premium justified. Prioritize. |
-| Neutral | 4.0–7.0 | Stable. Directional. The signal in these companies is what separates great intelligence from mediocre. |
-| Dinosaur | ≤ 4.0 | Carrying coal. Not a write-off — a transformation opportunity. Assess the people before the balance sheet. |
+| 🔥 **Phoenix** | ≥ 7.0 | High-growth, AI-native or rapidly becoming so. Acquisition premium justified. Prioritize. |
+| 🧂 **Salt** | 4.0–7.0 | Stable. Directional. The signal in these companies is what separates great intelligence from mediocre. |
+| ⚖️ **Lead** | ≤ 4.0 | Carrying coal. Not a write-off — a transformation opportunity. Assess the people before the balance sheet. |
 
 ---
 *The full architecture of [AI Whisperers](https://www.ai-whisperers.org/).*
@@ -70,7 +70,7 @@ We have moved beyond theory. The methodology is active and yielding results.
 - **3 days** from brief to complete Attractiveness Board
 - **15+ European energy protocols** mapped to company coverage
 - **M&A genealogy** for 8 major players — full acquisition family trees
-- **Classification results:** 4 Rockets (14%), 18 Neutrals (62%), 7 Dinosaurs (24%)
+- **Classification results:** 4 Phoenixes (14%), 18 Salts (62%), 7 Leads (24%)
 
 This dataset is available to walk through in any introductory session.
 
@@ -80,11 +80,11 @@ The question we invite you to consider, when you see it: *What would you have pa
 
 ## Strategic Value Creation | Portfolio Transformation
 
-Solstein is the sunstone. It reads the landscape. It tells you which companies are Rockets and which are Dinosaurs.
+Solstein is the sunstone. It reads the landscape. It tells you which companies are 🔥 Phoenixes and which are ⚖️ Leads.
 
 But reading the landscape is only the first incantation.
 
-The deeper spell is **transmutation** — taking a Dinosaur company, finding the leaded brain inside it, and unlocking what has always been there. AI Whisperers enters the portfolio company. We identify the 2–5 people who have domain depth and the potential to become wizards. We deploy the same methodology that built Solstein. We transfer the craft.
+The deeper spell is **transmutation** — taking a Lead company, finding the leaded brain inside it, and unlocking what has always been there. AI Whisperers enters the portfolio company. We identify the 2–5 people who have domain depth and the potential to become wizards. We deploy the same methodology that built Solstein. We transfer the craft.
 
 When we leave, the wizards stay. The coal becomes gold. And we take a stake in the gold — because we are not service providers. We are co-investors in the transformation.
 

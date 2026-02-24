@@ -242,7 +242,7 @@ Solstein has **strong foundational documentation** (business narrative, architec
 **Current:** None
 
 **What's Missing:**
-- ❌ Domain-specific terms (Rocket, Dinosaur, Neutral, Growth Score, etc.)
+- ❌ Domain-specific terms (Phoenix, Lead, Salt, Growth Score, etc.)
 - ❌ Acronyms (PE, VC, SaaS, AI Maturity, etc.)
 - ❌ Technical terms specific to Solstein
 

@@ -25,6 +25,12 @@ Solstein uses GitHub Actions as the active CI/CD system.
   - Runs Playwright tests in `dashboard/`
 - `docker`
   - Builds and pushes image on `main`/`master` pushes
+- `mutation` (`.github/workflows/mutation.yml`)
+  - Runs mutation testing to verify test suite effectiveness.
+- `sbom` (`.github/workflows/sbom.yml`)
+  - Generates Software Bill of Materials for security and compliance.
+- `release` (`.github/workflows/release.yml`)
+  - Handles versioning and automated releases.
 
 ### Docs (`.github/workflows/docs.yml`)
 

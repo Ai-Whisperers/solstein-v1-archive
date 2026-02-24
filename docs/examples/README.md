@@ -69,8 +69,8 @@ for company in all_companies:
     print(f"{company.name}: {scored.classification}")
 
 # 5. Filter results
-rockets = [c for c in all_companies if c.classification == "Rocket"]
-print(f"Found {len(rockets)} Rockets")
+phoenixes = [c for c in all_companies if c.classification == "Phoenix"]
+print(f"Found {len(phoenixes)} Phoenixes")
 ```
 
 **Next:** See full example in `python_client_quickstart.py`
@@ -117,13 +117,13 @@ async def score_market(market: str, output_file: str):
     print(f"✓ Export complete: {output_path}")
     
     # 4. Summary
-    rockets = sum(1 for c in companies if c.classification == "Rocket")
-    dinosaurs = sum(1 for c in companies if c.classification == "Dinosaur")
+    phoenixes = sum(1 for c in companies if c.classification == "Phoenix")
+    leads = sum(1 for c in companies if c.classification == "Lead")
     
     print(f"\nResults:")
-    print(f"  🚀 Rockets: {rockets}")
-    print(f"  ⚖️  Neutral: {len(companies) - rockets - dinosaurs}")
-    print(f"  🦕 Dinosaurs: {dinosaurs}")
+    print(f"  🔥 Phoenixes: {phoenixes}")
+    print(f"  🧂  Salt: {len(companies) - phoenixes - leads}")
+    print(f"  ⚖️  Leads: {leads}")
 
 # Run it
 if __name__ == "__main__":
@@ -145,8 +145,7 @@ Collection of common analysis patterns with code:
 high_growth = [c for c in companies if c.financials.growth_rate and c.financials.growth_rate > 30]
 
 # Pattern 2: Segment by classification
-segments = {}
-for classification in ["Rocket", "Neutral", "Dinosaur"]:
+for classification in ["Phoenix", "Salt", "Lead"]:
     segments[classification] = [c for c in companies if c.classification == classification]
 
 # Pattern 3: Financial metrics analysis

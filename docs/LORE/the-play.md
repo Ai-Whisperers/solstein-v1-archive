@@ -12,9 +12,9 @@ We are not here to invoice you. We are here to **transmute your portfolio** — 
 
 This is alchemy. Real alchemy. Not metaphor.
 
-- Lead in: A Dinosaur company carrying decades of coal — legacy systems, buried talent, promised synergies that never materialized.
+- Lead in: A Lead company carrying decades of coal — legacy systems, buried talent, promised synergies that never materialized.
 - Process: The Spell — AI tooling, wizard methodology, unlocking the people inside.
-- Gold out: A Rocket company with compounding growth, realized synergies, and a technical team that now moves like an AI-native.
+- Gold out: A Phoenix company with compounding growth, realized synergies, and a technical team that now moves like an AI-native.
 
 The equity is how the alchemist gets paid. Not by the hour. By the transformation.
 
@@ -53,7 +53,7 @@ There are three distinct players in this flywheel. Each has a different role. Ea
 │   The Sunstone     →    The Spellcasters   →   The Gold          │
 │                                                                  │
 │   Reads the market.     Enter the company.     Take equity.      │
-│   Names the Dinosaurs.  Find the apprentices.  Own the outcome.  │
+│   Names the Leads.  Find the apprentices.  Own the outcome.  │
 │   Gets us in the room.  Cast the spell.                          │
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
@@ -71,7 +71,7 @@ There are three distinct players in this flywheel. Each has a different role. Ea
 
 Solstein is the instrument that sees through market fog.
 
-It maps every company in a target market across three dimensions — growth trajectory, financial health, and competitive position — and classifies them as Rocket, Neutral, or Dinosaur. Every score exposes its reasoning. No black boxes.
+It maps every company in a target market across three dimensions — growth trajectory, financial health, and competitive position — and classifies them as 🔥 Phoenix, 🧂 Salt, or ⚖️ Lead. Every score exposes its reasoning. No black boxes.
 
 **Solstein gets us in the room.**
 
@@ -81,7 +81,7 @@ When a PE partner sees the full Attractiveness Board — every portfolio-adjacen
 
 ## Transformation Layer | AI Whisperers
 
-Inside every Dinosaur company lives what we call **the leaded brain.**
+Inside every Lead company lives what we call **the leaded brain.**
 
 The principal engineer who has been fighting the monolith for eight years and knows exactly what needs to change but cannot get a committee to approve it. The technical lead who has twenty years of domain expertise and has watched recent graduates with no context ship ten times faster. The person who, given the right tools and the right permission, could transform the company from within in months.
 
@@ -107,7 +107,7 @@ When a typical developer is hired, the company gets code. When the Guild enters 
 
 ## Investment Layer | Value Creation Vehicle
 
-The Spell is cast. The Dinosaur is becoming a Riser. The integration roadmap that was "eighteen months out" for three years is now complete.
+The Spell is cast. The Lead is becoming a Riser. The integration roadmap that was "eighteen months out" for three years is now complete.
 
 The PE firm exits at a multiple they did not think was possible when they entered the position.
 

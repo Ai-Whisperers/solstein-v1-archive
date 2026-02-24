@@ -87,7 +87,7 @@ class Company:
     environmental_score: float | None = None  # NEW
     
     # Classifications
-    classification: str = "Neutral"  # Rocket/Neutral/Dinosaur
+    classification: str = "Salt"  # Phoenix/Salt/Lead
     environmental_classification: str = "Unknown"  # Eco/Standard/Heavy  # NEW
     
     # Explanations
@@ -185,7 +185,7 @@ class CompanySchema(BaseModel):
     competitive_position_score: float | None = None
     environmental_score: float | None = None  # NEW
     
-    classification: str = "Neutral"
+    classification: str = "Salt"
     environmental_classification: str = "Unknown"  # NEW
 ```
 
@@ -592,7 +592,7 @@ class CompetitorDataLoader:
 
 ## Pattern 4: Add Custom Classification Logic
 
-**Goal:** Implement your own classification system instead of Rocket/Neutral/Dinosaur.
+**Goal:** Implement your own classification system instead of Phoenix/Salt/Lead.
 
 **File:** `src/solstein/analytics/custom_classifiers.py`
 
@@ -723,7 +723,7 @@ class Company:
 
 ```python
 if growth_score >= 7.0:  # ❌ Magic number
-    classification = "Rocket"
+    classification = "Phoenix"
 ```
 
 ✅ **Good** — Configurable thresholds:
@@ -733,7 +733,7 @@ class ScoringConfig:
     rocket_threshold: float = 7.0
 
 if growth_score >= self.config.rocket_threshold:  # ✅ Configurable
-    classification = "Rocket"
+    classification = "Phoenix"
 ```
 
 ### 4. Test Extensions Independently

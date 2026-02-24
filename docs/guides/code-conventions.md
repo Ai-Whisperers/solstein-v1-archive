@@ -368,9 +368,9 @@ Use comments sparingly; let code be self-documenting:
 ```python
 # ✅ GOOD — Code explains itself
 companies_by_classification = {
-    "Rocket": [],
-    "Neutral": [],
-    "Dinosaur": [],
+    "Phoenix": [],
+    "Salt": [],
+    "Lead": [],
 }
 for company in companies:
     companies_by_classification[company.classification].append(company)
@@ -415,7 +415,7 @@ def process_market(market: str):
         calculate_scores(company)
     
     # 3. Filter
-    rockets = [c for c in companies if c.classification == "Rocket"]
+    phoenixes = [c for c in companies if c.classification == "Phoenix"]
     
     # 4. Export
     exporter = ExcelExporter()
@@ -439,10 +439,10 @@ def score_companies(companies: list[Company]) -> None:
     for company in companies:
         scorer.calculate_scores(company)
 
-def export_rockets(companies: list[Company]) -> None:
-    """Export only Rocket-classified companies."""
-    rockets = [c for c in companies if c.classification == "Rocket"]
-    ExcelExporter().export(rockets)
+def export_phoenixes(companies: list[Company]) -> None:
+    """Export only Phoenix-classified companies."""
+    phoenixes = [c for c in companies if c.classification == "Phoenix"]
+    ExcelExporter().export(phoenixes)
 ```
 
 ### Single Responsibility Principle
@@ -480,10 +480,10 @@ Functions should have no side effects:
 def classify_company(growth_score: float) -> str:
     """Classify based on score (pure, testable)."""
     if growth_score >= 7.0:
-        return "Rocket"
+        return "Phoenix"
     elif growth_score <= 4.0:
-        return "Dinosaur"
-    return "Neutral"
+        return "Lead"
+    return "Salt"
 
 # ⚠️ ACCEPTABLE — Side effect necessary (logging)
 def calculate_scores(company: Company) -> Company:
@@ -524,7 +524,7 @@ logger.info(
 
 # ✅ GOOD — Log levels appropriately
 logger.debug("Starting score calculation for company")  # Low-level detail
-logger.info("Company scored as Rocket")                # Interesting event
+logger.info("Company scored as Phoenix")                # Interesting event
 logger.warning("Profit margin is negative")            # Potential issue
 logger.error("Database connection failed")             # Error occurred
 
@@ -558,20 +558,20 @@ All tuneable values go through configuration:
 # ❌ BAD — Hardcoded threshold
 def classify(growth_score: float) -> str:
     if growth_score >= 7.0:  # 🔥 Magic number
-        return "Rocket"
+        return "Phoenix"
     ...
 
 # ✅ GOOD — Configurable threshold
 class ScoringConfig:
-    rocket_threshold: float = 7.0
+    phoenix_threshold: float = 7.0
 
 def classify(growth_score: float, config: ScoringConfig) -> str:
-    if growth_score >= config.rocket_threshold:
-        return "Rocket"
+    if growth_score >= config.phoenix_threshold:
+        return "Phoenix"
     ...
 
 # Or use environment variable
-ROCKET_THRESHOLD = os.getenv("ROCKET_THRESHOLD", "7.0")
+PHOENIX_THRESHOLD = os.getenv("PHOENIX_THRESHOLD", "7.0")
 ```
 
 ### Configuration via Environment
@@ -673,11 +673,11 @@ class Company:
 ```python
 # ✅ GOOD — Clear test names
 def test_rocket_classification_with_high_growth():
-    """High growth should classify as Rocket."""
+    """High growth should classify as Phoenix."""
     ...
 
 def test_dinosaur_classification_with_low_growth():
-    """Low growth should classify as Dinosaur."""
+    """Low growth should classify as Lead."""
     ...
 
 def test_invalid_company_raises_validation_error():
@@ -709,7 +709,7 @@ def test_calculate_score():
     
     # Assert — Verify results
     assert result.growth_score > 7.0
-    assert result.classification == "Rocket"
+    assert result.classification == "Phoenix"
 ```
 
 ### Use pytest.approx for Floats

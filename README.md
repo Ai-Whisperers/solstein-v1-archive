@@ -21,6 +21,46 @@
 
 ---
 
+## 🎯 How It Works
+
+Solstein combines **financial intelligence**, **technical signals**, and **market context** to deliver comprehensive company assessments:
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Data Sources   │───→│  Scoring Engine │───→│  Attractiveness │
+│                 │    │                 │    │     Board       │
+├─────────────────┤    ├─────────────────┤    ├─────────────────┤
+│ • Financial     │    │ • Growth Score  │    │ • Ranked list   │
+│ • GitHub        │    │ • Financial     │    │ • Classified    │
+│ • News          │    │   Health        │    │ • Explainable   │
+│ • Team          │    │ • Competitive   │    │ • Actionable    │
+│ • Technology    │    │   Position      │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+**The Process:**
+
+| Step | Action | Timeline |
+|------|--------|----------|
+| 1️⃣ **Discover** | Define market universe (100-500 companies) | Day 1 |
+| 2️⃣ **Gather** | AI agents collect data from 5+ sources | Day 1-2 |
+| 3️⃣ **Score** | Multi-dimensional scoring with full traceability | Day 2-3 |
+| 4️⃣ **Present** | Interactive Attractiveness Board with explanations | Day 3 |
+
+**vs. Traditional Consulting:**
+
+| Aspect | McKinsey/Bain/BCG | Solstein |
+|--------|-------------------|----------|
+| **Timeline** | 90 days | 3 days |
+| **Cost** | EUR 500K–1.5M | EUR 60K–150K/year |
+| **Deliverable** | Static 100-page PDF | Interactive dashboard |
+| **Updates** | One-time snapshot | Quarterly refreshes |
+| **Explainability** | "Trust our analysis" | Full signal chain visible |
+
+📊 **Live Proof**: [29 European energy software companies](docs/PITCH/case-study.md) analyzed in 3 days with complete classification.
+
+---
+
 ## 📜 What Is Solstein?
 
 Companies are born with wings. They start light, agile, and fast. But as they grow, something heavy begins to form — a manual process here, a temporary workaround there, a script that only one person understands and that person left six months ago.
@@ -33,7 +73,13 @@ It replaces the old ritual — EUR 500K–1.5M to McKinsey, 90 days to wait, a s
 
 The core output is an **Attractiveness Board**: ranked, clickable, fully-explainable. Every score exposes its signal chain. No black boxes. No "trust the algorithm."
 
-> *It does not replace the analyst. It gives the analyst a sunstone.*
+### 💎 Business Value Proposition
+
+Solstein transforms the Private Equity due diligence process:
+- **Velocity**: Market maps delivered in days, not months.
+- **Explainability**: Every score is traceable to specific financial and technical signals.
+- **Edge**: Identify hidden "Diamonds in the Lead" that traditional analysis misses.
+- **Cost Efficiency**: 80% lower cost than traditional tier-1 consulting engagements.
 
 ---
 
@@ -130,7 +176,7 @@ The API will be available at **http://localhost:8000** with interactive docs at 
 
 ---
 
-## 📚 Documentation
+## 📚 Documentation by Persona
 
 | Scroll | Contents |
 |--------|----------|
@@ -144,6 +190,28 @@ The API will be available at **http://localhost:8000** with interactive docs at 
 | 📜 [`docs/api/reference.md`](docs/api/reference.md) | Full API reference |
 | 📜 [`docs/architecture/decisions.md`](docs/architecture/decisions.md) | Architecture decision records |
 
+### 👨‍💼 For Investors & Business Stakeholders
+| Document | Purpose |
+|----------|---------|
+| 📊 [Executive Brief](docs/PITCH/executive-brief.md) | One-page investment thesis |
+| 💰 [Business Model](docs/PITCH/business-model.md) | Pricing & commercial strategy |
+| 📈 [Case Study](docs/PITCH/case-study.md) | Live 29-company analysis proof |
+| 🏛️ [The Strategic Play](docs/LORE/the-play.md) | Three-entity value architecture |
+
+### 👨‍💻 For Developers & Engineers
+| Document | Purpose |
+|----------|---------|
+| ⚙️ [Developer Guide](docs/guides/developer.md) | Setup, testing, architecture |
+| 🔌 [API Reference](docs/api/reference.md) | Complete endpoint documentation |
+| 🏗️ [Architecture Decisions](docs/architecture/decisions.md) | Technical design rationale |
+| 🧪 [Testing Guide](docs/guides/developer.md#testing) | 4-layer testing pyramid |
+
+### 👨‍✈️ For Operators & DevOps
+| Document | Purpose |
+|----------|---------|
+| 🚀 [Operator Guide](docs/guides/operator.md) | Deployment, Docker, monitoring |
+| 🗄️ [Database Guide](docs/guides/database.md) | PostgreSQL setup & migrations |
+| ⚡ [Quick Reference](docs/QUICK-REFERENCE.md) | Commands & environment variables |
 Historical/internal planning docs that used to live in the repo root are archived in `docs/archive/root-docs/`.
 
 ---

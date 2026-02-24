@@ -24,7 +24,7 @@ Solstein is an AI-orchestrated intelligence engine. In the same time it takes a 
 
 - Every company in the target market, profiled across growth, financial health, and AI maturity
 - A ranked Attractiveness Board — clickable, reasoned, source-exposed
-- Full classification: Rockets (accelerate), Neutrals (watch), Dinosaurs (transform or exit)
+- Full classification: 🔥 Phoenixes (accelerate), 🧂 Salts (watch), ⚖️ Leads (transform or exit)
 - Every score linked to its underlying signal — no black boxes, no "trust the algorithm"
 
 ---
@@ -34,9 +34,9 @@ Solstein is an AI-orchestrated intelligence engine. In the same time it takes a 
 ```
 Rank  Company          Growth  Financial  AI Maturity  Classification
 ────  ───────────────  ──────  ─────────  ───────────  ──────────────
-1     Acme Energy BV   8.4     7.2        Strong       Rocket
-2     GridTech BV      6.1     6.8        Moderate     Neutral
-3     LegacyPower AG   3.2     4.1        None         Dinosaur
+1     Acme Energy BV   8.4     7.2        Strong       🔥 Phoenix
+2     GridTech BV      6.1     6.8        Moderate     🧂 Salt
+3     LegacyPower AG   3.2     4.1        None         ⚖️ Lead
 ...   (29 companies, fully scored, fully explained)
 ```
 
@@ -46,7 +46,7 @@ Rank  Company          Growth  Financial  AI Maturity  Classification
 
 AI broke the perfume trick.
 
-For years PE could buy a Dinosaur, repackage it, and sell the coal wrapped in polished slides. AI-native competitors have ended that era. They ship at speeds that expose legacy players within months. Due diligence has sharper eyes. LPs ask questions the perfume cannot answer.
+For years PE could buy a Lead, repackage it, and sell the coal wrapped in polished slides. AI-native competitors have ended that era. They ship at speeds that expose legacy players within months. Due diligence has sharper eyes. LPs ask questions the perfume cannot answer.
 
 **2026 is the window. Eighteen months, maybe twenty-four. Then the firms that moved are compounding. The firms that waited are explaining why they didn't.**
 

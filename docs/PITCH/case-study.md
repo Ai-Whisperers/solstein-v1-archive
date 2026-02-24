@@ -42,9 +42,9 @@ Every company was scored across three dimensions:
 
 | Classification | Count | Share of Market | What It Signals |
 |---------------|-------|-----------------|-----------------|
-| Rocket | 4 | 14% | High-growth, AI-native or rapidly adopting. Acquisition premium justified now. |
-| Neutral | 18 | 62% | Stable players. Signal-rich for anyone reading carefully. |
-| Dinosaur | 7 | 24% | Carrying coal. Three have transformation potential. Four are irreversible. Solstein shows you which is which. |
+| 🔥 Phoenix | 4 | 14% | High-growth, AI-native or rapidly adopting. Acquisition premium justified now. |
+| 🧂 Salt | 18 | 62% | Stable players. Signal-rich for anyone reading carefully. |
+| ⚖️ Lead | 7 | 24% | Carrying coal. Three have transformation potential. Four are irreversible. Solstein shows you which is which. |
 
 ### Structural Indicators | Deep-Dive Insights
 
@@ -60,7 +60,7 @@ Every company was scored across three dimensions:
 ```
 Company:            EnergyTech BV
 Country:            Netherlands
-Classification:     Rocket
+Classification:     🔥 Phoenix
 Growth Score:       8.2 / 10
 Financial Health:   7.4 / 10
 Competitive Pos.:   8.0 / 10
@@ -73,7 +73,7 @@ Evidence Signals:
   ✗ No ENTSO-E mapping yet — one certified competitor has this, gap identified
 
 Competitive Overlap: 6 direct competitors identified and ranked by threat level
-Transformation potential: N/A — already a Rocket. Watch for acquisition premium.
+Transformation potential: N/A — already a Phoenix. Watch for acquisition premium.
 ```
 
 ---
@@ -88,14 +88,14 @@ Transformation potential: N/A — already a Rocket. Watch for acquisition premiu
 | Freshness | Static on delivery | Continuously refreshable |
 | Reasoning visible | Never | Always |
 | Protocol mapping | Sometimes, high-level | Complete — every company, every protocol |
-| Transformation signal | Not included | Built into every Dinosaur classification |
+| Transformation signal | Not included | Built into every Lead classification |
 
 ---
 
 ## Strategic Utility | Decision Support
 
 **1. Target screening before committing to full DD**
-Rank the 29 companies in 3 days. Spend DD budget on the 3 that matter. Skip the 7 that are irreversible Dinosaurs.
+Rank the 29 companies in 3 days. Spend DD budget on the 3 that matter. Skip the 7 that are irreversible Leads.
 
 **2. Competitive gap analysis for a target acquisition**
 Before acquiring Company X, see exactly where its 6 direct competitors are stronger, weaker, and on what dimensions.
@@ -124,7 +124,7 @@ The methodology is scalable across all high-complexity sectors. Every structured
 Let us walk you through these 29 companies. In the session, you will see:
 
 - How the scores were produced and what evidence underlies each
-- How the Dinosaur classifications were made — and which of the 7 have transformation potential
+- How the Lead classifications were made — and which of the 7 have transformation potential
 - How the protocol map exposes gaps that standard DD misses
 
 **Duration: 45 minutes. No slide deck. Live data only.**

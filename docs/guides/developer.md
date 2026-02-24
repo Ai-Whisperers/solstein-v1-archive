@@ -126,9 +126,9 @@ Company → GrowthScorer.calculate_scores() → scored Company
 ```
 
 Classification thresholds:
-- `growth_score >= 7.0` → 🚀 Rocket
-- `growth_score <= 4.0` → 🦕 Dinosaur
-- Otherwise → ⚖️ Neutral
+- `growth_score >= 7.0` → 🔥 Phoenix
+- `growth_score <= 4.0` → ⚖️ Lead
+- Otherwise → 🧂 Salt
 
 ### Dependency Injection
 
@@ -206,7 +206,7 @@ Solstein uses **4 layers of testing** ensuring reliability without brittleness:
 **Examples:**
 - `test_company_creation` — Domain model instantiation
 - `test_growth_score_calculation` — Scoring math with known inputs
-- `test_classification_boundaries` — Classification logic (Rocket/Neutral/Dinosaur)
+- `test_classification_boundaries` — Classification logic (Phoenix/Salt/Lead)
 - `test_financial_metric_validation` — Input validation
 
 **How to write:**
@@ -235,26 +235,26 @@ def test_growth_score_with_zero_growth(scorer):
     
     # Use pytest.approx for float comparisons
     assert result.growth_score == pytest.approx(5.0, abs=0.01)
-    assert result.classification == "Neutral"
+    assert result.classification == "Salt"
 
 
 def test_growth_score_with_high_growth(scorer):
     """High growth rate should increase score."""
-    company = Company(id="test", name="Rocket Corp")
+    company = Company(id="test", name="Phoenix Corp")
     company.financials = FinancialMetric(revenue=100.0, growth_rate=50.0)
     
     result = scorer.calculate_scores(company)
     
     assert result.growth_score > 7.0
-    assert result.classification == "Rocket"
+    assert result.classification == "Phoenix"
 
 
 @pytest.mark.parametrize("growth_rate,expected_classification", [
-    (50.0, "Rocket"),
-    (25.0, "Rocket"),
-    (10.0, "Neutral"),
-    (3.0, "Dinosaur"),
-    (0.0, "Neutral"),
+    (50.0, "Phoenix"),
+    (25.0, "Phoenix"),
+    (10.0, "Salt"),
+    (3.0, "Lead"),
+    (0.0, "Salt"),
 ])
 def test_classification_boundaries(scorer, growth_rate, expected_classification):
     """Test all classification boundaries."""
@@ -323,7 +323,7 @@ def test_score_company_endpoint(client: TestClient, mock_repo):
     assert response.status_code == 200
     data = response.json()
     assert data["growth_score"] is not None
-    assert data["classification"] == "Rocket"
+    assert data["classification"] == "Phoenix"
 
 
 def test_missing_company_returns_404(client: TestClient, mock_repo):
@@ -425,17 +425,17 @@ from solstein.domain.models import Company, FinancialMetric
 # Golden dataset — known companies with expected classifications
 GOLDEN_DATA = [
     {
-        "id": "rocket-corp",
-        "name": "Rocket Corp",
+        "id": "phoenix-corp",
+        "name": "Phoenix Corp",
         "financials": {"revenue": 500.0, "growth_rate": 75.0, "profit_margin": 25.0},
-        "expected_classification": "Rocket",
+        "expected_classification": "Phoenix",
         "expected_growth_score_min": 7.0,
     },
     {
-        "id": "dinosaur-corp",
-        "name": "Dinosaur Corp",
+        "id": "lead-corp",
+        "name": "Lead Corp",
         "financials": {"revenue": 50.0, "growth_rate": -10.0, "profit_margin": -5.0},
-        "expected_classification": "Dinosaur",
+        "expected_classification": "Lead",
         "expected_growth_score_max": 4.0,
     },
 ]
@@ -623,9 +623,9 @@ def test_with_mocked_exporter(mock_exporter_class):
 
 ```python
 @pytest.mark.parametrize("growth_rate,expected", [
-    (50.0, "Rocket"),
-    (10.0, "Neutral"),
-    (3.0, "Dinosaur"),
+    (50.0, "Phoenix"),
+    (10.0, "Salt"),
+    (3.0, "Lead"),
 ])
 def test_classification(growth_rate, expected):
     # ... test runs 3 times, once per parameter set

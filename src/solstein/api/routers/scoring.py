@@ -58,7 +58,7 @@ async def score_company(
         elif growth_score <= 3.9:
             classification = "Lead"
         else:
-            classification = "Neutral"
+            classification = "Salt"
 
         # Save the scores back to the DB to keep it 'magically' up to date
         repo.save(scored_company)
@@ -175,7 +175,7 @@ async def get_statistics(
             tier = company.tier.value
             tier_counts[tier] = tier_counts.get(tier, 0) + 1
 
-            cls_val = company.classification or "Neutral"
+            cls_val = company.classification or "Salt"
             class_counts[cls_val] = class_counts.get(cls_val, 0) + 1
 
         return {

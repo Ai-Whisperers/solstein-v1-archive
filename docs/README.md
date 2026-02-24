@@ -38,9 +38,9 @@ Every company in every market is one of three things. Solstein reads which.
 
 | Classification | Score | What It Means |
 |---------------|-------|---------------|
-| 🚀 **Rocket** | ≥ 7.0 | High-growth, AI-native or rapidly becoming so |
-| ⚖️ **Neutral** | 4.0–7.0 | Stable. Signal-rich. The most misread companies in any portfolio. |
-| 🦕 **Dinosaur** | ≤ 4.0 | Carrying coal. Not a write-off — a transformation opportunity. |
+| 🔥 **Phoenix** | ≥ 7.0 | High-growth, AI-native or rapidly becoming so |
+| 🧂 **Salt** | 4.0–7.0 | Stable. Signal-rich. The most misread companies in any portfolio. |
+| ⚖️ **Lead** | ≤ 4.0 | Carrying coal. Not a write-off — a transformation opportunity. |
 
 ---
 

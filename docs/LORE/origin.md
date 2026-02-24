@@ -76,19 +76,19 @@ The result: a complete competitive intelligence platform — built in the time i
 
 Every company in every market is one of three things. Solstein reads which.
 
-### Rockets
+### Phoenixes
 
-Moving. Compounding. AI-native or rapidly becoming so. They ship fast. They iterate. They attract talent and capital that compounds the advantage. They do not need us — and we are not chasing them. We are tracking them, because every Neutral wants to know how far ahead the Rockets are.
+Moving. Compounding. AI-native or rapidly becoming so. They ship fast. They iterate. They attract talent and capital that compounds the advantage. They do not need us — and we are not chasing them. We are tracking them, because every Salt wants to know how far ahead the Phoenixes are.
 
-### Neutrals
+### Salts
 
 Stable. Alive. Profitable, often. But not flying. These are the most misread companies in any portfolio — underestimated by acquirers who see "flat growth" and overvalued by sellers who see "stable recurring revenue." Solstein reads the directional signal inside the quiet numbers. That's the edge.
 
-### Dinosaurs
+### Leads
 
 Carrying coal.
 
-Dinosaurs are not failures. They are companies where unrealized potential has been pressed down by years of legacy architecture, committee culture, and the quiet despair of engineers who know exactly what needs to change but cannot get permission. The brain is there. The domain knowledge is there. What is missing is the spark.
+Leads are not failures. They are companies where unrealized potential has been pressed down by years of legacy architecture, committee culture, and the quiet despair of engineers who know exactly what needs to change but cannot get permission. The brain is there. The domain knowledge is there. What is missing is the spark.
 
 Coal pressed long enough and hard enough becomes a diamond.
 

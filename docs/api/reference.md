@@ -9,6 +9,24 @@
 
 ---
 
+## 📋 Quick Reference
+
+| Endpoint | Method | Description | Auth |
+|----------|--------|-------------|------|
+| `/health` | GET | Platform health check | No |
+| `/companies` | GET | List all companies | Optional |
+| `/companies` | POST | Create and score company | Optional |
+| `/companies/{id}` | GET | Get company by ID | Optional |
+| `/scoring/company/{id}/score` | POST | Score specific company | Optional |
+| `/scoring/stats` | GET | Market-wide statistics | Optional |
+| `/scoring/batch` | GET | Queue batch scoring | Optional |
+| `/market/analysis` | GET | Market landscape analysis | Optional |
+| `/market/search` | GET | Search companies | Optional |
+| `/market/overlap/{id}` | GET | Competitive overlap | Optional |
+| `/export/excel` | GET | Export Excel dashboard | Optional |
+| `/export/json` | GET | Export JSON data | Optional |
+---
+
 ## Quick Start
 
 ### 1. Health Check
@@ -286,15 +304,15 @@ Score a specific company across all three dimensions.
   "growth_score": 8.2,
   "financial_health_score": 7.4,
   "competitive_position_score": 8.0,
-  "classification": "Rocket",
+  "classification": "Phoenix",
   "calculated_at": "2026-02-20T01:43:00Z"
 }
 ```
 
 **Classification thresholds:**
-- `growth_score >= 7.0` → 🚀 Rocket
-- `growth_score <= 4.0` → 🦕 Dinosaur
-- Otherwise → ⚖️ Neutral
+- `growth_score >= 7.0` → 🔥 Phoenix
+- `growth_score <= 4.0` → ⚖️ Lead
+- Otherwise → 🧂 Salt
 
 **Error:** `404 Not Found` if company does not exist
 
@@ -464,3 +482,69 @@ Synchronous JSON export of all scored companies.
 > `401 Unauthorized` is **not currently returned** — unauthenticated requests receive anonymous viewer access.
 
 ---
+
+
+---
+
+## 📝 Complete Endpoint Documentation
+
+### Response Schema Reference
+
+#### Company Object
+
+```json
+{
+  "id": "string",                    // Unique identifier
+  "name": "string",                  // Company name
+  "industry": "string",              // Industry classification
+  "tier": "string",                  // Tier 1-4
+  "ai_maturity": "string",           // Weak/Medium/Strong
+  "saas_maturity": integer,          // 0-10 scale
+  "growth_score": number,            // 0.0-10.0
+  "financial_health_score": number,  // 0.0-10.0
+  "competitive_position_score": number, // 0.0-10.0
+  "classification": "string",        // Phoenix/Salt/Lead
+  "financials": {
+    "revenue": number,               // EUR millions
+    "growth_rate": number,           // Percentage
+    "profit_margin": number          // Percentage
+  },
+  "calculated_at": "ISO-8601 timestamp"
+}
+```
+
+#### Score Response Object
+
+```json
+{
+  "company_id": "string",
+  "growth_score": number,              // 0.0-10.0
+  "financial_health_score": number,    // 0.0-10.0
+  "competitive_position_score": number, // 0.0-10.0
+  "classification": "Phoenix|Salt|Lead",
+  "calculated_at": "ISO-8601 timestamp"
+}
+```
+
+#### Market Analysis Object
+
+```json
+{
+  "industry": "string",
+  "total_companies": integer,
+  "summary": "string",
+  "swot_analysis": {
+    "strengths": ["string"],
+    "weaknesses": ["string"],
+    "opportunities": ["string"],
+    "threats": ["string"]
+  },
+  "key_trends": ["string"],
+  "barriers_to_entry": ["string"],
+  "recommendations": ["string"],
+  "aggregate_metrics": {
+    "average_revenue": number,
+    "average_growth_rate": number
+  }
+}
+```

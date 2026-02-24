@@ -14,6 +14,14 @@ Operational agility decays as companies scale. Manual processes, legacy workarou
 
 We replace the traditional 90-day consulting cycle — EUR 500K to McKinsey, a static PDF, and a handshake — with **AI-orchestrated market intelligence**, delivered in days. The result is a high-definition **Attractiveness Board**: ranked, clickable, and fully explainable. Every score exposes its underlying signal chain. No black boxes. No *"trust the algorithm."*
 
+### 💎 Business Value Proposition
+
+Solstein transforms the Private Equity due diligence process:
+- **Velocity**: Market maps delivered in days, not months.
+- **Explainability**: Every score is traceable to specific financial and technical signals.
+- **Edge**: Identify hidden "Diamonds in the Lead" that traditional analysis misses.
+- **Cost Efficiency**: 80% lower cost than traditional tier-1 consulting engagements.
+
 ---
 
 ## Scoring & Classification
@@ -33,8 +41,8 @@ Every company in a market is weighed, measured, and classified:
 | Symbol | Archetype | Meaning | The Directive |
 |---|---|---|---|
 | 🔥 **The Phoenix** | High-growth, AI-native | Rising from the ashes of legacy — moving fast, compounding. | **Acquire. Invest. Now.** |
-| ⚖️ **The Salt** | Stable, directional | Balanced. Neither ascending nor descending. A signal awaits. | **Watch. Position. Wait.** |
-| 🝆 **The Lead** | Legacy-heavy, inert | The ancient substance. Heavy, slow, full of hidden latent value. | **Transmute or Exit.** |
+| 🧂 **The Salt** | Stable, directional | Balanced. Neither ascending nor descending. A signal awaits. | **Watch. Position. Wait.** |
+| ⚖️ **The Lead** | Legacy-heavy, inert | The ancient substance. Heavy, slow, full of hidden latent value. | **Transmute or Exit.** |
 
 > *Lead is not worthless. The Alchemist's art is knowing which Lead conceals Gold.*
 

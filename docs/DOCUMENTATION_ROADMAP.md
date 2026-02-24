@@ -240,7 +240,7 @@
 **Deliverable:** `docs/GLOSSARY.md` and `docs/QUICK-REFERENCE.md`
 
 **Glossary Contents:**
-- [ ] Business terms (Rocket, Dinosaur, Growth Score, etc.)
+- [ ] Business terms (Phoenix, Lead, Growth Score, etc.)
 - [ ] Technical terms (Repository, Scorer, Workflow, etc.)
 - [ ] Acronyms (PE, VC, SaaS, ADR, etc.)
 - [ ] Scoring terminology

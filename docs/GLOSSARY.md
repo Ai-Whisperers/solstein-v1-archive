@@ -11,9 +11,9 @@ The core output of Solstein — a ranked, clickable, fully-explainable list of c
 
 ### **Classification** / **Classification System**
 The three-tier system that categorizes companies:
-- 🚀 **Rocket** (≥ 7.0) — High-growth companies, AI-native or rapidly adopting
-- ⚖️ **Neutral** (4.0–7.0) — Stable players, signal-rich
-- 🦕 **Dinosaur** (≤ 4.0) — Legacy-heavy but transformation opportunities
+- 🔥 **Phoenix** (≥ 7.0) — High-growth companies, AI-native or rapidly adopting
+- 🧂 **Salt** (4.0–7.0) — Stable players, signal-rich
+- ⚖️ **Lead** (≤ 4.0) — Legacy-heavy but transformation opportunities
 
 ### **Competitive Position Score**
 One of three scoring dimensions. Measures how well-positioned a company is in its market based on:
@@ -79,9 +79,9 @@ Each dimension is 0–10. Combined they inform classification.
 
 ### **Scoring Threshold**
 Boundary value that determines classification:
-- Rocket threshold: growth_score ≥ 7.0
-- Dinosaur threshold: growth_score ≤ 4.0
-- Neutral: everything in between
+- Phoenix threshold: growth_score ≥ 7.0
+- Lead threshold: growth_score ≤ 4.0
+- Salt: everything in between
 
 ---
 
@@ -212,7 +212,7 @@ Hosted PostgreSQL database with auth and real-time APIs. Solstein uses it for:
 ### **Value Object**
 Immutable object with no identity, defined by its values. In Solstein:
 - `Score` (a float 0–10)
-- `Classification` (enum: Rocket/Neutral/Dinosaur)
+- `Classification` (enum: Phoenix/Salt/Lead)
 
 Unlike entities, value objects are not persisted separately.
 
@@ -245,9 +245,9 @@ def test_endpoint(mock_repo):
 Test that runs multiple times with different inputs:
 ```python
 @pytest.mark.parametrize("score,expected", [
-    (8.5, "Rocket"),
-    (5.0, "Neutral"),
-    (3.2, "Dinosaur"),
+    (8.5, "Phoenix"),
+    (5.0, "Salt"),
+    (3.2, "Lead"),
 ])
 def test_classification(score, expected):
     # ...
@@ -358,7 +358,7 @@ Commit message format:
 feat(scoring): add competitive position dimension
 fix(api): resolve CORS header bug
 docs(readme): update quick start
-test(golden-dataset): add regression for Rocket threshold
+test(golden-dataset): add regression for Phoenix threshold
 ```
 
 ### **CHANGELOG**
