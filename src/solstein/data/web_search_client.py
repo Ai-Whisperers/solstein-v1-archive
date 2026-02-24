@@ -8,9 +8,14 @@ Provides web search capabilities using multiple backends:
 This enables news gathering without requiring NewsAPI keys.
 """
 
+from datetime import datetime
 from typing import Any
 
 from loguru import logger
+
+
+def _current_year() -> str:
+    return str(datetime.now().year)
 
 
 def search_company_news(company_name: str, max_results: int = 20) -> list[dict[str, Any]]:
@@ -29,10 +34,10 @@ def search_company_news(company_name: str, max_results: int = 20) -> list[dict[s
 
         exa = Exa()
         results = exa.search_and_contents(
-            query=f"{company_name} news 2025",
+            query=f"{company_name} news {_current_year()}",
             num_results=max_results,
             text=True,
-            start_published_date="2025-01-01",
+            start_published_date=f"{_current_year()}-01-01",
         )
 
         news_items = []
@@ -66,7 +71,7 @@ def _google_search_fallback(company_name: str, max_results: int = 20) -> list[di
     try:
         from google_search import google_search
 
-        query = f"{company_name} latest news 2025"
+        query = f"{company_name} latest news {_current_year()}"
         results = google_search(query, num_results=max_results)
 
         news_items = []

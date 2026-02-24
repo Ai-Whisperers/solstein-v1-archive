@@ -180,11 +180,11 @@ class CurrencyRateFetcher:
         if key in self._cached_rates:
             return self._cached_rates[key]
 
-        from_usd = self._cached_rates.get(f"{from_currency.value}_USD", 1.0)
-        to_usd = self._cached_rates.get(f"{to_currency.value}_USD", 1.0)
+        from_usd = self._cached_rates.get(f"{from_currency.value}_USD")
+        to_usd = self._cached_rates.get(f"{to_currency.value}_USD")
 
         if from_usd and to_usd:
-            return to_usd / from_usd
+            return from_usd / to_usd
 
         return None
 

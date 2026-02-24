@@ -875,11 +875,78 @@ All components verified via import tests:
 - Functional test: `StaticCatalogSource.discover()` returns candidates for energy and LATAM markets
 - DataSourceType enum: 16 values confirmed
 
-### What Remains (Phase 2+)
+### What Remains (Phase 3+)
 
-- Wrap dead modules as `EnrichmentSource` adapters (8 adapters)
 - Create `DefaultFactAggregator` in `aggregation/default.py`
 - Create signal extraction in `signals/default.py`
 - Refactor `discover_companies()` to iterate registry adapters
 - Refactor `build_company_profile()` to iterate registry adapters
 - Wire registry into `run_market_intelligence()`
+
+---
+
+## Appendix C: Phase 2 Implementation Log
+
+> Implemented: 2026-02-24
+
+### Bug Fixes Applied
+
+| Module | Bug | Fix |
+|--------|-----|-----|
+| `web_search_client.py` | Hardcoded year "2025" in 3 locations | Replaced with `_current_year()` using `datetime.now().year` |
+| `patent_client.py` | Fabricated patent counts: Google x5, DuckDuckGo x3 | Changed to `len(results)` — report actual counts |
+| `patent_client.py` | "patent" listed as AI keyword inflating `ai_related_patents` | Removed "patent" from AI keyword lists in both backends |
+| `fetchers.py` | Cross-rate formula inverted: `to_usd / from_usd` | Fixed to `from_usd / to_usd` |
+| `fetchers.py` | Silent `1.0` fallback for missing rates masked errors | Changed to `None` fallback (uses `.get()` without default) |
+
+### Enrichment Adapters Created (8 total)
+
+| Adapter | File | Wraps | DataSourceType | Requires Key? |
+|---------|------|-------|---------------|--------------|
+| `YahooFinanceEnrichment` | `enrichment/yahoo_finance.py` | `CompanyResearcher.research()` | `YAHOO_FINANCE` | No (needs ticker) |
+| `NewsEnrichment` | `enrichment/news.py` | `AdditionalDataSources.get_news()` | `NEWSAPI` / `NEWS` | Optional (`news_api_key`) |
+| `FundingEnrichment` | `enrichment/funding.py` | `AdditionalDataSources.get_funding_data()` | `CRUNCHBASE` | Optional (`crunchbase_api_key`) |
+| `PatentEnrichment` | `enrichment/patents.py` | `search_company_patents()` | `USPTO` / `GOOGLE_PATENTS` | No |
+| `LinkedInEnrichment` | `enrichment/linkedin.py` | `AdditionalDataSources.get_linkedin_data()` | `LINKEDIN` | No |
+| `WebsiteEnrichment` | `enrichment/website.py` | `AdditionalDataSources.scrape_company_website()` | `WEBSITE` | No (needs URL) |
+| `WebSearchNewsEnrichment` | `enrichment/web_search_news.py` | `search_company_news()` | `EXA_SEARCH` | Optional (`exa_api_key`) |
+| `GlobalMarketEnrichment` | `enrichment/global_market.py` | `GlobalMarketLoader.get_stock_data()` | `YAHOO_FINANCE` | No (needs ticker) |
+
+### Discovery Adapters Created (1 new, 2 from Phase 1)
+
+| Adapter | File | Wraps | Requires Key? |
+|---------|------|-------|--------------|
+| `WebSearchDiscoverySource` | `discovery/web_search.py` | `search_company_info()` | Optional (`exa_api_key`) |
+
+### Registry Updated
+
+`build_default_registry(settings)` now registers:
+- **Always available (no API keys):** StaticCatalog, CompetitorJson, YahooFinance, Patents, LinkedIn, Website, GlobalMarket
+- **Conditional on `news_api_key`:** NewsEnrichment
+- **Conditional on `crunchbase_api_key`:** FundingEnrichment
+- **Conditional on `exa_api_key`:** WebSearchDiscovery, WebSearchNewsEnrichment
+
+Default configuration (no keys): **2 discovery + 5 enrichment** sources.
+All keys configured: **3 discovery + 8 enrichment** sources.
+
+### Verification
+
+- All 11 adapters (3 discovery + 8 enrichment) pass `isinstance()` checks against their protocols
+- 222 existing tests pass with zero regressions
+- Registry builds correctly with conditional adapter registration
+
+### Config Changes
+
+Added to `Settings` class in `config.py`:
+- `exa_api_key: str | None` (Phase 1)
+- `crunchbase_api_key: str | None` (Phase 1)
+
+### What Remains (Phase 3+)
+
+- Create `DefaultFactAggregator` in `aggregation/default.py`
+- Create signal extraction in `signals/default.py`
+- Refactor `discover_companies()` to iterate registry adapters instead of hardcoded catalog
+- Refactor `build_company_profile()` to iterate registry enrichment adapters
+- Wire registry into `run_market_intelligence()`
+- Enhance quality gates to use `RawDataSource` counts
+- Enhance scoring to use `SignalExtraction` confidence

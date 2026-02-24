@@ -169,12 +169,11 @@ def _search_google_patents(company_name: str) -> PatentResult:
                 "machine learning",
                 "artificial intelligence",
                 "neural",
-                "patent",
             ]
             ai_count = sum(1 for r in results if any(kw in r.get("title", "").lower() for kw in ai_keywords))
 
             return PatentResult(
-                total_patents=len(results) * 5,
+                total_patents=len(results),
                 recent_patents=results[:10],
                 ai_related_patents=ai_count,
                 source="google_patents",
@@ -221,12 +220,11 @@ def _search_duckduckgo(company_name: str) -> PatentResult:
                 "machine learning",
                 "artificial intelligence",
                 "neural",
-                "patent",
             ]
             ai_count = sum(1 for r in results if any(kw in r.get("title", "").lower() for kw in ai_keywords))
 
             return PatentResult(
-                total_patents=len(results) * 3,
+                total_patents=len(results),
                 recent_patents=results[:10],
                 ai_related_patents=ai_count,
                 source="duckduckgo",

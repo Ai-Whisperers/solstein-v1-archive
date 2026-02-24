@@ -51,14 +51,52 @@ def build_default_registry(settings: Settings) -> SourceRegistry:
     # lightweight and testable without requiring every dependency.
     from solstein.adapters.discovery.competitor_json import CompetitorJsonSource
     from solstein.adapters.discovery.static_catalog import StaticCatalogSource
+    from solstein.adapters.enrichment.patents import PatentEnrichment
+    from solstein.adapters.enrichment.yahoo_finance import YahooFinanceEnrichment
 
     registry = SourceRegistry()
 
-    # Always available — no external API keys needed
+    # -- Discovery: always available --
     registry.register_discovery(StaticCatalogSource())
     registry.register_discovery(CompetitorJsonSource())
 
-    # Conditional on API keys being configured
-    # (adapters added in Phase 2 will plug in here)
+    # -- Enrichment: always available (no API key needed) --
+    registry.register_enrichment(YahooFinanceEnrichment())
+    registry.register_enrichment(PatentEnrichment())
+
+    # -- Enrichment: conditional on API keys --
+    if settings.news_api_key:
+        from solstein.adapters.enrichment.news import NewsEnrichment
+
+        registry.register_enrichment(NewsEnrichment(news_api_key=settings.news_api_key))
+
+    if settings.crunchbase_api_key:
+        from solstein.adapters.enrichment.funding import FundingEnrichment
+
+        registry.register_enrichment(
+            FundingEnrichment(
+                crunchbase_api_key=settings.crunchbase_api_key,
+                news_api_key=settings.news_api_key,
+            )
+        )
+
+    if settings.exa_api_key:
+        from solstein.adapters.discovery.web_search import WebSearchDiscoverySource
+        from solstein.adapters.enrichment.web_search_news import WebSearchNewsEnrichment
+
+        registry.register_discovery(WebSearchDiscoverySource(exa_api_key=settings.exa_api_key))
+        registry.register_enrichment(WebSearchNewsEnrichment())
+
+    # LinkedIn and website enrichment are always available but lower quality
+    from solstein.adapters.enrichment.linkedin import LinkedInEnrichment
+    from solstein.adapters.enrichment.website import WebsiteEnrichment
+
+    registry.register_enrichment(LinkedInEnrichment(news_api_key=settings.news_api_key))
+    registry.register_enrichment(WebsiteEnrichment())
+
+    # GlobalMarketEnrichment provides currency-normalized market data
+    from solstein.adapters.enrichment.global_market import GlobalMarketEnrichment
+
+    registry.register_enrichment(GlobalMarketEnrichment())
 
     return registry
