@@ -99,4 +99,9 @@ def build_default_registry(settings: Settings) -> SourceRegistry:
 
     registry.register_enrichment(GlobalMarketEnrichment())
 
+    # Unified Web Search adapter (Task 15)
+    from solstein.adapters.enrichment.web_search_unified import WebSearchUnifiedAdapter
+
+    registry.register_enrichment(WebSearchUnifiedAdapter())
+
     return registry
