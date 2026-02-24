@@ -189,8 +189,6 @@ Desktop.ini
 # OpenCode/Claude MCP local overrides
 .mcp.local.json
 
-# Local Sisyphus work area
-.sisyphus/
 
 # Secrets scanning
 .trufflehog.cache

@@ -1,0 +1,35 @@
+{
+  "python": {
+    "dependencies_parsed": 6,
+    "outdated": [
+      {
+        "name": "requests",
+        "current_version": "2.28.0",
+        "latest_version": "2.32.3"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "ecosystem": "PyPI",
+        "name": "examplepkg",
+        "version": "1.0.0",
+        "id": "GHSA-xxxx-xxxx-xxxx",
+        "summary": "Example vulnerability",
+        "severity": null
+      }
+    ]
+  },
+  "javascript": {
+    "dependencies_parsed": 5,
+    "outdated": [
+      {
+        "name": "lodash",
+        "current_version": "4.17.15",
+        "latest_version": "4.17.21"
+      }
+    ],
+    "vulnerabilities": []
+  },
+  "health_score_0_to_10": 8,
+  "signal": "2 outdated dependencies"
+}

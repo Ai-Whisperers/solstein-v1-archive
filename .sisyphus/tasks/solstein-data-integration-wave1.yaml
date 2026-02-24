@@ -1,0 +1,48 @@
+# solstein-data-integration-wave1
+# Atomic execution checklist (source: .sisyphus/plans/solstein-data-integration-wave1.md)
+
+- "[x] C0. Verify existing NewsSignalDetector + unit tests actually pass in this repo"
+
+- "[x] X0. Undo unintended scope creep changes (CI/Makefile/pre-commit/pyproject)"
+
+- "[x] A1a. Add SEC EDGAR deps (edgartools, pytest-httpx) to project dependencies"
+- "[x] A1b. Add SECEdgarConnector skeleton + CompanyNotFoundError"
+- "[x] A1c. Add unit tests scaffold for SECEdgarConnector (mocked HTTP)"
+
+- "[x] A2a. Implement fetch_filing() happy path for 10-K/10-Q (edgartools)"
+- "[x] A2b. Implement minimal metric extraction (revenue, gross margin, ebitda, cash)"
+
+- "[x] A3a. Add retry/backoff + rate-limit handling + structured logging"
+- "[x] A3b. Add unit tests for error paths (invalid ticker, rate limit, network failure)"
+
+- "[x] B1a. Add CompaniesHouseConnector skeleton + env var support"
+- "[x] B1b. Add unit tests scaffold for CompaniesHouseConnector (mocked HTTP)"
+
+- "[x] B2a. Implement Companies House financial extraction (10 metrics) + confidence"
+- "[x] B2b. Add unit tests for edge cases (missing accounts, dissolved company)"
+
+- "[x] D1a. Locate existing GitHub agent and add commit velocity trend method"
+- "[x] D1b. Add unit tests for velocity/trend computation"
+
+- "[x] D2a. Add dependency health analysis (lockfile parsing) + scoring output"
+- "[x] D2b. Add unit tests for dependency health"
+
+- "[x] E1a. Add SQL migration for facts tables (facts, gathering_batches, fact_sources)"
+- "[x] E1b. Add migration tests / smoke query"
+
+- "[x] E2a. Add ORM models for facts + repositories methods"
+- "[x] E2b. Add unit tests for ORM serialization + roundtrip"
+
+- "[x] F1a. Integrate financial facts into Growth score pipeline"
+- "[x] F1b. Add unit tests covering growth scoring with/without financials"
+
+- "[x] F2a. Implement Financial Health Score component using stored facts"
+- "[x] F2b. Add unit tests covering financial health scoring"
+
+- "[ ] G1. Add end-to-end integration test: company -> connectors -> stored facts"
+- "[ ] G2. Add golden dataset regression tests (5 known companies)"
+
+- "[ ] V1. Data Correctness Audit"
+- "[ ] V2. Performance & Scale Check"
+- "[ ] V3. Integration Success Verification"
+- "[ ] V4. Test Coverage & Quality"
