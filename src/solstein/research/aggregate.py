@@ -3,6 +3,9 @@
 Takes a RawDataRecord (multiple RawDataSource objects from different
 enrichment adapters) and produces an AggregatedDataRecord with
 deduplicated facts, agreement percentages, and contradiction tracking.
+
+Enhanced with ConflictResolutionEngine for intelligent conflict resolution
+using source authority and confidence calibration.
 """
 
 from __future__ import annotations
@@ -20,6 +23,11 @@ from solstein.domain.models import (
     DataSourceType,
     RawDataRecord,
     RawDataSource,
+)
+from solstein.infrastructure.conflict_resolution import (
+    Conflict,
+    ConflictResolutionEngine,
+    ConflictStrategy,
 )
 
 # Desired fact types for data completeness calculation
@@ -98,105 +106,63 @@ def _extract_facts_from_source(source: RawDataSource) -> list[tuple[str, Any]]:
     if isinstance(content, str):
         return []
 
-    if isinstance(content, list):
-        # e.g., WebSearchNewsEnrichment returns a list of articles
-        return [("article_count", len(content))]
-
     if not isinstance(content, dict):
         return []
 
-    st = source.source_type
-    facts: list[tuple[str, Any]] = []
+    # Route to appropriate extractor based on source type
+    source_type = source.source_type
 
-    if st == DataSourceType.YAHOO_FINANCE:
-        facts.extend(_extract_yahoo_finance(content))
-    elif st in (DataSourceType.NEWSAPI, DataSourceType.NEWS):
-        facts.extend(_extract_news(content))
-    elif st == DataSourceType.EXA_SEARCH:
-        facts.extend(_extract_exa_search(content))
-    elif st == DataSourceType.CRUNCHBASE:
-        facts.extend(_extract_crunchbase(content))
-    elif st in (DataSourceType.PATENTS, DataSourceType.USPTO, DataSourceType.GOOGLE_PATENTS):
-        facts.extend(_extract_patents(content))
-    elif st == DataSourceType.LINKEDIN:
-        facts.extend(_extract_linkedin(content))
-    elif st == DataSourceType.WEBSITE:
-        facts.extend(_extract_website(content))
+    if source_type in (DataSourceType.YAHOO_FINANCE,):
+        return _extract_yahoo_finance(content)
 
-    return facts
+    if source_type == DataSourceType.NEWS:
+        return _extract_news(content)
+
+    if source_type == DataSourceType.NEWSAPI:
+        return _extract_news(content)
+
+    if source_type in (DataSourceType.GOOGLE_PATENTS, DataSourceType.USPTO, DataSourceType.PATENTS):
+        return _extract_patents(content)
+
+    if source_type == DataSourceType.CRUNCHBASE:
+        return _extract_crunchbase(content)
+
+    if source_type == DataSourceType.LINKEDIN:
+        return _extract_linkedin(content)
+
+    if source_type == DataSourceType.WEBSITE:
+        return _extract_website(content)
+
+    if source_type in (DataSourceType.EXA_SEARCH,):
+        return _extract_exa_search(content)
+
+    # Generic fallback: extract common fields
+    return _extract_generic(content)
 
 
 def _extract_yahoo_finance(content: dict[str, Any]) -> list[tuple[str, Any]]:
-    """Extract facts from CompanyResearch or GlobalMarketEnrichment dicts."""
+    """Extract facts from CompanyProfile model dump."""
     facts: list[tuple[str, Any]] = []
-
-    # -- CompanyResearch nested financials --
-    fin = content.get("financials")
-    if isinstance(fin, dict):
-        for key, fact_type in [
-            ("revenue", "revenue"),
-            ("revenue_growth_yoy", "revenue_growth"),
-            ("profit_margin", "profit_margin"),
-            ("ebitda", "ebitda"),
-            ("net_income", "net_income"),
-        ]:
-            if fin.get(key) is not None:
-                facts.append((fact_type, fin[key]))
-
-    # -- Top-level numeric fields (CompanyResearch + GlobalMarket) --
-    for key, fact_type in [
+    mappings = [
+        ("revenue", "revenue"),
         ("market_cap", "market_cap"),
+        ("profit_margin", "profit_margin"),
+        ("revenue_growth", "revenue_growth"),
+        ("earnings_growth", "earnings_growth"),
+        ("employee_count", "employees"),
         ("pe_ratio", "pe_ratio"),
+        ("eps_ttm", "eps"),
+        ("industry", "industry"),
+        ("sector", "sector"),
         ("current_price", "current_price"),
-        ("eps_ttm", "eps_ttm"),
-        ("employees", "employee_count"),
-        ("founded", "founded_year"),
-    ]:
+    ]
+    for fact_type, key in mappings:
         if content.get(key) is not None:
             facts.append((fact_type, content[key]))
 
-    # GlobalMarket has top-level revenue and market_cap
-    if "source_currency" in content:
-        if content.get("revenue") is not None:
-            facts.append(("revenue", content["revenue"]))
-        # market_cap already handled above
-
-    # -- String facts --
-    for key, fact_type in [
-        ("description", "description"),
-        ("headquarters", "headquarters"),
-        ("website", "website"),
-        ("name", "name"),
-        ("exchange", "exchange"),
-    ]:
-        if content.get(key) is not None:
-            facts.append((fact_type, content[key]))
-
-    # -- Growth signals --
-    growth = content.get("growth")
-    if isinstance(growth, dict):
-        for key, fact_type in [
-            ("employee_count", "employee_count"),
-            ("employee_growth", "employee_growth_pct"),
-            ("job_postings_count", "open_positions"),
-            ("ai_related_jobs", "ai_related_positions"),
-        ]:
-            if growth.get(key) is not None:
-                facts.append((fact_type, growth[key]))
-
-    # -- AI assessment --
-    ai = content.get("ai")
-    if isinstance(ai, dict):
-        if ai.get("ai_score") is not None:
-            facts.append(("ai_score", ai["ai_score"]))
-        if ai.get("ai_signal_strength") is not None:
-            facts.append(("ai_signal_strength", ai["ai_signal_strength"]))
-
-    # -- Technology --
-    tech = content.get("technology")
+    # Tech stack / products from profile
+    tech = content.get("tech_stack")
     if isinstance(tech, dict):
-        if tech.get("industry") is not None:
-            facts.append(("industry", tech["industry"]))
         if tech.get("sector") is not None:
             facts.append(("sector", tech["sector"]))
 
@@ -289,6 +255,16 @@ def _extract_website(content: dict[str, Any]) -> list[tuple[str, Any]]:
     return facts
 
 
+def _extract_generic(content: dict[str, Any]) -> list[tuple[str, Any]]:
+    """Generic extraction for unknown source types."""
+    facts: list[tuple[str, Any]] = []
+    # Try to extract common fields
+    for key in ["name", "description", "website", "founded_year", "headquarters"]:
+        if content.get(key) is not None:
+            facts.append((key, content[key]))
+    return facts
+
+
 # ---------------------------------------------------------------------------
 # Aggregation logic
 # ---------------------------------------------------------------------------
@@ -301,15 +277,47 @@ def _is_numeric(value: Any) -> bool:
 def _aggregate_numeric_fact(
     fact_type: str,
     observations: list[_FactObservation],
+    conflict_engine: ConflictResolutionEngine | None = None,
 ) -> AggregatedFact:
     """Aggregate numeric observations with agreement/contradiction detection."""
     numeric_obs = [o for o in observations if _is_numeric(o.value)]
     if not numeric_obs:
         # Fall back to non-numeric aggregation if values aren't actually numeric
-        return _aggregate_non_numeric_fact(fact_type, observations)
+        return _aggregate_non_numeric_fact(fact_type, observations, conflict_engine)
 
-    # Best value: from highest-confidence source
-    best_obs = max(numeric_obs, key=lambda o: o.source_confidence)
+    # Apply conflict resolution if engine provided
+    if conflict_engine and len(numeric_obs) >= 2:
+        # Convert observations to fact dictionaries for conflict resolution
+        fact_dicts = [
+            {
+                "company_id": "temp",
+                "fact_type": fact_type,
+                "value": obs.value,
+                "confidence": obs.source_confidence,
+                "source": obs.source_name,
+                "extracted_at": datetime.now(timezone.utc),
+            }
+            for obs in numeric_obs
+        ]
+
+        # Detect conflicts
+        conflicts = conflict_engine.detect_conflicts(fact_dicts[:-1], [fact_dicts[-1]])
+
+        if conflicts:
+            # Resolve conflicts
+            resolutions = conflict_engine.resolve_all(conflicts)
+            # Use the winning fact's source as the best observation
+            winning_source = resolutions[-1].winning_fact.get("source")
+            best_obs = next(
+                (o for o in numeric_obs if o.source_name == winning_source),
+                max(numeric_obs, key=lambda o: o.source_confidence),
+            )
+        else:
+            best_obs = max(numeric_obs, key=lambda o: o.source_confidence)
+    else:
+        # Best value: from highest-confidence source
+        best_obs = max(numeric_obs, key=lambda o: o.source_confidence)
+
     best_value = best_obs.value
 
     # Agreement: what fraction of sources are within tolerance of best_value
@@ -368,10 +376,42 @@ def _aggregate_numeric_fact(
 def _aggregate_non_numeric_fact(
     fact_type: str,
     observations: list[_FactObservation],
+    conflict_engine: ConflictResolutionEngine | None = None,
 ) -> AggregatedFact:
     """Aggregate non-numeric observations (strings, lists)."""
-    # Best value: from highest-confidence source
-    best_obs = max(observations, key=lambda o: o.source_confidence)
+    # Apply conflict resolution if engine provided
+    if conflict_engine and len(observations) >= 2:
+        # Convert observations to fact dictionaries for conflict resolution
+        fact_dicts = [
+            {
+                "company_id": "temp",
+                "fact_type": fact_type,
+                "value": obs.value,
+                "confidence": obs.source_confidence,
+                "source": obs.source_name,
+                "extracted_at": datetime.now(timezone.utc),
+            }
+            for obs in observations
+        ]
+
+        # Detect conflicts
+        conflicts = conflict_engine.detect_conflicts(fact_dicts[:-1], [fact_dicts[-1]])
+
+        if conflicts:
+            # Resolve conflicts
+            resolutions = conflict_engine.resolve_all(conflicts)
+            # Use the winning fact's source as the best observation
+            winning_source = resolutions[-1].winning_fact.get("source")
+            best_obs = next(
+                (o for o in observations if o.source_name == winning_source),
+                max(observations, key=lambda o: o.source_confidence),
+            )
+        else:
+            best_obs = max(observations, key=lambda o: o.source_confidence)
+    else:
+        # Best value: from highest-confidence source
+        best_obs = max(observations, key=lambda o: o.source_confidence)
+
     best_value = best_obs.value
 
     # Agreement for strings: exact match ratio
@@ -404,7 +444,23 @@ class DefaultFactAggregator:
 
     Implements the ``FactAggregator`` protocol defined in
     ``solstein.adapters.protocols``.
+
+    Enhanced with ConflictResolutionEngine for intelligent conflict resolution
+    using source authority and confidence calibration.
     """
+
+    def __init__(self, use_conflict_resolution: bool = True):
+        """Initialize the aggregator.
+
+        Args:
+            use_conflict_resolution: Whether to use ConflictResolutionEngine
+                for intelligent conflict resolution.
+        """
+        self.use_conflict_resolution = use_conflict_resolution
+        self._conflict_engine: ConflictResolutionEngine | None = None
+
+        if use_conflict_resolution:
+            self._conflict_engine = ConflictResolutionEngine()
 
     def aggregate(
         self,
@@ -437,13 +493,13 @@ class DefaultFactAggregator:
                     )
                 )
 
-        # 2. Aggregate each fact type
+        # 2. Aggregate each fact type with conflict resolution
         aggregated_facts: list[AggregatedFact] = []
         for fact_type, observations in sorted(fact_groups.items()):
             if fact_type in _NUMERIC_FACT_TYPES:
-                fact = _aggregate_numeric_fact(fact_type, observations)
+                fact = _aggregate_numeric_fact(fact_type, observations, self._conflict_engine)
             else:
-                fact = _aggregate_non_numeric_fact(fact_type, observations)
+                fact = _aggregate_non_numeric_fact(fact_type, observations, self._conflict_engine)
             aggregated_facts.append(fact)
 
         # 3. Build record
@@ -460,6 +516,16 @@ class DefaultFactAggregator:
         if _DESIRED_FACTS:
             record.data_completeness_percentage = round(len(found_fact_types & _DESIRED_FACTS) / len(_DESIRED_FACTS), 3)
 
+        # 5. Log conflict resolution stats if applicable
+        if self._conflict_engine:
+            stats = self._conflict_engine.get_resolution_stats()
+            if stats["total_resolved"] > 0:
+                logger.info(
+                    "Conflict resolution: {} conflicts resolved for {}",
+                    stats["total_resolved"],
+                    company_id,
+                )
+
         logger.info(
             "Aggregated {} facts for {} ({} sources, {:.0%} completeness)",
             len(aggregated_facts),
@@ -469,3 +535,9 @@ class DefaultFactAggregator:
         )
 
         return record
+
+    def get_conflict_resolution_stats(self) -> dict[str, Any]:
+        """Get statistics on conflict resolution if enabled."""
+        if self._conflict_engine:
+            return self._conflict_engine.get_resolution_stats()
+        return {"total_resolved": 0, "enabled": False}
