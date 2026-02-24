@@ -1,7 +1,5 @@
 from datetime import UTC, datetime
 
-import yfinance as yf
-
 from solstein.domain.models import (
     AIMaturity,
     Company,
@@ -14,9 +12,27 @@ from solstein.domain.models import (
 from .discovery import DiscoveryCandidate
 
 
+def _get_yfinance():
+    try:
+        import yfinance as yf
+
+        return yf
+    except ModuleNotFoundError:  # pragma: no cover
+        return None
+
+
 def _ai_maturity_from_text(text: str) -> AIMaturity:
     txt = text.lower()
-    if any(k in txt for k in ["generative", "llm", "artificial intelligence", "machine learning", "neural"]):
+    if any(
+        k in txt
+        for k in [
+            "generative",
+            "llm",
+            "artificial intelligence",
+            "machine learning",
+            "neural",
+        ]
+    ):
         return AIMaturity.STRONG
     if any(k in txt for k in ["analytics", "automation", "digital"]):
         return AIMaturity.MODERATE
@@ -51,8 +67,14 @@ def _as_percent(value: float | None) -> float | None:
 
 def build_company_profile(candidate: DiscoveryCandidate) -> Company:
     now = datetime.now(UTC)
-    ticker_url = f"https://finance.yahoo.com/quote/{candidate.ticker}/" if candidate.ticker else None
-    source_links = list(dict.fromkeys(candidate.source_links + ([ticker_url] if ticker_url else [])))
+    ticker_url = (
+        f"https://finance.yahoo.com/quote/{candidate.ticker}/"
+        if candidate.ticker
+        else None
+    )
+    source_links = list(
+        dict.fromkeys(candidate.source_links + ([ticker_url] if ticker_url else []))
+    )
 
     metric_sources = {
         "revenue": [ticker_url] if ticker_url else [],
@@ -105,6 +127,37 @@ def build_company_profile(candidate: DiscoveryCandidate) -> Company:
             last_updated=now,
         )
 
+    yf = _get_yfinance()
+    if yf is None:
+        metric_justifications = {
+            "revenue": "Optional dependency 'yfinance' is not installed; ticker enrichment is unavailable.",
+            "growth_rate": "Optional dependency 'yfinance' is not installed; ticker enrichment is unavailable.",
+            "employees": "Optional dependency 'yfinance' is not installed; ticker enrichment is unavailable.",
+            "profit_margin": "Optional dependency 'yfinance' is not installed; ticker enrichment is unavailable.",
+            "funding": "Funding data not provided in ticker profile metadata.",
+            "valuation": "Optional dependency 'yfinance' is not installed; ticker enrichment is unavailable.",
+        }
+        metric_observations = {metric: [] for metric in metric_sources}
+        return Company(
+            id=candidate.company_id,
+            name=candidate.name,
+            industry=candidate.industry,
+            description=f"Discovery candidate without live enrichment: {candidate.discovery_reason}",
+            headquarters=candidate.region,
+            tier=CompanyTier.TIER_3,
+            threat_level=ThreatLevel.MEDIUM,
+            ai_maturity=AIMaturity.LOW,
+            financials=FinancialMetric(),
+            geographic_presence=[candidate.region],
+            tech_stack=candidate.tags,
+            data_source="Discovery catalog (yfinance missing)",
+            source_links=source_links,
+            metric_sources=metric_sources,
+            metric_justifications=metric_justifications,
+            metric_observations=metric_observations,
+            last_updated=now,
+        )
+
     try:
         info = yf.Ticker(candidate.ticker).info
     except Exception as exc:
@@ -140,43 +193,94 @@ def build_company_profile(candidate: DiscoveryCandidate) -> Company:
     employees = info.get("fullTimeEmployees")
     margin = _as_percent(info.get("profitMargins"))
     market_cap = info.get("marketCap")
-    description = info.get("longBusinessSummary") or f"Discovered candidate in {candidate.market}."
+    description = (
+        info.get("longBusinessSummary")
+        or f"Discovered candidate in {candidate.market}."
+    )
 
     metric_observations = {
-        "revenue": [{"source": ticker_url, "value": revenue}] if revenue is not None and ticker_url else [],
-        "growth_rate": [{"source": ticker_url, "value": growth}] if growth is not None and ticker_url else [],
-        "employees": [{"source": ticker_url, "value": employees}] if employees is not None and ticker_url else [],
-        "profit_margin": [{"source": ticker_url, "value": margin}] if margin is not None and ticker_url else [],
+        "revenue": (
+            [{"source": ticker_url, "value": revenue}]
+            if revenue is not None and ticker_url
+            else []
+        ),
+        "growth_rate": (
+            [{"source": ticker_url, "value": growth}]
+            if growth is not None and ticker_url
+            else []
+        ),
+        "employees": (
+            [{"source": ticker_url, "value": employees}]
+            if employees is not None and ticker_url
+            else []
+        ),
+        "profit_margin": (
+            [{"source": ticker_url, "value": margin}]
+            if margin is not None and ticker_url
+            else []
+        ),
         "funding": [],
-        "valuation": [{"source": ticker_url, "value": market_cap}] if market_cap is not None and ticker_url else [],
+        "valuation": (
+            [{"source": ticker_url, "value": market_cap}]
+            if market_cap is not None and ticker_url
+            else []
+        ),
     }
 
     if revenue is None:
-        metric_justifications["revenue"] = "Revenue not published in ticker profile metadata."
+        metric_justifications["revenue"] = (
+            "Revenue not published in ticker profile metadata."
+        )
     if growth is None:
-        metric_justifications["growth_rate"] = "Growth rate not published in ticker profile metadata."
+        metric_justifications["growth_rate"] = (
+            "Growth rate not published in ticker profile metadata."
+        )
     if employees is None:
-        metric_justifications["employees"] = "Employee count not published in ticker profile metadata."
+        metric_justifications["employees"] = (
+            "Employee count not published in ticker profile metadata."
+        )
     if margin is None:
-        metric_justifications["profit_margin"] = "Profit margin not published in ticker profile metadata."
+        metric_justifications["profit_margin"] = (
+            "Profit margin not published in ticker profile metadata."
+        )
 
-    metric_justifications["funding"] = "Funding rounds are typically unavailable in ticker metadata; needs private round sources."
+    metric_justifications["funding"] = (
+        "Funding rounds are typically unavailable in ticker metadata; needs private round sources."
+    )
     if market_cap is None:
-        metric_justifications["valuation"] = "Market cap/valuation not available in ticker metadata at retrieval time."
+        metric_justifications["valuation"] = (
+            "Market cap/valuation not available in ticker metadata at retrieval time."
+        )
 
     financials = FinancialMetric(
         revenue=float(revenue) if revenue is not None else None,
-        revenue_confidence=ConfidenceLevel.CONFIRMED if revenue is not None else ConfidenceLevel.UNKNOWN,
+        revenue_confidence=(
+            ConfidenceLevel.CONFIRMED
+            if revenue is not None
+            else ConfidenceLevel.UNKNOWN
+        ),
         growth_rate=float(growth) if growth is not None else None,
-        growth_confidence=ConfidenceLevel.ESTIMATED if growth is not None else ConfidenceLevel.UNKNOWN,
+        growth_confidence=(
+            ConfidenceLevel.ESTIMATED if growth is not None else ConfidenceLevel.UNKNOWN
+        ),
         employees=int(employees) if employees is not None else None,
-        employees_confidence=ConfidenceLevel.ESTIMATED if employees is not None else ConfidenceLevel.UNKNOWN,
+        employees_confidence=(
+            ConfidenceLevel.ESTIMATED
+            if employees is not None
+            else ConfidenceLevel.UNKNOWN
+        ),
         profit_margin=float(margin) if margin is not None else None,
-        margin_confidence=ConfidenceLevel.ESTIMATED if margin is not None else ConfidenceLevel.UNKNOWN,
+        margin_confidence=(
+            ConfidenceLevel.ESTIMATED if margin is not None else ConfidenceLevel.UNKNOWN
+        ),
         funding_raised=None,
         funding_confidence=ConfidenceLevel.UNKNOWN,
         valuation=float(market_cap) if market_cap is not None else None,
-        valuation_confidence=ConfidenceLevel.ESTIMATED if market_cap is not None else ConfidenceLevel.UNKNOWN,
+        valuation_confidence=(
+            ConfidenceLevel.ESTIMATED
+            if market_cap is not None
+            else ConfidenceLevel.UNKNOWN
+        ),
     )
 
     region = info.get("country") or candidate.region
@@ -191,7 +295,9 @@ def build_company_profile(candidate: DiscoveryCandidate) -> Company:
         website=info.get("website"),
         headquarters=region,
         founded_year=info.get("foundedDate"),
-        tier=_tier_from_market_cap(float(market_cap) if market_cap is not None else None),
+        tier=_tier_from_market_cap(
+            float(market_cap) if market_cap is not None else None
+        ),
         threat_level=_threat_from_growth(float(growth) if growth is not None else None),
         ai_maturity=_ai_maturity_from_text(str(description)),
         saas_maturity=5,
