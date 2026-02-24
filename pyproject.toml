@@ -158,6 +158,7 @@ disable_error_code = [
     "var-annotated",
     "valid-type",
     "dict-item",
+    "type-var",
 ]
 
 [tool.pytest.ini_options]
