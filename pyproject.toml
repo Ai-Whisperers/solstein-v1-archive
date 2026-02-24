@@ -123,6 +123,7 @@ ignore = [
     "TC003",
     "TC006",
     "UP017", # datetime.UTC requires Python 3.11+, project supports 3.10
+    "UP036", # StrEnum version check needed for Python 3.10 compat
     "UP042",
     "W291",
 ]

@@ -2,8 +2,16 @@
 Domain models for market simulation.
 """
 
+import sys
 from datetime import datetime, timezone
-from enum import StrEnum
+
+if sys.version_info >= (3, 11):  # noqa: UP036
+    from enum import StrEnum
+else:
+    from enum import Enum
+
+    class StrEnum(str, Enum):
+        pass
 
 from pydantic import BaseModel, ConfigDict, Field
 
