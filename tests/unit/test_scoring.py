@@ -69,7 +69,7 @@ def test_calculate_growth_score_phoenix(scorer, phoenix_company):
     """
     scored = scorer.calculate_scores(phoenix_company)
     assert scored.growth_score == pytest.approx(8.25)
-    assert scored.financial_health_score >= 6.0
+    assert scored.financial_health_score == pytest.approx(5.25)
 
 
 def test_calculate_growth_score_lead(scorer, lead_company):
@@ -81,8 +81,8 @@ def test_calculate_growth_score_lead(scorer, lead_company):
     """
     scored = scorer.calculate_scores(lead_company)
     assert scored.growth_score == pytest.approx(3.75)
-    # financial_health: base(5.0) + revenue_small(10 < 100 → no large bonus) + margin_negative(-2.5) = 2.5
-    assert scored.financial_health_score == pytest.approx(2.5)
+    # financial_health: base(5.0) + revenue_small(10 < 1M → -1.0) + margin_negative(-2.5) = 1.5
+    assert scored.financial_health_score == pytest.approx(1.5)
 
 
 def test_calculate_scores_returns_same_company_object(scorer):
@@ -196,6 +196,7 @@ def test_custom_scoring_config_is_respected():
 
     default_scored = default_scorer.calculate_scores(company)
     default_score = default_scored.growth_score
+    assert default_score is not None
 
     # Reset scores and use custom scorer
     company.growth_score = None
@@ -204,6 +205,7 @@ def test_custom_scoring_config_is_respected():
     custom_scored = custom_scorer.calculate_scores(company)
 
     # Custom divisor → smaller growth contribution → lower score
+    assert custom_scored.growth_score is not None
     assert custom_scored.growth_score < default_score
 
 

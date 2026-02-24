@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -97,16 +97,17 @@ def test_dependency_health_parses_manifests_and_scores(monkeypatch: pytest.Monke
 
     result = agent._api_dependency_health("acme", [{"name": "repo1"}])
     assert result is not None
+    result_typed = cast(dict[str, Any], result)
 
-    assert result["python"]["dependencies_parsed"] >= 5
-    assert result["javascript"]["dependencies_parsed"] >= 5
-    assert result["health_score_0_to_10"] <= 10
-    assert isinstance(result["signal"], str)
+    assert result_typed["python"]["dependencies_parsed"] >= 5
+    assert result_typed["javascript"]["dependencies_parsed"] >= 5
+    assert result_typed["health_score_0_to_10"] <= 10
+    assert isinstance(result_typed["signal"], str)
 
-    assert len(result["python"]["outdated"]) >= 1
-    assert len(result["javascript"]["outdated"]) >= 1
+    assert len(result_typed["python"]["outdated"]) >= 1
+    assert len(result_typed["javascript"]["outdated"]) >= 1
 
     # Ensure OSV results appear.
-    assert len(result["python"]["vulnerabilities"]) >= 1
-    vuln = result["python"]["vulnerabilities"][0]
+    assert len(result_typed["python"]["vulnerabilities"]) >= 1
+    vuln = result_typed["python"]["vulnerabilities"][0]
     assert vuln["id"] == "OSV-TEST-0001"

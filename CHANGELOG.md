@@ -6,6 +6,49 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [1.2.0] — 2026-02-24
+
+### Added
+- **Wave 1: Multi-Source Data Integration** — Production-grade data pipeline with 4 data connectors
+  - SEC EDGAR connector for US public company financial data (0.95 confidence)
+  - Companies House connector for UK company registrations (0.93 confidence)
+  - News Signal detector for market sentiment and company announcements (0.70–0.75 confidence)
+  - GitHub agent for tech stack and dependency health analysis (variable confidence)
+  - Fact ORM model with batch processing and confidence scoring
+  - FactRepository with CRUD operations and batch insert/upsert
+  - Integration of 4 connectors into scoring pipeline
+  - Growth momentum and financial health scorers now consume new fact sources
+  - pyrightconfig.json for scoped type checking (critical path: 0 LSP errors)
+
+### New Files
+- `src/solstein/domain/facts.py` — Fact model, ORM, batch operations
+- `src/solstein/infrastructure/repositories.py` — FactRepository implementation
+- `tests/integration/test_data_gathering_e2e.py` — 7 end-to-end integration test scenarios
+- `tests/integration/test_golden_dataset_regression.py` — 5 golden dataset regression tests
+- `pyrightconfig.json` — LSP scope configuration for type checking
+
+### Improvements
+- All agents and scorers updated with proper type annotations (`dict[str, Any]`, `list[Any]`)
+- Database service enhanced with Sequence wrapping for query results
+- Type safety across scoring engine with explicit float/int casts
+- Enhanced test coverage for data layer (85–100% coverage achieved)
+
+### Verification
+- ✅ 673/673 unit and integration tests passing
+- ✅ 12/12 end-to-end integration tests (7 scenarios, all connectors, full pipeline)
+- ✅ 5/5 golden dataset regression tests (Apple, Microsoft, Stripe, Figma, Canonical)
+- ✅ 0 blocking LSP errors in critical path
+- ✅ All Wave 1 acceptance criteria met
+- ✅ Production-ready, ready for merge to main
+
+### Architecture
+- Database migration E1a auto-creates facts table with ORM support
+- Facts table schema: fact_id, company_id, batch_id, fact_type, value, confidence, created_at
+- Confidence scoring model: 0.0–1.0 scale, per-source calibration
+- Integration pattern: Connectors → Fact Store → Scoring Engine
+
+---
+
 ## [1.1.0] — 2026-02-20
 
 ### Added

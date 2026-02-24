@@ -5,11 +5,19 @@ Pure Python objects representing the core business concepts,
 now powered directly by Pydantic for end-to-end validation.
 """
 
+import sys
 from datetime import UTC, datetime
-from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+if sys.version_info >= (3, 11):  # noqa: UP036
+    from enum import StrEnum
+else:
+    from enum import Enum
+
+    class StrEnum(str, Enum):
+        pass
 
 
 class ConfidenceLevel(StrEnum):
