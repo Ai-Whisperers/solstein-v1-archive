@@ -1126,8 +1126,130 @@ Updated 3 tests that monkeypatched `build_company_profile`:
 
 The import chain `pipeline.py → adapters.registry → adapters.__init__ → adapters.protocols → research.discovery → research.__init__ → pipeline.py` created a circular dependency. Resolved by making the `build_default_registry` import lazy (inside `run_market_intelligence()` function body instead of module level).
 
-### What Remains (Future Work)
+### What Remains (Phases 5–7)
 
-- **P3:** Enhance scoring to weight by `SignalExtraction.signal_confidence` — `GrowthScorer.calculate_scores()` currently reads Company fields directly; could multiply scores by confidence
-- **P3:** Enhance quality gates to use per-company `RawDataSource` counts for minimum source volume checks
-- **P3:** Add integration tests that exercise the full adapter→aggregate→signal→Company flow with real (mocked) adapters
+See below.
+
+---
+
+## Phase 5 — Confidence-Weighted Scoring
+
+**Status:** Planned
+
+**Goal:** `GrowthScorer.calculate_scores()` currently reads Company fields directly with no awareness of how confident we are in each value. This phase multiplies raw scores by `SignalExtraction.signal_confidence` so that low-confidence data points contribute less to the final score.
+
+**Scope:**
+- Thread `SignalExtractionRecord` through to the scoring layer (currently only `Company` is passed)
+- For each scored dimension (revenue, growth, profitability, etc.), look up the corresponding signal's confidence
+- Apply confidence as a multiplier: `weighted_score = raw_score × signal_confidence`
+- Expose per-dimension confidence in the scored output so dashboards/reports can flag "low confidence" scores
+- Update `MarketAnalysis` to include aggregate confidence metrics per company
+
+**Key files:**
+- `src/solstein/analytics/scoring.py` — `GrowthScorer.calculate_scores()`
+- `src/solstein/research/pipeline.py` — needs to pass signal records alongside companies
+- `src/solstein/domain/models.py` — may need a `scored_confidence` field on Company or a parallel structure
+
+**Risks:**
+- Changing the scoring signature is a breaking change for any callers of `calculate_scores()`
+- Confidence multiplier may dramatically change existing score rankings — needs before/after comparison
+
+---
+
+## Phase 6 — Per-Company Source Volume Gates
+
+**Status:** Planned
+
+**Goal:** The current source volume gate in `run_market_intelligence()` checks *total* unique sources across all companies. This is too coarse — a single well-sourced company can mask several companies with zero enrichment data. This phase adds per-company minimum source requirements.
+
+**Scope:**
+- Track `RawDataSource` count per company during enrichment (available from `RawDataRecord.sources`)
+- Add a per-company minimum source threshold parameter to `run_market_intelligence()`
+- Companies below the threshold are either flagged in the stage report or excluded from scoring
+- Update the `gather` stage report to include per-company source counts
+- Add a "data quality" tier to the output: "well-sourced" (≥N sources), "partial" (1–N), "stub" (0 real sources, fallback only)
+
+**Key files:**
+- `src/solstein/research/pipeline.py` — new gate logic after enrichment
+- `src/solstein/research/gather.py` — `enrich_company()` already has `RawDataRecord`; needs to surface source count
+- `src/solstein/domain/models.py` — may add `enrichment_source_count` or `data_quality_tier` to Company
+
+**Risks:**
+- Strict per-company gates may reduce the candidate set too aggressively in markets with sparse data
+- Need a sensible default threshold that doesn't break existing runs
+
+---
+
+## Phase 7 — Integration Tests with Real Adapters (Fully Validated Runs)
+
+**Status:** Planned
+
+**Goal:** End-to-end tests exercising the full adapter → aggregate → signal → Company flow with **real** adapters (not mocked). Produces a full audit report document in markdown format as a reference artifact proving the pipeline works against live data sources.
+
+**Scope:**
+- Create integration test suite that runs the complete pipeline against a known seed company/market
+- Each adapter is called with real credentials (tests gated on API key availability via `pytest.mark.skipif`)
+- Validate the full chain: discovery adapters produce candidates → enrichment adapters return `RawDataSource` → aggregation cross-references → signals extracted → Company built with real provenance
+- Generate a **markdown audit report** per run containing:
+  - Run metadata (seed company, market, timestamp, batch_id)
+  - Per-adapter results: which adapters succeeded/failed, response times, data shapes
+  - Aggregation summary: fact count, agreement percentages, contradictions detected
+  - Signal extraction summary: which signals were produced, confidence levels
+  - Per-company data quality: source count, completeness percentage, confidence breakdown
+  - Final scored output with provenance chain for each metric
+- Store the audit report as a dated artifact (e.g., `docs/audit/run_YYYY-MM-DD_<market>.md`)
+
+**Key files:**
+- `tests/integration/test_full_pipeline.py` — new integration test file
+- `src/solstein/research/pipeline.py` — may need a "report mode" flag or hook to emit the audit report
+- `docs/audit/` — output directory for generated audit reports
+
+**Prerequisites:**
+- Phase 5 (confidence-weighted scoring) should ideally land first so the audit report includes confidence data
+- API keys for at least Yahoo Finance + one additional source must be configured in the test environment
+
+**Audit report template:**
+
+```markdown
+# Pipeline Audit Report — {market}
+
+**Seed company:** {seed}
+**Date:** {timestamp}
+**Batch ID:** {batch_id}
+**Pipeline version:** research.v2
+
+## Discovery
+- Adapters called: {list}
+- Candidates discovered: {count}
+- Deduplicated to: {count}
+
+## Enrichment
+| Company | Sources Attempted | Sources Succeeded | Facts Extracted | Completeness |
+|---------|-------------------|-------------------|-----------------|--------------|
+| ...     | ...               | ...               | ...             | ...          |
+
+## Aggregation Quality
+| Company | Total Facts | Avg Agreement | Contradictions | Confidence |
+|---------|-------------|---------------|----------------|------------|
+| ...     | ...         | ...           | ...            | ...        |
+
+## Signal Extraction
+| Company | Signals Produced | Avg Confidence | Missing Signals |
+|---------|------------------|----------------|-----------------|
+| ...     | ...              | ...            | ...             |
+
+## Scoring
+| Company | Raw Score | Confidence-Weighted Score | Data Quality Tier |
+|---------|-----------|---------------------------|-------------------|
+| ...     | ...       | ...                       | ...               |
+
+## Adapter Health
+| Adapter | Status | Response Time | Error (if any) |
+|---------|--------|---------------|----------------|
+| ...     | ...    | ...           | ...            |
+```
+
+**Risks:**
+- Integration tests with real APIs are slow, flaky, and cost money — must be clearly gated and not run in CI by default
+- API rate limits may cause intermittent failures
+- Audit report format may need iteration based on what's actually useful for review
