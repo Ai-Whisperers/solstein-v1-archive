@@ -1359,3 +1359,174 @@ Three new module-level constructs:
 - Audit report reads existing pipeline artifacts — no new pipeline output hooks needed
 - WebsiteEnrichment always errors in pipeline (passes `website=None`) — expected, recorded as error in adapter health
 - Tests gated with `@pytest.mark.integration` + `@pytest.mark.slow`, not run in CI by default
+
+---
+
+## Appendix F — Nyx-Gestalt Pattern Unification (2026-02-24)
+
+**Objective:** Unify Nyx's data freshness infrastructure (refresh connectors, conflict resolution, confidence calibration) with Gestalt's adapter architecture (DiscoverySource, EnrichmentSource protocols) across all 13 data sources.
+
+### Unified Architecture Overview
+
+The unification creates a single `UnifiedDataSource` protocol that combines:
+- **Discovery** (from Gestalt): `discover()` for finding companies
+- **Enrichment** (from Gestalt): `enrich()` for fetching company data
+- **Refresh** (from Nyx): `refresh()` for updating data incrementally
+- **Confidence** (from Nyx): `get_confidence()`, `get_authority()` for quality scoring
+- **Metadata**: `supports_incremental()`, `supports_discovery()` for capability discovery
+
+### Protocol Definition
+
+```python
+@runtime_checkable
+class UnifiedDataSource(Protocol):
+    @property
+    def source_name(self) -> str: ...
+    @property
+    def source_type(self) -> DataSourceType: ...
+    
+    # Discovery (Gestalt)
+    def discover(self, market: str, seed_company: str, max_results: int = 50, 
+                 extra_keywords: list[str] | None = None) -> list[DiscoveryCandidate]: ...
+    
+    # Enrichment (Gestalt)
+    def enrich(self, company_id: str, company_name: str, ticker: str | None = None,
+               website: str | None = None) -> RawDataSource: ...
+    
+    # Refresh (Nyx)
+    def refresh(self, company_ids: list[str], start_date: datetime | None = None,
+                end_date: datetime | None = None) -> list[dict[str, Any]]: ...
+    
+    # Confidence & Authority (Nyx)
+    def get_confidence(self) -> float: ...
+    def get_authority(self) -> SourceAuthority: ...
+    def supports_incremental(self) -> bool: ...
+    def supports_discovery(self) -> bool: ...
+```
+
+### Implementation Summary
+
+#### Wave 1: Foundation (Tasks 1-3)
+| Task | File | Description |
+|------|------|-------------|
+| 1 | `adapters/protocols.py` | Extended with refresh support, added `UnifiedDataSource` protocol |
+| 2 | `infrastructure/unified_registry.py` | Created unified adapter registry |
+| 3 | `adapters/discovery/*.py` | Updated existing adapters to implement unified protocol |
+
+#### Wave 2: Refresh Connectors (Tasks 4-11)
+Created 8 new refresh connectors extending `BaseRefreshConnector`:
+
+| Task | Connector | SourceAuthority | Schedule |
+|------|-----------|-----------------|----------|
+| 4 | `YahooFinanceRefreshConnector` | YAHOO_FINANCE (0.85) | Every 6 hours |
+| 5 | `PatentsRefreshConnector` | PATENTS (0.85) | Daily |
+| 6 | `NewsRefreshConnector` | NEWS_API (0.75) | Every 2 hours |
+| 7 | `WebsiteRefreshConnector` | WEBSITE (0.70) | Daily |
+| 8 | `LinkedInRefreshConnector` | LINKEDIN (0.70) | Every 12 hours |
+| 9 | `FundingRefreshConnector` | FUNDING (0.70) | Every 6 hours |
+| 10 | `GlobalMarketRefreshConnector` | GLOBAL_MARKET (0.80) | Every 6 hours |
+| 11 | `WebSearchRefreshConnector` | WEB_SEARCH (0.65) | Every 6 hours |
+
+#### Wave 3: Integration (Tasks 12-14)
+| Task | File | Description |
+|------|------|-------------|
+| 12 | `research/aggregate.py` | Integrated conflict resolution with SourceAuthority priority |
+| 13 | `analytics/confidence_integration.py` | Integrated confidence calibration |
+| 14 | `worker_tasks.py`, `celery_config.py` | Created Celery tasks and schedules for all 12 sources |
+
+#### Wave 4: Dead Module Revival (Tasks 15-17)
+Revived 3 dead modules as 6 unified adapters:
+
+| Task | Original Module | Unified Adapter(s) | Confidence | Authority |
+|------|-----------------|-------------------|------------|-----------|
+| 15 | `web_search_client.py` | `WebSearchUnifiedAdapter` | 0.70 | WEB_SEARCH (0.65) |
+| 16 | `additional_sources.py` | `NewsUnifiedAdapter` | 0.70 | NEWS_API (0.75) |
+| | | `FundingUnifiedAdapter` | 0.65 | FUNDING (0.70) |
+| | | `LinkedInUnifiedAdapter` | 0.60 | LINKEDIN (0.70) |
+| | | `WebsiteUnifiedAdapter` | 0.70 | WEBSITE (0.70) |
+| 17 | `patent_client.py` | `PatentsUnifiedAdapter` | 0.80 | PATENTS (0.85) |
+
+### SourceAuthority Levels (13 levels)
+
+Extended `SourceAuthority` enum with granular authority levels for conflict resolution:
+
+| Authority | Value | Sources |
+|-----------|-------|---------|
+| SEC_EDGAR | 1.00 | Financial filings (most authoritative) |
+| COMPANIES_HOUSE | 0.95 | UK/EU company data |
+| YAHOO_FINANCE | 0.90 | Market data |
+| PATENTS | 0.85 | USPTO patent data |
+| GLOBAL_MARKET | 0.80 | Global market trends |
+| NEWS_API | 0.75 | News with API |
+| WEBSITE | 0.70 | Company websites |
+| FUNDING | 0.70 | Funding data |
+| LINKEDIN | 0.70 | LinkedIn hiring data |
+| GITHUB | 0.65 | GitHub repository data |
+| WEB_SEARCH | 0.65 | General web search |
+| NEWS_SIGNALS | 0.60 | News signals |
+| UNKNOWN | 0.60 | Default/fallback |
+
+### Celery Task Schedules
+
+All 12 data sources have automated refresh schedules:
+
+```python
+# Original 4 sources
+refresh-sec-edgar-daily:           Daily at 9:00 AM
+refresh-companies-house-daily:     Daily at 9:30 AM
+refresh-news-signals-hourly:       Every hour
+refresh-github-every-6-hours:      Every 6 hours
+
+# New 8 sources (Wave 2)
+refresh-yahoo-finance-every-6-hours:  Every 6 hours (offset 15 min)
+refresh-patents-daily:                Daily at 10:00 AM
+refresh-news-every-2-hours:           Every 2 hours
+refresh-website-daily:                Daily at 11:00 AM
+refresh-linkedin-every-12-hours:      Every 12 hours
+refresh-funding-every-6-hours:        Every 6 hours (offset 45 min)
+refresh-global-market-every-6-hours:  Every 6 hours (offset 30 min)
+refresh-web-search-every-6-hours:     Every 6 hours
+
+# Full refresh
+refresh-all-sources-weekly:           Sunday at 2:00 AM
+```
+
+### Files Created/Modified
+
+**New Files (14):**
+- `src/solstein/infrastructure/unified_registry.py`
+- `src/solstein/infrastructure/connectors/*_refresh.py` (8 files)
+- `src/solstein/analytics/confidence_integration.py`
+- `src/solstein/adapters/enrichment/*_unified.py` (6 files)
+- `tests/integration/test_unified_adapters.py`
+
+**Modified Files (6):**
+- `src/solstein/adapters/protocols.py` — Extended with refresh support
+- `src/solstein/adapters/registry.py` — Registered unified adapters
+- `src/solstein/infrastructure/conflict_resolution.py` — Extended SourceAuthority
+- `src/solstein/research/aggregate.py` — Integrated conflict resolution
+- `src/solstein/worker_tasks.py` — 12 Celery tasks
+- `src/solstein/celery_config.py` — 13 schedules
+
+### Backward Compatibility
+
+- All original modules preserved (`web_search_client.py`, `additional_sources.py`, `patent_client.py`)
+- Existing adapter classes unchanged
+- New unified adapters are additive — existing code continues to work
+- Celery tasks use new refresh connectors but don't affect existing enrichment flow
+
+### Testing
+
+- 352-line integration test suite: `tests/integration/test_unified_adapters.py`
+- Tests all 6 unified adapters for protocol compliance
+- Cross-cutting tests for confidence levels and authority validity
+- Verified all adapters implement `UnifiedDataSource` protocol
+
+### Verification
+
+- 17/17 tasks completed (100%)
+- 8 refresh connectors working
+- 6 unified adapters registered
+- 12 Celery tasks with schedules
+- All tests pass
+- Zero breaking changes
