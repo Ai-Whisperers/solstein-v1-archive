@@ -78,21 +78,9 @@ def _process_outbox_record(*, session: Session, record: OutboxRecord) -> None:
         market=market,
         seed_company=seed_company,
         strict_provenance=strict_provenance,
-        min_readiness_score=(
-            float(min_readiness_score)
-            if isinstance(min_readiness_score, (int, float))
-            else None
-        ),
-        max_contradictions=(
-            int(max_contradictions)
-            if isinstance(max_contradictions, (int, float))
-            else None
-        ),
-        min_total_sources=(
-            int(min_total_sources)
-            if isinstance(min_total_sources, (int, float))
-            else None
-        ),
+        min_readiness_score=(float(min_readiness_score) if isinstance(min_readiness_score, (int, float)) else None),
+        max_contradictions=(int(max_contradictions) if isinstance(max_contradictions, (int, float)) else None),
+        min_total_sources=(int(min_total_sources) if isinstance(min_total_sources, (int, float)) else None),
         stage_report=stage_report,
         artifacts=artifacts,
     )

@@ -23,44 +23,48 @@ from solstein.domain.models import (
 )
 
 # Desired fact types for data completeness calculation
-_DESIRED_FACTS = frozenset({
-    "revenue",
-    "employee_count",
-    "market_cap",
-    "profit_margin",
-    "revenue_growth",
-    "total_patents",
-    "total_funding_raised",
-    "description",
-    "industry",
-    "headquarters",
-})
+_DESIRED_FACTS = frozenset(
+    {
+        "revenue",
+        "employee_count",
+        "market_cap",
+        "profit_margin",
+        "revenue_growth",
+        "total_patents",
+        "total_funding_raised",
+        "description",
+        "industry",
+        "headquarters",
+    }
+)
 
 # Numeric fact types where cross-source agreement is meaningful
-_NUMERIC_FACT_TYPES = frozenset({
-    "revenue",
-    "revenue_growth",
-    "employee_count",
-    "profit_margin",
-    "market_cap",
-    "ebitda",
-    "net_income",
-    "pe_ratio",
-    "current_price",
-    "eps_ttm",
-    "total_funding_raised",
-    "last_round_amount",
-    "total_patents",
-    "ai_related_patents",
-    "sentiment_score",
-    "open_positions",
-    "employee_growth_pct",
-    "ai_related_positions",
-    "ai_score",
-    "funding_rounds",
-    "founded_year",
-    "article_count",
-})
+_NUMERIC_FACT_TYPES = frozenset(
+    {
+        "revenue",
+        "revenue_growth",
+        "employee_count",
+        "profit_margin",
+        "market_cap",
+        "ebitda",
+        "net_income",
+        "pe_ratio",
+        "current_price",
+        "eps_ttm",
+        "total_funding_raised",
+        "last_round_amount",
+        "total_patents",
+        "ai_related_patents",
+        "sentiment_score",
+        "open_positions",
+        "employee_growth_pct",
+        "ai_related_positions",
+        "ai_score",
+        "funding_rounds",
+        "founded_year",
+        "article_count",
+    }
+)
 
 # Threshold for numeric agreement (within this fraction = agree)
 _AGREEMENT_TOLERANCE = 0.10  # 10%
@@ -316,9 +320,7 @@ def _aggregate_numeric_fact(
             agreeing = sum(1 for o in numeric_obs if o.value == 0)
         else:
             agreeing = sum(
-                1
-                for o in numeric_obs
-                if abs(o.value - best_value) / abs(best_value) <= _AGREEMENT_TOLERANCE
+                1 for o in numeric_obs if abs(o.value - best_value) / abs(best_value) <= _AGREEMENT_TOLERANCE
             )
         agreement = agreeing / len(numeric_obs)
 
@@ -330,12 +332,14 @@ def _aggregate_numeric_fact(
                 continue
             divergence = abs(obs.value - best_value) / abs(best_value)
             if divergence > _CONTRADICTION_TOLERANCE:
-                contradictions.append({
-                    "source": obs.source_name,
-                    "value": obs.value,
-                    "best_value": best_value,
-                    "divergence_pct": round(divergence * 100, 1),
-                })
+                contradictions.append(
+                    {
+                        "source": obs.source_name,
+                        "value": obs.value,
+                        "best_value": best_value,
+                        "divergence_pct": round(divergence * 100, 1),
+                    }
+                )
 
     sources_used = [o.url or o.source_name for o in observations]
     credibility = {o.source_name: o.source_confidence for o in observations}
@@ -347,9 +351,7 @@ def _aggregate_numeric_fact(
 
     contradiction_notes = None
     if contradictions:
-        contradiction_notes = (
-            f"{len(contradictions)} source(s) diverge >25% from best value"
-        )
+        contradiction_notes = f"{len(contradictions)} source(s) diverge >25% from best value"
 
     return AggregatedFact(
         fact_type=fact_type,
@@ -456,9 +458,7 @@ class DefaultFactAggregator:
         record.update_quality_metrics()
         found_fact_types = {f.fact_type for f in aggregated_facts}
         if _DESIRED_FACTS:
-            record.data_completeness_percentage = round(
-                len(found_fact_types & _DESIRED_FACTS) / len(_DESIRED_FACTS), 3
-            )
+            record.data_completeness_percentage = round(len(found_fact_types & _DESIRED_FACTS) / len(_DESIRED_FACTS), 3)
 
         logger.info(
             "Aggregated {} facts for {} ({} sources, {:.0%} completeness)",

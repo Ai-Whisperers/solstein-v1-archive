@@ -10,7 +10,12 @@ import operator
 from datetime import UTC, datetime
 from typing import Annotated, Any
 
-from langgraph.graph import END, START, StateGraph
+try:
+    from langgraph.graph import END, START, StateGraph
+except ImportError:
+    StateGraph = None  # type: ignore[assignment, misc]
+    START = "start"  # type: ignore[assignment]
+    END = "end"  # type: ignore[assignment]
 from loguru import logger
 from typing_extensions import TypedDict
 

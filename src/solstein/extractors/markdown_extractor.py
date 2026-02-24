@@ -80,9 +80,7 @@ class MarkdownExtractor:
         # Extract geographic presence
         geo_match = re.search(r"Geographic Presence:\s*(.+)", content)
         if geo_match:
-            data["geographic_presence"] = [
-                g.strip() for g in geo_match.group(1).split(",")
-            ]
+            data["geographic_presence"] = [g.strip() for g in geo_match.group(1).split(",")]
 
         # Extract tech stack
         tech_match = re.search(r"Tech Stack:\s*(.+)", content)
@@ -130,11 +128,7 @@ class MarkdownExtractor:
                 body = stripped.lstrip("- ")
                 metric, raw_urls = body.split(":", 1)
                 metric_key = metric.strip().lower()
-                urls = [
-                    u.strip()
-                    for u in raw_urls.split(",")
-                    if u.strip().startswith("http")
-                ]
+                urls = [u.strip() for u in raw_urls.split(",") if u.strip().startswith("http")]
                 if urls:
                     result[metric_key] = urls
 
@@ -189,13 +183,7 @@ class MarkdownExtractor:
     def to_company_profile(self, extracted_data: dict[str, Any]) -> Company:
         """Convert extracted data to Company model."""
         # Generate ID from name
-        company_id = (
-            extracted_data.get("name", "unknown")
-            .lower()
-            .replace(" ", "-")
-            .replace(".", "")
-            .replace(",", "")
-        )
+        company_id = extracted_data.get("name", "unknown").lower().replace(" ", "-").replace(".", "").replace(",", "")
 
         # Create financial metrics
         employees_val = self._parse_numeric(extracted_data.get("employees"))
@@ -362,9 +350,7 @@ class BatchExtractor:
         self.extractor = extractor or MarkdownExtractor()
 
     @classmethod
-    async def process_file(
-        cls, file_path: Path, extractor: "MarkdownExtractor | None" = None
-    ) -> Company | None:
+    async def process_file(cls, file_path: Path, extractor: "MarkdownExtractor | None" = None) -> Company | None:
         """Process a single file asynchronously."""
         if extractor is None:
             extractor = MarkdownExtractor()
@@ -377,9 +363,7 @@ class BatchExtractor:
                 logger.error(f"Failed to create profile from {file_path}: {e}")
         return None
 
-    def extract_directory(
-        self, directory: Path, pattern: str = "*.md"
-    ) -> list[Company]:
+    def extract_directory(self, directory: Path, pattern: str = "*.md") -> list[Company]:
         """Extract data from all markdown files in a directory."""
         profiles: list[Company] = []
 
@@ -408,9 +392,7 @@ class BatchExtractor:
         try:
             data = [profile.model_dump(mode="json") for profile in profiles]
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            output_path.write_text(
-                json.dumps(data, indent=2, default=str), encoding="utf-8"
-            )
+            output_path.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
             logger.info(f"Saved {len(profiles)} profiles to {output_path}")
         except Exception as e:
             logger.error(f"Failed to save to JSON: {e}")
@@ -423,9 +405,7 @@ class BatchExtractor:
             violations.append("Missing source_links")
 
         canonical_sources = {
-            canonicalize_url(link)
-            for link in (profile.source_links or [])
-            if isinstance(link, str) and link.strip()
+            canonicalize_url(link) for link in (profile.source_links or []) if isinstance(link, str) and link.strip()
         }
 
         for metric in REQUIRED_PROVENANCE_METRICS:
@@ -433,22 +413,14 @@ class BatchExtractor:
             justification = profile.metric_justifications.get(metric, "").strip()
 
             if isinstance(sources, list):
-                bad_urls = [
-                    s
-                    for s in sources
-                    if not isinstance(s, str) or not is_probably_url(s)
-                ]
+                bad_urls = [s for s in sources if not isinstance(s, str) or not is_probably_url(s)]
                 if bad_urls:
-                    violations.append(
-                        f"Metric '{metric}' contains non-url metric_sources entries: {bad_urls[:3]}"
-                    )
+                    violations.append(f"Metric '{metric}' contains non-url metric_sources entries: {bad_urls[:3]}")
 
                 missing_from_sources = [
                     s
                     for s in sources
-                    if isinstance(s, str)
-                    and s.strip()
-                    and canonicalize_url(s) not in canonical_sources
+                    if isinstance(s, str) and s.strip() and canonicalize_url(s) not in canonical_sources
                 ]
                 if missing_from_sources:
                     violations.append(
@@ -456,28 +428,18 @@ class BatchExtractor:
                     )
 
             if not sources and not justification:
-                violations.append(
-                    f"Metric '{metric}' has neither metric_sources nor metric_justification"
-                )
+                violations.append(f"Metric '{metric}' has neither metric_sources nor metric_justification")
 
             observations = (profile.metric_observations or {}).get(metric, [])
             if isinstance(observations, list):
-                expected = {
-                    canonicalize_url(s)
-                    for s in sources
-                    if isinstance(s, str) and s.strip()
-                }
+                expected = {canonicalize_url(s) for s in sources if isinstance(s, str) and s.strip()}
                 for obs in observations:
                     if not isinstance(obs, dict):
-                        violations.append(
-                            f"Metric '{metric}' has a non-dict metric_observation entry"
-                        )
+                        violations.append(f"Metric '{metric}' has a non-dict metric_observation entry")
                         continue
 
                     if "source" not in obs or "value" not in obs:
-                        violations.append(
-                            f"Metric '{metric}' observation missing 'source' or 'value'"
-                        )
+                        violations.append(f"Metric '{metric}' observation missing 'source' or 'value'")
                         continue
 
                     src = obs.get("source")
@@ -494,9 +456,7 @@ class BatchExtractor:
 
         return violations
 
-    def validate_profiles_provenance(
-        self, profiles: list[Company]
-    ) -> dict[str, list[str]]:
+    def validate_profiles_provenance(self, profiles: list[Company]) -> dict[str, list[str]]:
         report: dict[str, list[str]] = {}
         for profile in profiles:
             violations = self.validate_profile_provenance(profile)

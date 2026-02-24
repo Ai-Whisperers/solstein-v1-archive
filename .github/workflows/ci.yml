@@ -47,11 +47,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: dawidd6/action-get-latest-tag@v1
-      if: github.event_name == 'push'
-      with:
-        registry: github
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -107,12 +103,12 @@ jobs:
         
     - name: Install dependencies
       working-directory: ./dashboard
-      run: npm ci
-      
+      run: npm ci --legacy-peer-deps
+
     - name: Lint Dashboard
       working-directory: ./dashboard
       run: npm run lint
-      
+
     - name: Test Dashboard
       working-directory: ./dashboard
       run: npm run test
@@ -144,7 +140,7 @@ jobs:
 
     - name: Install Frontend
       working-directory: ./dashboard
-      run: npm ci
+      run: npm ci --legacy-peer-deps
       
     - name: Install Playwright Browsers
       working-directory: ./dashboard

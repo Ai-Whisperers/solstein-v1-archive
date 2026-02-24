@@ -8,9 +8,7 @@ from solstein.infrastructure.retry_policy import (
 
 
 def test_next_delay_seconds_is_deterministic_for_same_key_and_attempt() -> None:
-    policy = RetryPolicy(
-        base_delay_seconds=0.25, max_delay_seconds=30.0, jitter_ratio=0.2
-    )
+    policy = RetryPolicy(base_delay_seconds=0.25, max_delay_seconds=30.0, jitter_ratio=0.2)
 
     first = policy.next_delay_seconds(attempt=3, key="company:abc")
     second = policy.next_delay_seconds(attempt=3, key="company:abc")
@@ -21,20 +19,12 @@ def test_next_delay_seconds_is_deterministic_for_same_key_and_attempt() -> None:
 
 
 def test_next_delay_seconds_is_monotonic_until_cap_without_jitter() -> None:
-    policy = RetryPolicy(
-        base_delay_seconds=0.5, max_delay_seconds=2.0, jitter_ratio=0.0
-    )
+    policy = RetryPolicy(base_delay_seconds=0.5, max_delay_seconds=2.0, jitter_ratio=0.0)
 
-    delays = [
-        policy.next_delay_seconds(attempt=attempt, key="market:xyz")
-        for attempt in range(1, 7)
-    ]
+    delays = [policy.next_delay_seconds(attempt=attempt, key="market:xyz") for attempt in range(1, 7)]
 
     assert delays == pytest.approx([0.5, 1.0, 2.0, 2.0, 2.0, 2.0])
-    assert all(
-        current <= following
-        for current, following in zip(delays, delays[1:], strict=False)
-    )
+    assert all(current <= following for current, following in zip(delays, delays[1:], strict=False))
 
 
 def test_circuit_breaker_opens_at_threshold_and_closes_after_cooldown(
@@ -45,9 +35,7 @@ def test_circuit_breaker_opens_at_threshold_and_closes_after_cooldown(
     def fake_monotonic() -> float:
         return fake_clock["now"]
 
-    monkeypatch.setattr(
-        "solstein.infrastructure.retry_policy.time.monotonic", fake_monotonic
-    )
+    monkeypatch.setattr("solstein.infrastructure.retry_policy.time.monotonic", fake_monotonic)
 
     breaker = CircuitBreaker(failure_threshold=2, cooldown_seconds=5.0)
 

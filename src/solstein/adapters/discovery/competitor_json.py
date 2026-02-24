@@ -32,19 +32,13 @@ class CompetitorJsonSource:
             loader = CompetitorDataLoader()
             companies = loader.load_companies()
         except Exception as exc:
-            logger.warning(
-                "CompetitorJsonSource: failed to load competitor data: {}", exc
-            )
+            logger.warning("CompetitorJsonSource: failed to load competitor data: {}", exc)
             return []
 
         source_url = "https://github.com/ai-whisperers/solstein/blob/main/data/input/competitor_data.json"
         candidates: list[DiscoveryCandidate] = []
         for company in companies[:max_results]:
-            region = (
-                ", ".join(company.geographic_presence)
-                if company.geographic_presence
-                else "Unknown"
-            )
+            region = ", ".join(company.geographic_presence) if company.geographic_presence else "Unknown"
             tags = company.tech_stack[:3] if company.tech_stack else []
             candidates.append(
                 DiscoveryCandidate(

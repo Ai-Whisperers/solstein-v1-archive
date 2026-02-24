@@ -9,8 +9,6 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from loguru import logger
-
 from solstein.domain.models import DataSourceType, RawDataSource
 
 

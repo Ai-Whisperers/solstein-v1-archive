@@ -487,11 +487,11 @@ class GitHubAgent(BaseDataGatheringAgent):
 
     def _is_outdated(self, current: str, latest: str) -> bool:
         c = self._parse_semver(current)
-        l = self._parse_semver(latest)
-        if not c or not l:
+        lat = self._parse_semver(latest)
+        if not c or not lat:
             return False
         cmaj, cmin, _ = c
-        lmaj, lmin, _ = l
+        lmaj, lmin, _ = lat
         if lmaj != cmaj:
             return True
         return (lmin - cmin) > 3
@@ -704,9 +704,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             trend_ratio = (recent_count - prev_count) / prev_count
 
         direction = "flat"
-        if prev_count == 0 and recent_count > 0:
-            direction = "up"
-        elif prev_count > 0 and recent_count > prev_count:
+        if prev_count == 0 and recent_count > 0 or prev_count > 0 and recent_count > prev_count:
             direction = "up"
         elif prev_count > 0 and recent_count < prev_count:
             direction = "down"

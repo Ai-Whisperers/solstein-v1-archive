@@ -58,9 +58,7 @@ class ContradictionLifecycleError(Exception):
         self.code = code
         normalized_transitions = None
         if allowed_transitions is not None:
-            normalized_transitions = {
-                key: sorted(values) for key, values in allowed_transitions.items()
-            }
+            normalized_transitions = {key: sorted(values) for key, values in allowed_transitions.items()}
         self.details = {
             "contradiction_id": contradiction_id,
             "from_status": from_status,
@@ -85,14 +83,10 @@ def transition_contradiction_status(
     reason: str | None = None,
 ) -> ContradictionRecord:
     now = datetime.now(UTC)
-    transaction = (
-        session.begin_nested() if session.in_transaction() else session.begin()
-    )
+    transaction = session.begin_nested() if session.in_transaction() else session.begin()
     with transaction:
         contradiction = session.execute(
-            select(ContradictionRecord).where(
-                ContradictionRecord.id == contradiction_id
-            )
+            select(ContradictionRecord).where(ContradictionRecord.id == contradiction_id)
         ).scalar_one_or_none()
         if contradiction is None:
             raise ContradictionLifecycleError(
@@ -105,8 +99,7 @@ def transition_contradiction_status(
         from_status = contradiction.status
         if (
             from_status not in ALLOWED_CONTRADICTION_TRANSITIONS
-            or to_status
-            not in ALLOWED_CONTRADICTION_TRANSITIONS.get(from_status, set())
+            or to_status not in ALLOWED_CONTRADICTION_TRANSITIONS.get(from_status, set())
         ):
             raise ContradictionLifecycleError(
                 "Invalid contradiction status transition",
@@ -175,14 +168,10 @@ def load_research_artifacts(
     stage_report_value = _read_json_file(stage_report_path)
     if not isinstance(stage_report_value, dict):
         raise ValueError("stage_report.json must contain a JSON object")
-    stage_report: dict[str, JsonValue] = cast(
-        "dict[str, JsonValue]", stage_report_value
-    )
+    stage_report: dict[str, JsonValue] = cast("dict[str, JsonValue]", stage_report_value)
 
     artifacts: dict[str, JsonValue] = {
-        "discovery_candidates": _read_json_file(
-            output_dir / "discovery_candidates.json"
-        ),
+        "discovery_candidates": _read_json_file(output_dir / "discovery_candidates.json"),
         "extracted": _read_json_file(output_dir / "extracted.json"),
         "provenance": _read_json_file(output_dir / "provenance_report.json"),
         "contradictions": _read_json_file(output_dir / "contradictions_report.json"),
@@ -241,9 +230,7 @@ def record_outbox_failure(
 ) -> None:
     failed_time = datetime.now(UTC)
     retryable = isinstance(exc, (TimeoutError, ConnectionError, OperationalError))
-    classification = (
-        FailureClassification.RETRYABLE if retryable else FailureClassification.TERMINAL
-    )
+    classification = FailureClassification.RETRYABLE if retryable else FailureClassification.TERMINAL
     retry_policy = RetryPolicy()
     failed_outbox = session.execute(
         select(OutboxRecord).where(OutboxRecord.event_key == event_key)
@@ -251,15 +238,9 @@ def record_outbox_failure(
     attempt_count = failed_outbox.attempt_count if failed_outbox is not None else 1
     if attempt_count < 1:
         attempt_count = 1
-    decision = retry_policy.evaluate(
-        attempt=attempt_count, key=event_key, classification=classification
-    )
+    decision = retry_policy.evaluate(attempt=attempt_count, key=event_key, classification=classification)
     delay_seconds = decision.delay_seconds
-    available_at = (
-        failed_time + timedelta(seconds=delay_seconds)
-        if decision.should_retry
-        else failed_time
-    )
+    available_at = failed_time + timedelta(seconds=delay_seconds) if decision.should_retry else failed_time
     last_error = {
         "error_type": type(exc).__name__,
         "message": str(exc),
@@ -304,40 +285,14 @@ def persist_research_run_records(
     stage_report: dict[str, JsonValue],
     artifacts: dict[str, JsonValue],
 ) -> UUID:
-    existing = session.execute(
-        select(ResearchRunRecord).where(ResearchRunRecord.run_id == run_id)
-    ).scalar_one_or_none()
+    existing = session.execute(select(ResearchRunRecord).where(ResearchRunRecord.run_id == run_id)).scalar_one_or_none()
     if existing is not None:
-        _ = (
-            session.query(ResearchStageRecord)
-            .filter(ResearchStageRecord.run_id == existing.id)
-            .delete()
-        )
-        _ = (
-            session.query(ResearchArtifactRecord)
-            .filter(ResearchArtifactRecord.run_id == existing.id)
-            .delete()
-        )
-        _ = (
-            session.query(SourceDocumentRecord)
-            .filter(SourceDocumentRecord.run_id == existing.id)
-            .delete()
-        )
-        _ = (
-            session.query(MetricObservationRecord)
-            .filter(MetricObservationRecord.run_id == existing.id)
-            .delete()
-        )
-        _ = (
-            session.query(EvidenceReadinessRecord)
-            .filter(EvidenceReadinessRecord.run_id == existing.id)
-            .delete()
-        )
-        _ = (
-            session.query(ContradictionRecord)
-            .filter(ContradictionRecord.run_id == existing.id)
-            .delete()
-        )
+        _ = session.query(ResearchStageRecord).filter(ResearchStageRecord.run_id == existing.id).delete()
+        _ = session.query(ResearchArtifactRecord).filter(ResearchArtifactRecord.run_id == existing.id).delete()
+        _ = session.query(SourceDocumentRecord).filter(SourceDocumentRecord.run_id == existing.id).delete()
+        _ = session.query(MetricObservationRecord).filter(MetricObservationRecord.run_id == existing.id).delete()
+        _ = session.query(EvidenceReadinessRecord).filter(EvidenceReadinessRecord.run_id == existing.id).delete()
+        _ = session.query(ContradictionRecord).filter(ContradictionRecord.run_id == existing.id).delete()
         session.delete(existing)
         session.flush()
 
@@ -356,9 +311,7 @@ def persist_research_run_records(
     session.add(run)
     session.flush()
 
-    run_pk = session.execute(
-        select(ResearchRunRecord.id).where(ResearchRunRecord.run_id == run_id)
-    ).scalar_one()
+    run_pk = session.execute(select(ResearchRunRecord.id).where(ResearchRunRecord.run_id == run_id)).scalar_one()
 
     stages: list[dict[str, JsonValue]] = []
     stages_obj = stage_report.get("stages")
@@ -428,9 +381,7 @@ def persist_research_run_records(
                             run_id=run.id,
                             company_id=company_id,
                             source_url=canonical,
-                            source_domain=(
-                                parsed.netloc.lower() if parsed.netloc else None
-                            ),
+                            source_domain=(parsed.netloc.lower() if parsed.netloc else None),
                             source_type="web",
                             observed_at=observed_time,
                             status="observed",
@@ -463,9 +414,7 @@ def persist_research_run_records(
                                 metric_value=metric_value,
                                 metric_value_raw=raw_value,
                                 source_url=(
-                                    str(row_payload.get("source"))
-                                    if row_payload.get("source") is not None
-                                    else None
+                                    str(row_payload.get("source")) if row_payload.get("source") is not None else None
                                 ),
                                 created_at=datetime.now(UTC),
                             )
@@ -485,29 +434,13 @@ def persist_research_run_records(
                         run_id=run.id,
                         company_id=str(report_payload.get("company_id", "unknown")),
                         company_name=str(report_payload.get("company_name", "unknown")),
-                        readiness_score=_coerce_float(
-                            report_payload.get("readiness_score"), default=0.0
-                        ),
-                        readiness_level=str(
-                            report_payload.get("readiness_level", "unknown")
-                        ),
-                        source_count=_coerce_int(
-                            report_payload.get("source_count"), default=0
-                        ),
-                        source_domain_count=int(
-                            _coerce_int(
-                                report_payload.get("source_domain_count"), default=0
-                            )
-                        ),
-                        metric_source_coverage=_coerce_float(
-                            report_payload.get("metric_source_coverage"), default=0.0
-                        ),
-                        metric_explainability=_coerce_float(
-                            report_payload.get("metric_explainability"), default=0.0
-                        ),
-                        unsupported_metrics=_coerce_int(
-                            report_payload.get("unsupported_metrics"), default=0
-                        ),
+                        readiness_score=_coerce_float(report_payload.get("readiness_score"), default=0.0),
+                        readiness_level=str(report_payload.get("readiness_level", "unknown")),
+                        source_count=_coerce_int(report_payload.get("source_count"), default=0),
+                        source_domain_count=int(_coerce_int(report_payload.get("source_domain_count"), default=0)),
+                        metric_source_coverage=_coerce_float(report_payload.get("metric_source_coverage"), default=0.0),
+                        metric_explainability=_coerce_float(report_payload.get("metric_explainability"), default=0.0),
+                        unsupported_metrics=_coerce_int(report_payload.get("unsupported_metrics"), default=0),
                         created_at=datetime.now(UTC),
                     )
                 )
@@ -567,9 +500,7 @@ def persist_research_run(
         artifacts=artifacts,
     )
 
-    outbox = session.execute(
-        select(OutboxRecord).where(OutboxRecord.event_key == event_key)
-    ).scalar_one_or_none()
+    outbox = session.execute(select(OutboxRecord).where(OutboxRecord.event_key == event_key)).scalar_one_or_none()
     if outbox is None:
         outbox = OutboxRecord(
             event_key=event_key,
@@ -593,9 +524,7 @@ def persist_research_run(
     session.commit()
 
     in_progress_time = datetime.now(UTC)
-    outbox = session.execute(
-        select(OutboxRecord).where(OutboxRecord.event_key == event_key)
-    ).scalar_one()
+    outbox = session.execute(select(OutboxRecord).where(OutboxRecord.event_key == event_key)).scalar_one()
     outbox.status = "in_progress"
     outbox.attempt_count = (outbox.attempt_count or 0) + 1
     outbox.updated_at = in_progress_time

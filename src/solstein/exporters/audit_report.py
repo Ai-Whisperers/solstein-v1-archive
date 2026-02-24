@@ -67,25 +67,21 @@ class PipelineAuditReportGenerator:
         evidence = self._load_artifact(artifacts_dir, "evidence_readiness.json")
 
         market = stage_report.get("market", "Unknown") if stage_report else "Unknown"
-        seed = (
-            stage_report.get("seed_company", "Unknown") if stage_report else "Unknown"
-        )
+        seed = stage_report.get("seed_company", "Unknown") if stage_report else "Unknown"
         timestamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
 
         sections: list[str] = []
         sections.append(f"# Pipeline Audit Report — {market}\n")
         sections.append(f"**Seed company:** {seed}")
         sections.append(f"**Date:** {timestamp}")
-        sections.append(f"**Pipeline version:** research.v2\n")
+        sections.append("**Pipeline version:** research.v2\n")
 
         if stage_report and candidates:
             sections.append(self._render_discovery_section(stage_report, candidates))
         if stage_report and companies:
             sections.append(self._render_enrichment_section(stage_report, companies))
         if companies:
-            sections.append(
-                self._render_aggregation_section(companies, contradictions or {})
-            )
+            sections.append(self._render_aggregation_section(companies, contradictions or {}))
             sections.append(self._render_signal_section(companies))
         if scored:
             sections.append(self._render_scoring_section(scored))
@@ -126,9 +122,7 @@ class PipelineAuditReportGenerator:
             None,
         )
         candidate_count = (
-            discovery_stage.get("candidate_count", len(candidates))
-            if discovery_stage
-            else len(candidates)
+            discovery_stage.get("candidate_count", len(candidates)) if discovery_stage else len(candidates)
         )
         lines = [
             "## Discovery\n",
@@ -147,9 +141,7 @@ class PipelineAuditReportGenerator:
             (s for s in stage_report.get("stages", []) if s.get("stage") == "gather"),
             None,
         )
-        quality_breakdown = (
-            gather_stage.get("data_quality_breakdown", {}) if gather_stage else {}
-        )
+        quality_breakdown = gather_stage.get("data_quality_breakdown", {}) if gather_stage else {}
 
         lines = [
             "## Enrichment\n",
@@ -167,9 +159,10 @@ class PipelineAuditReportGenerator:
 
         if quality_breakdown:
             lines.append("")
-            lines.append("**Quality breakdown:** " + ", ".join(
-                f"{tier}: {count}" for tier, count in quality_breakdown.items() if count
-            ))
+            lines.append(
+                "**Quality breakdown:** "
+                + ", ".join(f"{tier}: {count}" for tier, count in quality_breakdown.items() if count)
+            )
 
         lines.append("")
         return "\n".join(lines)
@@ -191,20 +184,10 @@ class PipelineAuditReportGenerator:
             observations = company.get("metric_observations", {})
             obs_count = sum(len(v) for v in observations.values() if isinstance(v, list))
             company_contradictions = contradictions.get(cid, [])
-            contradiction_count = (
-                len(company_contradictions)
-                if isinstance(company_contradictions, list)
-                else 0
-            )
+            contradiction_count = len(company_contradictions) if isinstance(company_contradictions, list) else 0
             signal_conf = company.get("signal_confidences", {})
-            avg_conf = (
-                f"{sum(signal_conf.values()) / len(signal_conf):.2f}"
-                if signal_conf
-                else "N/A"
-            )
-            lines.append(
-                f"| {name} | {obs_count} | {contradiction_count} | {avg_conf} |"
-            )
+            avg_conf = f"{sum(signal_conf.values()) / len(signal_conf):.2f}" if signal_conf else "N/A"
+            lines.append(f"| {name} | {obs_count} | {contradiction_count} | {avg_conf} |")
 
         lines.append("")
         return "\n".join(lines)
@@ -220,11 +203,7 @@ class PipelineAuditReportGenerator:
             name = company.get("name", "Unknown")
             signal_conf = company.get("signal_confidences", {})
             produced = len(signal_conf)
-            avg_conf = (
-                f"{sum(signal_conf.values()) / len(signal_conf):.2f}"
-                if signal_conf
-                else "N/A"
-            )
+            avg_conf = f"{sum(signal_conf.values()) / len(signal_conf):.2f}" if signal_conf else "N/A"
             missing = sorted(_ALL_SIGNAL_NAMES - set(signal_conf.keys()))
             missing_str = ", ".join(missing) if missing else "none"
             lines.append(f"| {name} | {produced} | {avg_conf} | {missing_str} |")

@@ -8,7 +8,6 @@ calculation methods, and human-readable reasoning.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any
 
 from loguru import logger
 
@@ -18,7 +17,6 @@ from solstein.domain.models import (
     SignalExtraction,
     SignalExtractionRecord,
 )
-
 
 # ---------------------------------------------------------------------------
 # Signal definitions: each maps one or more fact types to a signal
@@ -75,8 +73,7 @@ def _signal_growth_rate(facts: dict[str, AggregatedFact]) -> SignalExtraction | 
         source_facts=["revenue_growth"],
         calculation_method="direct",
         calculation_formula="revenue_growth_yoy from highest-confidence source",
-        reasoning=f"Revenue growth of {growth:.1%} YoY, "
-        f"confidence {growth_fact.confidence:.0%}",
+        reasoning=f"Revenue growth of {growth:.1%} YoY, confidence {growth_fact.confidence:.0%}",
         why_it_matters="Growth rate drives scoring and threat assessment",
     )
 
@@ -96,8 +93,7 @@ def _signal_profitability(facts: dict[str, AggregatedFact]) -> SignalExtraction 
         source_facts=["profit_margin"],
         calculation_method="direct",
         calculation_formula="profit_margin from highest-confidence source",
-        reasoning=f"Profit margin of {margin:.1%}, "
-        f"confidence {margin_fact.confidence:.0%}",
+        reasoning=f"Profit margin of {margin:.1%}, confidence {margin_fact.confidence:.0%}",
         why_it_matters="Profitability indicates financial health and sustainability",
     )
 
@@ -388,9 +384,7 @@ def extract_signals(
     -------
     SignalExtractionRecord with all extracted signals.
     """
-    facts_by_type: dict[str, AggregatedFact] = {
-        f.fact_type: f for f in aggregated.facts
-    }
+    facts_by_type: dict[str, AggregatedFact] = {f.fact_type: f for f in aggregated.facts}
 
     signals: list[SignalExtraction] = []
     for extractor in _SIGNAL_EXTRACTORS:

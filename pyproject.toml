@@ -117,6 +117,10 @@ ignore = [
     "SIM103",
     "SIM108",
     "SIM118",
+    "TC001", # runtime imports used in Protocol/dataclass patterns
+    "TC002",
+    "TC003",
+    "TC006",
     "UP042",
     "W291",
 ]

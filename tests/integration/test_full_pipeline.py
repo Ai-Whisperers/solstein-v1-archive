@@ -12,6 +12,7 @@ These tests are NOT run in CI by default.
 
 from __future__ import annotations
 
+import contextlib
 import os
 import time
 from pathlib import Path
@@ -275,16 +276,12 @@ class TestAggregationWithRealData:
         raw_sources = []
         for source in registry.enrichment_sources:
             try:
-                raw = source.enrich(
-                    TEST_COMPANY_ID, TEST_COMPANY_NAME, ticker=TEST_TICKER
-                )
+                raw = source.enrich(TEST_COMPANY_ID, TEST_COMPANY_NAME, ticker=TEST_TICKER)
                 raw_sources.append(raw)
             except Exception:
                 pass  # expected for adapters that need website, etc.
 
-        assert len(raw_sources) >= 2, (
-            f"Expected at least 2 successful sources, got {len(raw_sources)}"
-        )
+        assert len(raw_sources) >= 2, f"Expected at least 2 successful sources, got {len(raw_sources)}"
 
         raw_record = RawDataRecord(
             company_id=TEST_COMPANY_ID,
@@ -299,9 +296,7 @@ class TestAggregationWithRealData:
         assert len(aggregated.facts) > 0
         assert aggregated.data_completeness_percentage > 0.0
 
-    def test_signal_extraction_from_real_aggregated_data(
-        self, real_settings
-    ) -> None:
+    def test_signal_extraction_from_real_aggregated_data(self, real_settings) -> None:
         from solstein.adapters.registry import build_default_registry
         from solstein.domain.models import RawDataRecord
         from solstein.research.aggregate import DefaultFactAggregator
@@ -311,9 +306,7 @@ class TestAggregationWithRealData:
         raw_sources = []
         for source in registry.enrichment_sources:
             try:
-                raw = source.enrich(
-                    TEST_COMPANY_ID, TEST_COMPANY_NAME, ticker=TEST_TICKER
-                )
+                raw = source.enrich(TEST_COMPANY_ID, TEST_COMPANY_NAME, ticker=TEST_TICKER)
                 raw_sources.append(raw)
             except Exception:
                 pass
@@ -389,21 +382,15 @@ class TestFullPipelineIntegration:
 
         # Step 2: Collect adapter health via instrumented wrappers
         settings = Settings.load()
-        registry, enrichment_wrappers, discovery_wrappers = (
-            build_instrumented_registry(settings)
-        )
+        registry, enrichment_wrappers, discovery_wrappers = build_instrumented_registry(settings)
 
         for source in registry.discovery_sources:
-            try:
+            with contextlib.suppress(Exception):
                 source.discover(market=TEST_MARKET, seed_company=TEST_SEED, max_results=3)
-            except Exception:
-                pass
 
         for source in registry.enrichment_sources:
-            try:
+            with contextlib.suppress(Exception):
                 source.enrich(TEST_COMPANY_ID, TEST_COMPANY_NAME, ticker=TEST_TICKER)
-            except Exception:
-                pass
 
         all_health: list[dict] = []
         for w in discovery_wrappers:
@@ -438,9 +425,7 @@ class TestFullPipelineIntegration:
 class TestAdapterHealthSmoke:
     """Quick health check: every registered adapter responds."""
 
-    def test_all_registered_enrichment_adapters_respond(
-        self, real_registry
-    ) -> None:
+    def test_all_registered_enrichment_adapters_respond(self, real_registry) -> None:
         results: dict[str, dict] = {}
         for source in real_registry.enrichment_sources:
             start = time.perf_counter()
@@ -453,9 +438,5 @@ class TestAdapterHealthSmoke:
             results[source.source_name] = {"status": status, "ms": round(elapsed)}
 
         # At least YahooFinance, GlobalMarket, Patents should succeed
-        successful = [
-            name for name, r in results.items() if r["status"] == "success"
-        ]
-        assert len(successful) >= 3, (
-            f"Only {len(successful)} adapters succeeded: {results}"
-        )
+        successful = [name for name, r in results.items() if r["status"] == "success"]
+        assert len(successful) >= 3, f"Only {len(successful)} adapters succeeded: {results}"

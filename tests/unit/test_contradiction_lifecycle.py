@@ -52,9 +52,7 @@ def test_new_contradiction_defaults_open() -> None:
         session.commit()
 
         stored = session.execute(
-            select(ContradictionRecord).where(
-                ContradictionRecord.id == contradiction.id
-            )
+            select(ContradictionRecord).where(ContradictionRecord.id == contradiction.id)
         ).scalar_one()
         assert stored.status == "open"
         assert stored.updated_at is not None
@@ -86,9 +84,7 @@ def test_open_to_resolved_records_transition() -> None:
         )
 
         stored = session.execute(
-            select(ContradictionRecord).where(
-                ContradictionRecord.id == contradiction.id
-            )
+            select(ContradictionRecord).where(ContradictionRecord.id == contradiction.id)
         ).scalar_one()
         assert stored.status == "resolved"
         assert stored.resolved_at is not None
@@ -135,9 +131,7 @@ def test_invalid_transition_rejected_without_mutation() -> None:
         assert exc_info.value.code == "CONTRADICTION_INVALID_TRANSITION"
 
         stored = session.execute(
-            select(ContradictionRecord).where(
-                ContradictionRecord.id == contradiction.id
-            )
+            select(ContradictionRecord).where(ContradictionRecord.id == contradiction.id)
         ).scalar_one()
         expected_created_at = created_at.replace(tzinfo=None)
         assert stored.status == "resolved"

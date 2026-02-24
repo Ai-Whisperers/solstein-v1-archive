@@ -29,11 +29,7 @@ def _as_payload_dict(payload: object) -> dict[str, JsonValue] | None:
 
 def _outbox_candidates_for_research_runs(session: Session) -> list[OutboxRecord]:
     return list(
-        session.execute(
-            select(OutboxRecord).where(OutboxRecord.event_type == "research_run_persist")
-        )
-        .scalars()
-        .all()
+        session.execute(select(OutboxRecord).where(OutboxRecord.event_type == "research_run_persist")).scalars().all()
     )
 
 
@@ -100,19 +96,13 @@ def reconcile_research_run(
     if resolved_run_id is not None and resolved_output_dir is None:
         outbox_record = _find_outbox_for_run_id(session, resolved_run_id)
         if outbox_record is None:
-            raise ReconciliationError(
-                f"Could not resolve output_dir from outbox payload for run_id {resolved_run_id}"
-            )
+            raise ReconciliationError(f"Could not resolve output_dir from outbox payload for run_id {resolved_run_id}")
         payload = _as_payload_dict(outbox_record.payload)
         if payload is None:
-            raise ReconciliationError(
-                f"Outbox payload for run_id {resolved_run_id} is not a JSON object"
-            )
+            raise ReconciliationError(f"Outbox payload for run_id {resolved_run_id} is not a JSON object")
         output_dir_value = payload.get("output_dir")
         if not isinstance(output_dir_value, str) or not output_dir_value:
-            raise ReconciliationError(
-                f"Outbox payload for run_id {resolved_run_id} is missing output_dir"
-            )
+            raise ReconciliationError(f"Outbox payload for run_id {resolved_run_id} is missing output_dir")
         resolved_output_dir = Path(output_dir_value)
 
     if resolved_output_dir is not None and resolved_run_id is None:
@@ -123,14 +113,10 @@ def reconcile_research_run(
             )
         payload = _as_payload_dict(outbox_record.payload)
         if payload is None:
-            raise ReconciliationError(
-                f"Outbox payload for output_dir {resolved_output_dir} is not a JSON object"
-            )
+            raise ReconciliationError(f"Outbox payload for output_dir {resolved_output_dir} is not a JSON object")
         run_id_value = payload.get("run_id")
         if not isinstance(run_id_value, str) or not run_id_value:
-            raise ReconciliationError(
-                f"Outbox payload for output_dir {resolved_output_dir} is missing run_id"
-            )
+            raise ReconciliationError(f"Outbox payload for output_dir {resolved_output_dir} is missing run_id")
         resolved_run_id = run_id_value
 
     if resolved_run_id is None or resolved_output_dir is None:
@@ -156,11 +142,7 @@ def reconcile_research_run(
     db_artifact_records: list[ResearchArtifactRecord] = []
     if run_record is not None:
         db_artifact_records = list(
-            session.execute(
-                select(ResearchArtifactRecord).where(
-                    ResearchArtifactRecord.run_id == run_record.id
-                )
-            )
+            session.execute(select(ResearchArtifactRecord).where(ResearchArtifactRecord.run_id == run_record.id))
             .scalars()
             .all()
         )
@@ -296,8 +278,7 @@ def _parse_args() -> tuple[str | None, Path | None]:
 
     parser = argparse.ArgumentParser(
         description=(
-            "Reconcile JSON research artifacts against persisted research records and "
-            "write reconciliation_report.json"
+            "Reconcile JSON research artifacts against persisted research records and write reconciliation_report.json"
         )
     )
     _ = parser.add_argument("--run-id", dest="run_id", required=False)

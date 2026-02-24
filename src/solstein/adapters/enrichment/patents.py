@@ -14,7 +14,6 @@ from datetime import UTC, datetime
 
 from solstein.domain.models import DataSourceType, RawDataSource
 
-
 _SOURCE_TYPE_MAP = {
     "uspto_peds": DataSourceType.USPTO,
     "google_patents": DataSourceType.GOOGLE_PATENTS,

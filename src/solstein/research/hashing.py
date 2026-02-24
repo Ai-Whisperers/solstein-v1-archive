@@ -48,10 +48,7 @@ def _to_canonical_jsonable(value: object) -> object:
         return _to_canonical_jsonable(value.model_dump(mode="json"))
 
     if is_dataclass(value) and not isinstance(value, type):
-        return {
-            field.name: _to_canonical_jsonable(getattr(value, field.name))
-            for field in fields(value)
-        }
+        return {field.name: _to_canonical_jsonable(getattr(value, field.name)) for field in fields(value)}
 
     if isinstance(value, MappingProxyType):
         return _to_canonical_jsonable(dict(value))
