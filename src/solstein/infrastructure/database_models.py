@@ -102,7 +102,7 @@ class CompanyRecord(Base):
         Index("ix_company_ai_score", "ai_score"),
     )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "company_id": self.company_id,
@@ -148,8 +148,12 @@ class CompanyRecord(Base):
             "competitive_position_score": self.competitive_position_score,
             "composite_score": self.composite_score,
             "scoring_breakdown": self.scoring_breakdown,
-            "last_updated": self.last_updated.isoformat() if self.last_updated else None,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "last_updated": (
+                self.last_updated.isoformat() if self.last_updated is not None else None
+            ),
+            "created_at": (
+                self.created_at.isoformat() if self.created_at is not None else None
+            ),
         }
 
 
@@ -172,7 +176,9 @@ class ScoringRecord(Base):
     scored_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
     data_sources_used = Column(JSON, nullable=True)
 
-    signals = relationship("SignalRecord", back_populates="scoring_record", cascade="all, delete-orphan")
+    signals = relationship(
+        "SignalRecord", back_populates="scoring_record", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         Index("ix_company_scored_at", "company_id", "scored_at"),
@@ -180,7 +186,7 @@ class ScoringRecord(Base):
         Index("ix_classification", "classification"),
     )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary representation."""
         return {
             "id": self.id,
@@ -191,7 +197,9 @@ class ScoringRecord(Base):
             "competitive_position_score": self.competitive_position_score,
             "overall_score": self.overall_score,
             "classification": self.classification,
-            "scored_at": self.scored_at.isoformat() if self.scored_at else None,
+            "scored_at": (
+                self.scored_at.isoformat() if self.scored_at is not None else None
+            ),
             "data_sources_used": self.data_sources_used,
             "signals_count": len(self.signals) if self.signals else 0,
         }
@@ -206,7 +214,9 @@ class SignalRecord(Base):
     __tablename__ = "signal_records"
 
     id = Column(Integer, primary_key=True, index=True)
-    scoring_record_id = Column(Integer, ForeignKey("scoring_records.id"), nullable=False, index=True)
+    scoring_record_id = Column(
+        Integer, ForeignKey("scoring_records.id"), nullable=False, index=True
+    )
 
     signal_name = Column(String(255), nullable=False, index=True)
     signal_category = Column(String(50), nullable=False)
@@ -222,9 +232,11 @@ class SignalRecord(Base):
 
     scoring_record = relationship("ScoringRecord", back_populates="signals")
 
-    __table_args__ = (Index("ix_signal_name_category", "signal_name", "signal_category"),)
+    __table_args__ = (
+        Index("ix_signal_name_category", "signal_name", "signal_category"),
+    )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary representation."""
         return {
             "id": self.id,
@@ -235,7 +247,9 @@ class SignalRecord(Base):
             "source_agent": self.source_agent,
             "evidence": self.evidence,
             "confidence": self.confidence,
-            "extracted_at": self.extracted_at.isoformat() if self.extracted_at else None,
+            "extracted_at": (
+                self.extracted_at.isoformat() if self.extracted_at is not None else None
+            ),
         }
 
 
@@ -248,7 +262,9 @@ class MarketSnapshot(Base):
     __tablename__ = "market_snapshots"
 
     id = Column(Integer, primary_key=True, index=True)
-    snapshot_date = Column(DateTime, nullable=False, index=True, default=lambda: datetime.now(UTC))
+    snapshot_date = Column(
+        DateTime, nullable=False, index=True, default=lambda: datetime.now(UTC)
+    )
 
     total_companies_scored = Column(Integer, nullable=False)
     average_growth_score = Column(Float, nullable=False)
@@ -263,11 +279,15 @@ class MarketSnapshot(Base):
 
     __table_args__ = (Index("ix_snapshot_date", "snapshot_date"),)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary representation."""
         return {
             "id": self.id,
-            "snapshot_date": self.snapshot_date.isoformat() if self.snapshot_date else None,
+            "snapshot_date": (
+                self.snapshot_date.isoformat()
+                if self.snapshot_date is not None
+                else None
+            ),
             "total_companies_scored": self.total_companies_scored,
             "average_growth_score": self.average_growth_score,
             "average_financial_score": self.average_financial_score,
@@ -313,9 +333,11 @@ class AuditTrailRecord(Base):
 
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
 
-    __table_args__ = (Index("ix_audit_company_batch", "company_id", "gathering_batch_id"),)
+    __table_args__ = (
+        Index("ix_audit_company_batch", "company_id", "gathering_batch_id"),
+    )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary representation."""
         return {
             "id": self.id,
@@ -329,9 +351,129 @@ class AuditTrailRecord(Base):
             "financial_health_score": self.financial_health_score,
             "competitive_position_score": self.competitive_position_score,
             "classification": self.classification,
-            "analysis_started_at": self.analysis_started_at.isoformat() if self.analysis_started_at else None,
-            "analysis_completed_at": self.analysis_completed_at.isoformat() if self.analysis_completed_at else None,
+            "analysis_started_at": (
+                self.analysis_started_at.isoformat()
+                if self.analysis_started_at is not None
+                else None
+            ),
+            "analysis_completed_at": (
+                self.analysis_completed_at.isoformat()
+                if self.analysis_completed_at is not None
+                else None
+            ),
             "data_completeness": self.data_completeness,
             "confidence_level": self.confidence_level,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "created_at": (
+                self.created_at.isoformat() if self.created_at is not None else None
+            ),
         }
+
+
+class ResearchRunRecord(Base):
+    __tablename__ = "research_runs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    run_id = Column(String(255), unique=True, index=True, nullable=False)
+    market = Column(String(255), nullable=False)
+    seed_company = Column(String(500), nullable=False)
+    status = Column(String(50), nullable=False, default="completed")
+
+    strict_provenance = Column(String(10), nullable=False, default="true")
+    min_readiness_score = Column(Float, nullable=True)
+    max_contradictions = Column(Integer, nullable=True)
+    min_total_sources = Column(Integer, nullable=True)
+
+    summary = Column(JSON, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+
+    stages = relationship(
+        "ResearchStageRecord", back_populates="run", cascade="all, delete-orphan"
+    )
+    artifacts = relationship(
+        "ResearchArtifactRecord", back_populates="run", cascade="all, delete-orphan"
+    )
+    sources = relationship(
+        "SourceDocumentRecord", back_populates="run", cascade="all, delete-orphan"
+    )
+
+
+class ResearchStageRecord(Base):
+    __tablename__ = "research_stages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    run_id = Column(Integer, ForeignKey("research_runs.id"), nullable=False, index=True)
+    stage_name = Column(String(100), nullable=False, index=True)
+    stage_order = Column(Integer, nullable=False)
+    status = Column(String(50), nullable=True)
+    metrics = Column(JSON, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+
+    run = relationship("ResearchRunRecord", back_populates="stages")
+
+
+class ResearchArtifactRecord(Base):
+    __tablename__ = "research_artifacts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    run_id = Column(Integer, ForeignKey("research_runs.id"), nullable=False, index=True)
+    artifact_name = Column(String(255), nullable=False)
+    artifact_path = Column(String(1000), nullable=True)
+    payload = Column(JSON, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+
+    run = relationship("ResearchRunRecord", back_populates="artifacts")
+
+
+class SourceDocumentRecord(Base):
+    __tablename__ = "source_documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    run_id = Column(Integer, ForeignKey("research_runs.id"), nullable=False, index=True)
+    company_id = Column(String(255), nullable=False, index=True)
+    source_url = Column(String(2000), nullable=False)
+    source_domain = Column(String(255), nullable=True, index=True)
+    source_type = Column(String(100), nullable=True, index=True)
+    observed_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+
+    run = relationship("ResearchRunRecord", back_populates="sources")
+
+
+class MetricObservationRecord(Base):
+    __tablename__ = "metric_observations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    run_id = Column(Integer, ForeignKey("research_runs.id"), nullable=False, index=True)
+    company_id = Column(String(255), nullable=False, index=True)
+    metric_key = Column(String(100), nullable=False, index=True)
+    metric_value = Column(JSON, nullable=True)
+    source_url = Column(String(2000), nullable=True)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+
+
+class EvidenceReadinessRecord(Base):
+    __tablename__ = "evidence_readiness"
+
+    id = Column(Integer, primary_key=True, index=True)
+    run_id = Column(Integer, ForeignKey("research_runs.id"), nullable=False, index=True)
+    company_id = Column(String(255), nullable=False, index=True)
+    company_name = Column(String(500), nullable=False)
+    readiness_score = Column(Float, nullable=False)
+    readiness_level = Column(String(100), nullable=False, index=True)
+    source_count = Column(Integer, nullable=False, default=0)
+    source_domain_count = Column(Integer, nullable=False, default=0)
+    metric_source_coverage = Column(Float, nullable=False, default=0.0)
+    metric_explainability = Column(Float, nullable=False, default=0.0)
+    unsupported_metrics = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+
+
+class ContradictionRecord(Base):
+    __tablename__ = "research_contradictions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    run_id = Column(Integer, ForeignKey("research_runs.id"), nullable=False, index=True)
+    company_id = Column(String(255), nullable=False, index=True)
+    metric_key = Column(String(100), nullable=False, index=True)
+    contradiction_type = Column(String(100), nullable=False)
+    details = Column(JSON, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
