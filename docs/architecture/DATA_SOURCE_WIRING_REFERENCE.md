@@ -943,10 +943,125 @@ Added to `Settings` class in `config.py`:
 
 ### What Remains (Phase 3+)
 
-- Create `DefaultFactAggregator` in `aggregation/default.py`
-- Create signal extraction in `signals/default.py`
+- Create `DefaultFactAggregator` in `aggregation/default.py` ✅ Done (Phase 3)
+- Create signal extraction in `signals/default.py` ✅ Done (Phase 3)
 - Refactor `discover_companies()` to iterate registry adapters instead of hardcoded catalog
 - Refactor `build_company_profile()` to iterate registry enrichment adapters
 - Wire registry into `run_market_intelligence()`
 - Enhance quality gates to use `RawDataSource` counts
 - Enhance scoring to use `SignalExtraction` confidence
+
+---
+
+## Appendix D: Phase 3 Implementation Log (2026-02-24)
+
+**Objective:** Create the three new pipeline stages: fact aggregation, signal extraction, and signal-based Company construction.
+
+### Files Created
+
+| File | Purpose | Size |
+|------|---------|------|
+| `src/solstein/research/aggregate.py` | `DefaultFactAggregator` — cross-references `RawDataRecord` into `AggregatedDataRecord` | ~470 lines |
+| `src/solstein/research/signals.py` | `extract_signals()` — maps `AggregatedFact` to `SignalExtraction` objects | ~425 lines |
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/solstein/research/gather.py` | Added `build_company_from_signals()` + helper functions (~300 lines added) |
+
+### DefaultFactAggregator (`research/aggregate.py`)
+
+Implements the `FactAggregator` protocol. Core algorithm:
+
+1. **Per-source-type extractors** — Dedicated extractor for each `DataSourceType` that maps raw_content dict keys to normalized `(fact_type, value)` tuples:
+   - `_extract_yahoo_finance()`: Handles both `CompanyResearch.model_dump()` (nested `financials.revenue`) and `GlobalMarketEnrichment` (top-level `revenue`) structures
+   - `_extract_news()`: Maps `PressCoverage` fields (sentiment_score, article counts)
+   - `_extract_crunchbase()`: Maps `FundingData` fields (total_raised → total_funding_raised)
+   - `_extract_patents()`: Maps `PatentResult` fields
+   - `_extract_linkedin()`: Maps `LinkedInData` fields
+   - `_extract_website()`: Maps `ProductInfo` fields
+
+2. **Fact grouping** — All observations for the same `fact_type` from different sources are grouped together
+
+3. **Numeric aggregation** — For numeric facts (revenue, employee_count, etc.):
+   - Best value: from highest-confidence source
+   - Agreement: fraction of sources within 10% of best value
+   - Contradiction detection: sources diverging >25% flagged with details
+   - Confidence: base confidence penalized by 15% per contradiction
+
+4. **Non-numeric aggregation** — For strings and lists:
+   - Best value: from highest-confidence source
+   - Agreement: exact match ratio
+
+5. **Data completeness** — Computed against 10 desired fact types: revenue, employee_count, market_cap, profit_margin, revenue_growth, total_patents, total_funding_raised, description, industry, headquarters
+
+### extract_signals() (`research/signals.py`)
+
+10 signal extractors, each mapping one or more fact types to a business signal:
+
+| Signal | Source Facts | Method | Purpose |
+|--------|-------------|--------|---------|
+| `revenue_level` | revenue | direct | Core financial metric |
+| `growth_rate` | revenue_growth | direct | Growth scoring |
+| `profitability` | profit_margin | direct | Financial health |
+| `company_size` | employee_count, market_cap | composite | Tier classification |
+| `valuation` | market_cap, valuation | direct | Tier classification |
+| `innovation` | total_patents, ai_related_patents | direct | R&D strength |
+| `ai_maturity` | ai_score, ai_signal_strength, ai_related_positions | composite | Threat assessment |
+| `hiring_velocity` | employee_growth_pct, open_positions | composite | Growth trajectory |
+| `market_sentiment` | sentiment_score, article_count | direct | Brand perception |
+| `funding` | total_funding_raised, funding_rounds, last_round_stage | direct | Runway / investor confidence |
+
+Each signal includes:
+- `signal_confidence`: inherited from aggregated fact, used downstream by scoring
+- `reasoning`: human-readable explanation of the signal value and sources
+- `calculation_method` and `calculation_formula`: audit trail for how the signal was derived
+
+### build_company_from_signals() (`research/gather.py`)
+
+Replaces the direct-yfinance approach with signal-based Company construction:
+
+**Key improvements over `build_company_profile()`:**
+- **Provenance populated AFTER data fetch** — `metric_sources` built from actual `AggregatedFact.sources_used`, not pre-assumed URLs
+- **Multi-source metric_observations** — Each metric observation includes the actual value and source URL/name
+- **Signal-derived justifications** — `metric_justifications` populated from signal `reasoning` (human-readable)
+- **Confidence levels derived from data quality** — `ConfidenceLevel` mapped from signal confidence (≥0.7 → CONFIRMED, ≥0.4 → ESTIMATED, else UNKNOWN)
+- **AI maturity from actual assessment** — Uses `ai_score` to derive `AIMaturity` enum instead of keyword-matching description text
+- **No hardcoded `saas_maturity=5`** — Left as default (1) when no data available
+
+Helper functions added:
+- `_confidence_from_signal()` — Maps 0-1 float to ConfidenceLevel
+- `_ai_maturity_from_score()` — Maps 0-10 AI score to AIMaturity enum
+- `_build_metric_sources()` — Builds metric→source URL mapping from facts
+- `_build_metric_observations()` — Builds metric→observation list from facts
+- `_build_metric_justifications()` — Builds metric→justification from signals
+
+### Protocol Conformance
+
+- `DefaultFactAggregator` passes `isinstance(agg, FactAggregator)` check
+- End-to-end test with 5 synthetic sources → 30 aggregated facts → 9 signals → Company with fully populated provenance fields
+
+### Verification
+
+- All Phase 3 modules import cleanly
+- 244 existing tests pass with zero regressions (14 pre-existing async failures unrelated)
+- End-to-end pipeline test: `RawDataSource[]` → `DefaultFactAggregator` → `extract_signals()` → `build_company_from_signals()` produces correct `Company` with verified fields
+
+### Design Decisions
+
+1. **Placed in `research/` not `adapters/`** — The aggregator and signal modules are pipeline stages, not adapter wrappers. They belong alongside `discovery.py`, `gather.py`, and `pipeline.py` in the research package.
+
+2. **Backward compatible** — `build_company_profile()` left intact. `build_company_from_signals()` is additive. Phase 4 will swap the call site in `pipeline.py`.
+
+3. **Flat extraction, no inheritance** — Per-source-type extractors are plain functions, not subclasses. This avoids over-abstraction for what is essentially a dict key mapping.
+
+4. **Contradiction threshold separation** — 10% for agreement, 25% for contradiction. Values between 10-25% are "soft disagreement" (not flagged as contradiction, but reduce agreement percentage).
+
+### What Remains (Phase 4: Pipeline Integration)
+
+- Refactor `discover_companies()` to iterate `DiscoverySource` adapters from registry
+- Refactor `build_company_profile()` call site in `pipeline.py` to use enrichment loop + `build_company_from_signals()`
+- Wire `SourceRegistry` into `run_market_intelligence()` (build once, pass through)
+- Enhance quality gates to use `RawDataSource` counts per company
+- Enhance scoring to weight by `SignalExtraction.signal_confidence`
