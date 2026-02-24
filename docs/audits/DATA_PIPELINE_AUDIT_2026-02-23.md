@@ -1379,5 +1379,332 @@ On a UTC+2 machine, Excel timestamps are 2 hours ahead of gather timestamps. Mix
 
 ---
 
-*Total issues cataloged across all three passes: **180+** across CRITICAL, HIGH, MEDIUM, and LOW severity.*
-*Audit covers 20+ source files, 3 SQL migrations, 2 scripts, pyproject.toml, and inter-module data flows.*
+---
+
+# PART 4: Data Origin & Batch Size Analysis
+
+*Appended 2026-02-23 after full provenance trace of information fetching pipelines and investigation of company count constraints.*
+
+---
+
+## 37. Why Only ~33 Companies — Not 100
+
+### 37.1 The Company Count Ceiling Stack
+
+The pipeline cannot reach 100 companies because of a stack of hard limits at every layer:
+
+```
+Layer 1: CLI Default               → max_companies = 25
+Layer 2: Pipeline Function Default  → max_companies = 25
+Layer 3: Discovery Function Default → max_companies = 25
+Layer 4: Hardcoded Catalog Size     → 20 companies (energy) or 20 (LATAM)
+Layer 5: competitor_data.json       → 33 companies (energy market only)
+Layer 6: Deduplication              → ~4 exact matches removed
+Layer 7: Final Truncation           → scored[:max_companies]
+```
+
+**Maximum possible companies for the energy/Dutch market:**
+- 20 (hardcoded catalog) + 33 (competitor_data.json) - 4 (dedup) = **49 unique candidates**
+- Default truncation at 25 → **25 in output**
+- Even with `max_companies=100` → **49 is the absolute ceiling**
+
+**Maximum possible companies for LATAM or ANY other market:**
+- 20 (hardcoded catalog only — no enrichment path exists)
+- **20 is the absolute ceiling regardless of max_companies setting**
+
+### 37.2 Constraint-by-Constraint Trace
+
+| # | File:Line | Constraint | Value | Type |
+|---|-----------|-----------|-------|------|
+| C-1 | `scripts/discover_and_research_market.py:13` | `--max-companies` CLI default | 25 | Overridable default |
+| C-2 | `scripts/supabase_dual_write_smoke_test.py:21` | `MAX_COMPANIES` env var default | 25 | Overridable default |
+| C-3 | `research/pipeline.py:24` | `max_companies` function parameter | 25 | Overridable default |
+| C-4 | `research/discovery.py:468` | `max_companies` function parameter | 25 | Overridable default |
+| C-5 | `research/discovery.py:36-239` | Energy market catalog | 20 entries | Hard-coded ceiling |
+| C-6 | `research/discovery.py:241-462` | LATAM/fallback catalog | 20 entries | Hard-coded ceiling |
+| C-7 | `data/input/competitor_data.json` | Competitor dataset | 33 entries | Data ceiling |
+| C-8 | `research/discovery.py:479` | Enrichment gate: `max_companies > len(catalog)` | Only when 25 > 20 | Conditional filter |
+| C-9 | `research/discovery.py:482-505` | Name deduplication | ~4 exact matches | Filter |
+| C-10 | `research/discovery.py:561` | `scored[:max_companies]` | Truncation to 25 | Hard cap |
+| C-11 | `research/discovery.py:475-478` | Enrichment only for energy-type markets | Other markets get 0 enrichment | Conditional filter |
+
+### 37.3 Off-by-One in Enrichment Gate
+
+`discovery.py:479`:
+```python
+) and max_companies > len(catalog):
+```
+
+If `max_companies == len(catalog)` (e.g., both are 20), enrichment from `competitor_data.json` is **skipped entirely**. Setting `max_companies=20` for the energy market yields only the 20 hardcoded companies, discarding the 29 potential additions from the JSON.
+
+### 37.4 Silent Enrichment Failure
+
+`discovery.py:506-510`: If `CompetitorDataLoader` fails for any reason (file not found, JSON parse error, config path mismatch), the entire enrichment is silently skipped and the catalog stays at 20. The `config.py` default `data_dir` is `data/input`, but if `DATA__DATA_DIR=data` is set in `.env`, the loader looks for `data/competitor_data.json` (doesn't exist) instead of `data/input/competitor_data.json`.
+
+### 37.5 No Dynamic Discovery Exists
+
+**There is no mechanism to discover companies at runtime.** Every company comes from:
+1. A hardcoded Python list literal in `discovery.py` (40 total across 2 catalogs), OR
+2. A static JSON file (`competitor_data.json`, 33 entries)
+
+Despite the function name `discover_companies()`, there is zero API-based discovery. No web search, no database query, no market data scan. The "discovery" is a static catalog lookup with a relevance scoring overlay.
+
+---
+
+## 38. Complete Data Origin Map
+
+### 38.1 Two Separate Pipelines Exist
+
+The codebase contains **two distinct pipeline entry points** that are not connected:
+
+#### Pipeline A: Discovery-First (`discover_and_research_market.py` → `pipeline.py`)
+
+```
+discover_companies()          [hardcoded catalogs + competitor_data.json]
+    → build_company_profile() [yfinance for tickers, defaults for non-tickers]
+    → validate_provenance()   [structural checks only]
+    → detect_contradictions()
+    → evaluate_evidence()
+    → calculate_scores()
+    → export (JSON + Excel + optional DB)
+```
+
+**Actual external API calls: yfinance ONLY**
+
+#### Pipeline B: Markdown-First (`run_market_pipeline.py` → `BatchExtractor`)
+
+```
+BatchExtractor.extract_directory()  [reads .md files from data/input/custom_market_runs/]
+    → validate_provenance()          [structural checks]
+    → calculate_scores()
+    → export (JSON + Excel)
+```
+
+**Actual external API calls: NONE** — reads pre-gathered markdown profiles from disk.
+
+These pipelines are **completely independent**. Pipeline A doesn't read markdown files. Pipeline B doesn't call `discover_companies()` or yfinance.
+
+### 38.2 55 Markdown Research Profiles Exist But Are Disconnected
+
+55 hand-gathered research markdown files sit in `data/input/custom_market_runs/2026-02-23/`:
+
+| Directory | Count | Market |
+|-----------|-------|--------|
+| `dutch_market/` | 4 | Initial Dutch energy research |
+| `dutch_market_bulk/` | 33 | Bulk Dutch energy profiles |
+| `latam_market/` | 3 | Initial LATAM financial research |
+| `latam_market_bulk/` | 15 | Bulk LATAM financial profiles |
+| **Total** | **55** | |
+
+**These files are never read by Pipeline A** (`run_market_intelligence`). They are only consumable by Pipeline B (`run_market_pipeline.py`), which is referenced in documentation (`docs/guides/data-gathering-stages.md`) but has no evidence of ever being run.
+
+### 38.3 Actual External Data Sources Called During Pipeline A
+
+| Data Source | Module | Called? | Evidence |
+|-------------|--------|---------|----------|
+| **Hardcoded Python catalogs** | `discovery.py` | YES | Always — this is the only discovery mechanism |
+| **`competitor_data.json`** | `loaders.py` | YES | Only for energy markets when `max_companies > 20` |
+| **Yahoo Finance (yfinance)** | `gather.py` | YES | For companies with ticker symbols |
+| Exa web search | `web_search_client.py` | **NO** | Not imported by any pipeline module |
+| Google search | `web_search_client.py` | **NO** | Not imported by any pipeline module |
+| NewsAPI.org | `additional_sources.py` | **NO** | Not imported by any pipeline module |
+| Crunchbase API | `additional_sources.py` | **NO** | Not imported by any pipeline module |
+| PatentsView API | `additional_sources.py` | **NO** | Not imported by any pipeline module |
+| USPTO PEDS | `patent_client.py` | **NO** | Not imported by any pipeline module |
+| Google Patents | `patent_client.py` | **NO** | Not imported by any pipeline module |
+| DuckDuckGo patents | `patent_client.py` | **NO** | Not imported by any pipeline module |
+| LinkedIn | `additional_sources.py` | **NO** | Not imported by any pipeline module |
+| Website scraping | `additional_sources.py` | **NO** | Not imported by any pipeline module |
+
+**11 of 13 data source capabilities are dead code — never invoked by either pipeline.**
+
+### 38.4 Data Source Capabilities vs. Actual Usage
+
+```
+┌──────────────────────────────────────────────────────────┐
+│              WHAT EXISTS IN THE CODEBASE                  │
+│                                                          │
+│  web_search_client.py ─── Exa API, Google Search         │
+│  additional_sources.py ── NewsAPI, Crunchbase, LinkedIn,  │
+│                           PatentsView, Web Scraping       │
+│  patent_client.py ─────── USPTO, Google Patents, DDG      │
+│  fetchers.py ──────────── Yahoo Finance, Currency Rates   │
+│  loaders.py ───────────── competitor_data.json            │
+│  markdown_extractor.py ── Markdown profile parsing        │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+                         vs.
+┌──────────────────────────────────────────────────────────┐
+│            WHAT THE PIPELINE ACTUALLY USES                │
+│                                                          │
+│  1. Hardcoded Python dicts (discovery.py catalogs)       │
+│  2. competitor_data.json (33 static entries)             │
+│  3. yfinance (Yahoo Finance ticker lookups)              │
+│                                                          │
+│  Everything else is dead code.                           │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 39. Pipeline Has Never Run To Completion On Disk
+
+### 39.1 No Pipeline A Artifacts Exist
+
+The `data/output/` directory contains only demo script outputs:
+
+| File | Source | Companies |
+|------|--------|-----------|
+| `demo_output/solstein_demo_20260218_065816.csv` | `demo_solstein.py` | 5 |
+| `demo_output/solstein_demo_20260218_065816.xlsx` | `demo_solstein.py` | 5 |
+| `demo_output/solstein_demo_20260219_223205.csv` | `demo_solstein.py` | 2 |
+| `demo_output/solstein_demo_20260219_223205.xlsx` | `demo_solstein.py` | 2 |
+| `demo_output/solstein_demo_20260219_224433.csv` | `demo_solstein.py` | 2 |
+| `demo_output/solstein_demo_20260219_224433.xlsx` | `demo_solstein.py` | 2 |
+
+**Zero** `discovery_candidates.json`, `extracted.json`, `scored.json`, `run_summary.json`, `stage_report.json`, `evidence_readiness.json`, `provenance_report.json`, `contradictions_report.json`, or `dashboard.xlsx` files exist anywhere on disk.
+
+The full research pipeline (`run_market_intelligence`) has **never been run to completion** — or outputs were cleaned up / gitignored.
+
+### 39.2 No Pipeline B Artifacts Exist
+
+Despite 55 markdown research profiles existing in `data/input/custom_market_runs/`, `run_market_pipeline.py` has never been executed (no output directories exist for it).
+
+### 39.3 Demo Script Bypasses The Entire Pipeline
+
+`scripts/demo_solstein.py` is the only script that has produced output. It:
+- Reads directly from `competitor_data.json` with a hard cap of 5 companies
+- Bypasses discovery, evidence evaluation, contradiction detection, and quality gates
+- Uses a simplified scoring path
+- Is not representative of the full pipeline's capabilities
+
+---
+
+## 40. Root Causes: Why Not 100 Companies
+
+### 40.1 Structural Limitations (Cannot Be Overcome Without Code Changes)
+
+| Cause | Impact | Fix Required |
+|-------|--------|-------------|
+| **Only 2 hardcoded catalogs exist** (20 + 20 = 40 companies) | Universe is 40 + 33 = 49 max (energy) or 20 max (any other market) | Add catalogs for more markets, or implement dynamic discovery |
+| **No external discovery API** | Cannot find companies at runtime | Integrate Exa, Crunchbase, or similar for dynamic company discovery |
+| **`competitor_data.json` only covers energy market** | LATAM and all other markets have no enrichment source | Create equivalent JSON datasets for other markets |
+| **Enrichment only works for energy-type markets** | `discovery.py:475-478` gates enrichment on market name containing "dutch"/"netherlands"/"energy" | Remove market-type gate or make enrichment market-agnostic |
+
+### 40.2 Configuration Limitations (Overridable But Not Obvious)
+
+| Cause | Default | Max Achievable |
+|-------|---------|---------------|
+| `max_companies` default is 25 | 25 | Set `--max-companies 100` but still capped by data ceiling |
+| No CLI option to add extra catalogs | N/A | Would require code change to load additional market catalogs |
+| No CLI option to enable web search enrichment | N/A | Would require integrating `web_search_client.py` into pipeline |
+
+### 40.3 Dead Code That Could Help
+
+The codebase already contains implementations for:
+- **Web search** (`web_search_client.py`) — could discover new companies via Exa/Google
+- **News aggregation** (`additional_sources.py`) — could identify trending/emerging companies
+- **Patent search** (`patent_client.py`) — could enrich company profiles with IP data
+
+None of these are wired into the pipeline. Connecting them would:
+1. Enable dynamic company discovery (breaking the 49-company ceiling)
+2. Enrich profiles with multi-source data (improving evidence readiness scores)
+3. Enable cross-validation (catching data inaccuracies)
+
+### 40.4 The "33" Number Explained
+
+The number 33 likely comes from `competitor_data.json` containing exactly 33 entries. When users count "how many companies does Solstein know about", they see the 33 in the JSON file. But the pipeline's actual output depends on which path is taken:
+
+| Scenario | Output Count | Explanation |
+|----------|-------------|-------------|
+| Energy market, default settings | **25** | 49 candidates truncated to `max_companies=25` |
+| Energy market, `max_companies=100` | **49** | Full universe: 20 catalog + 33 JSON - 4 dedup |
+| Energy market, enrichment fails | **20** | Only hardcoded catalog, JSON silently skipped |
+| LATAM market, any settings | **20** | Only hardcoded catalog, no enrichment path |
+| Any unknown market | **20** | Falls through to LATAM catalog as default |
+| Demo script | **2-5** | Hard-capped in demo code |
+
+---
+
+## 41. Disconnected Data Assets
+
+### 41.1 Markdown Profiles Not Consumed By Main Pipeline
+
+55 research markdown files in `data/input/custom_market_runs/` are only consumable by `scripts/run_market_pipeline.py` (Pipeline B), which:
+- Reads `.md` files via `BatchExtractor.extract_directory()`
+- Scores and exports
+- Does NOT call yfinance, web search, or any enrichment API
+- Has never been run (no output artifacts exist)
+
+**Pipeline A** (`run_market_intelligence`) does not read these files. It uses `discover_companies()` + `build_company_profile()`, which only touch the hardcoded catalogs, `competitor_data.json`, and yfinance.
+
+The two pipelines produce **different Company objects** from **different data sources** with **no shared lineage**.
+
+### 41.2 `fetchers.py` Partially Dead
+
+`src/solstein/data/fetchers.py` contains:
+- `YahooFinanceFetcher` — used by `gather.py` indirectly via `yfinance`
+- `CurrencyRateFetcher` — **not imported by any pipeline module**
+- `CurrencyConverter` — **not imported by any pipeline module**
+- `GlobalMarketLoader` — **not imported by any pipeline module**
+- `get_market_summary()` — **not imported by any pipeline module**
+
+The currency conversion and market summary capabilities exist but are never used in either pipeline.
+
+### 41.3 `additional_sources.py` Exists in TWO Locations
+
+The same module is duplicated:
+- `src/solstein/data/additional_sources.py`
+- `src/solstein/infrastructure/data_loaders/additional_sources.py`
+
+Neither copy is imported by either pipeline. Both are dead code.
+
+Similarly `patent_client.py` is duplicated:
+- `src/solstein/data/patent_client.py`
+- `src/solstein/infrastructure/data_loaders/patent_client.py`
+
+Both are dead code.
+
+---
+
+## 42. Updated Risk Matrix — Data Origin Findings
+
+| Risk | Likelihood | Impact | Issues | Status |
+|------|-----------|--------|--------|--------|
+| **Total company universe capped at 49** | CERTAIN | HIGH | §37.1 | Structural — no dynamic discovery |
+| **Non-energy markets limited to 20 companies** | CERTAIN | HIGH | C-6, C-11 | No enrichment path exists |
+| **11 of 13 data source modules are dead code** | CERTAIN | HIGH | §38.3 | Never integrated into pipeline |
+| **Pipeline never run to completion** | HIGH | HIGH | §39.1 | Only demo outputs exist on disk |
+| **Two disconnected pipelines** | CERTAIN | MEDIUM | §38.1 | Markdown profiles unreachable from main pipeline |
+| **Silent enrichment failure drops to 20 companies** | MEDIUM | HIGH | C-8, §37.4 | Config path mismatch can trigger this |
+| **Markdown profiles are a wasted data asset** | CERTAIN | MEDIUM | §41.1 | 55 files not consumed by primary pipeline |
+| **Duplicate dead modules** | CERTAIN | LOW | §41.3 | `additional_sources.py` and `patent_client.py` in 2 locations each |
+
+---
+
+## 43. Recommendations — Reaching 100+ Companies
+
+### Phase 1: Unlock Existing Data (no new code needed)
+
+1. **Raise `max_companies` default** to 50 or 100 in all three locations (CLI, pipeline, discovery).
+2. **Add more companies to hardcoded catalogs** — the energy catalog has 20 entries, could easily be 50-100 with known players.
+3. **Create additional market catalogs** — currently only energy and LATAM exist. Add tech, healthcare, fintech-global, etc.
+4. **Create `competitor_data.json` equivalents for other markets** — the LATAM path has no enrichment dataset.
+
+### Phase 2: Wire Up Dead Code (moderate effort)
+
+5. **Integrate `web_search_client.py` into discovery** — use Exa search to find additional companies dynamically when catalogs are exhausted.
+6. **Integrate `additional_sources.py` into gather** — enrich company profiles with news, funding, and patent data.
+7. **Integrate `patent_client.py` into gather** — replace keyword-based AI maturity with actual patent analysis.
+8. **Connect Pipeline B into Pipeline A** — use markdown profiles as an additional data source in `discover_companies()` or `build_company_profile()`.
+
+### Phase 3: True Dynamic Discovery (significant effort)
+
+9. **Implement API-based company discovery** — use Exa, Crunchbase, or industry databases to find companies matching market keywords at runtime.
+10. **Implement competitor graph traversal** — start from seed company, find competitors, find their competitors, building a network.
+11. **Implement automatic catalog refresh** — periodically re-fetch financials for cataloged companies and add newly discovered ones.
+
+---
+
+*Total issues cataloged across all four passes: **190+** across CRITICAL, HIGH, MEDIUM, and LOW severity.*
+*Audit covers 20+ source files, 3 SQL migrations, 3 scripts, pyproject.toml, inter-module data flows, data provenance, and batch size constraints.*
