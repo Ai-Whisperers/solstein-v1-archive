@@ -10,7 +10,7 @@ from alembic import context
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from solstein.config import Settings
-from solstein.core.database import Base
+from solstein.infrastructure.database import Base
 
 config = context.config
 

@@ -3,7 +3,9 @@ version: '3.8'
 services:
   # SolStein API
   api:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     ports:
       - "8000:8000"
     environment:
@@ -11,9 +13,9 @@ services:
       API__PORT: 8000
       API__DEBUG: "true"
     volumes:
-      - ./data:/app/data
-      - ./exports:/app/exports
-      - ./logs:/app/logs
+      - ../data:/app/data
+      - ../exports:/app/exports
+      - ../logs:/app/logs
     command: >
       sh -c "
         uvicorn solstein.api.main:app --host 0.0.0.0 --port 8000 --reload
@@ -25,7 +27,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -38,12 +40,12 @@ services:
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3001:3000"
+      - "3002:3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
 

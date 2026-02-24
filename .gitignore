@@ -191,3 +191,7 @@ Desktop.ini
 
 # Local Sisyphus work area
 .sisyphus/
+
+# Secrets scanning
+.trufflehog.cache
+secrets.json

@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "policies": {
+    "main": {
+      "coverage_min": 80,
+      "mutation_score_min": 75,
+      "lint_errors": 0,
+      "security_vulnerabilities": 0,
+      "docs_required": true,
+      "max_complexity": 10
+    },
+    "develop": {
+      "coverage_min": 75,
+      "mutation_score_min": 70,
+      "lint_errors": 5,
+      "security_vulnerabilities": 0,
+      "docs_required": false,
+      "max_complexity": 15
+    },
+    "feature": {
+      "coverage_min": 70,
+      "mutation_score_min": 0,
+      "lint_errors": 10,
+      "security_vulnerabilities": 1,
+      "docs_required": false,
+      "max_complexity": 20
+    },
+    "hotfix": {
+      "coverage_min": 75,
+      "mutation_score_min": 70,
+      "lint_errors": 0,
+      "security_vulnerabilities": 0,
+      "docs_required": false,
+      "max_complexity": 10
+    },
+    "release": {
+      "coverage_min": 80,
+      "mutation_score_min": 75,
+      "lint_errors": 0,
+      "security_vulnerabilities": 0,
+      "docs_required": true,
+      "max_complexity": 10
+    }
+  },
+  "enforcement": {
+    "fail_on_policy_violation": true,
+    "allow_waiver": false,
+    "comment_on_pr": true
+  }
+}

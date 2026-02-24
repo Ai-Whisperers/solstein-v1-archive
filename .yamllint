@@ -1,0 +1,42 @@
+extends:
+  - default
+
+rules:
+  line-length:
+    max: 120
+    level: warning
+  indentation:
+    spaces: 2
+  comments:
+    min-spaces-from-content: 1
+  comments-indentation: false
+  document-start: disable
+  trailing-spaces: error
+  new-line-at-end-of-file: enable
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 0
+  empty-lines:
+    max: 1
+  colons:
+    max-spaces-before: 0
+    max-spaces-after: 1
+
+ignore: |
+  .git/
+  .github/
+  dashboard/
+  .venv/
+  venv/
+  node_modules/
+  build/
+  dist/
+  *.egg-info/
+  .pytest_cache/
+  .ruff_cache/
+  .mypy_cache/
+
+exclude: |
+  .sisyphus/
+  graveyard/
+  legacy/
