@@ -238,10 +238,10 @@ class Settings(BaseSettings):
             GOOGLE_API_KEY - For web search data extraction
         """
         github_token = os.getenv("GITHUB_TOKEN")
-        if not github_token:
-            logger.warning(
-                "GITHUB_TOKEN not configured. GitHub data gathering will be disabled. "
-                "Get a token from: https://github.com/settings/tokens"
+        if github_token is None or github_token == "":
+            raise ConfigurationError(
+                "GITHUB_TOKEN environment variable is required. "
+                "Get a token from: https://github.com/settings/tokens and set it before starting."
             )
 
         companies_house_key = os.getenv("COMPANIES_HOUSE_API_KEY")
