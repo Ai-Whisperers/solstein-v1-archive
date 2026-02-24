@@ -4,8 +4,22 @@ Provides SQLAlchemy engine, session factory, and async context management
 for PostgreSQL persistence of scoring results and market analysis data.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator, Callable
+
+    from sqlalchemy.engine import Engine
+
 from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import Session, declarative_base
 from sqlalchemy.pool import QueuePool
 
@@ -24,14 +38,14 @@ class DatabaseManager:
             settings: Application settings with database configuration
         """
         self.settings = settings
-        self.engine = None
-        self.session_factory = None
-        self._sync_engine = None
-        self._sync_session_factory = None
+        self.engine: AsyncEngine | None = None
+        self.session_factory: async_sessionmaker[AsyncSession] | None = None
+        self._sync_engine: Engine | None = None
+        self._sync_session_factory: Callable[[], Session] | None = None
 
     def init_async(self):
         """Initialize async engine and session factory."""
-        url = self.settings.database.url
+        url = self.settings.get_database_url()
         if url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
@@ -43,21 +57,28 @@ class DatabaseManager:
             poolclass=QueuePool,
         )
 
-        self.session_factory = async_sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
+        self.session_factory = async_sessionmaker(
+            self.engine, class_=AsyncSession, expire_on_commit=False
+        )
 
     def init_sync(self):
         """Initialize sync engine and session factory for Alembic migrations."""
         self._sync_engine = create_engine(
-            self.settings.database.url,
+            self.settings.get_database_url(),
             pool_size=self.settings.database.pool_size,
             max_overflow=10,
             echo=self.settings.database.echo,
             poolclass=QueuePool,
         )
 
-        self._sync_session_factory = lambda: Session(self._sync_engine)
+        def _factory() -> Session:
+            if self._sync_engine is None:
+                raise RuntimeError("Sync database engine not initialized")
+            return Session(self._sync_engine)
 
-    async def get_session(self) -> AsyncSession:
+        self._sync_session_factory = _factory
+
+    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         """Get an async database session.
 
         Yields:
@@ -66,7 +87,7 @@ class DatabaseManager:
         Raises:
             RuntimeError: If async engine not initialized
         """
-        if not self.engine:
+        if self.engine is None or self.session_factory is None:
             raise RuntimeError("Database not initialized. Call init_async() first.")
 
         async with self.session_factory() as session:
