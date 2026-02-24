@@ -1,8 +1,11 @@
 from datetime import UTC, datetime
 from urllib.parse import urlparse
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+
+from solstein.research.sources import canonicalize_url
 
 from .database_models import (
     ContradictionRecord,
@@ -26,13 +29,39 @@ def persist_research_run(
     min_total_sources: int | None,
     stage_report: dict[str, object],
     artifacts: dict[str, object],
-) -> int:
+) -> UUID:
+    existing = session.execute(
+        select(ResearchRunRecord).where(ResearchRunRecord.run_id == run_id)
+    ).scalar_one_or_none()
+
+    if existing is not None:
+        session.query(ResearchStageRecord).filter(
+            ResearchStageRecord.run_id == existing.id
+        ).delete()
+        session.query(ResearchArtifactRecord).filter(
+            ResearchArtifactRecord.run_id == existing.id
+        ).delete()
+        session.query(SourceDocumentRecord).filter(
+            SourceDocumentRecord.run_id == existing.id
+        ).delete()
+        session.query(MetricObservationRecord).filter(
+            MetricObservationRecord.run_id == existing.id
+        ).delete()
+        session.query(EvidenceReadinessRecord).filter(
+            EvidenceReadinessRecord.run_id == existing.id
+        ).delete()
+        session.query(ContradictionRecord).filter(
+            ContradictionRecord.run_id == existing.id
+        ).delete()
+        session.delete(existing)
+        session.flush()
+
     run = ResearchRunRecord(
         run_id=run_id,
         market=market,
         seed_company=seed_company,
         status="completed",
-        strict_provenance="true" if strict_provenance else "false",
+        strict_provenance=strict_provenance,
         min_readiness_score=min_readiness_score,
         max_contradictions=max_contradictions,
         min_total_sources=min_total_sources,
@@ -90,12 +119,13 @@ def persist_research_run(
                 for source_url in source_links:
                     if not isinstance(source_url, str):
                         continue
-                    parsed = urlparse(source_url)
+                    canonical = canonicalize_url(source_url)
+                    parsed = urlparse(canonical)
                     session.add(
                         SourceDocumentRecord(
                             run_id=run.id,
                             company_id=company_id,
-                            source_url=source_url,
+                            source_url=canonical,
                             source_domain=(
                                 parsed.netloc.lower() if parsed.netloc else None
                             ),
@@ -112,12 +142,19 @@ def persist_research_run(
                     for row in rows:
                         if not isinstance(row, dict):
                             continue
+                        raw_value = row.get("value")
+                        metric_value: float | None
+                        if isinstance(raw_value, (int, float)):
+                            metric_value = float(raw_value)
+                        else:
+                            metric_value = None
                         session.add(
                             MetricObservationRecord(
                                 run_id=run.id,
                                 company_id=company_id,
                                 metric_key=str(metric_key),
-                                metric_value=row.get("value"),
+                                metric_value=metric_value,
+                                metric_value_raw=raw_value,
                                 source_url=(
                                     str(row.get("source"))
                                     if row.get("source") is not None

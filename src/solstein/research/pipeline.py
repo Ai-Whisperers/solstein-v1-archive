@@ -1,5 +1,5 @@
+import hashlib
 import json
-import uuid
 from pathlib import Path
 
 from solstein.analytics.scoring import GrowthScorer
@@ -14,6 +14,7 @@ from .discovery import DiscoveryCandidate, discover_companies
 from .evidence import evaluate_market_evidence
 from .gather import build_company_profile
 from .reconcile import detect_market_contradictions
+from .sources import canonicalize_url
 
 
 def run_market_intelligence(
@@ -86,7 +87,7 @@ def run_market_intelligence(
     unique_sources = set()
     for company in companies:
         for source in company.source_links:
-            unique_sources.add(source)
+            unique_sources.add(canonicalize_url(source))
     total_sources = len(unique_sources)
     avg_sources_per_company = total_sources / len(companies) if companies else 0.0
 
@@ -258,9 +259,27 @@ def run_market_intelligence(
             if db_manager._sync_engine is None:
                 raise RuntimeError("Synchronous database engine not initialized")
             Base.metadata.create_all(bind=db_manager._sync_engine)
+
+            extra_keywords_norm = sorted(extra_keywords or [])
+            run_id_seed = json.dumps(
+                {
+                    "market": market,
+                    "seed_company": seed_company,
+                    "max_companies": max_companies,
+                    "extra_keywords": extra_keywords_norm,
+                    "strict_provenance": strict_provenance,
+                    "min_readiness_score": min_readiness_score,
+                    "max_contradictions": max_contradictions,
+                    "min_total_sources": min_total_sources,
+                    "pipeline": "research.v1",
+                },
+                sort_keys=True,
+            ).encode("utf-8")
+            stable_run_id = hashlib.sha256(run_id_seed).hexdigest()
+
             persist_research_run(
                 session=session,
-                run_id=str(uuid.uuid4()),
+                run_id=stable_run_id,
                 market=market,
                 seed_company=seed_company,
                 strict_provenance=strict_provenance,

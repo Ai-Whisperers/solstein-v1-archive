@@ -20,6 +20,7 @@ from ..domain.models import (
     FinancialMetric,
     ThreatLevel,
 )
+from ..research.sources import canonicalize_url, is_probably_url
 
 REQUIRED_PROVENANCE_METRICS = [
     "revenue",
@@ -421,13 +422,75 @@ class BatchExtractor:
         if not profile.source_links:
             violations.append("Missing source_links")
 
+        canonical_sources = {
+            canonicalize_url(link)
+            for link in (profile.source_links or [])
+            if isinstance(link, str) and link.strip()
+        }
+
         for metric in REQUIRED_PROVENANCE_METRICS:
             sources = profile.metric_sources.get(metric, [])
             justification = profile.metric_justifications.get(metric, "").strip()
+
+            if isinstance(sources, list):
+                bad_urls = [
+                    s
+                    for s in sources
+                    if not isinstance(s, str) or not is_probably_url(s)
+                ]
+                if bad_urls:
+                    violations.append(
+                        f"Metric '{metric}' contains non-url metric_sources entries: {bad_urls[:3]}"
+                    )
+
+                missing_from_sources = [
+                    s
+                    for s in sources
+                    if isinstance(s, str)
+                    and s.strip()
+                    and canonicalize_url(s) not in canonical_sources
+                ]
+                if missing_from_sources:
+                    violations.append(
+                        f"Metric '{metric}' has metric_sources not present in source_links: {missing_from_sources[:3]}"
+                    )
+
             if not sources and not justification:
                 violations.append(
                     f"Metric '{metric}' has neither metric_sources nor metric_justification"
                 )
+
+            observations = (profile.metric_observations or {}).get(metric, [])
+            if isinstance(observations, list):
+                expected = {
+                    canonicalize_url(s)
+                    for s in sources
+                    if isinstance(s, str) and s.strip()
+                }
+                for obs in observations:
+                    if not isinstance(obs, dict):
+                        violations.append(
+                            f"Metric '{metric}' has a non-dict metric_observation entry"
+                        )
+                        continue
+
+                    if "source" not in obs or "value" not in obs:
+                        violations.append(
+                            f"Metric '{metric}' observation missing 'source' or 'value'"
+                        )
+                        continue
+
+                    src = obs.get("source")
+                    if isinstance(src, str) and src.strip():
+                        canon = canonicalize_url(src)
+                        if canon not in canonical_sources:
+                            violations.append(
+                                f"Metric '{metric}' observation source not present in source_links: {src}"
+                            )
+                        if expected and canon not in expected:
+                            violations.append(
+                                f"Metric '{metric}' observation source not present in metric_sources: {src}"
+                            )
 
         return violations
 

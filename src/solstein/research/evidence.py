@@ -2,6 +2,8 @@ from urllib.parse import urlparse
 
 from solstein.domain.models import Company
 
+from .sources import canonicalize_url
+
 REQUIRED_METRICS = [
     "revenue",
     "growth_rate",
@@ -29,6 +31,16 @@ def evaluate_company_evidence(company: Company) -> dict[str, object]:
     metric_sources = company.metric_sources or {}
     metric_justifications = company.metric_justifications or {}
 
+    evidence_sources = set(
+        canonicalize_url(link) for link in source_links if isinstance(link, str)
+    )
+    for sources in metric_sources.values():
+        if not isinstance(sources, list):
+            continue
+        for src in sources:
+            if isinstance(src, str):
+                evidence_sources.add(canonicalize_url(src))
+
     metric_with_sources = 0
     metric_with_justification = 0
     unsupported_metrics = 0
@@ -54,9 +66,11 @@ def evaluate_company_evidence(company: Company) -> dict[str, object]:
 
     total_required = len(REQUIRED_METRICS)
     metric_source_coverage = metric_with_sources / total_required
-    metric_explainability = (metric_with_sources + metric_with_justification) / total_required
-    domain_count = len(_domains(source_links))
-    source_count = len(source_links)
+    metric_explainability = (
+        metric_with_sources + metric_with_justification
+    ) / total_required
+    domain_count = len(_domains(list(evidence_sources)))
+    source_count = len(evidence_sources)
 
     source_count_score = min(1.0, source_count / 6)
     domain_diversity_score = min(1.0, domain_count / 4)
@@ -124,7 +138,9 @@ def evaluate_market_evidence(companies: list[Company]) -> dict[str, object]:
     return {
         "company_reports": reports,
         "average_readiness_score": round(avg_score, 2),
-        "investment_ready_count": sum(1 for level in levels if level == "investment_ready"),
+        "investment_ready_count": sum(
+            1 for level in levels if level == "investment_ready"
+        ),
         "decision_support_ready_count": sum(
             1 for level in levels if level == "decision_support_ready"
         ),
