@@ -6,6 +6,7 @@ to extract facts about company growth, funding, and announcements.
 
 import asyncio
 from datetime import UTC, datetime
+from typing import Any
 
 import requests
 
@@ -31,7 +32,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
 
         self.circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=45.0, name="GoogleSearchAPI")
 
-    async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
+    async def gather(self, company_name: str, context: dict[str, Any]) -> AgentTaskResult:
         """Gather web search data for a company."""
         start_time = datetime.now(UTC)
         result = AgentTaskResult(
@@ -104,7 +105,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
 
         return result
 
-    def _generate_search_queries(self, company_name: str, context: dict) -> list[tuple[str, str]]:
+    def _generate_search_queries(self, company_name: str, context: dict[str, Any]) -> list[tuple[str, str]]:
         """Generate relevant search queries."""
         industry = context.get("industry", "company")
 

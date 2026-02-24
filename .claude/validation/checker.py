@@ -45,7 +45,7 @@ class ComplianceChecker:
 
     def __init__(self):
         self.rules_dir = Path(".claude/rules")
-        self.rules: Dict[str, Dict] = {}
+        self.rules: Dict[str, Dict[str, Any]] = {}
         self.load_rules()
 
     def load_rules(self):
@@ -174,7 +174,7 @@ class ComplianceChecker:
 
         return True
 
-    def _rule_applies(self, rule: Dict, file_path: str) -> bool:
+    def _rule_applies(self, rule: Dict[str, Any], file_path: str) -> bool:
         """Check if a rule applies to a specific file."""
         # Check file extension patterns
         if "file_patterns" in rule:
@@ -238,7 +238,7 @@ class ComplianceChecker:
                     return severity
         return "info"
 
-    def _extract_custom_validators(self, content: str) -> List[Callable]:
+    def _extract_custom_validators(self, content: str) -> List[Callable[..., Any]]:
         """Extract custom validation functions from rule content."""
         validators = []
 
@@ -422,22 +422,6 @@ class ComplianceChecker:
             ]
         ):
             return False
-
-        return True
-
-    def _rule_applies(self, rule: Dict, file_path: str) -> bool:
-        """Check if a rule applies to a specific file."""
-        # Check file extension patterns
-        if "file_patterns" in rule:
-            file_patterns = rule["file_patterns"]
-            if not any(file_path.endswith(ext) for ext in file_patterns):
-                return False
-
-        # Check excluded directories
-        if "excluded_dirs" in rule:
-            excluded_dirs = rule["excluded_dirs"]
-            if any(dir in file_path for dir in excluded_dirs):
-                return False
 
         return True
 

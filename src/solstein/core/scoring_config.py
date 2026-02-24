@@ -41,12 +41,12 @@ class FinancialHealthConfig(BaseModel):
 
     base_score: float = 5.0
 
-    # Revenue Scale (in Millions)
-    revenue_large_threshold: float = 100.0
+    # Revenue Scale (in EUR)
+    revenue_large_threshold: float = 100_000_000.0  # EUR 100M
     revenue_large_bonus: float = 2.5
-    revenue_med_threshold: float = 10.0
+    revenue_med_threshold: float = 10_000_000.0  # EUR 10M
     revenue_med_bonus: float = 1.25
-    revenue_small_threshold: float = 1.0
+    revenue_small_threshold: float = 1_000_000.0  # EUR 1M
     revenue_small_penalty: float = -1.0
 
     # Profitability

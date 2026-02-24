@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -32,7 +33,7 @@ class DatabaseService:
         competitive_position_score: float,
         overall_score: float,
         classification: str,
-        data_sources_used: dict | None = None,
+        data_sources_used: dict[str, Any] | None = None,
     ) -> ScoringRecord:
         """Save a scoring record to the database."""
         record = ScoringRecord(
@@ -59,7 +60,7 @@ class DatabaseService:
         confidence: float,
         signal_value: float | None = None,
         signal_text: str | None = None,
-        evidence: dict | None = None,
+        evidence: dict[str, Any] | None = None,
     ) -> SignalRecord:
         """Save a signal record linked to a scoring record."""
         signal = SignalRecord(
@@ -86,7 +87,7 @@ class DatabaseService:
         phoenix_count: int,
         salt_count: int,
         lead_count: int,
-        market_metadata: dict | None = None,
+        market_metadata: dict[str, Any] | None = None,
     ) -> MarketSnapshot:
         """Save a market snapshot for trend analysis."""
         snapshot = MarketSnapshot(
@@ -151,7 +152,7 @@ class DatabaseService:
             .limit(limit)
         )
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     async def get_latest_score(self, company_id: str) -> ScoringRecord | None:
         """Get the most recent score for a company."""
@@ -168,13 +169,13 @@ class DatabaseService:
         """Get all signals for a scoring record."""
         query = select(SignalRecord).where(SignalRecord.scoring_record_id == scoring_record_id)
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     async def get_market_snapshots(self, limit: int = 10) -> list[MarketSnapshot]:
         """Get recent market snapshots."""
         query = select(MarketSnapshot).order_by(desc(MarketSnapshot.snapshot_date)).limit(limit)
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     async def commit(self):
         """Commit the current transaction."""

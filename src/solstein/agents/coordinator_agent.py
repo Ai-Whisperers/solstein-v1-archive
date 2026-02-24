@@ -36,9 +36,9 @@ class AgentState(TypedDict):
     company_name: str
     gathering_batch_id: str
     company_id: str
-    context: dict
+    context: dict[str, Any]
     enabled_sources: list[DataSourceType]
-    agent_results: Annotated[list, operator.add]
+    agent_results: Annotated[list[AgentTaskResult], operator.add]
     errors: Annotated[list[str], operator.add]
     raw_records: RawDataRecord | None
     aggregated: AggregatedDataRecord | None

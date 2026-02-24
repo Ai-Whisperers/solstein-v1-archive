@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from loguru import logger
 
@@ -14,7 +15,7 @@ class SeedMarkdownAgent(BaseDataGatheringAgent):
         super().__init__("SeedMarkdownAgent", DataSourceType.PRESS_RELEASE)
         self.extractor = MarkdownExtractor()
 
-    async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
+    async def gather(self, company_name: str, context: dict[str, Any]) -> AgentTaskResult:
         start_ts = self._now()
         result = AgentTaskResult(agent_name=self.agent_name, source_type=self.source_type, success=False)
 

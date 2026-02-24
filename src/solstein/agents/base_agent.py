@@ -45,7 +45,7 @@ class BaseDataGatheringAgent(ABC):
         self.logger = logger.bind(agent=agent_name)
 
     @abstractmethod
-    async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
+    async def gather(self, company_name: str, context: dict[str, Any]) -> AgentTaskResult:
         """Gather data about a company from this agent's source.
 
         Must be implemented by subclasses.
@@ -61,13 +61,13 @@ class BaseDataGatheringAgent(ABC):
 
     def _create_raw_source(
         self,
-        raw_content: str | dict,
+        raw_content: str | dict[str, Any],
         source_name: str,
         url: str | None = None,
         publication_date: datetime | None = None,
         confidence: float = 0.8,
         relevance_score: float = 0.8,
-        metadata: dict | None = None,
+        metadata: dict[str, Any] | None = None,
         extraction_method: str | None = None,
     ) -> RawDataSource:
         """Create a RawDataSource record."""

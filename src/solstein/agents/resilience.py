@@ -202,8 +202,8 @@ async def call_with_retry(
     *args: Any,
     retry_config: RetryConfig | None = None,
     circuit_breaker: CircuitBreaker | None = None,
-    retryable_exceptions: tuple = (Exception,),
-    non_retryable_exceptions: tuple = (),
+    retryable_exceptions: tuple[type[BaseException], ...] = (Exception,),
+    non_retryable_exceptions: tuple[type[BaseException], ...] = (),
     name: str = "call",
     **kwargs: Any,
 ) -> Any:
