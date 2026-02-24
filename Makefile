@@ -62,3 +62,51 @@ clean:
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 	find . -type d -name ".ruff_cache" -exec rm -rf {} +
 	find . -type f -name ".coverage" -delete
+
+# Coverage enforcement
+check-coverage:
+	python3 scripts/enforce_coverage.py
+
+# Run tests + enforce coverage
+test-with-enforcement: test check-coverage
+	@echo "Tests passed with coverage enforcement"
+
+# Tag-based versioning
+tag-release:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Usage: make tag-release VERSION=1.2.3"; \
+		exit 1; \
+	fi
+	git tag -a release-$(VERSION) -m "Release version $(VERSION)"
+	git push origin release-$(VERSION)
+
+tag-test:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Usage: make tag-test VERSION=1.2.3"; \
+		exit 1; \
+	fi
+	git tag -a test-$(VERSION)-rc1 -m "Test version $(VERSION) rc1"
+	git push origin test-$(VERSION)-rc1
+
+tag-coverage:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Usage: make tag-coverage VERSION=1.2.3"; \
+		exit 1; \
+	fi
+	git tag -a coverage-$(VERSION) -m "Coverage report $(VERSION)"
+	git push origin coverage-$(VERSION)
+
+tag-security:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Usage: make tag-security VERSION=20260224"; \
+		exit 1; \
+	fi
+	git tag -a security-$(VERSION) -m "Security patch $(VERSION)"
+	git push origin security-$(VERSION)
+
+show-version:
+	python3 scripts/parse_version_from_tag.py
+
+# Secret scanning
+scan-secrets:
+	python3 scripts/secret_scan.py
