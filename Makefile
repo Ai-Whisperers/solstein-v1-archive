@@ -110,3 +110,13 @@ show-version:
 # Secret scanning
 scan-secrets:
 	python3 scripts/secret_scan.py
+
+# Mutation testing (requires mutpy)
+mutation-test:
+	pip install mutpy
+	mutpy --target solstein --tests tests/unit --experimental -m AOR,BOR,COI,ROR
+
+# Generate SBOM (Software Bill of Materials)
+generate-sbom:
+	pip install cyclonedx-bom
+	cyclonedx-py -i . -o bom.xml --format xml

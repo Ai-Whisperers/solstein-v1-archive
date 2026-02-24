@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "target_score": 75,
+  "operators": {
+    "AOR": true,
+    "BOR": true,
+    "COI": true,
+    "LOD": false,
+    "ROR": true
+  },
+  "exclude_modules": ["tests/", "conftest.py"],
+  "timeout": 5
+}
