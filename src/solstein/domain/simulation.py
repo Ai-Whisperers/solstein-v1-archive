@@ -13,6 +13,7 @@ else:
     class StrEnum(str, Enum):
         pass
 
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
