@@ -182,6 +182,10 @@ class Settings(BaseSettings):
     groq_api_key: str | None = Field(default=None)
     fireworks_api_key: str | None = Field(default=None)
 
+    celery_broker_url: str | None = Field(default=None)
+    celery_result_backend: str | None = Field(default=None)
+    refresh_schedule: dict | None = Field(default=None)
+
     llm_provider: str = Field(
         default="auto",
         description="LLM provider selection: auto|ollama|fireworks|openai|groq|none",
