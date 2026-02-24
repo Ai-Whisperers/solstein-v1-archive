@@ -232,21 +232,15 @@ class Settings(BaseSettings):
         Validates that required API keys are set. Raises ConfigurationError
         if critical keys are missing. Warns if optional keys are missing.
 
-        Required:
-            GITHUB_TOKEN - Used for GitHub API calls
-
         Optional (warns if missing):
+            GITHUB_TOKEN - Used for GitHub API calls
             COMPANIES_HOUSE_API_KEY - For Companies House data extraction
             GOOGLE_API_KEY - For web search data extraction
-
-        Raises:
-            ConfigurationError: If GITHUB_TOKEN is not set.
         """
         github_token = os.getenv("GITHUB_TOKEN")
         if not github_token:
-            raise ConfigurationError(
-                "GITHUB_TOKEN environment variable is required but not set. "
-                "Please set it before starting the application. "
+            logger.warning(
+                "GITHUB_TOKEN not configured. GitHub data gathering will be disabled. "
                 "Get a token from: https://github.com/settings/tokens"
             )
 
