@@ -973,4 +973,411 @@ Characters like `&`, `#`, `=`, `?`, `../` in company names could cause URL injec
 ---
 
 *Deep dive audit conducted by line-by-line review of 14 source files on master branch at commit 4c4fa7a.*
-*Total issues cataloged: 120+ across CRITICAL, HIGH, MEDIUM, and LOW severity.*
+
+---
+
+# PART 3: Nuanced Findings — Second Pass
+
+*Appended 2026-02-23 after pull of commits through 9e6c7c6. Covers new scripts, domain models, database layer, configuration, exports, inter-module data flows, test coverage gaps, and environment-specific behavior.*
+
+---
+
+## 27. New Scripts Audit
+
+### 27.1 apply_supabase_migrations.py
+
+**File**: `scripts/apply_supabase_migrations.py`
+
+| # | Lines | Issue | Severity |
+|---|-------|-------|----------|
+| NS-1 | 26-36 | **Credential exposure in process list.** Database URL (with password) passed as CLI arg to `psql`. Visible via `ps aux` on multi-user systems. Should use `PGPASSWORD` env var. | HIGH |
+| NS-2 | 25-36 | **No migration tracking.** All `*.sql` files re-run every time. No metadata table tracking applied migrations. Re-runs fail on `CREATE TABLE` or silently re-execute `ALTER/UPDATE`. | HIGH |
+| NS-3 | 26-36 | **No `--single-transaction` flag.** A migration with multiple statements can fail mid-way, leaving DB in partially-migrated state. | MEDIUM |
+| NS-4 | 25-36 | **No partial-failure recovery.** If migration 002 fails after 001 succeeds, retry re-runs 001 which fails. | MEDIUM |
+| NS-5 | 19 | **No production safeguard.** No confirmation prompt, no `--dry-run`, no environment detection. Will immediately apply to any DB URL provided. | MEDIUM |
+| NS-6 | 19 | **No URL format validation.** Malformed URLs produce confusing `psql` errors. | LOW |
+
+### 27.2 supabase_dual_write_smoke_test.py
+
+**File**: `scripts/supabase_dual_write_smoke_test.py`
+
+| # | Lines | Issue | Severity |
+|---|-------|-------|----------|
+| NS-7 | 26 | **Writes real data to potentially production DB.** `db_dual_write=True` unconditionally. No schema isolation, no cleanup mechanism. | HIGH |
+| NS-8 | 10-13 | **Redundant validation that gives false confidence.** Checks `SUPABASE__DB_URL` non-empty, but pipeline reads it independently via `Settings`. Validation here is cosmetic. | MEDIUM |
+| NS-9 | 21 | **Unsafe `int()` conversion.** `int(os.getenv("MAX_COMPANIES", "25"))` raises `ValueError` on non-integer input with no handler. | MEDIUM |
+| NS-10 | 17-27 | **No pre-flight DB connectivity check.** Full pipeline runs (minutes) before discovering DB is unreachable. | MEDIUM |
+| NS-11 | 25 | **Non-standard boolean parsing.** Only `"true"` accepted; `"1"`, `"yes"`, `"on"` all treated as `False`. | LOW |
+| NS-12 | 16 | **Relative output path default.** Actual location depends on CWD at execution time. | LOW |
+| NS-13 | 28 | **No success confirmation output.** Smoke test returns 0 silently — no indication of what was tested. | LOW |
+
+---
+
+## 28. Domain Models Audit
+
+**File**: `src/solstein/domain/models.py`
+
+### 28.1 Missing Pydantic Validation Constraints
+
+| # | Lines | Field | Issue |
+|---|-------|-------|-------|
+| DM-1 | 56 | `FinancialMetric.revenue` | No constraints. Accepts negative, NaN, infinity. Should have `ge=0`. |
+| DM-2 | 58 | `FinancialMetric.growth_rate` | No bounds. `FinancialMetric` has no CAGR-style validator, unlike `Company.revenue_cagr_*` which validates >= -100. |
+| DM-3 | 62 | `FinancialMetric.profit_margin` | No constraints, yet `Company.profit_margin` (line 132) IS validated to -100..100. Same concept, different validation. |
+| DM-4 | 64 | `FinancialMetric.funding_raised` | No constraint. Should be `ge=0`. |
+| DM-5 | 66 | `FinancialMetric.valuation` | No constraint. Should be `ge=0`. |
+| DM-6 | 82-83 | `Company.id`, `Company.name` | No `min_length`. Empty string `""` is a valid company ID/name. |
+| DM-7 | 86 | `Company.website` | No URL validation. Any string accepted. |
+| DM-8 | 88 | `Company.founded_year` | No range constraint. Year -5000 or 999999 both valid. |
+| DM-9 | 121-124 | Score fields | All `float | None` with no bounds. Accept negative, infinity, NaN. |
+| DM-10 | 145 | `employee_cagr_3yr` | NOT covered by `validate_cagr` (which only handles `revenue_cagr_*`). |
+| DM-11 | 275 | `CompetitiveOverlap.overlap_score` | No bounds at all. Can be negative, >1.0, or NaN. |
+| DM-12 | 273-274 | `company_a_id`, `company_b_id` | No validation that they're different. Self-overlap is valid. |
+
+### 28.2 Defaults That Mask Missing Data
+
+| # | Lines | Field | Default | Problem |
+|---|-------|-------|---------|---------|
+| DM-13 | 84 | `industry` | `"Energy Software"` | Every company without explicit industry data silently receives a domain-specific default. Should be `str | None`. |
+| DM-14 | 91 | `tier` | `TIER_3` | Unknown tier silently becomes mid-tier. `market_leaders` property (line 243) filters TIER_1 — unknowns are excluded. |
+| DM-15 | 92 | `threat_level` | `MEDIUM` | Unknown threat = "Medium". Cannot distinguish "assessed as medium" from "no data". |
+| DM-16 | 96 | `saas_maturity` | `1` | Why not 0 or None? Implies minimum level 1 even when unknown. |
+| DM-17 | 265 | `ScoringExplanation.final_score` | `0.0` | "Not scored" = "scored zero". Indistinguishable. |
+| DM-18 | 310-311 | `RawDataSource.confidence`, `.relevance_score` | `0.5` | Midpoint default masks "unknown" vs "assessed as 50%". |
+| DM-19 | 377-378 | `AggregatedDataRecord.average_confidence`, `.data_completeness_percentage` | `0.0` | "Not computed" = "zero confidence/completeness". |
+
+### 28.3 Extensive Use of `Any` Undermines Type Safety
+
+12+ fields use `Any` or `dict[str, Any]`, making Pydantic validation nearly useless for those fields:
+
+| Lines | Field | Problem |
+|-------|-------|---------|
+| 344 | `AggregatedFact.value` | Revenue could be `"banana"` or `[1,2,3]` |
+| 394 | `SignalExtraction.signal_value` | Completely untyped |
+| 109 | `acquisitions: list[dict[str, Any]]` | Unstructured |
+| 125 | `scoring_breakdown: dict[str, Any]` | Loses `ScoringExplanation` type after JSON round-trip |
+| 128 | `revenue_timeline: list[dict[str, Any]]` | Unstructured |
+| 136 | `profitability_raw_metrics: dict[str, Any]` | Unstructured |
+| 118 | `metric_observations` | Deeply nested unstructured |
+| 138 | `funding_rounds: list[dict[str, Any]]` | Unstructured |
+
+### 28.4 String Fields That Should Be Enums
+
+| Lines | Field | Known Values |
+|-------|-------|-------------|
+| 126 | `classification` | "Phoenix", "Salt", "Lead" |
+| 149 | `ai_signal_level` | Unknown, should be constrained |
+| 153 | `data_availability` | Unknown, should be constrained |
+| 277 | `competitive_intensity` | "Low", "Medium", "High", "Critical" |
+| 438 | `GatheringBatch.status` | "pending", "in_progress", "completed", "failed" |
+| 435 | `refresh_mode` | "full", "incremental" |
+| 483 | `confidence_level` | "low", "medium", "high", "very_high" |
+
+### 28.5 Duplicate Field Semantics
+
+The `Company` model has parallel fields that can diverge:
+
+| Nested (FinancialMetric) | Top-level (Company) | Used By |
+|--------------------------|--------------------|---------|
+| `financials.profit_margin` | `profit_margin` (line 132) | Scoring reads nested; Excel reads top-level |
+| `financials.employees` | `employee_count` (line 144) | Scoring reads nested; display reads top-level |
+| `financials.valuation` | `latest_valuation_eur` (line 140) | Scoring reads nested |
+| `financials.funding_raised` | `total_funding_raised_eur` (line 139) | Scoring reads nested |
+
+### 28.6 Duplicate Divergent Enum: constants.py vs domain/models.py
+
+`src/solstein/constants.py` defines `CompanyTier` with `TIER_1`, `TIER_1B`, `TIER_2`, `TIER_3`.
+`src/solstein/domain/models.py` defines `CompanyTier` with `TIER_1`, `TIER_2`, `TIER_3`, `TIER_4`.
+
+**TIER_1B exists only in constants. TIER_4 exists only in models.** Code importing from the wrong module gets incompatible enum values.
+
+### 28.7 NaN Acceptance
+
+All `float` fields accept `float('nan')`, `float('inf')`, `float('-inf')`. No Pydantic validator rejects these. NaN is particularly insidious because `NaN != NaN`, breaking equality checks and dict lookups.
+
+### 28.8 `arbitrary_types_allowed=True` Without Justification
+
+Line 80: `arbitrary_types_allowed=True` weakens type checking. The model uses only standard types — this flag appears unnecessary.
+
+---
+
+## 29. Database & Infrastructure Audit
+
+### 29.1 CRITICAL Schema-Model Mismatches
+
+| # | Issue | ORM | SQL Migration | Impact |
+|---|-------|-----|---------------|--------|
+| DB-1 | **Primary key type mismatch** | `database_models.py:33` — `Integer` | `001_companies.sql:5` — `UUID` | Inserts from ORM produce integer PKs; DB expects UUID. Complete incompatibility. |
+| DB-2 | **Column name mismatch** | `database_models.py:99` — `last_updated` | `001_companies.sql:22` — `updated_at` | ORM reads/writes wrong column name. |
+| DB-3 | **Type mismatch: Float vs NUMERIC** | `database_models.py:392,564,570,573,526` — `Float` | `003_research_runs.sql:8,77,81,82,57` — `NUMERIC` | Silent precision loss. |
+| DB-4 | **Type mismatch: JSON vs JSONB** | `database_models.py:396,427,456,527,605` — `JSON` | Migration files — `JSONB` | ORM emits `JSON`, DB expects `JSONB`. Indexing and query operators differ. |
+| DB-5 | **4 ORM tables have no migration** | `scoring_records`, `signal_records`, `market_snapshots`, `audit_trails` (lines 164-373) | None | Tables only created via `Base.metadata.create_all()` — schema conflicts with manual migrations. |
+| DB-6 | **ORM has many columns absent from SQL** | `database_models.py:34-96` — 30+ columns | `001_companies.sql` — ~12 columns | ORM attempts to insert into nonexistent columns. |
+
+### 29.2 Transaction Safety
+
+| # | Lines | Issue | Severity |
+|---|-------|-------|----------|
+| DB-7 | `research_dual_write.py:33-57` | **Race condition: delete-then-insert without `SELECT FOR UPDATE`.** Concurrent runs with same `run_id` can both find `existing`, both delete, both insert. | HIGH |
+| DB-8 | `research_dual_write.py:219` | **Commit inside function, no rollback on failure.** Violates caller-controlled transaction boundaries. Partial writes on exception leave dirty session. | HIGH |
+| DB-9 | `research_dual_write.py:38-56` | **Manual child deletion bypasses ORM cascade.** `Query.delete()` executes bulk DELETE without ORM event synchronization. Redundant for tables with cascade; required for those without. Asymmetric and fragile. | MEDIUM |
+| DB-10 | `database.py:93-94` | **Async session yielded with no commit/rollback.** Caller must handle transactions manually. No explicit rollback on exceptions. | MEDIUM |
+
+### 29.3 Connection Management
+
+| # | Lines | Issue | Severity |
+|---|-------|-------|----------|
+| DB-11 | `database.py:52-58` | **No `pool_recycle` or `pool_pre_ping`.** Stale connections returned from pool without health check. Supabase/PgBouncer may enforce idle timeouts. | MEDIUM |
+| DB-12 | `database.py:96-108` | **Sync session returned without context manager.** Callers must manually close. Inconsistent with async `get_session()` which auto-closes. | MEDIUM |
+| DB-13 | `database.py:137` | **Module-level singleton runs `Settings.load()` at import time.** Creates directories, logs config, reads `.env` as side effect of importing. | LOW |
+
+### 29.4 Migration Safety
+
+| # | Issue | Severity |
+|---|-------|----------|
+| DB-14 | **No `IF NOT EXISTS` guards.** All 3 migration files fail on re-run. | MEDIUM |
+| DB-15 | **No migration tracking table.** No way to know which migrations have been applied. | MEDIUM |
+| DB-16 | **`source_url VARCHAR(2000)` in unique constraint.** PostgreSQL B-tree index row size limit (~2712 bytes) can be exceeded with multi-byte characters. | MEDIUM |
+
+### 29.5 Security — RLS Policies
+
+| # | Migration | Issue | Severity |
+|---|-----------|-------|----------|
+| DB-17 | `001_companies.sql:48-50` | **Anonymous full INSERT/UPDATE on companies table.** `anon` role can write arbitrary company data. RLS is effectively disabled. | HIGH |
+| DB-18 | `003_research_runs.sql:114-120` | **Anonymous SELECT on all research tables with `USING (true)`.** All research data publicly readable. No INSERT/UPDATE policies for service role. | MEDIUM |
+
+### 29.6 Data Integrity Gaps
+
+| # | Lines | Issue |
+|---|-------|-------|
+| DB-19 | `database_models.py:170` | `ScoringRecord.company_id` — no `ForeignKey` constraint. Can reference nonexistent companies. |
+| DB-20 | `database_models.py:533-547` | Unique constraint includes nullable columns (`source_url`, `metric_value`). PostgreSQL treats NULLs as distinct — duplicates with NULL fields are not prevented. |
+| DB-21 | `database_models.py:387,426` | `status` columns are plain `String(50)` — no CHECK constraint or PostgreSQL ENUM. Any arbitrary string accepted. |
+| DB-22 | Multiple | Score columns (`growth_score`, `readiness_score`, `confidence`, etc.) have no CHECK constraints for valid ranges. |
+
+---
+
+## 30. Configuration & Exports Audit
+
+### 30.1 config.py
+
+| # | Lines | Issue | Severity |
+|---|-------|-------|----------|
+| CF-1 | 26 | **Hardcoded `postgres:postgres` in default DB URL.** Production-unsafe credentials as class-level default. | HIGH |
+| CF-2 | 63-66 | **Supabase secrets as plain `str`, not `SecretStr`.** Exposed in logs, tracebacks, and serialization. | HIGH |
+| CF-3 | 172-181 | **All API keys as plain `str | None`.** Same exposure risk as CF-2. | HIGH |
+| CF-4 | 221-227 | **Test DB URL generation is broken.** `rsplit("/", 1)` puts `_test` after the port, not the database name. Produces invalid URL. | HIGH |
+| CF-5 | 142 | **`__file__`-based project root breaks after `pip install`.** Resolves to `site-packages` directory, not project root. All relative paths become invalid. | MEDIUM |
+| CF-6 | 205-206 | **`.env` path is CWD-relative, not project-root-relative.** Different working directories load different (or no) env files. | MEDIUM |
+| CF-7 | 268-287 | **`get_settings()` duplicates all `Settings.load()` work.** Double `.env` check, double `ensure_dirs()`, double logging. | LOW |
+| CF-8 | 95-105 | **`secret_key` validator only warns, never rejects.** "change-me-in-production" accepted in all environments. | MEDIUM |
+
+### 30.2 scoring_config.py
+
+| # | Lines | Issue | Severity |
+|---|-------|-------|----------|
+| SC-1 | 10-36 | **Maximum growth score is 15.0** (5.0 base + 4.0 + 2.0 + 2.0 + 2.0). Clamped to 10 — 5 points of discrimination lost. | MEDIUM |
+| SC-2 | 39-74 | **Minimum financial health score is -0.5** (5.0 - 1.0 - 2.5 - 1.0 - 1.0). Negative score possible before clamp. | MEDIUM |
+| SC-3 | 19 vs 59 | **Two sets of efficiency thresholds** with different tiers, names, and granularity. Unclear which applies where. | MEDIUM |
+| SC-4 | 25-29, 44-50 | **"In Millions" comments but no unit enforcement.** If data arrives in absolute EUR, thresholds are wrong by 6 orders of magnitude. | CRITICAL (repeat) |
+| SC-5 | 82-89 | **Tier score lookup has no default for unknown tiers.** `KeyError` if tier not in hardcoded dict. | MEDIUM |
+| SC-6 | 107, 112 | **`geo_single_penalty` and `tech_none_penalty` defined but never used.** Config suggests penalties should exist but they're unimplemented. | LOW |
+| SC-7 | All | **No `Field` constraints on any config value.** `base_score = -1000` would pass without error. | MEDIUM |
+
+### 30.3 excel.py — Excel Dashboard
+
+| # | Lines | Issue | Severity |
+|---|-------|-------|----------|
+| EX-1 | 218-228 | **All scores written as formatted strings, not numbers.** Users cannot sort, chart, or calculate on these columns. | HIGH |
+| EX-2 | 222-225 | **Score of 0.0 displays as "N/A".** `0.0` is falsy — truthiness check conflates zero with missing. Affects all 4 score columns. | HIGH |
+| EX-3 | 259-263 | **Financial values of 0.0 display as "N/A" or "Bootstrapped".** Revenue 0.0 → "N/A". Funding 0.0 → "Bootstrapped". Zero is not the same as missing. | HIGH |
+| EX-4 | 219, 258, 301, 303, 306 | **CSV/Formula injection vulnerability.** Company names from external sources written directly to cells. Names starting with `=`, `+`, `-`, `@` execute as Excel formulas. | MEDIUM |
+| EX-5 | 124 | **Banner merge hardcoded to 7 columns.** Market Rankings and Financial Intelligence have 9 columns — banner doesn't span full width. | LOW |
+| EX-6 | 254 | **Financial Intelligence sheet is unsorted.** Market Rankings sorts by composite_score; Financial Intelligence uses arbitrary order. Inconsistent. | LOW |
+| EX-7 | 24 | **Creates standalone `Settings()`, bypasses singleton `get_settings()`.** Different config path than pipeline. | LOW |
+| EX-8 | 128 | **Timezone-naive `datetime.now()`.** Domain models use UTC; Excel banner uses local time. | LOW |
+
+### 30.4 pyproject.toml
+
+| # | Lines | Issue | Severity |
+|---|-------|-------|----------|
+| PY-1 | 5 vs 55, 123 | **`requires-python >= 3.10` but ruff/mypy target 3.12.** 3.12-only syntax passes linting but fails on 3.10/3.11. | MEDIUM |
+| PY-2 | 11-30 | **All deps use floor-only pinning (`>=X`).** No upper bounds. Pydantic 3.0, FastAPI breaking changes, yfinance API changes all accepted silently. No lockfile. | HIGH |
+| PY-3 | 122-152 | **mypy effectively disabled.** Only checks 4 files. 13 error codes disabled including `arg-type`, `union-attr`, `return-value`. Type checker is a no-op. | MEDIUM |
+| PY-4 | 54, 109 | **Line length unenforced.** `line-length = 120` set but `E501` rule ignored. | LOW |
+| PY-5 | 25 | **`aiosqlite` dependency may be unused.** Entire DB layer is PostgreSQL. | LOW |
+| PY-6 | 18 | **`python-dotenv` redundant with `pydantic-settings`.** Risk of double-loading env vars. | LOW |
+| PY-7 | 35, 38 | **`black` alongside `ruff format`.** Redundant formatters may conflict. | LOW |
+
+---
+
+## 31. Inter-Module Data Flow Inconsistencies
+
+### 31.1 CRITICAL: Revenue Unit Mismatch Across Data Paths
+
+| Source | Revenue Unit | Evidence |
+|--------|-------------|----------|
+| `competitor_data.json` via `loaders.py:96` | **EUR millions** | `latest.get("eur_millions")` |
+| yfinance via `gather.py:191` | **Absolute (raw API value, typically USD)** | `info.get("totalRevenue")` |
+| Scoring thresholds in `scoring_config.py:45-50` | **"In Millions" per comments** | `revenue_large_threshold: 100.0` |
+| Efficiency thresholds in `scoring_config.py:19` | **"In EUR" per comments** | `efficiency_high_threshold: 500_000.0` |
+
+**Impact**: A yfinance company with 30M real revenue has `revenue = 30,000,000`. Against the "in Millions" threshold of 100.0: `30,000,000 > 100` = True → incorrectly gets the large-revenue bonus. A loader company with the same real revenue has `revenue = 30`. Against the threshold: `30 > 100` = False → correctly scored.
+
+**yfinance companies are systematically over-scored on every revenue-based metric.**
+
+### 31.2 Tier Determination Uses Different Criteria Per Source
+
+| Path | Tier Metric | Scale |
+|------|------------|-------|
+| `loaders.py:500-512` | Revenue | Millions (1000 = 1B) |
+| `gather.py:42-49` | Market cap | Absolute (10,000,000,000 = 10B) |
+
+Same company gets different tiers depending on entry point.
+
+### 31.3 API Router Classification Bug
+
+`src/solstein/api/routers/scoring.py:56-61`:
+- Classifies on `growth_score` instead of `composite_score`
+- Returns `"Neutral"` instead of `"Salt"` for mid-range
+- Ignores the already-correct `classification` field on the `Company` object
+
+### 31.4 Inconsistent Slugification Across Entry Points
+
+| Module | Method | Example: "ABC Corp." |
+|--------|--------|---------------------|
+| `discovery.py:22-30` | `ch.isalnum()` filter + hyphen | `"abc-corp"` |
+| `loaders.py:270` | `.lower().replace(" ", "-").replace("/", "-")` | `"abc-corp."` (keeps dot) |
+| `markdown_extractor.py:192-198` | `.lower().replace(" ", "-").replace(".", "").replace(",", "")` | `"abc-corp"` |
+
+The same company can get different IDs from different entry points. Cross-referencing between loader data and discovery data fails silently.
+
+---
+
+## 32. Test Coverage Gaps
+
+| # | Area | Issue |
+|---|------|-------|
+| TC-1 | `sources.py` | **Zero dedicated unit tests.** `canonicalize_url` and `is_probably_url` completely untested. Used throughout pipeline for deduplication. |
+| TC-2 | `gather.py` yfinance paths | Only the no-ticker path is tested. yfinance success path, exception path, `_as_percent`, `_ai_maturity_from_text`, `_tier_from_market_cap`, `_threat_from_growth` — all untested. |
+| TC-3 | `reconcile.detect_market_contradictions` | Only `detect_company_contradictions` tested. Market-level aggregation untested. |
+| TC-4 | End-to-end data consistency | No integration test traces a Company from discovery → gather → scoring → evidence → export verifying field values remain consistent. |
+| TC-5 | `test_core_config.py:137` | **Test asserts the BUGGY behavior** of `get_database_url(test=True)`. `_test` after port is tested as correct. |
+| TC-6 | `MarketAnalyzer.analyze_market` | Public method untested. Uses `datetime.now()` (naive) which may conflict with UTC-aware model fields. |
+| TC-7 | Currency conversion | No tests for `CurrencyRateFetcher`, `CurrencyConverter`, or the inverted cross-rate formula. |
+| TC-8 | Excel exporter | No tests for data loss (0.0→"N/A"), formula injection, or layout issues. |
+
+---
+
+## 33. Hidden Dependencies & Import Side Effects
+
+| # | Location | Issue |
+|---|----------|-------|
+| HD-1 | `data/fetchers.py:14` | **Top-level `import yfinance`** — no guard. Missing yfinance crashes the entire module. |
+| HD-2 | `data/loaders.py:542` | **Module-level `CompetitorDataLoader()` singleton** — runs `Settings.load()` at import time. Creates directories on disk. |
+| HD-3 | `infrastructure/database.py:137` | **Module-level `DatabaseManager(Settings.load())`** — same import-time side effects. |
+| HD-4 | `__init__.py:19,27` | **`import solstein` requires pandas, openpyxl, pydantic-settings** installed. Missing any one crashes the entire package. |
+
+---
+
+## 34. Environment-Specific Behavior
+
+### 34.1 Timezone Inconsistency
+
+| Location | Method | Timezone |
+|----------|--------|----------|
+| `gather.py:69` | `datetime.now(UTC)` | UTC |
+| `domain/models.py:112` | `datetime.now(UTC)` | UTC |
+| `scoring.py:373` (MarketAnalyzer) | `datetime.now()` | **Local** |
+| `excel.py:128` | `datetime.now()` | **Local** |
+| `api/routers/scoring.py:74` | `datetime.now()` | **Local** |
+
+On a UTC+2 machine, Excel timestamps are 2 hours ahead of gather timestamps. Mixing aware/naive datetimes in the same model can cause `TypeError` on comparison.
+
+### 34.2 CWD-Dependent Configuration
+
+`config.py:205` uses `Path(".env")` — resolves relative to CWD. Running from `/home/user` vs project root loads different env files.
+
+### 34.3 Locale-Dependent Float Formatting
+
+`excel.py` uses Python f-string formatting (`f"{value:.1f}"`). On systems with non-US locales, this could theoretically interact with locale-specific decimal separators if the `locale` module has been configured, though Python's built-in `format` is locale-independent by default.
+
+---
+
+## 35. Updated Comprehensive Risk Matrix (All Passes Combined)
+
+| Risk | Likelihood | Impact | Total Issues | Status |
+|------|-----------|--------|-------------|--------|
+| **Revenue unit mismatch (millions vs absolute)** | HIGH | CRITICAL | §31.1, S-1, S-2 | NOT mitigated |
+| **Schema-model mismatch (UUID vs Integer PK)** | HIGH | CRITICAL | DB-1 | NOT mitigated |
+| **Currency conversion bugs** | HIGH | CRITICAL | F-1, F-2, F-3, F-4, L-1, L-2 | NOT mitigated |
+| **Test DB URL bug (port not DB name)** | HIGH | HIGH | CF-4, TC-5 | Bug enshrined in tests |
+| **Fabricated patent counts** | HIGH | HIGH | PT-1, PT-2, PT-3 | NOT mitigated |
+| **All quality gates disabled by default** | HIGH | HIGH | P-1 | NOT mitigated |
+| **Excel scores as strings (not sortable)** | HIGH | HIGH | EX-1 | NOT mitigated |
+| **Zero values display as "N/A"** | HIGH | HIGH | EX-2, EX-3 | NOT mitigated |
+| **No Pydantic bounds on financial fields** | HIGH | HIGH | DM-1 through DM-12 | NOT mitigated |
+| **Anon write access to companies table** | MEDIUM | HIGH | DB-17 | NOT mitigated |
+| **Credential exposure in migration script** | MEDIUM | HIGH | NS-1 | NOT mitigated |
+| **Dependencies unpinned (no lockfile)** | MEDIUM | HIGH | PY-2 | NOT mitigated |
+| **Duplicate divergent CompanyTier enums** | MEDIUM | HIGH | DM-23, §2.3 | NOT mitigated |
+| **API router wrong classification** | HIGH | MEDIUM | §31.3 | NOT mitigated |
+| **mypy effectively disabled** | HIGH | MEDIUM | PY-3 | NOT mitigated |
+| **Import-time side effects** | HIGH | MEDIUM | HD-2, HD-3, HD-4 | NOT mitigated |
+| **Missing tests for critical paths** | HIGH | MEDIUM | TC-1 through TC-8 | NOT mitigated |
+
+---
+
+## 36. Revised Priority Remediation Roadmap
+
+### P0 — Fix Before Next Pipeline Run (carries forward + new)
+
+1. **Fix revenue unit mismatch** (§31.1): Normalize all revenue to a single unit (absolute EUR or EUR millions) across both data paths and scoring thresholds.
+2. **Fix currency rate inversion** (F-1, F-2): Normalize all Yahoo Finance pairs to consistent direction.
+3. **Fix USD=1.0 in loaders** (L-1): USD is not EUR.
+4. **Update hardcoded year "2025"** (W-1): Use `datetime.now().year`.
+5. **Remove "patent" from AI keywords** (PT-3, PT-4).
+6. **Remove fabricated patent multipliers** (PT-1, PT-2).
+7. **Fix Schema-Model PK type** (DB-1): Align ORM `Integer` with SQL `UUID`, or vice versa.
+8. **Fix test DB URL generation** (CF-4): `_test` goes on database name, not port.
+
+### P1 — Fix Within Sprint (carries forward + new)
+
+9. **Enable quality gates by default** (P-1).
+10. **Add per-candidate error isolation** (P-2, P-3).
+11. **Add Pydantic constraints** to `FinancialMetric` and score fields (DM-1 through DM-12).
+12. **Fix Excel: write numbers not strings** (EX-1). Use `is not None` instead of truthiness (EX-2, EX-3).
+13. **Sanitize Excel cell values** against formula injection (EX-4).
+14. **Fix API router classification** (§31.3): Use `composite_score` and return `"Salt"`.
+15. **Align ORM columns with SQL migrations** (DB-2 through DB-6).
+16. **Remove duplicate `CompanyTier` enum** from constants.py.
+17. **Use `SecretStr` for API keys and DB credentials** (CF-2, CF-3).
+18. **Secure migration script**: Use `PGPASSWORD` env var instead of CLI arg (NS-1).
+19. **Add `--single-transaction` to migration runner** (NS-3).
+
+### P2 — Fix Within Quarter (carries forward + new)
+
+20. **Add dependency upper bounds or lockfile** (PY-2).
+21. **Enable mypy on more files, re-enable critical error codes** (PY-3).
+22. **Add unit tests for `sources.py`, `gather.py` paths, `reconcile.py`** (TC-1 through TC-8).
+23. **Unify slugification** across all entry points (§31.4).
+24. **Make `industry` default to `None` not "Energy Software"** (DM-13).
+25. **Replace `Any`-typed fields with structured models** where possible.
+26. **Add `pool_recycle` and `pool_pre_ping` to DB engines** (DB-11).
+27. **Add migration idempotency** (`IF NOT EXISTS`) and tracking table (DB-14, DB-15).
+28. **Fix RLS policies**: Remove anonymous write access to companies (DB-17).
+29. **Normalize all datetime usage to UTC** (§34.1).
+
+### P3 — Backlog (carries forward)
+
+30. Replace keyword-based AI maturity with LLM classifier.
+31. Add URL liveness checks to evidence evaluation.
+32. Add multi-source financial data for cross-validation.
+33. Implement source credibility tiers.
+34. Replace Google scraping with legitimate API alternatives.
+35. Add end-to-end data consistency integration tests (TC-4).
+
+---
+
+*Total issues cataloged across all three passes: **180+** across CRITICAL, HIGH, MEDIUM, and LOW severity.*
+*Audit covers 20+ source files, 3 SQL migrations, 2 scripts, pyproject.toml, and inter-module data flows.*
