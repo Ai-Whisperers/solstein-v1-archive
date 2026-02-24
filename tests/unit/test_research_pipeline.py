@@ -1,6 +1,12 @@
 from pathlib import Path
 
+import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+
 from solstein.domain.models import Company
+from solstein.infrastructure.database_models import ResearchRunRecord
+from solstein.research import pipeline as research_pipeline
 from solstein.research.discovery import discover_companies
 from solstein.research.evidence import evaluate_company_evidence
 from solstein.research.gather import build_company_profile
@@ -35,10 +41,10 @@ def test_build_company_profile_without_ticker_is_explainable() -> None:
     assert profile.metric_justifications["revenue"]
 
 
-def test_run_market_intelligence_writes_artifacts(tmp_path: Path) -> None:
-    import solstein.research.pipeline as pipeline
-
-    def _fake_profile(candidate):
+def test_run_market_intelligence_writes_artifacts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def _fake_profile(candidate) -> Company:
         return Company(
             id=candidate.company_id,
             name=candidate.name,
@@ -54,7 +60,7 @@ def test_run_market_intelligence_writes_artifacts(tmp_path: Path) -> None:
             },
         )
 
-    pipeline.build_company_profile = _fake_profile
+    monkeypatch.setattr(research_pipeline, "build_company_profile", _fake_profile)
 
     summary = run_market_intelligence(
         seed_company="ueno",
@@ -69,6 +75,7 @@ def test_run_market_intelligence_writes_artifacts(tmp_path: Path) -> None:
     for expected in [
         "discovery_candidates.json",
         "extracted.json",
+        "stage_report.json",
         "provenance_report.json",
         "contradictions_report.json",
         "evidence_readiness.json",
@@ -77,6 +84,41 @@ def test_run_market_intelligence_writes_artifacts(tmp_path: Path) -> None:
         "dashboard.xlsx",
     ]:
         assert (tmp_path / expected).exists()
+
+
+def test_run_market_intelligence_source_volume_gate_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def _fake_profile(candidate) -> Company:
+        return Company(
+            id=candidate.company_id,
+            name=candidate.name,
+            industry=candidate.industry,
+            source_links=["https://example.com/source-a"],
+            metric_sources={
+                "revenue": ["https://example.com/source-a"],
+                "growth_rate": ["https://example.com/source-a"],
+                "employees": ["https://example.com/source-a"],
+                "profit_margin": ["https://example.com/source-a"],
+                "funding": ["https://example.com/source-a"],
+                "valuation": ["https://example.com/source-a"],
+            },
+        )
+
+    monkeypatch.setattr(research_pipeline, "build_company_profile", _fake_profile)
+
+    with pytest.raises(RuntimeError, match="Source volume gate failed"):
+        run_market_intelligence(
+            seed_company="ueno",
+            market="LATAM Financial Services",
+            output_dir=tmp_path,
+            max_companies=5,
+            extra_keywords=["bank", "fintech"],
+            strict_provenance=False,
+            min_total_sources=20,
+        )
+
+    assert (tmp_path / "stage_report.json").exists()
 
 
 def test_evidence_readiness_uses_sources_and_justifications() -> None:
@@ -99,7 +141,9 @@ def test_evidence_readiness_uses_sources_and_justifications() -> None:
 
     report = evaluate_company_evidence(company)
     assert report["source_count"] == 2
-    assert float(report["metric_explainability"]) >= 1.0
+    explainability = report["metric_explainability"]
+    assert isinstance(explainability, (int, float))
+    assert float(explainability) >= 1.0
     assert report["unsupported_metrics"] == 0
 
 
@@ -119,3 +163,44 @@ def test_detect_company_contradictions_flags_divergence() -> None:
     contradictions = detect_company_contradictions(company)
     assert contradictions
     assert contradictions[0]["metric"] == "revenue"
+
+
+def test_run_market_intelligence_dual_write_sqlite(tmp_path: Path, monkeypatch) -> None:
+    db_path = tmp_path / "research_test.db"
+    monkeypatch.setenv("SUPABASE__DB_URL", f"sqlite:///{db_path}")
+
+    def _fake_profile(candidate) -> Company:
+        return Company(
+            id=candidate.company_id,
+            name=candidate.name,
+            industry=candidate.industry,
+            source_links=[
+                "https://example.com/source-a",
+                "https://example.com/source-b",
+            ],
+            metric_sources={
+                "revenue": ["https://example.com/source-a"],
+                "growth_rate": ["https://example.com/source-a"],
+                "employees": ["https://example.com/source-b"],
+                "profit_margin": ["https://example.com/source-b"],
+                "funding": ["https://example.com/source-a"],
+                "valuation": ["https://example.com/source-a"],
+            },
+        )
+
+    monkeypatch.setattr(research_pipeline, "build_company_profile", _fake_profile)
+
+    run_market_intelligence(
+        seed_company="ueno",
+        market="LATAM Financial Services",
+        output_dir=tmp_path / "out",
+        max_companies=5,
+        extra_keywords=["bank", "fintech"],
+        strict_provenance=False,
+        db_dual_write=True,
+    )
+
+    engine = create_engine(f"sqlite:///{db_path}")
+    with Session(engine) as session:
+        count = session.query(ResearchRunRecord).count()
+        assert count >= 1

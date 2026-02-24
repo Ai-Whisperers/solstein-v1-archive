@@ -15,6 +15,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-strict-provenance", action="store_true")
     parser.add_argument("--min-readiness-score", type=float)
     parser.add_argument("--max-contradictions", type=int)
+    parser.add_argument("--min-total-sources", type=int)
+    parser.add_argument("--db-dual-write", action="store_true")
     return parser.parse_args()
 
 
@@ -29,10 +31,14 @@ def main() -> None:
         strict_provenance=not args.no_strict_provenance,
         min_readiness_score=args.min_readiness_score,
         max_contradictions=args.max_contradictions,
+        min_total_sources=args.min_total_sources,
+        db_dual_write=args.db_dual_write,
     )
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
-    (out / "run_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    (out / "run_summary.json").write_text(
+        json.dumps(summary, indent=2), encoding="utf-8"
+    )
 
 
 if __name__ == "__main__":
