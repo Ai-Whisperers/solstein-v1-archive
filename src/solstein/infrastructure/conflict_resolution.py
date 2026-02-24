@@ -18,12 +18,37 @@ class ConflictStrategy(Enum):
 
 
 class SourceAuthority(Enum):
-    """Authority levels for different data sources."""
+    """Authority levels for different data sources.
 
-    SEC_EDGAR = 1.0  # Most authoritative for financial data
-    COMPANIES_HOUSE = 0.95  # Authoritative for corporate data
-    GITHUB = 0.85  # Authoritative for technical data
-    NEWS_SIGNAL = 0.70  # Less authoritative, market signals
+    Higher values indicate more authoritative sources that win
+    when facts conflict between sources.
+    """
+
+    # Most authoritative - official government/regulatory sources
+    SEC_EDGAR = 1.0
+    COMPANIES_HOUSE = 0.95
+
+    # Highly authoritative - financial market data
+    YAHOO_FINANCE = 0.88
+    GLOBAL_MARKET = 0.87
+
+    # Authoritative - technical and corporate data
+    GITHUB = 0.85
+    WEBSITE = 0.84
+    PATENTS = 0.80
+
+    # Moderate authority - professional and industry data
+    LINKEDIN = 0.75
+    FUNDING = 0.73
+
+    # Lower authority - news and general market signals
+    NEWS = 0.72
+    NEWS_SIGNAL = 0.70
+    WEB_SEARCH = 0.68
+
+    # Lowest authority - catalog and reference data
+    STATIC_CATALOG = 0.65
+    COMPETITOR_JSON = 0.60
 
 
 @dataclass
@@ -63,8 +88,18 @@ class ConflictResolutionEngine:
         self.authority_map = {
             "sec_edgar": SourceAuthority.SEC_EDGAR,
             "companies_house": SourceAuthority.COMPANIES_HOUSE,
+            "yahoo_finance": SourceAuthority.YAHOO_FINANCE,
             "github": SourceAuthority.GITHUB,
             "news_signal": SourceAuthority.NEWS_SIGNAL,
+            "news": SourceAuthority.NEWS,
+            "patents": SourceAuthority.PATENTS,
+            "website": SourceAuthority.WEBSITE,
+            "linkedin": SourceAuthority.LINKEDIN,
+            "funding": SourceAuthority.FUNDING,
+            "global_market": SourceAuthority.GLOBAL_MARKET,
+            "web_search": SourceAuthority.WEB_SEARCH,
+            "static_catalog": SourceAuthority.STATIC_CATALOG,
+            "competitor_json": SourceAuthority.COMPETITOR_JSON,
         }
         self.resolution_log: List[Resolution] = []
 

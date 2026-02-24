@@ -3,12 +3,19 @@
 Reads ``data/input/competitor_data.json`` and converts each entry
 into a ``DiscoveryCandidate`` so the pipeline can merge them with
 candidates from other discovery sources.
+
+Updated to implement UnifiedDataSource protocol.
 """
 
 from __future__ import annotations
 
+from datetime import datetime
+from typing import Any
+
 from loguru import logger
 
+from solstein.domain.models import DataSourceType, RawDataSource
+from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.research.discovery import DiscoveryCandidate, _slugify
 
 
@@ -18,6 +25,10 @@ class CompetitorJsonSource:
     @property
     def source_name(self) -> str:
         return "competitor_json"
+
+    @property
+    def source_type(self) -> DataSourceType:
+        return DataSourceType.COMPETITOR_JSON
 
     def discover(
         self,
@@ -55,3 +66,44 @@ class CompetitorJsonSource:
                 )
             )
         return candidates
+
+    def enrich(
+        self,
+        company_id: str,
+        company_name: str,
+        ticker: str | None = None,
+        website: str | None = None,
+    ) -> RawDataSource:
+        """Competitor JSON doesn't support enrichment - returns empty data."""
+        return RawDataSource(
+            source_type=DataSourceType.COMPETITOR_JSON,
+            source_name=self.source_name,
+            raw_content={"company_id": company_id, "company_name": company_name},
+            retrieval_timestamp=datetime.now(),
+            confidence=0.5,
+        )
+
+    def refresh(
+        self,
+        company_ids: list[str],
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> list[dict[str, Any]]:
+        """Competitor JSON doesn't support refresh - returns empty list."""
+        return []
+
+    def get_confidence(self) -> float:
+        """Competitor JSON has moderate confidence."""
+        return 0.7
+
+    def get_authority(self) -> SourceAuthority:
+        """Competitor JSON has medium authority."""
+        return SourceAuthority.COMPETITOR_JSON
+
+    def supports_incremental(self) -> bool:
+        """Competitor JSON doesn't support incremental refresh."""
+        return False
+
+    def supports_discovery(self) -> bool:
+        """Competitor JSON supports discovery."""
+        return True
