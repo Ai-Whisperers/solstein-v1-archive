@@ -63,6 +63,7 @@ class SupabaseConfig(BaseModel):
     url: str = Field(default="")
     key: str = Field(default="")
     anon_key: str = Field(default="")
+    db_url: str = Field(default="")
 
 
 class TemporalConfig(BaseModel):
@@ -219,7 +220,7 @@ class Settings(BaseSettings):
 
     def get_database_url(self, test: bool = False) -> str:
         """Get database URL, optionally for tests."""
-        url = self.database.url
+        url = self.supabase.db_url or self.database.url
         if test and "test" not in url and "/" in url:
             parts = url.rsplit("/", 1)
             url = f"{parts[0]}_test/{parts[1]}"
@@ -251,11 +252,15 @@ class Settings(BaseSettings):
 
         companies_house_key = os.getenv("COMPANIES_HOUSE_API_KEY")
         if not companies_house_key:
-            logger.warning("COMPANIES_HOUSE_API_KEY not configured. Companies House data gathering will be disabled.")
+            logger.warning(
+                "COMPANIES_HOUSE_API_KEY not configured. Companies House data gathering will be disabled."
+            )
 
         google_api_key = os.getenv("GOOGLE_API_KEY")
         if not google_api_key:
-            logger.warning("GOOGLE_API_KEY not configured. Web search data gathering will be disabled.")
+            logger.warning(
+                "GOOGLE_API_KEY not configured. Web search data gathering will be disabled."
+            )
 
         logger.info("Configuration validation passed")
 
@@ -312,6 +317,7 @@ DATABASE__ECHO=false
 SUPABASE__URL=https://your-project.supabase.co
 SUPABASE__KEY=sb_secret_your_key
 SUPABASE__ANON_KEY=sb_publishable_your_key
+SUPABASE__DB_URL=postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres
 
 # Temporal
 TEMPORAL__HOST_URL=localhost:7233
