@@ -107,7 +107,7 @@ jobs:
         
     - name: Install dependencies
       working-directory: ./dashboard
-      run: npm ci
+      run: npm ci --legacy-peer-deps
       
     - name: Lint Dashboard
       working-directory: ./dashboard
@@ -144,7 +144,7 @@ jobs:
 
     - name: Install Frontend
       working-directory: ./dashboard
-      run: npm ci
+      run: npm ci --legacy-peer-deps
       
     - name: Install Playwright Browsers
       working-directory: ./dashboard
