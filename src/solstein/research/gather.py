@@ -330,6 +330,19 @@ def build_company_profile(candidate: DiscoveryCandidate) -> Company:
 # Multi-source enrichment flow (Phase 4)
 # ---------------------------------------------------------------------------
 
+# Data quality tier thresholds
+_WELL_SOURCED_MIN = 3
+_PARTIAL_MIN = 1
+
+
+def _data_quality_tier(source_count: int) -> str:
+    """Classify data quality tier based on enrichment source count."""
+    if source_count >= _WELL_SOURCED_MIN:
+        return "well-sourced"
+    if source_count >= _PARTIAL_MIN:
+        return "partial"
+    return "stub"
+
 
 def enrich_company(
     candidate: DiscoveryCandidate,
@@ -371,7 +384,10 @@ def enrich_company(
             "No enrichment sources succeeded for {}; using legacy profile",
             candidate.name,
         )
-        return build_company_profile(candidate)
+        company = build_company_profile(candidate)
+        company.enrichment_source_count = 0
+        company.data_quality_tier = "stub"
+        return company
 
     raw_record = RawDataRecord(
         company_id=candidate.company_id,
@@ -384,7 +400,10 @@ def enrich_company(
     aggregated = aggregator.aggregate(candidate.company_id, raw_record)
     signal_record = extract_signals(aggregated, batch_id=batch_id)
 
-    return build_company_from_signals(candidate, signal_record, aggregated)
+    company = build_company_from_signals(candidate, signal_record, aggregated)
+    company.enrichment_source_count = len(raw_sources)
+    company.data_quality_tier = _data_quality_tier(len(raw_sources))
+    return company
 
 
 # ---------------------------------------------------------------------------

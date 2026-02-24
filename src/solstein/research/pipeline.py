@@ -30,6 +30,7 @@ def run_market_intelligence(
     min_readiness_score: float | None = None,
     max_contradictions: int | None = None,
     min_total_sources: int | None = None,
+    min_sources_per_company: int | None = None,
     db_dual_write: bool = False,
 ) -> dict[str, object]:
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -104,6 +105,19 @@ def run_market_intelligence(
     total_sources = len(unique_sources)
     avg_sources_per_company = total_sources / len(companies) if companies else 0.0
 
+    # Per-company source quality breakdown
+    quality_counts = {"well-sourced": 0, "partial": 0, "stub": 0, "unknown": 0}
+    per_company_sources = []
+    for company in companies:
+        tier = company.data_quality_tier
+        quality_counts[tier] = quality_counts.get(tier, 0) + 1
+        per_company_sources.append({
+            "company_id": company.id,
+            "name": company.name,
+            "enrichment_source_count": company.enrichment_source_count,
+            "data_quality_tier": tier,
+        })
+
     stages.append(
         {
             "stage": "gather",
@@ -111,8 +125,41 @@ def run_market_intelligence(
             "profile_count": len(companies),
             "total_unique_sources": total_sources,
             "avg_unique_sources_per_company": round(avg_sources_per_company, 2),
+            "data_quality_breakdown": quality_counts,
+            "per_company_sources": per_company_sources,
         }
     )
+
+    # Per-company source volume gate
+    if min_sources_per_company is not None:
+        under_threshold = [
+            c for c in companies if c.enrichment_source_count < min_sources_per_company
+        ]
+        if under_threshold:
+            stages.append(
+                {
+                    "stage": "per_company_source_gate",
+                    "status": "filtered",
+                    "required_min_sources_per_company": min_sources_per_company,
+                    "companies_below_threshold": len(under_threshold),
+                    "filtered_companies": [
+                        {"company_id": c.id, "name": c.name, "sources": c.enrichment_source_count}
+                        for c in under_threshold
+                    ],
+                }
+            )
+            companies = [c for c in companies if c.enrichment_source_count >= min_sources_per_company]
+            logger.info(
+                "Per-company source gate: filtered {} companies below {} sources, {} remain",
+                len(under_threshold), min_sources_per_company, len(companies),
+            )
+            if not companies:
+                (output_dir / "stage_report.json").write_text(
+                    json.dumps(stage_report, indent=2), encoding="utf-8",
+                )
+                raise RuntimeError(
+                    f"Per-company source gate removed all companies (threshold={min_sources_per_company})"
+                )
 
     if min_total_sources is not None and total_sources < min_total_sources:
         stages.append(

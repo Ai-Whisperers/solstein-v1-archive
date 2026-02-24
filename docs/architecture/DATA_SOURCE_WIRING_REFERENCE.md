@@ -1209,7 +1209,7 @@ Three new module-level constructs:
 
 ## Phase 6 — Per-Company Source Volume Gates
 
-**Status:** Planned
+**Status:** Implemented ✅
 
 **Goal:** The current source volume gate in `run_market_intelligence()` checks *total* unique sources across all companies. This is too coarse — a single well-sourced company can mask several companies with zero enrichment data. This phase adds per-company minimum source requirements.
 
@@ -1228,6 +1228,29 @@ Three new module-level constructs:
 **Risks:**
 - Strict per-company gates may reduce the candidate set too aggressively in markets with sparse data
 - Need a sensible default threshold that doesn't break existing runs
+
+### Phase 6 Implementation Log
+
+**Changes:**
+
+1. **`src/solstein/domain/models.py`** — Added `enrichment_source_count: int = 0` and `data_quality_tier: str = "unknown"` fields to Company. Default values ensure backward compatibility with existing Company objects.
+
+2. **`src/solstein/research/gather.py`** — Added `_data_quality_tier()` helper with thresholds: ≥3 sources → "well-sourced", 1–2 → "partial", 0 → "stub". `enrich_company()` now populates both fields after enrichment. Fallback path (no enrichment sources succeeded) sets count=0, tier="stub".
+
+3. **`src/solstein/research/pipeline.py`** — Added `min_sources_per_company: int | None = None` parameter. Gather stage report now includes `data_quality_breakdown` (counts per tier) and `per_company_sources` (per-company detail). New `per_company_source_gate` stage filters companies below threshold, logs filtered count, and raises `RuntimeError` if all companies removed.
+
+4. **`tests/unit/test_research_pipeline.py`** — Added 4 tests:
+   - `test_data_quality_tier_classification` — verifies tier thresholds
+   - `test_per_company_source_gate_filters_low_source_companies` — mixed sources, some filtered
+   - `test_per_company_source_gate_removes_all_raises` — all below threshold → RuntimeError
+   - `test_gather_stage_reports_source_quality_breakdown` — gather stage includes quality breakdown
+
+**Test results:** 11 pipeline tests pass, 98 scoring tests pass (no regressions).
+
+**Design decisions:**
+- Gate parameter is `None` by default → no filtering on existing runs (backward compat)
+- Tier thresholds are module-level constants (`_WELL_SOURCED_MIN = 3`, `_PARTIAL_MIN = 1`) for easy tuning
+- Gate filtering produces a stage report entry with filtered company details before removing them
 
 ---
 

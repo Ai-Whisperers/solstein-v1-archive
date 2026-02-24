@@ -167,6 +167,154 @@ def test_detect_company_contradictions_flags_divergence() -> None:
     assert contradictions[0]["metric"] == "revenue"
 
 
+def test_data_quality_tier_classification() -> None:
+    """Verify _data_quality_tier thresholds: >=3 well-sourced, 1-2 partial, 0 stub."""
+    from solstein.research.gather import _data_quality_tier
+
+    assert _data_quality_tier(0) == "stub"
+    assert _data_quality_tier(1) == "partial"
+    assert _data_quality_tier(2) == "partial"
+    assert _data_quality_tier(3) == "well-sourced"
+    assert _data_quality_tier(10) == "well-sourced"
+
+
+def test_per_company_source_gate_filters_low_source_companies(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Companies below min_sources_per_company are filtered out."""
+    call_count = {"n": 0}
+
+    def _fake_enrich(candidate, registry, batch_id) -> Company:
+        call_count["n"] += 1
+        # Alternate: odd calls get 1 source (partial), even get 3 (well-sourced)
+        if call_count["n"] % 2 == 1:
+            sources = ["https://example.com/a"]
+        else:
+            sources = [
+                "https://example.com/a",
+                "https://example.com/b",
+                "https://example.com/c",
+            ]
+        return Company(
+            id=candidate.company_id,
+            name=candidate.name,
+            industry=candidate.industry,
+            source_links=sources,
+            enrichment_source_count=len(sources),
+            data_quality_tier="well-sourced" if len(sources) >= 3 else "partial",
+            metric_sources={
+                "revenue": sources,
+                "growth_rate": sources,
+                "employees": sources,
+                "profit_margin": sources,
+                "funding": sources,
+                "valuation": sources,
+            },
+        )
+
+    monkeypatch.setattr(research_pipeline, "enrich_company", _fake_enrich)
+
+    summary = run_market_intelligence(
+        seed_company="ueno",
+        market="LATAM Financial Services",
+        output_dir=tmp_path,
+        max_companies=5,
+        extra_keywords=["bank", "fintech"],
+        strict_provenance=False,
+        min_sources_per_company=3,
+    )
+
+    # 5 discovered, but only even-numbered calls (2nd, 4th) have >=3 sources
+    assert summary["discovered"] == 5
+    assert summary["profiles"] < 5  # some were filtered
+
+
+def test_per_company_source_gate_removes_all_raises(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """When all companies are below the threshold, a RuntimeError is raised."""
+
+    def _fake_enrich(candidate, registry, batch_id) -> Company:
+        return Company(
+            id=candidate.company_id,
+            name=candidate.name,
+            industry=candidate.industry,
+            source_links=["https://example.com/only-one"],
+            enrichment_source_count=1,
+            data_quality_tier="partial",
+            metric_sources={
+                "revenue": ["https://example.com/only-one"],
+                "growth_rate": ["https://example.com/only-one"],
+                "employees": ["https://example.com/only-one"],
+                "profit_margin": ["https://example.com/only-one"],
+                "funding": ["https://example.com/only-one"],
+                "valuation": ["https://example.com/only-one"],
+            },
+        )
+
+    monkeypatch.setattr(research_pipeline, "enrich_company", _fake_enrich)
+
+    with pytest.raises(RuntimeError, match="Per-company source gate removed all companies"):
+        run_market_intelligence(
+            seed_company="ueno",
+            market="LATAM Financial Services",
+            output_dir=tmp_path,
+            max_companies=5,
+            extra_keywords=["bank", "fintech"],
+            strict_provenance=False,
+            min_sources_per_company=5,
+        )
+
+    assert (tmp_path / "stage_report.json").exists()
+
+
+def test_gather_stage_reports_source_quality_breakdown(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Gather stage includes per-company source counts and quality tiers."""
+    import json
+
+    def _fake_enrich(candidate, registry, batch_id) -> Company:
+        return Company(
+            id=candidate.company_id,
+            name=candidate.name,
+            industry=candidate.industry,
+            source_links=[
+                "https://example.com/a",
+                "https://example.com/b",
+                "https://example.com/c",
+            ],
+            enrichment_source_count=3,
+            data_quality_tier="well-sourced",
+            metric_sources={
+                "revenue": ["https://example.com/a"],
+                "growth_rate": ["https://example.com/b"],
+                "employees": ["https://example.com/c"],
+                "profit_margin": ["https://example.com/a"],
+                "funding": ["https://example.com/b"],
+                "valuation": ["https://example.com/c"],
+            },
+        )
+
+    monkeypatch.setattr(research_pipeline, "enrich_company", _fake_enrich)
+
+    run_market_intelligence(
+        seed_company="ueno",
+        market="LATAM Financial Services",
+        output_dir=tmp_path,
+        max_companies=3,
+        extra_keywords=["bank", "fintech"],
+        strict_provenance=False,
+    )
+
+    stage_report = json.loads((tmp_path / "stage_report.json").read_text())
+    gather_stage = next(s for s in stage_report["stages"] if s["stage"] == "gather")
+    assert "data_quality_breakdown" in gather_stage
+    assert "per_company_sources" in gather_stage
+    assert gather_stage["data_quality_breakdown"]["well-sourced"] == 3
+    assert len(gather_stage["per_company_sources"]) == 3
+
+
 def test_run_market_intelligence_dual_write_sqlite(tmp_path: Path, monkeypatch) -> None:
     db_path = tmp_path / "research_test.db"
     monkeypatch.setenv("SUPABASE__DB_URL", f"sqlite:///{db_path}")

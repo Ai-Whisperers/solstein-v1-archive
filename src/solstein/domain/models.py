@@ -117,6 +117,8 @@ class Company(BaseModel):
     metric_justifications: dict[str, str] = Field(default_factory=dict)
     metric_observations: dict[str, list[dict[str, Any]]] = Field(default_factory=dict)
     signal_confidences: dict[str, float] = Field(default_factory=dict)
+    enrichment_source_count: int = 0
+    data_quality_tier: str = "unknown"
 
     # Scores (Calculated)
     growth_score: float | None = None
