@@ -172,7 +172,9 @@ class Settings(BaseSettings):
     openai_api_key: str | None = Field(default=None)
     perplexity_api_key: str | None = Field(default=None)
 
-    # News & Patent APIs
+    # Data source APIs
+    exa_api_key: str | None = Field(default=None)
+    crunchbase_api_key: str | None = Field(default=None)
     news_api_key: str | None = Field(default=None)
     patentsview_api_key: str | None = Field(default=None)
 

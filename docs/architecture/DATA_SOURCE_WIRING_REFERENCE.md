@@ -837,3 +837,49 @@ src/solstein/
     ├── signals.py               # NEW — SignalExtraction logic
     └── sources.py               # Unchanged
 ```
+
+---
+
+## Appendix B: Phase 1 Implementation Log
+
+> Implemented: 2026-02-24
+
+### What Was Done
+
+**1. DataSourceType enum extended** (`src/solstein/domain/models.py`)
+- Added 8 new values: `YAHOO_FINANCE`, `EXA_SEARCH`, `GOOGLE_SEARCH`, `USPTO`, `GOOGLE_PATENTS`, `NEWSAPI`, `COMPETITOR_JSON`, `STATIC_CATALOG`
+- Total enum values: 16 (was 8)
+
+**2. Adapter package created** (`src/solstein/adapters/`)
+- `protocols.py` — `DiscoverySource`, `EnrichmentSource`, `FactAggregator` as `@runtime_checkable` Protocol classes
+- `registry.py` — `SourceRegistry` dataclass + `build_default_registry(settings)` factory
+- `discovery/static_catalog.py` — wraps `_catalog_for_market()` as a `DiscoverySource`
+- `discovery/competitor_json.py` — wraps `CompetitorDataLoader` as a `DiscoverySource`
+- Sub-packages created (empty `__init__.py`): `discovery/`, `enrichment/`, `aggregation/`, `signals/`
+
+**3. Config updated** (`src/solstein/config.py`)
+- Added `exa_api_key` and `crunchbase_api_key` fields to `Settings` class
+- These join existing `news_api_key` and `patentsview_api_key` for conditional adapter registration
+
+**4. Infrastructure duplicates deleted**
+- Removed `src/solstein/infrastructure/data_loaders/additional_sources.py` (httpx duplicate with broken imports)
+- Removed `src/solstein/infrastructure/data_loaders/patent_client.py` (lxml duplicate with broken imports)
+- Removed `src/solstein/infrastructure/data_loaders/` directory (now empty)
+
+### Verification
+
+All components verified via import tests:
+- Protocol imports: OK
+- Registry construction: OK — `build_default_registry()` returns 2 discovery sources, 0 enrichment sources
+- Protocol conformance: OK — both `StaticCatalogSource` and `CompetitorJsonSource` pass `isinstance()` checks against `DiscoverySource`
+- Functional test: `StaticCatalogSource.discover()` returns candidates for energy and LATAM markets
+- DataSourceType enum: 16 values confirmed
+
+### What Remains (Phase 2+)
+
+- Wrap dead modules as `EnrichmentSource` adapters (8 adapters)
+- Create `DefaultFactAggregator` in `aggregation/default.py`
+- Create signal extraction in `signals/default.py`
+- Refactor `discover_companies()` to iterate registry adapters
+- Refactor `build_company_profile()` to iterate registry adapters
+- Wire registry into `run_market_intelligence()`

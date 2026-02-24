@@ -294,6 +294,14 @@ class DataSourceType(StrEnum):
     PATENTS = "patents"
     WEBSITE = "website"
     PRESS_RELEASE = "press_release"
+    YAHOO_FINANCE = "yahoo_finance"
+    EXA_SEARCH = "exa_search"
+    GOOGLE_SEARCH = "google_search"
+    USPTO = "uspto"
+    GOOGLE_PATENTS = "google_patents"
+    NEWSAPI = "newsapi"
+    COMPETITOR_JSON = "competitor_json"
+    STATIC_CATALOG = "static_catalog"
 
 
 class RawDataSource(BaseModel):
