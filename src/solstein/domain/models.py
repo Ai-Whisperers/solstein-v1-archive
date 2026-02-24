@@ -8,6 +8,9 @@ now powered directly by Pydantic for end-to-end validation.
 import sys
 
 from datetime import timezone, datetime
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 if sys.version_info >= (3, 11):
     from enum import StrEnum
@@ -16,13 +19,6 @@ else:
 
     class StrEnum(str, Enum):
         pass
-
-
-from typing import Any
-from enum import StrEnum
-from typing import Any
-
-from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ConfidenceLevel(StrEnum):
