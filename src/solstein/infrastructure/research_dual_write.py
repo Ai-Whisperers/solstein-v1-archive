@@ -3,7 +3,7 @@ from __future__ import annotations
 # pyright: reportMissingTypeStubs=false
 import json
 import logging
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, cast
 from urllib.parse import urlparse
 
@@ -84,7 +84,7 @@ def transition_contradiction_status(
     changed_by: str | None = None,
     reason: str | None = None,
 ) -> ContradictionRecord:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     transaction = (
         session.begin_nested() if session.in_transaction() else session.begin()
     )
@@ -239,7 +239,7 @@ def record_outbox_failure(
     payload: dict[str, JsonValue],
     exc: Exception,
 ) -> None:
-    failed_time = datetime.now(UTC)
+    failed_time = datetime.now(timezone.utc)
     retryable = isinstance(exc, (TimeoutError, ConnectionError, OperationalError))
     classification = (
         FailureClassification.RETRYABLE if retryable else FailureClassification.TERMINAL
@@ -351,7 +351,7 @@ def persist_research_run_records(
         max_contradictions=max_contradictions,
         min_total_sources=min_total_sources,
         summary=artifacts.get("run_summary"),
-        created_at=datetime.now(UTC),
+        created_at=datetime.now(timezone.utc),
     )
     session.add(run)
     session.flush()
@@ -377,7 +377,7 @@ def persist_research_run_records(
                 stage_order=idx,
                 status=str(status) if status is not None else None,
                 metrics=stage,
-                created_at=datetime.now(UTC),
+                created_at=datetime.now(timezone.utc),
             )
         )
 
@@ -403,7 +403,7 @@ def persist_research_run_records(
                 artifact_name=name,
                 artifact_path=None,
                 payload=persisted_payload,
-                created_at=datetime.now(UTC),
+                created_at=datetime.now(timezone.utc),
             )
         )
 
@@ -422,7 +422,7 @@ def persist_research_run_records(
                         continue
                     canonical = canonicalize_url(source_url)
                     parsed = urlparse(canonical)
-                    observed_time = datetime.now(UTC)
+                    observed_time = datetime.now(timezone.utc)
                     session.add(
                         SourceDocumentRecord(
                             run_id=run.id,
@@ -467,7 +467,7 @@ def persist_research_run_records(
                                     if row_payload.get("source") is not None
                                     else None
                                 ),
-                                created_at=datetime.now(UTC),
+                                created_at=datetime.now(timezone.utc),
                             )
                         )
 
@@ -508,7 +508,7 @@ def persist_research_run_records(
                         unsupported_metrics=_coerce_int(
                             report_payload.get("unsupported_metrics"), default=0
                         ),
-                        created_at=datetime.now(UTC),
+                        created_at=datetime.now(timezone.utc),
                     )
                 )
 
@@ -521,7 +521,7 @@ def persist_research_run_records(
                 if not isinstance(row, dict):
                     continue
                 row_payload = cast("dict[str, JsonValue]", row)
-                created_at = datetime.now(UTC)
+                created_at = datetime.now(timezone.utc)
                 session.add(
                     ContradictionRecord(
                         run_id=run.id,
@@ -554,7 +554,7 @@ def persist_research_run(
 ) -> UUID:
     event_type = "research_run_persist"
     event_key = f"{run_id}:{event_type}"
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     payload = _build_outbox_payload(
         run_id=run_id,
         event_type=event_type,
@@ -592,7 +592,7 @@ def persist_research_run(
 
     session.commit()
 
-    in_progress_time = datetime.now(UTC)
+    in_progress_time = datetime.now(timezone.utc)
     outbox = session.execute(
         select(OutboxRecord).where(OutboxRecord.event_key == event_key)
     ).scalar_one()
@@ -615,7 +615,7 @@ def persist_research_run(
             stage_report=stage_report,
             artifacts=artifacts,
         )
-        success_time = datetime.now(UTC)
+        success_time = datetime.now(timezone.utc)
         outbox.status = "succeeded"
         outbox.updated_at = success_time
         outbox.available_at = success_time

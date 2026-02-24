@@ -6,7 +6,7 @@ the companies table via company_id (string).
 """
 
 import uuid
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 from typing import List, Optional
 
 from sqlalchemy import (
@@ -41,7 +41,7 @@ class GatheringBatch(Base):
         String(255), ForeignKey("companies.company_id"), nullable=False, index=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(UTC), nullable=False, onupdate=lambda: datetime.now(UTC)
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, onupdate=lambda: datetime.now(timezone.utc)
     )
     status: Mapped[str] = mapped_column(
         String(50), default="in_progress", nullable=False
@@ -86,7 +86,7 @@ class Fact(Base):
         Numeric(3, 2), default=0.5, nullable=False
     )  # 0.0 - 1.0
     extracted_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(UTC), nullable=False, onupdate=lambda: datetime.now(UTC)
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, onupdate=lambda: datetime.now(timezone.utc)
     )
 
     # Relationships
@@ -145,7 +145,7 @@ class FactSource(Base):
     )  # "sec_edgar", "companies_house", "newsapi", "github"
     source_url: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
     extraction_timestamp: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(UTC), nullable=False, onupdate=lambda: datetime.now(UTC)
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, onupdate=lambda: datetime.now(timezone.utc)
     )
     raw_content: Mapped[Optional[str]] = mapped_column(
         Text, nullable=True

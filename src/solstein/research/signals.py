@@ -7,7 +7,7 @@ calculation methods, and human-readable reasoning.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 from typing import Any
 
 from loguru import logger
@@ -409,7 +409,7 @@ def extract_signals(
     record = SignalExtractionRecord(
         company_id=aggregated.company_id,
         gathering_batch_id=batch_id or aggregated.gathering_batch_id,
-        timestamp=datetime.now(UTC),
+        timestamp=datetime.now(timezone.utc),
         signals=signals,
     )
 

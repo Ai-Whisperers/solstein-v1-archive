@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 
 from sqlalchemy import (
     JSON,
@@ -96,8 +96,8 @@ class CompanyRecord(Base):
     scoring_breakdown = Column(JSON, nullable=True)
 
     # Metadata
-    last_updated = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+    last_updated = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         Index("ix_company_name", "name"),
@@ -177,7 +177,7 @@ class ScoringRecord(Base):
 
     classification = Column(String(50), nullable=False)
 
-    scored_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+    scored_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     data_sources_used = Column(JSON, nullable=True)
 
     signals = relationship(
@@ -232,7 +232,7 @@ class SignalRecord(Base):
 
     confidence = Column(Float, nullable=False)
 
-    extracted_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+    extracted_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     scoring_record = relationship("ScoringRecord", back_populates="signals")
 
@@ -267,7 +267,7 @@ class MarketSnapshot(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     snapshot_date = Column(
-        DateTime, nullable=False, index=True, default=lambda: datetime.now(UTC)
+        DateTime, nullable=False, index=True, default=lambda: datetime.now(timezone.utc)
     )
 
     total_companies_scored = Column(Integer, nullable=False)
@@ -335,7 +335,7 @@ class AuditTrailRecord(Base):
     errors = Column(JSON, default=list)
     warnings = Column(JSON, default=list)
 
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(UTC))
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         Index("ix_audit_company_batch", "company_id", "gathering_batch_id"),
@@ -395,7 +395,7 @@ class ResearchRunRecord(Base):
 
     summary: Mapped[object | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
 
     stages: Mapped[list["ResearchStageRecord"]] = relationship(
@@ -425,13 +425,13 @@ class OutboxRecord(Base):
     payload: Mapped[object] = mapped_column(JSON, nullable=False)
     attempt_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     available_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC), index=True
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), index=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
     last_error: Mapped[object | None] = mapped_column(JSON, nullable=True)
 
@@ -455,7 +455,7 @@ class ResearchStageRecord(Base):
     status: Mapped[str | None] = mapped_column(String(50), nullable=True)
     metrics: Mapped[object | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
 
     run: Mapped["ResearchRunRecord"] = relationship(
@@ -484,7 +484,7 @@ class ResearchArtifactRecord(Base):
     artifact_path: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     payload: Mapped[object | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
 
     run: Mapped["ResearchRunRecord"] = relationship(
@@ -521,7 +521,7 @@ class SourceDocumentRecord(Base):
         String(100), nullable=True, index=True
     )
     observed_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="observed")
     fetched_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
@@ -560,7 +560,7 @@ class MetricObservationRecord(Base):
     metric_value_raw: Mapped[object | None] = mapped_column(JSON, nullable=True)
     source_url: Mapped[str | None] = mapped_column(String(2000), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
 
     __table_args__ = (
@@ -608,7 +608,7 @@ class EvidenceReadinessRecord(Base):
     )
     unsupported_metrics: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
 
     __table_args__ = (
@@ -638,12 +638,12 @@ class ContradictionRecord(Base):
     details: Mapped[object | None] = mapped_column(JSON, nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="open")
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     ignored_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
 
     transitions: Mapped[list["ContradictionTransitionRecord"]] = relationship(
@@ -678,7 +678,7 @@ class ContradictionTransitionRecord(Base):
     from_status: Mapped[str] = mapped_column(String(50), nullable=False)
     to_status: Mapped[str] = mapped_column(String(50), nullable=False)
     changed_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(UTC)
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
     changed_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)

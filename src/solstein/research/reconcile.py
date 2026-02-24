@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 
 from solstein.domain.models import Company
 
@@ -33,7 +33,7 @@ def detect_company_contradictions(
             continue
 
         values = [_as_float(r.get("value")) for r in rows if isinstance(r, dict)]
-        values = [v for v in values if v is not None]
+        values = cast(list[float], [v for v in values if v is not None])
         if len(values) < 2:
             continue
 

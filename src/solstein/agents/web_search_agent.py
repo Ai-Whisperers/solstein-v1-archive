@@ -5,8 +5,7 @@ to extract facts about company growth, funding, and announcements.
 """
 
 import asyncio
-from datetime import UTC, datetime
-from typing import Any
+from datetime import timezone, datetime
 
 import requests
 
@@ -32,9 +31,9 @@ class WebSearchAgent(BaseDataGatheringAgent):
 
         self.circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=45.0, name="GoogleSearchAPI")
 
-    async def gather(self, company_name: str, context: dict[str, Any]) -> AgentTaskResult:
+    async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
         """Gather web search data for a company."""
-        start_time = datetime.now(UTC)
+        start_time = datetime.now(timezone.utc)
         result = AgentTaskResult(
             agent_name=self.agent_name,
             source_type=self.source_type,
@@ -49,7 +48,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
                 result.coverage_gaps.append("Web search API not configured")
                 result.success = False
                 result.error_message = "Web search API not configured"
-                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+                result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
                 return result
 
             search_queries = self._generate_search_queries(company_name, context)
@@ -101,11 +100,11 @@ class WebSearchAgent(BaseDataGatheringAgent):
             result.success = False
 
         finally:
-            result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+            result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
 
         return result
 
-    def _generate_search_queries(self, company_name: str, context: dict[str, Any]) -> list[tuple[str, str]]:
+    def _generate_search_queries(self, company_name: str, context: dict) -> list[tuple[str, str]]:
         """Generate relevant search queries."""
         industry = context.get("industry", "company")
 

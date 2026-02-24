@@ -24,7 +24,7 @@ jobs:
       
       - name: Run mutation tests
         run: |
-          mutpy --target solstein \
+          python -m mutpy --target solstein \
             --tests tests/unit \
             --experimental \
             --timeout 5 \

@@ -2,7 +2,7 @@ import hashlib
 import json
 import time
 import uuid
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 from pathlib import Path
 
 from loguru import logger
@@ -75,7 +75,7 @@ def run_market_intelligence(
     prompt_version = "research.pipeline.v2"
 
     def _start_stage_timer() -> tuple[str, float]:
-        return datetime.now(UTC).isoformat(), time.monotonic()
+        return datetime.now(timezone.utc).isoformat(), time.monotonic()
 
     def _append_stage_artifact(
         *,
@@ -88,7 +88,7 @@ def run_market_intelligence(
         error_class: str | None = None,
     ) -> None:
         stage_start_iso, stage_start_monotonic = stage_start
-        stage_end_iso = datetime.now(UTC).isoformat()
+        stage_end_iso = datetime.now(timezone.utc).isoformat()
         duration_ms = int((time.monotonic() - stage_start_monotonic) * 1000)
         stage_payload = dict(payload or {})
         stage_payload.update(

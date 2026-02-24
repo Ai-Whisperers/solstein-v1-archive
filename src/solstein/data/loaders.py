@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from datetime import UTC, date, datetime
+from datetime import timezone, date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -282,7 +282,7 @@ class CompetitorDataLoader:
             financials=financial,
             geographic_presence=["Europe"],
             key_customers=[],
-            last_updated=datetime.now(UTC),
+            last_updated=datetime.now(timezone.utc),
             data_source="SolStein Competitive Intelligence",
             # Scores
             composite_score=composite_score,

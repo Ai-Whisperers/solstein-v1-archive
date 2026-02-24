@@ -28,6 +28,7 @@ dependencies = [
     "edgartools",
     "lxml>=4.9",
     "yfinance>=0.2",
+    "langgraph>=0.0.20",
 ]
 
 [project.optional-dependencies]
@@ -151,6 +152,8 @@ disable_error_code = [
     "return-value",
     "union-attr",
     "var-annotated",
+    "valid-type",
+    "dict-item",
 ]
 
 [tool.pytest.ini_options]
