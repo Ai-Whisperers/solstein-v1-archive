@@ -6,7 +6,7 @@ for UK-registered companies and their subsidiaries.
 
 import asyncio
 import os
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import requests
 
@@ -29,7 +29,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
 
     async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
         """Gather Companies House data for a company."""
-        start_time = datetime.now(UTC)
+        start_time = datetime.now(timezone.utc)
         result = AgentTaskResult(
             agent_name=self.agent_name,
             source_type=self.source_type,
@@ -44,7 +44,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 result.coverage_gaps.append("Companies House API not configured")
                 result.success = False
                 result.error_message = "Companies House API not configured"
-                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+                result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
                 return result
 
             company_num = await self._search_company_by_name(company_name)
@@ -53,7 +53,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 result.coverage_gaps.append("Company not found in Companies House")
                 result.success = False
                 result.error_message = "Company not found in Companies House"
-                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+                result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
                 return result
 
             company_data = await self._fetch_company_details(company_num)
@@ -61,7 +61,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 result.coverage_gaps.append("Could not fetch company details")
                 result.success = False
                 result.error_message = "Could not fetch company details from Companies House"
-                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+                result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
                 return result
 
             raw_source = self._create_raw_source(
@@ -100,7 +100,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             result.success = False
 
         finally:
-            result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+            result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
 
         return result
 

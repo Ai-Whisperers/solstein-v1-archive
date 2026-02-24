@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import pytest
 from sqlalchemy import create_engine, select
@@ -31,7 +31,7 @@ def _create_run(session: Session) -> ResearchRunRecord:
         seed_company="Test Seed",
         status="completed",
         strict_provenance=False,
-        created_at=datetime.now(UTC),
+        created_at=datetime.now(timezone.utc),
     )
     session.add(run)
     session.commit()
@@ -70,7 +70,7 @@ def test_open_to_resolved_records_transition() -> None:
             contradiction_type="variance",
             details={"metric": "revenue"},
             status="open",
-            updated_at=datetime.now(UTC),
+            updated_at=datetime.now(timezone.utc),
         )
         session.add(contradiction)
         session.commit()
@@ -105,7 +105,7 @@ def test_open_to_resolved_records_transition() -> None:
 def test_invalid_transition_rejected_without_mutation() -> None:
     with _create_session() as session:
         run = _create_run(session)
-        created_at = datetime.now(UTC)
+        created_at = datetime.now(timezone.utc)
         contradiction = ContradictionRecord(
             run_id=run.id,
             company_id="c-3",

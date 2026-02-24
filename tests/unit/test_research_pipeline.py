@@ -6,7 +6,7 @@
 # pyright: reportUnusedCallResult=false
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import cast
 
@@ -457,9 +457,9 @@ def test_outbox_worker_replays_pending_records(tmp_path: Path, monkeypatch: pyte
                 status="pending",
                 payload=payload,
                 attempt_count=0,
-                available_at=datetime.now(UTC),
-                created_at=datetime.now(UTC),
-                updated_at=datetime.now(UTC),
+                available_at=datetime.now(timezone.utc),
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc),
                 last_error=None,
             )
         )

@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -50,7 +50,7 @@ def sample_company():
         ),
         geographic_presence=["NA"],
         key_customers=[],
-        last_updated=datetime(2023, 1, 1, tzinfo=UTC),
+        last_updated=datetime(2023, 1, 1, tzinfo=timezone.utc),
         data_source="Test",
     )
 

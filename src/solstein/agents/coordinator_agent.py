@@ -7,7 +7,7 @@ for the main scoring engine.
 
 import asyncio
 import operator
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Annotated, Any
 
 try:
@@ -139,7 +139,7 @@ class CoordinatorAgent:
         enabled_sources: list[DataSourceType] | None = None,
     ) -> CompanyAnalysisAuditTrail:
         """Analyze a single company using LangGraph StateMachine."""
-        start_time = datetime.now(UTC)
+        start_time = datetime.now(timezone.utc)
         company_id = company_name.lower().replace(" ", "-")
 
         if enabled_sources is None:
@@ -167,7 +167,7 @@ class CoordinatorAgent:
 
             final_state = await self.workflow.ainvoke(initial_state)
 
-            completed_at = datetime.now(UTC)
+            completed_at = datetime.now(timezone.utc)
 
             audit_trail = CompanyAnalysisAuditTrail(
                 company_id=company_id,

@@ -10,7 +10,7 @@ Tests cover:
 """
 
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import pytest
 
@@ -37,7 +37,7 @@ class TestGatheringBatchModel:
 
     def test_batch_created_at_default(self):
         """Test batch created_at can be set explicitly."""
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         batch = GatheringBatch(company_id="test-company", created_at=now)
         assert batch.created_at == now
         assert isinstance(batch.created_at, datetime)
@@ -98,7 +98,7 @@ class TestFactModel:
     def test_create_fact_with_date_value(self):
         """Test creating a Fact with date value."""
         batch_id = uuid.uuid4()
-        date_val = datetime(2024, 1, 15, tzinfo=UTC)
+        date_val = datetime(2024, 1, 15, tzinfo=timezone.utc)
         fact = Fact(
             company_id="test-company",
             batch_id=batch_id,
@@ -182,7 +182,7 @@ class TestFactModel:
     def test_fact_extracted_at_default(self):
         """Test fact extracted_at can be set explicitly."""
         batch_id = uuid.uuid4()
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         fact = Fact(
             company_id="test-company",
             batch_id=batch_id,
@@ -240,7 +240,7 @@ class TestFactSourceModel:
     def test_source_extraction_timestamp_default(self):
         """Test source extraction_timestamp can be set explicitly."""
         fact_id = uuid.uuid4()
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         source = FactSource(
             fact_id=fact_id,
             source_type="newsapi",
@@ -424,7 +424,7 @@ class TestFactModelSerialization:
     def test_fact_datetime_serialization(self):
         """Test fact datetime fields serialize correctly."""
         batch_id = uuid.uuid4()
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         fact = Fact(
             company_id="test-company",
             batch_id=batch_id,
@@ -437,7 +437,7 @@ class TestFactModelSerialization:
 
     def test_batch_datetime_serialization(self):
         """Test batch datetime fields serialize correctly."""
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         batch = GatheringBatch(company_id="test-company", created_at=now)
         assert batch.created_at == now
         assert isinstance(batch.created_at, datetime)
@@ -445,7 +445,7 @@ class TestFactModelSerialization:
     def test_source_datetime_serialization(self):
         """Test source datetime fields serialize correctly."""
         fact_id = uuid.uuid4()
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         source = FactSource(
             fact_id=fact_id,
             source_type="sec_edgar",

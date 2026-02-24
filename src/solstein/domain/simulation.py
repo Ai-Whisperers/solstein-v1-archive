@@ -2,7 +2,7 @@
 Domain models for market simulation.
 """
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -39,7 +39,7 @@ class Scenario(BaseModel):
     name: str
     description: str
     conditions: list[MarketCondition]
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class SimulationResult(BaseModel):

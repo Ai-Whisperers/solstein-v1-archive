@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -450,7 +450,7 @@ class DefaultFactAggregator:
         record = AggregatedDataRecord(
             company_id=company_id,
             gathering_batch_id=raw_record.gathering_batch_id,
-            timestamp=datetime.now(UTC),
+            timestamp=datetime.now(timezone.utc),
             facts=aggregated_facts,
         )
 

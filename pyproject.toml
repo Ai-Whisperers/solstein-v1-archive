@@ -122,6 +122,7 @@ ignore = [
     "TC002",
     "TC003",
     "TC006",
+    "UP017", # datetime.UTC requires Python 3.11+, project supports 3.10
     "UP042",
     "W291",
 ]

@@ -7,7 +7,7 @@ Requires a ticker.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from solstein.domain.models import DataSourceType, RawDataSource
 
@@ -57,7 +57,7 @@ class GlobalMarketEnrichment:
             source_name="GlobalMarketLoader",
             raw_content=content,
             url=f"https://finance.yahoo.com/quote/{ticker}/",
-            retrieval_timestamp=datetime.now(UTC),
+            retrieval_timestamp=datetime.now(timezone.utc),
             confidence=0.8,
             relevance_score=0.9,
             metadata={

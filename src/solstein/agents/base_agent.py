@@ -4,7 +4,7 @@ Provides common interface, error handling, and data model support.
 """
 
 from abc import ABC, abstractmethod
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -76,7 +76,7 @@ class BaseDataGatheringAgent(ABC):
             source_name=source_name,
             raw_content=raw_content,
             url=url,
-            retrieval_timestamp=datetime.now(UTC),
+            retrieval_timestamp=datetime.now(timezone.utc),
             publication_date=publication_date,
             confidence=confidence,
             relevance_score=relevance_score,

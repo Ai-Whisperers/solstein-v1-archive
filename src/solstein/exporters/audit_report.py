@@ -8,7 +8,7 @@ audit document.
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -68,7 +68,7 @@ class PipelineAuditReportGenerator:
 
         market = stage_report.get("market", "Unknown") if stage_report else "Unknown"
         seed = stage_report.get("seed_company", "Unknown") if stage_report else "Unknown"
-        timestamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
+        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M timezone.utc")
 
         sections: list[str] = []
         sections.append(f"# Pipeline Audit Report — {market}\n")
@@ -91,7 +91,7 @@ class PipelineAuditReportGenerator:
             sections.append(self._render_adapter_health_section(adapter_health))
 
         report_text = "\n".join(sections) + "\n"
-        filename = f"PIPELINE_AUDIT_{datetime.now(UTC).strftime('%Y-%m-%d')}_{_slug(market)}.md"
+        filename = f"PIPELINE_AUDIT_{datetime.now(timezone.utc).strftime('%Y-%m-%d')}_{_slug(market)}.md"
         output_path = output_dir / filename
         output_path.write_text(report_text, encoding="utf-8")
         logger.info("Audit report written to {}", output_path)

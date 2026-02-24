@@ -5,7 +5,7 @@ to extract facts about company growth, funding, and announcements.
 """
 
 import asyncio
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import requests
 
@@ -33,7 +33,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
 
     async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
         """Gather web search data for a company."""
-        start_time = datetime.now(UTC)
+        start_time = datetime.now(timezone.utc)
         result = AgentTaskResult(
             agent_name=self.agent_name,
             source_type=self.source_type,
@@ -48,7 +48,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
                 result.coverage_gaps.append("Web search API not configured")
                 result.success = False
                 result.error_message = "Web search API not configured"
-                result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+                result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
                 return result
 
             search_queries = self._generate_search_queries(company_name, context)
@@ -100,7 +100,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
             result.success = False
 
         finally:
-            result.execution_time_seconds = (datetime.now(UTC) - start_time).total_seconds()
+            result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
 
         return result
 

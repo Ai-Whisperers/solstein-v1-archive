@@ -15,7 +15,7 @@ import logging
 import random
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, TypeVar
 
@@ -174,7 +174,7 @@ class CircuitBreaker:
     def record_failure(self) -> None:
         """Record failed call, may open circuit."""
         self.failure_count += 1
-        self.last_failure_time = datetime.now(UTC)
+        self.last_failure_time = datetime.now(timezone.utc)
 
         if self.state == CircuitBreakerState.HALF_OPEN:
             self.state = CircuitBreakerState.OPEN
@@ -189,7 +189,7 @@ class CircuitBreaker:
         """Check if enough time has passed to retry in HALF_OPEN state."""
         if not self.last_failure_time:
             return False
-        elapsed = (datetime.now(UTC) - self.last_failure_time).total_seconds()
+        elapsed = (datetime.now(timezone.utc) - self.last_failure_time).total_seconds()
         return elapsed >= self.recovery_timeout
 
     def get_state(self) -> str:

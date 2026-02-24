@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 import pytest
@@ -91,7 +91,7 @@ def test_reconcile_research_run_by_run_id_writes_report(tmp_path: Path) -> None:
             status="completed",
             strict_provenance=False,
             summary={"output_dir": str(output_dir)},
-            created_at=datetime.now(UTC),
+            created_at=datetime.now(timezone.utc),
         )
         session.add(run)
         session.flush()
@@ -105,7 +105,7 @@ def test_reconcile_research_run_by_run_id_writes_report(tmp_path: Path) -> None:
                         "artifact_hash": "a" * 64,
                         "artifact": [],
                     },
-                    created_at=datetime.now(UTC),
+                    created_at=datetime.now(timezone.utc),
                 ),
                 ResearchArtifactRecord(
                     run_id=run.id,
@@ -114,7 +114,7 @@ def test_reconcile_research_run_by_run_id_writes_report(tmp_path: Path) -> None:
                         "artifact_hash": "x" * 64,
                         "artifact": [],
                     },
-                    created_at=datetime.now(UTC),
+                    created_at=datetime.now(timezone.utc),
                 ),
                 ResearchArtifactRecord(
                     run_id=run.id,
@@ -123,7 +123,7 @@ def test_reconcile_research_run_by_run_id_writes_report(tmp_path: Path) -> None:
                         "artifact_hash": "z" * 64,
                         "artifact": {},
                     },
-                    created_at=datetime.now(UTC),
+                    created_at=datetime.now(timezone.utc),
                 ),
             ]
         )
@@ -138,9 +138,9 @@ def test_reconcile_research_run_by_run_id_writes_report(tmp_path: Path) -> None:
                     "output_dir": str(output_dir),
                 },
                 attempt_count=1,
-                available_at=datetime.now(UTC),
-                created_at=datetime.now(UTC),
-                updated_at=datetime.now(UTC),
+                available_at=datetime.now(timezone.utc),
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc),
                 last_error=None,
             )
         )
@@ -186,7 +186,7 @@ def test_reconcile_research_run_by_output_dir_resolves_run_id(tmp_path: Path) ->
             status="completed",
             strict_provenance=False,
             summary={"output_dir": str(output_dir)},
-            created_at=datetime.now(UTC),
+            created_at=datetime.now(timezone.utc),
         )
         session.add(run)
         session.flush()
@@ -197,7 +197,7 @@ def test_reconcile_research_run_by_output_dir_resolves_run_id(tmp_path: Path) ->
                     run_id=run.id,
                     artifact_name=artifact_name,
                     payload={"artifact_hash": artifact_hash, "artifact": {}},
-                    created_at=datetime.now(UTC),
+                    created_at=datetime.now(timezone.utc),
                 )
             )
 
@@ -211,9 +211,9 @@ def test_reconcile_research_run_by_output_dir_resolves_run_id(tmp_path: Path) ->
                     "output_dir": str(output_dir),
                 },
                 attempt_count=1,
-                available_at=datetime.now(UTC),
-                created_at=datetime.now(UTC),
-                updated_at=datetime.now(UTC),
+                available_at=datetime.now(timezone.utc),
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc),
                 last_error=None,
             )
         )

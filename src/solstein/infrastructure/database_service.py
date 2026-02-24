@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -44,7 +44,7 @@ class DatabaseService:
             overall_score=overall_score,
             classification=classification,
             data_sources_used=data_sources_used,
-            scored_at=datetime.now(UTC),
+            scored_at=datetime.now(timezone.utc),
         )
         self.session.add(record)
         await self.session.flush()
@@ -71,7 +71,7 @@ class DatabaseService:
             signal_value=signal_value,
             signal_text=signal_text,
             evidence=evidence,
-            extracted_at=datetime.now(UTC),
+            extracted_at=datetime.now(timezone.utc),
         )
         self.session.add(signal)
         await self.session.flush()
@@ -90,7 +90,7 @@ class DatabaseService:
     ) -> MarketSnapshot:
         """Save a market snapshot for trend analysis."""
         snapshot = MarketSnapshot(
-            snapshot_date=datetime.now(UTC),
+            snapshot_date=datetime.now(timezone.utc),
             total_companies_scored=total_companies_scored,
             average_growth_score=average_growth_score,
             average_financial_score=average_financial_score,
@@ -125,7 +125,7 @@ class DatabaseService:
             confidence_level=audit_trail.confidence_level,
             errors=audit_trail.errors,
             warnings=audit_trail.warnings,
-            created_at=datetime.now(UTC),
+            created_at=datetime.now(timezone.utc),
         )
         self.session.add(record)
         await self.session.flush()

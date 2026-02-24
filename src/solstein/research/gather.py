@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 from loguru import logger
@@ -79,7 +79,7 @@ def _as_percent(value: float | None) -> float | None:
 
 
 def build_company_profile(candidate: DiscoveryCandidate) -> Company:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     ticker_url = f"https://finance.yahoo.com/quote/{candidate.ticker}/" if candidate.ticker else None
     source_links = list(dict.fromkeys(candidate.source_links + ([ticker_url] if ticker_url else [])))
 
@@ -514,7 +514,7 @@ def build_company_from_signals(
     aggregated:
         The aggregated fact record with cross-referenced source data.
     """
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     signals = {s.signal_name: s for s in signal_record.signals}
     facts = {f.fact_type: f for f in aggregated.facts}
 
