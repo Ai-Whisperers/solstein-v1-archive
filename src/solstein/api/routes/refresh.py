@@ -1,7 +1,5 @@
 """FastAPI routes for manual data refresh and webhook triggers."""
 
-from typing import Any
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 

@@ -8,7 +8,7 @@ from typing import Any
 
 from loguru import logger
 
-from solstein.domain.facts import Fact, GatheringBatch, RefreshMetadata
+from solstein.domain.facts import Fact, GatheringBatch
 from solstein.infrastructure.database import DatabaseManager
 
 

@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from loguru import logger
 
@@ -18,7 +18,7 @@ class ConfidenceMetrics:
     base_confidence: float = 0.5
     calibration_factor: float = 1.0
     last_updated: datetime = field(default_factory=datetime.now)
-    history: List[Dict[str, Any]] = field(default_factory=list)
+    history: list[dict[str, Any]] = field(default_factory=list)
 
 
 class ConfidenceAdjuster:
@@ -47,7 +47,7 @@ class ConfidenceAdjuster:
         self.min_confidence = min_confidence
         self.max_confidence = max_confidence
         self.history_window_days = history_window_days
-        self.metrics: Dict[str, ConfidenceMetrics] = {}
+        self.metrics: dict[str, ConfidenceMetrics] = {}
 
     def register_source(
         self,
@@ -68,7 +68,7 @@ class ConfidenceAdjuster:
         source_name: str,
         predicted_confidence: float,
         was_correct: bool,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Record a prediction outcome for calibration.
 
@@ -166,7 +166,7 @@ class ConfidenceAdjuster:
     def get_adjusted_confidence(
         self,
         source_name: str,
-        base_confidence: Optional[float] = None,
+        base_confidence: float | None = None,
     ) -> float:
         """Get the calibrated confidence for a source.
 
@@ -189,7 +189,7 @@ class ConfidenceAdjuster:
 
         return metrics.current_confidence
 
-    def get_source_stats(self, source_name: str) -> Optional[Dict[str, Any]]:
+    def get_source_stats(self, source_name: str) -> dict[str, Any] | None:
         """Get calibration statistics for a source."""
         if source_name not in self.metrics:
             return None
@@ -212,7 +212,7 @@ class ConfidenceAdjuster:
             "history_size": len(metrics.history),
         }
 
-    def get_all_stats(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_stats(self) -> dict[str, dict[str, Any]]:
         """Get calibration statistics for all sources."""
         return {name: self.get_source_stats(name) for name in self.metrics.keys()}
 
@@ -231,7 +231,7 @@ class ConfidenceAdjuster:
     def auto_calibrate_from_conflicts(
         self,
         source_name: str,
-        conflicts_resolved: List[Dict[str, Any]],
+        conflicts_resolved: list[dict[str, Any]],
     ) -> None:
         """Auto-calibrate based on conflict resolution outcomes.
 
@@ -288,6 +288,6 @@ class SourceConfidenceRegistry:
         """Register a new source with default confidence."""
         self.confidences[source_name] = confidence
 
-    def get_all(self) -> Dict[str, float]:
+    def get_all(self) -> dict[str, float]:
         """Get all registered source confidences."""
         return dict(self.confidences)

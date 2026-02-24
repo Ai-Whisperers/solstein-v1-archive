@@ -1,11 +1,10 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from loguru import logger
 
 from solstein.data.connectors.news_signal_detector import NewsSignalDetector
-
-
+from solstein.infrastructure.database import DatabaseManager
 from solstein.infrastructure.refresh import BaseRefreshConnector
 
 
@@ -23,10 +22,10 @@ class NewsSignalRefreshConnector(BaseRefreshConnector):
 
     async def fetch_facts(
         self,
-        company_ids: List[str],
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-    ) -> List[Dict[str, Any]]:
+        company_ids: list[str],
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> list[dict[str, Any]]:
         """Fetch market signals from news articles."""
         logger.info(f"Fetching news signals for {len(company_ids)} companies")
         facts = []
@@ -57,7 +56,7 @@ class NewsSignalRefreshConnector(BaseRefreshConnector):
 
         return facts
 
-    def _convert_signal_to_fact(self, signal: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_signal_to_fact(self, signal: dict[str, Any]) -> dict[str, Any]:
         """Convert news signal to fact dictionary."""
         # Extract signal metrics
         signal_metrics = {
@@ -89,7 +88,7 @@ class NewsSignalRefreshConnector(BaseRefreshConnector):
 
         return fact_data
 
-    async def _filter_delta(self, facts: List[Dict[str, Any]], since: datetime) -> List[Dict[str, Any]]:
+    async def _filter_delta(self, facts: list[dict[str, Any]], since: datetime) -> list[dict[str, Any]]:
         """Filter news signals to only return changed data since last refresh."""
         filtered_facts = []
 

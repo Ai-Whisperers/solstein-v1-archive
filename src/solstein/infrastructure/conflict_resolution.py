@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from loguru import logger
 
@@ -32,8 +32,8 @@ class Conflict:
 
     company_id: str
     fact_type: str
-    existing_fact: Dict[str, Any]
-    new_fact: Dict[str, Any]
+    existing_fact: dict[str, Any]
+    new_fact: dict[str, Any]
     conflict_type: str
     detected_at: datetime
 
@@ -43,7 +43,7 @@ class Resolution:
     """Result of conflict resolution."""
 
     conflict: Conflict
-    winning_fact: Dict[str, Any]
+    winning_fact: dict[str, Any]
     strategy_used: ConflictStrategy
     reason: str
     resolved_at: datetime
@@ -66,13 +66,13 @@ class ConflictResolutionEngine:
             "github": SourceAuthority.GITHUB,
             "news_signal": SourceAuthority.NEWS_SIGNAL,
         }
-        self.resolution_log: List[Resolution] = []
+        self.resolution_log: list[Resolution] = []
 
     def detect_conflicts(
         self,
-        existing_facts: List[Dict[str, Any]],
-        new_facts: List[Dict[str, Any]],
-    ) -> List[Conflict]:
+        existing_facts: list[dict[str, Any]],
+        new_facts: list[dict[str, Any]],
+    ) -> list[Conflict]:
         """Detect conflicts between existing and new facts.
 
         A conflict exists when:
@@ -111,8 +111,8 @@ class ConflictResolutionEngine:
 
     def _values_differ(
         self,
-        fact1: Dict[str, Any],
-        fact2: Dict[str, Any],
+        fact1: dict[str, Any],
+        fact2: dict[str, Any],
     ) -> bool:
         """Check if two facts have different values."""
         val1 = fact1.get("value")
@@ -128,7 +128,7 @@ class ConflictResolutionEngine:
     def resolve_conflict(
         self,
         conflict: Conflict,
-        strategy: Optional[ConflictStrategy] = None,
+        strategy: ConflictStrategy | None = None,
     ) -> Resolution:
         """Resolve a single conflict using specified or auto-selected strategy."""
         if strategy is None:
@@ -187,7 +187,7 @@ class ConflictResolutionEngine:
         self,
         conflict: Conflict,
         strategy: ConflictStrategy,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Apply resolution strategy to determine winning fact."""
         existing = conflict.existing_fact
         new = conflict.new_fact
@@ -245,9 +245,9 @@ class ConflictResolutionEngine:
 
     def resolve_all(
         self,
-        conflicts: List[Conflict],
-        strategy: Optional[ConflictStrategy] = None,
-    ) -> List[Resolution]:
+        conflicts: list[Conflict],
+        strategy: ConflictStrategy | None = None,
+    ) -> list[Resolution]:
         """Resolve all conflicts using specified or auto-selected strategy."""
         resolutions = []
         for conflict in conflicts:
@@ -255,7 +255,7 @@ class ConflictResolutionEngine:
             resolutions.append(resolution)
         return resolutions
 
-    def get_resolution_stats(self) -> Dict[str, Any]:
+    def get_resolution_stats(self) -> dict[str, Any]:
         """Get statistics on conflict resolutions."""
         if not self.resolution_log:
             return {"total_resolved": 0}

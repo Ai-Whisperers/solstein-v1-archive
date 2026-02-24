@@ -1,11 +1,10 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from loguru import logger
 
 from solstein.data.connectors.companies_house_connector import CompaniesHouseConnector
-
-
+from solstein.infrastructure.database import DatabaseManager
 from solstein.infrastructure.refresh import BaseRefreshConnector
 
 
@@ -23,10 +22,10 @@ class CompaniesHouseRefreshConnector(BaseRefreshConnector):
 
     async def fetch_facts(
         self,
-        company_ids: List[str],
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-    ) -> List[Dict[str, Any]]:
+        company_ids: list[str],
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> list[dict[str, Any]]:
         """Fetch company profile facts from Companies House."""
         logger.info(f"Fetching Companies House facts for {len(company_ids)} companies")
         facts = []
@@ -53,7 +52,7 @@ class CompaniesHouseRefreshConnector(BaseRefreshConnector):
 
         return facts
 
-    def _convert_metrics_to_fact(self, metrics: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_metrics_to_fact(self, metrics: dict[str, Any]) -> dict[str, Any]:
         """Convert Companies House metrics to fact dictionary."""
         # Extract profile metrics
         profile_metrics = {
@@ -92,7 +91,7 @@ class CompaniesHouseRefreshConnector(BaseRefreshConnector):
 
         return fact_data
 
-    async def _filter_delta(self, facts: List[Dict[str, Any]], since: datetime) -> List[Dict[str, Any]]:
+    async def _filter_delta(self, facts: list[dict[str, Any]], since: datetime) -> list[dict[str, Any]]:
         """Filter Companies House facts to only return changed data since last refresh."""
         filtered_facts = []
 

@@ -141,7 +141,6 @@ class FactSource(Base):
         return f"<FactSource(source_id={self.source_id}, source_type={self.source_type})>"
 
 
-
 class RefreshMetadata(Base):
     """Tracks refresh scheduling and status for each data source.
 
@@ -157,32 +156,19 @@ class RefreshMetadata(Base):
     source_name: Mapped[str] = mapped_column(
         String(100), unique=True, nullable=False, index=True
     )  # sec_edgar, companies_house, newsapi, github
-    source_type: Mapped[str] = mapped_column(
-        String(50), nullable=False
-    )  # financial, regulatory, news, github
-    last_refresh_time: Mapped[Optional[datetime]] = mapped_column(
-        DateTime, nullable=True
-    )
-    last_refresh_status: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True
-    )  # success, failed, partial
-    last_refresh_job_id: Mapped[Optional[str]] = mapped_column(
-        String(255), nullable=True
-    )
-    next_scheduled_time: Mapped[Optional[datetime]] = mapped_column(
-        DateTime, nullable=True, index=True
-    )
-    refresh_interval_seconds: Mapped[int] = mapped_column(
-        nullable=False, default=86400
-    )  # default: 24 hours
+    source_type: Mapped[str] = mapped_column(String(50), nullable=False)  # financial, regulatory, news, github
+    last_refresh_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_refresh_status: Mapped[str | None] = mapped_column(String(50), nullable=True)  # success, failed, partial
+    last_refresh_job_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    next_scheduled_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, index=True)
+    refresh_interval_seconds: Mapped[int] = mapped_column(nullable=False, default=86400)  # default: 24 hours
     enabled: Mapped[bool] = mapped_column(nullable=False, default=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(UTC), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(UTC),
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
         nullable=False,
-        onupdate=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(timezone.utc),
     )
 
     def __repr__(self) -> str:
@@ -203,45 +189,42 @@ class DataSourceConflict(Base):
     __tablename__ = "data_source_conflicts"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    company_id: Mapped[str] = mapped_column(
-        String(255), ForeignKey("companies.company_id"), nullable=False, index=True
-    )
+    company_id: Mapped[str] = mapped_column(String(255), ForeignKey("companies.company_id"), nullable=False, index=True)
     metric_key: Mapped[str] = mapped_column(
         String(100), nullable=False, index=True
     )  # e.g., "annual_revenue", "employee_count"
-    period: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    period: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     # Source 1 (the higher confidence source)
     source1_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    source1_value: Mapped[Optional[float]] = mapped_column(Numeric(20, 4), nullable=True)
+    source1_value: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
     source1_confidence: Mapped[float] = mapped_column(Numeric(3, 2), nullable=False)
-    source1_url: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
+    source1_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
 
     # Source 2 (the lower confidence source)
     source2_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    source2_value: Mapped[Optional[float]] = mapped_column(Numeric(20, 4), nullable=True)
+    source2_value: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
     source2_confidence: Mapped[float] = mapped_column(Numeric(3, 2), nullable=False)
-    source2_url: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
+    source2_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
 
     # Resolution
     contradiction_detected: Mapped[bool] = mapped_column(nullable=False, default=True)
-    resolution_strategy: Mapped[Optional[str]] = mapped_column(
+    resolution_strategy: Mapped[str | None] = mapped_column(
         String(50), nullable=True
     )  # highest_confidence, weighted_average, flagged_for_review, manual
-    chosen_value: Mapped[Optional[float]] = mapped_column(Numeric(20, 4), nullable=True)
-    chosen_source: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    chosen_value: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
+    chosen_source: Mapped[str | None] = mapped_column(String(100), nullable=True)
     flagged_for_review: Mapped[bool] = mapped_column(nullable=False, default=False)
-    analyst_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    resolved_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    resolved_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    analyst_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    resolved_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(UTC), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(UTC),
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
         nullable=False,
-        onupdate=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(timezone.utc),
     )
 
     # Indexes
@@ -272,48 +255,33 @@ class ConfidenceCalibration(Base):
     metric_key: Mapped[str] = mapped_column(
         String(100), nullable=False, index=True
     )  # annual_revenue, employee_count, etc.
-    company_id: Mapped[Optional[str]] = mapped_column(
-        String(255), nullable=True, index=True
-    )
+    company_id: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
 
     # Prediction (original confidence score)
-    predicted_value: Mapped[Optional[float]] = mapped_column(
-        Numeric(20, 4), nullable=True
-    )
-    confidence_original: Mapped[float] = mapped_column(
-        Numeric(3, 2), nullable=False
-    )
+    predicted_value: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
+    confidence_original: Mapped[float] = mapped_column(Numeric(3, 2), nullable=False)
 
     # Actual (observed value - may come later from another source)
-    actual_value: Mapped[Optional[float]] = mapped_column(
-        Numeric(20, 4), nullable=True
-    )
-    actual_source: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    actual_observed_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime, nullable=True
-    )
+    actual_value: Mapped[float | None] = mapped_column(Numeric(20, 4), nullable=True)
+    actual_source: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    actual_observed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     # Derived
-    is_correct: Mapped[Optional[bool]] = mapped_column(nullable=True)  # null = unknown
-    accuracy_tolerance_pct: Mapped[float] = mapped_column(
-        nullable=False, default=10.0
-    )  # 10% tolerance by default
+    is_correct: Mapped[bool | None] = mapped_column(nullable=True)  # null = unknown
+    accuracy_tolerance_pct: Mapped[float] = mapped_column(nullable=False, default=10.0)  # 10% tolerance by default
 
     # Calibration factor (calculated after 10+ records)
-    calibration_factor: Mapped[Optional[float]] = mapped_column(
+    calibration_factor: Mapped[float | None] = mapped_column(
         Numeric(3, 2), nullable=True
     )  # e.g., 0.95 means 95% accurate
-    confidence_adjusted: Mapped[Optional[float]] = mapped_column(
-        Numeric(3, 2), nullable=True
-    )
+    confidence_adjusted: Mapped[float | None] = mapped_column(Numeric(3, 2), nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(UTC), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(UTC),
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
         nullable=False,
-        onupdate=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(timezone.utc),
     )
 
     # Indexes
