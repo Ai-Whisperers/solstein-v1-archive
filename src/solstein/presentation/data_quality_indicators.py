@@ -6,8 +6,9 @@ Includes confidence levels, data provenance, and completeness metrics.
 """
 
 from typing import Any
-from solstein.domain.models import Company, ConfidenceLevel
+
 from solstein.analytics.completeness import CompletenessCalculator, DataQualityTier
+from solstein.domain.models import Company, ConfidenceLevel
 
 
 class DataQualityIndicators:

@@ -5,8 +5,9 @@ Ensures companies are loaded with merged JSON + Markdown data before scoring.
 This fixes the revenue per employee bug by using unified financials.
 """
 
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 
 from solstein.analytics.company_loader import UnifiedCompanyScoreLoader
 from solstein.domain.models import Company, FinancialMetric

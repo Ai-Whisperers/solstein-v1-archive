@@ -5,13 +5,13 @@ Verify that classification confidence is calculated and available.
 """
 
 import pytest
-from src.solstein.data.unified_loader import UnifiedCompanyLoader
-from src.solstein.analytics.scoring import GrowthScorer
 from src.solstein.analytics.classification import (
+    format_classification_with_confidence,
     get_classification_with_confidence,
     is_tentative_classification,
-    format_classification_with_confidence
 )
+from src.solstein.analytics.scoring import GrowthScorer
+from src.solstein.data.unified_loader import UnifiedCompanyLoader
 
 
 class TestClassificationConfidence:
@@ -36,9 +36,9 @@ class TestClassificationConfidence:
         """Test that get_classification_with_confidence returns (classification, confidence) tuple."""
         company = companies[0]
         scored = scorer.calculate_scores(company)
-        
+
         result = get_classification_with_confidence(scored)
-        
+
         assert isinstance(result, tuple)
         assert len(result) == 2
         classification, confidence = result
@@ -51,7 +51,7 @@ class TestClassificationConfidence:
         for company in companies:
             scored = scorer.calculate_scores(company)
             _, confidence = get_classification_with_confidence(scored)
-            
+
             # Confidence should always be between 0 and 1
             assert 0 <= confidence <= 1, f"Invalid confidence {confidence} for {company.name}"
 
@@ -61,7 +61,7 @@ class TestClassificationConfidence:
             scored = scorer.calculate_scores(company)
             _, confidence = get_classification_with_confidence(scored)
             is_tentative = is_tentative_classification(confidence)
-            
+
             # Tentative if confidence < 0.65
             if confidence < 0.65:
                 assert is_tentative, f"Classification with confidence {confidence} should be tentative"
@@ -73,9 +73,9 @@ class TestClassificationConfidence:
         company = companies[0]
         scored = scorer.calculate_scores(company)
         classification, confidence = get_classification_with_confidence(scored)
-        
+
         formatted = format_classification_with_confidence(classification, confidence)
-        
+
         assert isinstance(formatted, str)
         assert classification in formatted
         # Check that confidence percentage is in the formatted string
@@ -87,22 +87,22 @@ class TestClassificationConfidence:
         for company in companies:
             scored = scorer.calculate_scores(company)
             _, confidence = get_classification_with_confidence(scored)
-            
+
             assert 0 <= confidence <= 1, f"Confidence {confidence} out of range"
 
     def test_classification_confidence_integration(self, companies, scorer):
         """Test that classification and confidence work together."""
         classifications = set()
-        
+
         for company in companies:
             scored = scorer.calculate_scores(company)
             classification, confidence = get_classification_with_confidence(scored)
-            
+
             classifications.add(classification)
-            
+
             # Verify confidence is valid
             assert 0 <= confidence <= 1
-        
+
         # Should have multiple classifications
         assert len(classifications) > 0, "No classifications found"
         assert len(classifications) >= 2, "Should have at least 2 different classifications"

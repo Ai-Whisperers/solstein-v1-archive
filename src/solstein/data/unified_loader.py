@@ -6,14 +6,13 @@ Priority: Markdown > JSON (when conflicts exist)
 """
 
 import logging
-from pathlib import Path
-from typing import Any, Dict, Optional, List
 from datetime import datetime, timezone
+from pathlib import Path
 
-from ..domain.models import Company, FinancialMetric, ConfidenceLevel, AIMaturity, ThreatLevel, CompanyTier
-from .loaders import CompetitorDataLoader
-from ..extractors.markdown_extractor import MarkdownExtractor
 from ..analytics.confidence_weighting import populate_signal_confidences
+from ..domain.models import Company, FinancialMetric
+from ..extractors.markdown_extractor import MarkdownExtractor
+from .loaders import CompetitorDataLoader
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +20,10 @@ logger = logging.getLogger(__name__)
 class UnifiedCompany(Company):
     """Extended Company model with data source tracking and merge conflict documentation."""
 
-    data_source_per_field: Dict[str, str] = {}  # Track where each field came from
-    merge_conflicts: List[str] = []  # Fields where JSON and Markdown differed
+    data_source_per_field: dict[str, str] = {}  # Track where each field came from
+    merge_conflicts: list[str] = []  # Fields where JSON and Markdown differed
     merge_priority: str = "Markdown > JSON"  # Document priority rules
-    merge_timestamp: Optional[datetime] = None
+    merge_timestamp: datetime | None = None
 
 
 class UnifiedCompanyLoader:
@@ -42,7 +41,7 @@ class UnifiedCompanyLoader:
             / "dutch_market"
         )
 
-    def load_unified_companies(self) -> List[UnifiedCompany]:
+    def load_unified_companies(self) -> list[UnifiedCompany]:
         """Load all companies with unified data from both sources."""
 
         # Load JSON companies
@@ -78,15 +77,15 @@ class UnifiedCompanyLoader:
                 unified_companies.append(unified)
 
         logger.info(f"Created {len(unified_companies)} unified companies")
-        
+
         # Populate signal confidences for scoring component weighting
         for company in unified_companies:
             populate_signal_confidences(company)
-        
-        return unified_companies
+
         return unified_companies
 
-    def _load_markdown_companies(self) -> List[Company]:
+
+    def _load_markdown_companies(self) -> list[Company]:
         """Load companies from Markdown files in dutch_market directory."""
 
         companies = []
@@ -178,8 +177,8 @@ class UnifiedCompanyLoader:
         self,
         json_fin: FinancialMetric,
         markdown_fin: FinancialMetric,
-        conflicts: List[str],
-        data_sources: Dict[str, str],
+        conflicts: list[str],
+        data_sources: dict[str, str],
     ) -> FinancialMetric:
         """Merge financial metrics with Markdown priority."""
 
@@ -263,15 +262,15 @@ class UnifiedCompanyLoader:
 
     def _infer_ai_score_from_maturity(self, company: UnifiedCompany, ai_maturity: str) -> None:
         """Infer AI score from AI maturity level when there's a conflict.
-        
+
         Maps AI maturity levels to scores using the CompetitivePositionConfig mapping.
         This fixes contradictions like 'Strong' maturity with 0/10 score.
         """
         from ..core.scoring_config import CompetitivePositionConfig
-        
+
         config = CompetitivePositionConfig()
         ai_maturity_scores = config.ai_maturity_scores
-        
+
         # Map AI maturity to score (0-10 scale)
         # CompetitivePositionConfig uses -1.0 to 2.5 scale, so we need to normalize to 0-10
         maturity_score = ai_maturity_scores.get(ai_maturity, 0.0)
@@ -279,7 +278,7 @@ class UnifiedCompanyLoader:
         # Formula: ((maturity_score - (-1.0)) / (2.5 - (-1.0))) * 10
         normalized_score = ((maturity_score - (-1.0)) / (2.5 - (-1.0))) * 10
         normalized_score = max(0, min(10, int(round(normalized_score))))  # Round to int and clamp to 0-10
-        
+
         company.ai_score = normalized_score
         logger.info(f"Inferred AI score {normalized_score}/10 for {company.name} from AI maturity '{ai_maturity}'")
 

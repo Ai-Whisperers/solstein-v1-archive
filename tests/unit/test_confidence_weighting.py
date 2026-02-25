@@ -5,15 +5,14 @@ Tests for converting ConfidenceLevel enums to numeric weights and populating
 signal_confidences for use in scoring component weighting.
 """
 
-import pytest
-from src.solstein.domain.models import Company, FinancialMetric, ConfidenceLevel
 from src.solstein.analytics.confidence_weighting import (
     confidence_level_to_weight,
-    populate_signal_confidences,
+    get_average_confidence,
     get_confidence_summary,
     has_high_confidence_data,
-    get_average_confidence,
+    populate_signal_confidences,
 )
+from src.solstein.domain.models import Company, ConfidenceLevel, FinancialMetric
 
 
 class TestConfidenceLevelToWeight:
@@ -138,21 +137,6 @@ class TestPopulateSignalConfidences:
         # Should return company with empty signal_confidences
         assert result.signal_confidences == {}
 
-
-class TestGetConfidenceSummary:
-    """Test getting confidence summary."""
-    def test_get_summary_with_data(self):
-        """Test populating when company has no financials."""
-        company = Company(
-            id="test-6",
-            name="Test Company",
-            financials=None,
-        )
-
-        result = populate_signal_confidences(company)
-
-        # Should return company unchanged
-        assert result.signal_confidences == {}
 
 
 class TestGetConfidenceSummary:

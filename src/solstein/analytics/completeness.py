@@ -25,7 +25,7 @@ Classification: ai_signal_level, ai_key_capabilities, ai_in_production
 
 import logging
 from enum import Enum
-from typing import Optional, Any
+from typing import Any
 
 from ..domain.models import Company
 
@@ -156,7 +156,7 @@ class CompletenessCalculator:
             "field_details": field_details,
         }
 
-    def _get_field_value(self, company: Company, field: str) -> Optional[Any]:
+    def _get_field_value(self, company: Company, field: str) -> Any | None:
         """
         Get field value from company, handling nested fields.
 

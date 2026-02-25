@@ -4,9 +4,8 @@ Task 4: Unit Tests for NULL Handling & Interpolation
 Tests the interpolation engine for revenue, growth, and employee estimation.
 """
 
-import pytest
 
-from solstein.data.interpolation import InterpolationEngine, InterpolationConfig
+from solstein.data.interpolation import InterpolationConfig, InterpolationEngine
 
 
 class TestInterpolationConfig:

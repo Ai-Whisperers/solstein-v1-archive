@@ -22,17 +22,17 @@ class TestGeographicSpecificity:
         """Eneve should have 7 specific countries, not 'Europe'."""
         eneve = next((c for c in companies if "Eneve" in c.name), None)
         assert eneve is not None, "Eneve not found in companies"
-        
+
         # Should have exactly 7 countries
         assert len(eneve.geographic_presence) == 7, \
             f"Expected 7 countries, got {len(eneve.geographic_presence)}: {eneve.geographic_presence}"
-        
+
         # Should NOT contain continent-level entries
         assert "Europe" not in eneve.geographic_presence, \
             "Geographic presence should not contain 'Europe' (continent-level)"
         assert "EU" not in eneve.geographic_presence, \
             "Geographic presence should not contain 'EU'"
-        
+
         # Should contain specific countries
         expected_countries = {
             "Netherlands", "Belgium", "Germany", "France",
@@ -47,7 +47,7 @@ class TestGeographicSpecificity:
         for company in companies:
             assert isinstance(company.geographic_presence, list), \
                 f"{company.name}: geographic_presence should be a list"
-            
+
             for country in company.geographic_presence:
                 assert isinstance(country, str), \
                     f"{company.name}: geographic_presence items should be strings, got {type(country)}"
@@ -57,7 +57,7 @@ class TestGeographicSpecificity:
     def test_no_continent_level_entries(self, companies):
         """No company should have continent-level entries like 'Europe', 'Asia', etc."""
         continents = {"Europe", "Asia", "Africa", "Americas", "Oceania", "EU", "EMEA"}
-        
+
         for company in companies:
             for country in company.geographic_presence:
                 assert country not in continents, \
@@ -67,11 +67,11 @@ class TestGeographicSpecificity:
         """Geographic presence data source should be tracked."""
         eneve = next((c for c in companies if "Eneve" in c.name), None)
         assert eneve is not None
-        
+
         # Should have data_source_per_field tracking
         assert hasattr(eneve, 'data_source_per_field'), \
             "Company should have data_source_per_field attribute"
-        
+
         # Geographic presence source should be documented
         geo_source = eneve.data_source_per_field.get('geographic_presence')
         assert geo_source is not None, \
@@ -82,14 +82,14 @@ class TestGeographicSpecificity:
     def test_geographic_specificity_deterministic(self):
         """Geographic data should be deterministic across multiple loads."""
         results = []
-        
+
         for _ in range(3):
             loader = UnifiedCompanyLoader()
             companies = loader.load_unified_companies()
             eneve = next((c for c in companies if "Eneve" in c.name), None)
             if eneve:
                 results.append(tuple(sorted(eneve.geographic_presence)))
-        
+
         # All runs should produce identical results
         assert len(set(results)) == 1, \
             f"Geographic data should be deterministic, got different results: {results}"

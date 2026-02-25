@@ -6,7 +6,6 @@ This fixes the revenue per employee bug by using unified financials.
 """
 
 import logging
-from typing import Optional
 
 from ..data.unified_loader import UnifiedCompanyLoader
 from ..domain.models import Company
@@ -20,9 +19,9 @@ class UnifiedCompanyScoreLoader:
     def __init__(self):
         """Initialize with unified loader."""
         self.unified_loader = UnifiedCompanyLoader()
-        self._unified_companies_cache: Optional[dict[str, Company]] = None
+        self._unified_companies_cache: dict[str, Company] | None = None
 
-    def load_company_for_scoring(self, company_id: str) -> Optional[Company]:
+    def load_company_for_scoring(self, company_id: str) -> Company | None:
         """
         Load a company with unified data for scoring.
 

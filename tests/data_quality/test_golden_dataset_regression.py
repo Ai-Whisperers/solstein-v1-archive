@@ -5,12 +5,10 @@ Regression tests to prevent score drift in the scoring engine.
 Uses a curated golden dataset of representative companies.
 """
 
-import pytest
-from solstein.domain.models import Company, FinancialMetric
 from tests.data_quality.golden_dataset import (
-    get_golden_dataset,
     get_golden_company_by_id,
     get_golden_company_by_name,
+    get_golden_dataset,
 )
 
 

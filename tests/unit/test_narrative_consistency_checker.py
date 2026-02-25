@@ -6,8 +6,9 @@ between data, classification, and narrative tone.
 """
 
 import pytest
+
+from solstein.domain.models import AIMaturity, Company, FinancialMetric
 from solstein.presentation.narrative_consistency_checker import NarrativeConsistencyChecker
-from solstein.domain.models import Company, FinancialMetric, AIMaturity
 
 
 class TestNarrativeConsistencyChecker:
