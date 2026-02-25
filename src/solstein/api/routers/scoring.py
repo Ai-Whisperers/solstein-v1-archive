@@ -25,6 +25,7 @@ class TemporalClient:
 
 # from ...analytics.workflows import BatchScoreMarketWorkflow
 from ...analytics.scoring import GrowthScorer
+from ...analytics.company_loader import unified_score_loader
 from ...core.repositories import CompanyRepository
 from ..dependencies import get_current_user, get_repository
 
@@ -41,7 +42,11 @@ async def score_company(
     """Calculate growth and competitive scores for a company."""
     try:
         # One high-performance lookup
-        target_company = repo.get_by_id(company_id)
+        # Load company with unified JSON + Markdown data for accurate scoring
+        target_company = unified_score_loader.load_company_for_scoring(company_id)
+        if not target_company:
+            # Fallback to repository if unified loader fails
+            target_company = repo.get_by_id(company_id)
 
         if not target_company:
             raise HTTPException(
