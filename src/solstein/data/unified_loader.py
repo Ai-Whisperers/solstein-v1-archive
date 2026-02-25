@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from ..domain.models import Company, FinancialMetric, ConfidenceLevel, AIMaturity, ThreatLevel, CompanyTier
 from .loaders import CompetitorDataLoader
 from ..extractors.markdown_extractor import MarkdownExtractor
+from ..analytics.confidence_weighting import populate_signal_confidences
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +78,12 @@ class UnifiedCompanyLoader:
                 unified_companies.append(unified)
 
         logger.info(f"Created {len(unified_companies)} unified companies")
+        
+        # Populate signal confidences for scoring component weighting
+        for company in unified_companies:
+            populate_signal_confidences(company)
+        
+        return unified_companies
         return unified_companies
 
     def _load_markdown_companies(self) -> List[Company]:
