@@ -31,7 +31,7 @@ class MockDiscoverySource:
 
 
 class MockEnrichmentSource:
-    """Mock implementation of EnrichmentSource protocol with refresh support."""
+    """Mock implementation of EnrichmentSource protocol."""
 
     @property
     def source_name(self) -> str:
@@ -54,24 +54,6 @@ class MockEnrichmentSource:
             raw_content={},
         )
 
-    def refresh(
-        self,
-        company_ids: list[str],
-        start_date=None,
-        end_date=None,
-    ) -> list[dict]:
-        return []
-
-    def get_confidence(self) -> float:
-        return 0.85
-
-    def get_authority(self) -> SourceAuthority:
-        return SourceAuthority.YAHOO_FINANCE
-
-    def supports_incremental(self) -> bool:
-        return True
-
-
 class TestDiscoverySourceProtocol:
     """Test DiscoverySource protocol runtime checkability."""
 
@@ -93,37 +75,27 @@ class TestDiscoverySourceProtocol:
 
 
 class TestEnrichmentSourceProtocol:
-    """Test EnrichmentSource protocol with refresh extensions."""
+    """Test EnrichmentSource protocol (original interface)."""
 
     def test_isinstance_check_passes(self):
-        """Mock implementing full EnrichmentSource passes isinstance check."""
+        """Mock implementing EnrichmentSource passes isinstance check."""
         mock = MockEnrichmentSource()
         assert isinstance(mock, EnrichmentSource)
 
-    def test_refresh_method_exists(self):
-        """EnrichmentSource protocol includes refresh method."""
-        mock = MockEnrichmentSource()
-        assert hasattr(mock, "refresh")
-        assert callable(mock.refresh)
+    def test_missing_method_fails_isinstance(self):
+        """Class missing enrich method fails isinstance check."""
 
-    def test_get_confidence_method_exists(self):
-        """EnrichmentSource protocol includes get_confidence method."""
-        mock = MockEnrichmentSource()
-        assert hasattr(mock, "get_confidence")
-        assert mock.get_confidence() == 0.85
+        class IncompleteEnrichment:
+            @property
+            def source_name(self):
+                return "incomplete"
 
-    def test_get_authority_method_exists(self):
-        """EnrichmentSource protocol includes get_authority method."""
-        mock = MockEnrichmentSource()
-        assert hasattr(mock, "get_authority")
-        assert mock.get_authority() == SourceAuthority.YAHOO_FINANCE
+            @property
+            def source_type(self):
+                return DataSourceType.YAHOO_FINANCE
 
-    def test_supports_incremental_method_exists(self):
-        """EnrichmentSource protocol includes supports_incremental method."""
-        mock = MockEnrichmentSource()
-        assert hasattr(mock, "supports_incremental")
-        assert mock.supports_incremental() is True
-
+        incomplete = IncompleteEnrichment()
+        assert not isinstance(incomplete, EnrichmentSource)
 
 class TestUnifiedDataSourceProtocol:
     """Test UnifiedDataSource protocol."""

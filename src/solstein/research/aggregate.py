@@ -101,10 +101,20 @@ class _FactObservation:
 
 
 def _extract_facts_from_source(source: RawDataSource) -> list[tuple[str, Any]]:
-    """Extract (fact_type, value) pairs from a single RawDataSource."""
+    """Extract (fact_type, value) pairs from a single RawDataSource.
+
+    Routes to the appropriate per-source-type extractor based on
+    ``source.source_type``.  Each extractor expects a specific dict
+    shape matching the Pydantic model_dump() output of the corresponding
+    adapter's domain model (e.g., CompanyResearch, PressCoverage, etc.).
+    """
     content = source.raw_content
     if isinstance(content, str):
         return []
+
+    if isinstance(content, list):
+        # e.g., WebSearchNewsEnrichment returns a list of articles
+        return [("article_count", len(content))]
 
     if not isinstance(content, dict):
         return []
@@ -115,10 +125,7 @@ def _extract_facts_from_source(source: RawDataSource) -> list[tuple[str, Any]]:
     if source_type in (DataSourceType.YAHOO_FINANCE,):
         return _extract_yahoo_finance(content)
 
-    if source_type == DataSourceType.NEWS:
-        return _extract_news(content)
-
-    if source_type == DataSourceType.NEWSAPI:
+    if source_type in (DataSourceType.NEWSAPI, DataSourceType.NEWS):
         return _extract_news(content)
 
     if source_type in (DataSourceType.GOOGLE_PATENTS, DataSourceType.USPTO, DataSourceType.PATENTS):
@@ -141,28 +148,112 @@ def _extract_facts_from_source(source: RawDataSource) -> list[tuple[str, Any]]:
 
 
 def _extract_yahoo_finance(content: dict[str, Any]) -> list[tuple[str, Any]]:
-    """Extract facts from CompanyProfile model dump."""
+    """Extract facts from CompanyResearch.model_dump(mode='json') output.
+
+    Expected input schema (from ``data.company_research.CompanyResearch``):
+        {
+            "ticker": str, "name": str, "exchange": str,
+            "description": str | None, "founded": int | None,
+            "headquarters": str | None, "website": str | None,
+            "employees": int | None, "market_cap": float | None,
+            "pe_ratio": float | None,
+            "financials": {  # CompanyFinancials
+                "revenue": float, "revenue_growth_yoy": float,
+                "ebitda": float, "net_income": float,
+                "profit_margin": float, ...
+            } | None,
+            "growth": {  # CompanyGrowthSignals
+                "employee_count": int, "employee_growth": float,
+                "job_postings_count": int, "ai_related_jobs": int, ...
+            } | None,
+            "ai": {  # CompanyAIAssessment
+                "ai_score": int, "ai_signal_strength": str, ...
+            } | None,
+            "technology": {  # CompanyTechnology
+                "industry": str, "sector": str, ...
+            } | None,
+            "products": {  # CompanyProducts
+                "products": list[str], ...
+            } | None,
+        }
+
+    Also handles GlobalMarketEnrichment output (has top-level
+    'source_currency' key and flat 'revenue' / 'market_cap').
+
+    WARNING: This dict is NESTED — financial metrics live under
+    'financials', growth signals under 'growth', etc.  Do NOT access
+    them as flat top-level keys (e.g., content['revenue'] will be None;
+    use content['financials']['revenue'] instead).
+    """
     facts: list[tuple[str, Any]] = []
-    mappings = [
-        ("revenue", "revenue"),
+
+    # -- CompanyResearch nested financials --
+    fin = content.get("financials")
+    if isinstance(fin, dict):
+        for key, fact_type in [
+            ("revenue", "revenue"),
+            ("revenue_growth_yoy", "revenue_growth"),
+            ("profit_margin", "profit_margin"),
+            ("ebitda", "ebitda"),
+            ("net_income", "net_income"),
+        ]:
+            if fin.get(key) is not None:
+                facts.append((fact_type, fin[key]))
+
+    # -- Top-level numeric fields (CompanyResearch + GlobalMarket) --
+    for key, fact_type in [
         ("market_cap", "market_cap"),
-        ("profit_margin", "profit_margin"),
-        ("revenue_growth", "revenue_growth"),
-        ("earnings_growth", "earnings_growth"),
-        ("employee_count", "employees"),
         ("pe_ratio", "pe_ratio"),
-        ("eps_ttm", "eps"),
-        ("industry", "industry"),
-        ("sector", "sector"),
         ("current_price", "current_price"),
-    ]
-    for fact_type, key in mappings:
+        ("eps_ttm", "eps_ttm"),
+        ("employees", "employee_count"),
+        ("founded", "founded_year"),
+    ]:
         if content.get(key) is not None:
             facts.append((fact_type, content[key]))
 
-    # Tech stack / products from profile
-    tech = content.get("tech_stack")
+    # GlobalMarket has top-level revenue and market_cap
+    if "source_currency" in content:
+        if content.get("revenue") is not None:
+            facts.append(("revenue", content["revenue"]))
+        # market_cap already handled above
+
+    # -- String facts --
+    for key, fact_type in [
+        ("description", "description"),
+        ("headquarters", "headquarters"),
+        ("website", "website"),
+        ("name", "name"),
+        ("exchange", "exchange"),
+    ]:
+        if content.get(key) is not None:
+            facts.append((fact_type, content[key]))
+
+    # -- Growth signals --
+    growth = content.get("growth")
+    if isinstance(growth, dict):
+        for key, fact_type in [
+            ("employee_count", "employee_count"),
+            ("employee_growth", "employee_growth_pct"),
+            ("job_postings_count", "open_positions"),
+            ("ai_related_jobs", "ai_related_positions"),
+        ]:
+            if growth.get(key) is not None:
+                facts.append((fact_type, growth[key]))
+
+    # -- AI assessment --
+    ai = content.get("ai")
+    if isinstance(ai, dict):
+        if ai.get("ai_score") is not None:
+            facts.append(("ai_score", ai["ai_score"]))
+        if ai.get("ai_signal_strength") is not None:
+            facts.append(("ai_signal_strength", ai["ai_signal_strength"]))
+
+    # -- Technology --
+    tech = content.get("technology")
     if isinstance(tech, dict):
+        if tech.get("industry") is not None:
+            facts.append(("industry", tech["industry"]))
         if tech.get("sector") is not None:
             facts.append(("sector", tech["sector"]))
 
@@ -176,7 +267,12 @@ def _extract_yahoo_finance(content: dict[str, Any]) -> list[tuple[str, Any]]:
 
 
 def _extract_news(content: dict[str, Any]) -> list[tuple[str, Any]]:
-    """Extract facts from PressCoverage model dump."""
+    """Extract facts from PressCoverage.model_dump() output.
+
+    Expected input schema (from ``adapters.enrichment.news``):
+        {"total_articles": int, "sentiment_score": float,
+         "positive_count": int, "negative_count": int, ...}
+    """
     facts: list[tuple[str, Any]] = []
     if content.get("total_articles") is not None:
         facts.append(("article_count", content["total_articles"]))
@@ -190,7 +286,10 @@ def _extract_news(content: dict[str, Any]) -> list[tuple[str, Any]]:
 
 
 def _extract_exa_search(content: dict[str, Any]) -> list[tuple[str, Any]]:
-    """Extract facts from Exa/Google web search results."""
+    """Extract facts from Exa/Google web search results.
+
+    Expected input schema: {"article_count": int, ...}
+    """
     facts: list[tuple[str, Any]] = []
     if content.get("article_count") is not None:
         facts.append(("article_count", content["article_count"]))
@@ -198,7 +297,13 @@ def _extract_exa_search(content: dict[str, Any]) -> list[tuple[str, Any]]:
 
 
 def _extract_crunchbase(content: dict[str, Any]) -> list[tuple[str, Any]]:
-    """Extract facts from FundingData model dump."""
+    """Extract facts from FundingData.model_dump() output.
+
+    Expected input schema (from ``adapters.enrichment.funding``):
+        {"total_raised": float, "last_round_amount": float,
+         "last_round_valuation": float, "num_rounds": int,
+         "last_round_stage": str, "investors": list[str], ...}
+    """
     facts: list[tuple[str, Any]] = []
     for key, fact_type in [
         ("total_raised", "total_funding_raised"),
@@ -216,7 +321,12 @@ def _extract_crunchbase(content: dict[str, Any]) -> list[tuple[str, Any]]:
 
 
 def _extract_patents(content: dict[str, Any]) -> list[tuple[str, Any]]:
-    """Extract facts from PatentResult / PatentData dicts."""
+    """Extract facts from PatentResult / PatentData.model_dump() output.
+
+    Expected input schema (from ``adapters.enrichment.patents``):
+        {"total_patents": int, "ai_related_patents": int,
+         "top_categories": list[str], ...}
+    """
     facts: list[tuple[str, Any]] = []
     if content.get("total_patents") is not None:
         facts.append(("total_patents", content["total_patents"]))
@@ -228,7 +338,12 @@ def _extract_patents(content: dict[str, Any]) -> list[tuple[str, Any]]:
 
 
 def _extract_linkedin(content: dict[str, Any]) -> list[tuple[str, Any]]:
-    """Extract facts from LinkedInData model dump."""
+    """Extract facts from LinkedInData.model_dump() output.
+
+    Expected input schema (from ``adapters.enrichment.linkedin``):
+        {"employee_count": int, "employee_growth_pct": float,
+         "open_positions": int, "ai_related_positions": int, ...}
+    """
     facts: list[tuple[str, Any]] = []
     for key, fact_type in [
         ("employee_count", "employee_count"),
@@ -242,7 +357,12 @@ def _extract_linkedin(content: dict[str, Any]) -> list[tuple[str, Any]]:
 
 
 def _extract_website(content: dict[str, Any]) -> list[tuple[str, Any]]:
-    """Extract facts from ProductInfo model dump."""
+    """Extract facts from ProductInfo.model_dump() output.
+
+    Expected input schema (from ``adapters.enrichment.website``):
+        {"main_products": list[str], "tech_stack": list[str],
+         "pricing_model": str, "target_customers": list[str], ...}
+    """
     facts: list[tuple[str, Any]] = []
     if content.get("main_products"):
         facts.append(("products", content["main_products"]))
@@ -256,9 +376,11 @@ def _extract_website(content: dict[str, Any]) -> list[tuple[str, Any]]:
 
 
 def _extract_generic(content: dict[str, Any]) -> list[tuple[str, Any]]:
-    """Generic extraction for unknown source types."""
+    """Generic extraction for unknown source types.
+
+    Attempts to extract commonly named fields as a best-effort fallback.
+    """
     facts: list[tuple[str, Any]] = []
-    # Try to extract common fields
     for key in ["name", "description", "website", "founded_year", "headquarters"]:
         if content.get(key) is not None:
             facts.append((key, content[key]))

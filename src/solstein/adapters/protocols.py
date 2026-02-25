@@ -1,13 +1,13 @@
 """Protocol definitions for pluggable data source adapters.
 
-Three protocols cover all data source modules:
+Four protocols cover all data source modules:
 
 - DiscoverySource: produces company candidates for a given market
 - EnrichmentSource: enriches a known company with factual data from one source
 - FactAggregator: cross-references multiple RawDataSource objects into
   verified AggregatedFact objects
-
-Extended with refresh support for unified data source architecture.
+- UnifiedDataSource: combines discovery, enrichment, and refresh capabilities
+  for the unified data source architecture
 """
 
 from __future__ import annotations
@@ -59,8 +59,6 @@ class EnrichmentSource(Protocol):
     NewsAPI, patent search, etc.) and returns a RawDataSource object
     containing the raw fetched data.  Multiple EnrichmentSource
     adapters are composed by the gather stage to build a RawDataRecord.
-
-    Extended with refresh support for unified data source architecture.
     """
 
     @property
@@ -85,55 +83,6 @@ class EnrichmentSource(Protocol):
         Returns a RawDataSource containing the raw API response or
         scraped content.  Raises if the source is unavailable or
         returns no data.
-        """
-        ...
-
-    def refresh(
-        self,
-        company_ids: list[str],
-        start_date: datetime | None = None,
-        end_date: datetime | None = None,
-    ) -> list[dict[str, Any]]:
-        """Refresh facts for multiple companies.
-
-        Fetches updated data for the given company IDs and returns
-        a list of fact dictionaries. Implementations should support
-        incremental refresh (only returning changed data) when
-        supports_incremental() returns True.
-
-        Args:
-            company_ids: List of company IDs to refresh
-            start_date: Optional start date for data range
-            end_date: Optional end date for data range
-
-        Returns:
-            List of fact dictionaries with updated data
-        """
-        ...
-
-    def get_confidence(self) -> float:
-        """Return the base confidence score for this source (0.0-1.0).
-
-        This is the default confidence level for facts from this source
-        before any calibration. Higher values indicate more trustworthy
-        sources (e.g., SEC EDGAR = 0.95, News = 0.72).
-        """
-        ...
-
-    def get_authority(self) -> SourceAuthority:
-        """Return the authority level for this source.
-
-        Authority determines priority when resolving conflicts between
-        sources. Sources with higher authority win when facts disagree.
-        """
-        ...
-
-    def supports_incremental(self) -> bool:
-        """Return True if this source supports incremental refresh.
-
-        Incremental refresh means the source can efficiently detect
-        and return only changed data since a given timestamp, rather
-        than fetching all data every time.
         """
         ...
 

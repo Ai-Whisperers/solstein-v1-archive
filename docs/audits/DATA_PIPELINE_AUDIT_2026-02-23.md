@@ -1239,7 +1239,7 @@ Same company gets different tiers depending on entry point.
 
 `src/solstein/api/routers/scoring.py:56-61`:
 - Classifies on `growth_score` instead of `composite_score`
-- Returns `"Salt"` instead of `"Salt"` for mid-range
+- Returns `"Neutral"` (pre-rename) instead of correct classification for mid-range companies
 - Ignores the already-correct `classification` field on the `Company` object
 
 ### 31.4 Inconsistent Slugification Across Entry Points

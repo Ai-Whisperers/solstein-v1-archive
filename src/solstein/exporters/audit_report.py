@@ -68,7 +68,7 @@ class PipelineAuditReportGenerator:
 
         market = stage_report.get("market", "Unknown") if stage_report else "Unknown"
         seed = stage_report.get("seed_company", "Unknown") if stage_report else "Unknown"
-        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M timezone.utc")
+        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
         sections: list[str] = []
         sections.append(f"# Pipeline Audit Report — {market}\n")
