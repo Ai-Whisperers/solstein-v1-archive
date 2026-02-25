@@ -25,8 +25,11 @@ docs/
 │   ├── json-to-database-roadmap.md    ← Migration planning
 │   └── DATA_SOURCE_WIRING_REFERENCE.md ← Data source configuration
 │
-├── audits/                            ← Audit reports (merged from audit/)
-│   └── DATA_PIPELINE_AUDIT_2026-02-23.md
+├── audits/                            ← Audit reports
+│   ├── DATA_PIPELINE_AUDIT_2026-02-23.md
+│   ├── NYX_REMOTE_DIFF_ANALYSIS.md    ← Nyx commit diff analysis
+│   ├── YAHOO_EXTRACTION_AUDIT.md      ← Yahoo Finance extraction audit
+│   └── CODEBASE_AUDIT_REPORT.md       ← Comprehensive codebase audit
 │
 ├── communications/                    ← Team communications
 │   ├── phase-1-announcement.md

@@ -25,11 +25,13 @@
 | **Tests** | `tests/` |
 | **Documentation** | `docs/` |
 | **Data input** | `data/input/` |
-| **Data output/exports** | `data/output/exports/` |
+| **Data output** | `data/output/` |
 | **Docker files** | `docker/` |
 | **Configuration** | `src/solstein/config.py` or `.env` |
 | **Environment vars** | `.env` (root) |
 | **Database schema** | `supabase/migrations/` |
+| **Dashboard frontend** | `dashboard/` |
+| **Alembic migrations** | `alembic/` |
 
 ---
 
@@ -85,14 +87,24 @@ SOLSTEIN_SUPABASE__KEY=your-anon-key
 | Method | Endpoint | What It Does |
 |--------|----------|-------------|
 | `GET` | `/health` | API health check |
+| `GET` | `/health/status` | Full health status |
 | `GET` | `/companies` | List all companies |
 | `GET` | `/companies/{id}` | Get single company |
 | `POST` | `/companies` | Create new company |
 | `POST` | `/scoring/company/{id}/score` | Score a company |
+| `GET` | `/scoring/batch` | Batch scoring |
 | `GET` | `/scoring/stats` | Scoring statistics |
 | `GET` | `/market/analysis` | Full market analysis |
 | `GET` | `/market/search?q=...` | Search companies |
-| `POST` | `/export/` | Generate Excel report |
+| `GET` | `/market/overlap/{id}` | Competitive overlap |
+| `GET` | `/export/excel` | Generate Excel report |
+| `GET` | `/export/json` | Export as JSON |
+| `GET` | `/drill-down/company/{id}/why/{signal}` | Signal drill-down |
+| `GET` | `/drill-down/company/{id}/facts` | Extracted facts |
+| `POST` | `/simulation/run` | Run market simulation |
+| `GET` | `/jobs/{workflow_id}` | Check job status |
+| `POST` | `/refresh/{source_name}` | Trigger data refresh |
+| `GET` | `/refresh/sources` | List refresh sources |
 
 **Full reference:** [API Reference](api/reference.md)
 
@@ -103,12 +115,16 @@ SOLSTEIN_SUPABASE__KEY=your-anon-key
 ```
 src/solstein/
 ├── api/              ← FastAPI routes & schemas
+├── adapters/         ← Data source adapters & protocols
+├── agents/           ← AI data collection agents
 ├── analytics/        ← Scoring & market analysis logic
 ├── domain/           ← Pure business models
 ├── data/             ← Repository & data loading
 ├── core/             ← Interfaces & configuration
-├── exporters/        ← Excel & other outputs
-└── tasks.py          ← Celery background jobs
+├── exporters/        ← Excel, Markdown, LLM reports
+├── infrastructure/   ← DB, refresh connectors, conflict resolution
+├── research/         ← Data aggregation & pipeline
+└── worker_tasks.py   ← Celery background jobs
 ```
 
 **Full structure:** [Repository Structure](STRUCTURE.md)
@@ -125,7 +141,7 @@ src/solstein/
 | **"Module not found"** | Virtual env | `source venv/bin/activate && pip install -e ".[dev]"` |
 | **"Celery tasks not running"** | Redis running? | `redis-cli ping` should return `PONG` |
 
-**Full troubleshooting:** [Troubleshooting Guide](guides/troubleshooting.md) *(coming soon)*
+**Full troubleshooting:** [Troubleshooting Guide](guides/troubleshooting.md)
 
 ---
 
@@ -137,7 +153,10 @@ src/solstein/
 | `GrowthScorer` | `src/solstein/analytics/scoring.py` | Scoring engine |
 | `CompanyRepository` | `src/solstein/core/repositories.py` | Data access interface |
 | `SupabaseRepository` | `src/solstein/data/repositories.py` | Supabase implementation |
-| `ExcelExporter` | `src/solstein/exporters/excel_exporter.py` | Report generation |
+| `ExcelExporter` | `src/solstein/exporters/excel.py` | Report generation |
+| `CompanyResearch` | `src/solstein/data/company_research.py` | Company intel Pydantic model |
+| `ConflictResolutionEngine` | `src/solstein/infrastructure/conflict_resolution.py` | Multi-source conflict resolver |
+| `RawDataSource` | `src/solstein/domain/models.py` | Raw data container model |
 
 ---
 
@@ -247,13 +266,13 @@ git push origin feature/FD-123-my-feature
 ## ❓ Can't Find It?
 
 Try searching:
-- 📖 **What does X mean?** → [Glossary](GLOSSARY.md) *(coming soon)*
+- 📖 **What does X mean?** → [Glossary](GLOSSARY.md)
 - 🔍 **Where is file X?** → Check [STRUCTURE.md](STRUCTURE.md)
 - 📝 **How do I...?** → Search guides, or check [Code Conventions](guides/code-conventions.md)
 - 🚀 **How to deploy?** → [Operator Guide](guides/operator.md)
 
 ---
 
-*Last Updated: February 20, 2026*
+*Last Updated: February 24, 2026*
 *Keep this page bookmarked!*
 
