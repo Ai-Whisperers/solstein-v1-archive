@@ -28,7 +28,8 @@ Navigate using the tabs above.
 | ⚙️ [Operator Guide](guides/operator.md) | DevOps | Deployment, monitoring, and operations |
 | ⚙️ [API Reference](api/reference.md) | Integrators | All REST endpoints, schemas, and error codes |
 | 🏛️ [Decision Records](architecture/decisions.md) | Architects | Why FastAPI, Celery, JSON files, and the 4-layer test pyramid |
-
+🏛️ [Decision Records](architecture/decisions.md) | Architects | Why FastAPI, Celery, JSON files, and the 4-layer test pyramid |
+| 📊 [Analysis & Reports](analysis/README.md) | Analysts | Market intelligence, company analysis, session reports |
 ---
 
 ## The Classification System
