@@ -109,17 +109,16 @@ class NarrativeConsistencyChecker:
             )
 
         # Check for contradictory tones
+        # Check for contradictory tones
         phoenix_tones = NarrativeConsistencyChecker.CLASSIFICATION_TONE["Phoenix"]
-        salt_tones = NarrativeConsistencyChecker.CLASSIFICATION_TONE["Salt"]
-        lead_tones = NarrativeConsistencyChecker.CLASSIFICATION_TONE["Lead"]
 
         if company.classification == "Salt":
             # Salt should not have Phoenix-level praise
             phoenix_count = sum(1 for tone in phoenix_tones if tone in narrative_lower)
             if phoenix_count >= 2:
                 contradictions.append(
-                    f"Narrative Contradiction: Classification is 'Salt' (stable) "
-                    f"but narrative uses Phoenix-level language (high-growth, exceptional, etc.)"
+                    "Narrative Contradiction: Classification is 'Salt' (stable) "
+                    "but narrative uses Phoenix-level language (high-growth, exceptional, etc.)"
                 )
 
         elif company.classification == "Lead":
@@ -127,8 +126,8 @@ class NarrativeConsistencyChecker:
             phoenix_count = sum(1 for tone in phoenix_tones if tone in narrative_lower)
             if phoenix_count >= 2:
                 contradictions.append(
-                    f"Narrative Contradiction: Classification is 'Lead' (legacy) "
-                    f"but narrative uses Phoenix-level language (high-growth, exceptional, etc.)"
+                    "Narrative Contradiction: Classification is 'Lead' (legacy) "
+                    "but narrative uses Phoenix-level language (high-growth, exceptional, etc.)"
                 )
 
         return contradictions

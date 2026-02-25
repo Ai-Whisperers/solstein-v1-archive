@@ -8,7 +8,6 @@ Templates adjust narrative tone and detail level based on:
 - Available metrics and signals
 """
 
-from typing import Optional
 from solstein.domain.models import Company
 from solstein.analytics.completeness import CompletenessCalculator
 
