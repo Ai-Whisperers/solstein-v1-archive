@@ -142,8 +142,13 @@ class UnifiedCompanyLoader:
             conflicts.append("ai_maturity")
             merged.ai_maturity = markdown_company.ai_maturity
             data_sources["ai_maturity"] = "Markdown"
+            # Infer AI score from AI maturity when there's a conflict
+            self._infer_ai_score_from_maturity(merged, markdown_company.ai_maturity)
         else:
             data_sources["ai_maturity"] = "JSON"
+            # Also check if AI score is 0 but maturity is Strong/Very Strong - fix contradiction
+            if merged.ai_score == 0 and merged.ai_maturity in ["Strong", "Very Strong"]:
+                self._infer_ai_score_from_maturity(merged, merged.ai_maturity)
 
         if markdown_company.threat_level != json_company.threat_level:
             conflicts.append("threat_level")
@@ -254,6 +259,29 @@ class UnifiedCompanyLoader:
         unified.merge_timestamp = datetime.now(timezone.utc)
 
         return unified
+
+
+    def _infer_ai_score_from_maturity(self, company: UnifiedCompany, ai_maturity: str) -> None:
+        """Infer AI score from AI maturity level when there's a conflict.
+        
+        Maps AI maturity levels to scores using the CompetitivePositionConfig mapping.
+        This fixes contradictions like 'Strong' maturity with 0/10 score.
+        """
+        from ..core.scoring_config import CompetitivePositionConfig
+        
+        config = CompetitivePositionConfig()
+        ai_maturity_scores = config.ai_maturity_scores
+        
+        # Map AI maturity to score (0-10 scale)
+        # CompetitivePositionConfig uses -1.0 to 2.5 scale, so we need to normalize to 0-10
+        maturity_score = ai_maturity_scores.get(ai_maturity, 0.0)
+        # Normalize: -1.0 to 2.5 range maps to 0-10 range
+        # Formula: ((maturity_score - (-1.0)) / (2.5 - (-1.0))) * 10
+        normalized_score = ((maturity_score - (-1.0)) / (2.5 - (-1.0))) * 10
+        normalized_score = max(0, min(10, int(round(normalized_score))))  # Round to int and clamp to 0-10
+        
+        company.ai_score = normalized_score
+        logger.info(f"Inferred AI score {normalized_score}/10 for {company.name} from AI maturity '{ai_maturity}'")
 
 
 # Global instance
