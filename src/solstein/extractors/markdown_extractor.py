@@ -234,7 +234,7 @@ class MarkdownExtractor:
             financials=financials,
             ai_maturity=self._parse_ai_maturity(extracted_data.get("ai_maturity")),
             threat_level=self._parse_threat_level(extracted_data.get("threat_level")),
-            tier=self._parse_tier(extracted_data.get("tier")),
+            tier=self._determine_tier_from_revenue(financials.revenue),
             geographic_presence=extracted_data.get("geographic_presence", []),
             tech_stack=extracted_data.get("tech_stack", []),
             data_source=extracted_data.get("source"),
@@ -332,6 +332,27 @@ class MarkdownExtractor:
         elif "Tier 4" in value:
             return CompanyTier.TIER_4
         return CompanyTier.TIER_3
+
+    def _determine_tier_from_revenue(self, revenue: float | None) -> CompanyTier:
+        """Determine company tier based on revenue (in euros).
+        
+        Tier boundaries:
+        - Tier 1: > €1B (1,000,000,000)
+        - Tier 2: €100M - €1B (100,000,000 - 1,000,000,000)
+        - Tier 3: €10M - €100M (10,000,000 - 100,000,000)
+        - Tier 4: < €10M (< 10,000,000)
+        """
+        if revenue is None:
+            return CompanyTier.TIER_3
+        
+        if revenue >= 1_000_000_000:  # >= €1B
+            return CompanyTier.TIER_1
+        elif revenue >= 100_000_000:  # >= €100M
+            return CompanyTier.TIER_2
+        elif revenue >= 10_000_000:  # >= €10M
+            return CompanyTier.TIER_3
+        else:
+            return CompanyTier.TIER_4
 
     def _get_confidence(self, data: dict[str, Any], metric: str) -> ConfidenceLevel:
         """Get confidence level for a metric."""

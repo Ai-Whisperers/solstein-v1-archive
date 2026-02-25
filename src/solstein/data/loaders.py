@@ -502,11 +502,11 @@ class CompetitorDataLoader:
         if revenue is None:
             return CompanyTier.TIER_4
 
-        if revenue > 1000:  # > €1B
+        if revenue >= 1000:  # >= €1B
             return CompanyTier.TIER_1
-        elif revenue > 100:  # > €100M
+        elif revenue >= 100:  # >= €100M
             return CompanyTier.TIER_2
-        elif revenue > 10:  # > €10M
+        elif revenue >= 10:  # >= €10M
             return CompanyTier.TIER_3
         else:
             return CompanyTier.TIER_4

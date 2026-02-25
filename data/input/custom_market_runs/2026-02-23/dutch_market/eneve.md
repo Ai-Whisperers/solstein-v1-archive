@@ -10,7 +10,7 @@ Funding Raised: €15M (Estimated)
 Valuation: €120M (Estimated)
 AI Maturity: Strong
 Threat Level: High
-Tier: Tier 2
+Tier: Tier 3
 Geographic Presence: Netherlands, Belgium, Germany, France, Switzerland, United Kingdom, Portugal
 Tech Stack: Energy procurement software, Contract management, Billing automation, Portfolio balancing, Data validation, Forecasting analytics, API integrations
 

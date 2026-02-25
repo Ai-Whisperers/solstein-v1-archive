@@ -66,7 +66,7 @@ def test_markdown_extractor_to_profile(sample_markdown):
     assert profile.financials.valuation == 1_000_000_000.0
     assert profile.ai_maturity == AIMaturity.STRONG
     assert profile.threat_level == ThreatLevel.HIGH
-    assert profile.tier == CompanyTier.TIER_1
+    assert profile.tier == CompanyTier.TIER_2  # €100M is Tier 2 (€100M-€1B)
 
 
 def test_markdown_extractor_extract_from_file(tmp_path, sample_markdown):
