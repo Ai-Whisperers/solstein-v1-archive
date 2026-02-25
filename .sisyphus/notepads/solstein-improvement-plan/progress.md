@@ -287,3 +287,72 @@ Tasks F1-F3 (PENDING) - Final Review
   - [ ] Provenance tracking maintained
   - [ ] 80%+ test coverage
 
+
+## Task 5: Fix Revenue Per Employee Bug ✅ COMPLETE
+
+**Completed**: 2026-02-25 14:00 UTC
+
+**What was done**:
+- Created UnifiedCompanyScoreLoader to load companies with merged JSON + Markdown data
+- Integrated into scoring API endpoint (replaces raw repository fetch)
+- Added 15 comprehensive unit tests (all passing)
+- Fixed bug: Envision Digital now shows €281K instead of €0 revenue per employee
+
+**Files created**:
+- src/solstein/analytics/company_loader.py (67 lines)
+- tests/unit/test_company_loader.py (256 lines, 15 tests)
+
+**Files modified**:
+- src/solstein/api/routers/scoring.py (integrated unified loader)
+
+**Test status**: 722/722 passing (15 new tests)
+
+---
+
+## Task 6: Repair Tier Classification Logic ✅ COMPLETE
+
+**Completed**: 2026-02-25 14:03 UTC
+
+**What was done**:
+- Fixed tier boundaries to use >= instead of > for accurate classification
+- Added _determine_tier_from_revenue() to markdown extractor for consistency
+- Eneve now correctly classified as Tier 3 (€30M is in €10M-€100M range)
+- Updated tier logic in both loaders.py and markdown_extractor.py
+
+**Tier boundaries (now correct)**:
+- Tier 1: >= €1B (1,000,000,000)
+- Tier 2: >= €100M (100,000,000)
+- Tier 3: >= €10M (10,000,000)
+- Tier 4: < €10M
+
+**Files modified**:
+- src/solstein/data/loaders.py (boundary conditions)
+- src/solstein/extractors/markdown_extractor.py (new method + integration)
+- data/input/custom_market_runs/2026-02-23/dutch_market/eneve.md (tier updated)
+- tests/unit/test_extractors.py (test expectation corrected)
+
+**Test status**: 722/722 passing (no regressions)
+
+---
+
+## Progress Summary
+
+**Completed**: 6/24 tasks (25%)
+**Wave 1 (Foundation)**: 4/4 complete ✅
+- Task 1: Data Source Audit ✅
+- Task 2: Unified Model ✅
+- Task 3: Completeness Scoring ✅
+- Task 4: NULL Handling ✅
+
+**Wave 2 (Scoring Fixes)**: 2/4 complete ⏳
+- Task 5: Revenue/Employee Bug ✅
+- Task 6: Tier Classification ✅
+- Task 7: Deterministic Scoring ⏳
+- Task 8: Confidence Weighting ⏳
+
+**Remaining**: 18 tasks across Waves 2-5
+
+**Test Coverage**: 722/722 passing (61% overall coverage)
+
+**Momentum**: Strong - 2 tasks completed in this session, all tests passing
+
