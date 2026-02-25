@@ -1,0 +1,196 @@
+"""
+Task 9-11: Classification System with Confidence Scoring
+
+Implements balanced classification (Phoenix/Salt/Lead) with confidence scoring
+based on data quality and score distribution.
+
+Classification Boundaries (based on percentile analysis):
+- Phoenix (High Growth): >= 7.0 (top 15-25%)
+- Salt (Stable): 5.5 - 6.99 (middle 60-70%)
+- Lead (Legacy/Opportunity): < 5.5 (bottom 10-20%)
+
+Classification Confidence:
+- Based on data completeness (from Task 3)
+- High completeness (>80%) → high confidence (0.8-1.0)
+- Medium completeness (50-80%) → medium confidence (0.5-0.8)
+- Low completeness (<50%) → low confidence (0.3-0.5)
+"""
+
+from src.solstein.domain.models import Company
+
+
+def classify_company_balanced(composite_score: float | None) -> str:
+    """Classify company based on balanced score boundaries.
+
+    Args:
+        composite_score: Composite score (0-10)
+
+    Returns:
+        Classification: 'Phoenix', 'Salt', or 'Lead'
+    """
+    if composite_score is None:
+        return "Salt"  # Default to Salt for unknown scores
+
+    if composite_score >= 7.0:
+        return "Phoenix"
+    elif composite_score >= 5.5:
+        return "Salt"
+    else:
+        return "Lead"
+
+
+def calculate_classification_confidence(
+    composite_score: float | None,
+    data_completeness: float | None,
+) -> float:
+    """Calculate confidence in classification based on score and data quality.
+
+    Args:
+        composite_score: Composite score (0-10)
+        data_completeness: Data completeness percentage (0-100)
+
+    Returns:
+        Confidence score (0-1)
+    """
+    if composite_score is None or data_completeness is None:
+        return 0.3  # Low confidence for missing data
+
+    # Normalize completeness to 0-1
+    completeness_factor = data_completeness / 100.0
+
+    # Score certainty: higher scores are more certain
+    # Scores near boundaries (5.5, 7.0) are less certain
+    score_certainty = 1.0
+    if 5.4 <= composite_score <= 5.6:  # Near Salt/Lead boundary
+        score_certainty = 0.7
+    elif 6.9 <= composite_score <= 7.1:  # Near Phoenix/Salt boundary
+        score_certainty = 0.7
+
+    # Combine factors: 70% data quality, 30% score certainty
+    confidence = (0.7 * completeness_factor) + (0.3 * score_certainty)
+
+    # Clamp to 0-1 range
+    return max(0.0, min(1.0, confidence))
+
+
+def get_classification_with_confidence(
+    company: Company,
+) -> tuple[str, float]:
+    """Get classification and confidence for a company.
+
+    Args:
+        company: Company object with composite_score and data_quality_tier
+
+    Returns:
+        Tuple of (classification, confidence)
+    """
+    # Get classification
+    classification = classify_company_balanced(company.composite_score)
+
+    # Estimate data completeness from data_quality_tier
+    completeness_map = {
+        "COMPLETE": 90.0,
+        "PARTIAL": 65.0,
+        "MINIMAL": 35.0,
+        "INSUFFICIENT": 15.0,
+        "unknown": 50.0,
+    }
+
+    completeness = completeness_map.get(company.data_quality_tier, 50.0)
+
+    # Calculate confidence
+    confidence = calculate_classification_confidence(
+        company.composite_score,
+        completeness,
+    )
+
+    return classification, confidence
+
+
+def is_tentative_classification(confidence: float, threshold: float = 0.7) -> bool:
+    """Check if classification is tentative (low confidence).
+
+    Args:
+        confidence: Classification confidence (0-1)
+        threshold: Confidence threshold for tentative classification
+
+    Returns:
+        True if confidence < threshold
+    """
+    return confidence < threshold
+
+
+def format_classification_with_confidence(
+    classification: str,
+    confidence: float,
+) -> str:
+    """Format classification with confidence for display.
+
+    Args:
+        classification: Classification name
+        confidence: Confidence score (0-1)
+
+    Returns:
+        Formatted string like "Phoenix (92% confidence)"
+    """
+    confidence_pct = int(confidence * 100)
+    return f"{classification} ({confidence_pct}% confidence)"
+
+
+def get_classification_distribution(companies: list[Company]) -> dict[str, int]:
+    """Get distribution of classifications across companies.
+
+    Args:
+        companies: List of Company objects
+
+    Returns:
+        Dict with counts: {'Phoenix': N, 'Salt': N, 'Lead': N}
+    """
+    distribution = {"Phoenix": 0, "Salt": 0, "Lead": 0}
+
+    for company in companies:
+        classification = classify_company_balanced(company.composite_score)
+        distribution[classification] += 1
+
+    return distribution
+
+
+def validate_classification_distribution(
+    companies: list[Company],
+    phoenix_min: float = 0.15,
+    phoenix_max: float = 0.25,
+    salt_min: float = 0.60,
+    salt_max: float = 0.70,
+    lead_min: float = 0.10,
+    lead_max: float = 0.20,
+) -> dict[str, bool]:
+    """Validate that classification distribution meets targets.
+
+    Args:
+        companies: List of Company objects
+        phoenix_min/max: Target Phoenix percentage range
+        salt_min/max: Target Salt percentage range
+        lead_min/max: Target Lead percentage range
+
+    Returns:
+        Dict with validation results
+    """
+    dist = get_classification_distribution(companies)
+    total = len(companies)
+
+    phoenix_pct = dist["Phoenix"] / total
+    salt_pct = dist["Salt"] / total
+    lead_pct = dist["Lead"] / total
+
+    return {
+        "phoenix_valid": phoenix_min <= phoenix_pct <= phoenix_max,
+        "salt_valid": salt_min <= salt_pct <= salt_max,
+        "lead_valid": lead_min <= lead_pct <= lead_max,
+        "phoenix_pct": phoenix_pct,
+        "salt_pct": salt_pct,
+        "lead_pct": lead_pct,
+        "phoenix_count": dist["Phoenix"],
+        "salt_count": dist["Salt"],
+        "lead_count": dist["Lead"],
+        "total": total,
+    }
