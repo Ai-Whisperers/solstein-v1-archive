@@ -150,15 +150,6 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# SolStein Specific
-data/cache/
-data/output/
-.cache/
-data/output/logs/
-*.xlsx
-!data/input/
-!data/input/competitor_data.json
-
 # Reports and temporary artifacts
 reports/
 coverage_report.txt
