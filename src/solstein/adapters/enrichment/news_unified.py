@@ -12,7 +12,7 @@ from typing import Any
 import requests
 from loguru import logger
 
-from solstein.domain.models import DataSourceType, RawDataSource
+from solstein.domain.models import RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
@@ -36,10 +36,6 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
             confidence=0.70,
         )
         self.news_api_key = news_api_key
-
-    @property
-    def source_type(self) -> DataSourceType:
-        return DataSourceType.NEWS
 
     def _analyze_sentiment(self, text: str) -> str:
         """Simple keyword-based sentiment analysis."""

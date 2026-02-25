@@ -25,9 +25,7 @@ from solstein.domain.models import (
     RawDataSource,
 )
 from solstein.infrastructure.conflict_resolution import (
-    Conflict,
     ConflictResolutionEngine,
-    ConflictStrategy,
 )
 
 # Desired fact types for data completeness calculation

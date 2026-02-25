@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
+from loguru import logger
 from sqlalchemy import select
 
 from solstein.config import Settings
@@ -296,7 +297,7 @@ def main() -> int:
         run_id=run_id,
         output_dir=output_dir,
     )
-    print(json.dumps(report, indent=2, sort_keys=True))
+    logger.info(json.dumps(report, indent=2, sort_keys=True))
     return 0
 
 

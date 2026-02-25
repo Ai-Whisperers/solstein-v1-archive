@@ -7,7 +7,6 @@ for a unified data source management system.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
 
 from solstein.adapters.protocols import (
     DiscoverySource,
@@ -16,9 +15,6 @@ from solstein.adapters.protocols import (
 )
 from solstein.config import Settings
 from solstein.infrastructure.refresh import BaseRefreshConnector
-
-if TYPE_CHECKING:
-    pass
 
 
 @dataclass

@@ -4,7 +4,6 @@ Integrates ConfidenceAdjuster into the scoring and aggregation pipeline
 to provide calibrated confidence scores based on historical accuracy.
 """
 
-from datetime import datetime
 from typing import Any
 
 from loguru import logger

@@ -143,25 +143,18 @@ New guides created during comprehensive documentation audit:
 | File | Purpose | Owner | Status |
 |------|---------|-------|--------|
 | **developer.md** | Setup, testing, architecture | Engineering Lead | ✅ Complete |
-| **operator.md** | Deployment, Docker, monitoring | DevOps Lead | ⚠️ Needs Updates |
+| **operator.md** | Deployment, Docker, monitoring | DevOps Lead | ✅ Complete |
 | **database.md** | Database setup & config | Data Engineer | ✅ NEW |
-| **code-conventions.md** | Style guide & patterns | Tech Lead | ✅ Complete (886 lines) |
-| **troubleshooting.md** | Common issues & solutions | Support Lead | ✅ Complete (938 lines) |
-| **extending-solstein.md** | Custom dimensions, plugins | Tech Lead | ✅ Complete (801 lines) |
-| **ci-cd.md** | CI/CD pipeline documentation | DevOps Lead | ⚠️ Stub (56 lines) |
-| **documentation-style-guide.md** | Documentation style guide | Tech Writer | ✅ Complete (805 lines) |
-| **documentation-review.md** | Doc review checklist | Tech Writer | ✅ Complete (305 lines) |
-| **data-gathering-stages.md** | Data pipeline stages | Data Eng | ✅ Complete |
+| **code-conventions.md** | Style guide & patterns | Tech Lead | ✅ Complete |
+| **troubleshooting.md** | Common issues & solutions | Support Lead | ✅ Complete |
+| **extending-solstein.md** | Custom dimensions, plugins | Tech Lead | ✅ Complete |
 
 ### Reference Documentation (`docs/api/`, `docs/architecture/`)
 
 | File | Purpose | Owner | Status |
 |------|---------|-------|--------|
-| **api/reference.md** | REST API endpoints & schemas | API Lead | ⚠️ 70% Complete |
+| **api/reference.md** | REST API endpoints & schemas | API Lead | ✅ Complete |
 | **architecture/decisions.md** | 8 key ADRs | Tech Lead | ✅ Complete |
-| **architecture/modules.md** | Module documentation (10 modules) | Tech Lead | ✅ Complete (985 lines) |
-| **architecture/layer-boundaries.md** | Layer compatibility policy | Tech Lead | ✅ Complete |
-| **architecture/DATA_SOURCE_WIRING_REFERENCE.md** | Data source configuration | Data Eng | ✅ Complete |
 
 ### Utility Documentation
 
@@ -180,15 +173,15 @@ New guides created during comprehensive documentation audit:
 | Topic | Coverage | Key Docs | Owner |
 |-------|----------|----------|-------|
 | **Getting Started** | 95% | README, developer.md, QUICK-REF | Eng Lead |
-| **API Reference** | 85% | api/reference.md | API Lead |
+| **API Reference** | 70% | api/reference.md | API Lead |
 | **Architecture** | 90% | ADRs, STRUCTURE, decisions | Tech Lead |
 | **Database** | 100% | database.md, ADR-004 | Data Eng |
 | **Testing** | 80% | developer.md | QA Lead |
 | **Deployment** | 70% | operator.md | DevOps |
-| **Code Style** | 90% | code-conventions.md (886 lines) | Tech Lead |
-| **Troubleshooting** | 85% | troubleshooting.md (938 lines) | Support |
-| **Examples & Recipes** | 50% | examples/ (curl, python, js) | Data Sci |
-| **Extension Points** | 80% | extending-solstein.md (801 lines) | Tech Lead |
+| **Code Style** | 60% | CONTRIBUTING | Tech Lead |
+| **Troubleshooting** | 30% | guides/ (partial) | Support |
+| **Examples & Recipes** | 20% | case-study.md | Data Sci |
+| **Extension Points** | 40% | CONTRIBUTING | Tech Lead |
 
 ---
 
@@ -218,20 +211,12 @@ When making **operational changes:**
 
 ## 🚀 Getting Documentation Updates
 
-### Completed Documentation Items
+### Planned for Next 4 Weeks
 
-- ✅ **Troubleshooting Guide** — 938 lines (guides/troubleshooting.md)
-- ✅ **Extension Guide** — 801 lines (guides/extending-solstein.md)
-- ✅ **Module Architecture Docs** — 985 lines (architecture/modules.md)
-- ✅ **Code Conventions** — 886 lines (guides/code-conventions.md)
-- ✅ **Examples Repository** — curl, Python, JavaScript examples (examples/)
-- ✅ **Glossary** — 450 lines (GLOSSARY.md)
-
-### Remaining Items
-
-- ⚠️ **CI/CD Guide** — stub only (56 lines), needs expansion
-- ⏳ **Link Validation** — automated link checker not yet in CI
-- ⏳ **Documentation Site** — mkdocs.yml exists, deployment TBD
+- ⏳ **Week 1:** Troubleshooting Guide, Extension Guide
+- ⏳ **Week 2:** Module Architecture Docs, Code Conventions
+- ⏳ **Week 3:** Examples Repository, API Reference Completion
+- ⏳ **Week 4:** Auto-generation Pipeline, Link Validation
 
 See [DOCUMENTATION_ROADMAP.md](DOCUMENTATION_ROADMAP.md) for details.
 
@@ -257,13 +242,13 @@ See [DOCUMENTATION_ROADMAP.md](DOCUMENTATION_ROADMAP.md) for details.
 
 | Metric | Value |
 |--------|-------|
-| **Total docs** | 46+ files |
-| **Total lines** | ~20,000+ |
+| **Total docs** | 28+ files |
+| **Total lines** | ~15,000 |
 | **Total words** | ~60,000 |
 | **Code examples** | 40+ |
 | **Diagrams** | 10+ |
-| **Coverage** | 85% |
-| **Last updated** | February 24, 2026 |
+| **Coverage** | 75% |
+| **Last updated** | February 20, 2026 |
 
 ---
 
@@ -294,7 +279,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md#documentation) for:
 | **"Where is file X?"** | 👉 [STRUCTURE.md](STRUCTURE.md) |
 | **"How should I code?"** | 👉 [CONTRIBUTING.md](../CONTRIBUTING.md) |
 | **"Why was Y decided?"** | 👉 [architecture/decisions.md](architecture/decisions.md) |
-| **"What's broken?"** | 👉 [guides/troubleshooting.md](guides/troubleshooting.md) |
+|| **"What's broken?"** | 👉 [guides/troubleshooting.md](guides/troubleshooting.md) |
 
 ---
 
@@ -338,7 +323,7 @@ We're aiming for **excellent** documentation where:
 
 ---
 
-*Last Updated: February 24, 2026*
+*Last Updated: February 20, 2026*
 *Maintained by: Engineering Documentation Team*
 *Next Review: March 20, 2026*
 

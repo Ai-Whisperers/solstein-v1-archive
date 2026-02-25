@@ -100,12 +100,12 @@ def build_default_registry(settings: Settings) -> SourceRegistry:
     registry.register_enrichment(GlobalMarketEnrichment())
 
     # Unified adapters from dead module revival (Tasks 15-17)
-    from solstein.adapters.enrichment.web_search_unified import WebSearchUnifiedAdapter
-    from solstein.adapters.enrichment.news_unified import NewsUnifiedAdapter
     from solstein.adapters.enrichment.funding_unified import FundingUnifiedAdapter
     from solstein.adapters.enrichment.linkedin_unified import LinkedInUnifiedAdapter
-    from solstein.adapters.enrichment.website_unified import WebsiteUnifiedAdapter
+    from solstein.adapters.enrichment.news_unified import NewsUnifiedAdapter
     from solstein.adapters.enrichment.patents_unified import PatentsUnifiedAdapter
+    from solstein.adapters.enrichment.web_search_unified import WebSearchUnifiedAdapter
+    from solstein.adapters.enrichment.website_unified import WebsiteUnifiedAdapter
 
     registry.register_enrichment(WebSearchUnifiedAdapter())
     registry.register_enrichment(NewsUnifiedAdapter(news_api_key=settings.news_api_key))

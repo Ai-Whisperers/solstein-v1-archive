@@ -364,7 +364,7 @@ test(golden-dataset): add regression for Phoenix threshold
 ### **CHANGELOG**
 Record of version history and notable changes. Updated per-release.
 
-**Location:** `CHANGELOG.md`
+**Location:** `[CHANGELOG.md](../CHANGELOG.md)`
 
 ### **Pull Request / PR**
 GitHub feature for code review and merge. Includes:
@@ -440,7 +440,7 @@ Initial/test data loaded into the system. Solstein seed data:
 
 - **Business Context:** [Executive Brief](PITCH/executive-brief.md), [The Origin](LORE/origin.md)
 - **Architecture:** [ADRs](architecture/decisions.md), [Repository Structure](STRUCTURE.md)
-- **Development:** [Developer Guide](guides/developer.md), [Code Conventions](guides/code-conventions.md) *(coming soon)*
+- **Development:** [Developer Guide](guides/developer.md), [Code Conventions](guides/code-conventions.md)
 - **Quick Lookup:** [Quick Reference](QUICK-REFERENCE.md)
 
 ---

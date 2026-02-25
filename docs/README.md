@@ -27,7 +27,6 @@ Navigate using the tabs above.
 | ⚔️ [Case Study](PITCH/case-study.md) | Skeptics | 29 companies, 3 days, full classification — live cast |
 | ⚙️ [Operator Guide](guides/operator.md) | DevOps | Deployment, monitoring, and operations |
 | ⚙️ [API Reference](api/reference.md) | Integrators | All REST endpoints, schemas, and error codes |
-| ⚙️ [API Reference](api/reference.md) | Integrators | All REST endpoints, schemas, and error codes |
 | 🏛️ [Decision Records](architecture/decisions.md) | Architects | Why FastAPI, Celery, JSON files, and the 4-layer test pyramid |
 
 ---

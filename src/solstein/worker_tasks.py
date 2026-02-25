@@ -20,8 +20,6 @@ from loguru import logger
 from sqlalchemy import select
 
 from solstein.config import get_settings
-from solstein.infrastructure.database import DatabaseManager
-from solstein.infrastructure.database_models import CompanyRecord
 
 # Import all refresh connectors
 from solstein.infrastructure.connectors.companies_house_refresh import (
@@ -44,6 +42,8 @@ from solstein.infrastructure.connectors.website_refresh import WebsiteRefreshCon
 from solstein.infrastructure.connectors.yahoo_finance_refresh import (
     YahooFinanceRefreshConnector,
 )
+from solstein.infrastructure.database import DatabaseManager
+from solstein.infrastructure.database_models import CompanyRecord
 
 
 def _get_db_manager():
@@ -123,7 +123,7 @@ def refresh_sec_edgar(self):
         logger.error(f"SEC EDGAR refresh failed: {exc}")
         # Retry with exponential backoff
         countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)
+        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
 
 
 @shared_task(name="solstein.worker_tasks.refresh_companies_house", bind=True, max_retries=3)
@@ -159,7 +159,7 @@ def refresh_companies_house(self):
     except Exception as exc:
         logger.error(f"Companies House refresh failed: {exc}")
         countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)
+        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
 
 
 @shared_task(name="solstein.worker_tasks.refresh_news_signals", bind=True, max_retries=3)
@@ -195,7 +195,7 @@ def refresh_news_signals(self):
     except Exception as exc:
         logger.error(f"News Signals refresh failed: {exc}")
         countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)
+        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
 
 
 @shared_task(name="solstein.worker_tasks.refresh_github", bind=True, max_retries=3)
@@ -231,7 +231,7 @@ def refresh_github(self):
     except Exception as exc:
         logger.error(f"GitHub refresh failed: {exc}")
         countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)
+        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
 
 
 # ============================================================================
@@ -267,7 +267,7 @@ def refresh_yahoo_finance(self):
     except Exception as exc:
         logger.error(f"Yahoo Finance refresh failed: {exc}")
         countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)
+        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
 
 
 @shared_task(name="solstein.worker_tasks.refresh_patents", bind=True, max_retries=3)
@@ -303,7 +303,7 @@ def refresh_patents(self):
     except Exception as exc:
         logger.error(f"Patents refresh failed: {exc}")
         countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)
+        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
 
 
 @shared_task(name="solstein.worker_tasks.refresh_news", bind=True, max_retries=3)
@@ -339,7 +339,7 @@ def refresh_news(self):
     except Exception as exc:
         logger.error(f"News refresh failed: {exc}")
         countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)
+        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
 
 
 @shared_task(name="solstein.worker_tasks.refresh_website", bind=True, max_retries=3)
@@ -370,7 +370,7 @@ def refresh_website(self):
     except Exception as exc:
         logger.error(f"Website refresh failed: {exc}")
         countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)
+        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
 
 
 @shared_task(name="solstein.worker_tasks.refresh_linkedin", bind=True, max_retries=3)
@@ -401,7 +401,7 @@ def refresh_linkedin(self):
     except Exception as exc:
         logger.error(f"LinkedIn refresh failed: {exc}")
         countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)
+        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
 
 
 @shared_task(name="solstein.worker_tasks.refresh_funding", bind=True, max_retries=3)
@@ -437,7 +437,7 @@ def refresh_funding(self):
     except Exception as exc:
         logger.error(f"Funding refresh failed: {exc}")
         countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)
+        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
 
 
 @shared_task(name="solstein.worker_tasks.refresh_global_market", bind=True, max_retries=3)
@@ -468,7 +468,7 @@ def refresh_global_market(self):
     except Exception as exc:
         logger.error(f"Global Market refresh failed: {exc}")
         countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)
+        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
 
 
 @shared_task(name="solstein.worker_tasks.refresh_web_search", bind=True, max_retries=3)
@@ -504,7 +504,7 @@ def refresh_web_search(self):
     except Exception as exc:
         logger.error(f"Web Search refresh failed: {exc}")
         countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)
+        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
 
 
 @shared_task(name="solstein.worker_tasks.refresh_all_sources", bind=True)

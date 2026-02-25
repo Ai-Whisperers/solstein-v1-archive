@@ -44,11 +44,6 @@ class PatentsUnifiedAdapter(BaseRefreshConnector):
             db_manager=db_manager,
             confidence=0.80,
         )
-
-    @property
-    def source_type(self) -> DataSourceType:
-        return DataSourceType.PATENTS
-
     def discover(
         self,
         market: str,

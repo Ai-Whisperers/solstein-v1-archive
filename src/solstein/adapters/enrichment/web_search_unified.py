@@ -19,7 +19,7 @@ from solstein.data.web_search_client import (
     search_company_info,
     search_company_news,
 )
-from solstein.domain.models import DataSourceType, RawDataSource
+from solstein.domain.models import RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
@@ -42,12 +42,6 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
             db_manager=db_manager,
             confidence=0.70,
         )
-
-    @property
-    def source_type(self) -> DataSourceType:
-        """Return DataSourceType for this source."""
-        return DataSourceType.WEB_SEARCH
-
     def discover(
         self,
         market: str,

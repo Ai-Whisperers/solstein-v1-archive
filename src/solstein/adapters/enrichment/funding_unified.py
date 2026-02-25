@@ -6,13 +6,13 @@ implementing the full UnifiedDataSource protocol.
 Uses Crunchbase API when available, falls back to public sources.
 """
 
-from datetime import date, datetime, timedelta
+from datetime import datetime
 from typing import Any
 
 import requests
 from loguru import logger
 
-from solstein.domain.models import DataSourceType, RawDataSource
+from solstein.domain.models import RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
@@ -36,11 +36,6 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
             confidence=0.65,
         )
         self.crunchbase_api_key = crunchbase_api_key
-
-    @property
-    def source_type(self) -> DataSourceType:
-        return DataSourceType.FUNDING
-
     def _get_crunchbase_data(self, company_name: str) -> dict[str, Any] | None:
         """Get funding data from Crunchbase API."""
         if not self.crunchbase_api_key:

@@ -7,12 +7,12 @@ Confidence: 0.60
 Authority: LINKEDIN
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any
 
 from loguru import logger
 
-from solstein.domain.models import DataSourceType, RawDataSource
+from solstein.domain.models import RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
@@ -36,11 +36,6 @@ class LinkedInUnifiedAdapter(BaseRefreshConnector):
             confidence=0.60,
         )
         self.news_api_key = news_api_key
-
-    @property
-    def source_type(self) -> DataSourceType:
-        return DataSourceType.LINKEDIN
-
     def _get_hiring_signals(self, company_name: str) -> dict[str, Any]:
         """Get hiring signals from news."""
         try:
