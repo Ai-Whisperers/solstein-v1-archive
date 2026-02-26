@@ -37,7 +37,7 @@ class PlannerAgent:
 
         plan = {
             "cycle": self.cycle_num,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "objective": self._create_objective(recommendations),
             "tasks": self._create_tasks(recommendations),
             "success_criteria": self._define_success_criteria(),

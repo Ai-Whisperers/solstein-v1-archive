@@ -34,7 +34,7 @@ class DocumenterAgent:
 
         report = {
             "cycle_number": self.cycle_num,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "phases": {
                 "runner": runner,
                 "critiquer": critiquer,
@@ -94,7 +94,7 @@ class DocumenterAgent:
     def write_report(self, report):
         """Write detailed cycle report"""
         # Date for directory
-        now = datetime.utcnow()
+        now = datetime.now()
         date_str = now.strftime("%Y-%m-%d")
 
         # Create date directory if needed

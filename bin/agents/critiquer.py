@@ -37,7 +37,7 @@ class CritiquerAgent:
 
         return {
             "cycle": self.cycle_num,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "issues_found": len(issues),
             "issues": issues,
             "recommendations": self._generate_recommendations(issues),

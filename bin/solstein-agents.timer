@@ -1,17 +1,18 @@
 [Unit]
-Description=Solstein Agent Cycle Timer (Every 6 hours)
+Description=Solstein Agent Cycle Timer (Every 30 Minutes - Rate Limited)
 Requires=solstein-agents.service
+Documentation=file:///home/ai-whisperers/solstein/docs/agent-cycles/
 
 [Timer]
-# Run every 6 hours starting now
+# Run every 30 minutes (48 cycles/day instead of 96)
 OnBootSec=1min
-OnUnitActiveSec=6h
+OnUnitActiveSec=30min
 
 # If we miss a cycle, run immediately when system comes back
 Persistent=true
 
-# Randomize by 5 minutes to avoid thundering herd
-RandomizedDelaySec=5min
+# Randomize by 1 minute to avoid thundering herd
+RandomizedDelaySec=1min
 
 [Install]
 WantedBy=timers.target

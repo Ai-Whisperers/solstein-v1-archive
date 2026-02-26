@@ -27,7 +27,7 @@ class RunnerAgent:
         """Execute full test suite"""
         print(f"[RUNNER] Cycle #{self.cycle_num}: Running test suite...")
         result = subprocess.run(
-            ["python", "-m", "pytest", "tests/", "-v", "--tb=short"],
+            ["pytest", "tests/", "-v", "--tb=short"],
             cwd=self.project_root,
             capture_output=True,
             text=True,
@@ -36,7 +36,7 @@ class RunnerAgent:
             "exit_code": result.returncode,
             "stdout": result.stdout,
             "stderr": result.stderr,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
         }
 
     def run_quality_checks(self):
@@ -75,7 +75,7 @@ class RunnerAgent:
         print(f"[RUNNER] Cycle #{self.cycle_num}: Gathering metrics...")
         return {
             "cycle": self.cycle_num,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "tests": self.run_tests(),
             "quality": self.run_quality_checks(),
         }

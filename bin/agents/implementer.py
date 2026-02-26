@@ -36,7 +36,7 @@ class ImplementerAgent:
 
         results = {
             "cycle": self.cycle_num,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "tasks_executed": len(tasks),
             "changes_made": self._simulate_changes(tasks),
             "tests_after": "PASSING",

@@ -34,7 +34,7 @@ class AgentOrchestrator:
 
     def log(self, message):
         """Print with timestamp"""
-        timestamp = datetime.utcnow().strftime("%H:%M:%S UTC")
+        timestamp = datetime.now().strftime("%H:%M:%S UTC")
         print(f"[{timestamp}] {message}")
 
     def run_agent(self, agent_name):
@@ -82,7 +82,7 @@ class AgentOrchestrator:
 
         agents = ["runner", "critiquer", "planner", "implementer", "documenter"]
         results = {}
-        start_time = datetime.utcnow()
+        start_time = datetime.now()
 
         for i, agent_name in enumerate(agents, 1):
             self.log(f"[{i}/{len(agents)}] {agent_name.upper()}")
@@ -93,7 +93,7 @@ class AgentOrchestrator:
             if i < len(agents):
                 time.sleep(2)
 
-        end_time = datetime.utcnow()
+        end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
 
         # Summary

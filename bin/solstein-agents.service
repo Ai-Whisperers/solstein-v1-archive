@@ -1,11 +1,11 @@
 [Unit]
 Description=Solstein Autonomous Agent Cycles (24/7 Improvement Loop)
-After=network.target
+After=network-online.target
+Wants=network-online.target
 Documentation=file:///home/ai-whisperers/solstein/docs/agent-cycles/
 
 [Service]
 Type=simple
-User=ai-whisperers
 WorkingDirectory=/home/ai-whisperers/solstein
 
 # Environment setup
@@ -18,24 +18,16 @@ ExecStart=/usr/bin/python3 /home/ai-whisperers/solstein/bin/orchestrate_agents.p
 
 # Auto-restart on failure
 Restart=on-failure
-RestartSec=10
+RestartSec=30
 
 # Log output
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=solstein-agents
 
-# Resource limits (prevent runaway processes)
-MemoryLimit=2G
+# Resource limits
 CPUQuota=50%
 TasksMax=100
 
-# Security
-PrivateTmp=yes
-NoNewPrivileges=true
-ProtectSystem=strict
-ProtectHome=yes
-ReadWritePaths=/home/ai-whisperers/solstein
-
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
