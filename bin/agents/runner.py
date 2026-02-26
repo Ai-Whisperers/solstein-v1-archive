@@ -27,7 +27,7 @@ class RunnerAgent:
         """Execute full test suite"""
         print(f"[RUNNER] Cycle #{self.cycle_num}: Running test suite...")
         result = subprocess.run(
-            ["pytest", "tests/", "-v", "--tb=short"],
+            ["/home/ai-whisperers/.linuxbrew/bin/python3", "-m", "pytest", "tests/", "-v", "--tb=short"],
             cwd=self.project_root,
             capture_output=True,
             text=True,
@@ -51,13 +51,13 @@ class RunnerAgent:
 
     def _run_mypy(self):
         result = subprocess.run(
-            ["mypy", "src/", "--ignore-missing-imports"], cwd=self.project_root, capture_output=True, text=True
+            ["/home/ai-whisperers/.linuxbrew/bin/python3", "-m", "mypy", "src/", "--ignore-missing-imports"],
         )
         return {"exit_code": result.returncode, "output": result.stdout}
 
     def _run_bandit(self):
         result = subprocess.run(
-            ["bandit", "-r", "src/", "-f", "json"], cwd=self.project_root, capture_output=True, text=True
+            ["bandit", "-r", "src/", "-f", "json"],
         )
         try:
             return json.loads(result.stdout)
@@ -66,7 +66,7 @@ class RunnerAgent:
 
     def _run_radon(self):
         result = subprocess.run(
-            ["radon", "cc", "src/", "-a", "-nc"], cwd=self.project_root, capture_output=True, text=True
+            ["radon", "cc", "src/", "-a", "-nc"],
         )
         return {"output": result.stdout}
 
