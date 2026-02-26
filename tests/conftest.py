@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 os.environ.setdefault("GITHUB_TOKEN", "test-github-token-12345")
 
-from factories import make_company
+from tests.factories import make_company
 
 
 

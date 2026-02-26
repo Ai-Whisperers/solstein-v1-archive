@@ -1,0 +1,17 @@
+[Unit]
+Description=Solstein Agent Cycle Timer (Every 6 hours)
+Requires=solstein-agents.service
+
+[Timer]
+# Run every 6 hours starting now
+OnBootSec=1min
+OnUnitActiveSec=6h
+
+# If we miss a cycle, run immediately when system comes back
+Persistent=true
+
+# Randomize by 5 minutes to avoid thundering herd
+RandomizedDelaySec=5min
+
+[Install]
+WantedBy=timers.target
