@@ -47,3 +47,12 @@ def instrumented_registry(real_settings):
 
     registry, enrichment_wrappers, discovery_wrappers = build_instrumented_registry(real_settings)
     return registry, enrichment_wrappers, discovery_wrappers
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limiter():
+    """Reset rate limiter before each test to avoid cross-test pollution."""
+    from solstein.data.security_hardening import rate_limiter
+    rate_limiter.client_requests.clear()
+    yield
+    rate_limiter.client_requests.clear()

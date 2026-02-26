@@ -936,3 +936,171 @@ If your issue isn't here:
 *Last Updated: February 20, 2026*
 *Maintained by: Support & DevOps Team*
 
+
+---
+
+## Section 9: Async Task Issues (Phase 13)
+
+### Symptom: Task Retries Endlessly
+
+**Cause**: Task is retrying but never succeeding
+
+**Diagnosis**:
+
+```bash
+# Check logs for retry pattern
+tail -f application.log | grep RETRY-ATTEMPT
+
+# Output should show:
+# [RETRY-ATTEMPT-1] Task will retry in 5s: Connection timeout
+# [RETRY-ATTEMPT-2] Task will retry in 10s: Rate limit exceeded
+# [RETRY-ATTEMPT-3] Task will retry in 20s: Service unavailable
+# [RETRY-FAILED] Task permanently failed after 3 attempts
+```
+
+**Solutions**:
+
+1. **Check external service**: Is the API/service the task is calling actually available?
+   ```bash
+   curl https://api.example.com/health
+   ```
+
+2. **Check network connectivity**: Can the worker reach the service?
+   ```bash
+   ping api.example.com
+   ```
+
+3. **Check rate limiting**: Is the external service rate limiting us?
+   ```bash
+   # Look for 429 (Too Many Requests) in logs
+   grep "429" application.log
+   ```
+
+4. **Increase max retries** (if transient issue):
+   ```python
+   @shared_task(bind=True, max_retries=5)  # Increase from 3
+   def my_task(self):
+       pass
+   ```
+
+**See**: [Retry Logic Guide](./retry-logic.md)
+
+---
+
+## Section 10: Rate Limiting Issues (Phase 13)
+
+### Symptom: All Requests Return 429 (Too Many Requests)
+
+**Cause**: Rate limiter is rejecting all requests
+
+**Diagnosis**:
+
+```bash
+# Check if rate limiter is working
+curl -i http://localhost:8000/companies/1/enrich
+# If 429: Rate limit exceeded
+
+# Check health endpoint (should NOT be rate limited)
+curl -i http://localhost:8000/health
+# Should return 200, not 429
+```
+
+**Solutions**:
+
+1. **Check Redis connection**:
+   ```bash
+   redis-cli ping
+   # Should return: PONG
+   ```
+
+2. **Check rate limit configuration**:
+   ```bash
+   # In .env
+   RATE_LIMIT_PER_MINUTE=100  # Default
+   ```
+
+3. **Check client identification**:
+   - Rate limiter tracks by client IP
+   - If all requests from same IP, they share the limit
+   - Solution: Use different client IPs or increase limit
+
+4. **Reset rate limiter** (if stuck):
+   ```bash
+   # Clear Redis rate limit keys
+   redis-cli KEYS "rate_limit:*" | xargs redis-cli DEL
+   ```
+
+**See**: [Rate Limiting Guide](./rate-limiting.md)
+
+---
+
+## Section 11: Health Check Issues (Phase 13)
+
+### Symptom: /health Returns 503 (Unhealthy)
+
+**Cause**: One or more critical components are down
+
+**Diagnosis**:
+
+```bash
+# Check health endpoint
+curl http://localhost:8000/health | jq .
+
+# Output shows which components are unhealthy:
+{
+  "status": "unhealthy",
+  "checks": {
+    "database": {"status": "disconnected", "healthy": false},
+    "cache": {"status": "operational", "healthy": true}
+  }
+}
+```
+
+**Solutions**:
+
+1. **Database down**: Check PostgreSQL
+   ```bash
+   psql -c "SELECT 1"
+   ```
+
+2. **Cache down**: Check Redis
+   ```bash
+   redis-cli ping
+   ```
+
+3. **Connector down**: Check external API
+   ```bash
+   curl https://api.example.com/health
+   ```
+
+**See**: [Health Checks Guide](./health-checks.md)
+
+### Symptom: /ready Returns 503 (Not Ready)
+
+**Cause**: System is not ready to handle traffic (more strict than /health)
+
+**Diagnosis**:
+
+```bash
+# Check readiness
+curl http://localhost:8000/ready | jq .
+
+# Shows which connectors are unavailable
+{
+  "ready": false,
+  "checks": {
+    "database": {"healthy": true},
+    "cache": {"healthy": true},
+    "sec_edgar_connector": {"healthy": false},
+    "companies_house_connector": {"healthy": false},
+    "news_signals_connector": {"healthy": true},
+    "github_connector": {"healthy": true}
+  }
+}
+```
+
+**Solution**: Wait for connectors to become available, or reduce required connector count.
+
+**See**: [Health Checks Guide](./health-checks.md)
+
+---

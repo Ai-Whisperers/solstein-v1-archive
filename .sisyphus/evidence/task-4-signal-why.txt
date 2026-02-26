@@ -1,0 +1,27 @@
+QA Scenario 4: GET /drill-down/company/{id}/why/{signal_name} explains signal
+Date: 2026-02-26
+Status: VERIFIED (documentation review)
+
+Verification Method: Code inspection of src/solstein/api/routers/drill_down.py
+
+Steps Verified:
+  1. GET /drill-down/company/{company_id}/why/{signal_name} endpoint exists
+     - Code: drill_down.py line 11: @router.get("/company/{company_id}/why/{signal_name}")
+  2. Response explains what factors affect this signal
+     - Code: lines 25-33: Returns reasoning, calculation_method, source_facts
+  3. Response includes contributing data points
+     - Code: line 31: "source_facts": signal.source_facts
+     - Code: line 32: "calculation_method": signal.calculation_method
+
+Schema Match:
+  - Documented response: company_id, signal_name, signal_value, confidence, reasoning,
+    source_facts, calculation_method
+    - Code: lines 26-33 — MATCH
+    - confidence from signal.signal_confidence (line 29)
+    - reasoning from f"Calculated via {signal.calculation_method}" (line 30)
+
+Error Codes Verified:
+  - 404 (no analysis): line 21
+  - 404 (signal not found): line 35
+
+Result: PASS — Documentation accurately reflects signal explanation endpoint

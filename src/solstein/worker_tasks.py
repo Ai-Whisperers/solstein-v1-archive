@@ -13,11 +13,18 @@ Provides scheduled tasks for refreshing data from all 12 sources:
 - Funding (funding rounds)
 - Global Market (market trends)
 - Web Search (search results)
+
+Phase 13.4: Async Job Retry Logic
+- Exponential backoff: 5s, 10s, 20s for retries 1, 2, 3
+- Dead Letter Queue tracking for permanently failed jobs
+- Logging with [RETRY-ATTEMPT-N] and [RETRY-FAILED] prefixes
 """
 
-from celery import shared_task
+from celery import shared_task, Task
+from celery.exceptions import MaxRetriesExceededError, SoftTimeLimitExceeded
 from loguru import logger
 from sqlalchemy import select
+from datetime import datetime, timezone
 
 from solstein.config import get_settings
 
@@ -89,9 +96,51 @@ async def _store_facts(db_manager, facts: list[dict], source: str) -> int:
     return stored_count
 
 
+# ============================================================================
+# PHASE 13.4: DEAD LETTER QUEUE FOR PERMANENTLY FAILED JOBS
+# ============================================================================
+
+
+class DeadLetterQueue:
+    """Track permanently failed jobs after max retries exceeded."""
+
+    def __init__(self):
+        self.failed_jobs = []
+
+    def record_failure(self, task_name: str, task_id: str, error: str, attempt: int):
+        """Record a permanently failed job."""
+        logger.info(
+            f"[RETRY-FAILED] {task_name} (task_id={task_id}): {error} after {attempt} attempts"
+        )
+        self.failed_jobs.append(
+            {
+                "task_name": task_name,
+                "task_id": task_id,
+                "error": error,
+                "final_attempt": attempt,
+                "timestamp": datetime.now(timezone.utc),
+            }
+        )
+
+
+# Global Dead Letter Queue instance
+dead_letter_queue = DeadLetterQueue()
+
+
+# ============================================================================
+# ORIGINAL 4 REFRESH TASKS (with Phase 13.4 retry logic)
+# ============================================================================
+
+
 @shared_task(name="solstein.worker_tasks.refresh_sec_edgar", bind=True, max_retries=3)
 def refresh_sec_edgar(self):
-    """Refresh SEC EDGAR data for all tracked companies."""
+    """Refresh SEC EDGAR data for all tracked companies.
+
+    Phase 13.4: Implements exponential backoff retry logic
+    - Attempt 1: 5 seconds
+    - Attempt 2: 10 seconds
+    - Attempt 3: 20 seconds
+    """
     logger.info("Starting SEC EDGAR refresh task")
 
     try:
@@ -121,14 +170,23 @@ def refresh_sec_edgar(self):
 
     except Exception as exc:
         logger.error(f"SEC EDGAR refresh failed: {exc}")
-        # Retry with exponential backoff
-        countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        # Phase 13.4: Exponential backoff - 5 * (2^(attempt-1))
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] SEC EDGAR refresh will retry in {countdown}s")
+
+        try:
+            raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure("refresh_sec_edgar", self.request.id, str(exc), self.request.retries + 1)
+            raise
 
 
 @shared_task(name="solstein.worker_tasks.refresh_companies_house", bind=True, max_retries=3)
 def refresh_companies_house(self):
-    """Refresh Companies House data for all tracked companies."""
+    """Refresh Companies House data for all tracked companies.
+
+    Phase 13.4: Implements exponential backoff retry logic
+    """
     logger.info("Starting Companies House refresh task")
 
     try:
@@ -158,13 +216,24 @@ def refresh_companies_house(self):
 
     except Exception as exc:
         logger.error(f"Companies House refresh failed: {exc}")
-        countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] Companies House refresh will retry in {countdown}s")
+
+        try:
+            raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure(
+                "refresh_companies_house", self.request.id, str(exc), self.request.retries + 1
+            )
+            raise
 
 
 @shared_task(name="solstein.worker_tasks.refresh_news_signals", bind=True, max_retries=3)
 def refresh_news_signals(self):
-    """Refresh news signals for all tracked companies."""
+    """Refresh news signals for all tracked companies.
+
+    Phase 13.4: Implements exponential backoff retry logic
+    """
     logger.info("Starting News Signals refresh task")
 
     try:
@@ -194,13 +263,24 @@ def refresh_news_signals(self):
 
     except Exception as exc:
         logger.error(f"News Signals refresh failed: {exc}")
-        countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] News Signals refresh will retry in {countdown}s")
+
+        try:
+            raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure(
+                "refresh_news_signals", self.request.id, str(exc), self.request.retries + 1
+            )
+            raise
 
 
 @shared_task(name="solstein.worker_tasks.refresh_github", bind=True, max_retries=3)
 def refresh_github(self):
-    """Refresh GitHub data for all tracked companies."""
+    """Refresh GitHub data for all tracked companies.
+
+    Phase 13.4: Implements exponential backoff retry logic
+    """
     logger.info("Starting GitHub refresh task")
 
     try:
@@ -230,8 +310,14 @@ def refresh_github(self):
 
     except Exception as exc:
         logger.error(f"GitHub refresh failed: {exc}")
-        countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] GitHub refresh will retry in {countdown}s")
+
+        try:
+            raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure("refresh_github", self.request.id, str(exc), self.request.retries + 1)
+            raise
 
 
 # ============================================================================
@@ -241,7 +327,10 @@ def refresh_github(self):
 
 @shared_task(name="solstein.worker_tasks.refresh_yahoo_finance", bind=True, max_retries=3)
 def refresh_yahoo_finance(self):
-    """Refresh Yahoo Finance market data for all tracked companies."""
+    """Refresh Yahoo Finance market data for all tracked companies.
+
+    Phase 13.4: Implements exponential backoff retry logic
+    """
     logger.info("Starting Yahoo Finance refresh task")
 
     try:
@@ -266,13 +355,24 @@ def refresh_yahoo_finance(self):
 
     except Exception as exc:
         logger.error(f"Yahoo Finance refresh failed: {exc}")
-        countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] Yahoo Finance refresh will retry in {countdown}s")
+
+        try:
+            raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure(
+                "refresh_yahoo_finance", self.request.id, str(exc), self.request.retries + 1
+            )
+            raise
 
 
 @shared_task(name="solstein.worker_tasks.refresh_patents", bind=True, max_retries=3)
 def refresh_patents(self):
-    """Refresh patent data for all tracked companies."""
+    """Refresh patent data for all tracked companies.
+
+    Phase 13.4: Implements exponential backoff retry logic
+    """
     logger.info("Starting Patents refresh task")
 
     try:
@@ -302,13 +402,22 @@ def refresh_patents(self):
 
     except Exception as exc:
         logger.error(f"Patents refresh failed: {exc}")
-        countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] Patents refresh will retry in {countdown}s")
+
+        try:
+            raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure("refresh_patents", self.request.id, str(exc), self.request.retries + 1)
+            raise
 
 
 @shared_task(name="solstein.worker_tasks.refresh_news", bind=True, max_retries=3)
 def refresh_news(self):
-    """Refresh news data for all tracked companies."""
+    """Refresh news data for all tracked companies.
+
+    Phase 13.4: Implements exponential backoff retry logic
+    """
     logger.info("Starting News refresh task")
 
     try:
@@ -338,13 +447,22 @@ def refresh_news(self):
 
     except Exception as exc:
         logger.error(f"News refresh failed: {exc}")
-        countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] News refresh will retry in {countdown}s")
+
+        try:
+            raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure("refresh_news", self.request.id, str(exc), self.request.retries + 1)
+            raise
 
 
 @shared_task(name="solstein.worker_tasks.refresh_website", bind=True, max_retries=3)
 def refresh_website(self):
-    """Refresh website data for all tracked companies."""
+    """Refresh website data for all tracked companies.
+
+    Phase 13.4: Implements exponential backoff retry logic
+    """
     logger.info("Starting Website refresh task")
 
     try:
@@ -369,13 +487,22 @@ def refresh_website(self):
 
     except Exception as exc:
         logger.error(f"Website refresh failed: {exc}")
-        countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] Website refresh will retry in {countdown}s")
+
+        try:
+            raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure("refresh_website", self.request.id, str(exc), self.request.retries + 1)
+            raise
 
 
 @shared_task(name="solstein.worker_tasks.refresh_linkedin", bind=True, max_retries=3)
 def refresh_linkedin(self):
-    """Refresh LinkedIn data for all tracked companies."""
+    """Refresh LinkedIn data for all tracked companies.
+
+    Phase 13.4: Implements exponential backoff retry logic
+    """
     logger.info("Starting LinkedIn refresh task")
 
     try:
@@ -400,13 +527,22 @@ def refresh_linkedin(self):
 
     except Exception as exc:
         logger.error(f"LinkedIn refresh failed: {exc}")
-        countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] LinkedIn refresh will retry in {countdown}s")
+
+        try:
+            raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure("refresh_linkedin", self.request.id, str(exc), self.request.retries + 1)
+            raise
 
 
 @shared_task(name="solstein.worker_tasks.refresh_funding", bind=True, max_retries=3)
 def refresh_funding(self):
-    """Refresh funding data for all tracked companies."""
+    """Refresh funding data for all tracked companies.
+
+    Phase 13.4: Implements exponential backoff retry logic
+    """
     logger.info("Starting Funding refresh task")
 
     try:
@@ -436,13 +572,22 @@ def refresh_funding(self):
 
     except Exception as exc:
         logger.error(f"Funding refresh failed: {exc}")
-        countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] Funding refresh will retry in {countdown}s")
+
+        try:
+            raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure("refresh_funding", self.request.id, str(exc), self.request.retries + 1)
+            raise
 
 
 @shared_task(name="solstein.worker_tasks.refresh_global_market", bind=True, max_retries=3)
 def refresh_global_market(self):
-    """Refresh global market data."""
+    """Refresh global market data.
+
+    Phase 13.4: Implements exponential backoff retry logic
+    """
     logger.info("Starting Global Market refresh task")
 
     try:
@@ -467,13 +612,24 @@ def refresh_global_market(self):
 
     except Exception as exc:
         logger.error(f"Global Market refresh failed: {exc}")
-        countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] Global Market refresh will retry in {countdown}s")
+
+        try:
+            raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure(
+                "refresh_global_market", self.request.id, str(exc), self.request.retries + 1
+            )
+            raise
 
 
 @shared_task(name="solstein.worker_tasks.refresh_web_search", bind=True, max_retries=3)
 def refresh_web_search(self):
-    """Refresh web search data for all tracked companies."""
+    """Refresh web search data for all tracked companies.
+
+    Phase 13.4: Implements exponential backoff retry logic
+    """
     logger.info("Starting Web Search refresh task")
 
     try:
@@ -503,8 +659,14 @@ def refresh_web_search(self):
 
     except Exception as exc:
         logger.error(f"Web Search refresh failed: {exc}")
-        countdown = 60 * (2**self.request.retries)
-        raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] Web Search refresh will retry in {countdown}s")
+
+        try:
+            raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure("refresh_web_search", self.request.id, str(exc), self.request.retries + 1)
+            raise
 
 
 @shared_task(name="solstein.worker_tasks.refresh_all_sources", bind=True)
@@ -552,3 +714,190 @@ def refresh_all_sources(self):
             "web_search",
         ],
     }
+
+
+# ============================================================================
+# PHASE 12: ENRICHMENT ASYNC TASKS (with Phase 13.4 retry logic)
+# ============================================================================
+
+from celery import Celery
+from datetime import datetime, timezone
+
+# Import celery_app from config
+from solstein.celery_config import celery_app
+
+
+class EnrichmentTask(Task):
+    """Base task class for enrichment operations with result tracking."""
+
+    def on_success(self, result, task_id, args, kwargs):
+        """Called on task success - update result tracking."""
+        pass
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        """Called on task failure - update result tracking."""
+        pass
+
+
+@celery_app.task(base=EnrichmentTask, bind=True, max_retries=3)
+def enrich_company_async(
+    self, company_id: str, company_name: str | None = None, sources: list[str] | None = None, user_id: str | None = None
+):
+    """Asynchronously enrich a single company (Phase 12).
+
+    Phase 13.4: Implements exponential backoff retry logic
+
+    Args:
+        company_id: Company identifier
+        company_name: Company name (optional)
+        sources: List of enrichment sources (default: ['SEC_EDGAR'])
+        user_id: User who requested enrichment (optional)
+
+    Returns:
+        Dict with enrichment results
+    """
+    try:
+        from solstein.data.unified_loader import unified_loader, UnifiedCompany
+        import time
+
+        sources = sources or ["SEC_EDGAR"]
+        start_time = time.time()
+
+        # Perform enrichment
+        company = UnifiedCompany(id=company_id, name=company_name or company_id)
+        enriched = unified_loader.enrich_from_connectors(company)
+
+        duration_ms = (time.time() - start_time) * 1000
+
+        # Track enriched fields
+        fields_enriched = []
+        if enriched.financials and enriched.financials.revenue:
+            fields_enriched.append("revenue")
+        if enriched.financials and enriched.financials.employees:
+            fields_enriched.append("employees")
+        if enriched.financials and enriched.financials.growth_rate:
+            fields_enriched.append("growth_rate")
+
+        return {
+            "task_id": self.request.id,
+            "company_id": company_id,
+            "company_name": enriched.name or company_name or company_id,
+            "status": "SUCCESS",
+            "sources_used": sources,
+            "fields_enriched": fields_enriched,
+            "duration_ms": duration_ms,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "enriched_data": {
+                "revenue": enriched.financials.revenue if enriched.financials else None,
+                "employees": enriched.financials.employees if enriched.financials else None,
+                "growth_rate": enriched.financials.growth_rate if enriched.financials else None,
+                "profit_margin": enriched.financials.profit_margin if enriched.financials else None,
+            },
+        }
+
+    except Exception as exc:
+        # Phase 13.4: Exponential backoff retry
+        countdown = 5 * (2**self.request.retries)
+        logger.info(
+            f"[RETRY-ATTEMPT-{self.request.retries + 1}] Enrichment for {company_id} will retry in {countdown}s"
+        )
+
+        try:
+            self.retry(exc=exc, countdown=countdown)
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure(
+                "enrich_company_async", self.request.id, str(exc), self.request.retries + 1
+            )
+            return {
+                "task_id": self.request.id,
+                "company_id": company_id,
+                "company_name": company_name,
+                "status": "FAILED",
+                "error": str(exc),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+
+
+@celery_app.task(bind=True, max_retries=3)
+def enrich_companies_batch_async(
+    self, companies: list[dict], sources: list[str] | None = None, batch_size: int = 10, user_id: str | None = None
+):
+    """Asynchronously enrich multiple companies in batches (Phase 12).
+
+    Phase 13.4: Implements exponential backoff retry logic
+
+    Args:
+        companies: List of company dicts with 'id' and 'name' keys
+        sources: List of enrichment sources
+        batch_size: Number of companies per batch
+        user_id: User who requested enrichment
+
+    Returns:
+        Dict with batch enrichment results
+    """
+    try:
+        from solstein.data.unified_loader import unified_loader, UnifiedCompany
+        import time
+
+        sources = sources or ["SEC_EDGAR"]
+        start_time = time.time()
+        batch_results = []
+        failed_count = 0
+
+        # Process companies
+        for i, company_data in enumerate(companies):
+            try:
+                company_id = company_data.get("id")
+                company_name = company_data.get("name", company_id)
+
+                company = UnifiedCompany(id=company_id, name=company_name)
+                enriched = unified_loader.enrich_from_connectors(company)
+
+                batch_results.append(
+                    {
+                        "company_id": company_id,
+                        "company_name": enriched.name or company_name,
+                        "status": "SUCCESS",
+                    }
+                )
+
+            except Exception as e:
+                failed_count += 1
+                batch_results.append(
+                    {
+                        "company_id": company_data.get("id"),
+                        "company_name": company_data.get("name"),
+                        "status": "FAILED",
+                        "error": str(e),
+                    }
+                )
+
+        duration_ms = (time.time() - start_time) * 1000
+
+        return {
+            "task_id": self.request.id,
+            "total": len(companies),
+            "successful": len(companies) - failed_count,
+            "failed": failed_count,
+            "results": batch_results,
+            "duration_ms": duration_ms,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+    except Exception as exc:
+        # Phase 13.4: Exponential backoff retry
+        countdown = 5 * (2**self.request.retries)
+        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] Batch enrichment will retry in {countdown}s")
+
+        try:
+            self.retry(exc=exc, countdown=countdown)
+        except MaxRetriesExceededError:
+            dead_letter_queue.record_failure(
+                "enrich_companies_batch_async", self.request.id, str(exc), self.request.retries + 1
+            )
+            return {
+                "task_id": self.request.id,
+                "status": "FAILED",
+                "error": str(exc),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }

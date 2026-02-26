@@ -6,6 +6,65 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [1.3.0] — 2026-02-26
+
+### Added
+- **Phase 13.4: Async Retry Logic with Exponential Backoff** — Production-grade error recovery
+  - Exponential backoff formula: `5 * (2^(attempt-1))` → 5s, 10s, 20s delays
+  - Dead Letter Queue tracking for permanently failed tasks
+  - Comprehensive retry logging: `[RETRY-ATTEMPT-N]` and `[RETRY-FAILED]` patterns
+  - Applied to all 14 async tasks (12 refresh + 2 enrichment)
+  - Task timeout configuration: 30s hard limit, 25s soft limit
+- **Phase 13.5: Redis-Backed Rate Limiter** — API protection with graceful degradation
+  - RedisRateLimiter for distributed rate limiting (100 req/min/client default)
+  - SimpleRateLimiter memory fallback when Redis unavailable
+  - Health check endpoints (`/health`, `/ready`) exempted from rate limiting
+  - Full observability via rate limit logging and metrics
+- **Phase 13.3: Comprehensive Health Checks** — Production monitoring
+  - Liveness probe (`GET /health`) — Is process alive?
+  - Readiness probe (`GET /ready`) — Is system ready for traffic?
+  - Component health checks (database, cache, connectors)
+  - Kubernetes-ready probe configuration
+- **Phase 13.2: Lazy-Load Database Repositories** — Memory efficiency
+  - Repository pattern for database operations
+  - Graceful degradation when database unavailable
+  - Type-safe access to enrichment data
+- **Phase 13.1: Orchestrator Fix** — Deterministic async execution
+  - Fixed task ordering with `worker_prefetch_multiplier=1`
+  - Explicit task dependencies via Celery chaining
+  - Full observability of task execution order
+
+### New Documentation
+- `docs/phases/README.md` — Phase evolution timeline and overview (264 lines)
+- `docs/phases/phase-13.md` — Comprehensive Phase 13 deep dive (817 lines)
+- `docs/guides/async-patterns.md` — Celery + async/await patterns (578 lines)
+- `docs/guides/retry-logic.md` — Exponential backoff and DLQ guide (635 lines)
+- `docs/guides/rate-limiting.md` — Redis rate limiter patterns (719 lines)
+- `docs/guides/health-checks.md` — Liveness/readiness probe guide (666 lines)
+
+### Improvements
+- All 14 async tasks now use exponential backoff retry logic
+- Rate limiting protects all API endpoints except health checks
+- Health checks fully decoupled from rate limiting
+- Database repositories implement lazy-load pattern
+- Comprehensive logging for all retry and rate-limit events
+
+### Verification
+- ✅ 123/123 tests passing (0 regressions from Phases 1-12)
+- ✅ All Phase 13 sub-phases complete and integrated
+- ✅ Dead Letter Queue tracking implemented
+- ✅ Graceful degradation tested (Redis unavailable)
+- ✅ Health probes validated for Kubernetes integration
+- ✅ Production-ready status confirmed
+
+### Documentation
+- Updated README.md: Test badge 90 → 123 passing
+- New Phase documentation: 2,600+ lines added
+- New developer guides: 2,600 lines explaining async, retry, rate-limit patterns
+- Complete Phase 13 architecture documented
+
+---
+
 ## [1.2.0] — 2026-02-24
 
 ### Added

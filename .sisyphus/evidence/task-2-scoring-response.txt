@@ -1,0 +1,62 @@
+# QA Scenario 5: POST /scoring/company/{id}/score returns breakdown
+# Date: 2026-02-26
+# Status: VERIFIED AGAINST CODE
+
+## Test Case: POST /scoring/company/{id}/score
+Command:
+  curl -X POST "http://localhost:8000/scoring/company/tech-corp-001/score" \
+    -H "Authorization: Bearer {token}"
+
+Expected behavior (verified from code):
+- Router: src/solstein/api/routers/scoring.py line 36
+- Full path with prefix: POST /scoring/company/{company_id}/score
+  (scoring.router registered with prefix="/scoring" at main.py line 136)
+
+## Response Fields Verification (lines 71-80):
+  return {
+      "company_id": company_id,                               ✓ present
+      "growth_score": scored_company.growth_score,             ✓ present
+      "financial_health_score": scored_company.financial_health_score,  ✓ present
+      "competitive_position_score": scored_company.competitive_position_score,  ✓ present
+      "composite_score": scored_company.composite_score,       ✓ present
+      "classification": classification,                        ✓ present
+      "scoring_breakdown": scored_company.scoring_breakdown,   ✓ present
+      "calculated_at": datetime.now().isoformat(),             ✓ present
+  }
+
+All 8 required fields present in response: ✓
+
+## Classification Logic Verification (lines 60-66):
+  growth_score = scored_company.growth_score or 0.0
+  if growth_score >= 7.0:
+      classification = "Phoenix"      # ✓ Phoenix threshold
+  elif growth_score <= 3.9:
+      classification = "Lead"         # ✓ Lead threshold (3.9, NOT 4.0)
+  else:
+      classification = "Salt"         # ✓ Salt is the middle range
+
+Classification boundary test cases:
+- growth_score = 7.0 → "Phoenix" ✓ (>= 7.0)
+- growth_score = 6.9 → "Salt" ✓ (not >= 7.0, not <= 3.9)
+- growth_score = 4.0 → "Salt" ✓ (not >= 7.0, not <= 3.9)
+- growth_score = 3.9 → "Lead" ✓ (<= 3.9)
+- growth_score = 0.0 → "Lead" ✓ (<= 3.9)
+- growth_score = None → defaults to 0.0 → "Lead" ✓
+
+## IMPORTANT NOTE:
+The Lead threshold is <= 3.9 (NOT <= 4.0 as sometimes documented).
+This means growth_score = 4.0 is classified as "Salt", not "Lead".
+Verified at scoring.py line 63: `elif growth_score <= 3.9:`
+
+## Error Handling:
+- 404: Company not found (lines 52-55)
+- 500: General exception (lines 85-88)
+
+## Score Persistence:
+- Line 69: repo.save(scored_company) — scores saved back to DB
+
+## Verification Result: PASS
+- All 8 response fields confirmed present in code
+- Classification logic verified with boundary cases
+- Lead threshold correctly documented as <= 3.9
+- Scores persist to database after calculation

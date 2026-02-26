@@ -8,6 +8,8 @@ os.environ.setdefault("GITHUB_TOKEN", "test-github-token-12345")
 
 from tests.factories import make_company
 
+
+
 from solstein.api.dependencies import get_current_user, get_repository
 from solstein.api.main import app
 from solstein.core.repositories import CompanyRepository
@@ -61,3 +63,100 @@ def unauthenticated_client():
     """
     with TestClient(app) as test_client:
         yield test_client
+
+
+@pytest.fixture(autouse=True)
+def patch_competitor_data_loader(monkeypatch):
+    """
+    Auto-use fixture that patches CompetitorDataLoader globally.
+    
+    This ensures ALL tests that use UnifiedCompanyLoader will get mock data
+    instead of trying to load from the missing data/input/competitor_data.json file.
+    """
+    from solstein.domain.models import Company
+    from solstein.data.loaders import CompetitorDataLoader
+    
+    # Create comprehensive test companies with all required financial fields
+    test_companies = [
+        Company(
+            id="eneve_001",
+            name="Eneve",
+            industry="Energy Software",
+            country="Germany",
+            founded_year=2015,
+            employees=150,
+            revenue=5000000.0,
+            growth_rate=0.25,
+            profit_margin=0.15,
+            funding_raised=2000000.0,
+            valuation=50000000.0,
+            github_url="https://github.com/eneve",
+            website="https://eneve.de",
+            description="Energy software company",
+            ai_maturity_score=7.5,
+            geographic_presence=["Germany", "France", "UK", "Netherlands", "Belgium", "Austria", "Switzerland"],
+            revenue_timeline=[{"year": 2020, "value": 2000000}, {"year": 2021, "value": 3000000}, {"year": 2022, "value": 4000000}, {"year": 2023, "value": 5000000}],
+            revenue_cagr_3yr=30.0,
+            revenue_cagr_5yr=25.0,
+            ebitda_margin=25.0,
+            recurring_revenue_pct=85.0,
+            revenue_per_employee_eur_k=333.0,
+            classification="Phoenix",
+        ),
+        Company(
+            id="test_002",
+            name="Test Company 2",
+            industry="Energy Software",
+            country="US",
+            founded_year=2016,
+            employees=100,
+            revenue=3000000.0,
+            growth_rate=0.20,
+            profit_margin=0.12,
+            funding_raised=1500000.0,
+            valuation=30000000.0,
+            github_url="https://github.com/test2",
+            website="https://test2.com",
+            description="Test company",
+            ai_maturity_score=6.0,
+            geographic_presence=["US", "Canada"],
+            revenue_timeline=[{"year": 2020, "value": 1500000}, {"year": 2021, "value": 2000000}, {"year": 2022, "value": 2500000}, {"year": 2023, "value": 3000000}],
+            revenue_cagr_3yr=25.0,
+            revenue_cagr_5yr=20.0,
+            ebitda_margin=18.0,
+            recurring_revenue_pct=75.0,
+            revenue_per_employee_eur_k=300.0,
+            classification="Salt",
+        ),
+        Company(
+            id="test_003",
+            name="Test Company 3",
+            industry="Energy Software",
+            country="UK",
+            founded_year=2017,
+            employees=80,
+            revenue=2000000.0,
+            growth_rate=0.15,
+            profit_margin=0.10,
+            funding_raised=1000000.0,
+            valuation=20000000.0,
+            github_url="https://github.com/test3",
+            website="https://test3.com",
+            description="Test company",
+            ai_maturity_score=5.0,
+            geographic_presence=["UK", "Ireland"],
+            revenue_timeline=[{"year": 2020, "value": 1000000}, {"year": 2021, "value": 1200000}, {"year": 2022, "value": 1500000}, {"year": 2023, "value": 2000000}],
+            revenue_cagr_3yr=26.0,
+            revenue_cagr_5yr=20.0,
+            ebitda_margin=12.0,
+            recurring_revenue_pct=65.0,
+            revenue_per_employee_eur_k=250.0,
+            classification="Lead",
+        ),
+    ]
+    
+    # Patch CompetitorDataLoader.load_companies to return test data
+    def mock_load_companies(self, limit=None):
+        return test_companies[:limit] if limit else test_companies
+    
+    monkeypatch.setattr(CompetitorDataLoader, "load_companies", mock_load_companies)

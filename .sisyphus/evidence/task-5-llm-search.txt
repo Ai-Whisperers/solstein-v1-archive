@@ -1,0 +1,82 @@
+# QA Scenario 4: GET /export/search/llm filters by natural language
+# Date: 2026-02-26
+# Status: PASS
+
+## Verification Method: Code Analysis
+
+### Step 1: Verify endpoint signature
+
+From export.py (line 127):
+  @router.get("/search/llm")
+  async def search_with_llm(
+      criteria: str = Query(..., description="Natural language search criteria"),
+      limit: int | None = Query(None, description="Maximum number of results"),
+      include_reasoning: bool = Query(True, description="Include LLM reasoning in response"),
+      _: dict[str, Any] = Depends(get_current_user),
+      repo: CompanyRepository = Depends(get_repository),
+  ) -> JSONResponse:
+
+✓ criteria is required (Query(...))
+✓ limit is optional
+✓ include_reasoning defaults to True
+
+### Step 2: Verify response.total_matched >= 0
+
+From export.py line 176:
+  response = {
+      "criteria": criteria,
+      "total_matched": filter_metadata["total_matched"],
+      "total_checked": filter_metadata["total_checked"],
+      "companies": companies_data,
+  }
+
+✓ total_matched comes from filter_metadata (from repo.get_all_llm_filtered)
+✓ If no matches, returns {"total_matched": 0, "companies": []} (lines 157-165)
+
+### Step 3: Verify count(response.companies) <= limit
+
+From export.py lines 152-155:
+  companies, filter_metadata = await repo.get_all_llm_filtered(
+      criteria=criteria,
+      limit=limit,
+  )
+
+The limit parameter is passed to the LLM filtering function, which constrains results. ✓
+
+### Step 4: Verify filter_reasoning is included
+
+From export.py lines 181-182:
+  if include_reasoning:
+      response["filter_reasoning"] = filter_metadata["reasoning"]
+
+✓ filter_reasoning included when include_reasoning=True (default)
+✓ String type (from LLM output)
+
+### Step 5: Verify JSON-only limitation
+
+From export.py lines 146-150:
+  if not isinstance(repo, JsonFileRepository):
+      return JSONResponse(
+          content={"error": "LLM filtering is only available for JSON repository"},
+          status_code=400,
+      )
+
+✓ Returns 400 for non-JSON repositories
+✓ Documented as a limitation
+
+### Step 6: Verify curl example
+
+curl -X GET "http://localhost:8000/export/search/llm?criteria=fast%20growing%20saas&limit=10" \
+  -H "Authorization: Bearer {token}"
+
+Expected response:
+{
+  "criteria": "fast growing saas",
+  "total_matched": N,
+  "total_checked": M,
+  "companies": [...],
+  "filter_reasoning": "..."
+}
+
+### Result: PASS
+LLM search endpoint documented accurately with all query params, response fields, and JSON-only limitation.

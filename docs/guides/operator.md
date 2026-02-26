@@ -201,3 +201,90 @@ tar -xzf solstein-data-20260220.tar.gz
 | Loader cache | In-process | Cache is per-process. Scale by running more API replicas. |
 
 ---
+
+---
+
+## Phase 13: Production Reliability
+
+### Health Checks for Monitoring
+
+The API now provides comprehensive health checks for orchestration systems:
+
+```bash
+# Liveness probe (Kubernetes: every 10 seconds)
+curl http://localhost:8000/health
+# Returns: {"status": "healthy", "checks": {...}}
+
+# Readiness probe (Kubernetes: every 5 seconds)
+curl http://localhost:8000/ready
+# Returns: {"ready": true, "checks": {...}}
+```
+
+**Kubernetes Configuration**:
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  periodSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8000
+  periodSeconds: 5
+  failureThreshold: 2
+```
+
+**See**: [Health Checks Guide](./health-checks.md)
+
+### Async Task Retry Logic
+
+All 14 async tasks (12 refresh + 2 enrichment) now implement exponential backoff:
+
+```
+Attempt 1: wait 5 seconds
+Attempt 2: wait 10 seconds
+Attempt 3: wait 20 seconds
+Failure: recorded in Dead Letter Queue
+```
+
+**Monitoring**:
+
+```bash
+# Watch retry attempts
+tail -f application.log | grep RETRY-ATTEMPT
+
+# Watch permanent failures
+tail -f application.log | grep RETRY-FAILED
+```
+
+**See**: [Retry Logic Guide](./retry-logic.md)
+
+### Rate Limiting Configuration
+
+API endpoints are protected by Redis-backed rate limiting (100 req/min/client):
+
+```env
+# .env configuration
+RATE_LIMIT_PER_MINUTE=100
+REDIS_URL=redis://localhost:6379
+```
+
+**Graceful Degradation**: If Redis is unavailable, the system falls back to in-memory rate limiting.
+
+**See**: [Rate Limiting Guide](./rate-limiting.md)
+
+### Task Timeout Configuration
+
+```python
+# celery_config.py
+celery_app.conf.update(
+    task_time_limit=30,      # Hard limit: kill after 30s
+    task_soft_time_limit=25, # Soft limit: graceful shutdown at 25s
+)
+```
+
+---

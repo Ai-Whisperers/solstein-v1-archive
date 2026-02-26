@@ -3,6 +3,12 @@
 
 **Setting Up, Contributing, and Understanding the Codebase**
 
+**Phase**: 1-13 (Production-Ready)  
+**Last Updated**: February 26, 2026
+# 📜 Developer Guide
+
+**Setting Up, Contributing, and Understanding the Codebase**
+
 ---
 
 ## Prerequisites
@@ -10,6 +16,50 @@
 - Python 3.12+
 - Redis (for Celery workers)
 - Git
+
+---
+
+## Redis Dependency
+
+Solstein uses Redis for:
+- Celery message broker (default: redis://localhost:6379/0)
+- Celery result backend (default: redis://localhost:6379/1)
+- Rate limiter (when configured with Redis client)
+
+### Starting Redis (Development)
+
+**Option 1: Docker** (Recommended)
+```bash
+docker run -d -p 6379:6379 redis:7-alpine
+```
+
+**Option 2: Homebrew (macOS)**
+```bash
+brew install redis
+redis-server
+```
+
+**Option 3: From Source (Linux)**
+```bash
+git clone https://github.com/redis/redis.git
+cd redis && make && ./src/redis-server
+```
+
+### Verify Redis is Running
+
+```bash
+redis-cli ping
+# Expected output: PONG
+```
+
+### Configuration
+
+Set these environment variables to use non-default Redis:
+
+```bash
+export CELERY_BROKER_URL="redis://your-redis-host:6379/0"
+export CELERY_RESULT_BACKEND="redis://your-redis-host:6379/1"
+```
 
 ---
 
@@ -664,3 +714,59 @@ make coverage    # Coverage report
 ---
 
 
+
+---
+
+## Phase 13: Production Reliability Features
+
+### Async Patterns & Retry Logic
+
+All async tasks now implement exponential backoff retry logic:
+
+```python
+@shared_task(bind=True, max_retries=3)
+def refresh_sec_edgar(self):
+    """Retry with exponential backoff: 5s → 10s → 20s"""
+    try:
+        result = asyncio.run(_refresh_async())
+        return result
+    except Exception as e:
+        countdown = 5 * (2 ** self.request.retries)
+        raise self.retry(exc=e, countdown=countdown)
+```
+
+**See**: [Async Patterns Guide](./async-patterns.md), [Retry Logic Guide](./retry-logic.md)
+
+### Health Checks
+
+The API now includes liveness and readiness probes for Kubernetes:
+
+```bash
+# Liveness probe (is process alive?)
+curl http://localhost:8000/health
+
+# Readiness probe (is system ready for traffic?)
+curl http://localhost:8000/ready
+```
+
+**See**: [Health Checks Guide](./health-checks.md)
+
+### Rate Limiting
+
+All API endpoints (except `/health` and `/ready`) are protected by rate limiting:
+
+```
+Default: 100 requests/minute per client
+Fallback: Memory-based when Redis unavailable
+```
+
+**See**: [Rate Limiting Guide](./rate-limiting.md)
+
+### Phase Documentation
+
+Complete documentation of all 13 phases:
+
+- [Phase Overview](../phases/README.md) — Timeline and evolution
+- [Phase 13 Deep Dive](../phases/phase-13.md) — Production reliability features
+
+---

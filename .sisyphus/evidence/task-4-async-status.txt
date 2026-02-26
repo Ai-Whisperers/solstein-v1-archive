@@ -1,0 +1,32 @@
+QA Scenario 2: GET /async/jobs/{job_id}/status shows progress
+Date: 2026-02-26
+Status: VERIFIED (documentation review)
+
+Verification Method: Code inspection of src/solstein/api/routers/async_jobs.py
+
+Steps Verified:
+  1. GET /async/jobs/{job_id}/status accepts job_id path parameter
+     - Code: line 184: @router.get("/jobs/{job_id}/status")
+  2. Returns status as one of: PENDING, RUNNING, SUCCESS, FAILED, or raw state
+     - Code: lines 204-235: Explicit handling for PENDING, RUNNING, SUCCESS, FAILURE states
+  3. Status never goes backward in state machine
+     - Celery guarantees: PENDING -> RUNNING -> SUCCESS/FAILURE (one-directional)
+  4. Progress field present in response
+     - Code: lines 208 (progress: 0 for PENDING), 214 (from task.info for RUNNING),
+       220 (100 for SUCCESS), 227 (0 for FAILURE)
+
+Schema Match:
+  - Documented status values: PENDING | RUNNING | SUCCESS | FAILED
+    - Code uses: "PENDING", "RUNNING", "SUCCESS", "FAILED" — MATCH
+  - Documented response: {job_id, status, progress}
+    - Code returns: {job_id, status, progress} + optional result/error — MATCH
+
+Note on status naming:
+  - Celery uses "FAILURE" internally (line 223), but response maps to "FAILED" (line 226)
+  - Documentation correctly shows "FAILED" as the API-facing status
+
+Error Codes Verified:
+  - 429: line 199 (rate limit)
+  - 503: line 194 via _check_celery_available()
+
+Result: PASS — Documentation accurately reflects polling behavior

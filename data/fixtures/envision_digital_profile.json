@@ -1,0 +1,199 @@
+{
+  "company_name": "Envision Digital",
+  "ticker": null,
+  "industry": "Energy AI & IoT Platform",
+  "folder": "envision-digital",
+  "headquarters": "Singapore",
+  "region": "Asia-Pacific",
+  "founded_year": 2014,
+  "description": "Leading AIoT platform company powering the energy transition with AI-enabled solutions for smart cities, renewable energy, and decarbonization. EnOS™ platform connects over 200 million smart devices and 500GW of energy assets globally.",
+  "website": "https://www.envision-digital.com",
+  "data_availability": "High - Well-funded unicorn with strong public presence",
+  
+  "scorecard": {
+    "dimensions": {
+      "AI Maturity": {
+        "score": 10,
+        "evidence": "AI-native platform, EnOS AI powers all solutions, machine learning for energy optimization, predictive analytics"
+      },
+      "Platform Scale": {
+        "score": 9,
+        "evidence": "200M+ devices connected, 500GW energy assets, 150+ countries, 500+ enterprise customers"
+      },
+      "Growth Trajectory": {
+        "score": 9,
+        "evidence": "Revenue 60%+ CAGR, 500%+ growth in international markets, expanding to 30+ countries"
+      },
+      "Funding Momentum": {
+        "score": 10,
+        "evidence": "$500M+ raised, unicorn valuation ($2B+), backed by Sequoia, GIC, Temasek"
+      },
+      "Geographic Expansion": {
+        "score": 9,
+        "evidence": "HQ Singapore, strong China base, expanding Europe/Middle East/Americas, 30+ offices"
+      },
+      "SaaS Maturity": {
+        "score": 10,
+        "evidence": "Cloud-native EnOS platform, 100% SaaS, multi-tenant, API-first architecture"
+      },
+      "ESG/Decarbonization": {
+        "score": 10,
+        "evidence": "Mission-driven climate tech, Net Zero platform, 500MW+ renewables managed, carbon accounting"
+      }
+    },
+    "composite_score": 9.5,
+    "classification": "Phoenix"
+  },
+  
+  "revenue": {
+    "timeline": [
+      {
+        "year": "2024 (estimated)",
+        "eur_millions": 450,
+        "yoy_growth_pct": 65,
+        "confidence": "Estimated"
+      },
+      {
+        "year": "2023",
+        "eur_millions": 275,
+        "yoy_growth_pct": 55,
+        "confidence": "Estimated"
+      },
+      {
+        "year": "2022",
+        "eur_millions": 175,
+        "yoy_growth_pct": 70,
+        "confidence": "Estimated"
+      }
+    ],
+    "cagr_3yr_pct": 62,
+    "latest_revenue_eur_m": 450,
+    "revenue_model": "SaaS subscriptions + Professional services"
+  },
+  
+  "profitability": {
+    "recurring_revenue_pct": 75,
+    "gross_margin_pct": 65,
+    "ebitda_margin_pct": 15,
+    "revenue_per_employee_eur_k": 280,
+    "path_to_profitability": "Expected EBITDA positive 2025"
+  },
+  
+  "employees": {
+    "timeline": [
+      {
+        "year": "2024",
+        "headcount": 1600
+      },
+      {
+        "year": "2023",
+        "headcount": 1200
+      },
+      {
+        "year": "2022",
+        "headcount": 850
+      }
+    ],
+    "employee_cagr_pct": 37,
+    "latest_headcount": 1600,
+    "rd_headcount": 800,
+    "rd_pct": 50
+  },
+  
+  "funding": {
+    "rounds": [
+      {
+        "date": "2021",
+        "round": "Series B",
+        "amount": "$210M",
+        "valuation": "$2B+",
+        "lead_investors": "Sequoia Capital China, GIC"
+      },
+      {
+        "date": "2019",
+        "round": "Series A",
+        "amount": "$150M",
+        "valuation": "$800M",
+        "lead_investors": "Temasek, Existing investors"
+      }
+    ],
+    "total_raised_text": "$500M+",
+    "latest_valuation_text": "$2B+ (unicorn)",
+    "lead_investors": [
+      "Sequoia Capital China",
+      "GIC (Singapore sovereign wealth)",
+      "Temasek Holdings"
+    ]
+  },
+  
+  "geographic": {
+    "region": "Asia-Pacific",
+    "headquarters": "Singapore",
+    "countries_present": 30,
+    "major_offices": ["Singapore", "Shanghai", "Beijing", "London", "Houston", "Dubai", "Tokyo", "Sydney"],
+    "market_focus": "APAC (60%), Europe (25%), Americas (15%)"
+  },
+  
+  "saas": {
+    "platform": "EnOS™",
+    "deployment_model": "Cloud-native SaaS",
+    "architecture": "AIoT platform, microservices, multi-tenant",
+    "key_features": [
+      "AI-powered energy optimization",
+      "Renewable asset management",
+      "Carbon accounting & reporting",
+      "Smart building/city solutions",
+      "EV charging management",
+      "Grid flexibility services"
+    ],
+    "integrations": "500+ device protocols, major cloud providers (AWS, Azure, Alibaba Cloud)",
+    "customers": "500+ enterprise customers including Microsoft, Shell, Sunseap, Marubeni"
+  },
+  
+  "tech_stack": [
+    "AI/ML",
+    "IoT",
+    "Cloud-native",
+    "Kubernetes",
+    "Microservices",
+    "Real-time analytics",
+    "Digital twin",
+    "Blockchain (for carbon tracking)"
+  ],
+  
+  "key_customers": [
+    "Microsoft (smart buildings)",
+    "Shell (renewable management)",
+    "Sunseap (solar + storage)",
+    "Marubeni (clean energy)"
+  ],
+  
+  "competitive_positioning": {
+    "differentiators": [
+      "AI-first platform (not retrofit)",
+      "Massive scale (500GW assets)",
+      "Strong APAC presence",
+      "Mission-driven climate focus",
+      "Full-stack solution (hardware to cloud)"
+    ],
+    "vs_incumbents": "More agile than legacy players like GE/Siemens, more AI-native than traditional software",
+    "vs_startups": "Massive scale advantage, proven enterprise customers, strong funding"
+  },
+  
+  "ai_capabilities": {
+    "ai_score": 10,
+    "ai_in_production": true,
+    "key_capabilities": [
+      "Predictive energy optimization",
+      "Renewable generation forecasting",
+      "Demand response automation",
+      "Anomaly detection",
+      "Digital twin modeling",
+      "Carbon intelligence"
+    ],
+    "ai_team_size": 300,
+    "patents": 500
+  },
+  
+  "tags": ["ai", "platform", "iot", "renewable", "decarbonization", "saas", "cloud-native", "smart-city", "ev", "unicorn"]
+}

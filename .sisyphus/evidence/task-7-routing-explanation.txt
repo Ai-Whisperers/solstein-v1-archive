@@ -1,0 +1,50 @@
+TASK 7 QA SCENARIO 1: Routing Conflict Explanation
+====================================================
+
+VERIFICATION: Path Resolution section clearly explains which implementation wins
+
+EVIDENCE:
+---------
+
+From docs/architecture/health-endpoint-routing.md - "Path Resolution: Which Implementation Wins?" section:
+
+1. FASTAPI ROUTING BEHAVIOR EXPLAINED:
+   "FastAPI processes routers in registration order. When multiple routers define 
+   the same path, the first registered router wins."
+
+2. ACTUAL ROUTING OUTCOMES TABLE:
+   ✓ GET /health → Enrichment router (registered first)
+   ✓ GET /ready → Enrichment router (registered first)
+   ✓ GET /health/status → Health router (no conflict)
+   ✓ GET /health/ready → Health router (no conflict)
+   ✓ GET /health/live → Health router (no conflict)
+   ✓ GET /metrics → Enrichment router (no conflict)
+
+3. DUPLICATE ENDPOINTS EXPLICITLY IDENTIFIED:
+   "These endpoints are shadowed by the enrichment router:
+   - GET /health — Enrichment implementation is used
+   - GET /ready — Enrichment implementation is used
+   
+   The health router's implementations of these endpoints are never reached 
+   because the enrichment router is registered first."
+
+4. REGISTRATION ORDER DOCUMENTED:
+   From main.py (lines 132-134):
+   - Line 132: app.include_router(enrichment.router)  # FIRST
+   - Line 133: app.include_router(health.router)      # SECOND
+   
+   "FastAPI processes routers in registration order" → enrichment wins
+
+5. CLEAR EXPLANATION OF SHADOWING:
+   The document explicitly states which implementations are "shadowed" and 
+   which are "never reached", making the routing conflict crystal clear.
+
+CONCLUSION:
+-----------
+✓ Routing conflict is clearly explained
+✓ Registration order is documented
+✓ Which implementation wins is explicitly stated
+✓ Shadowed endpoints are identified
+✓ No ambiguity about which is used
+
+PASS: Scenario 1 requirements met

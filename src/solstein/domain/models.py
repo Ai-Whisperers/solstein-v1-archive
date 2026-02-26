@@ -57,6 +57,22 @@ class CompanyTier(StrEnum):
     TIER_4 = "Tier 4"
 
 
+class ErrorCategory(StrEnum):
+    """Error categorization for enrichment failures."""
+
+    API_ERROR = "API_ERROR"
+    DATA_ERROR = "DATA_ERROR"
+    VALIDATION_ERROR = "VALIDATION_ERROR"
+    UNKNOWN = "UNKNOWN"
+
+
+class ErrorSeverity(StrEnum):
+    """Error severity levels for prioritization."""
+
+    CRITICAL = "CRITICAL"
+    WARNING = "WARNING"
+    INFO = "INFO"
+
 class FinancialMetric(BaseModel):
     """Financial metrics domain entity."""
 
@@ -128,7 +144,35 @@ class Company(BaseModel):
     signal_confidences: dict[str, float] = Field(default_factory=dict)
     enrichment_source_count: int = 0
     data_quality_tier: str = "unknown"
+    data_quality_tier: str = "unknown"
 
+
+
+    # External Identifiers for Connector Lookups
+
+    ticker: str | None = None
+
+    company_number: str | None = None
+
+    isin: str | None = None
+
+    geography_code: str | None = None
+
+
+
+    # Enrichment Tracking
+
+    enrichment_sources: list[str] = Field(default_factory=list)
+
+    enrichment_timestamps: dict[str, datetime] = Field(default_factory=dict)
+
+    enrichment_errors: list[str] = Field(default_factory=list)
+
+    # Phase 2.B: Error Tracking Infrastructure
+    enrichment_errors_per_field: dict[str, list[str]] = Field(default_factory=dict)  # Track errors by field
+    enrichment_error_timestamps: dict[str, datetime] = Field(default_factory=dict)  # When each error occurred
+    enrichment_error_count: int = 0  # Total error count for metrics
+    enrichment_error_categories: dict[str, int] = Field(default_factory=dict)  # Count by category (API_ERROR, DATA_ERROR, etc)
     # Scores (Calculated)
     growth_score: float | None = None
     financial_health_score: float | None = None
@@ -199,6 +243,68 @@ class Company(BaseModel):
             raise ValueError("Employee count cannot be negative")
         return v
 
+    @field_validator("ticker")
+    @classmethod
+    def validate_ticker(cls, v: str | None) -> str | None:
+        """Validate US stock ticker format: 1-5 uppercase alphanumeric characters."""
+        if v is None:
+            return v
+        v = v.strip()
+        if not v:
+            return None
+        if not (1 <= len(v) <= 5):
+            raise ValueError(f"Ticker must be 1-5 characters, got {len(v)}")
+        if not v.isupper():
+            raise ValueError(f"Ticker must be uppercase, got '{v}'")
+        if not v.isalnum():
+            raise ValueError(f"Ticker must be alphanumeric, got '{v}'")
+        return v
+
+    @field_validator("company_number")
+    @classmethod
+    def validate_company_number(cls, v: str | None) -> str | None:
+        """Validate UK Companies House company number: 8-digit format."""
+        if v is None:
+            return v
+        v = v.strip()
+        if not v:
+            return None
+        if not v.isdigit() or len(v) != 8:
+            raise ValueError(f"Company number must be 8 digits, got '{v}'")
+        return v
+
+    @field_validator("isin")
+    @classmethod
+    def validate_isin(cls, v: str | None) -> str | None:
+        """Validate ISIN format: 2-letter country code + 9 alphanumeric + 1 check digit."""
+        if v is None:
+            return v
+        v = v.strip().upper()
+        if not v:
+            return None
+        if len(v) != 12:
+            raise ValueError(f"ISIN must be 12 characters, got {len(v)}")
+        if not v[:2].isalpha():
+            raise ValueError(f"ISIN country code must be 2 letters, got '{v[:2]}'")
+        if not v[2:11].isalnum():
+            raise ValueError(f"ISIN security ID must be alphanumeric, got '{v[2:11]}'")
+        if not v[11].isdigit():
+            raise ValueError(f"ISIN check digit must be numeric, got '{v[11]}'")
+        return v
+
+    @field_validator("geography_code")
+    @classmethod
+    def validate_geography_code(cls, v: str | None) -> str | None:
+        """Validate geography code: must be US, UK, EU, or OTHER."""
+        if v is None:
+            return v
+        v = v.strip().upper()
+        if not v:
+            return None
+        valid_codes = {"US", "UK", "EU", "OTHER"}
+        if v not in valid_codes:
+            raise ValueError(f"Geography code must be one of {valid_codes}, got '{v}'")
+        return v
     @property
     def is_large_cap(self) -> bool:
         """Domain logic: Check if company is large cap (valuation > €100M)."""

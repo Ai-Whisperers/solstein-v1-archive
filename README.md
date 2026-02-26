@@ -11,7 +11,7 @@
 [![Python](https://img.shields.io/badge/Python-3.12-4b0082?style=for-the-badge&logo=python&logoColor=ffd700)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Live-4b0082?style=for-the-badge&logo=fastapi&logoColor=ffd700)](https://fastapi.tiangolo.com)
 [![Celery](https://img.shields.io/badge/Celery-Workers-4b0082?style=for-the-badge&logo=celery&logoColor=ffd700)](https://docs.celeryq.dev)
-[![Tests](https://img.shields.io/badge/Tests-90%20Passing-4b0082?style=for-the-badge&logo=pytest&logoColor=ffd700)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-123%20Passing-4b0082?style=for-the-badge&logo=pytest&logoColor=ffd700)](tests/)
 [![Coverage](https://img.shields.io/badge/Coverage-57%25-ffd700?style=for-the-badge&logo=codecov&logoColor=4b0082)](tests/)
 [![License](https://img.shields.io/badge/License-Proprietary-4b0082?style=for-the-badge&logo=scroll&logoColor=ffd700)](LICENSE)
 

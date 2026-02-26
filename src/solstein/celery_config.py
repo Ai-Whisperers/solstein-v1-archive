@@ -39,8 +39,9 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     task_track_started=True,
-    task_time_limit=3600,  # 1 hour hard limit
-    task_soft_time_limit=3000,  # 50 minutes soft limit
+    # Phase 13.4: Timeout configuration for single vs batch tasks
+    task_time_limit=30,  # 30 seconds hard limit for single tasks
+    task_soft_time_limit=25,  # 25 seconds soft limit for graceful shutdown
     worker_prefetch_multiplier=1,
     worker_max_tasks_per_child=100,
 )

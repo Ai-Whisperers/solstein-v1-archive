@@ -95,7 +95,7 @@ Found full database with 33 companies from previous research project.
 **Eneve Real Score**: 5.8/10 (Salt, #9 of 33)
 
 #### Continuous Discovery (101 → 198 Companies)
-Built `discover_all_companies.py` to automatically find ALL companies.
+Built `scripts/market-discovery/discover_all_companies.py` to automatically find ALL companies.
 
 **Discovery Iterations**:
 - Iteration 1: +107 companies (found via static catalogs, market segments, geographic)
@@ -135,7 +135,7 @@ Built `discover_all_companies.py` to automatically find ALL companies.
 68 of 198 companies had default 5.0 scores (no rich data).
 
 ### Solution
-Created `enrich_all_companies.py` - automated enrichment pipeline.
+Created `scripts/enrichment/enrich_all_companies.py` - automated enrichment pipeline.
 
 ### How It Works
 Algorithmic scoring based on:
@@ -342,7 +342,7 @@ To match Envision Digital (9.5):
 ## SYSTEMS BUILT
 
 ### 1. Continuous Discovery System
-**File**: `discover_all_companies.py`
+**File**: `scripts/market-discovery/discover_all_companies.py`
 
 **Features**:
 - Multiple discovery sources (static, segments, geographic)
@@ -353,7 +353,7 @@ To match Envision Digital (9.5):
 **Result**: Found 107 new companies automatically
 
 ### 2. Automated Enrichment Pipeline
-**File**: `enrich_all_companies.py`
+**File**: `scripts/enrichment/enrich_all_companies.py`
 
 **Features**:
 - Algorithmic scoring based on company profile
@@ -528,8 +528,8 @@ To match Envision Digital (9.5):
 10. `ENEXE_COMPLETE_FLOW_SUMMARY.md`
 
 ### System Files
-1. `discover_all_companies.py` - Continuous discovery
-2. `enrich_all_companies.py` - Automated enrichment
+1. `scripts/market-discovery/discover_all_companies.py` - Continuous discovery
+2. `scripts/enrichment/enrich_all_companies.py` - Automated enrichment
 3. `run_eneve_complete_flow.sh` - Client flow
 4. `start_api_server.sh` - API starter
 5. `start_celery_workers.sh` - Worker starter

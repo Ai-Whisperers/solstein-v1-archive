@@ -7,7 +7,7 @@
 ## What Was Accomplished
 
 ### Automated Enrichment Pipeline
-Created and ran `enrich_all_companies.py` which:
+Created and ran `scripts/enrichment/enrich_all_companies.py` which:
 1. ✅ Loaded all 101 companies from database
 2. ✅ Identified 68 companies needing enrichment
 3. ✅ Auto-enriched all 68 with estimated scores
@@ -84,7 +84,7 @@ Used intelligent scoring based on:
 ## Files Generated
 
 ### 1. Enrichment Script
-- **File**: `enrich_all_companies.py`
+- **File**: `scripts/enrichment/enrich_all_companies.py`
 - **Purpose**: Automated enrichment pipeline
 - **Status**: ✅ Working, can re-run anytime
 
