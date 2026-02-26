@@ -29,10 +29,12 @@ from ..core.production_hardening import (
     ResponseCache,
 )
 from .exceptions import setup_exception_handlers
-from .middleware import LoggingMiddleware
+from .middleware import setup_logging_middleware, setup_security_middleware
 from .routers import (
+    async_jobs,
     companies,
     drill_down,
+    enrichment,
     export,
     health,
     jobs,
@@ -116,14 +118,18 @@ app.add_middleware(
 )
 
 # Custom Logging Middleware (Request IDs and Timing)
-app.add_middleware(LoggingMiddleware)
+setup_logging_middleware(app)
 
 # Setup Global Exception Handlers
 setup_exception_handlers(app)
 
+# Setup Security Middleware
+setup_security_middleware(app)
+
 # Global dependencies configured in lifespan
 
 # Include Routers
+app.include_router(enrichment.router)
 app.include_router(health.router)
 app.include_router(health.metrics_router)
 app.include_router(companies.router)
@@ -133,6 +139,7 @@ app.include_router(export.router, prefix="/export")
 app.include_router(jobs.router, prefix="/jobs")
 app.include_router(drill_down.router)
 app.include_router(simulation.router, prefix="/simulation")
+app.include_router(async_jobs.router)
 
 
 # Custom docs endpoint

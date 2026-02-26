@@ -20,13 +20,13 @@ def setup_exception_handlers(app: FastAPI) -> None:
         modified_details = [{"loc": err.get("loc"), "msg": err.get("msg"), "type": err.get("type")} for err in errors]
 
         logger.warning(
-            f"Aura | Validation Error [422] | {request.method} {request.url.path} | Details: {modified_details}"
+            f"Aura | Validation Error [400] | {request.method} {request.url.path} | Details: {modified_details}"
         )  # noqa: E501
 
         return JSONResponse(
-            status_code=422,
+            status_code=400,
             content={
-                "error": "Unprocessable Entity (Validation Error)",
+                "error": "Bad Request (Validation Error)",
                 "details": modified_details,
                 "request_id": request_id,
             },
