@@ -46,9 +46,37 @@ from solstein.api.schemas.enrichment import (
 # Import enrichment infrastructure
 from solstein.data.unified_loader import unified_loader, UnifiedCompany
 from solstein.data.security_hardening import audit_logger, rate_limiter, input_validator, security_headers
+from solstein.infrastructure.enrichment_repositories import EnrichmentAuditRepository, EnrichmentCacheRepository
+from solstein.infrastructure.database import db_manager
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+# ============================================================================
+# LAZY-LOAD HELPERS FOR DATABASE REPOSITORIES
+# ============================================================================
+
+async def get_audit_repo_if_available():
+    """Get audit repository if database is initialized, else None."""
+    try:
+        if hasattr(db_manager, 'initialized') and db_manager.initialized:
+            async for session in db_manager.get_session():
+                return EnrichmentAuditRepository(session)
+    except Exception as e:
+        logger.debug(f"Could not initialize audit repository: {e}")
+    return None
+
+
+async def get_cache_repo_if_available():
+    """Get cache repository if database is initialized, else None."""
+    try:
+        if hasattr(db_manager, 'initialized') and db_manager.initialized:
+            async for session in db_manager.get_session():
+                return EnrichmentCacheRepository(session)
+    except Exception as e:
+        logger.debug(f"Could not initialize cache repository: {e}")
+    return None
 
 
 # ============================================================================
@@ -172,6 +200,8 @@ async def get_metrics(request: Request) -> MetricsResponse:
 # ============================================================================
 
 
+# Updated enrichment endpoint with cache and audit database support
+
 @router.post("/companies/{company_id}/enrich", response_model=EnrichmentResponse)
 async def enrich_single_company(
     company_id: str, request_data: EnrichmentRequest, request: Request
@@ -212,12 +242,47 @@ async def enrich_single_company(
         raise HTTPException(status_code=400, detail=error)
 
     logger.info(f"💼 Enriching company {company_id} from {request_data.sources}")
-    audit_logger.log_enrichment_start(
-        company_name=company_id, company_id=company_id, source=",".join(request_data.sources)
-    )
+    
+    # Get repositories if available (lazy-load)
+    audit_repo = await get_audit_repo_if_available()
+    cache_repo = await get_cache_repo_if_available()
+    
+    # Log enrichment start
+    if audit_repo:
+        await audit_repo.log_operation(
+            company_id=company_id,
+            company_name=company_id,
+            operation="enrich_start",
+            source=",".join(request_data.sources),
+            status="IN_PROGRESS",
+        )
+    else:
+        audit_logger.log_enrichment_start(
+            company_name=company_id, company_id=company_id, source=",".join(request_data.sources)
+        )
 
     try:
-        # Create a minimal company object from the ID
+        # Check cache first if available
+        cached_company = None
+        if cache_repo:
+            try:
+                cached_record = await cache_repo.get_cached(company_id)
+                if cached_record:
+                    logger.info(f"💾 Cache hit for {company_id}")
+                    cached_company = cached_record.enriched_data
+                    if audit_repo:
+                        await audit_repo.log_operation(
+                            company_id=company_id,
+                            company_name=company_id,
+                            operation="cache_hit",
+                            source="cache",
+                            status="SUCCESS",
+                            duration_ms=0,
+                        )
+            except Exception as e:
+                logger.debug(f"Cache read failed for {company_id}: {e}")
+        
+        # If not cached, create a minimal company object from the ID
         company = UnifiedCompany(id=company_id, name=company_id)
 
         # Call enrichment
@@ -234,13 +299,38 @@ async def enrich_single_company(
         if enriched.financials and enriched.financials.employees and (not company.financials or not company.financials.employees):
             fields_enriched.append("employees")
 
-        audit_logger.log_enrichment_success(
-            company_name=enriched.name or company_id,
-            company_id=company_id,
-            source=",".join(request_data.sources),
-            duration_ms=duration_ms,
-            fields_enriched=fields_enriched,
-        )
+        # Cache the enriched data if available
+        if cache_repo and not cached_company:
+            try:
+                await cache_repo.cache_enrichment(
+                    company_id=company_id,
+                    enriched_data=enriched.dict(),
+                    sources_used=request_data.sources,
+                    fields_enriched=fields_enriched,
+                    ttl_seconds=86400,  # 24 hours
+                )
+            except Exception as e:
+                logger.warning(f"Failed to cache enrichment for {company_id}: {e}")
+
+        # Log enrichment success
+        if audit_repo:
+            await audit_repo.log_operation(
+                company_id=company_id,
+                company_name=enriched.name or company_id,
+                operation="enrich_success",
+                source=",".join(request_data.sources),
+                status="SUCCESS",
+                duration_ms=duration_ms,
+                fields_enriched=fields_enriched,
+            )
+        else:
+            audit_logger.log_enrichment_success(
+                company_name=enriched.name or company_id,
+                company_id=company_id,
+                source=",".join(request_data.sources),
+                duration_ms=duration_ms,
+                fields_enriched=fields_enriched,
+            )
 
         return EnrichmentResponse(
             company_id=company_id,
@@ -264,12 +354,22 @@ async def enrich_single_company(
     except HTTPException:
         raise
     except Exception as e:
-        audit_logger.log_enrichment_failure(
-            company_name=company_id,
-            company_id=company_id,
-            source=",".join(request_data.sources),
-            error=str(e),
-        )
+        if audit_repo:
+            await audit_repo.log_operation(
+                company_id=company_id,
+                company_name=company_id,
+                operation="enrich_failure",
+                source=",".join(request_data.sources),
+                status="FAILURE",
+                error_message=str(e),
+            )
+        else:
+            audit_logger.log_enrichment_failure(
+                company_name=company_id,
+                company_id=company_id,
+                source=",".join(request_data.sources),
+                error=str(e),
+            )
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -352,7 +452,10 @@ async def enrich_batch(request_data: BatchEnrichmentRequest, request: Request) -
 
 @router.get("/companies/{company_id}/enrichment/audit", response_model=AuditTrailResponse)
 async def get_audit_trail(
-    company_id: str, limit: int = Query(50, ge=1, le=1000), request: Request = None
+    company_id: str,
+    limit: int = Query(50, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+    request: Request = None
 ) -> AuditTrailResponse:
     """Get enrichment audit trail for company."""
     if not request:
@@ -369,33 +472,77 @@ async def get_audit_trail(
     if not is_valid:
         raise HTTPException(status_code=404, detail="Company not found")
     
-    # Get audit entries from audit_logger
-    audit_entries = audit_logger.get_audit_trail(company_id=company_id)
-    
-    
-    # Map audit entries to response format
+    # Try to get audit entries from database first
+    audit_repo = await get_audit_repo_if_available()
     mapped_entries = []
-    if audit_entries:
-        for entry in audit_entries[:limit]:
-            # Parse timestamp if it's a string
-            ts = entry.get("timestamp")
-            if isinstance(ts, str):
-                from datetime import datetime as dt
-                ts = dt.fromisoformat(ts)
-            else:
-                ts = ts or datetime.now(timezone.utc)
-            
-            mapped_entries.append(
-                AuditEntry(
-                    timestamp=ts,
-                    operation=entry.get("operation", "unknown"),
-                    source=entry.get("source"),
-                    status=entry.get("status"),
-                    fields=entry.get("fields"),
-                    duration_ms=entry.get("duration_ms"),
-                    user_id=entry.get("user_id"),
-                )
+    
+    if audit_repo:
+        try:
+            # Get from database with pagination
+            db_entries = await audit_repo.get_audit_trail(
+                company_id=company_id,
+                limit=limit,
+                offset=offset
             )
+            for entry in db_entries:
+                mapped_entries.append(
+                    AuditEntry(
+                        timestamp=entry.timestamp,
+                        operation=entry.operation,
+                        source=entry.source,
+                        status=entry.status,
+                        fields=entry.fields_enriched,
+                        duration_ms=entry.duration_ms,
+                        user_id=entry.user_id,
+                    )
+                )
+        except Exception as e:
+            logger.warning(f"Failed to get audit trail from database: {e}. Falling back to in-memory logger.")
+            # Fall back to in-memory logger
+            audit_entries = audit_logger.get_audit_trail(company_id=company_id)
+            if audit_entries:
+                for entry in audit_entries[:limit]:
+                    ts = entry.get("timestamp")
+                    if isinstance(ts, str):
+                        from datetime import datetime as dt
+                        ts = dt.fromisoformat(ts)
+                    else:
+                        ts = ts or datetime.now(timezone.utc)
+                    
+                    mapped_entries.append(
+                        AuditEntry(
+                            timestamp=ts,
+                            operation=entry.get("operation", "unknown"),
+                            source=entry.get("source"),
+                            status=entry.get("status"),
+                            fields=entry.get("fields"),
+                            duration_ms=entry.get("duration_ms"),
+                            user_id=entry.get("user_id"),
+                        )
+                    )
+    else:
+        # Fall back to in-memory logger
+        audit_entries = audit_logger.get_audit_trail(company_id=company_id)
+        if audit_entries:
+            for entry in audit_entries[:limit]:
+                ts = entry.get("timestamp")
+                if isinstance(ts, str):
+                    from datetime import datetime as dt
+                    ts = dt.fromisoformat(ts)
+                else:
+                    ts = ts or datetime.now(timezone.utc)
+                
+                mapped_entries.append(
+                    AuditEntry(
+                        timestamp=ts,
+                        operation=entry.get("operation", "unknown"),
+                        source=entry.get("source"),
+                        status=entry.get("status"),
+                        fields=entry.get("fields"),
+                        duration_ms=entry.get("duration_ms"),
+                        user_id=entry.get("user_id"),
+                    )
+                )
 
     return AuditTrailResponse(
         company_id=company_id,
@@ -412,17 +559,41 @@ async def check_cache(company_id: str, request: Request) -> CacheCheckResponse:
     if not rate_limiter.is_allowed(client_id):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
-    # Check unified_loader.cache
     cached = False
     cache_key = None
     ttl_remaining = None
     cached_data = None
 
-    if hasattr(unified_loader, "cache") and unified_loader.cache:
-        cache_key = f"company_{company_id}"
-        cached = unified_loader.cache.get(cache_key) is not None
-        if cached:
-            ttl_remaining = 24  # Default TTL
+    # Try to check database cache first
+    cache_repo = await get_cache_repo_if_available()
+    
+    if cache_repo:
+        try:
+            cache_record = await cache_repo.get_cached(company_id)
+            if cache_record:
+                cached = True
+                cache_key = f"company_{company_id}"
+                # Calculate remaining TTL
+                now = datetime.now(timezone.utc)
+                expires_at = cache_record.expires_at
+                if expires_at > now:
+                    ttl_remaining = int((expires_at - now).total_seconds() / 3600)  # Convert to hours
+                cached_data = cache_record.enriched_data
+        except Exception as e:
+            logger.debug(f"Failed to check cache from database: {e}. Falling back to in-memory cache.")
+            # Fall back to in-memory cache
+            if hasattr(unified_loader, "cache") and unified_loader.cache:
+                cache_key = f"company_{company_id}"
+                cached = unified_loader.cache.get(cache_key) is not None
+                if cached:
+                    ttl_remaining = 24  # Default TTL
+    else:
+        # Fall back to in-memory cache
+        if hasattr(unified_loader, "cache") and unified_loader.cache:
+            cache_key = f"company_{company_id}"
+            cached = unified_loader.cache.get(cache_key) is not None
+            if cached:
+                ttl_remaining = 24  # Default TTL
 
     return CacheCheckResponse(
         company_id=company_id,
@@ -442,12 +613,24 @@ async def clear_all_cache(request: Request) -> CacheClearResponse:
 
     logger.info(f"🧹 Cache clear requested by {client_id}")
 
-    unified_loader.clear_enrichment_cache()
+    entries_cleared = 0
+    
+    # Try to clear database cache first
+    cache_repo = await get_cache_repo_if_available()
+    if cache_repo:
+        try:
+            entries_cleared = await cache_repo.delete_cache(company_id=None)  # Delete all expired
+        except Exception as e:
+            logger.warning(f"Failed to clear database cache: {e}")
+    
+    # Also clear in-memory cache
+    if hasattr(unified_loader, "clear_enrichment_cache"):
+        unified_loader.clear_enrichment_cache()
 
     return CacheClearResponse(
         status="success",
         message="Enrichment cache cleared",
-        entries_cleared=0,
+        entries_cleared=entries_cleared,
     )
 
 
@@ -460,16 +643,27 @@ async def clear_company_cache(company_id: str, request: Request) -> CacheClearRe
 
     logger.info(f"🧹 Cache clear for {company_id} by {client_id}")
 
-    # Clear specific company from cache
+    entries_cleared = 0
+    
+    # Try to clear database cache first
+    cache_repo = await get_cache_repo_if_available()
+    if cache_repo:
+        try:
+            entries_cleared = await cache_repo.delete_cache(company_id=company_id)
+        except Exception as e:
+            logger.warning(f"Failed to clear database cache for {company_id}: {e}")
+    
+    # Also clear in-memory cache
     if hasattr(unified_loader, "cache") and unified_loader.cache:
         cache_key = f"company_{company_id}"
         if cache_key in unified_loader.cache.cache:
             del unified_loader.cache.cache[cache_key]
+            entries_cleared = max(entries_cleared, 1)
 
     return CacheClearResponse(
         status="success",
         message=f"Cache cleared for {company_id}",
-        entries_cleared=1,
+        entries_cleared=entries_cleared,
     )
 
 
