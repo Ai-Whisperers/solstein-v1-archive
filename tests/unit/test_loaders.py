@@ -66,7 +66,7 @@ def test_loader_success(mock_file, mock_exists):
     assert c1.name == "Eneve"
     assert c1.id == "eneve_001"
     assert c1.classification == "Phoenix"
-    assert c1.ai_maturity == AIMaturity.NONE  # Default from fixture
+    assert c1.ai_maturity == AIMaturity.STRONG  # Fixed: fixture sets Strong
     
     # Check second company from fixture (Test Company 2)
     c2 = companies[1]
