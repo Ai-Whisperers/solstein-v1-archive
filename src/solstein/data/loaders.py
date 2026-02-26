@@ -266,22 +266,35 @@ class CompetitorDataLoader:
             composite_score = raw_data.get("composite_score", 5)
             classification = raw_data.get("classification")
 
-        # Determine AI maturity from scorecard
+        # Extract SaaS score for fallback AI maturity determination
         saas_score = dimensions.get("SaaS Maturity", {}).get("score", 5)
-        if ai_score is not None:
-            if ai_score >= 8:
+
+        # Determine AI maturity from string field first, then scorecard
+        ai_maturity_str = raw_data.get("ai_maturity", "").strip().lower()
+        if ai_maturity_str:
+            # Map string values to enum
+            if ai_maturity_str in ("strong", "advanced", "mature"):
                 ai_maturity = AIMaturity.STRONG
-            elif ai_score >= 5:
+            elif ai_maturity_str in ("moderate", "intermediate", "developing"):
                 ai_maturity = AIMaturity.MODERATE
-            else:
+            else:  # "low", "emerging", "minimal", etc.
                 ai_maturity = AIMaturity.LOW
         else:
-            if saas_score >= 8:
-                ai_maturity = AIMaturity.STRONG
-            elif saas_score >= 5:
-                ai_maturity = AIMaturity.MODERATE
+            # Fall back to numeric scoring
+            if ai_score is not None:
+                if ai_score >= 8:
+                    ai_maturity = AIMaturity.STRONG
+                elif ai_score >= 5:
+                    ai_maturity = AIMaturity.MODERATE
+                else:
+                    ai_maturity = AIMaturity.LOW
             else:
-                ai_maturity = AIMaturity.LOW
+                if saas_score >= 8:
+                    ai_maturity = AIMaturity.STRONG
+                elif saas_score >= 5:
+                    ai_maturity = AIMaturity.MODERATE
+                else:
+                    ai_maturity = AIMaturity.LOW
 
         # Determine threat level from composite score
         if composite_score >= 8:
