@@ -294,7 +294,7 @@ TIER_1B exists only in constants. TIER_4 exists only in models. Code importing f
 | "Processes 50+ companies in <2 days" | Max 49 companies (energy), 20 (anything else), never run to completion |
 | "Full signal chain visible" | Fabricated data (patent ×5, AI from keywords) mixed with real data, no distinction |
 | "90 Tests Passing" badge in README | CI billing expired; 66 tests fail due to missing deps |
-| "Coverage 57%" badge in README | Cannot verify — CI doesn't run |
+| "Coverage ~28%" badge in README | Cannot verify — CI doesn't run |
 | "Celery Workers" badge in README | Worker tasks exist but celery_config never started |
 | "Interactive dashboard" | No frontend exists — dashboard/ is Next.js scaffold with no data integration |
 | "Quarterly refreshes" | No refresh mechanism runs; 12 connectors are dead code |

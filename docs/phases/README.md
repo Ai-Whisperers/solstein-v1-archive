@@ -160,7 +160,7 @@ Solstein has evolved through 13 phases of development, from initial concept thro
 
 ## Test Coverage
 
-All 123 tests passing across 4 layers:
+1190+ tests collected (987 passing, see TEST_FAILURE_ANALYSIS_2026-02-26.md for details) across 4 layers:
 
 ```bash
 ✅ Unit Tests (domain models, scoring math)
@@ -237,7 +237,7 @@ Solstein Platform (Phase 13-Complete)
 
 | Metric | Phase 13 Status |
 |--------|-----------------|
-| **Test Coverage** | 123 tests passing, 57% coverage |
+| **Test Coverage** | 1190 collected, ~28% line coverage |
 | **API Availability** | 8 endpoints with health checks |
 | **Data Sources** | 12 connectors + async refresh |
 | **Retry Logic** | Exponential backoff, DLQ tracking |
@@ -260,5 +260,5 @@ See [PITCH/full-proposal.md](../PITCH/full-proposal.md) for long-term roadmap.
 
 **Current Status**: ✅ Phase 13 Complete  
 **Date**: February 26, 2026  
-**All 123 Tests Passing**  
+**1190+ Tests Collected**
 **Production Ready** 🚀

@@ -12,7 +12,7 @@ solstein/
 ├── tests/               ← Test suite (unit, integration, data quality)
 ├── docs/                ← All documentation (this folder)
 ├── data/                ← Input data (data/input/) + output (data/output/)
-├── dashboard/           ← Next.js frontend application
+├── bin/                 ← Agent deployment and orchestration scripts
 ├── scripts/             ← Utility and setup scripts
 ├── docker/              ← Docker, Compose, Grafana, Prometheus configs
 ├── supabase/            ← Supabase database migrations
@@ -34,7 +34,7 @@ src/solstein/
 ├── constants.py             ← Shared constants
 ├── exceptions.py            ← Custom exception hierarchy
 ├── worker.py                ← Celery app initialization
-├── worker_tasks.py          ← Celery task definitions (12 refresh sources)
+├── worker_tasks.py          ← Celery task definitions (14 refresh tasks)
 ├── celery_config.py         ← Celery configuration
 ├── adapters/
 │   ├── protocols.py         ← EnrichmentSource + UnifiedDataSource protocols
@@ -62,7 +62,10 @@ src/solstein/
 │   ├── main.py              ← FastAPI app entry point (CORS, lifespan, router mounts)
 │   ├── dependencies.py      ← Dependency injection (auth, repository)
 │   ├── exceptions.py        ← API exception handlers
-│   ├── middleware.py         ← Request/response middleware
+│   ├── middleware.py        ← Request/response middleware
+│   ├── middleware/
+│   │   ├── logging.py       ← Request/response logging middleware
+│   │   └── security.py      ← Security headers middleware
 │   ├── routers/
 │   │   ├── companies.py     ← GET/POST/DELETE /companies
 │   │   ├── scoring.py       ← POST /scoring/company/{id}/score, GET /scoring/batch, /stats
@@ -71,11 +74,16 @@ src/solstein/
 │   │   ├── drill_down.py    ← GET /drill-down/company/{id}/why, /sources, /facts, etc.
 │   │   ├── health.py        ← GET /health, /health/status, /health/ready, /health/live
 │   │   ├── jobs.py          ← GET /jobs/{workflow_id}
-│   │   └── simulation.py    ← POST /simulation/run
+│   │   ├── simulation.py    ← POST /simulation/run
+│   │   ├── enrichment.py    ← Enrichment REST API (8 endpoints)
+│   │   └── async_jobs.py    ← Async job management
 │   ├── routes/
 │   │   └── refresh.py       ← POST/GET /refresh endpoints
+│   ├── schemas/
+│   │   └── enrichment.py    ← Enrichment Pydantic schemas
 │   └── services/
-│       └── drill_down_service.py
+│       ├── drill_down_service.py
+│       └── enrichment_service.py ← Enrichment service layer
 ├── core/
 │   ├── repositories.py      ← Abstract interfaces (CompanyRepository, CompanyFilter)
 │   ├── scoring_config.py    ← Pydantic scoring configuration (thresholds, weights)
@@ -88,6 +96,13 @@ src/solstein/
 │   ├── company_research.py  ← CompanyResearch Pydantic model + CompanyResearcher
 │   ├── fetchers.py          ← YahooFinanceFetcher, CurrencyRateFetcher, GlobalMarketLoader
 │   ├── markets.py           ← Currency, MarketRegion, StockExchange, MarketIndex
+│   ├── enrichment_orchestrator.py ← Enrichment pipeline orchestrator
+│   ├── enrichment_config.py ← Enrichment source configuration
+│   ├── enrichment_service.py ← Data enrichment service
+│   ├── enrichment_validators.py ← Input validation & sanitization
+│   ├── error_logging.py     ← Structured error logging
+│   ├── security_hardening.py ← Rate limiter & security
+│   ├── unified_loader.py    ← Unified data loader
 │   └── connectors/          ← Data connectors (companies_house, sec_edgar, news_signal)
 ├── domain/
 │   ├── models.py            ← Pure domain entities (Company, FinancialMetric, RawDataSource, enums)
@@ -105,6 +120,7 @@ src/solstein/
 │   ├── database.py          ← Database connection/session
 │   ├── database_models.py   ← SQLAlchemy ORM models
 │   ├── database_service.py  ← Database service layer
+│   ├── enrichment_repositories.py ← DB repositories
 │   ├── conflict_resolution.py ← ConflictResolutionEngine
 │   ├── confidence_adjustment.py ← Confidence calibration
 │   ├── refresh.py           ← Refresh orchestrator
@@ -113,6 +129,10 @@ src/solstein/
 │   └── connectors/          ← 12 refresh connectors (yahoo_finance, news, linkedin, etc.)
 ├── monitoring/
 │   └── continuous_monitor.py
+├── presentation/            ← Presentation layer
+│   ├── adaptive_templates.py
+│   ├── data_quality_indicators.py
+│   └── narrative_consistency_checker.py
 ├── research/
 │   ├── aggregate.py         ← Data aggregation + fact extraction
 │   ├── pipeline.py          ← Research pipeline
@@ -149,7 +169,10 @@ tests/
 │   ├── test_data_gathering_e2e.py
 │   ├── test_full_pipeline.py
 │   ├── test_golden_dataset_regression.py
-│   └── test_resilience_scenarios.py
+│   ├── test_resilience_scenarios.py
+│   ├── test_enrichment_api.py
+│   ├── test_connector_enrichment.py
+│   └── test_phase_11_12_integration.py
 └── data_quality/
     └── test_ai_insights.py  ← Golden dataset regression tests
 ```
@@ -195,6 +218,8 @@ Input JSON / API Sources    CLI / API Request
         ↓
     CompetitorDataLoader + Enrichment Adapters
         ↓
+    Enrichment Pipeline Orchestrator (Enrichment Pipeline)
+        ↓
     JsonFileRepository / SupabaseRepository
         ↓
     GrowthScorer / MarketAnalyzer / CompetitiveOverlapCalculator
@@ -206,4 +231,4 @@ Input JSON / API Sources    CLI / API Request
 
 ---
 
-*Last Updated: February 24, 2026*
+*Last Updated: February 26, 2026*

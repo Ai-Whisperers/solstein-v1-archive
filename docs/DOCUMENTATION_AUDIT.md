@@ -324,7 +324,7 @@ Solstein has **strong foundational documentation** (business narrative, architec
 
 | Criterion | Current | Target |
 |-----------|---------|--------|
-| **Documentation Coverage** | 85% | 95% |
+| **Documentation Coverage** | ~28% | 95% |
 | **Up-to-date Info** | 85% | 100% |
 | **Code Examples** | 30% | 40% |
 | **Broken Links** | ~5% | 0% |

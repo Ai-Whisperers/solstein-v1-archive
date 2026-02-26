@@ -445,7 +445,7 @@ jobs:
 
 | Metric | Before | After |
 |--------|--------|-------|
-| Coverage | 57% | 80%+ |
+| Coverage | ~28% | 80%+ |
 | Quality Gates | 5 | 16 |
 | Pre-commit Hooks | 8 | 15+ |
 | Mutation Score | N/A | 75%+ |

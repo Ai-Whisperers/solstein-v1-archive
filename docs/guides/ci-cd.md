@@ -17,12 +17,12 @@ Solstein uses GitHub Actions as the active CI/CD system.
   - Python matrix: 3.10, 3.11, 3.12
   - Install: `pip install -e ".[dev]"`
   - Checks: `ruff`, `mypy`, `pytest` with coverage
-- `frontend-test`
+- `frontend-test` *(planned — dashboard/ not yet implemented)*
   - Node 20
-  - Dashboard lint + tests in `dashboard/`
-- `e2e-test`
+  - Dashboard lint + tests (when dashboard/ is created)
+- `e2e-test` *(planned)*
   - Depends on backend + frontend jobs
-  - Runs Playwright tests in `dashboard/`
+  - Will run Playwright tests when dashboard/ exists
 - `docker`
   - Builds and pushes image on `main`/`master` pushes
 - `mutation` (`.github/workflows/mutation.yml`)

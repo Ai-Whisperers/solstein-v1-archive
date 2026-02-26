@@ -30,8 +30,9 @@
 | **Configuration** | `src/solstein/config.py` or `.env` |
 | **Environment vars** | `.env` (root) |
 | **Database schema** | `supabase/migrations/` |
-| **Dashboard frontend** | `dashboard/` |
 | **Alembic migrations** | `alembic/` |
+| **Agent scripts** | `bin/agents/` |
+| **Enrichment API** | `src/solstein/api/routers/enrichment.py` |"],op:
 
 ---
 
@@ -105,6 +106,13 @@ SOLSTEIN_SUPABASE__KEY=your-anon-key
 | `GET` | `/jobs/{workflow_id}` | Check job status |
 | `POST` | `/refresh/{source_name}` | Trigger data refresh |
 | `GET` | `/refresh/sources` | List refresh sources |
+| `POST` | `/companies/{id}/enrich` | Enrich a single company |
+| `POST` | `/companies/enrich/batch` | Batch enrichment |
+| `GET` | `/companies/{id}/enrichment/audit` | Audit trail |
+| `GET` | `/companies/{id}/enrichment/cache` | Cache status |
+| `POST` | `/enrichment/cache/clear` | Clear enrichment cache |
+| `POST` | `/jobs/submit` | Submit async job |
+| `GET` | `/jobs/{job_id}/status` | Job status |"],op:
 
 **Full reference:** [API Reference](api/reference.md)
 
@@ -157,6 +165,9 @@ src/solstein/
 | `CompanyResearch` | `src/solstein/data/company_research.py` | Company intel Pydantic model |
 | `ConflictResolutionEngine` | `src/solstein/infrastructure/conflict_resolution.py` | Multi-source conflict resolver |
 | `RawDataSource` | `src/solstein/domain/models.py` | Raw data container model |
+| `CompetitorDataLoader` | `src/solstein/data/loaders.py` | JSON data ingestion |
+| `UnifiedDataLoader` | `src/solstein/data/unified_loader.py` | Multi-source data unification |
+| `EnrichmentOrchestrator` | `src/solstein/data/enrichment_orchestrator.py` | Enrichment pipeline |"],op:
 
 ---
 
@@ -273,6 +284,6 @@ Try searching:
 
 ---
 
-*Last Updated: February 24, 2026*
+*Last Updated: February 26, 2026*
 *Keep this page bookmarked!*
 

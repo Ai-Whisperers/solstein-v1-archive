@@ -407,7 +407,7 @@ Track these after implementation:
 
 1. **Developer Onboarding Time** — Target: <30 min from clone to running
 2. **Issue Resolution Time** — Target: <5 min to find answer in docs
-3. **Documentation Coverage** — Target: 95%+ of codebase documented
+3. **Documentation Coverage** — Target: ~28% line coverage (improving)
 4. **Broken Links** — Target: 0
 5. **Example Completeness** — Target: 40%+ of features have examples
 

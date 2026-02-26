@@ -23,7 +23,7 @@
 - ✅ Redis-backed rate limiter (100 req/min/client) with memory fallback
 - ✅ Comprehensive health checks (liveness + readiness probes)
 - ✅ Database repositories with lazy-load pattern
-- ✅ All 123 tests passing (0 regressions)
+- ✅ 1190+ tests collected (987 passing, see TEST_FAILURE_ANALYSIS_2026-02-26.md for details)
 - ✅ **2,600+ lines of new documentation**
 - ✅ **API documentation consolidated** (removed duplicate ENRICHMENT_API_REFERENCE.md)
 - ✅ **Archive reorganized** by date (2026-02/ subdirectories)
@@ -163,7 +163,6 @@
 |------|---------|-------|--------|
 | **README.md** | Project overview, quick start | Engineering Lead | ✅ Current |
 | **CONTRIBUTING.md** | Code standards, PR process | Tech Lead | ✅ Current |
-| **CODE_OF_CONDUCT.md** | Community guidelines | HR | ✅ Current |
 | **SECURITY.md** | Security policy, vulnerabilities | Security Team | ✅ Current |
 | **CHANGELOG.md** | Version history | Release Manager | ✅ Current (Phase 13 added) |
 | **DOCUMENTATION_INDEX.md** | This file | Tech Writer | ✅ Current |
@@ -336,7 +335,7 @@ When making **operational changes:**
 | **Diagrams** | 15+ |
 | **API endpoints documented** | 41/42 (98%) |
 | **Developer guides** | 15+ |
-| **Coverage** | 95% |
+| **Coverage** | ~28% |
 | **Last updated** | February 26, 2026 (Wave 4) |
 
 ---
@@ -421,7 +420,7 @@ We're aiming for **excellent** documentation where:
 - ✅ 98% API endpoint coverage (41/42 documented)
 - ✅ Clear developer onboarding path
 
-**Current status:** 95% coverage, Wave 4 complete
+**Current status:** ~28% line coverage (improving), Wave 4 complete
 
 ---
 

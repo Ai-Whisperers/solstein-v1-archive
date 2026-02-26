@@ -16,7 +16,7 @@ We've implemented 4 major enhancements to elevate our code quality standards:
 |------------|--------|-------|
 | Pre-commit hooks | 8 | 15+ |
 | Secret scanning | 3 patterns | 14 patterns |
-| Coverage thresholds | Fixed 57% | Branch-specific (70-80%) |
+| Coverage thresholds | Fixed ~28% | Branch-specific (70-80%) |
 | Versioning | Manual | Automated via git tags |
 
 ### Key Changes
