@@ -10,11 +10,11 @@
           {"year": 2022, "eur_millions": 4.0, "yoy_growth_pct": 33},
           {"year": 2023, "eur_millions": 5.0, "yoy_growth_pct": 25}
         ],
-        "cagr_3yr_pct": 30.0,
+        "cagr_3yr_pct": 45.0,
         "cagr_5yr_pct": 25.0
       },
       "profitability": {
-        "ebitda_margin_pct": 25.0,
+        "ebitda_margin_pct": 30.0,
         "recurring_revenue_pct": 85.0,
         "revenue_per_employee_eur_k": 333.0
       },
@@ -46,11 +46,11 @@
           {"year": 2022, "eur_millions": 2.5, "yoy_growth_pct": 25},
           {"year": 2023, "eur_millions": 3.0, "yoy_growth_pct": 20}
         ],
-        "cagr_3yr_pct": 25.0,
+        "cagr_3yr_pct": 18.0,
         "cagr_5yr_pct": 20.0
       },
       "profitability": {
-        "ebitda_margin_pct": 18.0,
+        "ebitda_margin_pct": 15.0,
         "recurring_revenue_pct": 75.0,
         "revenue_per_employee_eur_k": 300.0
       },
@@ -82,11 +82,11 @@
           {"year": 2022, "eur_millions": 1.5, "yoy_growth_pct": 25},
           {"year": 2023, "eur_millions": 2.0, "yoy_growth_pct": 33}
         ],
-        "cagr_3yr_pct": 26.0,
+        "cagr_3yr_pct": 10.0,
         "cagr_5yr_pct": 20.0
       },
       "profitability": {
-        "ebitda_margin_pct": 12.0,
+        "ebitda_margin_pct": 8.0,
         "recurring_revenue_pct": 65.0,
         "revenue_per_employee_eur_k": 250.0
       },
