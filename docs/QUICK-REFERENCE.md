@@ -31,8 +31,11 @@
 | **Environment vars** | `.env` (root) |
 | **Database schema** | `supabase/migrations/` |
 | **Alembic migrations** | `alembic/` |
-| **Agent scripts** | `bin/agents/` |
-| **Enrichment API** | `src/solstein/api/routers/enrichment.py` |"],op:
+| **Agent scripts** | `bin/agents/` (runner, critiquer, planner, implementer, documenter) |
+| **Agent orchestrator** | `bin/orchestrate_agents.py` (5-agent sequential cycle) |
+| **Hostinger utilities** | `bin/agents/hostinger-safe.py` + `bin/agents/rate-limiter.py` |
+| **Live monitoring** | `bin/monitor-live.sh` (systemd/journalctl watcher) |
+| **Enrichment API** | `src/solstein/api/routers/enrichment.py` |
 
 ---
 

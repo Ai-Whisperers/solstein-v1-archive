@@ -147,6 +147,27 @@ src/solstein/
 
 ---
 
+## Agent Deployment — `bin/`
+
+```
+bin/
+├── agents/
+│   ├── runner.py              ← Cycle execution: test suite + quality metrics (mypy, bandit, radon)
+│   ├── critiquer.py           ← Analyze issues found by runner
+│   ├── planner.py             ← Create improvement plan from critique
+│   ├── implementer.py         ← Apply planned fixes
+│   ├── documenter.py          ← Record audit trail for each cycle
+│   ├── hostinger-safe.py      ← Hostinger environment detection + Telegram rate limiting
+│   └── rate-limiter.py        ← API call rate limiting + response caching
+├── orchestrate_agents.py      ← 5-agent sequential orchestrator (6h cycles)
+├── monitor-live.sh            ← Live monitoring dashboard (systemd/journalctl)
+├── solstein-agents.service    ← systemd service unit
+└── solstein-agents.timer      ← systemd timer (6h intervals)
+```
+
+**Cycle flow**: Runner → Critiquer → Planner → Implementer → Documenter (every 6 hours)
+
+
 ## Tests Layout — `tests/`
 
 ```
