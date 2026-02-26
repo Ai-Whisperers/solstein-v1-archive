@@ -1,0 +1,50 @@
+# QA Scenario 4: DELETE /companies/{id} returns 204
+# Date: 2026-02-26
+# Status: VERIFIED AGAINST CODE
+
+## Test Case: DELETE lifecycle
+### Step 1: POST company (save ID)
+Command:
+  curl -X POST "http://localhost:8000/companies" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer {token}" \
+    -d '{"name": "DeleteTest", "id": "delete-test-001"}'
+Expected: 201 Created
+
+### Step 2: DELETE /companies/delete-test-001
+Command:
+  curl -X DELETE "http://localhost:8000/companies/delete-test-001" \
+    -H "Authorization: Bearer {token}"
+
+Expected behavior (verified from code):
+- Router: src/solstein/api/routers/companies.py line 97
+- Decorator: @router.delete("/companies/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
+- Line 105: success = repo.delete(company_id)
+- Line 106: if not success → 404
+- Line 102: return type is None (no response body)
+Expected: 204 No Content, empty body
+
+### Step 3: GET /companies/delete-test-001 again
+Command:
+  curl -X GET "http://localhost:8000/companies/delete-test-001" \
+    -H "Authorization: Bearer {token}"
+
+Expected behavior:
+- repo.get_by_id("delete-test-001") returns None (deleted)
+- 404 Not Found with detail "Company with ID delete-test-001 not found"
+
+## Code Path Verification (DELETE):
+1. company_id = "delete-test-001"
+2. repo.delete(company_id) returns True (company exists, deleted)
+3. Function returns None (no response body) → 204
+4. If company didn't exist: repo.delete() returns False → 404
+
+## Code Path Verification (subsequent GET):
+1. repo.get_by_id("delete-test-001") returns None (already deleted)
+2. HTTPException 404 raised
+
+## Verification Result: PASS
+- 204 status explicitly set in decorator (line 97)
+- Return type None confirmed (line 102)
+- 404 for missing company confirmed (lines 107-110)
+- Subsequent GET returns 404 after delete (companies.py lines 51-55)

@@ -17,6 +17,7 @@
 | `/companies` | GET | List all companies | Optional |
 | `/companies` | POST | Create and score company | Optional |
 | `/companies/{id}` | GET | Get company by ID | Optional |
+| `/companies/{id}` | DELETE | Delete company profile | Optional |
 | `/scoring/company/{id}/score` | POST | Score specific company | Optional |
 | `/scoring/stats` | GET | Market-wide statistics | Optional |
 | `/scoring/batch` | GET | Queue batch scoring | Optional |
@@ -244,21 +245,29 @@ Platform availability check. No authentication required.
 
 ### Companies
 
+CRUD endpoints for company profiles. Companies router has no prefix — paths are at the root level.
+
+**Source**: `src/solstein/api/routers/companies.py`
+
+---
+
 #### `GET /companies`
 
-List all profiled companies. Supports filtering and pagination.
+List all profiled companies with optional filtering and pagination.
+
+**Authentication**: Bearer token (optional — anonymous gets viewer access)
 
 **Query Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `skip` | integer | Records to skip (default: 0) |
-| `limit` | integer | Max records to return (1–1000, default: 100) |
-| `tier` | string | Filter by tier (`Tier 1`, `Tier 2`, `Tier 3`, `Tier 4`) |
-| `industry` | string | Filter by industry (partial match) |
-| `min_revenue` | float | Minimum revenue in EUR millions |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `skip` | integer (≥0) | `0` | Number of records to skip |
+| `limit` | integer (1–1000) | `100` | Maximum number of records to return |
+| `tier` | string | `null` | Filter by company tier (`Tier 1`, `Tier 2`, `Tier 3`, `Tier 4`) |
+| `industry` | string | `null` | Filter by industry |
+| `min_revenue` | float (≥0) | `null` | Minimum revenue in EUR millions |
 
-**Response:** Array of Company objects
+**Response**: `200 OK` — Array of Company objects
 
 ```json
 [
@@ -272,6 +281,9 @@ List all profiled companies. Supports filtering and pagination.
     "growth_score": 8.2,
     "financial_health_score": 7.4,
     "competitive_position_score": 8.0,
+    "composite_score": 7.8,
+    "classification": "Phoenix",
+    "geographic_presence": ["EU", "USA"],
     "financials": {
       "revenue": 12.5,
       "growth_rate": 34.0,
@@ -281,60 +293,281 @@ List all profiled companies. Supports filtering and pagination.
 ]
 ```
 
+**Status Codes:**
+
+| Code | Condition |
+|------|-----------|
+| `200` | Success |
+| `422` | Invalid query parameter type or range |
+| `500` | Internal server error |
+
+**Example:**
+
+```bash
+# List with pagination and tier filter
+curl -X GET "http://localhost:8000/companies?skip=0&limit=10&tier=Phoenix" \
+  -H "Authorization: Bearer {token}"
+
+# Filter by industry and minimum revenue
+curl -X GET "http://localhost:8000/companies?industry=SaaS&min_revenue=10" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
 #### `POST /companies`
 
-Create and immediately score a new company profile.
+Create a new company profile. Scores are calculated automatically on creation.
 
-**Request Body:** Company object (see schema above, without scores)
+**Authentication**: Bearer token (optional — anonymous gets viewer access)
 
-**Response:** `201 Created` — Scored company with all three scores calculated
+**Request Body**: `Company` object (JSON)
 
-**Error:** `400 Bad Request` if validation fails
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | **Yes** | Unique company identifier |
+| `name` | string | **Yes** | Company name |
+| `industry` | string | No | Industry classification (default: `"Energy Software"`) |
+| `description` | string | No | Company description |
+| `website` | string | No | Company website URL |
+| `headquarters` | string | No | Headquarters location |
+| `founded_year` | integer | No | Year founded |
+| `tier` | string | No | Company tier (`Tier 1`–`Tier 4`, default: `Tier 3`) |
+| `ai_maturity` | string | No | AI maturity level (`None`, `Low`, `Moderate`, `Strong`, `Very Strong`) |
+| `saas_maturity` | integer (0–10) | No | SaaS maturity score (default: `1`) |
+| `geographic_presence` | string[] | No | List of geographic regions |
+| `financials` | object | No | Financial metrics (`revenue`, `growth_rate`, `profit_margin`, etc.) |
+
+**Response**: `201 Created` — Scored Company object with all three dimension scores calculated
+
+```json
+{
+  "id": "tech-corp-001",
+  "name": "TechCorp",
+  "industry": "SaaS",
+  "tier": "Tier 3",
+  "growth_score": 5.0,
+  "financial_health_score": 5.0,
+  "competitive_position_score": 5.0,
+  "composite_score": 5.0,
+  "classification": "Salt",
+  "geographic_presence": ["USA", "EU"]
+}
+```
+
+**Status Codes:**
+
+| Code | Condition |
+|------|-----------|
+| `201` | Company created and scored successfully |
+| `400` | Bad request — invalid company data or creation error |
+| `422` | Schema validation failed (invalid field types/values) |
+
+**Example:**
+
+```bash
+curl -X POST "http://localhost:8000/companies" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {token}" \
+  -d '{
+    "name": "TechCorp",
+    "industry": "SaaS",
+    "geographic_presence": ["USA", "EU"],
+    "id": "tech-corp-001"
+  }'
+```
+
+---
 
 #### `GET /companies/{company_id}`
 
 Retrieve a single company by ID.
 
-**Path Parameters:** `company_id` — Company identifier string
+**Authentication**: Bearer token (optional — anonymous gets viewer access)
 
-**Response:** Single Company object
+**Path Parameters:**
 
-**Error:** `404 Not Found` if company does not exist
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Unique company identifier |
+
+**Response**: `200 OK` — Single Company object
+
+**Status Codes:**
+
+| Code | Condition |
+|------|-----------|
+| `200` | Success |
+| `404` | Company with specified ID not found |
+| `500` | Internal server error |
+
+**Example:**
+
+```bash
+curl -X GET "http://localhost:8000/companies/tech-corp-001" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+#### `DELETE /companies/{company_id}`
+
+Delete a company profile permanently.
+
+**Authentication**: Bearer token (optional — anonymous gets viewer access)
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Unique company identifier |
+
+**Response**: `204 No Content` — Empty response body on success
+
+**Status Codes:**
+
+| Code | Condition |
+|------|-----------|
+| `204` | Company deleted successfully |
+| `404` | Company with specified ID not found |
+| `500` | Internal server error |
+
+**Example:**
+
+```bash
+curl -X DELETE "http://localhost:8000/companies/tech-corp-001" \
+  -H "Authorization: Bearer {token}"
+```
 
 ---
 
 ### Scoring
 
+Scoring endpoints for calculating and retrieving company scores across three dimensions: growth, financial health, and competitive position. All scoring routes are prefixed with `/scoring`.
+
+**Source**: `src/solstein/api/routers/scoring.py`
+
+---
+
 #### `POST /scoring/company/{company_id}/score`
 
-Score a specific company across all three dimensions.
+Calculate growth and competitive scores for a specific company. Scores are persisted back to the database.
 
-**Path Parameters:** `company_id` — Company identifier string
+**Authentication**: Bearer token (optional — anonymous gets viewer access)
 
-**Response:**
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Unique company identifier |
+
+**Response**: `200 OK` — Scoring result with full breakdown
+
 ```json
 {
-  "company_id": "acme-energy-bv",
-  "growth_score": 8.2,
-  "financial_health_score": 7.4,
-  "competitive_position_score": 8.0,
+  "company_id": "tech-corp-001",
+  "growth_score": 7.5,
+  "financial_health_score": 6.8,
+  "competitive_position_score": 7.2,
+  "composite_score": 7.1,
   "classification": "Phoenix",
-  "calculated_at": "2026-02-20T01:43:00Z"
+  "scoring_breakdown": {
+    "growth": { "raw": 7.5, "weight": 0.4 },
+    "financial_health": { "raw": 6.8, "weight": 0.3 },
+    "competitive_position": { "raw": 7.2, "weight": 0.3 }
+  },
+  "calculated_at": "2026-02-26T10:30:00"
 }
 ```
 
-**Classification thresholds:**
-- `growth_score >= 7.0` → 🔥 Phoenix
-- `growth_score <= 4.0` → ⚖️ Lead
-- Otherwise → 🧂 Salt
+**Classification Thresholds** (based on `growth_score`):
 
-**Error:** `404 Not Found` if company does not exist
+| Classification | Condition | Meaning |
+|----------------|-----------|---------|
+| 🔥 **Phoenix** | `growth_score >= 7.0` | High-growth, act now |
+| 🧂 **Salt** | `4.0 <= growth_score <= 6.9` | Stable, watch for signals |
+| ⚖️ **Lead** | `growth_score <= 3.9` | Legacy weight, assess carefully |
+
+**Status Codes:**
+
+| Code | Condition |
+|------|-----------|
+| `200` | Scores calculated successfully |
+| `404` | Company with specified ID not found |
+| `500` | Internal server error |
+
+**Example:**
+
+```bash
+curl -X POST "http://localhost:8000/scoring/company/tech-corp-001/score" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+#### `GET /scoring/batch`
+
+Start a batch scoring job for multiple companies. Attempts to run via Temporal workflow; falls back to synchronous scoring if Temporal is unavailable.
+
+**Authentication**: Bearer token (optional — anonymous gets viewer access)
+
+**Query Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `industry` | string | `null` | Filter companies by industry |
+| `min_revenue` | float (≥0) | `null` | Filter by minimum revenue (EUR millions) |
+
+**Response**: `200 OK` — Job status (format depends on execution path)
+
+*Temporal workflow response:*
+```json
+{
+  "status": "running",
+  "workflow_id": "batch-abc123",
+  "message": "Batch scoring workflow started via Temporal",
+  "filters": { "industry": "Energy Software" }
+}
+```
+
+*Synchronous fallback response:*
+```json
+{
+  "processed_count": 15,
+  "status": "completed",
+  "message": "Batch scoring completed synchronously (Local Fallback)",
+  "filters": { "industry": "Energy Software" }
+}
+```
+
+**Status Codes:**
+
+| Code | Condition |
+|------|-----------|
+| `200` | Batch job started or completed |
+| `500` | Both Temporal and fallback scoring failed |
+
+**Example:**
+
+```bash
+curl -X GET "http://localhost:8000/scoring/batch?industry=SaaS" \
+  -H "Authorization: Bearer {token}"
+```
+
+> **Note**: There is currently no status-polling endpoint for Temporal workflow results. Task results are logged by the worker.
+
+---
 
 #### `GET /scoring/stats`
 
-Market-wide scoring statistics, including tier distribution and classification counts.
+Get platform-wide scoring statistics including revenue aggregates, growth rates, tier distribution, and classification counts.
 
-**Response:**
+**Authentication**: Bearer token (optional — anonymous gets viewer access)
+
+**Query Parameters**: None
+
+**Response**: `200 OK` — Market-wide statistics
+
 ```json
 {
   "total_companies": 29,
@@ -347,100 +580,186 @@ Market-wide scoring statistics, including tier distribution and classification c
     "average_growth_rate_pct": 12.4,
     "companies_with_growth_data": 22
   },
-  "growth_classification": {
-    "rockets": 4,
-    "neutral": 18,
-    "dinosaurs": 7
+  "tier_distribution": {
+    "Tier 1": 4,
+    "Tier 2": 8,
+    "Tier 3": 12,
+    "Tier 4": 5
   },
-  "calculated_at": "2026-02-20T01:43:00Z"
+  "growth_classification": {
+    "Phoenix": 4,
+    "Salt": 18,
+    "Lead": 7
+  },
+  "calculated_at": "2026-02-26T10:30:00"
 }
 ```
 
-> Note: Stats scoring is capped at 50 companies for performance.
+**Status Codes:**
 
-#### `GET /scoring/batch`
+| Code | Condition |
+|------|-----------|
+| `200` | Statistics calculated successfully |
+| `500` | Internal server error |
 
-Queue a background batch scoring job. Returns immediately with a Celery task ID.
+**Example:**
 
-**Query Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `industry` | string | Filter by industry |
-| `min_revenue` | float | Filter by minimum revenue (EUR millions) |
-
-**Response:**
-```json
-{
-  "message": "Batch scoring task started",
-  "task_id": "abc-123",
-  "status": "processing",
-  "filters": {"industry": "Energy Software", "min_revenue": null}
-}
+```bash
+curl -X GET "http://localhost:8000/scoring/stats" \
+  -H "Authorization: Bearer {token}"
 ```
-
-> Note: There is currently no status-polling endpoint for Celery tasks. Task results are logged by the worker.
 
 ---
 
 ### Market Analysis
 
+Market landscape analysis, competitive overlap, and company search. All market routes are prefixed with `/market`.
+
+**Source**: `src/solstein/api/routers/market.py`
+
+---
+
 #### `GET /market/analysis`
 
-Full market landscape analysis: SWOT, barriers to entry, key trends, recommendations, and aggregate metrics.
+Perform full market landscape analysis including SWOT, barriers to entry, key trends, recommendations, and aggregate metrics.
+
+**Authentication**: Bearer token (optional — anonymous gets viewer access)
 
 **Query Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `industry` | string | Industry to analyze |
-| `region` | string | Geographic region filter |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `industry` | string | `null` | Industry to analyze |
+| `region` | string | `null` | Geographic region filter (matches against company `geographic_presence`) |
 
-**Response:** MarketAnalysis object
+**Response**: `200 OK` — `MarketAnalysis` object
 
-**Error:** `404 Not Found` if no companies match the specified industry
+```json
+{
+  "market_name": "SaaS",
+  "analysis_date": "2026-02-26T10:30:00Z",
+  "companies": [ "...Company objects..." ],
+  "total_market_size": null,
+  "growth_rate": null,
+  "concentration_ratio": null,
+  "barriers_to_entry": ["High capital requirements", "Regulatory compliance"],
+  "key_trends": ["AI adoption accelerating", "Consolidation in mid-market"],
+  "regulatory_environment": [],
+  "swot_analysis": {
+    "strengths": ["Strong recurring revenue"],
+    "weaknesses": ["Limited geographic reach"],
+    "opportunities": ["AI-driven automation"],
+    "threats": ["Increasing competition"]
+  },
+  "recommendations": ["Focus on AI capabilities", "Expand geographic presence"]
+}
+```
+
+Returns an empty `MarketAnalysis` (with `companies: []`) if no companies match the filters.
+
+**Status Codes:**
+
+| Code | Condition |
+|------|-----------|
+| `200` | Analysis completed (may be empty if no matching companies) |
+| `500` | Internal server error |
+
+**Example:**
+
+```bash
+curl -X GET "http://localhost:8000/market/analysis?industry=SaaS" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
 
 #### `GET /market/overlap/{company_id}`
 
-Competitive overlap ranking for a specific company — which competitors are most similar by industry, tier, and AI maturity.
+Calculate competitive overlap for a specific company against all peers in the same industry. Returns the top 10 most similar competitors ranked by overlap score.
 
-**Path Parameters:** `company_id` — Company identifier string
+**Authentication**: Bearer token (optional — anonymous gets viewer access)
 
-**Query Parameters:** `top_n` (1–50, default: 10)
+**Path Parameters:**
 
-**Response:** Array of CompetitiveOverlap objects
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Unique company identifier |
+
+**Response**: `200 OK` — Array of `CompetitiveOverlap` objects (max 10, sorted by overlap score descending)
+
 ```json
 [
   {
     "company_a_id": "acme-energy-bv",
     "company_b_id": "gridtech-bv",
-    "overlap_score": 1.0,
-    "notes": "Calculated based on industry and tier match"
+    "overlap_score": 0.85,
+    "overlap_areas": ["Energy Software"],
+    "competitive_intensity": "Medium",
+    "notes": null
   }
 ]
 ```
 
-**Error:** `404 Not Found` if target company does not exist
+**Status Codes:**
+
+| Code | Condition |
+|------|-----------|
+| `200` | Overlap calculated successfully |
+| `404` | Target company not found |
+| `500` | Internal server error |
+
+**Example:**
+
+```bash
+curl -X GET "http://localhost:8000/market/overlap/tech-corp-001" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
 
 #### `GET /market/search`
 
-Search companies by keyword within a specific field.
+Search companies by keyword within a specific field. Returns up to 100 matching results.
+
+**Authentication**: Bearer token (optional — anonymous gets viewer access)
 
 **Query Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `query` | string | Search term (min 2 chars) |
-| `field` | string | Field to search: `name`, `industry`, or `description` (default: `name`) |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `query` | string (min 2 chars) | **Required** | Search term |
+| `field` | string | `"name"` | Field to search: `name`, `industry`, or `description` |
 
-**Response:**
+**Response**: `200 OK` — Search results
+
 ```json
 {
   "query": "acme",
   "field": "name",
   "total_results": 2,
-  "results": [...]
+  "results": [
+    {
+      "id": "acme-energy-bv",
+      "name": "Acme Energy BV",
+      "industry": "Energy Software"
+    }
+  ]
 }
+```
+
+**Status Codes:**
+
+| Code | Condition |
+|------|-----------|
+| `200` | Search completed |
+| `422` | Query too short (< 2 characters) |
+| `500` | Internal server error |
+
+**Example:**
+
+```bash
+curl -X GET "http://localhost:8000/market/search?query=acme&field=name" \
+  -H "Authorization: Bearer {token}"
 ```
 
 ---
@@ -565,18 +884,35 @@ Synchronous JSON export of all scored companies.
 
 ---
 
-## Enrichment API Endpoints (Phase 10-13)
+## Enrichment Operations
 
-The Connector Enrichment System provides REST API endpoints for enriching company data from multiple sources: SEC EDGAR, Companies House, and News Signals.
+The Enrichment API provides endpoints for enriching company data from multiple sources (SEC EDGAR, Companies House, News Signals), managing the enrichment cache, viewing audit trails, and monitoring platform health.
 
-### `POST /companies/{id}/enrich`
+> **Router**: `src/solstein/api/routers/enrichment.py` — Registered **without prefix** in `main.py`.
+>
+> **Routing Note**: The enrichment router is registered *first* in `main.py` (before `health.py`). This means `/health` is served by `enrichment.py`, not `health.py`. The health router provides separate endpoints at `/health/live`, `/health/ready`, and `/health/status` (see [Health Checks (Phase 13.3)](#health-checks-phase-133)).
 
-Enrich a single company from available connectors.
+---
 
-**Parameters**:
-- `id` (path, required): Company ID
+### `POST /companies/{company_id}/enrich`
 
-**Request Body**:
+Enrich a single company from available data connectors.
+
+**Authentication**: Optional Bearer token
+
+**Path Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier (required) |
+
+**Request Body** (`EnrichmentRequest`):
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `sources` | array[string] | `["SEC_EDGAR", "COMPANIES_HOUSE", "NEWS_SIGNALS"]` | Data sources to use |
+| `dry_run` | boolean | `false` | If true, don't persist results |
+
 ```json
 {
   "sources": ["SEC_EDGAR", "COMPANIES_HOUSE", "NEWS_SIGNALS"],
@@ -584,119 +920,215 @@ Enrich a single company from available connectors.
 }
 ```
 
-**Response**: 200 OK
+**Response** (`EnrichmentResponse`): `200 OK`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `company_id` | string | Company identifier |
+| `company_name` | string | Company name |
+| `status` | string | `"success"` or `"failure"` |
+| `enrichment` | object | Enrichment metadata |
+| `enrichment.sources_used` | array[string] | Sources that were queried |
+| `enrichment.fields_enriched` | array[string] | Fields that were updated |
+| `enrichment.duration_ms` | integer | Processing time in milliseconds |
+| `data` | EnrichmentResultData \| null | Enriched financial data |
+| `data.revenue` | float \| null | Company revenue |
+| `data.employees` | integer \| null | Number of employees |
+| `data.growth_rate` | float \| null | Revenue growth rate |
+| `data.profit_margin` | float \| null | Profit margin |
+| `data.funding_raised` | float \| null | Total funding raised |
+| `data.valuation` | float \| null | Company valuation |
+
 ```json
 {
-  "company_id": "001",
-  "company_name": "Acme Corp",
+  "company_id": "tech-corp-001",
+  "company_name": "TechCorp",
   "status": "success",
   "enrichment": {
     "sources_used": ["SEC_EDGAR", "COMPANIES_HOUSE"],
-    "fields_enriched": [
-      "revenue",
-      "employees",
-      "profit_margin"
-    ],
+    "fields_enriched": ["revenue", "employees", "profit_margin"],
     "duration_ms": 1234
   },
   "data": {
     "revenue": 5000000,
     "employees": 150,
     "growth_rate": 0.15,
-    "profit_margin": 0.12
+    "profit_margin": 0.12,
+    "funding_raised": 2000000,
+    "valuation": 50000000
   }
 }
 ```
 
-**Errors**:
-- `400 Bad Request`: Invalid company ID format
-- `404 Not Found`: Company not found
-- `429 Too Many Requests`: Rate limit exceeded (100 req/min/client)
-- `503 Service Unavailable`: Connectors unavailable
+**Status Codes**:
+
+| Code | Meaning |
+|------|---------|
+| `200` | Enrichment completed (success or partial) |
+| `400` | Invalid company ID or parameters |
+| `401` | Unauthorized |
+| `404` | Company not found |
+| `429` | Rate limit exceeded |
+| `503` | Connector unavailable |
+
+**Example**:
+```bash
+curl -X POST "http://localhost:8000/companies/tech-corp-001/enrich" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {token}" \
+  -d '{"sources": ["SEC_EDGAR", "NEWS_SIGNALS"], "dry_run": false}'
+```
 
 ---
 
 ### `POST /companies/enrich/batch`
 
-Batch enrich multiple companies with performance optimization.
+Batch enrich multiple companies with caching and optimization.
 
-**Request Body**:
+**Authentication**: Optional Bearer token
+
+**Request Body** (`BatchEnrichmentRequest`):
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `company_ids` | array[string] | *(required)* | Company IDs to enrich (1–1000) |
+| `batch_size` | integer | `10` | Companies per batch (1–100) |
+| `use_cache` | boolean | `true` | Whether to use cached results |
+| `dry_run` | boolean | `false` | If true, don't persist results |
+
 ```json
 {
-  "company_ids": ["001", "002", "003"],
+  "company_ids": ["tech-corp-001", "saas-inc-002", "fintech-003"],
   "batch_size": 10,
   "use_cache": true,
   "dry_run": false
 }
 ```
 
-**Response**: 200 OK
+**Response** (`BatchEnrichmentResponse`): `200 OK`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | Overall batch status |
+| `batch_id` | string | Unique batch identifier |
+| `total_companies` | integer | Total companies requested |
+| `enriched_count` | integer | Successfully enriched count |
+| `failed_count` | integer | Failed enrichment count |
+| `results` | array[BatchEnrichmentResult] | Per-company results |
+| `results[].company_id` | string | Company identifier |
+| `results[].status` | string | `"success"` or `"failed"` |
+| `results[].duration_ms` | float | Processing time in ms |
+| `results[].source` | string \| null | Data source used |
+| `results[].error` | string \| null | Error message if failed |
+| `metrics` | object | Batch processing metrics |
+| `metrics.total_duration_ms` | integer | Total batch processing time |
+| `metrics.avg_duration_ms` | integer | Average per-company time |
+| `metrics.cache_hits` | integer | Number of cache hits |
+| `metrics.cache_misses` | integer | Number of cache misses |
+| `metrics.success_rate` | float | Percentage of successful enrichments |
+
 ```json
 {
   "status": "success",
-  "batch_id": "batch_12345",
+  "batch_id": "batch_1740000000.0",
   "total_companies": 3,
   "enriched_count": 3,
   "failed_count": 0,
   "results": [
-    {
-      "company_id": "001",
-      "status": "success",
-      "duration_ms": 245,
-      "source": "cache"
-    },
-    {
-      "company_id": "002",
-      "status": "success",
-      "duration_ms": 1234,
-      "source": "SEC_EDGAR"
-    },
-    {
-      "company_id": "003",
-      "status": "failed",
-      "error": "No identifiers found",
-      "duration_ms": 0
-    }
+    {"company_id": "tech-corp-001", "status": "success", "duration_ms": 245, "source": "batch_enrichment"},
+    {"company_id": "saas-inc-002", "status": "success", "duration_ms": 245, "source": "batch_enrichment"},
+    {"company_id": "fintech-003", "status": "success", "duration_ms": 245, "source": "batch_enrichment"}
   ],
   "metrics": {
-    "total_duration_ms": 1479,
-    "avg_duration_ms": 493,
-    "cache_hits": 1,
-    "cache_misses": 2,
-    "success_rate": 66.7
+    "total_duration_ms": 735,
+    "avg_duration_ms": 245,
+    "cache_hits": 0,
+    "cache_misses": 3,
+    "success_rate": 100.0
   }
 }
 ```
 
+**Status Codes**:
+
+| Code | Meaning |
+|------|---------|
+| `200` | Batch processing completed |
+| `400` | Invalid request (bad company ID format) |
+| `401` | Unauthorized |
+| `429` | Rate limit exceeded |
+
+**Example**:
+```bash
+curl -X POST "http://localhost:8000/companies/enrich/batch" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {token}" \
+  -d '{
+    "company_ids": ["tech-corp-001", "saas-inc-002"],
+    "batch_size": 2,
+    "use_cache": true
+  }'
+```
+
 ---
 
-### `GET /companies/{id}/enrichment/audit`
+### `GET /companies/{company_id}/enrichment/audit`
 
-Get enrichment audit trail for specific company.
+Retrieve the enrichment audit trail for a specific company. Returns a chronological log of all enrichment operations (starts, successes, failures, cache hits).
 
-**Parameters**:
-- `id` (path, required): Company ID
-- `limit` (query, optional): Max entries to return (default: 50)
+**Authentication**: Optional Bearer token
 
-**Response**: 200 OK
+**Path Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier (required) |
+
+**Query Parameters**:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `limit` | integer | `50` | Max entries to return (1–1000) |
+| `offset` | integer | `0` | Entries to skip (for pagination) |
+
+**Response** (`AuditTrailResponse`): `200 OK`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `company_id` | string | Company identifier |
+| `company_name` | string \| null | Company name |
+| `audit_entries` | array[AuditEntry] | Audit log entries |
+| `audit_entries[].timestamp` | datetime | Operation timestamp (ISO 8601) |
+| `audit_entries[].operation` | string | Operation type (`enrich_start`, `enrich_success`, `enrich_failure`, `cache_hit`) |
+| `audit_entries[].source` | string \| null | Data source used |
+| `audit_entries[].status` | string \| null | Operation status |
+| `audit_entries[].fields` | array[string] \| null | Fields enriched |
+| `audit_entries[].duration_ms` | float \| null | Operation duration in ms |
+| `audit_entries[].user_id` | string \| null | User who triggered the operation |
+| `summary` | object | Audit statistics |
+
 ```json
 {
-  "company_id": "001",
-  "company_name": "Acme Corp",
+  "company_id": "tech-corp-001",
+  "company_name": null,
   "audit_entries": [
     {
-      "timestamp": "2026-02-25T21:00:00Z",
+      "timestamp": "2026-02-26T10:30:00Z",
       "operation": "enrich_success",
       "source": "SEC_EDGAR",
+      "status": "SUCCESS",
       "fields": ["revenue", "employees"],
       "duration_ms": 450,
-      "user_id": "admin@example.com"
+      "user_id": null
     },
     {
-      "timestamp": "2026-02-25T20:55:00Z",
+      "timestamp": "2026-02-26T10:29:55Z",
       "operation": "enrich_start",
-      "source": "COMPANIES_HOUSE",
-      "status": "in_progress"
+      "source": "SEC_EDGAR,COMPANIES_HOUSE",
+      "status": "IN_PROGRESS",
+      "fields": null,
+      "duration_ms": null,
+      "user_id": null
     }
   ],
   "summary": {
@@ -708,18 +1140,49 @@ Get enrichment audit trail for specific company.
 }
 ```
 
+**Status Codes**:
+
+| Code | Meaning |
+|------|---------|
+| `200` | Audit trail retrieved |
+| `404` | Company not found (invalid ID format) |
+| `429` | Rate limit exceeded |
+
+**Example**:
+```bash
+curl -X GET "http://localhost:8000/companies/tech-corp-001/enrichment/audit?limit=10" \
+  -H "Authorization: Bearer {token}"
+```
+
 ---
 
-### `GET /companies/{id}/enrichment/cache`
+### `GET /companies/{company_id}/enrichment/cache`
 
-Check if company is cached.
+Check whether enrichment data is cached for a specific company, and retrieve cache metadata.
 
-**Response**: 200 OK
+**Authentication**: Optional Bearer token
+
+**Path Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier (required) |
+
+**Response** (`CacheCheckResponse`): `200 OK`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `company_id` | string | Company identifier |
+| `cached` | boolean | Whether data is cached |
+| `cache_key` | string \| null | Cache key used |
+| `ttl_remaining_hours` | float \| null | Remaining TTL in hours |
+| `cached_data` | object \| null | Cached enrichment data (if available) |
+
 ```json
 {
-  "company_id": "001",
+  "company_id": "tech-corp-001",
   "cached": true,
-  "cache_key": "enriched_001_AAPL",
+  "cache_key": "company_tech-corp-001",
   "ttl_remaining_hours": 23.5,
   "cached_data": {
     "revenue": 5000000,
@@ -728,13 +1191,37 @@ Check if company is cached.
 }
 ```
 
+**Status Codes**:
+
+| Code | Meaning |
+|------|---------|
+| `200` | Cache status retrieved (cached or not) |
+| `429` | Rate limit exceeded |
+
+**Example**:
+```bash
+curl -X GET "http://localhost:8000/companies/tech-corp-001/enrichment/cache" \
+  -H "Authorization: Bearer {token}"
+```
+
 ---
 
 ### `POST /enrichment/cache/clear`
 
-Clear all enrichment cache.
+Clear all enrichment cache entries. Clears both database-backed and in-memory caches.
 
-**Response**: 200 OK
+**Authentication**: Optional Bearer token
+
+**Request Body**: None
+
+**Response** (`CacheClearResponse`): `200 OK`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | Operation status (`"success"`) |
+| `message` | string | Status message |
+| `entries_cleared` | integer | Number of cache entries cleared |
+
 ```json
 {
   "status": "success",
@@ -743,26 +1230,245 @@ Clear all enrichment cache.
 }
 ```
 
----
+**Status Codes**:
 
-### `POST /enrichment/cache/clear/{id}`
+| Code | Meaning |
+|------|---------|
+| `200` | Cache cleared successfully |
+| `429` | Rate limit exceeded |
 
-Clear cache for specific company.
-
-**Parameters**:
-- `id` (path, required): Company ID
-
-**Response**: 200 OK
-```json
-{
-  "status": "success",
-  "company_id": "001",
-  "message": "Cache cleared",
-  "cache_key": "enriched_001_AAPL"
-}
+**Example**:
+```bash
+curl -X POST "http://localhost:8000/enrichment/cache/clear" \
+  -H "Authorization: Bearer {token}"
 ```
 
 ---
+
+### `POST /enrichment/cache/clear/{company_id}`
+
+Clear cached enrichment data for a specific company.
+
+**Authentication**: Optional Bearer token
+
+**Path Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier (required) |
+
+**Request Body**: None
+
+**Response** (`CacheClearResponse`): `200 OK`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | Operation status (`"success"`) |
+| `message` | string | Status message (includes company ID) |
+| `entries_cleared` | integer | Number of cache entries cleared |
+
+```json
+{
+  "status": "success",
+  "message": "Cache cleared for tech-corp-001",
+  "entries_cleared": 1
+}
+```
+
+**Status Codes**:
+
+| Code | Meaning |
+|------|---------|
+| `200` | Cache cleared for company |
+| `429` | Rate limit exceeded |
+
+**Example**:
+```bash
+curl -X POST "http://localhost:8000/enrichment/cache/clear/tech-corp-001" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### `GET /health`
+
+Platform health check (liveness probe). Checks database and cache connectivity, plus status of all data connectors (SEC EDGAR, Companies House, News Signals).
+
+> **⚠️ Routing Note**: This endpoint is served by `enrichment.py` (registered first in `main.py`), not by `health.py`. The health router serves `/health/live`, `/health/ready`, and `/health/status` at prefixed paths. See [Health Checks (Phase 13.3)](#health-checks-phase-133) for the `health.py` endpoints.
+
+**Authentication**: Not required
+
+**Rate Limited**: No — health probes are always accessible
+
+**Response** (`HealthCheckResponse`): `200 OK`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | `"healthy"` or `"unhealthy"` |
+| `timestamp` | datetime | Health check timestamp (ISO 8601) |
+| `version` | string | API version (currently `"1.0"`) |
+| `components` | object | Per-component health statuses |
+| `components.database` | string | `"operational"`, `"not_initialized"`, or `"unavailable"` |
+| `components.cache` | string | Cache status |
+| `components.sec_edgar` | string | SEC EDGAR connector status |
+| `components.companies_house` | string | Companies House connector status |
+| `components.news_signals` | string | News Signals connector status |
+
+```json
+{
+  "status": "healthy",
+  "timestamp": "2026-02-26T10:30:00Z",
+  "version": "1.0",
+  "components": {
+    "database": "operational",
+    "cache": "operational",
+    "sec_edgar": "operational",
+    "companies_house": "not_initialized",
+    "news_signals": "operational"
+  }
+}
+```
+
+**Health Logic**: Overall status is `"healthy"` only when **both** database and cache are healthy. Individual connector failures do not affect overall health.
+
+**Status Codes**:
+
+| Code | Meaning |
+|------|---------|
+| `200` | System is healthy (or unhealthy — check `status` field) |
+
+> **Note**: The current implementation returns HTTP 200 even when unhealthy, with `status: "unhealthy"` in the body. Callers should check the `status` field. Production deployments should use middleware to convert unhealthy responses to HTTP 503.
+
+**Example**:
+```bash
+curl -X GET "http://localhost:8000/health"
+```
+
+---
+
+### `GET /ready`
+
+Readiness probe for load balancers. Checks whether the system is ready to serve traffic by verifying configuration, connectors, cache, and database.
+
+> **⚠️ Routing Note**: This endpoint is at `/ready` (from `enrichment.py`). The health router provides a separate readiness endpoint at `/health/ready`. Both perform similar checks but return different response models.
+
+**Authentication**: Not required (but rate limited)
+
+**Rate Limited**: Yes
+
+**Response** (`ReadinessCheckResponse`): `200 OK`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ready` | boolean | Whether service is ready to serve traffic |
+| `timestamp` | datetime | Readiness check timestamp (ISO 8601) |
+| `checks` | object | Individual readiness checks (all boolean) |
+| `checks.configuration_loaded` | boolean | Configuration is loaded |
+| `checks.connectors_initialized` | boolean | At least one data connector is healthy |
+| `checks.cache_operational` | boolean | Cache subsystem is operational |
+| `checks.enrichment_enabled` | boolean | Enrichment pipeline is enabled |
+| `checks.database_ready` | boolean | Database is accessible |
+
+```json
+{
+  "ready": true,
+  "timestamp": "2026-02-26T10:30:00Z",
+  "checks": {
+    "configuration_loaded": true,
+    "connectors_initialized": true,
+    "cache_operational": true,
+    "enrichment_enabled": true,
+    "database_ready": true
+  }
+}
+```
+
+**Readiness Logic**: System is `ready` when database status is `"operational"` or `"not_initialized"` AND cache status is `"operational"` or `"not_initialized"`. A system with `not_initialized` components can still serve traffic (graceful degradation).
+
+**Status Codes**:
+
+| Code | Meaning |
+|------|---------|
+| `200` | System is ready |
+| `429` | Rate limit exceeded |
+
+**Example**:
+```bash
+curl -X GET "http://localhost:8000/ready"
+```
+
+---
+
+### `GET /metrics`
+
+Retrieve enrichment performance metrics including enrichment counts, cache statistics, and rate limiting state.
+
+> **⚠️ Routing Note**: This endpoint is at `/metrics` (from `enrichment.py`). The health router provides a separate data quality metrics endpoint at `/metrics/data-quality`.
+
+**Authentication**: Not required (but rate limited)
+
+**Rate Limited**: Yes
+
+**Response** (`MetricsResponse`): `200 OK`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `timestamp` | datetime | Metrics collection timestamp (ISO 8601) |
+| `enrichment` | object | Enrichment processing metrics |
+| `enrichment.total` | integer | Total enrichment requests processed |
+| `enrichment.successful` | integer | Successful enrichments |
+| `enrichment.failed` | integer | Failed enrichments |
+| `enrichment.success_rate` | float | Success rate (0–100) |
+| `enrichment.avg_duration_ms` | float | Average enrichment duration in ms |
+| `enrichment.total_duration_ms` | float | Total cumulative processing time |
+| `cache` | object | Cache performance metrics |
+| `cache.size` | integer | Current cache size (entries) |
+| `cache.ttl_hours` | integer | Cache TTL in hours |
+| `cache.hits` | integer | Total cache hits |
+| `cache.misses` | integer | Total cache misses |
+| `cache.hit_rate` | float | Cache hit rate (0.0–1.0) |
+| `rate_limiting` | object | Rate limiting state for current client |
+| `rate_limiting.requests_per_minute` | integer | Configured rate limit |
+| `rate_limiting.current_requests` | integer | Requests made in current window |
+| `rate_limiting.remaining` | integer | Remaining requests in current window |
+
+```json
+{
+  "timestamp": "2026-02-26T10:30:00Z",
+  "enrichment": {
+    "total": 156,
+    "successful": 152,
+    "failed": 4,
+    "success_rate": 97.4,
+    "avg_duration_ms": 892,
+    "total_duration_ms": 139232
+  },
+  "cache": {
+    "size": 45,
+    "ttl_hours": 24,
+    "hits": 230,
+    "misses": 152,
+    "hit_rate": 0.0
+  },
+  "rate_limiting": {
+    "requests_per_minute": 100,
+    "current_requests": 1,
+    "remaining": 99
+  }
+}
+```
+
+**Status Codes**:
+
+| Code | Meaning |
+|------|---------|
+| `200` | Metrics retrieved |
+| `429` | Rate limit exceeded |
+
+**Example**:
+```bash
+curl -X GET "http://localhost:8000/metrics"
+```
 
 ## Rate Limiting (Phase 13.5)
 
@@ -1466,49 +2172,31 @@ curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/timeline" \
 
 ## Health Checks (Phase 13.3)
 
-### `GET /health`
+> **Note**: The primary `/health`, `/ready`, and `/metrics` endpoints are served by the enrichment router and documented above in [Enrichment Operations](#enrichment-operations). The endpoints below are from the **health router** (`health.py`) and serve at prefixed paths.
 
-Platform health check (liveness probe). **NOT rate limited**.
+### `GET /health/live`
 
-**Response**: 200 OK
-```json
-{
-  "status": "healthy",
-  "timestamp": "2026-02-25T21:00:00Z",
-  "checks": {
-    "database": {
-      "status": "connected",
-      "healthy": true
-    },
-    "cache": {
-      "status": "operational",
-      "healthy": true
-    }
-  }
-}
-```
+Kubernetes liveness probe (from `health.py`). Returns basic health status.
 
-**See**: [Health Checks Guide](../guides/health-checks.md)
+**Authentication**: Not required
 
-### `GET /ready`
+### `GET /health/ready`
 
-Readiness probe for load balancers. **NOT rate limited**.
+Kubernetes readiness probe (from `health.py`). Checks database and all connectors.
 
-**Response**: 200 OK
-```json
-{
-  "ready": true,
-  "timestamp": "2026-02-25T21:00:00Z",
-  "checks": {
-    "database": {"healthy": true},
-    "cache": {"healthy": true},
-    "sec_edgar_connector": {"healthy": true},
-    "companies_house_connector": {"healthy": true},
-    "news_signals_connector": {"healthy": true},
-    "github_connector": {"healthy": true}
-  }
-}
-```
+**Authentication**: Not required
+
+### `GET /health/status`
+
+Full health status with detailed component checks (from `health.py`).
+
+**Authentication**: Not required
+
+### `GET /metrics/data-quality`
+
+Data quality metrics for the market intelligence pipeline (from `health.py`).
+
+**Authentication**: Not required
 
 **See**: [Health Checks Guide](../guides/health-checks.md)
 
