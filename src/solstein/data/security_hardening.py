@@ -1,10 +1,11 @@
 """
 Phase 9: Security Hardening & Operations
+Phase 13.5: Redis-Backed Rate Limiter
 
 Implements security patterns for:
 - Audit logging of all enrichment operations
 - Input validation and sanitization
-- Rate limiting middleware
+- Rate limiting middleware (Redis-backed with memory fallback)
 - Security headers configuration
 - API key rotation and secrets management
 """
@@ -195,6 +196,70 @@ class AuditLogger:
         }
 
 
+# ============================================================================
+# PHASE 13.5: REDIS-BACKED RATE LIMITER WITH MEMORY FALLBACK
+# ============================================================================
+
+
+class RedisRateLimiter:
+    """Redis-backed rate limiter for API protection (Phase 13.5)."""
+
+    def __init__(self, requests_per_minute: int = 60, redis_client=None):
+        """
+        Initialize Redis-backed rate limiter.
+
+        Args:
+            requests_per_minute: Max requests per minute per client
+            redis_client: Redis client instance (optional, uses memory fallback if None)
+        """
+        self.requests_per_minute = requests_per_minute
+        self.redis_client = redis_client
+        # Memory fallback for when Redis is unavailable
+        self.memory_fallback = SimpleRateLimiter(requests_per_minute)
+        # Expose memory fallback's client_requests for test compatibility
+        self.client_requests = self.memory_fallback.client_requests
+    def is_allowed(self, client_id: str) -> bool:
+        """Check if client is allowed to make request."""
+        if self.redis_client:
+            try:
+                # Try Redis first
+                key = f"rate_limit:{client_id}"
+                current = self.redis_client.incr(key)
+
+                # Set expiration on first request
+                if current == 1:
+                    self.redis_client.expire(key, 60)
+
+                if current > self.requests_per_minute:
+                    logger.warning(
+                        f"🔐 Rate limit exceeded for client {client_id}: {current} requests in last minute (Redis)"
+                    )
+                    return False
+
+                return True
+            except Exception as e:
+                logger.warning(f"Redis rate limiter failed, falling back to memory: {e}")
+                # Fall back to memory if Redis fails
+                return self.memory_fallback.is_allowed(client_id)
+        else:
+            # Use memory fallback if Redis not configured
+            return self.memory_fallback.is_allowed(client_id)
+
+    def get_remaining(self, client_id: str) -> int:
+        """Get remaining requests for client this minute."""
+        if self.redis_client:
+            try:
+                key = f"rate_limit:{client_id}"
+                current = self.redis_client.get(key)
+                current = int(current) if current else 0
+                return max(0, self.requests_per_minute - current)
+            except Exception as e:
+                logger.warning(f"Redis get_remaining failed, falling back to memory: {e}")
+                return self.memory_fallback.get_remaining(client_id)
+        else:
+            return self.memory_fallback.get_remaining(client_id)
+
+
 class SimpleRateLimiter:
     """Simple in-memory rate limiter for API protection (Phase 9 - Operations item 8)."""
 
@@ -256,12 +321,13 @@ class InputValidator:
         dangerous_chars = ["';", "--", "/*", "*/", "xp_", "sp_"]
         if any(pattern in company_id.lower() for pattern in dangerous_chars):
             return False, "Company ID contains suspicious patterns"
-        
+
         # Check for special characters - only allow alphanumeric, hyphens, underscores
         import re
-        if not re.match(r'^[a-zA-Z0-9_-]+$', company_id):
+
+        if not re.match(r"^[a-zA-Z0-9_-]+$", company_id):
             return False, "Company ID contains invalid characters (only alphanumeric, hyphens, underscores allowed)"
-        
+
         return True, None
 
     @staticmethod
@@ -326,8 +392,9 @@ class SecurityHeadersConfig:
 
 # Global instances
 audit_logger = AuditLogger()
-rate_limiter = SimpleRateLimiter(requests_per_minute=100)
+# Phase 13.5: Use Redis-backed rate limiter if available, else memory fallback
+rate_limiter = RedisRateLimiter(requests_per_minute=100, redis_client=None)  # redis_client set by config
 input_validator = InputValidator()
 security_headers = SecurityHeadersConfig()
 
-logger.info("✅ Security hardening module loaded")
+logger.info("✅ Security hardening module loaded (Phase 13.5: Redis-backed rate limiter with memory fallback)")

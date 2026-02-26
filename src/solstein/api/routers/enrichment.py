@@ -169,12 +169,8 @@ async def health_check(request: Request) -> HealthCheckResponse:
         200: System is healthy
         503: System is unhealthy
     """
-    # Check rate limit
-    client_id = _get_client_id(request)
-    if not rate_limiter.is_allowed(client_id):
-        raise HTTPException(status_code=429, detail="Rate limit exceeded")
-
-    logger.info(f"🏥 Health check from {client_id}")
+    # Phase 13.5: Health check BEFORE rate limit - always accessible
+    logger.info(f"🏥 Health check from {request.client.host if request.client else 'unknown'}")
     
     # Perform actual health checks
     db_status, db_healthy = await check_database_health()
