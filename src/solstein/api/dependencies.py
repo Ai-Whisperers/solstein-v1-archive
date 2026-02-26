@@ -11,6 +11,7 @@ from ..core.repositories import CompanyRepository
 from ..data.repositories import JsonFileRepository, SupabaseRepository
 from ..infrastructure.database import db_manager
 from ..infrastructure.database_service import DatabaseService
+from ..infrastructure.enrichment_repositories import EnrichmentAuditRepository, EnrichmentCacheRepository
 
 security = HTTPBearer(auto_error=False)
 
@@ -52,6 +53,19 @@ def get_drill_down_service(
     """Dependency to get a DrillDownService instance."""
     return DrillDownService(db_service)
 
+
+async def get_enrichment_audit_repository(
+    session: AsyncSession = Depends(get_db_session),
+) -> EnrichmentAuditRepository:
+    """Dependency to get an EnrichmentAuditRepository instance."""
+    return EnrichmentAuditRepository(session)
+
+
+async def get_enrichment_cache_repository(
+    session: AsyncSession = Depends(get_db_session),
+) -> EnrichmentCacheRepository:
+    """Dependency to get an EnrichmentCacheRepository instance."""
+    return EnrichmentCacheRepository(session)
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
