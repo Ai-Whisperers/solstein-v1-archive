@@ -1,0 +1,48 @@
+# QA Scenario 3: GET /health returns correct status
+# Date: 2026-02-26
+# Status: VERIFIED (code analysis)
+
+## Verification Method
+Verified against source code: src/solstein/api/routers/enrichment.py (lines 160-211)
+Schema verified: src/solstein/api/schemas/enrichment.py (lines 58-80)
+
+## Test Command
+curl -X GET "http://localhost:8000/health"
+
+## Expected Response (200 OK)
+{
+  "status": "healthy",
+  "timestamp": "2026-02-26T10:30:00Z",
+  "version": "1.0",
+  "components": {
+    "database": "operational",
+    "cache": "operational",
+    "sec_edgar": "operational",
+    "companies_house": "not_initialized",
+    "news_signals": "operational"
+  }
+}
+
+## Verification Checks
+✅ Response status: 200 (line 160: @router.get("/health"))
+✅ response.status is "healthy" or "unhealthy" (line 184: determined by db_healthy AND cache_healthy)
+✅ Response has timestamp field (line 192: datetime.now(timezone.utc))
+✅ Response has version field (line 193: "1.0")
+✅ Response has components dict with 5 connector statuses (lines 194-200)
+✅ NOT rate limited (line 172: health check before rate limit)
+
+## Health Logic Verified
+- Overall status = "healthy" ONLY when db_healthy AND cache_healthy (line 183-184)
+- Individual connector status doesn't affect overall health
+- Component statuses: "operational" | "not_initialized" | "unavailable"
+- Each connector has independent check function (lines 86-154)
+
+## Routing Verification
+- enrichment.py registered FIRST in main.py (line 132)
+- health.py registered SECOND (line 133)
+- /health from enrichment.py takes precedence over health.py's /health
+- health.py endpoints accessible at /health/live, /health/ready, /health/status
+
+## Documentation Match
+Documented in docs/api/reference.md under "Enrichment Operations" → GET /health
+Routing note clearly explains enrichment.py vs health.py overlap.

@@ -14,7 +14,7 @@
 ## How We Did It
 
 ### Created Continuous Discovery System
-File: `discover_all_companies.py`
+File: `scripts/market-discovery/discover_all_companies.py`
 
 **Features**:
 - ✅ Multiple discovery sources
@@ -160,8 +160,8 @@ File: `discover_all_companies.py`
 
 ## Files Created
 
-1. **`discover_all_companies.py`** - Continuous discovery system
-2. **`enrich_all_companies.py`** - Automated enrichment pipeline
+1. **`scripts/market-discovery/discover_all_companies.py`** - Continuous discovery system
+2. **`scripts/enrichment/enrich_all_companies.py`** - Automated enrichment pipeline
 3. **`data/input/competitor_data.json`** - 198 companies with scores
 4. **`data/output/discovery_log.json`** - Discovery history
 5. **`data/output/exports/complete_market_198.json`** - Analysis export

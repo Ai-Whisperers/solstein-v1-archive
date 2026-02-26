@@ -24,6 +24,7 @@ from celery import shared_task, Task
 from celery.exceptions import MaxRetriesExceededError, SoftTimeLimitExceeded
 from loguru import logger
 from sqlalchemy import select
+from datetime import datetime, timezone
 
 from solstein.config import get_settings
 
@@ -108,15 +109,16 @@ class DeadLetterQueue:
 
     def record_failure(self, task_name: str, task_id: str, error: str, attempt: int):
         """Record a permanently failed job."""
+        logger.info(
+            f"[RETRY-FAILED] {task_name} (task_id={task_id}): {error} after {attempt} attempts"
+        )
         self.failed_jobs.append(
             {
                 "task_name": task_name,
                 "task_id": task_id,
                 "error": error,
                 "final_attempt": attempt,
-                "timestamp": logger.info(
-                    f"[RETRY-FAILED] {task_name} (task_id={task_id}): {error} after {attempt} attempts"
-                ),
+                "timestamp": datetime.now(timezone.utc),
             }
         )
 

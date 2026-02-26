@@ -126,7 +126,7 @@ data/output/exports/
 
 ### Option 1: Complete Flow Script
 ```bash
-./run_eneve_complete_flow.sh
+./scripts/workflows/run_eneve_complete_flow.sh
 ```
 
 ### Option 2: Individual Steps
@@ -149,14 +149,14 @@ python -m solstein.cli -v generate-report eneve -o data/output/exports
 
 ### Option 3: Start API Server (for integration)
 ```bash
-./start_api_server.sh
+./scripts/services/start_api_server.sh
 # API available at http://localhost:8000
 # Docs at http://localhost:8000/docs
 ```
 
 ### Option 4: Start Celery Workers (for background processing)
 ```bash
-./start_celery_workers.sh
+./scripts/services/start_celery_workers.sh
 ```
 
 ---

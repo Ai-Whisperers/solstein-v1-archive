@@ -30,3 +30,22 @@
    - industry defaults to "Energy Software" (not null)
    - tier defaults to "Tier 3"
    - saas_maturity defaults to 1
+
+## Task 6: Getting Started Guide (2026-02-26)
+
+### Patterns
+- Getting-started guides work best with persona-based reading paths (API user, developer, operator, business)
+- Estimated reading times help readers prioritize which docs to read
+- A "Common Tasks" section with quick copy-paste commands provides immediate value
+- Using relative links (`../PITCH/...`) keeps docs portable across hosting environments
+
+### Conventions Found
+- All guides in docs/guides/ use emoji prefixes in titles (🚀, 📜, ⚡, 🏥, 🚨, 🔄, 🔌, 🔧)
+- Guides include Phase/Status/Last Updated metadata headers
+- Guides use horizontal rules (---) as section dividers
+- The project has 4 personas: API users, developers, operators, business stakeholders
+
+### Key Files
+- 20 unique documentation files linked from getting-started.md
+- docs/guides/ contains 16 guide files (including new getting-started.md)
+- docs/ has 4 subdirectories: api/, architecture/, guides/, PITCH/, LORE/

@@ -202,19 +202,29 @@ class AuditLogger:
 
 
 class RedisRateLimiter:
-    """Redis-backed rate limiter for API protection (Phase 13.5)."""
+    """Redis-backed rate limiter for API protection (Phase 13.5).
+    
+    IMPORTANT: Redis is OPTIONAL. If redis_client=None, automatically falls back to
+    in-memory rate limiting. This means:
+    
+    - With Redis: Distributed rate limiting across multiple servers (shared state)
+    - Without Redis (redis_client=None): Per-server rate limiting (no shared state)
+    
+    Current production uses memory fallback (redis_client=None), so rate limits are
+    per-server, not distributed across servers.
+    """
 
     def __init__(self, requests_per_minute: int = 60, redis_client=None):
-        """
-        Initialize Redis-backed rate limiter.
-
+        """Initialize Redis-backed rate limiter.
+        
         Args:
-            requests_per_minute: Max requests per minute per client
+            requests_per_minute: Max requests per minute per client (default: 60)
             redis_client: Redis client instance (optional, uses memory fallback if None)
+                         To enable distributed rate limiting, pass a redis.Redis() instance
         """
         self.requests_per_minute = requests_per_minute
         self.redis_client = redis_client
-        # Memory fallback for when Redis is unavailable
+        # Memory fallback for when Redis is unavailable or not configured
         self.memory_fallback = SimpleRateLimiter(requests_per_minute)
         # Expose memory fallback's client_requests for test compatibility
         self.client_requests = self.memory_fallback.client_requests
