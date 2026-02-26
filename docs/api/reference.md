@@ -40,6 +40,12 @@
 | `/drill-down/company/{id}/sources` | GET | All data sources | Optional |
 | `/drill-down/company/{id}/timeline` | GET | Analysis timeline | Optional |
 | `/drill-down/company/{id}/why/{signal_name}` | GET | Signal explanation | Optional |
+| `/export/search/llm` | GET | LLM-powered natural language search | Yes |
+| `/health/live` | GET | Liveness probe (K8s) | No |
+| `/health/ready` | GET | Readiness probe (K8s) | No |
+| `/health/status` | GET | Full health status | No |
+| `/metrics/data-quality` | GET | Data quality metrics | No |
+| `/simulation/run` | POST | Run market simulation | Yes |
 ---
 
 ## Quick Start
@@ -224,22 +230,165 @@ curl "http://localhost:8000/companies?industry=Software&min_revenue=10"
 
 ## Endpoints
 
-### System
+### Health & Monitoring
+
+> **Routing Note**: The `/health` base path is defined in both `enrichment.py` and `health.py`. See [Routing Conflict: /ready and /health](#routing-conflict-ready-and-health) for resolution details.
 
 #### `GET /health`
 
-Platform availability check. No authentication required.
+Base health check. Runs all health checks and returns overall platform status.
 
-**Response:**
+**Authentication**: None required
+
+**Response (200 OK):**
 ```json
 {
   "status": "healthy",
-  "version": "0.1.0",
-  "timestamp": "2026-02-20T01:43:00Z"
+  "timestamp": "2026-02-26T10:30:00"
 }
 ```
 
-> Note: This endpoint checks API process availability only. It does not verify Redis or data directory health.
+**Response (503 Service Unavailable):** Returned when status is `"unhealthy"` — same body shape.
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/health"
+```
+
+> **Note**: This path exists in both `enrichment.py` (registered first in `main.py`) and `health.py` (prefix `/health`). FastAPI resolves to the first-registered route. See [Routing Conflict](#routing-conflict-ready-and-health).
+
+---
+
+#### `GET /health/status`
+
+Full health status with detailed component-level checks. Always returns `200` — inspect the response body for individual component health.
+
+**Authentication**: None required
+
+**Response (200 OK):**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2026-02-26T10:30:00",
+  "checks": {
+    "database": {"status": "connected", "healthy": true},
+    "cache": {"status": "operational", "healthy": true}
+  },
+  "uptime_seconds": 3600
+}
+```
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/health/status"
+```
+
+---
+
+#### `GET /health/ready`
+
+Kubernetes readiness probe. Returns `200` if ready to serve traffic, `503` if not.
+
+**Authentication**: None required
+
+**Response (200 OK — Ready):**
+```json
+{
+  "ready": true,
+  "timestamp": "2026-02-26T10:30:00"
+}
+```
+
+**Response (503 — Not Ready):**
+```json
+{
+  "message": "Application not ready",
+  "ready": false,
+  "timestamp": "2026-02-26T10:30:00"
+}
+```
+
+**Example:**
+```bash
+# Kubernetes readinessProbe target
+curl -X GET "http://localhost:8000/health/ready"
+```
+
+> ⚠️ **Dual Implementation Warning**: A separate `/ready` endpoint (without `/health` prefix) exists in `enrichment.py`. Use `/health/ready` for Kubernetes probes. See [Routing Conflict](#routing-conflict-ready-and-health).
+
+---
+
+#### `GET /health/live`
+
+Kubernetes liveness probe. Always returns `200` as long as the process is running. Does **not** check database, cache, or external dependencies.
+
+**Authentication**: None required
+
+**Response (200 OK):**
+```json
+{
+  "alive": true,
+  "timestamp": "2026-02-26T10:30:00"
+}
+```
+
+**Example:**
+```bash
+# Kubernetes livenessProbe target
+curl -X GET "http://localhost:8000/health/live"
+```
+
+> **Use Case**: If this fails, the process is dead — restart it. Unlike `/health/ready`, this does not verify dependencies.
+
+---
+
+#### Health Endpoint Comparison
+
+| Endpoint | Purpose | Checks Dependencies | Failure Code | K8s Probe |
+|----------|---------|---------------------|-------------|-----------|
+| `GET /health` | Load balancer | Yes (all checks) | 503 | — |
+| `GET /health/status` | Operator diagnostics | Yes (detailed) | Always 200 | — |
+| `GET /health/ready` | Readiness gate | Yes (`is_ready()`) | 503 | `readinessProbe` |
+| `GET /health/live` | Liveness gate | No (process only) | Never fails | `livenessProbe` |
+
+---
+
+#### `GET /metrics/data-quality`
+
+Data quality metrics for the scoring pipeline. Reports signal coverage, confidence levels, and companies with missing or low-quality data.
+
+**Authentication**: None required
+
+**Response (200 OK):**
+```json
+{
+  "timestamp": "2026-02-26T10:30:00",
+  "companies_scored": 29,
+  "companies_with_all_signals": 22,
+  "companies_missing_critical_signals": 3,
+  "signal_coverage": {
+    "average_per_company": 4.50,
+    "average_confidence": 0.850
+  },
+  "low_confidence_signals": 7
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `companies_scored` | integer | Total companies with scores |
+| `companies_with_all_signals` | integer | Companies with complete signal data |
+| `companies_missing_critical_signals` | integer | Companies missing key scoring inputs |
+| `signal_coverage.average_per_company` | float | Mean signals per company |
+| `signal_coverage.average_confidence` | float | Mean confidence score (0.0–1.0) |
+| `low_confidence_signals` | integer | Signals below confidence threshold |
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/metrics/data-quality"
+```
+
+> **Note**: This endpoint lives on the `metrics_router` (prefix `/metrics`), separate from the health router. A base `GET /metrics` endpoint (from `enrichment.py`) returns request throughput and cache statistics.
 
 ---
 
@@ -766,40 +915,239 @@ curl -X GET "http://localhost:8000/market/search?query=acme&field=name" \
 
 ### Export
 
+Export endpoints for generating reports in multiple formats. All export routes are prefixed with `/export`.
+
+**Source**: `src/solstein/api/routers/export.py`
+
+---
+
 #### `GET /export/excel`
 
-Trigger a background Excel dashboard export. Returns a Celery task ID.
+Start a **background** Excel dashboard export. Returns immediately with a filename; the file is generated asynchronously via FastAPI `BackgroundTasks`.
+
+**Authentication**: Required (Bearer token)
 
 **Query Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `industry` | string | Industry filter (optional) |
-| `include_charts` | boolean | Include charts in Excel output (default: true) |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `industry` | string | `null` | Filter companies by industry |
+| `include_charts` | boolean | `true` | Include charts in Excel output |
 
-**Response:**
+**Response (200 OK):**
 ```json
 {
   "message": "Export started",
-  "task_id": "abc-123",
-  "filename": "solstein_energy_software_20260220_014300.xlsx",
+  "filename": "solstein_saas_20260226_103000.xlsx",
   "status": "processing"
 }
 ```
 
+| Field | Description |
+|-------|-------------|
+| `message` | Always `"Export started"` |
+| `filename` | Generated filename (pattern: `solstein_[industry_]YYYYMMDD_HHMMSS.xlsx`) |
+| `status` | Always `"processing"` — file is generated in background |
+
+**Status Codes:** `200` OK, `401` Unauthorized, `500` Internal Server Error
+
+**Example:**
+```bash
+# Start Excel export for SaaS companies with charts
+curl -X GET "http://localhost:8000/export/excel?industry=SaaS&include_charts=true" \
+  -H "Authorization: Bearer {token}"
+```
+
+> **Async Pattern**: Returns immediately. The Excel file is generated in a background task and written to the configured export directory. There is no polling endpoint — check the filesystem for the generated file.
+
+---
+
 #### `GET /export/json`
 
-Synchronous JSON export of all scored companies.
+**Synchronous** JSON export of all scored companies. Blocks until all companies are scored and serialized.
+
+**Authentication**: Required (Bearer token)
 
 **Query Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `industry` | string | Industry filter (optional) |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `industry` | string | `null` | Filter companies by industry |
 
-**Response:** JSON object with `exported_at`, `total_companies`, and `companies` array (each with scores attached)
+**Response (200 OK):**
+```json
+{
+  "exported_at": "2026-02-26T10:30:00",
+  "total_companies": 150,
+  "companies": [
+    {
+      "id": "acme-energy-bv",
+      "name": "Acme Energy BV",
+      "industry": "Energy Software",
+      "growth_score": 8.2,
+      "financial_health_score": 7.4,
+      "competitive_position_score": 8.0,
+      "classification": "Phoenix"
+    }
+  ]
+}
+```
 
-**Error:** `404 Not Found` if no companies match the filter
+**Status Codes:** `200` OK, `401` Unauthorized, `404` No companies match filter, `500` Internal Server Error
+
+**Example:**
+```bash
+# Export all SaaS companies to JSON, save to file
+curl -X GET "http://localhost:8000/export/json?industry=SaaS" \
+  -H "Authorization: Bearer {token}" > export.json
+```
+
+> **Sync vs Async**: Unlike `/export/excel`, this endpoint blocks and returns the full dataset in the response body. For large datasets, prefer the Excel export.
+
+---
+
+#### `GET /export/search/llm`
+
+LLM-powered natural language search. Uses AI to understand free-text criteria and match companies based on their full profile — not keyword matching.
+
+**Authentication**: Required (Bearer token)
+
+**Query Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `criteria` | string | **required** | Natural language search (e.g., `"fast growing SaaS with large team"`) |
+| `limit` | integer | `null` | Maximum results to return |
+| `include_reasoning` | boolean | `true` | Include LLM reasoning in response |
+
+**Response (200 OK):**
+```json
+{
+  "criteria": "fast growing saas with large team",
+  "total_matched": 7,
+  "total_checked": 29,
+  "companies": [
+    {
+      "id": "acme-saas-inc",
+      "name": "Acme SaaS Inc",
+      "growth_score": 8.5,
+      "classification": "Phoenix"
+    }
+  ],
+  "filter_reasoning": "Identified 7 companies with SaaS model, >20% growth, and 50+ employees..."
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `criteria` | string | Echo of the search criteria |
+| `total_matched` | integer | Companies matching criteria |
+| `total_checked` | integer | Total companies evaluated |
+| `companies` | array | Scored Company objects matching criteria |
+| `filter_reasoning` | string | LLM explanation of filtering logic (when `include_reasoning=true`) |
+
+**Status Codes:** `200` OK (may return 0 matches), `400` LLM filtering only for JSON repository, `401` Unauthorized, `500` Internal Server Error
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/export/search/llm?criteria=fast%20growing%20saas&limit=10" \
+  -H "Authorization: Bearer {token}"
+```
+
+> **Limitation**: LLM search is currently only available when using the `JsonFileRepository` backend. PostgreSQL repositories return `400 Bad Request`.
+
+---
+
+### Simulation
+
+Market simulation endpoints for modeling scenario impacts. All routes prefixed with `/simulation`.
+
+**Source**: `src/solstein/api/routers/simulation.py`
+
+---
+
+#### `POST /simulation/run`
+
+Run a market simulation scenario against all (or filtered) companies. Models the impact of market conditions on company valuations and growth scores.
+
+**Authentication**: Required (Bearer token)
+
+**Query Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `industry` | string | `null` | Filter companies by industry before simulation |
+
+**Request Body** (`Scenario` object):
+```json
+{
+  "id": "sim-001",
+  "name": "Market Downturn 2026",
+  "description": "Simulating moderate recession impact on portfolio",
+  "conditions": [
+    {
+      "type": "interest_rate",
+      "name": "Rate Hike",
+      "impact_factor": 1.5,
+      "description": "Central bank raises rates by 150bps",
+      "affected_industries": ["SaaS", "FinTech"]
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Unique scenario identifier |
+| `name` | string | Yes | Human-readable scenario name |
+| `description` | string | Yes | Scenario description |
+| `conditions` | array | Yes | List of `MarketCondition` objects |
+| `conditions[].type` | enum | Yes | `interest_rate`, `inflation`, `sector_growth`, `competitor_activity`, `regulatory_change` |
+| `conditions[].name` | string | Yes | Condition name |
+| `conditions[].impact_factor` | float | Yes | Multiplier or additive impact factor |
+| `conditions[].description` | string | No | Optional description |
+| `conditions[].affected_industries` | array | No | Industries affected (empty = all) |
+
+**Response (200 OK):** Array of `SimulationResult` objects
+```json
+[
+  {
+    "company_id": "acme-energy-bv",
+    "company_name": "Acme Energy BV",
+    "base_valuation": 125000000.0,
+    "simulated_valuation": 98750000.0,
+    "valuation_change_pct": -21.0,
+    "base_growth_score": 8.2,
+    "simulated_growth_score": 6.4,
+    "growth_score_change": -1.8,
+    "notes": [
+      "Interest rate hike reduces growth by 15%",
+      "Tech slowdown reduces sector multiplier"
+    ]
+  }
+]
+```
+
+**Status Codes:** `200` OK, `401` Unauthorized, `404` No companies found, `422` Invalid scenario schema, `500` Simulation engine failure
+
+**Example:**
+```bash
+curl -X POST "http://localhost:8000/simulation/run?industry=SaaS" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {token}" \
+  -d '{
+    "id": "sim-downturn-001",
+    "name": "Market Downturn",
+    "description": "Moderate recession scenario",
+    "conditions": [
+      {
+        "type": "interest_rate",
+        "name": "Rate Hike",
+        "impact_factor": 1.5
+      }
+    ]
+  }'
+```
 
 ---
 
@@ -2170,35 +2518,47 @@ curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/timeline" \
 
 ---
 
-## Health Checks (Phase 13.3)
+## Routing Conflict: /ready and /health
 
-> **Note**: The primary `/health`, `/ready`, and `/metrics` endpoints are served by the enrichment router and documented above in [Enrichment Operations](#enrichment-operations). The endpoints below are from the **health router** (`health.py`) and serve at prefixed paths.
+> ⚠️ **Important**: Several health-related paths are defined in multiple router files. This section explains the resolution.
 
-### `GET /health/live`
+### Dual Implementations
 
-Kubernetes liveness probe (from `health.py`). Returns basic health status.
+| Path | Defined In | Registration Order (`main.py`) | Winner |
+|------|-----------|-------------------------------|--------|
+| `GET /health` | `enrichment.py` (line 160) | Line 132 (first) | **enrichment.py** |
+| `GET /health` | `health.py` (line 21, via prefix) | Line 133 (second) | Shadowed |
+| `GET /ready` | `enrichment.py` (line 213) | Line 132 | **enrichment.py** |
+| `GET /health/ready` | `health.py` (line 50, via prefix) | Line 133 | **health.py** (unique path) |
+| `GET /metrics` | `enrichment.py` (line 257) | Line 132 | **enrichment.py** |
+| `GET /metrics` | `health.py` metrics_router (line 88) | Line 134 | Shadowed |
 
-**Authentication**: Not required
+### How It Works
 
-### `GET /health/ready`
+FastAPI matches routes in registration order. In `main.py`:
 
-Kubernetes readiness probe (from `health.py`). Checks database and all connectors.
+```python
+app.include_router(enrichment.router)       # Line 132 — registers /health, /ready, /metrics
+app.include_router(health.router)           # Line 133 — registers /health/*, but /health base is shadowed
+app.include_router(health.metrics_router)   # Line 134 — registers /metrics/*, but /metrics base is shadowed
+```
 
-**Authentication**: Not required
+**Result**:
+- `GET /health` → served by `enrichment.py` (first registered)
+- `GET /ready` → served by `enrichment.py` (only implementation at this path)
+- `GET /metrics` → served by `enrichment.py` (first registered)
+- `GET /health/status` → served by `health.py` (unique path, no conflict)
+- `GET /health/ready` → served by `health.py` (unique path, no conflict)
+- `GET /health/live` → served by `health.py` (unique path, no conflict)
+- `GET /metrics/data-quality` → served by `health.py` metrics_router (unique path, no conflict)
 
-### `GET /health/status`
+### Recommendation
 
-Full health status with detailed component checks (from `health.py`).
-
-**Authentication**: Not required
-
-### `GET /metrics/data-quality`
-
-Data quality metrics for the market intelligence pipeline (from `health.py`).
-
-**Authentication**: Not required
-
-**See**: [Health Checks Guide](../guides/health-checks.md)
+For new integrations:
+- **Kubernetes readiness**: Use `GET /health/ready` (from `health.py`, unambiguous)
+- **Kubernetes liveness**: Use `GET /health/live` (from `health.py`, unambiguous)
+- **Load balancer health**: Use `GET /health` (served by `enrichment.py`)
+- **Data quality monitoring**: Use `GET /metrics/data-quality` (unique, from `health.py`)
 
 ---
 

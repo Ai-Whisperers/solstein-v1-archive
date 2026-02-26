@@ -1,0 +1,66 @@
+# QA Scenario 3: GET /export/json returns all companies synchronously
+# Date: 2026-02-26
+# Status: PASS
+
+## Verification Method: Code Analysis
+
+### Step 1: Verify endpoint is synchronous (no BackgroundTasks)
+
+From export.py (line 77):
+  @router.get("/json")
+  async def export_to_json(
+      industry: str | None = Query(None, description="Industry to export"),
+      _: dict[str, Any] = Depends(get_current_user),
+      repo: CompanyRepository = Depends(get_repository),
+  ) -> JSONResponse:
+
+No BackgroundTasks parameter → synchronous operation. ✓
+
+### Step 2: Verify response includes exported_at timestamp
+
+From export.py lines 110-114:
+  export_data = {
+      "exported_at": datetime.now().isoformat(),
+      "total_companies": len(companies_data),
+      "companies": companies_data,
+  }
+
+✓ Response includes exported_at timestamp
+✓ Response includes total_companies count
+✓ Response includes companies array
+
+### Step 3: Verify each company has required fields
+
+From export.py line 106:
+  company_dict = scored.model_dump(mode="json")
+
+Each company is scored (via GrowthScorer.calculate_scores) then serialized
+via Pydantic model_dump. This includes all Company model fields:
+  id, name, industry, tier, growth_score, financial_health_score,
+  competitive_position_score, classification, financials, etc.
+
+### Step 4: Verify 404 on empty result
+
+From export.py lines 95-99:
+  if not filtered_companies:
+      raise HTTPException(
+          status_code=status.HTTP_404_NOT_FOUND,
+          detail=f"No companies found for industry: {industry}",
+      )
+
+✓ Returns 404 when no companies match filter
+
+### Step 5: Verify curl example
+
+curl -X GET "http://localhost:8000/export/json?industry=SaaS" \
+  -H "Authorization: Bearer {token}" > export.json
+
+Expected response structure:
+{
+  "exported_at": "2026-02-26T10:30:00",
+  "total_companies": N,
+  "companies": [...]
+}
+
+### Result: PASS
+JSON export documented accurately with synchronous behavior, response schema, and error handling.
