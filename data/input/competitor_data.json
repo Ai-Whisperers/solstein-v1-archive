@@ -5,10 +5,10 @@
       "folder": "eneve",
       "revenue": {
         "timeline": [
-          {"year": 2020, "eur_millions": 2.0, "yoy_growth_pct": 0},
-          {"year": 2021, "eur_millions": 3.0, "yoy_growth_pct": 50},
-          {"year": 2022, "eur_millions": 4.0, "yoy_growth_pct": 33},
-          {"year": 2023, "eur_millions": 5.0, "yoy_growth_pct": 25}
+          {"year": 2023, "eur_millions": 5.0, "yoy_growth_pct": 35},
+          {"year": 2022, "eur_millions": 3.7, "yoy_growth_pct": 48},
+          {"year": 2021, "eur_millions": 2.5, "yoy_growth_pct": 67},
+          {"year": 2020, "eur_millions": 1.5, "yoy_growth_pct": 0}
         ],
         "cagr_3yr_pct": 45.0,
         "cagr_5yr_pct": 25.0
@@ -41,10 +41,10 @@
       "folder": "test-company-2",
       "revenue": {
         "timeline": [
-          {"year": 2020, "eur_millions": 1.5, "yoy_growth_pct": 0},
-          {"year": 2021, "eur_millions": 2.0, "yoy_growth_pct": 33},
-          {"year": 2022, "eur_millions": 2.5, "yoy_growth_pct": 25},
-          {"year": 2023, "eur_millions": 3.0, "yoy_growth_pct": 20}
+          {"year": 2023, "eur_millions": 3.0, "yoy_growth_pct": 15},
+          {"year": 2022, "eur_millions": 2.6, "yoy_growth_pct": 18},
+          {"year": 2021, "eur_millions": 2.2, "yoy_growth_pct": 22},
+          {"year": 2020, "eur_millions": 1.8, "yoy_growth_pct": 0}
         ],
         "cagr_3yr_pct": 18.0,
         "cagr_5yr_pct": 20.0
@@ -77,16 +77,16 @@
       "folder": "test-company-3",
       "revenue": {
         "timeline": [
-          {"year": 2020, "eur_millions": 1.0, "yoy_growth_pct": 0},
-          {"year": 2021, "eur_millions": 1.2, "yoy_growth_pct": 20},
-          {"year": 2022, "eur_millions": 1.5, "yoy_growth_pct": 25},
-          {"year": 2023, "eur_millions": 2.0, "yoy_growth_pct": 33}
+          {"year": 2023, "eur_millions": 1.5, "yoy_growth_pct": -10},
+          {"year": 2022, "eur_millions": 1.9, "yoy_growth_pct": 9},
+          {"year": 2021, "eur_millions": 1.75, "yoy_growth_pct": 12},
+          {"year": 2020, "eur_millions": 1.56, "yoy_growth_pct": 0}
         ],
-        "cagr_3yr_pct": 10.0,
+        "cagr_3yr_pct": -5.0,
         "cagr_5yr_pct": 20.0
       },
       "profitability": {
-        "ebitda_margin_pct": 8.0,
+        "ebitda_margin_pct": 2.0,
         "recurring_revenue_pct": 65.0,
         "revenue_per_employee_eur_k": 250.0
       },
