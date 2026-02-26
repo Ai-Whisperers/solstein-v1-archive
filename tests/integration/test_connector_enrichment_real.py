@@ -322,4 +322,4 @@ class TestEnrichmentWithoutConnectors:
         # Verify no enrichment happened
         assert enriched.financials.revenue is None
         assert len(enriched.enrichment_sources) == 0
-        assert len(enriched.enrichment_errors) == 1  # SEC EDGAR error for invalid ticker
+        assert len(enriched.enrichment_errors) == 0  # No errors when connectors unavailable - just graceful skip

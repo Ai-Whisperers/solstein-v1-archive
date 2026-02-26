@@ -173,10 +173,6 @@ class EnrichmentOrchestrator:
             logger.debug(f"Enrichment disabled for {company.name}")
             return True
 
-        # Check if data already complete
-        if self._is_data_complete(company):
-            logger.debug(f"Data already complete for {company.name}, skipping enrichment")
-            return True
 
         # Check if we have any valid identifiers
         has_ticker = company.ticker and company.ticker.strip()

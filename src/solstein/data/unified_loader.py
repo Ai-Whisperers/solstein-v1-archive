@@ -643,6 +643,9 @@ class UnifiedCompanyLoader:
 
         """
 
+        logger.info(f"[CONNECTOR-SEC-START] SEC EDGAR enrichment STARTED for {company.name} (ticker={company.ticker})")
+
+
         # Skip if no SEC connector available
 
         if not self.sec_connector:
@@ -814,7 +817,8 @@ class UnifiedCompanyLoader:
 
             company.enrichment_timestamps["SEC EDGAR"] = datetime.now(timezone.utc)
 
-            
+            logger.info(f"[CONNECTOR-SEC-END] SEC EDGAR enrichment COMPLETED for {company.name}. Revenue: {company.financials.revenue}")
+
 
             return company
 
@@ -855,8 +859,7 @@ class UnifiedCompanyLoader:
         Sets confidence to CONFIRMED for Companies House data.
 
         """
-
-        # Skip if no Companies House connector available
+        logger.info(f"[CONNECTOR-CH-START] Companies House enrichment STARTED for {company.name} (company_number={company.company_number})")
 
         if not self.companies_house_connector:
 
@@ -989,7 +992,7 @@ class UnifiedCompanyLoader:
             company.enrichment_timestamps["Companies House"] = datetime.now(timezone.utc)
 
             
-
+            logger.info(f"[CONNECTOR-CH-END] Companies House enrichment COMPLETED for {company.name}. Revenue: {company.financials.revenue}")
             return company
 
             
@@ -1027,6 +1030,7 @@ class UnifiedCompanyLoader:
         Appends to company.signals list with confidence scores.
 
         """
+        logger.info(f"[CONNECTOR-NEWS-START] News Signals enrichment STARTED for {company.name}")
 
         # Skip if no news detector available
 
@@ -1118,7 +1122,7 @@ class UnifiedCompanyLoader:
             company.enrichment_timestamps["News Signals"] = datetime.now(timezone.utc)
 
             
-
+            logger.info(f"[CONNECTOR-NEWS-END] News Signals enrichment COMPLETED for {company.name}")
             return company
 
             
