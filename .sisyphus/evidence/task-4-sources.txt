@@ -1,0 +1,30 @@
+QA Scenario 3: GET /drill-down/company/{id}/sources lists all sources
+Date: 2026-02-26
+Status: VERIFIED (documentation review)
+
+Verification Method: Code inspection of src/solstein/api/routers/drill_down.py + drill_down_service.py
+
+Steps Verified:
+  1. GET /drill-down/company/{company_id}/sources endpoint exists
+     - Code: drill_down.py line 38: @router.get("/company/{company_id}/sources")
+  2. Response has sources array with expected fields
+     - Code: drill_down.py lines 50-66: Returns dict with company_id, total_sources,
+       fact_type_filter, sources array
+  3. Each source contains: source_id, source_name, source_type, url, confidence,
+     retrieval_timestamp, facts_found
+     - Code: lines 56-63 maps each source to dict with all those fields
+  4. Optional fact_type query parameter
+     - Code: line 41: fact_type: str | None = None
+     - Service: drill_down_service.py lines 78-95 filters by fact_type
+
+Schema Match:
+  - Documented response fields: company_id, total_sources, fact_type_filter, sources[]
+    - Code: lines 51-53 — MATCH
+  - Documented source fields: source_id, source_name, source_type, url, confidence,
+    retrieval_timestamp, facts_found
+    - Code: lines 56-62 — MATCH (source_id from s.id, source_type from s.source_type.value)
+
+Error Codes Verified:
+  - 404: line 48 (no analysis found)
+
+Result: PASS — Documentation accurately reflects source listing behavior

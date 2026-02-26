@@ -25,6 +25,20 @@
 | `/market/overlap/{id}` | GET | Competitive overlap | Optional |
 | `/export/excel` | GET | Export Excel dashboard | Optional |
 | `/export/json` | GET | Export JSON data | Optional |
+| `/async/enrich/single` | POST | Start async single enrichment | Optional |
+| `/async/enrich/batch` | POST | Start async batch enrichment | Optional |
+| `/async/jobs/{job_id}/status` | GET | Poll async job status | Optional |
+| `/async/jobs/{job_id}/result` | GET | Get async job result | Optional |
+| `/drill-down/company/{id}/audit-trail` | GET | Enrichment audit trail | Optional |
+| `/drill-down/company/{id}/contradictions` | GET | Data contradictions | Optional |
+| `/drill-down/company/{id}/data-quality` | GET | Data quality metrics | Optional |
+| `/drill-down/company/{id}/fact/{fact_type}` | GET | Specific fact details | Optional |
+| `/drill-down/company/{id}/facts` | GET | All aggregated facts | Optional |
+| `/drill-down/company/{id}/signals` | GET | All extracted signals | Optional |
+| `/drill-down/company/{id}/source/{source_id}` | GET | Specific source details | Optional |
+| `/drill-down/company/{id}/sources` | GET | All data sources | Optional |
+| `/drill-down/company/{id}/timeline` | GET | Analysis timeline | Optional |
+| `/drill-down/company/{id}/why/{signal_name}` | GET | Signal explanation | Optional |
 ---
 
 ## Quick Start
@@ -548,3 +562,979 @@ Synchronous JSON export of all scored companies.
   }
 }
 ```
+
+---
+
+## Enrichment API Endpoints (Phase 10-13)
+
+The Connector Enrichment System provides REST API endpoints for enriching company data from multiple sources: SEC EDGAR, Companies House, and News Signals.
+
+### `POST /companies/{id}/enrich`
+
+Enrich a single company from available connectors.
+
+**Parameters**:
+- `id` (path, required): Company ID
+
+**Request Body**:
+```json
+{
+  "sources": ["SEC_EDGAR", "COMPANIES_HOUSE", "NEWS_SIGNALS"],
+  "dry_run": false
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "company_id": "001",
+  "company_name": "Acme Corp",
+  "status": "success",
+  "enrichment": {
+    "sources_used": ["SEC_EDGAR", "COMPANIES_HOUSE"],
+    "fields_enriched": [
+      "revenue",
+      "employees",
+      "profit_margin"
+    ],
+    "duration_ms": 1234
+  },
+  "data": {
+    "revenue": 5000000,
+    "employees": 150,
+    "growth_rate": 0.15,
+    "profit_margin": 0.12
+  }
+}
+```
+
+**Errors**:
+- `400 Bad Request`: Invalid company ID format
+- `404 Not Found`: Company not found
+- `429 Too Many Requests`: Rate limit exceeded (100 req/min/client)
+- `503 Service Unavailable`: Connectors unavailable
+
+---
+
+### `POST /companies/enrich/batch`
+
+Batch enrich multiple companies with performance optimization.
+
+**Request Body**:
+```json
+{
+  "company_ids": ["001", "002", "003"],
+  "batch_size": 10,
+  "use_cache": true,
+  "dry_run": false
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "status": "success",
+  "batch_id": "batch_12345",
+  "total_companies": 3,
+  "enriched_count": 3,
+  "failed_count": 0,
+  "results": [
+    {
+      "company_id": "001",
+      "status": "success",
+      "duration_ms": 245,
+      "source": "cache"
+    },
+    {
+      "company_id": "002",
+      "status": "success",
+      "duration_ms": 1234,
+      "source": "SEC_EDGAR"
+    },
+    {
+      "company_id": "003",
+      "status": "failed",
+      "error": "No identifiers found",
+      "duration_ms": 0
+    }
+  ],
+  "metrics": {
+    "total_duration_ms": 1479,
+    "avg_duration_ms": 493,
+    "cache_hits": 1,
+    "cache_misses": 2,
+    "success_rate": 66.7
+  }
+}
+```
+
+---
+
+### `GET /companies/{id}/enrichment/audit`
+
+Get enrichment audit trail for specific company.
+
+**Parameters**:
+- `id` (path, required): Company ID
+- `limit` (query, optional): Max entries to return (default: 50)
+
+**Response**: 200 OK
+```json
+{
+  "company_id": "001",
+  "company_name": "Acme Corp",
+  "audit_entries": [
+    {
+      "timestamp": "2026-02-25T21:00:00Z",
+      "operation": "enrich_success",
+      "source": "SEC_EDGAR",
+      "fields": ["revenue", "employees"],
+      "duration_ms": 450,
+      "user_id": "admin@example.com"
+    },
+    {
+      "timestamp": "2026-02-25T20:55:00Z",
+      "operation": "enrich_start",
+      "source": "COMPANIES_HOUSE",
+      "status": "in_progress"
+    }
+  ],
+  "summary": {
+    "total_enrichments": 5,
+    "successful": 4,
+    "failed": 1,
+    "success_rate": 80.0
+  }
+}
+```
+
+---
+
+### `GET /companies/{id}/enrichment/cache`
+
+Check if company is cached.
+
+**Response**: 200 OK
+```json
+{
+  "company_id": "001",
+  "cached": true,
+  "cache_key": "enriched_001_AAPL",
+  "ttl_remaining_hours": 23.5,
+  "cached_data": {
+    "revenue": 5000000,
+    "employees": 150
+  }
+}
+```
+
+---
+
+### `POST /enrichment/cache/clear`
+
+Clear all enrichment cache.
+
+**Response**: 200 OK
+```json
+{
+  "status": "success",
+  "message": "Enrichment cache cleared",
+  "entries_cleared": 47
+}
+```
+
+---
+
+### `POST /enrichment/cache/clear/{id}`
+
+Clear cache for specific company.
+
+**Parameters**:
+- `id` (path, required): Company ID
+
+**Response**: 200 OK
+```json
+{
+  "status": "success",
+  "company_id": "001",
+  "message": "Cache cleared",
+  "cache_key": "enriched_001_AAPL"
+}
+```
+
+---
+
+## Rate Limiting (Phase 13.5)
+
+All endpoints (except `/health` and `/ready`) are subject to rate limiting:
+
+- **Default**: 100 requests per minute per client
+- **Per-endpoint**: Consistent across all enrichment endpoints
+- **Reset**: Automatic every minute
+- **Headers Returned**:
+  ```
+  X-RateLimit-Limit: 100
+  X-RateLimit-Remaining: 45
+  X-RateLimit-Reset: 1614033660
+  ```
+
+**Rate Limit Error Response** (429):
+```json
+{
+  "error": "rate_limit_exceeded",
+  "message": "Rate limit exceeded: 100 requests per minute",
+  "retry_after_seconds": 35,
+  "code": "RATELIMIT_001"
+}
+```
+
+**See**: [Rate Limiting Guide](../guides/rate-limiting.md)
+
+---
+
+## Async Operations (Phase 12)
+
+The Async Job system enables long-running enrichment operations via Celery workers. Jobs are submitted, polled for status, and results retrieved when complete.
+
+> **Requires**: Celery + Redis. If Celery is unavailable, all async endpoints return `503 Service Unavailable`.
+
+### Job Lifecycle
+
+```
+1. POST /async/enrich/single or /async/enrich/batch  →  Returns job_id, status: SUBMITTED
+2. GET  /async/jobs/{job_id}/status                   →  Returns status: PENDING | RUNNING | SUCCESS | FAILED
+3. Poll every 1-5 seconds until status = SUCCESS or FAILED
+4. GET  /async/jobs/{job_id}/result                   →  Returns enrichment data (only when SUCCESS)
+```
+
+**Status state machine:**
+```
+SUBMITTED → PENDING → RUNNING → SUCCESS
+                               → FAILED (with error_message)
+```
+
+---
+
+### `POST /async/enrich/single`
+
+Submit a single company for async enrichment.
+
+**Request Body:**
+```json
+{
+  "company_id": "tech-corp-001",
+  "company_name": "TechCorp",
+  "sources": ["github", "news"],
+  "use_cache": true
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `company_id` | string | Yes | Company identifier |
+| `company_name` | string | No | Human-readable name |
+| `sources` | string[] | No | Data sources to use (defaults to all) |
+| `use_cache` | boolean | No | Use cached data if available (default: true) |
+
+**Response:** 200 OK
+```json
+{
+  "job_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "company_id": "tech-corp-001",
+  "status": "SUBMITTED",
+  "message": "Enrichment job submitted successfully"
+}
+```
+
+**Errors:**
+- `400 Bad Request`: Invalid company_id format
+- `429 Too Many Requests`: Rate limit exceeded
+- `503 Service Unavailable`: Celery/Redis not configured
+
+**Example:**
+```bash
+curl -X POST "http://localhost:8000/async/enrich/single" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {token}" \
+  -d '{
+    "company_id": "tech-corp-001",
+    "company_name": "TechCorp",
+    "sources": ["github", "news"],
+    "use_cache": true
+  }'
+```
+
+---
+
+### `POST /async/enrich/batch`
+
+Submit multiple companies for async batch enrichment.
+
+**Request Body:**
+```json
+{
+  "companies": [
+    {"id": "tech-corp-001", "name": "TechCorp"},
+    {"id": "acme-energy-bv", "name": "Acme Energy"}
+  ],
+  "sources": ["github", "news"],
+  "batch_size": 10
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `companies` | object[] | Yes | List of `{id, name}` dicts (max 1000) |
+| `sources` | string[] | No | Data sources to use (defaults to all) |
+| `batch_size` | integer | No | Processing batch size (default: 10) |
+
+**Response:** 200 OK
+```json
+{
+  "job_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+  "total_companies": 2,
+  "status": "SUBMITTED",
+  "message": "Batch enrichment job submitted for 2 companies"
+}
+```
+
+**Errors:**
+- `400 Bad Request`: Empty companies list or batch > 1000
+- `429 Too Many Requests`: Rate limit exceeded
+- `503 Service Unavailable`: Celery/Redis not configured
+
+**Example:**
+```bash
+curl -X POST "http://localhost:8000/async/enrich/batch" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {token}" \
+  -d '{
+    "companies": [
+      {"id": "tech-corp-001", "name": "TechCorp"},
+      {"id": "acme-energy-bv", "name": "Acme Energy"}
+    ],
+    "sources": ["github", "news"],
+    "batch_size": 10
+  }'
+```
+
+---
+
+### `GET /async/jobs/{job_id}/status`
+
+Poll the status of an async job. Use this to monitor job progress.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `job_id` | string | Celery task ID returned from submit endpoint |
+
+**Response:** 200 OK
+```json
+{
+  "job_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "status": "RUNNING",
+  "progress": 45
+}
+```
+
+**Status values:**
+
+| Status | Meaning |
+|--------|---------|
+| `PENDING` | Job queued, not yet started |
+| `RUNNING` | Job actively processing (includes `progress` %) |
+| `SUCCESS` | Job completed — call `/result` to get data |
+| `FAILED` | Job failed — `error` field contains details |
+
+**When `SUCCESS`:**
+```json
+{
+  "job_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "status": "SUCCESS",
+  "progress": 100,
+  "result": { ... }
+}
+```
+
+**When `FAILED`:**
+```json
+{
+  "job_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "status": "FAILED",
+  "progress": 0,
+  "error": "Connection to SEC EDGAR timed out"
+}
+```
+
+**Errors:**
+- `429 Too Many Requests`: Rate limit exceeded
+- `503 Service Unavailable`: Celery/Redis not configured
+
+**Example (polling pattern):**
+```bash
+# Submit job
+JOB_ID=$(curl -s -X POST "http://localhost:8000/async/enrich/single" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {token}" \
+  -d '{"company_id": "tech-corp-001"}' | jq -r '.job_id')
+
+# Poll until complete
+while true; do
+  STATUS=$(curl -s "http://localhost:8000/async/jobs/$JOB_ID/status" \
+    -H "Authorization: Bearer {token}" | jq -r '.status')
+  echo "Status: $STATUS"
+  if [ "$STATUS" = "SUCCESS" ] || [ "$STATUS" = "FAILED" ]; then break; fi
+  sleep 2
+done
+
+# Get result
+curl -s "http://localhost:8000/async/jobs/$JOB_ID/result" \
+  -H "Authorization: Bearer {token}" | jq .
+```
+
+---
+
+### `GET /async/jobs/{job_id}/result`
+
+Retrieve the result of a completed async job. Only available when job status is `SUCCESS` or `FAILED`.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `job_id` | string | Celery task ID returned from submit endpoint |
+
+**Response (SUCCESS):** 200 OK
+```json
+{
+  "job_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "status": "SUCCESS",
+  "result": {
+    "company_id": "tech-corp-001",
+    "enrichment_results": { ... },
+    "sources_used": ["github", "news"],
+    "duration_ms": 4500
+  }
+}
+```
+
+**Response (FAILED):** 200 OK
+```json
+{
+  "job_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "status": "FAILED",
+  "error": "Connection to SEC EDGAR timed out"
+}
+```
+
+**Errors:**
+- `202 Accepted`: Job still pending or running (not yet complete)
+- `400 Bad Request`: Unknown job state
+- `429 Too Many Requests`: Rate limit exceeded
+- `503 Service Unavailable`: Celery/Redis not configured
+
+> **Note:** A `202` response means the job is still in progress. Continue polling `/status` and retry `/result` when status reaches `SUCCESS` or `FAILED`.
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/async/jobs/a1b2c3d4-e5f6-7890-abcd-ef1234567890/result" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+## Deep Dive Analysis (Drill-Down Endpoints)
+
+The drill-down endpoints provide full transparency into company analysis. All endpoints are read-only (GET) and operate on data from the enrichment audit trail.
+
+> **Tag**: `transparency` — All drill-down endpoints are grouped under the "transparency" tag in the OpenAPI spec.
+
+**Common Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier (same as used in enrichment) |
+
+**Common Errors (all drill-down endpoints):**
+- `404 Not Found`: No analysis found for the given company_id
+
+---
+
+### `GET /drill-down/company/{company_id}/why/{signal_name}`
+
+Explain why a company received a specific signal value. Shows the calculation method, contributing facts, and confidence level.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier |
+| `signal_name` | string | Signal to explain (e.g., `growth_score`, `competitive_position`) |
+
+**Response:** 200 OK
+```json
+{
+  "company_id": "tech-corp-001",
+  "signal_name": "growth_score",
+  "signal_value": 7.8,
+  "confidence": 0.85,
+  "reasoning": "Calculated via weighted_multi_source",
+  "source_facts": ["revenue_growth_25pct", "employee_count_up_30pct"],
+  "calculation_method": "weighted_multi_source"
+}
+```
+
+**Errors:**
+- `404 Not Found`: No analysis found, or signal_name not found for the company
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/why/growth_score" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### `GET /drill-down/company/{company_id}/sources`
+
+List all data sources gathered during company analysis. Optionally filter by fact type.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier |
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `fact_type` | string | Filter sources by fact type (optional) |
+
+**Response:** 200 OK
+```json
+{
+  "company_id": "tech-corp-001",
+  "total_sources": 3,
+  "fact_type_filter": null,
+  "sources": [
+    {
+      "source_id": "src-github-001",
+      "source_name": "GitHub API",
+      "source_type": "github",
+      "url": "https://api.github.com/repos/techcorp/main",
+      "confidence": 0.92,
+      "retrieval_timestamp": "2026-02-26T10:30:00Z",
+      "facts_found": 5
+    }
+  ]
+}
+```
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/sources" \
+  -H "Authorization: Bearer {token}"
+
+# With fact_type filter
+curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/sources?fact_type=revenue" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### `GET /drill-down/company/{company_id}/source/{source_id}`
+
+Get detailed information about a specific data source, including raw content and metadata.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier |
+| `source_id` | string | Source identifier (from `/sources` response) |
+
+**Response:** 200 OK
+```json
+{
+  "source_id": "src-github-001",
+  "source_name": "GitHub API",
+  "source_type": "github",
+  "url": "https://api.github.com/repos/techcorp/main",
+  "confidence": 0.92,
+  "retrieval_timestamp": "2026-02-26T10:30:00Z",
+  "raw_content": "...",
+  "metadata": { ... },
+  "facts": [
+    {"type": "commit_velocity", "value": "8.5/day"}
+  ]
+}
+```
+
+**Errors:**
+- `404 Not Found`: Source not found for this company
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/source/src-github-001" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### `GET /drill-down/company/{company_id}/facts`
+
+List all aggregated facts for a company, with optional confidence filtering. Includes contradiction summary.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier |
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `min_confidence` | float | Minimum confidence threshold (0.0–1.0, default: 0.0) |
+
+**Response:** 200 OK
+```json
+{
+  "company_id": "tech-corp-001",
+  "facts_count": 12,
+  "min_confidence_filter": 0.5,
+  "facts": [
+    {
+      "fact_type": "revenue",
+      "value": "12500000",
+      "confidence": 0.95,
+      "sources_used": 3,
+      "source_agreement_percentage": 100.0
+    }
+  ],
+  "contradictions_count": 1,
+  "contradictions": [
+    {
+      "fact_type": "employee_count",
+      "value": "150",
+      "confidence": 0.6
+    }
+  ]
+}
+```
+
+**Example:**
+```bash
+# All facts
+curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/facts" \
+  -H "Authorization: Bearer {token}"
+
+# High-confidence only
+curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/facts?min_confidence=0.8" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### `GET /drill-down/company/{company_id}/fact/{fact_type}`
+
+Get detailed information about a specific aggregated fact.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier |
+| `fact_type` | string | Fact type (e.g., `revenue`, `employee_count`) |
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `value` | string | Required — the specific fact value to look up |
+
+**Response:** 200 OK
+```json
+{
+  "fact_type": "revenue",
+  "value": "12500000",
+  "confidence": 0.95,
+  "sources_used": 3,
+  "source_agreement_percentage": 100.0
+}
+```
+
+**Errors:**
+- `404 Not Found`: Fact type/value combination not found for this company
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/fact/revenue?value=12500000" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### `GET /drill-down/company/{company_id}/audit-trail`
+
+Get the complete audit trail for a company analysis, including all enrichment artifacts, scores, and data quality.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier |
+
+**Response:** 200 OK — Returns `CompanyAnalysisAuditTrail` object
+```json
+{
+  "company_id": "tech-corp-001",
+  "gathering_batch_id": "batch-2026-02-26",
+  "company_name": "TechCorp",
+  "raw_data": { "sources": [...] },
+  "aggregated_facts": { "facts": [...], "average_confidence": 0.87 },
+  "extracted_signals": { "signals": [...] },
+  "growth_score": 7.8,
+  "financial_health_score": 6.5,
+  "competitive_position_score": 8.1,
+  "classification": "Phoenix",
+  "scoring_breakdown": { ... },
+  "analysis_started_at": "2026-02-26T10:00:00Z",
+  "analysis_completed_at": "2026-02-26T10:02:30Z",
+  "analysis_duration_seconds": 150.0,
+  "data_completeness": 0.85,
+  "confidence_level": "high",
+  "errors": [],
+  "warnings": ["Companies House data unavailable"]
+}
+```
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/audit-trail" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### `GET /drill-down/company/{company_id}/signals`
+
+List all extracted business signals for a company. Signals are derived from aggregated facts using calculation methods.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier |
+
+**Response:** 200 OK
+```json
+{
+  "company_id": "tech-corp-001",
+  "signals_count": 5,
+  "signals": [
+    {
+      "signal_name": "growth_score",
+      "signal_value": 7.8,
+      "signal_confidence": 0.85,
+      "calculation_method": "weighted_multi_source",
+      "source_facts": ["revenue_growth_25pct", "employee_count_up_30pct"]
+    }
+  ]
+}
+```
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/signals" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### `GET /drill-down/company/{company_id}/contradictions`
+
+List all data contradictions detected during analysis. Contradictions occur when different sources report conflicting values for the same fact.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier |
+
+**Response:** 200 OK
+```json
+{
+  "company_id": "tech-corp-001",
+  "contradictions_count": 2,
+  "contradictions": [
+    {
+      "fact_type": "employee_count",
+      "value": "150",
+      "confidence": 0.6
+    },
+    {
+      "fact_type": "revenue",
+      "value": "10000000",
+      "confidence": 0.45
+    }
+  ]
+}
+```
+
+> **Note:** An empty `contradictions` array means all sources agreed. A high contradiction count suggests unreliable data — check individual sources for details.
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/contradictions" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### `GET /drill-down/company/{company_id}/data-quality`
+
+Get data quality metrics for a company analysis, including completeness, confidence, and coverage gaps.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier |
+
+**Response:** 200 OK
+```json
+{
+  "company_id": "tech-corp-001",
+  "completeness": 0.85,
+  "average_confidence": 0.87,
+  "sources_count": 4,
+  "confidence_level": "high",
+  "coverage_gaps": []
+}
+```
+
+**Confidence levels:**
+
+| Level | Meaning |
+|-------|---------|
+| `unknown` | Insufficient data to assess |
+| `low` | Significant data gaps |
+| `medium` | Adequate data, some gaps |
+| `high` | Comprehensive data |
+| `very_high` | Multiple corroborating sources |
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/data-quality" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### `GET /drill-down/company/{company_id}/timeline`
+
+Get the timeline of the analysis process, showing when analysis started, completed, and how long it took.
+
+**Path Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `company_id` | string | Company identifier |
+
+**Response:** 200 OK
+```json
+{
+  "company_id": "tech-corp-001",
+  "started_at": "2026-02-26T10:00:00Z",
+  "completed_at": "2026-02-26T10:02:30Z",
+  "duration_seconds": 150.0,
+  "batch_id": "batch-2026-02-26"
+}
+```
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/drill-down/company/tech-corp-001/timeline" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+## Health Checks (Phase 13.3)
+
+### `GET /health`
+
+Platform health check (liveness probe). **NOT rate limited**.
+
+**Response**: 200 OK
+```json
+{
+  "status": "healthy",
+  "timestamp": "2026-02-25T21:00:00Z",
+  "checks": {
+    "database": {
+      "status": "connected",
+      "healthy": true
+    },
+    "cache": {
+      "status": "operational",
+      "healthy": true
+    }
+  }
+}
+```
+
+**See**: [Health Checks Guide](../guides/health-checks.md)
+
+### `GET /ready`
+
+Readiness probe for load balancers. **NOT rate limited**.
+
+**Response**: 200 OK
+```json
+{
+  "ready": true,
+  "timestamp": "2026-02-25T21:00:00Z",
+  "checks": {
+    "database": {"healthy": true},
+    "cache": {"healthy": true},
+    "sec_edgar_connector": {"healthy": true},
+    "companies_house_connector": {"healthy": true},
+    "news_signals_connector": {"healthy": true},
+    "github_connector": {"healthy": true}
+  }
+}
+```
+
+**See**: [Health Checks Guide](../guides/health-checks.md)
+
+---
+
+## Security Headers
+
+All responses include security headers:
+```
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+Strict-Transport-Security: max-age=31536000
+Content-Security-Policy: default-src 'self'
+```
+
+---
+
+## Versioning
+
+API version: `1.0`  
+Stable endpoints version: `/v1/*`
+
+Future versions will be released as `/v2/*` with full backward compatibility maintained for `/v1/*`.
+
+---
+
+**Last Updated**: February 26, 2026  
+**Status**: Production-Ready ✅
