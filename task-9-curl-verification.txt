@@ -1,0 +1,357 @@
+=====================================================================
+TASK 9: CURL EXAMPLE VERIFICATION — docs/api/reference.md
+=====================================================================
+Date: 2026-02-26
+File: docs/api/reference.md
+Total curl examples verified: 54
+Issues found: 2 (both FIXED)
+Issues remaining: 0
+
+=====================================================================
+ENDPOINT INVENTORY (Source Code Cross-Reference)
+=====================================================================
+Router registrations from main.py:
+  enrichment.router       → no prefix (/, /health, /ready, /metrics, /companies/*)
+  health.router           → prefix=/health (/health/status, /health/ready, /health/live)
+  health.metrics_router   → prefix=/metrics (/metrics/data-quality)
+  companies.router        → no prefix (/companies, /companies/{id})
+  scoring.router          → prefix=/scoring (/scoring/company/{id}/score, /scoring/batch, /scoring/stats)
+  market.router           → prefix=/market (/market/analysis, /market/overlap/{id}, /market/search)
+  export.router           → prefix=/export (/export/excel, /export/json, /export/search/llm)
+  drill_down.router       → prefix=/drill-down (/drill-down/company/{id}/*)
+  simulation.router       → prefix=/simulation (/simulation/run)
+  async_jobs.router       → prefix=/async (/async/enrich/single, /async/enrich/batch, /async/jobs/{id}/*)
+
+=====================================================================
+CURL VERIFICATION RESULTS (54 examples)
+=====================================================================
+
+--- QUICK START SECTION (4 examples) ---
+
+#1  Line 56: curl http://localhost:8000/health
+    Method: GET (implicit) | Path: /health | Endpoint: enrichment.py GET /health
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: N/A | Body: N/A
+
+#2  Line 62: curl http://localhost:8000/companies?limit=10
+    Method: GET (implicit) | Path: /companies | Endpoint: companies.py GET /companies
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (limit is valid) | Body: N/A
+
+#3  Line 68: curl -X POST http://localhost:8000/scoring/company/company-id/score
+    Method: POST | Path: /scoring/company/{id}/score | Endpoint: scoring.py POST /company/{id}/score
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: N/A | Body: N/A
+
+#4  Lines 74-75: curl -X GET "http://localhost:8000/export/excel" (FIXED)
+    Method: GET | Path: /export/excel | Endpoint: export.py GET /excel
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: N/A | Body: N/A
+    *** WAS: POST /export/ with JSON body — endpoint didn't exist ***
+    *** FIX: Changed to GET /export/excel with auth header ***
+
+--- AUTHENTICATION SECTION (1 example) ---
+
+#5  Lines 91-93: curl -H "Authorization: Bearer your_token_here" http://localhost:8000/companies
+    Method: GET (implicit) | Path: /companies | Endpoint: companies.py GET /companies
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: N/A | Body: N/A
+
+--- CLIENT CODE CURL SECTION (4 examples) ---
+
+#6  Line 217: curl http://localhost:8000/companies
+    Method: GET (implicit) | Path: /companies
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: N/A | Body: N/A
+
+#7  Line 220: curl -X POST http://localhost:8000/scoring/company/company-1/score
+    Method: POST | Path: /scoring/company/{id}/score
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: N/A | Body: N/A
+
+#8  Line 223: curl "http://localhost:8000/companies?skip=0&limit=50"
+    Method: GET (implicit) | Path: /companies
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (skip, limit valid) | Body: N/A
+
+#9  Line 226: curl "http://localhost:8000/companies?industry=Software&min_revenue=10"
+    Method: GET (implicit) | Path: /companies
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (industry, min_revenue valid) | Body: N/A
+
+--- HEALTH & MONITORING (5 examples) ---
+
+#10 Line 255: curl -X GET "http://localhost:8000/health"
+    Endpoint: enrichment.py GET /health
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#11 Line 283: curl -X GET "http://localhost:8000/health/status"
+    Endpoint: health.py GET /status (prefix /health)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#12 Lines 314-315: curl -X GET "http://localhost:8000/health/ready"
+    Endpoint: health.py GET /ready (prefix /health)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#13 Lines 338-339: curl -X GET "http://localhost:8000/health/live"
+    Endpoint: health.py GET /live (prefix /health)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#14 Line 388: curl -X GET "http://localhost:8000/metrics/data-quality"
+    Endpoint: health.py metrics_router GET /data-quality (prefix /metrics)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+--- COMPANIES (5 examples) ---
+
+#15 Lines 455-456: curl -X GET "http://localhost:8000/companies?skip=0&limit=10&tier=Tier%201" (FIXED)
+    Endpoint: companies.py GET /companies
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (tier=Tier 1 is valid CompanyTier)
+    *** WAS: tier=Phoenix — Phoenix is a classification, not a valid CompanyTier enum ***
+    *** FIX: Changed to tier=Tier%201 (URL-encoded "Tier 1") ***
+
+#16 Lines 459-460: curl -X GET "http://localhost:8000/companies?industry=SaaS&min_revenue=10"
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅
+
+#17 Lines 518-527: curl -X POST "http://localhost:8000/companies" -d '{...}'
+    Endpoint: companies.py POST /companies
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Body: ✅ (name, industry, geographic_presence, id match Company model)
+
+#18 Lines 556-558: curl -X GET "http://localhost:8000/companies/tech-corp-001"
+    Endpoint: companies.py GET /companies/{company_id}
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#19 Lines 587-589: curl -X DELETE "http://localhost:8000/companies/tech-corp-001"
+    Endpoint: companies.py DELETE /companies/{company_id}
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+--- SCORING (3 examples) ---
+
+#20 Lines 651-653: curl -X POST "http://localhost:8000/scoring/company/tech-corp-001/score"
+    Endpoint: scoring.py POST /company/{company_id}/score (prefix /scoring)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#21 Lines 702-704: curl -X GET "http://localhost:8000/scoring/batch?industry=SaaS"
+    Endpoint: scoring.py GET /batch (prefix /scoring)
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (industry valid)
+
+#22 Lines 757-759: curl -X GET "http://localhost:8000/scoring/stats"
+    Endpoint: scoring.py GET /stats (prefix /scoring)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+--- MARKET ANALYSIS (3 examples) ---
+
+#23 Lines 819-821: curl -X GET "http://localhost:8000/market/analysis?industry=SaaS"
+    Endpoint: market.py GET /analysis (prefix /market)
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (industry valid)
+
+#24 Lines 863-865: curl -X GET "http://localhost:8000/market/overlap/tech-corp-001"
+    Endpoint: market.py GET /overlap/{company_id} (prefix /market)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#25 Lines 910-912: curl -X GET "http://localhost:8000/market/search?query=acme&field=name"
+    Endpoint: market.py GET /search (prefix /market)
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (query, field valid)
+
+--- EXPORT (3 examples) ---
+
+#26 Lines 957-959: curl -X GET "http://localhost:8000/export/excel?industry=SaaS&include_charts=true"
+    Endpoint: export.py GET /excel (prefix /export)
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (industry, include_charts valid)
+
+#27 Lines 1001-1003: curl -X GET "http://localhost:8000/export/json?industry=SaaS" > export.json
+    Endpoint: export.py GET /json (prefix /export)
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (industry valid)
+
+#28 Lines 1053-1055: curl -X GET "http://localhost:8000/export/search/llm?criteria=fast%20growing%20saas&limit=10"
+    Endpoint: export.py GET /search/llm (prefix /export)
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (criteria, limit valid)
+
+--- SIMULATION (1 example) ---
+
+#29 Lines 1135-1150: curl -X POST "http://localhost:8000/simulation/run?industry=SaaS" -d '{...}'
+    Endpoint: simulation.py POST /run (prefix /simulation)
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (industry valid)
+    Body: ✅ (Scenario: id, name, description, conditions with type/name/impact_factor)
+
+--- ENRICHMENT OPERATIONS (9 examples) ---
+
+#30 Lines 1324-1328: curl -X POST "http://localhost:8000/companies/tech-corp-001/enrich" -d '{...}'
+    Endpoint: enrichment.py POST /companies/{company_id}/enrich
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Body: ✅ (sources, dry_run match EnrichmentRequest)
+
+#31 Lines 1411-1419: curl -X POST "http://localhost:8000/companies/enrich/batch" -d '{...}'
+    Endpoint: enrichment.py POST /companies/enrich/batch
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Body: ✅ (company_ids, batch_size, use_cache match BatchEnrichmentRequest)
+
+#32 Lines 1501-1503: curl -X GET "http://localhost:8000/companies/tech-corp-001/enrichment/audit?limit=10"
+    Endpoint: enrichment.py GET /companies/{company_id}/enrichment/audit
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (limit valid)
+
+#33 Lines 1551-1553: curl -X GET "http://localhost:8000/companies/tech-corp-001/enrichment/cache"
+    Endpoint: enrichment.py GET /companies/{company_id}/enrichment/cache
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#34 Lines 1590-1592: curl -X POST "http://localhost:8000/enrichment/cache/clear"
+    Endpoint: enrichment.py POST /enrichment/cache/clear
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#35 Lines 1635-1637: curl -X POST "http://localhost:8000/enrichment/cache/clear/tech-corp-001"
+    Endpoint: enrichment.py POST /enrichment/cache/clear/{company_id}
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#36 Line 1692: curl -X GET "http://localhost:8000/health"
+    Endpoint: enrichment.py GET /health (duplicate, enrichment section)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#37 Line 1745: curl -X GET "http://localhost:8000/ready"
+    Endpoint: enrichment.py GET /ready
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#38 Line 1818: curl -X GET "http://localhost:8000/metrics"
+    Endpoint: enrichment.py GET /metrics
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+--- ASYNC OPERATIONS (5 examples) ---
+
+#39 Lines 1910-1919: curl -X POST "http://localhost:8000/async/enrich/single" -d '{...}'
+    Endpoint: async_jobs.py POST /enrich/single (prefix /async)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+    Body: ✅ (company_id, company_name, sources, use_cache match AsyncEnrichmentRequest)
+
+#40 Lines 1962-1973: curl -X POST "http://localhost:8000/async/enrich/batch" -d '{...}'
+    Endpoint: async_jobs.py POST /enrich/batch (prefix /async)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+    Body: ✅ (companies, sources, batch_size match AsyncBatchEnrichmentRequest)
+
+#41 Lines 2032-2049: Polling script (composite — 3 curl invocations)
+    Submit: POST /async/enrich/single ✅
+    Poll:   GET /async/jobs/$JOB_ID/status ✅
+    Result: GET /async/jobs/$JOB_ID/result ✅
+    Syntax: ✅ (proper shell variable usage, jq piping)
+
+#42 Lines 2096-2098: curl -X GET "http://localhost:8000/async/jobs/{uuid}/result"
+    Endpoint: async_jobs.py GET /jobs/{job_id}/result (prefix /async)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+--- DRILL-DOWN ENDPOINTS (12 examples) ---
+
+#43 Lines 2148-2150: curl -X GET ".../drill-down/company/tech-corp-001/why/growth_score"
+    Endpoint: drill_down.py GET /company/{company_id}/why/{signal_name} (prefix /drill-down)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#44 Lines 2192-2194: curl -X GET ".../drill-down/company/tech-corp-001/sources"
+    Endpoint: drill_down.py GET /company/{company_id}/sources (prefix /drill-down)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#45 Lines 2196-2198: curl -X GET ".../drill-down/company/tech-corp-001/sources?fact_type=revenue"
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (fact_type valid)
+
+#46 Lines 2235-2237: curl -X GET ".../drill-down/company/tech-corp-001/source/src-github-001"
+    Endpoint: drill_down.py GET /company/{company_id}/source/{source_id} (prefix /drill-down)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#47 Lines 2286-2288: curl -X GET ".../drill-down/company/tech-corp-001/facts"
+    Endpoint: drill_down.py GET /company/{company_id}/facts (prefix /drill-down)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#48 Lines 2290-2292: curl -X GET ".../drill-down/company/tech-corp-001/facts?min_confidence=0.8"
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (min_confidence valid)
+
+#49 Lines 2329-2331: curl -X GET ".../drill-down/company/tech-corp-001/fact/revenue?value=12500000"
+    Endpoint: drill_down.py GET /company/{company_id}/fact/{fact_type} (prefix /drill-down)
+    Syntax: ✅ | Method: ✅ | Path: ✅ | Params: ✅ (value required param)
+
+#50 Lines 2371-2373: curl -X GET ".../drill-down/company/tech-corp-001/audit-trail"
+    Endpoint: drill_down.py GET /company/{company_id}/audit-trail (prefix /drill-down)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#51 Lines 2406-2408: curl -X GET ".../drill-down/company/tech-corp-001/signals"
+    Endpoint: drill_down.py GET /company/{company_id}/signals (prefix /drill-down)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#52 Lines 2446-2448: curl -X GET ".../drill-down/company/tech-corp-001/contradictions"
+    Endpoint: drill_down.py GET /company/{company_id}/contradictions (prefix /drill-down)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#53 Lines 2486-2488: curl -X GET ".../drill-down/company/tech-corp-001/data-quality"
+    Endpoint: drill_down.py GET /company/{company_id}/data-quality (prefix /drill-down)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+#54 Lines 2515-2517: curl -X GET ".../drill-down/company/tech-corp-001/timeline"
+    Endpoint: drill_down.py GET /company/{company_id}/timeline (prefix /drill-down)
+    Syntax: ✅ | Method: ✅ | Path: ✅
+
+=====================================================================
+ISSUES FOUND AND FIXED
+=====================================================================
+
+ISSUE 1: Quick Start #4 — Export example (line 74, original)
+  BEFORE: curl -X POST http://localhost:8000/export/ -H "Content-Type: application/json" -d '{"format": "excel"}'
+  PROBLEM: POST /export/ endpoint does NOT exist. Export endpoints are GET-based:
+           - GET /export/excel (background Excel export)
+           - GET /export/json (synchronous JSON export)
+  AFTER:  curl -X GET "http://localhost:8000/export/excel" -H "Authorization: Bearer {token}"
+  SEVERITY: Path mismatch + Method mismatch + Body mismatch
+
+ISSUE 2: Companies tier filter (line 457, original)
+  BEFORE: curl -X GET "http://localhost:8000/companies?skip=0&limit=10&tier=Phoenix"
+  PROBLEM: tier=Phoenix is invalid. The `tier` query parameter accepts CompanyTier enum:
+           Tier 1, Tier 2, Tier 3, Tier 4. "Phoenix" is a growth classification, not a tier.
+  AFTER:  curl -X GET "http://localhost:8000/companies?skip=0&limit=10&tier=Tier%201"
+  SEVERITY: Parameter value mismatch
+
+=====================================================================
+VERIFICATION SUMMARY
+=====================================================================
+
+Total curl examples:          54
+  Quick Start section:         4
+  Authentication section:      1
+  Client Code section:         4
+  Health & Monitoring:         5
+  Companies:                   5
+  Scoring:                     3
+  Market Analysis:             3
+  Export:                       3
+  Simulation:                  1
+  Enrichment Operations:       9
+  Async Operations:            5 (includes composite polling script)
+  Drill-Down:                 12
+
+Verification checks performed per example:
+  - Syntax (proper quotes, escaping, line continuations)
+  - HTTP method matches endpoint decorator (@router.get/post/delete)
+  - URL path matches registered route (with prefix from main.py)
+  - Query parameters match function signature (Query() params)
+  - Request body (if POST) matches Pydantic model schema
+
+RESULTS (after fixes):
+  Syntax errors:           0
+  Path mismatches:         0  (1 found → fixed)
+  Method mismatches:       0  (1 found → fixed)
+  Parameter mismatches:    0  (1 found → fixed)
+  Request body mismatches: 0  (1 found → fixed)
+
+Cross-reference sources:
+  - companies.py:   GET /companies, GET /companies/{id}, POST /companies, DELETE /companies/{id}
+  - scoring.py:     POST /company/{id}/score, GET /batch, GET /stats (prefix: /scoring)
+  - market.py:      GET /analysis, GET /overlap/{id}, GET /search (prefix: /market)
+  - export.py:      GET /excel, GET /json, GET /search/llm (prefix: /export)
+  - simulation.py:  POST /run (prefix: /simulation)
+  - health.py:      GET /, GET /status, GET /ready, GET /live (prefix: /health)
+                    GET /data-quality (metrics_router, prefix: /metrics)
+  - enrichment.py:  GET /health, GET /ready, GET /metrics,
+                    POST /companies/{id}/enrich, POST /companies/enrich/batch,
+                    GET /companies/{id}/enrichment/audit, GET /companies/{id}/enrichment/cache,
+                    POST /enrichment/cache/clear, POST /enrichment/cache/clear/{id}
+  - async_jobs.py:  POST /enrich/single, POST /enrich/batch,
+                    GET /jobs/{id}/status, GET /jobs/{id}/result (prefix: /async)
+  - drill_down.py:  GET /company/{id}/why/{signal}, GET /company/{id}/sources,
+                    GET /company/{id}/source/{source_id}, GET /company/{id}/facts,
+                    GET /company/{id}/fact/{fact_type}, GET /company/{id}/audit-trail,
+                    GET /company/{id}/signals, GET /company/{id}/contradictions,
+                    GET /company/{id}/data-quality, GET /company/{id}/timeline
+                    (prefix: /drill-down)
+  - main.py:        Router registration order and prefix assignments
+
+=====================================================================
+ACCEPTANCE CRITERIA STATUS
+=====================================================================
+[✅] All 54 curl examples verified (exceeds 27 mentioned in task)
+[✅] Syntax errors: 0 (after fixes)
+[✅] Path mismatches: 0 (after fixes)
+[✅] Method mismatches: 0 (after fixes)
+[✅] Parameter mismatches: 0 (after fixes)
+[✅] Request body mismatches: 0 (after fixes)
+[✅] Evidence file created: task-9-curl-verification.txt

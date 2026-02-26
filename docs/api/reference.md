@@ -71,9 +71,8 @@ curl -X POST http://localhost:8000/scoring/company/company-id/score
 ### 4. Export to Excel
 
 ```bash
-curl -X POST http://localhost:8000/export/ \
-  -H "Content-Type: application/json" \
-  -d '{"format": "excel"}'
+curl -X GET "http://localhost:8000/export/excel" \
+  -H "Authorization: Bearer {token}"
 ```
 
 ---
@@ -454,7 +453,7 @@ List all profiled companies with optional filtering and pagination.
 
 ```bash
 # List with pagination and tier filter
-curl -X GET "http://localhost:8000/companies?skip=0&limit=10&tier=Phoenix" \
+curl -X GET "http://localhost:8000/companies?skip=0&limit=10&tier=Tier%201" \
   -H "Authorization: Bearer {token}"
 
 # Filter by industry and minimum revenue
