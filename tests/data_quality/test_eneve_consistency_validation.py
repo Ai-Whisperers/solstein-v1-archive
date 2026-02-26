@@ -6,8 +6,9 @@ Ensures deterministic scoring with variance < 0.2 for all dimensions.
 """
 
 import pytest
-from solstein.domain.models import Company, FinancialMetric, AIMaturity
+
 from solstein.analytics.scoring import GrowthScorer
+from solstein.domain.models import AIMaturity, Company, FinancialMetric
 from tests.data_quality.golden_dataset import get_golden_company_by_name
 
 

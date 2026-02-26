@@ -143,6 +143,13 @@ files = [
     "src/solstein/api/main.py",
     "src/solstein/cli.py",
     "src/solstein/config.py",
+    "src/solstein/analytics/classification.py",
+    "src/solstein/analytics/company_loader.py",
+    "src/solstein/analytics/completeness.py",
+    "src/solstein/analytics/confidence_weighting.py",
+    "src/solstein/data/interpolation.py",
+    "src/solstein/data/unified_loader.py",
+    "src/solstein/presentation",
 ]
 disable_error_code = [
     "arg-type",

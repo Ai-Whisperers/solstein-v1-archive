@@ -4,17 +4,16 @@ Task 9-11: Classification System Tests
 Tests for balanced classification (Phoenix/Salt/Lead) with confidence scoring.
 """
 
-import pytest
-from src.solstein.domain.models import Company, FinancialMetric
 from src.solstein.analytics.classification import (
-    classify_company_balanced,
     calculate_classification_confidence,
-    get_classification_with_confidence,
-    is_tentative_classification,
+    classify_company_balanced,
     format_classification_with_confidence,
     get_classification_distribution,
+    get_classification_with_confidence,
+    is_tentative_classification,
     validate_classification_distribution,
 )
+from src.solstein.domain.models import Company
 
 
 class TestClassifyCompanyBalanced:

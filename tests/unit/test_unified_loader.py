@@ -15,20 +15,19 @@ Test Coverage:
 - Document merge conflicts
 """
 
-import pytest
-from pathlib import Path
-from unittest.mock import MagicMock, patch
 from datetime import datetime, timezone
+from pathlib import Path
+from unittest.mock import patch
 
-from solstein.domain.models import (
-    Company,
-    FinancialMetric,
-    ConfidenceLevel,
-    AIMaturity,
-    ThreatLevel,
-    CompanyTier,
-)
 from solstein.data.unified_loader import UnifiedCompany, UnifiedCompanyLoader
+from solstein.domain.models import (
+    AIMaturity,
+    Company,
+    CompanyTier,
+    ConfidenceLevel,
+    FinancialMetric,
+    ThreatLevel,
+)
 from tests.factories import make_company, make_financial_metric
 
 
@@ -130,16 +129,15 @@ class TestLoadMarkdownCompanies:
                     {"name": "Eneve"},
                     {"name": "Dexter Energy"},
                 ],
+            ), patch.object(
+                loader.markdown_extractor,
+                "to_company_profile",
+                side_effect=[mock_company_1, mock_company_2],
             ):
-                with patch.object(
-                    loader.markdown_extractor,
-                    "to_company_profile",
-                    side_effect=[mock_company_1, mock_company_2],
-                ):
-                    result = loader._load_markdown_companies()
-                    assert len(result) == 2
-                    assert result[0].id == "eneve"
-                    assert result[1].id == "dexter"
+                result = loader._load_markdown_companies()
+                assert len(result) == 2
+                assert result[0].id == "eneve"
+                assert result[1].id == "dexter"
 
     def test_load_markdown_companies_handles_extraction_errors(self):
         """_load_markdown_companies should skip files that fail to extract."""
@@ -161,15 +159,14 @@ class TestLoadMarkdownCompanies:
                     {"name": "Eneve"},
                     Exception("Parse error"),
                 ],
+            ), patch.object(
+                loader.markdown_extractor,
+                "to_company_profile",
+                return_value=mock_company,
             ):
-                with patch.object(
-                    loader.markdown_extractor,
-                    "to_company_profile",
-                    return_value=mock_company,
-                ):
-                    result = loader._load_markdown_companies()
-                    # Should only have the successful one
-                    assert len(result) == 1
+                result = loader._load_markdown_companies()
+                # Should only have the successful one
+                assert len(result) == 1
 
 
 class TestConvertToUnified:

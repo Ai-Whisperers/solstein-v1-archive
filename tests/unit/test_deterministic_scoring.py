@@ -6,8 +6,8 @@ This is critical for reproducibility and auditability of company assessments.
 """
 
 import pytest
-from src.solstein.data.unified_loader import UnifiedCompanyLoader
 from src.solstein.analytics.scoring import GrowthScorer
+from src.solstein.data.unified_loader import UnifiedCompanyLoader
 
 
 class TestDeterministicScoring:

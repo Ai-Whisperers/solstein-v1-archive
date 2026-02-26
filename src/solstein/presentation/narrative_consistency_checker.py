@@ -5,8 +5,8 @@ Validates report narratives for contradictions and ensures consistency
 between data, classification, and narrative tone.
 """
 
-from typing import Optional
-from solstein.domain.models import Company, AIMaturity
+
+from solstein.domain.models import AIMaturity, Company
 
 
 class NarrativeConsistencyChecker:
@@ -133,7 +133,7 @@ class NarrativeConsistencyChecker:
         return contradictions
 
     @staticmethod
-    def check_all_contradictions(company: Company, narrative: Optional[str] = None) -> list[str]:
+    def check_all_contradictions(company: Company, narrative: str | None = None) -> list[str]:
         """Check all types of contradictions."""
         all_contradictions = []
 
@@ -150,13 +150,13 @@ class NarrativeConsistencyChecker:
         return all_contradictions
 
     @staticmethod
-    def is_consistent(company: Company, narrative: Optional[str] = None) -> bool:
+    def is_consistent(company: Company, narrative: str | None = None) -> bool:
         """Check if company data and narrative are consistent."""
         contradictions = NarrativeConsistencyChecker.check_all_contradictions(company, narrative)
         return len(contradictions) == 0
 
     @staticmethod
-    def get_consistency_report(company: Company, narrative: Optional[str] = None) -> str:
+    def get_consistency_report(company: Company, narrative: str | None = None) -> str:
         """Generate a consistency report for a company."""
         contradictions = NarrativeConsistencyChecker.check_all_contradictions(company, narrative)
 
@@ -201,7 +201,7 @@ class NarrativeConsistencyChecker:
         return expected_min <= company.composite_score < expected_max
 
     @staticmethod
-    def fix_ai_score_for_maturity(company: Company) -> Optional[int]:
+    def fix_ai_score_for_maturity(company: Company) -> int | None:
         """Suggest a corrected AI score based on maturity level."""
         if company.ai_maturity is None:
             return None
@@ -222,7 +222,7 @@ class NarrativeConsistencyChecker:
         return int((expected_min + expected_max) / 2)
 
     @staticmethod
-    def fix_classification_for_score(company: Company) -> Optional[str]:
+    def fix_classification_for_score(company: Company) -> str | None:
         """Suggest a corrected classification based on score."""
         if company.composite_score is None:
             return None

@@ -5,9 +5,10 @@ Tests for data quality indicators, provenance tracking, and confidence levels.
 """
 
 import pytest
-from solstein.presentation.data_quality_indicators import DataQualityIndicators
-from solstein.domain.models import Company, FinancialMetric, ConfidenceLevel, CompanyTier
+
 from solstein.analytics.completeness import DataQualityTier
+from solstein.domain.models import Company, CompanyTier, ConfidenceLevel, FinancialMetric
+from solstein.presentation.data_quality_indicators import DataQualityIndicators
 
 
 class TestDataQualityIndicators:

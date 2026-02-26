@@ -6,9 +6,9 @@ Comprehensive analysis of all 199 companies to identify NULL values, data comple
 
 import json
 import sys
-from pathlib import Path
 from collections import defaultdict
-from typing import Any, Dict, List, Tuple
+from pathlib import Path
+from typing import Any
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from solstein.data.loaders import CompetitorDataLoader
 
 
-def audit_data_quality() -> Dict[str, Any]:
+def audit_data_quality() -> dict[str, Any]:
     """
     Audit all 199 companies for data quality and completeness.
 
@@ -186,7 +186,7 @@ def audit_data_quality() -> Dict[str, Any]:
     return audit_report
 
 
-def print_summary(audit_report: Dict[str, Any]) -> None:
+def print_summary(audit_report: dict[str, Any]) -> None:
     """Print audit summary to console."""
 
     print("\n" + "=" * 80)

@@ -12,7 +12,6 @@ All interpolations are explicitly marked and documented.
 """
 
 import logging
-from typing import Optional, Tuple
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
@@ -45,16 +44,16 @@ class InterpolationConfig:
 class InterpolationEngine:
     """Engine for interpolating missing financial data."""
 
-    def __init__(self, config: Optional[InterpolationConfig] = None):
+    def __init__(self, config: InterpolationConfig | None = None):
         """Initialize with configuration."""
         self.config = config or InterpolationConfig()
         logger.info(f"InterpolationEngine initialized with config: {self.config}")
 
     def interpolate_revenue(
         self,
-        revenue_timeline: Optional[list[dict]] = None,
-        current_revenue: Optional[float] = None,
-    ) -> Tuple[Optional[float], bool]:
+        revenue_timeline: list[dict] | None = None,
+        current_revenue: float | None = None,
+    ) -> tuple[float | None, bool]:
         """
         Interpolate missing revenue from timeline.
 
@@ -106,9 +105,9 @@ class InterpolationEngine:
 
     def interpolate_growth_rate(
         self,
-        revenue_timeline: Optional[list[dict]] = None,
-        current_growth: Optional[float] = None,
-    ) -> Tuple[Optional[float], bool]:
+        revenue_timeline: list[dict] | None = None,
+        current_growth: float | None = None,
+    ) -> tuple[float | None, bool]:
         """
         Interpolate missing growth rate from revenue timeline.
 
@@ -159,10 +158,10 @@ class InterpolationEngine:
 
     def interpolate_employees(
         self,
-        employee_timeline: Optional[list[dict]] = None,
-        current_employees: Optional[int] = None,
-        revenue: Optional[float] = None,
-    ) -> Tuple[Optional[int], bool]:
+        employee_timeline: list[dict] | None = None,
+        current_employees: int | None = None,
+        revenue: float | None = None,
+    ) -> tuple[int | None, bool]:
         """
         Interpolate missing employee count.
 
@@ -196,8 +195,8 @@ class InterpolationEngine:
 
     def validate_interpolation(
         self,
-        original_value: Optional[float],
-        interpolated_value: Optional[float],
+        original_value: float | None,
+        interpolated_value: float | None,
         is_interpolated: bool,
     ) -> bool:
         """

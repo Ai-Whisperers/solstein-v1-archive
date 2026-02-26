@@ -117,10 +117,16 @@ class CompetitorDataLoader:
 
         # Extract profitability
         profitability_data = raw_data.get("profitability", {})
-        ebitda_margin = profitability_data.get("ebitda_margin_pct")
-        recurring_rev_pct = profitability_data.get("recurring_revenue_pct")
-        rev_per_employee = profitability_data.get("revenue_per_employee_eur_k")
-        raw_metrics = profitability_data.get("raw_metrics", {})
+        if isinstance(profitability_data, dict):
+            ebitda_margin = profitability_data.get("ebitda_margin_pct")
+            recurring_rev_pct = profitability_data.get("recurring_revenue_pct")
+            rev_per_employee = profitability_data.get("revenue_per_employee_eur_k")
+            raw_metrics = profitability_data.get("raw_metrics", {})
+        else:
+            ebitda_margin = None
+            recurring_rev_pct = None
+            rev_per_employee = None
+            raw_metrics = {}
 
         # Extract profit margin from raw_metrics - multiple strategies
         profit_margin = None
@@ -189,37 +195,76 @@ class CompetitorDataLoader:
                     except (ValueError, TypeError, KeyError, ZeroDivisionError) as e:
                         logger.debug(f"Could not parse profit margin: {e}")
 
-        # Extract funding
+        # Fallback: check root-level profit_margin (Ivan's flat format)
+        if profit_margin is None:
+            root_pm = raw_data.get("profit_margin")
+            if isinstance(root_pm, (int, float)):
+                # If < 1, assume it's a ratio (0.15 = 15%), convert to percentage
+                profit_margin = root_pm * 100 if root_pm < 1 else root_pm
+        # Extract funding - handle both nested and flat formats
         funding_data = raw_data.get("funding", {})
-        funding_rounds = funding_data.get("rounds", [])
-        total_raised_text = funding_data.get("total_raised_text", "")
-        latest_valuation_text = funding_data.get("latest_valuation_text", "")
-        lead_investors = funding_data.get("lead_investors", [])
-        war_chest = funding_data.get("war_chest_signals")
+        if isinstance(funding_data, dict) and funding_data:
+            # Original nested format
+            funding_rounds = funding_data.get("rounds", [])
+            total_raised_text = funding_data.get("total_raised_text", "")
+            latest_valuation_text = funding_data.get("latest_valuation_text", "")
+            lead_investors = funding_data.get("lead_investors", [])
+            war_chest = funding_data.get("war_chest_signals")
+            total_funding_eur = self._parse_funding_amount(total_raised_text)
+            latest_valuation_eur = self._parse_valuation(latest_valuation_text)
+        else:
+            # Flat format: funding_raised, valuation at root level
+            funding_rounds = raw_data.get("funding_rounds", [])
+            lead_investors = raw_data.get("lead_investors", [])
+            war_chest = raw_data.get("war_chest_signals")
+            # Direct numeric values
+            total_funding_eur = raw_data.get("funding_raised")
+            latest_valuation_eur = raw_data.get("valuation")
 
-        # Parse total raised amount
-        total_funding_eur = self._parse_funding_amount(total_raised_text)
-        latest_valuation_eur = self._parse_valuation(latest_valuation_text)
-
-        # Extract employees
+        # Extract employees - handle both dict and direct int formats
         employees_data = raw_data.get("employees", {})
-        employee_count_raw = employees_data.get("latest_headcount")
-        employee_count = int(employee_count_raw) if employee_count_raw else None
-        employee_cagr = employees_data.get("employee_cagr_pct")
-        open_positions = employees_data.get("open_positions")
+        if isinstance(employees_data, (int, float)):
+            # Ivan's simplified format: "employees": 150
+            employee_count = int(employees_data)
+            employee_cagr = raw_data.get("employee_cagr_pct")
+            open_positions = raw_data.get("open_positions")
+        elif isinstance(employees_data, dict):
+            # Original nested format: {"latest_headcount": 150, ...}
+            employee_count_raw = employees_data.get("latest_headcount")
+            employee_count = int(employee_count_raw) if employee_count_raw else None
+            employee_cagr = employees_data.get("employee_cagr_pct")
+            open_positions = employees_data.get("open_positions")
+        else:
+            employee_count = None
+            employee_cagr = None
+            open_positions = None
 
-        # Extract AI capabilities
+        # Extract AI capabilities - handle both nested and flat formats
         ai_data = raw_data.get("ai", {})
-        ai_score = ai_data.get("ai_score")
-        ai_signal_level = ai_data.get("signal_level")
-        ai_capabilities = ai_data.get("key_capabilities")
-        ai_in_production = ai_data.get("in_production")
+        if isinstance(ai_data, dict) and ai_data:
+            # Original nested format
+            ai_score = ai_data.get("ai_score")
+            ai_signal_level = ai_data.get("signal_level")
+            ai_capabilities = ai_data.get("key_capabilities")
+            ai_in_production = ai_data.get("in_production")
+        else:
+            # Flat format: ai_score, ai_maturity_score at root level
+            ai_score = raw_data.get("ai_score") or raw_data.get("ai_maturity_score")
+            ai_signal_level = raw_data.get("ai_signal_level")
+            ai_capabilities = raw_data.get("ai_key_capabilities")
+            ai_in_production = raw_data.get("ai_in_production")
 
-        # Extract scorecard
+        # Extract scorecard - handle both nested and flat formats
         scorecard = raw_data.get("scorecard", {})
-        dimensions = scorecard.get("dimensions", {})
-        composite_score = scorecard.get("composite_score", 5)
-        classification = scorecard.get("classification")
+        if isinstance(scorecard, dict) and scorecard:
+            dimensions = scorecard.get("dimensions", {})
+            composite_score = scorecard.get("composite_score", 5)
+            classification = scorecard.get("classification")
+        else:
+            # Flat format: classification at root level
+            dimensions = {}
+            composite_score = raw_data.get("composite_score", 5)
+            classification = raw_data.get("classification")
 
         # Determine AI maturity from scorecard
         saas_score = dimensions.get("SaaS Maturity", {}).get("score", 5)
@@ -269,11 +314,11 @@ class CompetitorDataLoader:
         company = Company(
             id=folder.lower().replace(" ", "-").replace("/", "-"),
             name=company_name,
-            industry="Energy Software",
+            industry=raw_data.get("industry", "Energy Software"),
             description=raw_data.get("description", "Competitor in energy software market"),
-            website=None,
-            headquarters=self._estimate_headquarters(folder),
-            founded_year=None,
+            website=raw_data.get("website"),
+            headquarters=raw_data.get("country") or self._estimate_headquarters(folder),
+            founded_year=raw_data.get("founded_year"),
             tier=tier,
             threat_level=threat_level,
             ai_maturity=ai_maturity,
@@ -304,7 +349,7 @@ class CompetitorDataLoader:
             employee_count=employee_count,
             employee_cagr_3yr=employee_cagr,
             open_positions=open_positions,
-            ai_score=ai_score,
+            ai_score=int(ai_score) if ai_score is not None else None,
             ai_signal_level=ai_signal_level,
             ai_key_capabilities=ai_capabilities,
             ai_in_production=ai_in_production,
@@ -535,12 +580,20 @@ class CompetitorDataLoader:
     def _extract_geographic_presence(self, raw_data: dict[str, Any]) -> list[str]:
         """Extract geographic presence from raw data.
         
+        Handles both nested format ({"geographic": {"major_offices": [...]}}) and
+        flat format ({"geographic_presence": ["Germany", "France"]}).
         Returns a list of countries/regions. If geographic data is not available,
         returns an empty list (will be overridden by Markdown data if available).
         """
+        # Check for flat format first (Ivan's simplified JSON)
+        flat_presence = raw_data.get("geographic_presence")
+        if isinstance(flat_presence, list) and flat_presence:
+            return flat_presence
+        
+        # Original nested format
         geographic = raw_data.get("geographic", {})
         
-        if not geographic:
+        if not geographic or not isinstance(geographic, dict):
             return []
         
         # If major_offices are available, extract countries from them

@@ -4,10 +4,9 @@ Task 3: Unit Tests for Data Completeness Scoring
 Tests the completeness calculator for scoring and tier assignment.
 """
 
-import pytest
 
 from solstein.analytics.completeness import CompletenessCalculator, DataQualityTier
-from solstein.domain.models import Company, FinancialMetric, CompanyTier, AIMaturity
+from solstein.domain.models import AIMaturity, Company, CompanyTier, FinancialMetric
 from tests.factories import make_company, make_financial_metric
 
 
@@ -57,7 +56,7 @@ class TestCompletenessCalculator:
         calc = CompletenessCalculator()
         company = make_company(id="test-1", name="Test Corp")
         report = calc.get_completeness_report(company)
-        
+
         assert report["company_id"] == "test-1"
         assert report["company_name"] == "Test Corp"
         assert "completeness_score" in report
@@ -114,7 +113,7 @@ class TestCompletenessCalculator:
         )
         score = calc.calculate_completeness_score(company)
         tier = calc.assign_tier(score)
-        
+
         assert 50 <= score < 80
         assert tier == DataQualityTier.PARTIAL
 
@@ -132,7 +131,7 @@ class TestCompletenessCalculator:
         )
         score = calc.calculate_completeness_score(company)
         tier = calc.assign_tier(score)
-        
+
         assert 20 <= score < 50
         assert tier == DataQualityTier.MINIMAL
 
@@ -146,6 +145,6 @@ class TestCompletenessCalculator:
         )
         score = calc.calculate_completeness_score(company)
         tier = calc.assign_tier(score)
-        
+
         assert 15 <= score < 50
         assert tier in [DataQualityTier.INSUFFICIENT, DataQualityTier.MINIMAL]

@@ -5,8 +5,9 @@ Tests for adaptive report templates that respond to data availability and classi
 """
 
 import pytest
+
+from solstein.domain.models import Company, FinancialMetric
 from solstein.presentation.adaptive_templates import AdaptiveTemplates
-from solstein.domain.models import Company, FinancialMetric, ConfidenceLevel
 
 
 class TestAdaptiveTemplates:
