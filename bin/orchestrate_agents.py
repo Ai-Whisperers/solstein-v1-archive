@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SOLSTEIN AGENT ORCHESTRATOR
+SOLSTEIN AGENT ORCHESTRATOR - FIXED VERSION
 
 Runs the 5-agent autonomous system in sequence:
 1. RUNNER - Execute tests & gather metrics
@@ -9,7 +9,7 @@ Runs the 5-agent autonomous system in sequence:
 4. IMPLEMENTER - Apply fixes
 5. DOCUMENTER - Record audit trail
 
-Cycle runs every 6 hours (4 cycles per day)
+Cycle runs every 30 minutes (48 cycles per day)
 """
 
 import subprocess
@@ -18,6 +18,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 import sys
+import os
 
 
 class AgentOrchestrator:
@@ -25,12 +26,28 @@ class AgentOrchestrator:
         self.project_root = Path("/home/ai-whisperers/solstein")
         self.agents_dir = self.project_root / "bin" / "agents"
         self.logs_dir = self.project_root / "logs"
+        self.counter_file = Path("/tmp/solstein-cycle-counter")
         self.logs_dir.mkdir(exist_ok=True)
 
-        # Calculate cycle number (0-based, increments every 6 hours)
-        import os
+        # Get and increment cycle number
+        self.cycle_num = self._get_and_increment_cycle_number()
 
-        self.cycle_num = int(os.environ.get("CYCLE_NUM", "1"))
+    def _get_and_increment_cycle_number(self):
+        """Get current cycle number and increment for next time"""
+        try:
+            if self.counter_file.exists():
+                with open(self.counter_file, "r") as f:
+                    cycle_num = int(f.read().strip())
+            else:
+                cycle_num = 1
+        except:
+            cycle_num = 1
+
+        # Write incremented number for next cycle
+        with open(self.counter_file, "w") as f:
+            f.write(str(cycle_num + 1))
+
+        return cycle_num
 
     def log(self, message):
         """Print with timestamp"""
@@ -110,28 +127,10 @@ class AgentOrchestrator:
 
         self.log(f"Total duration: {duration:.1f} seconds")
         self.log(f"Cycle complete at: {end_time.isoformat()}")
+        self.log(f"Next cycle number: {self.cycle_num + 1}")
         self.log("")
 
         return all(results.values())
-
-    def schedule_next_cycle(self):
-        """Schedule next cycle in 6 hours"""
-        import schedule
-        import atexit
-
-        def run_scheduler():
-            schedule.every(6).hours.do(self.run_cycle)
-            while True:
-                schedule.run_pending()
-                time.sleep(60)
-
-        self.log("Next cycle scheduled in 6 hours")
-        self.log("Press Ctrl+C to stop")
-
-        try:
-            run_scheduler()
-        except KeyboardInterrupt:
-            self.log("\nCycle scheduler stopped")
 
 
 def main():

@@ -1,0 +1,34 @@
+TASK 3: Install psycopg2-binary + Dependencies
+Status: ✅ COMPLETE
+
+Installed Packages:
+- psycopg: 3.3.3 (modern PostgreSQL adapter, includes binary)
+- sqlalchemy: 2.0.47 (async ORM support)
+- pytest: 9.0.2 (test framework)
+- pytest-asyncio: ✅ available (async test support)
+- asyncio: built-in (Python stdlib)
+
+Installation Method:
+- Used 'uv sync' (faster than pip)
+- Dependencies from pyproject.toml [project.dependencies] and [project.optional-dependencies]
+
+Supabase Connection Test:
+✅ Connected to: PostgreSQL 17.6 on aarch64-unknown-linux-gnu
+✅ Found 6 tables in public schema:
+   - companies
+   - confidence_calibration
+   - fact_sources
+   (and 3 more...)
+
+All Critical Dependencies Verified:
+✅ psycopg (PostgreSQL adapter with binary support)
+✅ sqlalchemy (async SQLAlchemy 2.0+)
+✅ pytest-asyncio (async test framework)
+✅ asyncio (Python built-in)
+
+Database Connectivity:
+✅ Direct connection to Supabase working
+✅ Can execute SQL queries
+✅ Table schema accessible
+
+Evidence Timestamp: 2026-02-26 21:00 UTC

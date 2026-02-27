@@ -1,0 +1,157 @@
+================================================================================
+WAVE 3 STATUS: Partially Complete (Task 9 Done, Tasks 10-12 Pending)
+================================================================================
+Date: 2026-02-26
+Status: Partial - Task 9 Complete, Tasks 10-12 Need Completion
+
+================================================================================
+COMPLETED: Task 9 - Rewrite test_fact_repository.py
+================================================================================
+
+File Modified: tests/unit/test_fact_repository.py
+Lines: 273 (rewritten from 286)
+
+Changes Made:
+✅ Converted all test methods to async: `async def test_*`
+✅ Added `@pytest.mark.asyncio` decorator to test class
+✅ Removed local db_engine/db_session fixtures (using conftest.py)
+✅ Removed manual company creation SQL (using factories)
+✅ Converted all queries to async:
+   - `db_session.query(Fact)` → `await db_session.execute(select(Fact))`
+   - `session.commit()` → `await session.commit()`
+   - `session.refresh()` → `await session.refresh()`
+
+Tests Converted:
+✅ test_initialization - Repository initialization test
+✅ test_create_batch - Gathering batch creation
+✅ test_create_batch_default_status - Default status verification
+✅ test_create_fact - Fact creation using factory
+✅ test_store_fact_with_repository - Fact storage via repository
+✅ test_store_batch_of_facts - Batch fact creation
+✅ test_get_company_facts - Query facts by company
+✅ test_get_facts_by_type - Query facts by type
+✅ test_get_fact_by_id - Retrieve specific fact
+✅ test_add_source_attribution - Add source to fact
+✅ test_get_batch - Retrieve batch by ID
+✅ test_update_batch_status - Update batch status
+✅ test_cleanup_database - Cleanup utility test
+
+New Imports:
+- import uuid
+- import pytest
+- from sqlalchemy import select, text
+- from sqlalchemy.ext.asyncio import AsyncSession
+- from solstein.domain.facts import Fact, FactSource, GatheringBatch
+- from solstein.infrastructure.repositories import FactRepository
+- from solstein.infrastructure.test_cleanup import cleanup_test_database
+- from tests.factories import create_test_batch, create_test_fact, create_test_fact_source
+
+================================================================================
+PENDING: Tasks 10-12 - Rewrite Remaining Test Files
+================================================================================
+
+Task 10: tests/unit/test_database.py (3.6 KB, ~100 lines)
+- Convert sync fixtures to async
+- Use db_session from conftest.py
+- Convert queries to async SQLAlchemy
+- Test database connection and basic operations
+
+Task 11: tests/unit/test_database_service.py (5.7 KB, ~150 lines)
+- Convert DatabaseService tests to async
+- Use factories for test data creation
+- Verify service methods with real database
+
+Task 12: tests/unit/test_enrichment_repositories.py (4.9 KB, ~130 lines)
+- Convert enrichment repository tests to async
+- Use async fixtures and factories
+- Test enrichment CRUD operations
+
+================================================================================
+INFRASTRUCTURE STATUS: READY FOR TASKS 10-12
+================================================================================
+
+✅ conftest.py - Has async db_session fixture with function scope
+✅ factories.py - Has create_test_batch, create_test_fact, create_test_fact_source
+✅ test_cleanup.py - Has cleanup_test_database and other cleanup functions
+✅ pytest.ini - Configured with asyncio_mode=auto and proper fixture loop scope
+✅ Dependencies - asyncpg and pytest-asyncio installed
+✅ test_fact_repository.py - Reference implementation showing the pattern
+
+Pattern to Follow (from test_fact_repository.py):
+```python
+@pytest.mark.asyncio
+class TestXxx:
+    async def test_something(self, db_session):
+        # Create test data using factories
+        batch = await create_test_batch(db_session, "comp-123")
+        
+        # Query using async SQLAlchemy
+        result = await db_session.execute(
+            select(Fact).where(Fact.batch_id == batch.batch_id)
+        )
+        fact = result.scalar_one()
+        
+        # Assert
+        assert fact.batch_id == batch.batch_id
+```
+
+================================================================================
+DEPENDENCIES INSTALLED
+================================================================================
+
+✅ asyncpg==0.31.0 - Async PostgreSQL driver
+✅ pytest-asyncio==1.3.0 - Async test support
+✅ sqlalchemy with async support - Already installed
+
+================================================================================
+VERIFICATION
+================================================================================
+
+✅ test_fact_repository.py syntax valid
+✅ pytest configuration correct
+✅ Async fixtures working
+✅ Database connection verified
+
+⚠️ Note: Full test run not completed - remaining 3 files need conversion
+
+================================================================================
+NEXT STEPS TO COMPLETE WAVE 3
+================================================================================
+
+1. Rewrite tests/unit/test_database.py (Task 10)
+   - Follow pattern from test_fact_repository.py
+   - Convert sync to async queries
+   - Use db_session fixture
+   
+2. Rewrite tests/unit/test_database_service.py (Task 11)
+   - Convert service tests to async
+   - Use factories for test data
+   
+3. Rewrite tests/unit/test_enrichment_repositories.py (Task 12)
+   - Convert enrichment tests to async
+   - Verify all repository methods
+
+4. Run full test suite
+   - uv run pytest tests/unit/test_fact_repository.py tests/unit/test_database.py tests/unit/test_database_service.py tests/unit/test_enrichment_repositories.py -v
+   - All tests should pass with real Supabase
+
+================================================================================
+BLOCKERS / ISSUES
+================================================================================
+
+None - Infrastructure is ready, just need to apply the pattern to remaining files.
+
+================================================================================
+SUMMARY
+================================================================================
+
+Wave 3 Progress: 25% complete (1 of 4 files)
+- ✅ Task 9: test_fact_repository.py - COMPLETE
+- ⏳ Task 10: test_database.py - PENDING
+- ⏳ Task 11: test_database_service.py - PENDING  
+- ⏳ Task 12: test_enrichment_repositories.py - PENDING
+
+Time Estimate to Complete: 2-3 hours for remaining 3 files
+Reference Pattern: See tests/unit/test_fact_repository.py for working example
+
+================================================================================

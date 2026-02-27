@@ -184,3 +184,9 @@ Desktop.ini
 # Secrets scanning
 .trufflehog.cache
 secrets.json
+
+# Environment files (contain sensitive database credentials)
+.env.test
+.env.dev
+.env.prod
+.env.local

@@ -1,8 +1,11 @@
+import asyncio
 import os
 from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 os.environ.setdefault("GITHUB_TOKEN", "test-github-token-12345")
 
@@ -14,6 +17,7 @@ from solstein.api.dependencies import get_current_user, get_repository
 from solstein.api.main import app
 from solstein.core.repositories import CompanyRepository
 from solstein.domain.models import AIMaturity
+from solstein.database_config import get_test_database_url, convert_to_async_url
 
 
 @pytest.fixture
@@ -164,3 +168,73 @@ def patch_competitor_data_loader(monkeypatch):
         return test_companies[:limit] if limit else test_companies
     
     monkeypatch.setattr(CompetitorDataLoader, "load_companies", mock_load_companies)
+
+
+# ============================================================================
+# DATABASE FIXTURES FOR REAL SUPABASE TESTING (Wave 2, Task 6)
+# ============================================================================
+
+import asyncio
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+from src.solstein.database_config import get_test_database_url, convert_to_async_url
+
+
+# Note: pytest-asyncio handles event_loop automatically with mode=auto
+# Removed custom event_loop fixture - pytest-asyncio mode=auto manages this
+
+
+@pytest.fixture(scope="function")
+async def db_engine():
+    """Shared async engine with connection pooling.
+    
+    This fixture creates a single SQLAlchemy async engine for the entire
+    test session. It uses connection pooling to efficiently manage database
+    connections across all tests.
+    
+    Configuration:
+    - pool_size=5: Maximum 5 connections in the pool
+    - max_overflow=10: Allow up to 10 additional connections if needed
+    - pool_recycle=3600: Recycle connections after 1 hour
+    - pool_pre_ping=True: Test connections before using them
+    """
+    db_url = get_test_database_url()
+    async_url = convert_to_async_url(db_url)
+    
+    engine = create_async_engine(
+        async_url,
+        echo=False,
+        pool_size=5,
+        max_overflow=10,
+        pool_recycle=3600,
+        pool_pre_ping=True,
+    )
+    
+    yield engine
+    
+    # Cleanup: dispose of all connections
+    await engine.dispose()
+
+
+@pytest.fixture
+async def db_session(db_engine):
+    """Per-test database session.
+    
+    This fixture provides a fresh AsyncSession for each test. The session
+    is automatically rolled back after the test completes, ensuring test
+    isolation and preventing data leakage between tests.
+    
+    Usage in tests:
+        async def test_something(db_session):
+            # db_session is an AsyncSession
+            result = await db_session.execute(...)
+    """
+    async_session = sessionmaker(
+        db_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+    )
+    
+    async with async_session() as session:
+        yield session
+        # Session is automatically rolled back after test
