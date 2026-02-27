@@ -405,8 +405,89 @@ class BatchExtractor:
                 except Exception as e:
                     logger.error(f"Failed to create profile from {md_file}: {e}")
 
-        logger.info(f"Successfully extracted {len(profiles)} profiles")
+        profiles = self._group_and_merge_profiles(profiles)
+        logger.info(f"Successfully extracted {len(profiles)} profiles (after merging duplicates)")
         return profiles
+
+    def _group_and_merge_profiles(self, profiles: list[Company]) -> list[Company]:
+        """Group profiles by company_name and merge duplicates into single records."""
+        if not profiles:
+            return profiles
+
+        # Group profiles by company_name
+        grouped: dict[str, list[Company]] = {}
+        for profile in profiles:
+            name = profile.company_name
+            if name not in grouped:
+                grouped[name] = []
+            grouped[name].append(profile)
+
+        # Merge duplicates
+        merged = []
+        for company_name, company_profiles in grouped.items():
+            if len(company_profiles) == 1:
+                merged.append(company_profiles[0])
+            else:
+                logger.debug(f"Merging {len(company_profiles)} profiles for {company_name}")
+                merged_profile = self._merge_company_profiles(company_profiles)
+                merged.append(merged_profile)
+
+        return merged
+
+    def _merge_company_profiles(self, profiles: list[Company]) -> Company:
+        """Merge multiple Company profiles into a single record."""
+        # Start with the first profile as base
+        result = profiles[0]
+
+        # Merge data from remaining profiles
+        for other in profiles[1:]:
+            # Merge numeric fields (prefer non-None)
+            if result.employees is None and other.employees is not None:
+                result.employees = other.employees
+            if result.revenue is None and other.revenue is not None:
+                result.revenue = other.revenue
+            if result.growth_rate is None and other.growth_rate is not None:
+                result.growth_rate = other.growth_rate
+            if result.profit_margin is None and other.profit_margin is not None:
+                result.profit_margin = other.profit_margin
+            if result.funding is None and other.funding is not None:
+                result.funding = other.funding
+            if result.valuation is None and other.valuation is not None:
+                result.valuation = other.valuation
+            if result.ai_maturity is None and other.ai_maturity is not None:
+                result.ai_maturity = other.ai_maturity
+            if result.threat_level is None and other.threat_level is not None:
+                result.threat_level = other.threat_level
+
+            # Merge source links (combine and deduplicate)
+            if other.source_links:
+                result.source_links = list(set(result.source_links or []) | set(other.source_links))
+
+            # Merge metric sources (combine per metric)
+            if other.metric_sources:
+                for metric, sources in other.metric_sources.items():
+                    if metric not in result.metric_sources:
+                        result.metric_sources[metric] = []
+                    # Combine and deduplicate sources
+                    existing = set(result.metric_sources[metric])
+                    result.metric_sources[metric] = list(existing | set(sources))
+
+            # Merge metric justifications (prefer non-empty)
+            if other.metric_justifications:
+                for metric, justification in other.metric_justifications.items():
+                    if metric not in result.metric_justifications and justification:
+                        result.metric_justifications[metric] = justification
+
+            # Merge metric observations (combine all)
+            if other.metric_observations:
+                for metric, observations in other.metric_observations.items():
+                    if metric not in result.metric_observations:
+                        result.metric_observations[metric] = []
+                    # Append new observations
+                    if isinstance(observations, list):
+                        result.metric_observations[metric].extend(observations)
+
+        return result
 
     def save_to_json(self, profiles: list[Company], output_path: Path) -> None:
         """Save profiles to JSON file."""
