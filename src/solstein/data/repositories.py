@@ -1,6 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+import warnings
 
 from loguru import logger
 
@@ -10,12 +11,47 @@ from ..data.loaders import CompetitorDataLoader
 from ..domain.models import Company, FinancialMetric
 
 
+# ============================================================================
+# MIGRATION GUIDE: JsonFileRepository Deprecation
+# ============================================================================
+# JsonFileRepository is deprecated and will be removed in a future version.
+# It is maintained for backward compatibility only.
+#
+# MIGRATION PATH:
+# 1. For development/testing: Use SqlAlchemyRepository with SQLite
+#    - Provides persistence without external dependencies
+#    - Suitable for local development and unit tests
+#
+# 2. For production: Use SupabaseRepository
+#    - Fully managed PostgreSQL backend
+#    - Supports real-time updates and advanced queries
+#    - Recommended for all production deployments
+#
+# EXAMPLE MIGRATION:
+# Before (deprecated):
+#   repo = JsonFileRepository(data_dir=Path('data'))
+#
+# After (recommended):
+#   repo = SupabaseRepository()  # Uses environment config
+#
+# For more details, see: docs/guides/repository-migration.md
+# ============================================================================
+
+
 class JsonFileRepository(CompanyRepository):
     """
     Repository implementation that reads from JSON files.
+    
+    .. deprecated:: 1.0.0
+        Use :class:`SupabaseRepository` or :class:`SqlAlchemyRepository` instead.
     """
 
     def __init__(self, data_dir: Path | None = None):
+        warnings.warn(
+            "JsonFileRepository is deprecated. Use SqlAlchemyRepository or SupabaseRepository instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.settings = get_settings()
         self.data_dir = data_dir or self.settings.data.data_dir
         self._loader = CompetitorDataLoader(data_dir=self.data_dir)
@@ -106,13 +142,31 @@ class JsonFileRepository(CompanyRepository):
         return None
 
     def save(self, company: Company) -> Company:
-        """Simulate saving to JSON."""
-        logger.info(f"Persisted company profile for {company.name} (Simulation)")
+        """Simulate saving to JSON.
+        
+        .. deprecated:: 1.0.0
+            JsonFileRepository does not persist data. Use SupabaseRepository instead.
+        """
+        warnings.warn(
+            "JsonFileRepository.save() is deprecated. Data is not persisted.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        logger.info(f"Simulated save for {company.name} (JsonFileRepository is deprecated)")
         return company
 
     def delete(self, company_id: str) -> bool:
-        """Simulate deletion."""
-        logger.info(f"Deleted company {company_id} (Simulation)")
+        """Simulate deletion.
+        
+        .. deprecated:: 1.0.0
+            JsonFileRepository does not persist data. Use SupabaseRepository instead.
+        """
+        warnings.warn(
+            "JsonFileRepository.delete() is deprecated. Data is not persisted.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        logger.info(f"Simulated deletion for {company_id} (JsonFileRepository is deprecated)")
         return True
 
     def search(self, query: str, field: str = "name") -> list[Company]:
