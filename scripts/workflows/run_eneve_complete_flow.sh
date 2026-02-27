@@ -118,6 +118,7 @@ else
     echo "--------------------------------------------------"
     python -m solstein.cli generate-report \
         "eneve" \
+        --input data/output/exports/eneve_dutch_4_scored.json \
         --output data/output/exports/
 
     echo ""
