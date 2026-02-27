@@ -19,63 +19,63 @@ class EnveEnrichmentService:
         Returns:
             Company object with confidence scores added
         """
-        if not company.confidence_scores:
-            company.confidence_scores = {}
+        if not company.signal_confidences:
+            company.signal_confidences = {}
 
         # Calculate confidence based on data availability
         metrics_present = 0
         total_metrics = 8
 
-        if company.revenue is not None:
+        if company.financials and company.financials.revenue is not None:
             metrics_present += 1
-            company.confidence_scores['revenue'] = 0.9
+            company.signal_confidences['revenue'] = 0.9
         else:
-            company.confidence_scores['revenue'] = 0.0
+            company.signal_confidences['revenue'] = 0.0
 
-        if company.growth_rate is not None:
+        if company.financials and company.financials.growth_rate is not None:
             metrics_present += 1
-            company.confidence_scores['growth_rate'] = 0.85
+            company.signal_confidences['growth_rate'] = 0.85
         else:
-            company.confidence_scores['growth_rate'] = 0.0
+            company.signal_confidences['growth_rate'] = 0.0
 
-        if company.employees is not None:
+        if company.financials and company.financials.employees is not None:
             metrics_present += 1
-            company.confidence_scores['employees'] = 0.95
+            company.signal_confidences['employees'] = 0.95
         else:
-            company.confidence_scores['employees'] = 0.0
+            company.signal_confidences['employees'] = 0.0
 
-        if company.profit_margin is not None:
+        if company.financials and company.financials.profit_margin is not None:
             metrics_present += 1
-            company.confidence_scores['profit_margin'] = 0.8
+            company.signal_confidences['profit_margin'] = 0.8
         else:
-            company.confidence_scores['profit_margin'] = 0.0
+            company.signal_confidences['profit_margin'] = 0.0
 
-        if company.funding is not None:
+        if company.financials and company.financials.funding_raised is not None:
             metrics_present += 1
-            company.confidence_scores['funding'] = 0.85
+            company.signal_confidences['funding'] = 0.85
         else:
-            company.confidence_scores['funding'] = 0.0
+            company.signal_confidences['funding'] = 0.0
 
-        if company.valuation is not None:
+        if company.financials and company.financials.valuation is not None:
             metrics_present += 1
-            company.confidence_scores['valuation'] = 0.75
+            company.signal_confidences['valuation'] = 0.75
         else:
-            company.confidence_scores['valuation'] = 0.0
+            company.signal_confidences['valuation'] = 0.0
 
         if company.ai_maturity is not None:
             metrics_present += 1
-            company.confidence_scores['ai_maturity'] = 0.7
+            company.signal_confidences['ai_maturity'] = 0.7
         else:
-            company.confidence_scores['ai_maturity'] = 0.0
+            company.signal_confidences['ai_maturity'] = 0.0
 
         if company.threat_level is not None:
             metrics_present += 1
-            company.confidence_scores['threat_level'] = 0.7
+            company.signal_confidences['threat_level'] = 0.7
         else:
-            company.confidence_scores['threat_level'] = 0.0
+            company.signal_confidences['threat_level'] = 0.0
 
         # Overall data completeness score
-        company.confidence_scores['data_completeness'] = metrics_present / total_metrics
+        company.signal_confidences['data_completeness'] = metrics_present / total_metrics
 
         return company
 
@@ -113,36 +113,42 @@ class EnveEnrichmentService:
         Returns:
             Tuple of (is_valid, error_message)
         """
-        if not company.company_name:
+        if not company.name:
             return False, "Company name is required"
 
         # Check for at least some data
-        has_data = any([
-            company.revenue is not None,
-            company.employees is not None,
-            company.growth_rate is not None,
-            company.profit_margin is not None,
-            company.funding is not None,
-            company.valuation is not None,
+        has_data = False
+        if company.financials:
+            has_data = any([
+                company.financials.revenue is not None,
+                company.financials.employees is not None,
+                company.financials.growth_rate is not None,
+                company.financials.profit_margin is not None,
+                company.financials.funding_raised is not None,
+                company.financials.valuation is not None,
+            ])
+
+        has_data = has_data or any([
             company.ai_maturity is not None,
             company.threat_level is not None,
         ])
 
         if not has_data:
-            return False, f"No enrichment data found for {company.company_name}"
+            return False, f"No enrichment data found for {company.name}"
 
         # Validate numeric ranges
-        if company.revenue is not None and company.revenue < 0:
-            return False, f"Revenue cannot be negative: {company.revenue}"
+        if company.financials:
+            if company.financials.revenue is not None and company.financials.revenue < 0:
+                return False, f"Revenue cannot be negative: {company.financials.revenue}"
 
-        if company.employees is not None and company.employees < 0:
-            return False, f"Employees cannot be negative: {company.employees}"
+            if company.financials.employees is not None and company.financials.employees < 0:
+                return False, f"Employees cannot be negative: {company.financials.employees}"
 
-        if company.growth_rate is not None and (company.growth_rate < -100 or company.growth_rate > 1000):
-            return False, f"Growth rate out of reasonable range: {company.growth_rate}%"
+            if company.financials.growth_rate is not None and (company.financials.growth_rate < -100 or company.financials.growth_rate > 1000):
+                return False, f"Growth rate out of reasonable range: {company.financials.growth_rate}%"
 
-        if company.profit_margin is not None and (company.profit_margin < -100 or company.profit_margin > 100):
-            return False, f"Profit margin out of range: {company.profit_margin}%"
+            if company.financials.profit_margin is not None and (company.financials.profit_margin < -100 or company.financials.profit_margin > 100):
+                return False, f"Profit margin out of range: {company.financials.profit_margin}%"
 
         return True, None
 
@@ -157,24 +163,25 @@ class EnveEnrichmentService:
         Returns:
             Merged company object
         """
-        # Merge numeric fields (prefer non-None)
-        if primary.revenue is None and secondary.revenue is not None:
-            primary.revenue = secondary.revenue
+        # Merge financials
+        if primary.financials and secondary.financials:
+            if primary.financials.revenue is None and secondary.financials.revenue is not None:
+                primary.financials.revenue = secondary.financials.revenue
 
-        if primary.employees is None and secondary.employees is not None:
-            primary.employees = secondary.employees
+            if primary.financials.employees is None and secondary.financials.employees is not None:
+                primary.financials.employees = secondary.financials.employees
 
-        if primary.growth_rate is None and secondary.growth_rate is not None:
-            primary.growth_rate = secondary.growth_rate
+            if primary.financials.growth_rate is None and secondary.financials.growth_rate is not None:
+                primary.financials.growth_rate = secondary.financials.growth_rate
 
-        if primary.profit_margin is None and secondary.profit_margin is not None:
-            primary.profit_margin = secondary.profit_margin
+            if primary.financials.profit_margin is None and secondary.financials.profit_margin is not None:
+                primary.financials.profit_margin = secondary.financials.profit_margin
 
-        if primary.funding is None and secondary.funding is not None:
-            primary.funding = secondary.funding
+            if primary.financials.funding is None and secondary.financials.funding is not None:
+                primary.financials.funding = secondary.financials.funding
 
-        if primary.valuation is None and secondary.valuation is not None:
-            primary.valuation = secondary.valuation
+            if primary.financials.valuation is None and secondary.financials.valuation is not None:
+                primary.financials.valuation = secondary.financials.valuation
 
         # Merge source links
         if secondary.source_links:
