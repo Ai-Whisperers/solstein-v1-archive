@@ -16,12 +16,12 @@ from solstein.infrastructure.enrichment_repositories import (
 
 class EnrichmentService:
     """Service for enrichment operations with database persistence."""
-    
+
     def __init__(self, session: AsyncSession):
         self.session = session
         self.audit_repo = EnrichmentAuditRepository(session)
         self.cache_repo = EnrichmentCacheRepository(session)
-    
+
     async def enrich_company(
         self,
         company_id: str,
@@ -34,7 +34,7 @@ class EnrichmentService:
         """Enrich a single company with caching and audit logging."""
         start_time = datetime.now(timezone.utc)
         sources = sources or ["SEC_EDGAR"]
-        
+
         # Check cache
         if use_cache:
             cached = await self.cache_repo.get_cached(company_id)
@@ -57,7 +57,7 @@ class EnrichmentService:
                     "fields_enriched": cached.fields_enriched or [],
                     "from_cache": True,
                 }
-        
+
         # Perform enrichment
         try:
             # Log start
@@ -70,13 +70,13 @@ class EnrichmentService:
                 user_id=user_id,
                 client_id=client_id,
             )
-            
+
             # Create company object
             company = UnifiedCompany(id=company_id, name=company_name or company_id)
-            
+
             # Enrich
             enriched = unified_loader.enrich_from_connectors(company)
-            
+
             # Track fields enriched
             fields_enriched = []
             if enriched.financials and enriched.financials.revenue:
@@ -85,9 +85,9 @@ class EnrichmentService:
                 fields_enriched.append("employees")
             if enriched.financials and enriched.financials.growth_rate:
                 fields_enriched.append("growth_rate")
-            
+
             duration_ms = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
-            
+
             # Log success
             await self.audit_repo.log_operation(
                 company_id=company_id,
@@ -100,7 +100,7 @@ class EnrichmentService:
                 user_id=user_id,
                 client_id=client_id,
             )
-            
+
             # Cache result
             enriched_dict = {
                 "id": enriched.id,
@@ -112,7 +112,7 @@ class EnrichmentService:
                 "funding_raised": enriched.financials.funding_raised if enriched.financials else None,
                 "valuation": enriched.financials.valuation if enriched.financials else None,
             }
-            
+
             if use_cache and fields_enriched:
                 await self.cache_repo.cache_enrichment(
                     company_id=company_id,
@@ -120,10 +120,10 @@ class EnrichmentService:
                     sources_used=sources,
                     fields_enriched=fields_enriched,
                 )
-            
+
             # Commit changes
             await self.session.commit()
-            
+
             return {
                 "company_id": company_id,
                 "company_name": enriched.name or company_name,
@@ -133,10 +133,10 @@ class EnrichmentService:
                 "duration_ms": duration_ms,
                 "from_cache": False,
             }
-        
+
         except Exception as e:
             duration_ms = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
-            
+
             # Log failure
             await self.audit_repo.log_operation(
                 company_id=company_id,
@@ -149,10 +149,10 @@ class EnrichmentService:
                 user_id=user_id,
                 client_id=client_id,
             )
-            
+
             await self.session.commit()
             raise
-    
+
     async def get_audit_trail(
         self,
         company_id: Optional[str] = None,
@@ -161,19 +161,19 @@ class EnrichmentService:
         """Get audit trail for a company."""
         entries = await self.audit_repo.get_audit_trail(company_id=company_id, limit=limit)
         stats = await self.audit_repo.get_company_stats(company_id) if company_id else {}
-        
+
         return {
             "entries": [e.to_dict() for e in entries],
             "stats": stats,
         }
-    
+
     async def clear_cache(self, company_id: Optional[str] = None) -> Dict[str, Any]:
         """Clear cache entries."""
         deleted_count = await self.cache_repo.delete_cache(company_id=company_id)
         cache_stats = await self.cache_repo.get_cache_stats()
-        
+
         await self.session.commit()
-        
+
         return {
             "deleted_count": deleted_count,
             "cache_stats": cache_stats,

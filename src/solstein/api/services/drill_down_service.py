@@ -1,5 +1,7 @@
 """Service for managing drill-down data and audit trail retrieval."""
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from ...domain.models import (
     AggregatedDataRecord,
     CompanyAnalysisAuditTrail,
@@ -7,7 +9,7 @@ from ...domain.models import (
     SignalExtractionRecord,
 )
 from ...infrastructure.database_service import DatabaseService
-
+from ...infrastructure.company_repository import CompanyRepository
 # Shared in-memory storage for non-persistent mode, ensuring consistency across instances
 _shared_audit_trails: dict[str, CompanyAnalysisAuditTrail] = {}
 
@@ -15,9 +17,11 @@ _shared_audit_trails: dict[str, CompanyAnalysisAuditTrail] = {}
 class DrillDownService:
     """Service for managing and retrieving audit trails for transparency."""
 
-    def __init__(self, db_service: DatabaseService | None = None):
-        """Initialize drill-down service with database or in-memory storage."""
+    def __init__(self, session: AsyncSession, db_service: DatabaseService | None = None):
+        """Initialize drill-down service with async session and optional database service."""
+        self.session = session
         self.db_service = db_service
+        self.company_repo = CompanyRepository(session)
         self._audit_trails = _shared_audit_trails
 
     async def store_audit_trail(self, audit_trail: CompanyAnalysisAuditTrail) -> None:
