@@ -241,7 +241,13 @@ def compare(profile1: str, profile2: str, input_file: Path) -> None:
     type=click.Path(path_type=Path),
     help="Output directory for reports",
 )
-def generate_report(company_name: str, output: Path | None) -> None:
+@click.option(
+    "--input",
+    "-i",
+    type=click.Path(exists=True, path_type=Path),
+    help="Input scored JSON file to load companies from",
+)
+def generate_report(company_name: str, input: Path | None, output: Path | None) -> None:
     """Generate intelligence report for a company."""
     from .data.loaders import CompetitorDataLoader
 
@@ -249,7 +255,7 @@ def generate_report(company_name: str, output: Path | None) -> None:
 
     try:
         loader = CompetitorDataLoader()
-        companies = loader.load_companies()
+        companies = loader.load_from_json(input) if input else loader.load_companies()
 
         scorer = GrowthScorer()
         scored_companies = []

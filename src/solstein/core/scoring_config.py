@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 class GrowthScoringConfig(BaseModel):
     """Configuration for growth score calculation."""
 
-    base_score: float = 5.0
+    base_score: float | None = None
 
     # Weights & Factors
     revenue_growth_divisor: float = 20.0
@@ -39,7 +39,7 @@ class GrowthScoringConfig(BaseModel):
 class FinancialHealthConfig(BaseModel):
     """Configuration for financial health score calculation."""
 
-    base_score: float = 5.0
+    base_score: float | None = None
 
     # Revenue Scale (in EUR)
     revenue_large_threshold: float = 100_000_000.0  # EUR 100M
@@ -76,7 +76,7 @@ class FinancialHealthConfig(BaseModel):
 class CompetitivePositionConfig(BaseModel):
     """Configuration for competitive position score."""
 
-    base_score: float = 5.0
+    base_score: float | None = None
 
     # Tier Scores
     tier_scores: dict[str, float] = Field(

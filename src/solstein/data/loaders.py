@@ -51,6 +51,9 @@ class CompetitorDataLoader:
 
         self._cache[cache_key] = companies
         return companies
+    def load_from_json(self, json_path: Path, limit: int | None = None) -> list[Company]:
+        """Load companies from scored JSON file (e.g., from pipeline output)."""
+        return self._load_from_json(json_path, limit)
 
     def _load_from_json(self, json_path: Path, limit: int | None = None) -> list[Company]:
         """Load companies from JSON file."""

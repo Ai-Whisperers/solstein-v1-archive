@@ -37,7 +37,7 @@ class GrowthMomentumScorer:
             Tuple of (score, explanation)
         """
         cfg = self.config.growth
-        score = cfg.base_score
+        score = cfg.base_score if cfg.base_score is not None else 0.0
         explanation = ScoringExplanation(base_score=score)
 
         # Merge facts from repository if available

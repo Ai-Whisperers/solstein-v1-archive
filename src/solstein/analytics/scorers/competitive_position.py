@@ -13,7 +13,7 @@ class CompetitivePositionScorer:
     def score(self, profile: Company) -> tuple[float, ScoringExplanation]:
         """Calculate competitive position score (0-10) with explanation."""
         cfg = self.config.competitive
-        score = cfg.base_score
+        score = cfg.base_score if cfg.base_score is not None else 0.0
         explanation = ScoringExplanation(base_score=score)
 
         tier_adj = cfg.tier_scores.get(profile.tier, 0.0)
