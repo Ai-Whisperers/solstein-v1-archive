@@ -436,7 +436,7 @@ class BatchExtractor:
         # Group profiles by company_name
         grouped: dict[str, list[Company]] = {}
         for profile in profiles:
-            name = profile.company_name
+            name = profile.name
             if name not in grouped:
                 grouped[name] = []
             grouped[name].append(profile)
