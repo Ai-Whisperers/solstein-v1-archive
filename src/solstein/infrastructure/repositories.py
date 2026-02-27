@@ -5,8 +5,10 @@ Repositories abstract the database layer and provide a clean interface for
 business logic.
 """
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from solstein.domain.facts import Fact, FactSource, GatheringBatch
-from solstein.infrastructure.database import DatabaseManager
 
 
 class FactRepository:
@@ -16,15 +18,15 @@ class FactRepository:
     scoring and source tracking.
     """
 
-    def __init__(self, db_manager: DatabaseManager):
-        """Initialize repository with database manager.
+    def __init__(self, session: AsyncSession):
+        """Initialize repository with async session.
 
         Args:
-            db_manager: DatabaseManager instance for session management.
+            session: AsyncSession instance for database operations.
         """
-        self.db_manager = db_manager
+        self.session = session
 
-    def create_batch(self, company_id: str, status: str = "in_progress") -> GatheringBatch:
+    async def create_batch(self, company_id: str, status: str = "in_progress") -> GatheringBatch:
         """Create a new gathering batch.
 
         Args:
@@ -41,19 +43,16 @@ class FactRepository:
             raise ValueError("Company ID is required")
 
         batch = GatheringBatch(company_id=company_id, status=status)
-        session = self.db_manager.get_session()
         try:
-            session.add(batch)
-            session.commit()
-            session.refresh(batch)
+            self.session.add(batch)
+            await self.session.commit()
+            await self.session.refresh(batch)
             return batch
         except Exception as e:
-            session.rollback()
+            await self.session.rollback()
             raise RuntimeError(f"Failed to create batch: {e}") from e
-        finally:
-            session.close()
 
-    def store(self, fact: Fact) -> str:
+    async def store(self, fact: Fact) -> str:
         """Store a fact in the database.
 
         Args:
@@ -68,20 +67,17 @@ class FactRepository:
         """
         fact.validate()
 
-        session = self.db_manager.get_session()
         try:
-            session.add(fact)
-            session.commit()
-            session.refresh(fact)
+            self.session.add(fact)
+            await self.session.commit()
+            await self.session.refresh(fact)
             fact_id = str(fact.fact_id)
             return fact_id
         except Exception as e:
-            session.rollback()
+            await self.session.rollback()
             raise RuntimeError(f"Failed to store fact: {e}") from e
-        finally:
-            session.close()
 
-    def store_batch(self, facts: list[Fact], batch: GatheringBatch) -> list[str]:
+    async def store_batch(self, facts: list[Fact], batch: GatheringBatch) -> list[str]:
         """Store multiple facts in a single batch.
 
         Args:
@@ -102,26 +98,23 @@ class FactRepository:
         for fact in facts:
             fact.validate()
 
-        session = self.db_manager.get_session()
         try:
-            session.add(batch)
-            session.flush()  # Ensure batch_id is generated
+            self.session.add(batch)
+            await self.session.flush()  # Ensure batch_id is generated
 
             for fact in facts:
                 fact.batch_id = batch.batch_id
-                session.add(fact)
+                self.session.add(fact)
 
-            session.commit()
+            await self.session.commit()
 
             fact_ids = [str(fact.fact_id) for fact in facts]
             return fact_ids
         except Exception as e:
-            session.rollback()
+            await self.session.rollback()
             raise RuntimeError(f"Failed to store batch: {e}") from e
-        finally:
-            session.close()
 
-    def get_company_facts(self, company_id: str) -> list[Fact]:
+    async def get_company_facts(self, company_id: str) -> list[Fact]:
         """Fetch all facts for a company.
 
         Args:
@@ -136,14 +129,12 @@ class FactRepository:
         if not company_id:
             raise ValueError("Company ID is required")
 
-        session = self.db_manager.get_session()
-        try:
-            facts = session.query(Fact).filter_by(company_id=company_id).order_by(Fact.extracted_at.desc()).all()
-            return facts
-        finally:
-            session.close()
+        stmt = select(Fact).where(Fact.company_id == company_id).order_by(Fact.extracted_at.desc())
+        result = await self.session.execute(stmt)
+        facts = result.scalars().all()
+        return facts
 
-    def get_facts_by_type(self, company_id: str, fact_type: str) -> list[Fact]:
+    async def get_facts_by_type(self, company_id: str, fact_type: str) -> list[Fact]:
         """Fetch facts of a specific type for a company.
 
         Args:
@@ -161,19 +152,16 @@ class FactRepository:
         if not fact_type:
             raise ValueError("Fact type is required")
 
-        session = self.db_manager.get_session()
-        try:
-            facts = (
-                session.query(Fact)
-                .filter_by(company_id=company_id, fact_type=fact_type)
-                .order_by(Fact.extracted_at.desc())
-                .all()
-            )
-            return facts
-        finally:
-            session.close()
+        stmt = (
+            select(Fact)
+            .where(Fact.company_id == company_id, Fact.fact_type == fact_type)
+            .order_by(Fact.extracted_at.desc())
+        )
+        result = await self.session.execute(stmt)
+        facts = result.scalars().all()
+        return facts
 
-    def get_fact_by_id(self, fact_id: str) -> Fact | None:
+    async def get_fact_by_id(self, fact_id: str) -> Fact | None:
         """Fetch a single fact by ID.
 
         Args:
@@ -188,14 +176,12 @@ class FactRepository:
         if not fact_id:
             raise ValueError("Fact ID is required")
 
-        session = self.db_manager.get_session()
-        try:
-            fact = session.query(Fact).filter_by(fact_id=fact_id).first()
-            return fact
-        finally:
-            session.close()
+        stmt = select(Fact).where(Fact.fact_id == fact_id)
+        result = await self.session.execute(stmt)
+        fact = result.scalar_one_or_none()
+        return fact
 
-    def add_source(
+    async def add_source(
         self,
         fact_id: str,
         source_type: str,
@@ -222,10 +208,11 @@ class FactRepository:
         if not source_type:
             raise ValueError("Source type is required")
 
-        session = self.db_manager.get_session()
         try:
             # Verify fact exists
-            fact = session.query(Fact).filter_by(fact_id=fact_id).first()
+            stmt = select(Fact).where(Fact.fact_id == fact_id)
+            result = await self.session.execute(stmt)
+            fact = result.scalar_one_or_none()
             if not fact:
                 raise RuntimeError(f"Fact {fact_id} not found")
 
@@ -235,17 +222,15 @@ class FactRepository:
                 source_url=source_url,
                 raw_content=raw_content,
             )
-            session.add(source)
-            session.commit()
-            session.refresh(source)
+            self.session.add(source)
+            await self.session.commit()
+            await self.session.refresh(source)
             return source
         except Exception as e:
-            session.rollback()
+            await self.session.rollback()
             raise RuntimeError(f"Failed to add source: {e}") from e
-        finally:
-            session.close()
 
-    def get_batch(self, batch_id: str) -> GatheringBatch | None:
+    async def get_batch(self, batch_id: str) -> GatheringBatch | None:
         """Fetch a gathering batch by ID.
 
         Args:
@@ -260,14 +245,12 @@ class FactRepository:
         if not batch_id:
             raise ValueError("Batch ID is required")
 
-        session = self.db_manager.get_session()
-        try:
-            batch = session.query(GatheringBatch).filter_by(batch_id=batch_id).first()
-            return batch
-        finally:
-            session.close()
+        stmt = select(GatheringBatch).where(GatheringBatch.batch_id == batch_id)
+        result = await self.session.execute(stmt)
+        batch = result.scalar_one_or_none()
+        return batch
 
-    def update_batch_status(self, batch_id: str, status: str) -> GatheringBatch:
+    async def update_batch_status(self, batch_id: str, status: str) -> GatheringBatch:
         """Update the status of a gathering batch.
 
         Args:
@@ -286,18 +269,17 @@ class FactRepository:
         if not status:
             raise ValueError("Status is required")
 
-        session = self.db_manager.get_session()
         try:
-            batch = session.query(GatheringBatch).filter_by(batch_id=batch_id).first()
+            stmt = select(GatheringBatch).where(GatheringBatch.batch_id == batch_id)
+            result = await self.session.execute(stmt)
+            batch = result.scalar_one_or_none()
             if not batch:
                 raise RuntimeError(f"Batch {batch_id} not found")
 
             batch.status = status
-            session.commit()
-            session.refresh(batch)
+            await self.session.commit()
+            await self.session.refresh(batch)
             return batch
         except Exception as e:
-            session.rollback()
+            await self.session.rollback()
             raise RuntimeError(f"Failed to update batch status: {e}") from e
-        finally:
-            session.close()
