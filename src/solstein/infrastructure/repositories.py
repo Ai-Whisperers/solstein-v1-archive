@@ -131,7 +131,7 @@ class FactRepository:
 
         stmt = select(Fact).where(Fact.company_id == company_id).order_by(Fact.extracted_at.desc())
         result = await self.session.execute(stmt)
-        facts = result.scalars().all()
+        facts = list(result.scalars().all())
         return facts
 
     async def get_facts_by_type(self, company_id: str, fact_type: str) -> list[Fact]:
@@ -158,7 +158,7 @@ class FactRepository:
             .order_by(Fact.extracted_at.desc())
         )
         result = await self.session.execute(stmt)
-        facts = result.scalars().all()
+        facts = list(result.scalars().all())
         return facts
 
     async def get_fact_by_id(self, fact_id: str) -> Fact | None:
