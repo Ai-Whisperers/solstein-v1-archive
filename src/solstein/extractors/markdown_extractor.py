@@ -12,6 +12,13 @@ from typing import Any
 
 from loguru import logger
 
+from .llm_financial_extractor import LLMFinancialExtractor
+import re
+from pathlib import Path
+from typing import Any
+
+from loguru import logger
+
 from ..domain.models import (
     AIMaturity,
     Company,
@@ -35,7 +42,19 @@ REQUIRED_PROVENANCE_METRICS = [
 class MarkdownExtractor:
     """Extract structured data from markdown files."""
 
-    def __init__(self) -> None:
+    def __init__(self, use_llm: bool = False) -> None:
+        self.patterns = {
+            "revenue": re.compile(r"Revenue:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
+            "growth_rate": re.compile(r"Growth Rate:\s*([\d.,]+\s*%)"),
+            "employees": re.compile(r"Employees:\s*([\d.,]+)"),
+            "profit_margin": re.compile(r"Profit Margin:\s*([\d.,]+\s*%)"),
+            "funding": re.compile(r"Funding Raised:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
+            "valuation": re.compile(r"Valuation:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
+            "ai_maturity": re.compile(r"AI Maturity:\s*(\w+(?:[\s\t]+\w+)*)"),
+            "threat_level": re.compile(r"Threat Level:\s*(\w+)"),
+            "tier": re.compile(r"Tier:\s*(\w+(?:[\s\t]+\w+)*)"),
+        }
+        self.llm_extractor = LLMFinancialExtractor() if use_llm else None
         self.patterns = {
             "revenue": re.compile(r"Revenue:\s*([€$]?\s*[\d.,]+[MKBT]?)"),
             "growth_rate": re.compile(r"Growth Rate:\s*([\d.,]+\s*%)"),
