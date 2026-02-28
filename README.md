@@ -244,9 +244,34 @@ Solstein underwent a structured **5-wave professionalization initiative** in Feb
 | Wave 2 | Repository Unification | Unified async SQLAlchemy repos, deprecated JsonFileRepository |
 | Wave 3 | Production Cleanup | Removed all mock clients, zero JSON in production paths |
 | Wave 4 | Constraints & Optimization | FK constraints, CHECK constraints, 11 performance indexes |
-| Wave 5 | Integration & Docs | 1,434+ tests passing, complete documentation suite |
+### Security & Performance Hardening (March 2026)
 
-### Database Schema
+Following the initial professionalization, a **comprehensive security and performance hardening initiative** was completed:
+
+| Phase | Focus | Key Deliverables |
+|-------|-------|------------------|
+| **Phase 1** | Critical Security | JWT authentication (17 tests), CORS hardening (16 tests), CI/CD security fixes, 75 total security tests |
+| **Phase 2** | Performance | N+1 query fixes, 13 database indexes, Redis caching layer, comprehensive input validation (33 tests) |
+
+**Security Improvements:**
+- ✅ Fixed CORS wildcard vulnerability with specific origin validation
+- ✅ Implemented JWT authentication with HS256 tokens and refresh support
+- ✅ Added production secret key validation
+- ✅ Removed CI/CD security bypasses (`|| true` flags)
+- ✅ Created 75 security tests covering headers, input sanitization, auth, and CORS
+
+**Performance Improvements:**
+- ✅ Fixed N+1 queries with `get_all_filtered()` database-level filtering
+- ✅ Added 13 database indexes (industry, headquarters, composite, score fields)
+- ✅ Implemented Redis caching with in-memory fallback for company data
+- ✅ Created Pydantic validation schemas with 33 comprehensive validation tests
+
+**Files Created:**
+- `src/solstein/security/jwt_handler.py` - JWT token handling
+- `src/solstein/security/cache.py` - Redis caching layer
+- `src/solstein/api/schemas/validation.py` - Input validation schemas
+- `tests/unit/test_*.py` - 158+ new tests across security, JWT, validation
+
 
 **16+ ORM models** across two files:
 - `src/solstein/infrastructure/database_models.py` — 17 models (companies, scoring, signals, research, enrichment, audit)

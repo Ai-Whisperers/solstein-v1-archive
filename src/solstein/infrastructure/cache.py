@@ -9,8 +9,14 @@ from datetime import timedelta
 from functools import wraps
 from typing import Any, Callable, Optional
 
-import redis
-from redis.asyncio import Redis as AsyncRedis
+try:
+    import redis
+    from redis.asyncio import Redis as AsyncRedis
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+    redis = None  # type: ignore
+    AsyncRedis = None  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +31,13 @@ class CacheManager:
         Args:
             redis_url: Redis connection URL
         """
+        if not REDIS_AVAILABLE:
+            logger.warning("Redis not installed, using in-memory cache")
+            self.redis = None
+            self.available = False
+            self._memory_cache: dict[str, tuple[Any, Optional[float]]] = {}
+            return
+
         try:
             # Try async Redis client first
             self.redis: Optional[AsyncRedis] = AsyncRedis.from_url(redis_url, decode_responses=True)
@@ -35,7 +48,6 @@ class CacheManager:
             self.redis = None
             self.available = False
             self._memory_cache: dict[str, tuple[Any, Optional[float]]] = {}
-
     async def get(self, key: str) -> Optional[Any]:
         """
         Get value from cache.

@@ -21,9 +21,20 @@ logger = logging.getLogger(__name__)
 
 
 class CompetitorDataLoader:
-    """Load competitor data from JSON files and convert to domain entities."""
+    """Load competitor data from JSON files and convert to domain entities.
+    
+    DEPRECATED: This loader is being consolidated. For new code, use UnifiedCompanyLoader
+    from solstein.data.unified_loader which provides enriched data with conflict resolution.
+    """
 
     def __init__(self, data_dir: Path | None = None):
+        import warnings
+        warnings.warn(
+            "CompetitorDataLoader is deprecated. Use UnifiedCompanyLoader from "
+            "solstein.data.unified_loader for enriched data with conflict resolution.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         settings = get_settings()
         self.data_dir = data_dir or Path(settings.data.data_dir)
         self._cache: dict[str, list[Company]] = {}

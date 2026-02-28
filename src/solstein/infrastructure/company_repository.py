@@ -10,7 +10,7 @@ from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .database_models import CompanyRecord
-
+from .cache import cache_manager, company_key
 
 class CompanyRepository:
     """Repository for company data access and manipulation.
@@ -41,7 +41,7 @@ class CompanyRepository:
         return list(result.scalars().all())
 
     async def get_by_id(self, company_id: str) -> Optional[CompanyRecord]:
-        """Retrieve a single company by company_id.
+        """Retrieve a single company by company_id with caching.
 
         Args:
             company_id: Unique company identifier.
@@ -49,8 +49,40 @@ class CompanyRepository:
         Returns:
             CompanyRecord if found, None otherwise.
         """
+        # Check cache first
+        cache_key = company_key(company_id)
+        cached_data = await cache_manager.get(cache_key)
+        if cached_data:
+            # Convert cached dict back to CompanyRecord
+            return CompanyRecord(**cached_data)
+
+        # Fetch from database
         result = await self.session.execute(select(CompanyRecord).where(CompanyRecord.company_id == company_id))
-        return result.scalar_one_or_none()
+        record = result.scalar_one_or_none()
+
+        # Cache the result
+        if record:
+            await cache_manager.set(cache_key, {
+                "company_id": record.company_id,
+                "name": record.name,
+                "industry": record.industry,
+                "headquarters": record.headquarters,
+                "revenue_eur_m": record.revenue_eur_m,
+                "employees": record.employees,
+                "growth_rate_pct": record.growth_rate_pct,
+                "ai_score": record.ai_score,
+                "tier": record.tier,
+                "classification": record.classification,
+                "market_position": record.market_position,
+                "strategic_position": record.strategic_position,
+                "ai_maturity": record.ai_maturity,
+                "description": record.description,
+                "website": record.website,
+                "founded_year": record.founded_year,
+                "last_updated": str(record.last_updated) if record.last_updated else None,
+            }, ttl=3600)
+
+        return record
 
     async def create(self, company_data: dict[str, Any]) -> CompanyRecord:
         """Create a new company record.
