@@ -4,7 +4,6 @@ Phase 1, Item 1.2: JWT Authentication Implementation
 """
 
 from datetime import datetime, timedelta
-from typing import Optional
 
 import jwt
 from pydantic import BaseModel
@@ -111,11 +110,6 @@ class JWTHandler:
             raise jwt.InvalidTokenError("Invalid token signature") from err
         except jwt.DecodeError as err:
             raise jwt.InvalidTokenError("Could not decode token") from err
-            raise jwt.ExpiredSignatureError("Token has expired")
-        except jwt.InvalidSignatureError:
-            raise jwt.InvalidTokenError("Invalid token signature")
-        except jwt.DecodeError:
-            raise jwt.InvalidTokenError("Could not decode token")
 
     def refresh_token(self, token: str) -> str:
         """Refresh an expiring token with a new expiration time.
