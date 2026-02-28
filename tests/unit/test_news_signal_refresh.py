@@ -1,7 +1,7 @@
 """Tests for NewsSignalRefreshConnector."""
 
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from solstein.infrastructure.connectors.news_signal_refresh import NewsSignalRefreshConnector
 from solstein.infrastructure.database import DatabaseManager
@@ -15,36 +15,44 @@ class TestNewsSignalRefreshConnector:
         return MagicMock(spec=DatabaseManager)
 
     def test_initialization(self, mock_db_manager):
-        connector = NewsSignalRefreshConnector(mock_db_manager)
-        assert connector.source_name == "news_signal"
-        assert connector.source_type == "market_signal"
-        assert connector.confidence == 0.72
+        with patch("solstein.infrastructure.connectors.news_signal_refresh.NewsSignalDetector") as mock_detector:
+            mock_detector.return_value = MagicMock()
+            connector = NewsSignalRefreshConnector(mock_db_manager)
+            assert connector.source_name == "news_signal"
+            assert connector.source_type == "market_signal"
+            assert connector.confidence == 0.72
 
     @pytest.mark.asyncio
     async def test_fetch_facts_success(self, mock_db_manager):
-        connector = NewsSignalRefreshConnector(mock_db_manager)
-        connector.news_detector = MagicMock()
-        connector.news_detector.detect_signals = MagicMock(
-            return_value=[{"signal": "acquisition", "confidence": 0.8, "date": "2023-01-01"}]
-        )
-
-        facts = await connector.fetch_facts(["company"])
-        assert len(facts) >= 0
+        with patch("solstein.infrastructure.connectors.news_signal_refresh.NewsSignalDetector") as mock_detector:
+            mock_detector_instance = MagicMock()
+            mock_detector_instance.detect_signals = MagicMock(
+                return_value=[{"signal": "acquisition", "confidence": 0.8, "date": "2023-01-01"}]
+            )
+            mock_detector.return_value = mock_detector_instance
+            
+            connector = NewsSignalRefreshConnector(mock_db_manager)
+            facts = await connector.fetch_facts(["company"])
+            assert len(facts) >= 0
 
     @pytest.mark.asyncio
     async def test_error_handling(self, mock_db_manager):
-        connector = NewsSignalRefreshConnector(mock_db_manager)
-        connector.news_detector = MagicMock()
-        connector.news_detector.detect_signals = MagicMock(side_effect=Exception("Error"))
-
-        facts = await connector.fetch_facts(["company"])
-        assert facts == []
+        with patch("solstein.infrastructure.connectors.news_signal_refresh.NewsSignalDetector") as mock_detector:
+            mock_detector_instance = MagicMock()
+            mock_detector_instance.detect_signals = MagicMock(side_effect=Exception("Error"))
+            mock_detector.return_value = mock_detector_instance
+            
+            connector = NewsSignalRefreshConnector(mock_db_manager)
+            facts = await connector.fetch_facts(["company"])
+            assert facts == []
 
     @pytest.mark.asyncio
     async def test_empty_results(self, mock_db_manager):
-        connector = NewsSignalRefreshConnector(mock_db_manager)
-        connector.news_detector = MagicMock()
-        connector.news_detector.detect_signals = MagicMock(return_value=[])
-
-        facts = await connector.fetch_facts(["company"])
-        assert facts == []
+        with patch("solstein.infrastructure.connectors.news_signal_refresh.NewsSignalDetector") as mock_detector:
+            mock_detector_instance = MagicMock()
+            mock_detector_instance.detect_signals = MagicMock(return_value=[])
+            mock_detector.return_value = mock_detector_instance
+            
+            connector = NewsSignalRefreshConnector(mock_db_manager)
+            facts = await connector.fetch_facts(["company"])
+            assert facts == []

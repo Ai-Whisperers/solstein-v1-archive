@@ -1,7 +1,7 @@
 """Tests for PatentsRefreshConnector."""
 
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from solstein.infrastructure.connectors.patents_refresh import PatentsRefreshConnector
 from solstein.infrastructure.database import DatabaseManager
@@ -32,19 +32,26 @@ class TestPatentsRefreshConnector:
         assert len(facts) >= 0
 
     @pytest.mark.asyncio
-    async def test_error_handling(self, mock_db_manager):
+    @patch("solstein.infrastructure.connectors.patents_refresh.search_company_patents")
+    async def test_error_handling(self, mock_search, mock_db_manager):
+        mock_search.side_effect = Exception("Error")
         connector = PatentsRefreshConnector(mock_db_manager)
-        connector.patent_client = MagicMock()
-        connector.patent_client.search = MagicMock(side_effect=Exception("Error"))
 
         facts = await connector.fetch_facts(["company"])
         assert facts == []
 
     @pytest.mark.asyncio
-    async def test_empty_results(self, mock_db_manager):
+    @patch("solstein.infrastructure.connectors.patents_refresh.search_company_patents")
+    async def test_empty_results(self, mock_search, mock_db_manager):
+        # Create a mock result object that mimics PatentSearchResult
+        mock_result = MagicMock()
+        mock_result.total_patents = 0
+        mock_result.recent_patents = 0
+        mock_result.ai_related_patents = 0
+        mock_result.top_categories = []
+        mock_result.source = "uspto_peds"
+        mock_search.return_value = mock_result
         connector = PatentsRefreshConnector(mock_db_manager)
-        connector.patent_client = MagicMock()
-        connector.patent_client.search = MagicMock(return_value=[])
 
         facts = await connector.fetch_facts(["company"])
-        assert facts == []
+        assert len(facts) == 1  # Returns fact with zero patents
