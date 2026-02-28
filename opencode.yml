@@ -1,0 +1,224 @@
+# OpenCode v1.0+ Configuration for Solstein
+# https://docs.opencode.ai/configuration
+
+version: "2.0"
+project:
+  name: solstein
+  language: python
+  framework: fastapi
+  ai_ready: true
+
+# MCP Server Configuration
+mcp:
+  servers:
+    filesystem:
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-filesystem", "."]
+      description: File system operations
+    
+    sequential-thinking:
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+      description: Structured reasoning
+    
+    memory:
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-memory"]
+      description: Persistent memory across sessions
+      optional: true
+
+# Granular Permissions (OpenCode v1.0+)
+permissions:
+  bash:
+    allow:
+      - "uv *"
+      - "pip *"
+      - "pytest *"
+      - "python *"
+      - "python3 *"
+      - "git *"
+      - "npm *"
+      - "make *"
+      - "black *"
+      - "ruff *"
+      - "mypy *"
+      - "cd *"
+      - "ls *"
+      - "cat *"
+      - "mkdir *"
+      - "find *"
+      - "head *"
+      - "tail *"
+      - "grep *"
+      - "./scripts/*"
+    deny:
+      - "rm -rf /"
+      - "rm -rf ~"
+      - "sudo *"
+      - "*password*"
+      - "*secret*"
+    default: ask
+  
+  read:
+    allow:
+      - "**/*.py"
+      - "**/*.json"
+      - "**/*.yaml"
+      - "**/*.yml"
+      - "**/*.md"
+      - "**/*.txt"
+      - "**/*.toml"
+      - "**/*.sh"
+      - "**/*.env.example"
+      - "**/*.example"
+    deny:
+      - "**/.env"
+      - "**/.env.*"
+      - "**/.env.local"
+      - "**/credentials*"
+      - "**/secrets*"
+      - "**/*.key"
+      - "**/*.pem"
+      - "**/kaggle.json"
+      - "**/.aws/credentials"
+    default: allow
+  
+  write:
+    allow:
+      - "**/*.py"
+      - "**/*.json"
+      - "**/*.yaml"
+      - "**/*.yml"
+      - "**/*.md"
+      - "**/*.txt"
+      - "tests/**/*.py"
+      - "docs/**/*.md"
+      - "scripts/**/*.sh"
+      - "src/**/*.py"
+    deny:
+      - "**/.env"
+      - "**/.env.*"
+      - "**/.env.local"
+      - "**/credentials*"
+      - "**/secrets*"
+      - "**/*.key"
+      - "**/*.pem"
+    default: ask
+
+# Subagent Configuration (OpenCode v1.0+)
+agents:
+  build:
+    name: "Build Agent"
+    purpose: Implementation and code changes
+    budget: 500
+    tools: ["write", "edit", "test", "bash"]
+    description: "Write code, implement features, fix bugs"
+  
+  plan:
+    name: "Plan Agent"
+    purpose: Architecture and research
+    budget: 300
+    tools: ["read", "analyze", "grep"]
+    read_only: true
+    description: "Analyze codebase, propose changes, design architecture"
+  
+  review:
+    name: "Review Agent"
+    purpose: Code quality checks
+    budget: 200
+    tools: ["read", "analyze"]
+    read_only: true
+    description: "Review code against standards, check quality"
+  
+  test:
+    name: "Test Agent"
+    purpose: Test generation and execution
+    budget: 200
+    tools: ["write", "test", "bash"]
+    description: "Generate tests, run test suites"
+  
+  docs:
+    name: "Docs Agent"
+    purpose: Documentation
+    budget: 150
+    tools: ["write", "read"]
+    description: "Write documentation, update READMEs"
+
+# LLM Provider Configuration
+providers:
+  # Primary provider selection strategy
+  primary: auto
+  
+  # Fallback chain when primary fails
+  fallback_chain:
+    - ollama      # Local, sensitive data
+    - fireworks   # Cost-effective
+    - openai      # General purpose
+    - groq        # Fast inference
+  
+  # Model assignments by provider
+  models:
+    ollama: llama3.2:latest
+    openai: gpt-4o-mini
+    groq: llama-3.3-70b-versatile
+    fireworks: qwen2-72b-instruct
+  
+  # Health checking configuration
+  health_check:
+    enabled: true
+    proactive: true
+    rate_limit_detection: true
+    quota_detection: true
+    retry_on_rate_limit: true
+    max_retries: 3
+    retry_delay_base: 1.0
+
+# Session Management
+session:
+  # Enable multi-session workflows (OpenCode v1.0+)
+  multi_session: true
+  
+  # Default agent for new sessions
+  default_agent: build
+  
+  # Context preservation
+  preserve_context: true
+  
+  # Hooks
+  hooks:
+    on_start: echo "OpenCode session started for solstein"
+    on_stop: echo "OpenCode session ended"
+
+# Logging
+logging:
+  level: info
+  format: "[{time}] {level} | {message}"
+  
+# Security
+security:
+  # Minimum OpenCode version (CVE-2026-22812 fix)
+  min_version: "1.0.216"
+  
+  # Secret scanning
+  scan_secrets: true
+  
+  # Block dangerous operations
+  block_dangerous_ops: true
+
+# Performance
+performance:
+  # Parallel tool execution
+  parallel_tools: true
+  
+  # Context management
+  max_context_files: 10
+  auto_compact_threshold: 0.8
+  
+  # Caching
+  cache_llm_responses: true
+  cache_duration: 3600
+
+# Environment
+environment:
+  PYTHONPATH: "${PYTHONPATH}:$(pwd)/src"
+  OPENCODE_PROJECT: "solstein"

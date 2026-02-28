@@ -1,19 +1,85 @@
 {
+  "version": "2.0",
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "."
-      ]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+      "description": "File system operations in the project directory"
     },
     "sequential-thinking": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Structured step-by-step reasoning for complex problems"
     }
+  },
+  "permissions": {
+    "bash": {
+      "uv *": "allow",
+      "pip *": "allow",
+      "pytest *": "allow",
+      "python *": "allow",
+      "git *": "allow",
+      "npm *": "allow",
+      "make *": "allow",
+      "black *": "allow",
+      "ruff *": "allow",
+      "mypy *": "allow",
+      "cd *": "allow",
+      "ls *": "allow",
+      "cat *": "allow",
+      "mkdir *": "allow",
+      "rm *": "deny",
+      "*": "ask"
+    },
+    "read": {
+      "**/*.py": "allow",
+      "**/*.json": "allow",
+      "**/*.yaml": "allow",
+      "**/*.yml": "allow",
+      "**/*.md": "allow",
+      "**/*.txt": "allow",
+      "**/*.toml": "allow",
+      "**/*.sh": "allow",
+      "**/*.env.example": "allow",
+      "**/.env*": "deny",
+      "**/credentials*": "deny",
+      "**/secrets*": "deny",
+      "**/*.key": "deny",
+      "**/*.pem": "deny"
+    },
+    "write": {
+      "**/*.py": "allow",
+      "**/*.json": "allow",
+      "**/*.yaml": "allow",
+      "**/*.yml": "allow",
+      "**/*.md": "allow",
+      "**/*.txt": "allow",
+      "tests/**/*.py": "allow",
+      "docs/**/*.md": "allow",
+      "**/.env*": "deny",
+      "**/credentials*": "deny",
+      "**/secrets*": "deny"
+    }
+  },
+  "agents": {
+    "enabled": ["build", "plan", "review", "test", "docs"],
+    "budgets": {
+      "build": 500,
+      "plan": 300,
+      "review": 200,
+      "test": 200,
+      "docs": 150
+    }
+  },
+  "providers": {
+    "primary": "auto",
+    "fallback": ["openai", "groq", "fireworks"],
+    "local": "ollama"
+  },
+  "features": {
+    "multiSession": true,
+    "subagentDelegation": true,
+    "granularPermissions": true,
+    "commandBar": true
   }
 }

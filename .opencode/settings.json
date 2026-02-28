@@ -1,0 +1,204 @@
+{
+  "$schema": "https://docs.opencode.ai/schemas/settings-v2.json",
+  "version": "2.0",
+  
+  "project": {
+    "name": "solstein",
+    "description": "AI-powered competitive intelligence platform for PE/VC professionals",
+    "language": "python",
+    "framework": "fastapi"
+  },
+
+  "permissions": {
+    "bash": {
+      "allow": [
+        "Bash(uv:*)",
+        "Bash(pip:*)",
+        "Bash(pytest:*)",
+        "Bash(python:*)",
+        "Bash(python3:*)",
+        "Bash(git:*)",
+        "Bash(npm:*)",
+        "Bash(make:*)",
+        "Bash(black:*)",
+        "Bash(ruff:*)",
+        "Bash(mypy:*)",
+        "Bash(cd:*)",
+        "Bash(ls:*)",
+        "Bash(cat:*)",
+        "Bash(mkdir:*)",
+        "Bash(find:*)",
+        "Bash(head:*)",
+        "Bash(tail:*)",
+        "Bash(grep:*)",
+        "Bash(./scripts/*)"
+      ],
+      "deny": [
+        "Bash(rm -rf /)",
+        "Bash(rm -rf ~)",
+        "Bash(sudo *)",
+        "Bash(*password*)",
+        "Bash(*secret*)"
+      ]
+    },
+    "read": {
+      "deny": [
+        "Read(**/.env)",
+        "Read(**/.env.*)",
+        "Read(**/credentials*)",
+        "Read(**/secrets*)",
+        "Read(**/*.key)",
+        "Read(**/*.pem)",
+        "Read(**/kaggle.json)",
+        "Read(**/.aws/credentials)"
+      ]
+    },
+    "write": {
+      "deny": [
+        "Write(**/.env)",
+        "Write(**/.env.*)",
+        "Write(**/credentials*)",
+        "Write(**/secrets*)",
+        "Write(**/*.key)",
+        "Write(**/*.pem)"
+      ]
+    }
+  },
+
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "notification",
+        "message": "🚀 Solstein | OpenCode v1.0+ session started",
+        "timeout": 5000
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write(*.py)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Writing Python file...'",
+            "timeout": 1000
+          }
+        ]
+      },
+      {
+        "matcher": "Write(**/.env*)",
+        "hooks": [
+          {
+            "type": "confirm",
+            "message": "⚠️  Attempting to write to .env file. Confirm?",
+            "timeout": 30000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write(*.py)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "black $FILE_PATH 2>/dev/null || true",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "echo 'Session completed. Run /cost to see usage.'",
+        "timeout": 1000
+      }
+    ]
+  },
+
+  "env": {
+    "PYTHONPATH": ".:./src",
+    "OPENCODE_PROJECT": "solstein"
+  },
+
+  "commands": {
+    "test": {
+      "description": "Run the test suite",
+      "prompt": "!pytest -v --tb=short"
+    },
+    "lint": {
+      "description": "Run linting checks",
+      "prompt": "!black . --check && ruff check ."
+    },
+    "format": {
+      "description": "Format all code",
+      "prompt": "!black . && ruff check --fix ."
+    },
+    "typecheck": {
+      "description": "Run type checking",
+      "prompt": "!mypy src --strict"
+    },
+    "mcp-check": {
+      "description": "Check MCP servers",
+      "prompt": "!./scripts/opencode-mcp-doctor.sh && ./scripts/opencode-mcp-smoke-test.sh"
+    },
+    "health": {
+      "description": "Check LLM provider health",
+      "prompt": "!python3 -c \"from src.solstein.llm import get_health_checker; import asyncio; result = asyncio.run(get_health_checker().check_all_providers()); print(result)\""
+    }
+  },
+
+  "agents": {
+    "build": {
+      "enabled": true,
+      "budget": 500,
+      "tools": ["write", "edit", "bash", "test"]
+    },
+    "plan": {
+      "enabled": true,
+      "budget": 300,
+      "tools": ["read", "analyze"],
+      "readOnly": true
+    },
+    "review": {
+      "enabled": true,
+      "budget": 200,
+      "tools": ["read", "analyze"],
+      "readOnly": true
+    },
+    "test": {
+      "enabled": true,
+      "budget": 200,
+      "tools": ["write", "test", "bash"]
+    },
+    "docs": {
+      "enabled": true,
+      "budget": 150,
+      "tools": ["write", "read"]
+    }
+  },
+
+  "providers": {
+    "primary": "auto",
+    "fallback": ["ollama", "fireworks", "openai", "groq"]
+  },
+
+  "features": {
+    "multiSession": true,
+    "subagentDelegation": true,
+    "granularPermissions": true,
+    "commandBar": true
+  },
+
+  "security": {
+    "minVersion": "1.0.216",
+    "scanSecrets": true,
+    "blockDangerousOps": true
+  },
+
+  "performance": {
+    "parallelTools": true,
+    "maxContextFiles": 10,
+    "autoCompactThreshold": 0.8
+  }
+}
