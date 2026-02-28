@@ -55,6 +55,6 @@ async def calculate_company_score(company_id: str) -> dict[str, Any]:
 
 async def fetch_market_company_ids(filters: dict[str, Any]) -> list[str]:
     """Fetch all company IDs matching a filter for batch scoring."""
-    repo = _get_repo()
+    repo = await _get_repo()
     companies = await asyncio.to_thread(repo.get_all, filters=CompanyFilter(**filters))
     return [c.id for c in companies if c.id]

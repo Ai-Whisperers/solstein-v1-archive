@@ -80,14 +80,24 @@ class APIConfig(BaseModel):
     host: str = Field(default="127.0.0.1")
     port: int = Field(default=8000, ge=1, le=65535)
     debug: bool = Field(default=False)
-    cors_origins: list[str] = Field(default=["http://localhost:3000"])
+    cors_origins: list[str] = Field(
+        default=["http://localhost:3000", "http://localhost:8000"],
+        description="Comma-separated list of allowed CORS origins"
+    )
+    cors_methods: list[str] = Field(
+        default=["GET", "POST", "PUT", "DELETE"],
+        description="Allowed HTTP methods"
+    )
+    cors_headers: list[str] = Field(
+        default=["Authorization", "Content-Type"],
+        description="Allowed request headers"
+    )
     api_prefix: str = Field(default="/api/v1")
 
     @property
     def base_url(self) -> str:
         """Get base URL for API."""
         return f"http://{self.host}:{self.port}{self.api_prefix}"
-
 
 class SecurityConfig(BaseModel):
     """Security configuration."""
@@ -96,6 +106,16 @@ class SecurityConfig(BaseModel):
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30, ge=1)
 
+    def __init__(self, **data: Any) -> None:
+        """Initialize and validate security config."""
+        super().__init__(**data)
+        # Fail startup in production if using default secret key
+        if data.get("environment") == "production" and self.secret_key == "change-me-in-production":
+            raise ValueError(
+                "FATAL: secret_key must be set to a strong value in production. "
+                "Set SECRET_KEY environment variable."
+            )
+
     @field_validator("secret_key")
     @classmethod
     def validate_secret_key(cls, v: str) -> str:
@@ -103,7 +123,6 @@ class SecurityConfig(BaseModel):
         if v == "change-me-in-production":
             logger.warning("Using default secret key - change in production!")
         return v
-
 
 class LoggingConfig(BaseModel):
     """Logging configuration."""

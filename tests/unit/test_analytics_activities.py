@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from tests.factories import make_company
@@ -24,8 +24,7 @@ def test_get_repo_fallback(mock_get_settings):
 
 
 @pytest.mark.asyncio
-@patch("solstein.analytics.activities._get_repo")
-async def test_calculate_company_score(mock_get_repo):
+async def test_calculate_company_score():
     """Test calculate_company_score activity."""
     mock_repo = MagicMock()
     mock_company = make_company()
@@ -33,19 +32,22 @@ async def test_calculate_company_score(mock_get_repo):
 
     # We must mock `repo.save` as synchronous because `asyncio.to_thread` wraps it
     mock_repo.save.return_value = mock_company
-    mock_get_repo.return_value = mock_repo
 
-    result = await calculate_company_score(mock_company.id)
-    assert result["company_id"] == mock_company.id
-    assert "classification" in result
-    assert "growth_score" in result
+    async def mock_get_repo():
+        return mock_repo
 
-    mock_repo.get_by_id.assert_called_once_with(mock_company.id)
-    mock_repo.save.assert_called_once()
+    with patch("solstein.analytics.activities._get_repo", side_effect=mock_get_repo):
+        result = await calculate_company_score(mock_company.id)
+        assert result["company_id"] == mock_company.id
+        assert "classification" in result
+        assert "growth_score" in result
+
+        mock_repo.get_by_id.assert_called_once_with(mock_company.id)
+        mock_repo.save.assert_called_once()
 
 
 @pytest.mark.asyncio
-@patch("solstein.analytics.activities._get_repo")
+@patch("solstein.analytics.activities._get_repo", new_callable=AsyncMock)
 async def test_calculate_company_score_not_found(mock_get_repo):
     """Test calculate_company_score raises ValueError on missing company."""
     mock_repo = MagicMock()
@@ -57,7 +59,7 @@ async def test_calculate_company_score_not_found(mock_get_repo):
 
 
 @pytest.mark.asyncio
-@patch("solstein.analytics.activities._get_repo")
+@patch("solstein.analytics.activities._get_repo", new_callable=AsyncMock)
 async def test_fetch_market_company_ids(mock_get_repo):
     """Test fetch_market_company_ids activity."""
     mock_repo = MagicMock()

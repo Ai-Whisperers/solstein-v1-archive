@@ -24,7 +24,7 @@ class TestLinkedInRefreshConnector:
     async def test_fetch_facts_success(self, mock_db_manager):
         connector = LinkedInRefreshConnector(mock_db_manager, news_api_key="test")
         connector.loader = MagicMock()
-        connector.loader.get_linkedin_data = MagicMock(return_value={"employees": 1000, "company_size": "1K-5K"})
+        connector.client.get_linkedin_data = MagicMock(return_value={"employees": 1000, "company_size": "1K-5K"})
 
         facts = await connector.fetch_facts(["company"])
         assert len(facts) >= 0
@@ -33,7 +33,7 @@ class TestLinkedInRefreshConnector:
     async def test_error_handling(self, mock_db_manager):
         connector = LinkedInRefreshConnector(mock_db_manager, news_api_key="test")
         connector.loader = MagicMock()
-        connector.loader.get_linkedin_data = MagicMock(side_effect=Exception("Error"))
+        connector.client.get_linkedin_data = MagicMock(side_effect=Exception("Error"))
 
         facts = await connector.fetch_facts(["company"])
         assert facts == []
@@ -42,7 +42,7 @@ class TestLinkedInRefreshConnector:
     async def test_empty_results(self, mock_db_manager):
         connector = LinkedInRefreshConnector(mock_db_manager, news_api_key="test")
         connector.loader = MagicMock()
-        connector.loader.get_linkedin_data = MagicMock(return_value={})
+        connector.client.get_linkedin_data = MagicMock(return_value={})
 
         facts = await connector.fetch_facts(["company"])
         assert facts == []

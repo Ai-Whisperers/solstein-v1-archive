@@ -24,7 +24,7 @@ class TestGlobalMarketRefreshConnector:
     async def test_fetch_facts_success(self, mock_db_manager):
         connector = GlobalMarketRefreshConnector(mock_db_manager)
         connector.loader = MagicMock()
-        connector.loader.fetch_market_data = MagicMock(return_value={"market_cap": 1000000, "growth": 0.15})
+        connector.loader.get_stock_data = MagicMock(return_value={"market_cap": 1000000, "growth": 0.15})
 
         facts = await connector.fetch_facts(["company"])
         assert len(facts) >= 0
@@ -33,7 +33,7 @@ class TestGlobalMarketRefreshConnector:
     async def test_error_handling(self, mock_db_manager):
         connector = GlobalMarketRefreshConnector(mock_db_manager)
         connector.loader = MagicMock()
-        connector.loader.fetch_market_data = MagicMock(side_effect=Exception("Error"))
+        connector.loader.get_stock_data = MagicMock(side_effect=Exception("Error"))
 
         facts = await connector.fetch_facts(["company"])
         assert facts == []
@@ -42,7 +42,7 @@ class TestGlobalMarketRefreshConnector:
     async def test_empty_results(self, mock_db_manager):
         connector = GlobalMarketRefreshConnector(mock_db_manager)
         connector.loader = MagicMock()
-        connector.loader.fetch_market_data = MagicMock(return_value={})
+        connector.loader.get_stock_data = MagicMock(return_value={})
 
         facts = await connector.fetch_facts(["company"])
         assert facts == []

@@ -38,7 +38,7 @@ class TestCompaniesHouseRefreshConnector:
         with patch("solstein.infrastructure.connectors.companies_house_refresh.CompaniesHouseConnector"):
             connector = CompaniesHouseRefreshConnector(mock_db_manager)
             connector.ch_connector = MagicMock()
-            connector.ch_connector.get_company = MagicMock(side_effect=Exception("API error"))
+            connector.ch_connector.get_company_metrics = MagicMock(side_effect=Exception("API error"))
 
             facts = await connector.fetch_facts(["12345678"])
             assert facts == []
@@ -48,7 +48,7 @@ class TestCompaniesHouseRefreshConnector:
         with patch("solstein.infrastructure.connectors.companies_house_refresh.CompaniesHouseConnector"):
             connector = CompaniesHouseRefreshConnector(mock_db_manager)
             connector.ch_connector = MagicMock()
-            connector.ch_connector.get_company = MagicMock(return_value=None)
+            connector.ch_connector.get_company_metrics = MagicMock(return_value=None)
 
             facts = await connector.fetch_facts(["12345678"])
             assert facts == []

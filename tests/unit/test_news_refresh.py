@@ -24,7 +24,7 @@ class TestNewsRefreshConnector:
     async def test_fetch_facts_success(self, mock_db_manager):
         connector = NewsRefreshConnector(mock_db_manager, news_api_key="test-key")
         connector.news_detector = MagicMock()
-        connector.news_detector.detect_signals = MagicMock(
+        connector.client.get_news = MagicMock(
             return_value=[{"title": "Company News", "url": "https://example.com", "date": "2023-01-01"}]
         )
 
@@ -35,7 +35,7 @@ class TestNewsRefreshConnector:
     async def test_error_handling(self, mock_db_manager):
         connector = NewsRefreshConnector(mock_db_manager, news_api_key="test-key")
         connector.news_detector = MagicMock()
-        connector.news_detector.detect_signals = MagicMock(side_effect=Exception("API error"))
+        connector.client.get_news = MagicMock(side_effect=Exception("API error"))
 
         facts = await connector.fetch_facts(["company-name"])
         assert facts == []
@@ -44,7 +44,7 @@ class TestNewsRefreshConnector:
     async def test_empty_results(self, mock_db_manager):
         connector = NewsRefreshConnector(mock_db_manager, news_api_key="test-key")
         connector.news_detector = MagicMock()
-        connector.news_detector.detect_signals = MagicMock(return_value=[])
+        connector.client.get_news = MagicMock(return_value=[])
 
         facts = await connector.fetch_facts(["company-name"])
         assert facts == []

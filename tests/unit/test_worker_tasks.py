@@ -121,119 +121,152 @@ class TestRefreshTasks:
         with patch("solstein.worker_tasks._get_db_manager") as mock:
             yield mock
 
-    def test_refresh_sec_edgar_success(self, mock_task_self, mock_db_manager):
+    @pytest.fixture
+    def mock_tracked_companies(self):
+        """Mock _get_tracked_company_ids to return test companies."""
+        with patch("solstein.worker_tasks._get_tracked_company_ids", new_callable=AsyncMock) as mock:
+            mock.return_value = ["comp_001", "comp_002"]
+            yield mock
+
+    @pytest.fixture
+    def mock_store_facts(self):
+        """Mock _store_facts to return success."""
+        with patch("solstein.worker_tasks._store_facts", new_callable=AsyncMock) as mock:
+            mock.return_value = 5
+            yield mock
+
+    def test_refresh_sec_edgar_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful SEC EDGAR refresh task execution."""
         with patch("solstein.worker_tasks.SECEDGARRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.fetch_facts = AsyncMock(return_value=[])
+            instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}, {"fact": 2}])
             mock_connector.return_value = instance
-            with patch("solstein.worker_tasks._store_facts", new_callable=AsyncMock, return_value=0):
-                result = refresh_sec_edgar(mock_task_self)
-                assert result is not None
+            result = refresh_sec_edgar(mock_task_self)
+            assert result is not None
+            assert result["status"] == "completed"
 
-    def test_refresh_companies_house_success(self, mock_task_self, mock_db_manager):
+    def test_refresh_companies_house_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful Companies House refresh task execution."""
         with patch("solstein.worker_tasks.CompaniesHouseRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.refresh = MagicMock(return_value={"status": "success"})
+            instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
             result = refresh_companies_house(mock_task_self)
             assert result is not None
 
-    def test_refresh_news_signals_success(self, mock_task_self, mock_db_manager):
+    def test_refresh_news_signals_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful News Signals refresh task execution."""
         with patch("solstein.worker_tasks.NewsSignalRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.refresh = MagicMock(return_value={"status": "success"})
+            instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
             result = refresh_news_signals(mock_task_self)
             assert result is not None
 
-    def test_refresh_github_success(self, mock_task_self, mock_db_manager):
+    def test_refresh_github_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful GitHub refresh task execution."""
         with patch("solstein.worker_tasks.GitHubRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.refresh = MagicMock(return_value={"status": "success"})
+            instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
             result = refresh_github(mock_task_self)
             assert result is not None
 
-    def test_refresh_yahoo_finance_success(self, mock_task_self, mock_db_manager):
+    def test_refresh_yahoo_finance_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful Yahoo Finance refresh task execution."""
         with patch("solstein.worker_tasks.YahooFinanceRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.refresh = MagicMock(return_value={"status": "success"})
+            instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
             result = refresh_yahoo_finance(mock_task_self)
             assert result is not None
 
-    def test_refresh_patents_success(self, mock_task_self, mock_db_manager):
+    def test_refresh_patents_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful Patents refresh task execution."""
         with patch("solstein.worker_tasks.PatentsRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.refresh = MagicMock(return_value={"status": "success"})
+            instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
             result = refresh_patents(mock_task_self)
             assert result is not None
 
-    def test_refresh_news_success(self, mock_task_self, mock_db_manager):
+    def test_refresh_news_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful News refresh task execution."""
         with patch("solstein.worker_tasks.NewsRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.refresh = MagicMock(return_value={"status": "success"})
+            instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
             result = refresh_news(mock_task_self)
             assert result is not None
 
-    def test_refresh_website_success(self, mock_task_self, mock_db_manager):
+    def test_refresh_website_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful Website refresh task execution."""
         with patch("solstein.worker_tasks.WebsiteRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.refresh = MagicMock(return_value={"status": "success"})
+            instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
             result = refresh_website(mock_task_self)
             assert result is not None
 
-    def test_refresh_linkedin_success(self, mock_task_self, mock_db_manager):
+    def test_refresh_linkedin_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful LinkedIn refresh task execution."""
         with patch("solstein.worker_tasks.LinkedInRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.refresh = MagicMock(return_value={"status": "success"})
+            instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
             result = refresh_linkedin(mock_task_self)
             assert result is not None
 
-    def test_refresh_funding_success(self, mock_task_self, mock_db_manager):
+    def test_refresh_funding_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful Funding refresh task execution."""
         with patch("solstein.worker_tasks.FundingRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.refresh = MagicMock(return_value={"status": "success"})
+            instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
             result = refresh_funding(mock_task_self)
             assert result is not None
 
-    def test_refresh_global_market_success(self, mock_task_self, mock_db_manager):
+    def test_refresh_global_market_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful Global Market refresh task execution."""
         with patch("solstein.worker_tasks.GlobalMarketRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.refresh = MagicMock(return_value={"status": "success"})
+            instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
             result = refresh_global_market(mock_task_self)
             assert result is not None
 
-    def test_refresh_web_search_success(self, mock_task_self, mock_db_manager):
+    def test_refresh_web_search_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful Web Search refresh task execution."""
         with patch("solstein.worker_tasks.WebSearchRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.refresh = MagicMock(return_value={"status": "success"})
+            instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
             result = refresh_web_search(mock_task_self)
             assert result is not None
 
     def test_refresh_all_sources_success(self, mock_task_self, mock_db_manager):
         """Test successful refresh_all_sources task execution."""
-        result = refresh_all_sources(mock_task_self)
-        assert result is not None
+        # Mock apply_async for all refresh tasks
+        with patch("solstein.worker_tasks.refresh_sec_edgar") as mock_sec, \
+             patch("solstein.worker_tasks.refresh_companies_house") as mock_ch, \
+             patch("solstein.worker_tasks.refresh_news_signals") as mock_ns, \
+             patch("solstein.worker_tasks.refresh_github") as mock_gh, \
+             patch("solstein.worker_tasks.refresh_yahoo_finance") as mock_yf, \
+             patch("solstein.worker_tasks.refresh_patents") as mock_pt, \
+             patch("solstein.worker_tasks.refresh_news") as mock_nw, \
+             patch("solstein.worker_tasks.refresh_website") as mock_ws, \
+             patch("solstein.worker_tasks.refresh_linkedin") as mock_li, \
+             patch("solstein.worker_tasks.refresh_funding") as mock_fn, \
+             patch("solstein.worker_tasks.refresh_global_market") as mock_gm, \
+             patch("solstein.worker_tasks.refresh_web_search") as mock_ws2:
+            
+            # Create mock AsyncResult objects
+            for mock in [mock_sec, mock_ch, mock_ns, mock_gh, mock_yf, mock_pt, 
+                        mock_nw, mock_ws, mock_li, mock_fn, mock_gm, mock_ws2]:
+                mock.apply_async = MagicMock(return_value=MagicMock(id=f"task_{mock.name}"))
+            
+            result = refresh_all_sources(mock_task_self)
+            assert result is not None
 
 
 class TestRetryLogic:
@@ -246,16 +279,17 @@ class TestRetryLogic:
         mock_task.request.retries = 0
         mock_task.retry = MagicMock()
 
-        with patch("solstein.worker_tasks.SECEDGARRefreshConnector") as mock_connector:
+        with patch("solstein.worker_tasks.SECEDGARRefreshConnector") as mock_connector, \
+             patch("solstein.worker_tasks._get_tracked_company_ids", new_callable=AsyncMock, return_value=["comp_001"]), \
+             patch("solstein.worker_tasks._store_facts", new_callable=AsyncMock, return_value=0):
             instance = MagicMock()
-            instance.refresh = MagicMock(side_effect=Exception("API Error"))
+            instance.fetch_facts = AsyncMock(side_effect=Exception("API Error"))
             mock_connector.return_value = instance
 
-            with patch("solstein.worker_tasks._get_db_manager"):
-                try:
-                    refresh_sec_edgar(mock_task)
-                except Exception:
-                    pass  # Expected
+            try:
+                refresh_sec_edgar(mock_task)
+            except Exception:
+                pass  # Expected
 
     def test_max_retries_exceeded_logging(self):
         """Test that MaxRetriesExceededError is logged with [RETRY-FAILED] prefix."""
@@ -264,16 +298,17 @@ class TestRetryLogic:
         mock_task.request.retries = 3
         mock_task.retry = MagicMock(side_effect=MaxRetriesExceededError("Max retries exceeded"))
 
-        with patch("solstein.worker_tasks.SECEDGARRefreshConnector") as mock_connector:
+        with patch("solstein.worker_tasks.SECEDGARRefreshConnector") as mock_connector, \
+             patch("solstein.worker_tasks._get_tracked_company_ids", new_callable=AsyncMock, return_value=["comp_001"]), \
+             patch("solstein.worker_tasks._store_facts", new_callable=AsyncMock, return_value=0):
             instance = MagicMock()
-            instance.refresh = MagicMock(side_effect=Exception("API Error"))
+            instance.fetch_facts = AsyncMock(side_effect=Exception("API Error"))
             mock_connector.return_value = instance
 
-            with patch("solstein.worker_tasks._get_db_manager"):
-                try:
-                    refresh_sec_edgar(mock_task)
-                except MaxRetriesExceededError:
-                    pass  # Expected
+            try:
+                refresh_sec_edgar(mock_task)
+            except MaxRetriesExceededError:
+                pass  # Expected
 
 
 class TestEnrichTasks:
