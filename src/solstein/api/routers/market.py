@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from loguru import logger
 
 from ...analytics.scoring import CompetitiveOverlapCalculator, MarketAnalyzer
-from ...core.repositories import CompanyFilter, CompanyRepository
+from ...infrastructure.company_repository import CompanyRepository
 from ...domain.models import CompetitiveOverlap, MarketAnalysis
 from ..dependencies import get_current_user, get_company_repository
 
@@ -22,12 +22,12 @@ async def analyze_market(
 ) -> MarketAnalysis:
     """Perform market analysis for a specific industry/region."""
     try:
-        # Pass filters to repository for efficient data fetching
-        filters = CompanyFilter(industry=industry)
-        companies = repo.get_all(filters=filters)
-
-        if region:
-            companies = [c for c in companies if region.lower() in [p.lower() for p in c.geographic_presence]]  # noqa: E501
+        # Use database-level filtering for efficient data fetching
+        companies = await repo.get_all_filtered(
+            industry=industry,
+            region=region,
+            limit=1000,
+        )
 
         if not companies:
             return MarketAnalysis(

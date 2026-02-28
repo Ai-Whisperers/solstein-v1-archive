@@ -161,3 +161,34 @@ class CompanyRepository:
 
         result = await self.session.execute(select(CompanyRecord).where(and_(*conditions)))
         return list(result.scalars().all())
+
+
+    async def get_all_filtered(
+        self,
+        industry: str | None = None,
+        region: str | None = None,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> list[CompanyRecord]:
+        """Retrieve companies with database-level filtering.
+
+        Args:
+            industry: Filter by industry (case-insensitive partial match).
+            region: Filter by region/headquarters (case-insensitive partial match).
+            skip: Number of records to skip (default: 0).
+            limit: Maximum number of records to return (default: 100).
+
+        Returns:
+            List of CompanyRecord objects matching filters.
+        """
+        query = select(CompanyRecord)
+
+        if industry:
+            query = query.where(CompanyRecord.industry.ilike(f"%{industry}%"))
+
+        if region:
+            query = query.where(CompanyRecord.headquarters.ilike(f"%{region}%"))
+
+        query = query.offset(skip).limit(limit)
+        result = await self.session.execute(query)
+        return list(result.scalars().all())

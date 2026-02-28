@@ -101,9 +101,17 @@ class CompanyRecord(Base):
 
     __table_args__ = (
         Index("ix_company_name", "name"),
+        Index("ix_company_industry", "industry"),  # NEW: For industry filtering
+        Index("ix_company_headquarters", "headquarters"),  # NEW: For region filtering
         Index("ix_company_tier", "tier"),
         Index("ix_company_classification", "classification"),
         Index("ix_company_ai_score", "ai_score"),
+        Index("ix_company_composite_score", "composite_score"),  # NEW: For sorting by score
+        Index("ix_company_revenue_eur_m", "revenue_eur_m"),  # NEW: For revenue filtering
+        Index("ix_company_growth_rate", "growth_rate_pct"),  # NEW: For growth filtering
+        Index("ix_company_last_updated", "last_updated"),  # NEW: For recency queries
+        # Composite index for common filter combinations
+        Index("ix_company_industry_headquarters", "industry", "headquarters"),  # NEW: Combined filter
     )
 
     def to_dict(self) -> dict[str, object]:
