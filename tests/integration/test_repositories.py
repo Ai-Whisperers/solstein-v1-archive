@@ -14,9 +14,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.solstein.infrastructure.models import (
-    CompanyRecord, ResearchRunRecord, FactRecord, SignalRecord,
-    ScoringRecord, SignalRecord as SignalRecordModel, EnrichmentJobRecord
+from src.solstein.infrastructure.database_models import (
+    CompanyRecord, ResearchRunRecord, SignalRecord,
+    ScoringRecord, EnrichmentJobRecord
 )
 from src.solstein.infrastructure.repositories import FactRepository
 from src.solstein.infrastructure.company_repository import CompanyRepository

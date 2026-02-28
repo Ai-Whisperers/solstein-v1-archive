@@ -4,7 +4,7 @@ import pytest
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.testclient import TestClient
 
-from solstein.api.dependencies import get_current_user, get_repository
+from solstein.api.dependencies import get_current_user, get_company_repository
 from solstein.api.main import app, lifespan
 from solstein.data.repositories import JsonFileRepository
 
@@ -13,35 +13,35 @@ client = TestClient(app)
 
 # --- Dependencies Tests ---
 @patch("solstein.api.dependencies.get_settings")
-def test_get_repository_fallback_json(mock_settings, caplog):
+def test_get_company_repository_fallback_json(mock_settings, caplog):
     m_set = MagicMock()
     m_set.supabase.url = "https://your-project.supabase.co"
     mock_settings.return_value = m_set
 
-    repo = get_repository()
+    repo = get_company_repository()
     assert isinstance(repo, JsonFileRepository)
 
 
 @patch("solstein.api.dependencies.get_settings")
 @patch("solstein.api.dependencies.SupabaseRepository")
-def test_get_repository_supabase_success(mock_supa, mock_settings):
+def test_get_company_repository_supabase_success(mock_supa, mock_settings):
     m_set = MagicMock()
     m_set.supabase.url = "https://valid.supabase.co"
     mock_settings.return_value = m_set
     mock_supa.return_value = MagicMock()
 
-    repo = get_repository()
+    repo = get_company_repository()
     assert repo is mock_supa.return_value
 
 
 @patch("solstein.api.dependencies.get_settings")
 @patch("solstein.api.dependencies.SupabaseRepository", side_effect=Exception("DB Error"))
-def test_get_repository_supabase_exception(mock_supa, mock_settings, caplog):
+def test_get_company_repository_supabase_exception(mock_supa, mock_settings, caplog):
     m_set = MagicMock()
     m_set.supabase.url = "https://valid.supabase.co"
     mock_settings.return_value = m_set
 
-    repo = get_repository()
+    repo = get_company_repository()
     assert isinstance(repo, JsonFileRepository)
 
 

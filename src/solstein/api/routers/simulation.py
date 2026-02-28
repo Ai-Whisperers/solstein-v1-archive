@@ -6,7 +6,7 @@ from loguru import logger
 from ...analytics.simulation import SimulationEngine
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...domain.simulation import Scenario, SimulationResult
-from ..dependencies import get_current_user, get_repository
+from ..dependencies import get_current_user, get_company_repository
 
 router = APIRouter(tags=["Simulation"])
 simulation_engine = SimulationEngine()
@@ -17,7 +17,7 @@ async def run_simulation(
     scenario_input: Scenario,
     industry: str | None = Query(None, description="Filter companies by industry"),
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> list[SimulationResult]:
     """Run a market simulation scenario."""
     try:

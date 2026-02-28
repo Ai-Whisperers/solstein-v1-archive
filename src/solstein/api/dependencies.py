@@ -7,32 +7,12 @@ from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import get_settings
-from ..core.repositories import CompanyRepository
-from ..data.repositories import JsonFileRepository, SupabaseRepository
+from ..infrastructure.company_repository import CompanyRepository
+from ..infrastructure.repositories import FactRepository
 from ..infrastructure.database import db_manager
 from ..infrastructure.database_service import DatabaseService
 from ..infrastructure.enrichment_repositories import EnrichmentAuditRepository, EnrichmentCacheRepository
-
-security = HTTPBearer(auto_error=False)
-
-
-def get_repository() -> CompanyRepository:
-    """Get repository instance. Falls back to JSON for local testing."""
-    settings = get_settings()
-
-    if not settings.supabase.url or "your-project" in settings.supabase.url:
-        logger.warning("Supabase URL not configured. Falling back to local JSON repository.")  # noqa: E501
-        return JsonFileRepository()
-
-    try:
-        return SupabaseRepository()
-    except Exception as e:
-        logger.error(f"Failed to initialize Supabase: {e}. Falling back to JSON.")
-        return JsonFileRepository()
-
-
 from ..api.services.drill_down_service import DrillDownService
-
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Dependency to get a database session."""
@@ -40,12 +20,25 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-def get_database_service(
+async def get_company_repository(
+    session: AsyncSession = Depends(get_db_session),
+) -> CompanyRepository:
+    """Get async CompanyRepository instance."""
+    return CompanyRepository(session)
+
+
+async def get_fact_repository(
+    session: AsyncSession = Depends(get_db_session),
+) -> FactRepository:
+    """Get async FactRepository instance."""
+    return FactRepository(session)
+
+
+async def get_database_service(
     session: AsyncSession = Depends(get_db_session),
 ) -> DatabaseService:
     """Dependency to get a DatabaseService instance."""
     return DatabaseService(session)
-
 
 def get_drill_down_service(
     db_service: DatabaseService = Depends(get_database_service),
@@ -66,6 +59,8 @@ async def get_enrichment_cache_repository(
 ) -> EnrichmentCacheRepository:
     """Dependency to get an EnrichmentCacheRepository instance."""
     return EnrichmentCacheRepository(session)
+security = HTTPBearer()
+
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),

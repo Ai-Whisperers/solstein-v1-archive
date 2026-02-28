@@ -13,7 +13,7 @@ from tests.factories import make_company
 
 
 
-from solstein.api.dependencies import get_current_user, get_repository
+from solstein.api.dependencies import get_current_user, get_company_repository
 from solstein.api.main import app
 from solstein.core.repositories import CompanyRepository
 from solstein.domain.models import AIMaturity
@@ -48,7 +48,7 @@ def client(mock_repo):
         "username": "testuser",
         "role": "admin",
     }
-    app.dependency_overrides[get_repository] = lambda: mock_repo
+    app.dependency_overrides[get_company_repository] = lambda: mock_repo
 
     with TestClient(app) as test_client:
         yield test_client

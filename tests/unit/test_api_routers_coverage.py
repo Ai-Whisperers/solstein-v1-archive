@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from solstein.api.dependencies import get_current_user, get_repository
+from solstein.api.dependencies import get_current_user, get_company_repository
 from solstein.api.main import app
 from solstein.domain.models import (
     AIMaturity,
@@ -22,9 +22,9 @@ app.dependency_overrides[get_current_user] = lambda: {"username": "test_user"}
 @pytest.fixture
 def mock_repo():
     repo = MagicMock()
-    app.dependency_overrides[get_repository] = lambda: repo
+    app.dependency_overrides[get_company_repository] = lambda: repo
     yield repo
-    app.dependency_overrides.pop(get_repository, None)
+    app.dependency_overrides.pop(get_company_repository, None)
 
 
 @pytest.fixture

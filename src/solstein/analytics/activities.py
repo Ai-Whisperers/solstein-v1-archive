@@ -14,19 +14,15 @@ from loguru import logger
 # from temporalio import activity
 from ..config import get_settings
 from ..core.repositories import CompanyFilter, CompanyRepository
-from ..data.repositories import JsonFileRepository, SupabaseRepository
+from ..infrastructure.company_repository import CompanyRepository
+from ..infrastructure.database import db_manager
 from .scoring import GrowthScorer, classify_company
 
 
-def _get_repo() -> CompanyRepository:
-    """Helper to get repo with fallback logic."""
-    settings = get_settings()
-    if not settings.supabase.url or "your-project" in settings.supabase.url:
-        return JsonFileRepository()
-    try:
-        return SupabaseRepository()
-    except Exception:
-        return JsonFileRepository()
+async def _get_repo() -> CompanyRepository:
+    """Helper to get async repo."""
+    async with db_manager.get_session() as session:
+        return CompanyRepository(session)
 
 
 async def calculate_company_score(company_id: str) -> dict[str, Any]:

@@ -9,7 +9,7 @@ from ...analytics.scoring import GrowthScorer
 from ...config import get_settings
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...exporters.excel import ExcelExporter
-from ..dependencies import get_current_user, get_repository
+from ..dependencies import get_current_user, get_company_repository
 
 router = APIRouter(tags=["Export"])
 settings = get_settings()
@@ -45,7 +45,7 @@ async def export_to_excel(
     industry: str | None = Query(None, description="Industry to export"),
     include_charts: bool = Query(True, description="Include charts in Excel"),
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> dict[str, Any]:
     """Trigger background Excel export."""
     try:
@@ -78,7 +78,7 @@ async def export_to_excel(
 async def export_to_json(
     industry: str | None = Query(None, description="Industry to export"),
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> JSONResponse:
     """Export company data to JSON."""
     try:
@@ -133,59 +133,41 @@ async def search_with_llm(
     limit: int | None = Query(None, description="Maximum number of results"),
     include_reasoning: bool = Query(True, description="Include LLM reasoning in response"),
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> JSONResponse:
     """Search and filter companies using natural language criteria via LLM.
 
     This endpoint uses AI to understand natural language criteria and match
     companies based on their full profile, not just keyword matching.
     """
-    try:
-        from ...data.repositories import JsonFileRepository
+    companies, filter_metadata = await repo.get_all_llm_filtered(
+        criteria=criteria,
+        limit=limit,
+    )
+    if not companies:
 
-        if not isinstance(repo, JsonFileRepository):
-            return JSONResponse(
-                content={"error": "LLM filtering is only available for JSON repository"},
-                status_code=400,
-            )
-
-        companies, filter_metadata = await repo.get_all_llm_filtered(
-            criteria=criteria,
-            limit=limit,
+        return JSONResponse(
+            content={
+                "criteria": criteria,
+                "total_matched": 0,
+                "companies": [],
+            },
+            status_code=200,
         )
 
-        if not companies:
-            return JSONResponse(
-                content={
-                    "criteria": criteria,
-                    "total_matched": 0,
-                    "companies": [],
-                    "message": "No companies matched the criteria",
-                }
-            )
-
-        scored_companies = []
-        for company in companies:
-            scored = growth_scorer.calculate_scores(company)
-            scored_companies.append(scored)
-
-        companies_data = [c.model_dump(mode="json") for c in scored_companies]
-
-        response = {
+    return JSONResponse(
+        content={
             "criteria": criteria,
-            "total_matched": filter_metadata["total_matched"],
-            "total_checked": filter_metadata["total_checked"],
-            "companies": companies_data,
-        }
-
-        if include_reasoning:
-            response["filter_reasoning"] = filter_metadata["reasoning"]
-
-        return JSONResponse(content=response)
-
-    except Exception as e:
-        logger.error(f"Error in LLM search: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error in LLM search: {str(e)}",
-        ) from e
+            "total_matched": len(companies),
+            "companies": [
+                {
+                    "id": str(c.id),
+                    "name": c.name,
+                    "industry": c.industry,
+                    "classification": c.classification,
+                }
+                for c in companies
+            ],
+        },
+        status_code=200,
+    )

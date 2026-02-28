@@ -27,7 +27,7 @@ class TemporalClient:
 from ...analytics.scoring import GrowthScorer
 from ...analytics.company_loader import unified_score_loader
 from ...core.repositories import CompanyRepository
-from ..dependencies import get_current_user, get_repository
+from ..dependencies import get_current_user, get_company_repository
 
 router = APIRouter(tags=["Scoring"])
 growth_scorer = GrowthScorer()
@@ -37,7 +37,7 @@ growth_scorer = GrowthScorer()
 async def score_company(
     company_id: str,
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> dict[str, Any]:
     """Calculate growth and competitive scores for a company."""
     try:
@@ -153,7 +153,7 @@ async def batch_score_companies_endpoint(
 @router.get("/stats", tags=["Statistics"])
 async def get_statistics(
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> dict[str, Any]:
     """Get platform statistics. Uses stored values for maximum performance."""
     try:

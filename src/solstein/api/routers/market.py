@@ -6,7 +6,7 @@ from loguru import logger
 from ...analytics.scoring import CompetitiveOverlapCalculator, MarketAnalyzer
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...domain.models import CompetitiveOverlap, MarketAnalysis
-from ..dependencies import get_current_user, get_repository
+from ..dependencies import get_current_user, get_company_repository
 
 router = APIRouter(tags=["Market Analysis"])
 market_analyzer = MarketAnalyzer()
@@ -18,7 +18,7 @@ async def analyze_market(
     industry: str | None = Query(None, description="Industry to analyze"),
     region: str | None = Query(None, description="Region to analyze"),
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> MarketAnalysis:
     """Perform market analysis for a specific industry/region."""
     try:
@@ -52,7 +52,7 @@ async def analyze_market(
 async def get_competitive_overlap(
     company_id: str,
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> list[CompetitiveOverlap]:
     """Calculate competitive overlap using the specialized calculator."""
     try:
@@ -111,7 +111,7 @@ async def search_companies(
     query: str = Query(..., min_length=2, description="Search query"),
     field: str = Query("name", description="Field to search (name, industry, description)"),
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> dict[str, Any]:
     """Search companies by various fields."""
     try:

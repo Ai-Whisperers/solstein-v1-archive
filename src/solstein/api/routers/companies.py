@@ -6,7 +6,7 @@ from loguru import logger
 from ...analytics.scoring import GrowthScorer
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...domain.models import Company, CompanyTier
-from ..dependencies import get_current_user, get_repository
+from ..dependencies import get_current_user, get_company_repository
 
 router = APIRouter(tags=["Companies"])
 growth_scorer = GrowthScorer()
@@ -20,7 +20,7 @@ async def get_companies(
     industry: str | None = Query(None, description="Filter by industry"),
     min_revenue: float | None = Query(None, ge=0, description="Minimum revenue in EUR millions"),
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> list[Company]:
     """Get list of companies with optional filtering."""
     try:
@@ -42,7 +42,7 @@ async def get_companies(
 async def get_company(
     company_id: str,
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> Any:
     """Get company by ID."""
     try:
@@ -73,7 +73,7 @@ async def get_company(
 async def create_company(
     company_in: Company,
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> Company:
     """Create a new company profile."""
     try:
@@ -98,7 +98,7 @@ async def create_company(
 async def delete_company(
     company_id: str,
     _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_repository),
+    repo: CompanyRepository = Depends(get_company_repository),
 ) -> None:
     """Delete a company profile."""
     try:

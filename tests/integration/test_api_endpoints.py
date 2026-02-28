@@ -22,7 +22,7 @@ try:
 except ImportError:
     FASTAPI_AVAILABLE = False
 
-from src.solstein.infrastructure.models import CompanyRecord, ResearchRunRecord
+from src.solstein.infrastructure.database_models import CompanyRecord, ResearchRunRecord
 from src.solstein.infrastructure.database import DatabaseManager
 from sqlalchemy.ext.asyncio import AsyncSession
 
