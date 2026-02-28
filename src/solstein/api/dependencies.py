@@ -1,7 +1,7 @@
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,7 +13,7 @@ from ..infrastructure.database import db_manager
 from ..infrastructure.database_service import DatabaseService
 from ..infrastructure.enrichment_repositories import EnrichmentAuditRepository, EnrichmentCacheRepository
 from ..api.services.drill_down_service import DrillDownService
-
+from ..security.jwt_handler import jwt_handler, UserPayload
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Dependency to get a database session."""
     async for session in db_manager.get_session():
@@ -64,11 +64,31 @@ security = HTTPBearer()
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
-) -> dict[str, Any]:
-    """Get current user from JWT token (simplified for demo)."""
-    # For demo, authentication is optional
+) -> UserPayload:
+    """Get current user from JWT token.
+    
+    Args:
+        credentials: HTTP Authorization credentials with Bearer token
+        
+    Returns:
+        UserPayload with user information
+        
+    Raises:
+        HTTPException: 401 if token is missing, expired, or invalid
+    """
     if not credentials:
-        return {"username": "anonymous", "role": "viewer"}
-
-    # In production, validate JWT token here
-    return {"username": "demo_user", "role": "admin"}
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    try:
+        return jwt_handler.verify_token(credentials.credentials)
+    except Exception as e:
+        logger.warning(f"Token verification failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

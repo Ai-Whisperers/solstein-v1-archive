@@ -32,6 +32,7 @@ from .exceptions import setup_exception_handlers
 from .middleware import setup_logging_middleware, setup_security_middleware
 from .routers import (
     async_jobs,
+    auth,
     companies,
     drill_down,
     enrichment,
@@ -130,6 +131,7 @@ setup_security_middleware(app)
 # Global dependencies configured in lifespan
 
 # Include Routers
+app.include_router(auth.router)
 app.include_router(enrichment.router)
 app.include_router(health.router)
 app.include_router(health.metrics_router)

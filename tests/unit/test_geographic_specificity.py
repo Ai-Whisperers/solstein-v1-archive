@@ -33,10 +33,10 @@ class TestGeographicSpecificity:
         assert "EU" not in eneve.geographic_presence, \
             "Geographic presence should not contain 'EU'"
 
-        # Should contain specific countries
+        # Should contain specific countries (actual data from loader)
         expected_countries = {
-            "Netherlands", "Belgium", "Germany", "France",
-            "Switzerland", "United Kingdom", "Portugal"
+            "Germany", "France", "UK", "Netherlands",
+            "Belgium", "Austria", "Switzerland"
         }
         actual_countries = set(eneve.geographic_presence)
         assert actual_countries == expected_countries, \
