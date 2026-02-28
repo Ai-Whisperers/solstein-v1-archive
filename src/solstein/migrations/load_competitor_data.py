@@ -57,6 +57,8 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with async_session() as session:
+        companies_to_add = []
+        
         for competitor in competitors:
             try:
                 # Check if company already exists
@@ -103,17 +105,20 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
                     # Data quality
                     data_source="competitor_data.json",
                     # Metadata
-                    created_at=datetime.now(timezone.utc),
-                    last_updated=datetime.now(timezone.utc),
+                    created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+                    last_updated=datetime.now(timezone.utc).replace(tzinfo=None),
                 )
 
-                session.add(company)
-                logger.info(f"Added company: {company_name}")
+                companies_to_add.append(company)
+                logger.info(f"Prepared company: {company_name}")
 
             except Exception as e:
                 logger.error(f"Error processing company {competitor.get('company_name')}: {e}")
                 raise
-
+        
+        # Add all companies at once
+        session.add_all(companies_to_add)
+        
         # Commit all changes
         await session.commit()
         logger.info("All companies committed to database")
