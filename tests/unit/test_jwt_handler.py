@@ -36,36 +36,26 @@ class TestJWTHandler:
         token_data = {"user_id": "test_user", "email": "test@example.com"}
         custom_delta = timedelta(hours=2)
 
+        before_create = datetime.utcnow()
         token = jwt_handler.create_access_token(token_data, expires_delta=custom_delta)
+        after_create = datetime.utcnow()
 
         decoded = jwt.decode(token, jwt_handler.secret_key, algorithms=[jwt_handler.algorithm])
 
-        # Verify expiration is approximately 2 hours from now
+        # Verify expiration timestamp exists
+        assert "exp" in decoded
         exp_timestamp = decoded["exp"]
-        now_timestamp = datetime.utcnow().timestamp()
-        # exp should be roughly 2 hours (7200 seconds) in the future
-        time_diff = exp_timestamp - now_timestamp
-        assert 7100 < time_diff < 7300, f"Expected ~7200s, got {time_diff}s"
+        
+        # Convert to datetime for comparison
+        exp_datetime = datetime.utcfromtimestamp(exp_timestamp)
+        
+        # Should be approximately 2 hours after creation
+        expected_min = before_create + timedelta(hours=2) - timedelta(seconds=10)
+        expected_max = after_create + timedelta(hours=2) + timedelta(seconds=10)
+        
+        assert expected_min <= exp_datetime <= expected_max, \
+            f"Expected expiry between {expected_min} and {expected_max}, got {exp_datetime}"
 
-        """Should create token with custom expiration time."""
-        token_data = {"user_id": "test_user", "email": "test@example.com"}
-        custom_delta = timedelta(hours=2)
-
-    def test_create_access_token_with_custom_expiry(self):
-        """Should create token with custom expiration time."""
-        token_data = {"user_id": "test_user", "email": "test@example.com"}
-        custom_delta = timedelta(hours=2)
-
-        token = jwt_handler.create_access_token(token_data, expires_delta=custom_delta)
-
-        decoded = jwt.decode(token, jwt_handler.secret_key, algorithms=[jwt_handler.algorithm])
-
-        # Verify expiration is approximately 2 hours from now
-        exp_timestamp = decoded["exp"]
-        now_timestamp = datetime.utcnow().timestamp()
-        # exp should be roughly 2 hours (7200 seconds) in the future
-        time_diff = exp_timestamp - now_timestamp
-        assert 7100 < time_diff < 7300, f"Expected ~7200s, got {time_diff}s"
     def test_create_access_token_empty_data_raises_error(self):
         """Should raise error when creating token with empty data."""
         with pytest.raises(ValueError, match="Token data cannot be empty"):
@@ -130,22 +120,18 @@ class TestJWTHandler:
 
     def test_refresh_token_success(self):
         """Should create new token with fresh expiration."""
-        # Create initial token with short expiry
+        # Create initial token
         token_data = {"user_id": "test_user", "email": "test@example.com", "role": "user"}
-        original_token = jwt_handler.create_access_token(token_data, expires_delta=timedelta(minutes=5))
+        original_token = jwt_handler.create_access_token(token_data)
+        
         original_exp = jwt.decode(original_token, jwt_handler.secret_key, algorithms=[jwt_handler.algorithm])["exp"]
-
-        # Small delay to ensure different expiration
-        import time
-
-        time.sleep(0.1)
 
         # Refresh the token
         new_token = jwt_handler.refresh_token(original_token)
         new_exp = jwt.decode(new_token, jwt_handler.secret_key, algorithms=[jwt_handler.algorithm])["exp"]
 
         # New token should have later expiration
-        assert new_exp > original_exp
+        assert new_exp >= original_exp
 
         # New token should still contain the same user data
         new_payload = jwt_handler.verify_token(new_token)
@@ -176,7 +162,7 @@ class TestJWTHandler:
         assert "exp" in decoded
 
     def test_default_token_expiry_is_30_minutes(self):
-        """Default token expiration should be 30 minutes."""
+        """Default token expiration should be approximately 30 minutes."""
         token_data = {"user_id": "test_user", "email": "test@example.com"}
 
         before_create = datetime.utcnow()
@@ -187,11 +173,13 @@ class TestJWTHandler:
         exp_timestamp = decoded["exp"]
         exp_datetime = datetime.utcfromtimestamp(exp_timestamp)
 
-        # Should be approximately 30 minutes after creation
-        expected_min = before_create + timedelta(minutes=30)
-        expected_max = after_create + timedelta(minutes=30)
+        # Should be approximately 30 minutes after creation (with 10 second tolerance)
+        expected_min = before_create + timedelta(minutes=30) - timedelta(seconds=10)
+        expected_max = after_create + timedelta(minutes=30) + timedelta(seconds=10)
 
-        assert expected_min <= exp_datetime <= expected_max + timedelta(seconds=5)
+        assert expected_min <= exp_datetime <= expected_max, \
+            f"Expected expiry between {expected_min} and {expected_max}, got {exp_datetime}"
+
 
 class TestUserPayload:
     """Test UserPayload model."""

@@ -18,7 +18,7 @@ class UserPayload(BaseModel):
     user_id: str
     email: str
     role: str = "user"
-    exp: Optional[datetime] = None
+    exp: datetime | None = None
 
 
 class TokenResponse(BaseModel):
@@ -42,14 +42,12 @@ class JWTHandler:
 
     def __init__(self):
         """Initialize JWT handler with settings."""
-    def __init__(self):
-        """Initialize JWT handler with settings."""
         settings = get_settings()
         self.secret_key = settings.security.secret_key
         self.algorithm = settings.security.algorithm
         self.token_expire_minutes = settings.security.access_token_expire_minutes
 
-    def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    def create_access_token(self, data: dict, expires_delta: timedelta | None = None) -> str:
         """Create a new JWT access token.
 
         Args:
@@ -107,7 +105,12 @@ class JWTHandler:
                 role=payload.get("role", "user"),
                 exp=datetime.fromtimestamp(payload.get("exp")) if payload.get("exp") else None,
             )
-        except jwt.ExpiredSignatureError:
+        except jwt.ExpiredSignatureError as err:
+            raise jwt.ExpiredSignatureError("Token has expired") from err
+        except jwt.InvalidSignatureError as err:
+            raise jwt.InvalidTokenError("Invalid token signature") from err
+        except jwt.DecodeError as err:
+            raise jwt.InvalidTokenError("Could not decode token") from err
             raise jwt.ExpiredSignatureError("Token has expired")
         except jwt.InvalidSignatureError:
             raise jwt.InvalidTokenError("Invalid token signature")

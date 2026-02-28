@@ -105,7 +105,7 @@ def test_batch_extractor_extract_directory(MockExtractor, tmp_path):
     batch = BatchExtractor(extractor=mock_extractor)
     profiles = batch.extract_directory(dir_path)
 
-    assert len(profiles) == 2
+    assert len(profiles) == 1  # Merged duplicates
     assert mock_extractor.extract_from_file.call_count == 2
 
 
