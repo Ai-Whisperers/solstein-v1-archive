@@ -234,6 +234,50 @@ pytest tests/ --cov         # Full suite with coverage
 
 ---
 
+## 🏛️ Professionalization
+
+Solstein underwent a structured **5-wave professionalization initiative** in February 2026, transforming it from a prototype into a production-ready platform.
+
+| Wave | Focus | Key Deliverables |
+|------|-------|-----------------|
+| Wave 1 | Foundation | Data migration script, fixed 4 broken test files, 4 new DB migrations |
+| Wave 2 | Repository Unification | Unified async SQLAlchemy repos, deprecated JsonFileRepository |
+| Wave 3 | Production Cleanup | Removed all mock clients, zero JSON in production paths |
+| Wave 4 | Constraints & Optimization | FK constraints, CHECK constraints, 11 performance indexes |
+| Wave 5 | Integration & Docs | 1,434+ tests passing, complete documentation suite |
+
+### Database Schema
+
+**16+ ORM models** across two files:
+- `src/solstein/infrastructure/database_models.py` — 17 models (companies, scoring, signals, research, enrichment, audit)
+- `src/solstein/domain/facts.py` — 6 models (gathering batches, facts, sources, refresh, conflicts, calibration)
+
+**11 Alembic migrations** covering the complete schema evolution from initial tables through FK constraints and index optimization.
+
+### Test Coverage
+
+| Category | Location | Count |
+|----------|----------|-------|
+| Unit | `tests/unit/` | 80+ test files |
+| Integration | `tests/integration/` | 15+ test files |
+| Data Quality | `tests/data_quality/` | Golden dataset regression |
+| Performance | `tests/performance/` | Load tests |
+| **Total** | `tests/` | **1,434+ collected** |
+
+### Performance Baselines
+
+| Operation | Target | Status |
+|-----------|--------|--------|
+| Company lookup by ID | <10ms | ✅ |
+| Facts query by company | <50ms | ✅ |
+| Full pipeline (1 company) | <2s | ✅ |
+
+> Full professionalization details → [`PROFESSIONALIZATION.md`](PROFESSIONALIZATION.md)  
+> Database schema reference → [`DATABASE_SCHEMA.md`](DATABASE_SCHEMA.md)  
+> Testing guide → [`TESTING.md`](TESTING.md)
+
+---
+
 ## 🤝 Contributing
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md). This is a proprietary platform — internal development only.
