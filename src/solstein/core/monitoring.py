@@ -182,42 +182,74 @@ class HealthMonitor:
             return check
 
     async def check_llm_services(self) -> HealthCheck:
-        """Check LLM service availability.
+        """Check LLM service availability with detailed health status.
+
+        Uses the enhanced health checker to provide detailed information about
+        provider status, credits, and rate limits.
 
         Returns:
             HealthCheck result
         """
         start = datetime.now(timezone.utc)
         try:
-            from ..exporters.llm import LLMReportEnhancer
+            from ..llm.health_checker import get_health_checker, ProviderStatus
 
-            enhancer = LLMReportEnhancer()
+            health_checker = get_health_checker()
+            health = await health_checker.check_all_providers()
 
-            # Simple check for any available backend
-            available = enhancer.is_available()
+            available_providers = health_checker.get_available_providers()
 
-            if available:
-                backends = []
-                if enhancer._check_ollama():
-                    backends.append("ollama")
-                if enhancer._has_valid_api_key():
-                    cloud = enhancer._get_cloud_provider()
-                    backends.append(cloud or "cloud_api")
+            if available_providers:
+                # Collect detailed status for each provider
+                provider_details = {}
+                for name, h in health.items():
+                    provider_details[name] = {
+                        "status": h.status.value,
+                        "is_available": h.is_available,
+                        "last_error": h.last_error.value if h.last_error else None,
+                        "consecutive_failures": h.consecutive_failures,
+                        "total_successes": h.total_successes,
+                    }
 
                 check = HealthCheck(
                     name="llm_services",
                     status=HealthStatus.HEALTHY,
-                    message="LLM services available",
+                    message=f"LLM services available: {', '.join(available_providers)}",
                     duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                    details={"backends": backends},
+                    details={
+                        "available_providers": available_providers,
+                        "all_providers": provider_details,
+                        "best_provider": health_checker.get_best_provider(),
+                    },
                 )
             else:
+                # Check if any providers are exhausted or rate limited
+                exhausted = [name for name, h in health.items() if h.status == ProviderStatus.EXHAUSTED]
+                rate_limited = [name for name, h in health.items() if h.status == ProviderStatus.RATE_LIMITED]
+
+                if exhausted or rate_limited:
+                    status = HealthStatus.DEGRADED
+                    message_parts = []
+                    if exhausted:
+                        message_parts.append(f"quota exhausted: {', '.join(exhausted)}")
+                    if rate_limited:
+                        message_parts.append(f"rate limited: {', '.join(rate_limited)}")
+                    message = "LLM " + "; ".join(message_parts)
+                else:
+                    status = HealthStatus.DEGRADED
+                    message = "No LLM backends configured or available"
+
                 check = HealthCheck(
                     name="llm_services",
-                    status=HealthStatus.DEGRADED,
-                    message="No LLM backends available, using fallbacks",
+                    status=status,
+                    message=message,
                     duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                    details={"fallback": "keyword_and_template_based"},
+                    details={
+                        "fallback": "keyword_and_template_based",
+                        "exhausted_providers": exhausted,
+                        "rate_limited_providers": rate_limited,
+                        "all_statuses": {name: h.status.value for name, h in health.items()},
+                    },
                 )
 
             self.checks["llm_services"] = check

@@ -1,43 +1,25 @@
 # Supabase Database Setup Guide for Tests
 
-## Current Situation
+## Current Configuration
 
-The project already has Supabase configured with PostgreSQL. The test database URL is:
+The project uses **Supabase PostgreSQL** for database tests. The connection is already configured in `.env`:
+
+```bash
+DATABASE_URL_TEST=postgresql+asyncpg://postgres:nN79Ali1JcQydUyj@db.ejmxbklrhmalgcqmdsoi.supabase.co:5432/postgres
 ```
-postgresql+asyncpg://postgres:nN79Ali1JcQydUyj@db.ejmxbklrhmalgcqmdsoi.supabase.co:5432/postgres
-```
 
-## Why Tests Can't Connect
+## Running Tests with Supabase
 
-From the current environment, the Supabase host is not reachable (network restrictions).
-
-## Options to Enable Database Tests
-
-### Option 1: Run Tests from Environment with Internet Access
-If you have a local machine or CI/CD environment with internet access:
+From an environment with internet access:
 
 ```bash
 export DATABASE_URL="postgresql+asyncpg://postgres:nN79Ali1JcQydUyj@db.ejmxbklrhmalgcqmdsoi.supabase.co:5432/postgres"
 pytest tests/unit/ -v
 ```
 
-### Option 2: Use Local PostgreSQL (Docker)
-If you prefer local testing:
+## Current Test Status (Without Database)
 
-```bash
-# Start PostgreSQL
-docker run -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15 -d
-
-# Create test database
-docker exec -it <container_id> psql -U postgres -c "CREATE DATABASE solstein_test;"
-
-# Run tests
-export DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/solstein_test"
-pytest tests/unit/ -v
-```
-
-### Option 3: Skip Database Tests (Current)
-Run tests without database-dependent ones:
+In environments without Supabase connectivity:
 
 ```bash
 pytest tests/unit/ \
@@ -50,18 +32,26 @@ pytest tests/unit/ \
   --ignore=tests/unit/test_facts_orm_models.py
 ```
 
-## Current Test Status (Without Database)
-
+**Results:**
 - **997 tests passing** ✅
 - **33 tests failing** (test isolation issues)
 - **12 tests skipped** (complex async/alembic)
 
 ## To Achieve 80%+ Coverage
 
-Enable the database tests by setting up DATABASE_URL:
-- 114 additional tests will run
-- Coverage will increase from 73%+ to 80%+
+Enable database tests by setting DATABASE_URL:
+
+```bash
+export DATABASE_URL="postgresql+asyncpg://postgres:nN79Ali1JcQydUyj@db.ejmxbklrhmalgcqmdsoi.supabase.co:5432/postgres"
+pytest tests/unit/ -v
+```
+
+This will:
+- Run 114 additional database tests
+- Increase coverage from 73%+ to 80%+
 
 ## Summary
 
-The project is already configured to use Supabase (PostgreSQL). You just need to run the tests from an environment that can connect to the Supabase database, or set up a local PostgreSQL instance.
+✅ **Supabase is already configured and ready to use**
+
+Just run the tests from an environment with internet access to connect to Supabase PostgreSQL.

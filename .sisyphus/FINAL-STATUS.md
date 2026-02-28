@@ -72,8 +72,6 @@
 
 ```bash
 # 1. Set up PostgreSQL
-docker run -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15 -d
-export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/solstein_test"
 
 # 2. Run repository tests
 pytest tests/unit/test_repositories_comprehensive.py -v

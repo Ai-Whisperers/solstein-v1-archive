@@ -123,8 +123,6 @@ Added comprehensive tests for:
 **Solution**:
 ```bash
 # Option 1: PostgreSQL Docker
-docker run -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15
-export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/solstein_test"
 
 # Option 2: Create test database locally
 createdb solstein_test
@@ -228,8 +226,6 @@ instance.fetch_facts = AsyncMock(return_value=[])
 ### Step 1: Set Up Database
 ```bash
 # Docker (easiest)
-docker run -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15 -d
-export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/solstein_test"
 
 # Or local
 createdb solstein_test
