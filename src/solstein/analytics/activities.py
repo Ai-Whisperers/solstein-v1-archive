@@ -30,7 +30,7 @@ async def calculate_company_score(company_id: str) -> dict[str, Any]:
     logger.info(f"Activity starting: calculate_company_score for {company_id}")
 
     # 1. Fetch from Repository
-    repo = _get_repo()
+    repo = await _get_repo()
     company = await asyncio.to_thread(repo.get_by_id, company_id)
     if not company:
         raise ValueError(f"Company {company_id} not found in database.")

@@ -108,13 +108,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware
+# CORS middleware - SECURE configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict to specific domains
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=settings.api.cors_origins,  # ✅ Specific origins only
+    allow_credentials=True,  # ✅ Only with specific origins
+    allow_methods=settings.api.cors_methods,  # ✅ Explicit methods
+    allow_headers=settings.api.cors_headers,  # ✅ Explicit headers
+    max_age=600,  # ✅ Cache preflight for 10 min
 )
 
 # Custom Logging Middleware (Request IDs and Timing)

@@ -124,14 +124,9 @@ class InputSanitizationMiddleware(BaseHTTPMiddleware):
 
 def setup_security_middleware(app) -> None:
     """Setup all security middleware."""
-    # CORS middleware
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],  # TODO: Restrict to known origins in production
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+    # CORS middleware is now configured in main.py with secure settings
+    # DO NOT add CORS middleware here - it would override the secure configuration
+    # See main.py lines 111-119 for the secure CORS configuration
 
     # Input sanitization (before auth, validate format)
     app.add_middleware(InputSanitizationMiddleware)
