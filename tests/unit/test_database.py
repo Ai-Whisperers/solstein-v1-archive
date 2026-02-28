@@ -25,7 +25,7 @@ class TestDatabaseManager:
 
         settings = Settings()
         # Override with test URL
-        settings.database_url = async_url
+        settings.DATABASE_URL = async_url
 
         manager = DatabaseManager(settings)
         return manager
@@ -110,7 +110,7 @@ class TestDatabaseManager:
         from solstein.config import Settings
 
         settings = Settings()
-        settings.database_url = async_url
+        settings.DATABASE_URL = async_url
 
         manager = DatabaseManager(settings)
         manager.init_async()

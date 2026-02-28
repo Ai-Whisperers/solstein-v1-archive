@@ -8,7 +8,7 @@ Tests cover:
 - Database operations with mocked SQLAlchemy session
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 import sys
 import pytest
 
@@ -125,10 +125,11 @@ class TestRefreshTasks:
         """Test successful SEC EDGAR refresh task execution."""
         with patch("solstein.worker_tasks.SECEDGARRefreshConnector") as mock_connector:
             instance = MagicMock()
-            instance.refresh = MagicMock(return_value={"status": "success"})
+            instance.fetch_facts = AsyncMock(return_value=[])
             mock_connector.return_value = instance
-            result = refresh_sec_edgar(mock_task_self)
-            assert result is not None
+            with patch("solstein.worker_tasks._store_facts", new_callable=AsyncMock, return_value=0):
+                result = refresh_sec_edgar(mock_task_self)
+                assert result is not None
 
     def test_refresh_companies_house_success(self, mock_task_self, mock_db_manager):
         """Test successful Companies House refresh task execution."""
