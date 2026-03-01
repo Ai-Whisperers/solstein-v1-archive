@@ -45,3 +45,15 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # Inject request ID into response for client traceability
             response.headers["X-Request-ID"] = request_id
             return response
+
+
+
+def setup_rate_limit_middleware(app: Any) -> None:
+    """Register rate limiting middleware on FastAPI app.
+
+    Args:
+        app: FastAPI application instance
+    """
+    from .rate_limiter import setup_rate_limit_middleware as _setup_rate_limit
+
+    _setup_rate_limit(app)

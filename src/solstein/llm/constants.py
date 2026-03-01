@@ -1,0 +1,34 @@
+"""Constants for LLM client configuration and health checking."""
+
+# LLM Client Configuration
+LLM_DEFAULT_TEMPERATURE = 0.3  # Default temperature for LLM responses
+LLM_DEFAULT_MAX_TOKENS = 2000  # Default maximum tokens
+LLM_REQUEST_TIMEOUT_S = 60  # HTTP request timeout for LLM
+
+# HTTP Status Codes
+HTTP_STATUS_OK = 200
+HTTP_STATUS_UNAUTHORIZED = 401
+HTTP_STATUS_PAYMENT_REQUIRED = 402
+HTTP_STATUS_RATE_LIMITED = 429
+
+# Health Checker Configuration
+HEALTH_CHECKER_CONSECUTIVE_FAILURES_THRESHOLD = 3  # Failures before marking unhealthy
+
+# Provider Confidence Scores
+PROVIDER_CONFIDENCE_OLLAMA = 0.95  # Ollama (local)
+PROVIDER_CONFIDENCE_OPENAI = 0.95  # OpenAI
+PROVIDER_CONFIDENCE_GROQ = 0.90  # Groq
+PROVIDER_CONFIDENCE_FIREWORKS = 0.85  # Fireworks
+
+# Default Confidence Scores by Source
+SOURCE_CONFIDENCE_SEC_EDGAR = 0.95  # SEC Edgar
+SOURCE_CONFIDENCE_COMPANIES_HOUSE = 0.93  # Companies House
+SOURCE_CONFIDENCE_GITHUB = 0.85  # GitHub
+SOURCE_CONFIDENCE_YAHOO_FINANCE = 0.88  # Yahoo Finance
+SOURCE_CONFIDENCE_GLOBAL_MARKET = 0.87  # Global market data
+SOURCE_CONFIDENCE_WEBSITE = 0.84  # Company website
+SOURCE_CONFIDENCE_LINKEDIN = 0.82  # LinkedIn
+SOURCE_CONFIDENCE_CRUNCHBASE = 0.85  # Crunchbase
+SOURCE_CONFIDENCE_NEWS = 0.75  # News articles
+SOURCE_CONFIDENCE_PATENTS = 0.80  # Patents
+SOURCE_CONFIDENCE_WEB_SEARCH = 0.68  # Web search

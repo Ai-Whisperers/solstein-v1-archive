@@ -5,6 +5,23 @@ from __future__ import annotations
 import httpx
 
 
+
+from solstein.data.connectors.constants import (
+
+    COMPANIES_HOUSE_DEFAULT_CONFIDENCE,
+
+    COMPANIES_HOUSE_REQUEST_TIMEOUT_S,
+
+    HTTP_STATUS_NOT_FOUND,
+
+    HTTP_STATUS_RATE_LIMITED,
+
+    HTTP_STATUS_SERVER_ERROR_MIN,
+
+    HTTP_STATUS_UNAUTHORIZED,
+
+)
+
 class CompaniesHouseNotConfiguredError(RuntimeError):
     pass
 
@@ -15,7 +32,7 @@ class CompaniesHouseCompanyNotFoundError(RuntimeError):
 
 class CompaniesHouseConnector:
     DEFAULT_API_BASE: str = "https://api.company-information.service.gov.uk"
-    DEFAULT_CONFIDENCE: float = 0.93
+    DEFAULT_CONFIDENCE: float = COMPANIES_HOUSE_DEFAULT_CONFIDENCE
 
     def __init__(
         self,
@@ -77,18 +94,18 @@ class CompaniesHouseConnector:
                 params=params,
                 auth=(self.api_key, ""),
                 headers={"User-Agent": self.user_agent},
-                timeout=15.0,
+                timeout=COMPANIES_HOUSE_REQUEST_TIMEOUT_S,
             )
         except Exception as e:
             raise RuntimeError(f"Companies House request failed: {path}") from e
 
-        if response.status_code == 401:
+        if response.status_code == HTTP_STATUS_UNAUTHORIZED:
             raise CompaniesHouseNotConfiguredError("Companies House API key rejected (401)")
-        if response.status_code == 404:
+        if response.status_code == HTTP_STATUS_NOT_FOUND:
             raise CompaniesHouseCompanyNotFoundError(f"Resource not found: {path}")
-        if response.status_code == 429:
+        if response.status_code == HTTP_STATUS_RATE_LIMITED:
             raise RuntimeError("Companies House rate limit (429)")
-        if response.status_code >= 500:
+        if response.status_code >= HTTP_STATUS_SERVER_ERROR_MIN:
             raise RuntimeError(f"Companies House server error ({response.status_code})")
 
         try:

@@ -1,14 +1,38 @@
 """GitHub API connector wrapper for data refresh operations.
 
+
+
 Provides a simple interface to GitHub data retrieval for refresh connectors.
+
 """
+
 
 
 from typing import Any
 
+
+
 import requests
+
 from loguru import logger
 
+
+
+from solstein.data.connectors.constants import (
+
+    GITHUB_DEFAULT_CONFIDENCE,
+
+    GITHUB_DEFAULT_PER_PAGE,
+
+    GITHUB_REQUEST_TIMEOUT_S,
+
+    HTTP_STATUS_FORBIDDEN,
+
+    HTTP_STATUS_NOT_FOUND,
+
+    HTTP_STATUS_OK,
+
+)
 
 class GitHubConnector:
     """GitHub API connector for fetching repository and commit data.
@@ -36,7 +60,7 @@ class GitHubConnector:
         if self.github_token:
             self.headers["Authorization"] = f"token {self.github_token}"
 
-    def get_user_repositories(self, username: str, per_page: int = 30) -> list[dict[str, Any]]:
+    def get_user_repositories(self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE) -> list[dict[str, Any]]:
         """Fetch repositories for a GitHub user or organization.
 
         Args:
@@ -50,16 +74,16 @@ class GitHubConnector:
             url = f"{self.api_base}/users/{username}/repos"
             params = {"per_page": per_page, "sort": "updated"}
 
-            response = requests.get(url, headers=self.headers, params=params, timeout=15)
+            response = requests.get(url, headers=self.headers, params=params, timeout=GITHUB_REQUEST_TIMEOUT_S)
 
-            if response.status_code == 200:
+            if response.status_code == HTTP_STATUS_OK:
                 repos = response.json()
                 logger.debug(f"Fetched {len(repos)} repositories for {username}")
                 return repos
-            elif response.status_code == 404:
+            elif response.status_code == HTTP_STATUS_NOT_FOUND:
                 logger.warning(f"GitHub user/org not found: {username}")
                 return []
-            elif response.status_code == 403:
+            elif response.status_code == HTTP_STATUS_FORBIDDEN:
                 logger.warning(f"GitHub rate limit exceeded or access denied for {username}")
                 return []
             else:
@@ -73,7 +97,7 @@ class GitHubConnector:
             logger.error(f"Unexpected error fetching repositories for {username}: {e}")
             return []
 
-    def get_recent_commits(self, username: str, per_page: int = 30) -> list[dict[str, Any]]:
+    def get_recent_commits(self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE) -> list[dict[str, Any]]:
         """Fetch recent commits for a GitHub user.
 
         Note: GitHub API doesn't provide a direct "commits by user" endpoint.
@@ -90,9 +114,9 @@ class GitHubConnector:
             url = f"{self.api_base}/users/{username}/events/public"
             params = {"per_page": per_page}
 
-            response = requests.get(url, headers=self.headers, params=params, timeout=15)
+            response = requests.get(url, headers=self.headers, params=params, timeout=GITHUB_REQUEST_TIMEOUT_S)
 
-            if response.status_code == 200:
+            if response.status_code == HTTP_STATUS_OK:
                 events = response.json()
                 # Filter for push events which contain commit data
                 commits = []
@@ -102,10 +126,10 @@ class GitHubConnector:
 
                 logger.debug(f"Fetched {len(commits)} commits from {username}'s public events")
                 return commits[:per_page]
-            elif response.status_code == 404:
+            elif response.status_code == HTTP_STATUS_NOT_FOUND:
                 logger.warning(f"GitHub user not found: {username}")
                 return []
-            elif response.status_code == 403:
+            elif response.status_code == HTTP_STATUS_FORBIDDEN:
                 logger.warning(f"GitHub rate limit exceeded or access denied for {username}")
                 return []
             else:
@@ -119,7 +143,7 @@ class GitHubConnector:
             logger.error(f"Unexpected error fetching commits for {username}: {e}")
             return []
 
-    def get_repository_activity(self, username: str, per_page: int = 30) -> list[dict[str, Any]]:
+    def get_repository_activity(self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE) -> list[dict[str, Any]]:
         """Fetch recent activity for a GitHub user.
 
         Returns the user's public events (activity stream).
@@ -135,16 +159,16 @@ class GitHubConnector:
             url = f"{self.api_base}/users/{username}/events/public"
             params = {"per_page": per_page}
 
-            response = requests.get(url, headers=self.headers, params=params, timeout=15)
+            response = requests.get(url, headers=self.headers, params=params, timeout=GITHUB_REQUEST_TIMEOUT_S)
 
-            if response.status_code == 200:
+            if response.status_code == HTTP_STATUS_OK:
                 events = response.json()
                 logger.debug(f"Fetched {len(events)} activity events for {username}")
                 return events
-            elif response.status_code == 404:
+            elif response.status_code == HTTP_STATUS_NOT_FOUND:
                 logger.warning(f"GitHub user not found: {username}")
                 return []
-            elif response.status_code == 403:
+            elif response.status_code == HTTP_STATUS_FORBIDDEN:
                 logger.warning(f"GitHub rate limit exceeded or access denied for {username}")
                 return []
             else:

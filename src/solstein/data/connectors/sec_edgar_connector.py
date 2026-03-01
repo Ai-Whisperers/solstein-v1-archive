@@ -1,14 +1,38 @@
 from __future__ import annotations
 
+
+
 import time
-import time
+
 from collections.abc import Iterable
+
 from dataclasses import dataclass
+
 from datetime import date
+
 from typing import Protocol, cast, runtime_checkable
 
+
+
 import pandas as pd
+
 from loguru import logger
+
+
+
+from solstein.data.connectors.constants import (
+
+    SEC_EDGAR_DEFAULT_BASE_SLEEP_S,
+
+    SEC_EDGAR_DEFAULT_CONFIDENCE,
+
+    SEC_EDGAR_DEFAULT_MAX_ATTEMPTS,
+
+    SEC_EDGAR_DEFAULT_MAX_SLEEP_S,
+
+    SEC_EDGAR_DEFAULT_RATE_LIMIT_SLEEP_S,
+
+)
 
 
 class CompanyNotFoundError(RuntimeError):
@@ -44,11 +68,15 @@ class SecFilingRequest:
 
 
 class SECEdgarConnector:
-    DEFAULT_CONFIDENCE: float = 0.95
-    DEFAULT_MAX_ATTEMPTS: int = 4
-    DEFAULT_BASE_SLEEP_S: float = 0.5
-    DEFAULT_MAX_SLEEP_S: float = 8.0
-    DEFAULT_RATE_LIMIT_SLEEP_S: float = 15.0
+    DEFAULT_CONFIDENCE: float = SEC_EDGAR_DEFAULT_CONFIDENCE
+
+    DEFAULT_MAX_ATTEMPTS: int = SEC_EDGAR_DEFAULT_MAX_ATTEMPTS
+
+    DEFAULT_BASE_SLEEP_S: float = SEC_EDGAR_DEFAULT_BASE_SLEEP_S
+
+    DEFAULT_MAX_SLEEP_S: float = SEC_EDGAR_DEFAULT_MAX_SLEEP_S
+
+    DEFAULT_RATE_LIMIT_SLEEP_S: float = SEC_EDGAR_DEFAULT_RATE_LIMIT_SLEEP_S
 
     def __init__(self, user_agent: str | None = None):
         from solstein.config import get_settings

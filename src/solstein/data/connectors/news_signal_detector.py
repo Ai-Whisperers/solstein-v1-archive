@@ -1,26 +1,56 @@
 """
+
 News Signal Detector for Solstein.
 
+
+
 Detects funding rounds, partnerships, and key hires from NewsAPI.
+
 Provides pattern-based signal extraction with confidence scoring.
 
+
+
 Features:
+
 - Funding signal detection (Series A/B/C, raised, investment)
+
 - Partnership detection (collaboration, integration, partnership)
+
 - Key hire detection (appoints, joins, new CEO, executive)
+
 - Deduplication by (company_id, signal_type, date)
+
 - Rate limit tracking (100 queries/day limit)
+
 - Confidence scoring (0.70-0.75 for news signals)
+
 """
 
 
+
 import re
+
 from datetime import datetime, timedelta
+
 from typing import Any
 
+
+
 import requests
+
 from loguru import logger
 
+
+
+from solstein.data.connectors.constants import (
+
+    HTTP_STATUS_RATE_LIMITED,
+
+    NEWS_SIGNAL_DAILY_QUERY_LIMIT,
+
+    NEWS_SIGNAL_REQUEST_TIMEOUT_S,
+
+)
 
 class NewsSignalDetector:
     """
@@ -80,7 +110,7 @@ class NewsSignalDetector:
             raise ValueError("NewsAPI key required. Set NEWSAPI_KEY env var or pass api_key parameter.")
 
         self.base_url = "https://newsapi.org/v2"
-        self.daily_query_limit = 100
+        self.daily_query_limit = NEWS_SIGNAL_DAILY_QUERY_LIMIT
         self.queries_today = 0
         self.last_reset = datetime.now().date()
         self.seen_signals = set()  # For deduplication
@@ -103,7 +133,7 @@ class NewsSignalDetector:
             logger.error(f"Daily query limit reached: {self.queries_today}/{self.daily_query_limit}")
             raise RuntimeError("NewsAPI daily query limit exceeded (100/day)")
 
-        if self.queries_today >= 90:
+        if self.queries_today >= NEWS_SIGNAL_DAILY_QUERY_LIMIT - 10:
             logger.warning(f"Approaching daily limit: {self.queries_today}/{self.daily_query_limit}")
 
     def _search_news(self, query: str) -> list[dict[str, Any]]:
@@ -133,11 +163,11 @@ class NewsSignalDetector:
             response = requests.get(
                 f"{self.base_url}/everything",
                 params=params,
-                timeout=10,
+                timeout=NEWS_SIGNAL_REQUEST_TIMEOUT_S,
             )
             self.queries_today += 1
 
-            if response.status_code == 429:
+            if response.status_code == HTTP_STATUS_RATE_LIMITED:
                 logger.error("NewsAPI rate limit hit (429)")
                 raise RuntimeError("NewsAPI rate limit exceeded")
 
