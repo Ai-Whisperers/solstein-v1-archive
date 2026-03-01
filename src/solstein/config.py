@@ -37,19 +37,6 @@ class DatabaseConfig(BaseModel):
         if "postgres:postgres@" in v or "password" in v.lower():
             logger.warning("Database URL may contain default credentials - ensure this is for development only")
         return v
-    """Database configuration."""
-
-    url: str = Field(default="postgresql://postgres:postgres@localhost:5432/solstein")
-    pool_size: int = Field(default=20, ge=1, le=100)
-    echo: bool = Field(default=False)
-
-    @field_validator("url")
-    @classmethod
-    def validate_url(cls, v: str) -> str:
-        """Validate database URL."""
-        if not v:
-            raise ValueError("Database URL cannot be empty")
-        return v
 
 
 class RedisConfig(BaseModel):
@@ -65,11 +52,6 @@ class RedisConfig(BaseModel):
         if not v:
             raise ValueError("Redis URL cannot be empty")
         return v
-    """Redis configuration for caching and job queues."""
-
-    url: str = Field(default="redis://localhost:6379/0")
-    cache_ttl: int = Field(default=3600, ge=60, description="Cache TTL in seconds")
-
     @property
     def host(self) -> str:
         """Extract host from URL."""
@@ -234,8 +216,6 @@ class Settings(BaseSettings):
     nvidia_nim_api_key: str | None = Field(default=None)
     cerebras_api_key: str | None = Field(default=None)
     kimi_api_key: str | None = Field(default=None)
-    groq_api_key: str | None = Field(default=None)
-    fireworks_api_key: str | None = Field(default=None)
 
     celery_broker_url: str | None = Field(default=None)
     celery_result_backend: str | None = Field(default=None)
@@ -257,15 +237,6 @@ class Settings(BaseSettings):
     cerebras_model: str = Field(default="llama-3.3-70b")
     kimi_model: str = Field(default="kimi-k2-32k")
 
-    model_config = SettingsConfigDict(
-        default="auto",
-        description="LLM provider selection: auto|ollama|fireworks|openai|groq|none",
-    )
-    ollama_url: str = Field(default="http://localhost:11434")
-    ollama_model: str = Field(default="llama3.2:latest")
-    openai_model: str = Field(default="gpt-4o-mini")
-    groq_model: str = Field(default="llama-3.3-70b-versatile")
-    fireworks_model: str = Field(default="accounts/fireworks/models/mixtral-8x22b-instruct")
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -335,23 +306,7 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> "Settings":
     """Get cached settings instance."""
-    settings = Settings.load()
-
-    # Try to load from .env file
-    env_file = Path(".env")
-    if env_file.exists():
-        logger.info(f"Loading configuration from {env_file}")
-    else:
-        logger.warning("No .env file found, using defaults")
-
-    settings.data.ensure_dirs()
-
-    # Log configuration summary
-    logger.info(f"Environment: {settings.environment}")
-    logger.info(f"Debug mode: {settings.debug}")
-    logger.info(f"Data directory: {settings.data.data_dir}")
-
-    return settings
+    return Settings.load()
 
 
 def configure_logging(settings: Settings) -> None:
