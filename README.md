@@ -8,14 +8,11 @@
 > *Solstein reveals the competitive landscape through market fog.*
 > *Built by the Guild of Architects — not engineers. Wizards.*
 
-[![Python](https://img.shields.io/badge/Python-3.12-4b0082?style=for-the-badge&logo=python&logoColor=ffd700)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.11+-4b0082?style=for-the-badge&logo=python&logoColor=ffd700)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Live-4b0082?style=for-the-badge&logo=fastapi&logoColor=ffd700)](https://fastapi.tiangolo.com)
-[![Celery](https://img.shields.io/badge/Celery-Workers-4b0082?style=for-the-badge&logo=celery&logoColor=ffd700)](https://docs.celeryq.dev)
-[![Tests](https://img.shields.io/badge/Tests-1190+%20Collected-4b0082?style=for-the-badge&logo=pytest&logoColor=ffd700)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-1434+%20Collected-4b0082?style=for-the-badge&logo=pytest&logoColor=ffd700)](tests/)
 [![Coverage](https://img.shields.io/badge/Coverage-~28%25-ffd700?style=for-the-badge&logo=codecov&logoColor=4b0082)](tests/)
 [![License](https://img.shields.io/badge/License-Proprietary-4b0082?style=for-the-badge&logo=scroll&logoColor=ffd700)](LICENSE)
-
-> **📖 Documentation Site**: [https://ai-whisperers.github.io/solstein/](https://ai-whisperers.github.io/solstein/)
 
 </div>
 
@@ -28,7 +25,7 @@ Solstein combines **financial intelligence**, **technical signals**, and **marke
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │  Data Sources   │───→│  Scoring Engine │───→│  Attractiveness │
-│                 │    │                 │    │     Board       │
+│ (AI-Orchestrated)│    │ (Multi-Factor)  │    │     Board       │
 ├─────────────────┤    ├─────────────────┤    ├─────────────────┤
 │ • Financial     │    │ • Growth Score  │    │ • Ranked list   │
 │ • GitHub        │    │ • Financial     │    │ • Classified    │
@@ -95,7 +92,7 @@ Every company in a market is scored and classified:
 
 The score is calculated across three dimensions:
 - **Growth Score** — Revenue trajectory, margin health
-- **Financial Health Score** — Scale, funding cushion, efficiency  
+- **Financial Health Score** — Scale, funding cushion, efficiency
 - **Competitive Position Score** — AI maturity, SaaS adoption, tech stack depth
 
 ---
@@ -103,22 +100,66 @@ The score is calculated across three dimensions:
 ## 🏗️ Architecture
 
 ```
+┌─────────────────────────────────────────────────────────────┐
+│                        API Layer                             │
+│              (FastAPI + Async Endpoints)                     │
+└─────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│   Research   │    │  Analytics   │    │   Export     │
+│   Engine     │    │   Engine     │    │   Engine     │
+└──────────────┘    └──────────────┘    └──────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┘
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Domain Layer (Business Logic)                   │
+│     Models • Services • Repositories • Scoring              │
+└─────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│ PostgreSQL   │    │    Redis     │    │ File System  │
+│   (Data)     │    │   (Cache)    │    │  (Exports)   │
+└──────────────┘    └──────────────┘    └──────────────┘
+```
+
+### Tech Stack
+
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| **Language** | Python | 3.11+ |
+| **Framework** | FastAPI | Latest |
+| **Package Manager** | uv / pip | — |
+| **Database** | PostgreSQL | 15+ |
+| **ORM** | SQLAlchemy | 2.0+ (async) |
+| **Data Processing** | Pandas | 2.x |
+| **Excel Export** | OpenPyXL | 3.x |
+| **Testing** | pytest | 8.x |
+| **Linting** | ruff + black + mypy | Latest |
+| **Frontend** | Next.js | 18+ |
+
+### Directory Structure
+
+```
 solstein/
 ├── src/solstein/
-│   ├── api/              ← FastAPI application & routers
-│   ├── infrastructure/   ← Stone Layer: PostgreSQL, SQLAlchemy, Services
-│   ├── analytics/        ← Logic Fusion: Scoring, Market Analysis
-│   ├── agents/           ← Specialized AIs (Coordinator, GitHub, News)
-│   ├── domain/           ← Pure domain models
-│   ├── utils/            ← Aura Layer: Logging, Traceability
-│   └── worker.py         ← Celery worker & Temporal workflows
-├── bin/agents/           ← Agent deployment scripts (planner, implementer, critiquer)
-├── tests/
-│   ├── unit/             ← Domain models & scoring logic
-│   ├── integration/      ← API endpoints & worker tasks
-│   └── data_quality/     ← Golden dataset regression tests
-├── docs/                 ← Technical Grimoire
-└── data/                 ← Market intelligence datasets
+│   ├── api/                 # FastAPI endpoints & routers
+│   ├── domain/              # Domain models & scoring logic
+│   ├── infrastructure/      # Database, cache, repositories
+│   ├── application/         # Application services
+│   ├── exporters/           # LLM, Excel, Markdown exports
+│   ├── analytics/           # Analysis tools & filters
+│   ├── llm/                 # LLM client with health checking
+│   ├── security/            # JWT auth & caching layer
+│   └── config.py            # Application settings
+├── tests/                   # Test suites (Unit, Integration, DQ)
+├── docs/                    # Documentation
+├── scripts/                 # Utility scripts
+└── dashboard/               # Next.js frontend
 ```
 
 ---
@@ -128,20 +169,54 @@ solstein/
 ```bash
 # 1. Clone and install
 git clone <repo> && cd solstein
-python -m venv venv && source venv/bin/activate
-pip install -e ".[dev]"
+uv sync  # or: pip install -r requirements.txt
 
-# 2. Start the API
-uvicorn solstein.api.main:app --reload
+# 2. Configure environment
+cp .env.example .env
+# Edit .env — set GITHUB_TOKEN and DATABASE__URL at minimum
 
-# 3. Start workers (separate terminal)
-celery -A solstein.worker worker --loglevel=info
+# 3. Setup database
+python scripts/setup_db.py
 
-# 4. Run the test suite
-pytest tests/ --cov=src/solstein
+# 4. Start the API
+PYTHONPATH=src python -m uvicorn solstein.api.main:app --reload
+
+# 5. Run the test suite
+pytest tests/
 ```
 
 The API will be available at **http://localhost:8000** with interactive docs at **http://localhost:8000/docs**.
+
+### Required Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITHUB_TOKEN` | ✅ Yes | GitHub API token for data gathering |
+| `DATABASE__URL` | ✅ Yes | PostgreSQL connection string |
+| `SECURITY__SECRET_KEY` | ✅ Prod | JWT secret key (change in production) |
+| `OPENAI_API_KEY` | Optional | OpenAI API key |
+| `GROQ_API_KEY` | Optional | Groq API key |
+| `FIREWORKS_API_KEY` | Optional | Fireworks API key |
+| `COMPANIES_HOUSE_API_KEY` | Optional | UK Companies House data |
+| `GOOGLE_API_KEY` | Optional | Web search data gathering |
+
+### LLM Provider Fallback
+
+Solstein features a robust LLM provider fallback chain to ensure high availability:
+
+```
+Ollama (local) → Fireworks → OpenAI → Groq → Template Fallback
+```
+
+Set `LLM_PROVIDER=auto` (default) to enable automatic fallback, or pin a specific provider:
+
+```bash
+LLM_PROVIDER=ollama    # Local Ollama (llama3.2:latest)
+LLM_PROVIDER=openai    # OpenAI (gpt-4o-mini)
+LLM_PROVIDER=groq      # Groq (llama-3.3-70b-versatile)
+LLM_PROVIDER=fireworks # Fireworks (mixtral-8x22b-instruct)
+LLM_PROVIDER=none      # Disable LLM, use template fallback
+```
 
 ---
 
@@ -150,6 +225,9 @@ The API will be available at **http://localhost:8000** with interactive docs at 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/health` | Platform health check |
+| `GET` | `/health/metrics` | Prometheus metrics |
+| `GET` | `/healthz` | K8s liveness probe alias |
+| `POST` | `/auth/login` | JWT authentication |
 | `GET` | `/companies` | List all profiled companies |
 | `GET` | `/companies/{id}` | Retrieve single company profile |
 | `POST` | `/scoring/company/{id}/score` | Score a specific company |
@@ -158,8 +236,10 @@ The API will be available at **http://localhost:8000** with interactive docs at 
 | `GET` | `/market/search` | Search companies by query |
 | `GET` | `/market/overlap/{id}` | Competitive overlap analysis |
 | `POST` | `/export/` | Generate Excel intelligence report |
+| `GET` | `/jobs` | List background jobs |
+| `GET` | `/simulation` | Run market simulation |
 
-> Full API reference → [`docs/api/reference.md`](docs/api/reference.md)
+> Full API reference → [`docs/api/reference.md`](docs/api/reference.md) | Interactive docs → `/docs`
 
 ---
 
@@ -176,53 +256,30 @@ The API will be available at **http://localhost:8000** with interactive docs at 
 
 ---
 
-## 📚 Documentation by Persona
+## 📚 Documentation
 
-| Scroll | Contents |
-|--------|----------|
-| 📜 [`docs/LORE/origin.md`](docs/LORE/origin.md) | The origin story — how Solstein was born |
-| 📜 [`docs/LORE/the-play.md`](docs/LORE/the-play.md) | The three-entity strategic architecture |
-| 📜 [`docs/PITCH/executive-brief.md`](docs/PITCH/executive-brief.md) | One-page investor brief |
-| 📜 [`docs/PITCH/business-model.md`](docs/PITCH/business-model.md) | Full commercial model |
-| 📜 [`docs/PITCH/case-study.md`](docs/PITCH/case-study.md) | Live case: 29 companies, European energy software |
+| Document | Contents |
+|----------|----------|
+| 📜 [`docs/architecture.md`](docs/architecture.md) | Architecture overview & diagrams |
+| 📜 [`docs/development.md`](docs/development.md) | Development commands & workflows |
+| 📜 [`docs/api.md`](docs/api.md) | API endpoint documentation |
 | 📜 [`docs/guides/developer.md`](docs/guides/developer.md) | Developer setup & contribution guide |
 | 📜 [`docs/guides/operator.md`](docs/guides/operator.md) | Deployment & operations guide |
 | 📜 [`docs/api/reference.md`](docs/api/reference.md) | Full API reference |
 | 📜 [`docs/architecture/decisions.md`](docs/architecture/decisions.md) | Architecture decision records |
-
-### 👨‍💼 For Investors & Business Stakeholders
-| Document | Purpose |
-|----------|---------|
-| 📊 [Executive Brief](docs/PITCH/executive-brief.md) | One-page investment thesis |
-| 💰 [Business Model](docs/PITCH/business-model.md) | Pricing & commercial strategy |
-| 📈 [Case Study](docs/PITCH/case-study.md) | Live 29-company analysis proof |
-| 🏛️ [The Strategic Play](docs/LORE/the-play.md) | Three-entity value architecture |
-
-### 👨‍💻 For Developers & Engineers
-| Document | Purpose |
-|----------|---------|
-| ⚙️ [Developer Guide](docs/guides/developer.md) | Setup, testing, architecture |
-| 🔌 [API Reference](docs/api/reference.md) | Complete endpoint documentation |
-| 🏗️ [Architecture Decisions](docs/architecture/decisions.md) | Technical design rationale |
-| 🧪 [Testing Guide](docs/guides/developer.md#testing) | 4-layer testing pyramid |
-
-### 👨‍✈️ For Operators & DevOps
-| Document | Purpose |
-|----------|---------|
-| 🚀 [Operator Guide](docs/guides/operator.md) | Deployment, Docker, monitoring |
-| 🗄️ [Database Guide](docs/guides/database.md) | PostgreSQL setup & migrations |
-| ⚡ [Quick Reference](docs/QUICK-REFERENCE.md) | Commands & environment variables |
-Historical/internal planning docs that used to live in the repo root are archived in `docs/archive/root-docs/`.
+| 📜 [`docs/PITCH/executive-brief.md`](docs/PITCH/executive-brief.md) | One-page investor brief |
+| 📜 [`docs/PITCH/case-study.md`](docs/PITCH/case-study.md) | Live case: 29 companies, European energy software |
+| 📜 [`docs/LORE/origin.md`](docs/LORE/origin.md) | The origin story |
 
 ---
 
-## 🧪 Testing Philosophy
+## 🧪 Testing
 
 Solstein follows a **4-layer testing pyramid**:
 
 1. **Unit** — Domain models and scoring math, `pytest.approx` precision
 2. **Integration** — All API endpoints with deterministic mock repositories
-3. **Worker** — Celery tasks verified synchronously without Redis dependency
+3. **Worker** — Background tasks verified synchronously
 4. **Data Quality** — Golden Dataset regression to protect classification boundaries
 
 ```bash
@@ -232,74 +289,12 @@ pytest tests/data_quality/  # Golden dataset regressions
 pytest tests/ --cov         # Full suite with coverage
 ```
 
----
-
-## 🏛️ Professionalization
-
-Solstein underwent a structured **5-wave professionalization initiative** in February 2026, transforming it from a prototype into a production-ready platform.
-
-| Wave | Focus | Key Deliverables |
-|------|-------|-----------------|
-| Wave 1 | Foundation | Data migration script, fixed 4 broken test files, 4 new DB migrations |
-| Wave 2 | Repository Unification | Unified async SQLAlchemy repos, deprecated JsonFileRepository |
-| Wave 3 | Production Cleanup | Removed all mock clients, zero JSON in production paths |
-| Wave 4 | Constraints & Optimization | FK constraints, CHECK constraints, 11 performance indexes |
-### Security & Performance Hardening (March 2026)
-
-Following the initial professionalization, a **comprehensive security and performance hardening initiative** was completed:
-
-| Phase | Focus | Key Deliverables |
-|-------|-------|------------------|
-| **Phase 1** | Critical Security | JWT authentication (17 tests), CORS hardening (16 tests), CI/CD security fixes, 75 total security tests |
-| **Phase 2** | Performance | N+1 query fixes, 13 database indexes, Redis caching layer, comprehensive input validation (33 tests) |
-
-**Security Improvements:**
-- ✅ Fixed CORS wildcard vulnerability with specific origin validation
-- ✅ Implemented JWT authentication with HS256 tokens and refresh support
-- ✅ Added production secret key validation
-- ✅ Removed CI/CD security bypasses (`|| true` flags)
-- ✅ Created 75 security tests covering headers, input sanitization, auth, and CORS
-
-**Performance Improvements:**
-- ✅ Fixed N+1 queries with `get_all_filtered()` database-level filtering
-- ✅ Added 13 database indexes (industry, headquarters, composite, score fields)
-- ✅ Implemented Redis caching with in-memory fallback for company data
-- ✅ Created Pydantic validation schemas with 33 comprehensive validation tests
-
-**Files Created:**
-- `src/solstein/security/jwt_handler.py` - JWT token handling
-- `src/solstein/security/cache.py` - Redis caching layer
-- `src/solstein/api/schemas/validation.py` - Input validation schemas
-- `tests/unit/test_*.py` - 158+ new tests across security, JWT, validation
-
-
-**16+ ORM models** across two files:
-- `src/solstein/infrastructure/database_models.py` — 17 models (companies, scoring, signals, research, enrichment, audit)
-- `src/solstein/domain/facts.py` — 6 models (gathering batches, facts, sources, refresh, conflicts, calibration)
-
-**11 Alembic migrations** covering the complete schema evolution from initial tables through FK constraints and index optimization.
-
-### Test Coverage
-
 | Category | Location | Count |
 |----------|----------|-------|
 | Unit | `tests/unit/` | 80+ test files |
 | Integration | `tests/integration/` | 15+ test files |
 | Data Quality | `tests/data_quality/` | Golden dataset regression |
-| Performance | `tests/performance/` | Load tests |
 | **Total** | `tests/` | **1,434+ collected** |
-
-### Performance Baselines
-
-| Operation | Target | Status |
-|-----------|--------|--------|
-| Company lookup by ID | <10ms | ✅ |
-| Facts query by company | <50ms | ✅ |
-| Full pipeline (1 company) | <2s | ✅ |
-
-> Full professionalization details → [`PROFESSIONALIZATION.md`](PROFESSIONALIZATION.md)  
-> Database schema reference → [`DATABASE_SCHEMA.md`](DATABASE_SCHEMA.md)  
-> Testing guide → [`TESTING.md`](TESTING.md)
 
 ---
 
