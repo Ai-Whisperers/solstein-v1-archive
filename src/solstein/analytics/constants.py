@@ -1,13 +1,16 @@
 """Constants for analytics, scoring, and classification thresholds."""
 
-# Classification Score Thresholds
-PHOENIX_SCORE_THRESHOLD = 7.0  # High-growth companies (top 15-25%)
-SALT_SCORE_THRESHOLD = 5.5  # Stable companies (middle 60-70%)
-LEAD_SCORE_THRESHOLD = 3.9  # Legacy/opportunity companies (bottom 10-20%)
+# Classification Score Thresholds (adjusted for better distribution)
+# Phoenix (High Growth): >= 7.5 (top 15-20%) - Raised to reduce Phoenix count
+# Salt (Stable): 4.5 - 7.49 (middle 60-70%) - Widened middle band
+# Lead (Legacy/Opportunity): < 4.5 (bottom 15-20%) - Raised to increase Lead count
+PHOENIX_SCORE_THRESHOLD = 7.5  # High-growth companies (top 15-20%)
+SALT_SCORE_THRESHOLD = 4.5  # Stable companies (middle 60-70%)
+LEAD_SCORE_THRESHOLD = 4.49  # Legacy/opportunity companies (bottom 15-20%)
 
 # Score Range Bounds
 MAX_SCORE = 10.0  # Maximum possible composite score
-MIN_SCORE = 0.0   # Minimum possible composite score
+MIN_SCORE = 0.0  # Minimum possible composite score
 
 # Confidence Thresholds
 CONFIDENCE_HIGH = 0.9  # High confidence threshold
@@ -58,12 +61,13 @@ SIGNAL_CONFIDENCE_NEWS = 0.75  # News signal confidence
 SIGNAL_DEFAULT_CONFIDENCE = 0.5  # Default confidence for signals
 
 # Classification Distribution Targets
-CLASSIFICATION_PHOENIX_MIN = 0.15  # Minimum Phoenix percentage (15%)
-CLASSIFICATION_PHOENIX_MAX = 0.25  # Maximum Phoenix percentage (25%)
+# Based on industry analysis: ~15% high-growth, ~65% stable, ~20% legacy
+CLASSIFICATION_PHOENIX_MIN = 0.10  # Minimum Phoenix percentage (10%)
+CLASSIFICATION_PHOENIX_MAX = 0.20  # Maximum Phoenix percentage (20%)
 CLASSIFICATION_SALT_MIN = 0.60  # Minimum Salt percentage (60%)
-CLASSIFICATION_SALT_MAX = 0.70  # Maximum Salt percentage (70%)
+CLASSIFICATION_SALT_MAX = 0.75  # Maximum Salt percentage (75%)
 CLASSIFICATION_LEAD_MIN = 0.10  # Minimum Lead percentage (10%)
-CLASSIFICATION_LEAD_MAX = 0.20  # Maximum Lead percentage (20%)
+CLASSIFICATION_LEAD_MAX = 0.25  # Maximum Lead percentage (25%)
 
 # Simulation Market Impact
 SIMULATION_INFLATION_THRESHOLD = 0.02  # Normal inflation < 2%
