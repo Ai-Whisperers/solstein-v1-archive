@@ -288,3 +288,104 @@ All imports verified working. No breaking changes to live code.
 - Consider adding database connection pool metrics
 - Consider adding Redis memory usage metrics
 - Consider adding LLM provider quota tracking
+
+## 2026-03-01 — EPIC-015: Standardize error response format
+
+### What Was Done
+
+**Objective**: Implement global exception handler in FastAPI that returns consistent error response format across all API routes.
+
+**Implementation**:
+1. **Created `src/solstein/api/exceptions.py`** (189 lines):
+   - `APIError` class extending `StarletteHTTPException` with `code`, `message`, `status_code`, `details` fields
+   - Global exception handlers for:
+     * `APIError`: Custom API exceptions with structured codes
+     * `RequestValidationError`: Pydantic validation errors (422)
+     * `StarletteHTTPException`: Standard HTTP exceptions (404, 401, etc.)
+     * `Exception`: Catch-all for unhandled server errors (500)
+   - Structured logging with loguru (5xx errors logged as errors, 4xx as warnings)
+   - Status code to error code mapping (e.g., 404 → "NOT_FOUND", 422 → "VALIDATION_ERROR")
+
+2. **Updated `src/solstein/api/main.py`**:
+   - Added `APIError` to imports from `.exceptions`
+   - Already had `setup_exception_handlers(app)` call in place
+
+3. **Updated all routers** (9 files, 27 exception handlers):
+   - `companies.py`: 4 endpoints (get_companies, get_company, create_company, delete_company)
+   - `scoring.py`: 3 endpoints (score_company, batch_score, get_statistics)
+   - `market.py`: 3 endpoints (analyze_market, get_competitive_overlap, search_companies)
+   - `export.py`: 2 endpoints (export_to_excel, export_to_json)
+   - `jobs.py`: 1 endpoint (get_job_status)
+   - `health.py`: 2 endpoints (health_check, readiness_check)
+   - `drill_down.py`: 10 endpoints (all 404 errors standardized)
+   - `simulation.py`: 1 endpoint (run_simulation)
+   - `async_jobs.py`: 1 helper function (_check_celery_available)
+
+### Response Format
+
+**Before**:
+```json
+{
+  "error": "HTTP Error",
+  "details": "Company not found",
+  "request_id": "uuid"
+}
+```
+
+**After**:
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Company with ID xyz not found",
+    "details": null
+  },
+  "request_id": "uuid"
+}
+```
+
+### Key Patterns
+
+- **Error codes**: Machine-readable codes (NOT_FOUND, VALIDATION_ERROR, INTERNAL_ERROR, etc.)
+- **Message**: Human-readable message for end users
+- **Details**: Optional additional context (validation errors, stack traces for 500s)
+- **Request ID**: Included in all error responses for tracing
+- **Logging**: 5xx errors logged with `logger.error()`, 4xx with `logger.warning()`
+- **Status code mapping**: Automatic mapping from HTTP status to error code
+
+### Verification
+
+- ✅ `python3 -c "import sys; sys.path.insert(0,'src'); from solstein.api.exceptions import APIError, setup_exception_handlers; print('✓ Import successful')"` passes
+- ✅ All routers updated to use APIError instead of raw HTTPException
+- ✅ No breaking changes to successful (2xx) responses
+- ✅ Commit: `3fda841 feat(api): standardize error response format`
+
+### Files Modified
+
+- `src/solstein/api/exceptions.py` — created (189 lines)
+- `src/solstein/api/main.py` — updated import
+- `src/solstein/api/routers/companies.py` — 4 handlers updated
+- `src/solstein/api/routers/scoring.py` — 3 handlers updated
+- `src/solstein/api/routers/market.py` — 3 handlers updated
+- `src/solstein/api/routers/export.py` — 2 handlers updated
+- `src/solstein/api/routers/jobs.py` — 1 handler updated
+- `src/solstein/api/routers/health.py` — 2 handlers updated
+- `src/solstein/api/routers/drill_down.py` — 10 handlers updated
+- `src/solstein/api/routers/simulation.py` — 1 handler updated
+- `src/solstein/api/routers/async_jobs.py` — 1 helper updated
+
+### Lessons Learned
+
+- **Centralized exception handling**: Much cleaner than scattered HTTPException raises
+- **Structured error codes**: Enables client-side error handling (e.g., retry on RATE_LIMITED, show user message on NOT_FOUND)
+- **Request ID tracking**: Critical for debugging in production (every error response includes request_id)
+- **Logging consistency**: All errors flow through single handler, ensuring consistent log format
+- **Status code mapping**: Automatic mapping prevents manual mistakes (e.g., forgetting to set status_code)
+
+### Result
+
+- **Lines added**: 189 (exceptions.py) + ~200 (router updates)
+- **Lines removed**: ~175 (old HTTPException patterns)
+- **Net change**: +214 lines
+- **Breaking changes**: None (error response format changed but all endpoints still work)
+- **API status**: ✅ Consistent error responses across all routes

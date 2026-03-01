@@ -1,36 +1,92 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Python cache
 __pycache__
+*.py[cod]
+*$py.class
 *.pyc
 *.pyo
 *.pyd
 .Python
+
+# Virtual environments
+.venv
+venv/
 env
+ENV
+
+# Testing
+tests/
+.pytest_cache
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+
+# Type checking
+.mypy_cache
+.ruff_cache
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+wheels/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Documentation
+docs/
+
+# Node.js (dashboard)
+dashboard/node_modules/
+dashboard/.next/
+dashboard/out/
+
+# Data directories (mounted as volumes)
+data/
+.cache/
+exports/
+analysis_output/
+demo_output/
+reports/
+
+# Logs
+*.log
+logs/
+
+# Environment files (use env_file in docker-compose)
 .env
 .env.*
+!.env.example
+
+# CI/CD
+.github/
+.sisyphus/
+
+# Scripts (not needed in container)
+scripts/
+
+# Misc
+*.bak
+*.tmp
+.antigravity/
+legacy/
+site/
 pip-log.txt
 pip-delete-this-directory.txt
 .tox
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git
-.github/
-.mypy_cache
-.pytest_cache
 .hypothesize
-venv/
-.venv/
+nosetests.xml
 node_modules/
-site/
-dist/
-build/
-legacy/
-tests/
-analysis_output/
-demo_output/
-exports/
-reports/
-data/
