@@ -29,7 +29,7 @@ from ..core.production_hardening import (
     ResponseCache,
 )
 from .exceptions import APIError, setup_exception_handlers
-from .middleware import setup_logging_middleware, setup_rate_limit_middleware, setup_security_middleware
+from .middleware import setup_logging_middleware, setup_rate_limiting, setup_security_middleware
 from .routers import (
     async_jobs,
     auth,
@@ -123,7 +123,7 @@ app.add_middleware(
 setup_logging_middleware(app)
 
 # Rate Limiting Middleware
-setup_rate_limit_middleware(app)
+setup_rate_limiting(app)
 
 # Setup Global Exception Handlers
 setup_exception_handlers(app)

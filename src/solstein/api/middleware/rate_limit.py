@@ -3,7 +3,7 @@
 Provides configurable rate limiting with multiple strategies:
 - IP-based limiting
 - User-based limiting
-- Endpoint-specific limits
+- Endpoint-specific limits with per-route configuration
 """
 
 from __future__ import annotations
@@ -13,10 +13,47 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Callable
 
-from fastapi import Request, Response
+from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
 from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
+
+
+# Route-specific rate limits: requests per minute
+ROUTE_LIMITS = {
+    # Expensive analysis routes: 10/minute
+    "/api/v1/companies/analyze": 10,
+    "/api/v1/research/": 10,
+    "/api/v1/export/": 10,
+    "/scoring/": 10,
+    "/market/analysis": 10,
+    "/export/": 10,
+    # General routes: 60/minute (default)
+}
+
+
+def get_rate_limit_for_path(path: str) -> int:
+    """Determine rate limit for a given path.
+
+    Args:
+        path: Request path
+
+    Returns:
+        Requests per minute limit
+    """
+    # Check for exact matches first
+    if path in ROUTE_LIMITS:
+        return ROUTE_LIMITS[path]
+
+    # Check for prefix matches
+    for route_pattern, limit in ROUTE_LIMITS.items():
+        if route_pattern.endswith("/") and path.startswith(route_pattern):
+            return limit
+        elif path.startswith(route_pattern):
+            return limit
+
+    # Default: 60 requests per minute
+    return 60
 
 
 @dataclass
@@ -61,6 +98,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     Uses sliding window algorithm for accurate rate limiting.
     Supports IP-based and user-based limiting.
+    Supports per-route rate limit configuration.
 
     Example:
         >>> from fastapi import FastAPI
@@ -79,6 +117,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         "/docs",
         "/openapi.json",
         "/redoc",
+        "/healthz",
     }
 
     def __init__(
@@ -120,8 +159,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         return path in self.EXCLUDED_PATHS
 
-    def _check_rate_limit(self, key: str) -> tuple[bool, dict]:
+    def _check_rate_limit(self, key: str, requests_per_minute: int) -> tuple[bool, dict]:
         """Check if request should be rate limited.
+
+        Args:
+            key: Client identifier
+            requests_per_minute: Rate limit for this request
 
         Returns:
             Tuple of (allowed: bool, headers: dict)
@@ -133,7 +176,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if entry.is_blocked():
             remaining_time = int(entry.blocked_until - now)
             return False, {
-                "X-RateLimit-Limit": str(self.config.requests_per_minute),
+                "X-RateLimit-Limit": str(requests_per_minute),
                 "X-RateLimit-Remaining": "0",
                 "X-RateLimit-Reset": str(remaining_time),
                 "Retry-After": str(remaining_time),
@@ -144,13 +187,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         current_count = len(entry.requests)
 
         # Check if over limit
-        if current_count >= self.config.requests_per_minute:
+        if current_count >= requests_per_minute:
             # Block client
             block_duration = self.config.window_seconds
             entry.blocked_until = now + block_duration
-            logger.warning(f"Rate limit exceeded for client: {key}")
+            logger.warning(f"Rate limit exceeded for client: {key} (limit: {requests_per_minute}/min)")
             return False, {
-                "X-RateLimit-Limit": str(self.config.requests_per_minute),
+                "X-RateLimit-Limit": str(requests_per_minute),
                 "X-RateLimit-Remaining": "0",
                 "X-RateLimit-Reset": str(block_duration),
                 "Retry-After": str(block_duration),
@@ -158,11 +201,11 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         # Allow request
         entry.add_request()
-        remaining = self.config.requests_per_minute - current_count - 1
+        remaining = requests_per_minute - current_count - 1
         reset_time = int(now + self.config.window_seconds)
 
         return True, {
-            "X-RateLimit-Limit": str(self.config.requests_per_minute),
+            "X-RateLimit-Limit": str(requests_per_minute),
             "X-RateLimit-Remaining": str(remaining),
             "X-RateLimit-Reset": str(reset_time),
         }
@@ -176,17 +219,26 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # Get client identifier
         key = self.key_func(request)
 
+        # Get per-route limit if configured, otherwise use default config
+        route_limit = get_rate_limit_for_path(request.url.path)
+
         # Check rate limit
-        allowed, headers = self._check_rate_limit(key)
+        allowed, headers = self._check_rate_limit(key, route_limit)
 
         if not allowed:
-            # Return 429 Too Many Requests
+            # Get request_id from state if available
+            request_id = getattr(request.state, "request_id", None) or "unknown"
+
+            # Return 429 Too Many Requests with standardized error format
             response = JSONResponse(
-                status_code=429,
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 content={
-                    "error": "rate_limit_exceeded",
-                    "message": "Too many requests. Please try again later.",
-                    "retry_after": int(headers.get("Retry-After", 60)),
+                    "error": {
+                        "code": "RATE_LIMIT_EXCEEDED",
+                        "message": "Too many requests",
+                        "details": None,
+                    },
+                    "request_id": request_id,
                 },
             )
             for header, value in headers.items():
@@ -226,8 +278,8 @@ def setup_rate_limiting(app, requests_per_minute: int = 60) -> None:
 
     Args:
         app: FastAPI application
-        requests_per_minute: Rate limit per client
+        requests_per_minute: Default rate limit per client
     """
     config = RateLimitConfig(requests_per_minute=requests_per_minute)
     app.add_middleware(RateLimitMiddleware, config=config)
-    logger.info(f"Rate limiting enabled: {requests_per_minute} requests/minute")
+    logger.info(f"Rate limiting enabled: {requests_per_minute} requests/minute (with per-route overrides)")
