@@ -102,6 +102,13 @@ def convert_json_to_company(data: dict) -> Company:
     }
     ai_maturity = ai_maturity_map.get(ai_maturity_str, AIMaturity.NONE)
     
+    # Extract profitability data
+    profitability = data.get("profitability", {})
+    profit_margin = profitability.get("ebitda_margin_pct")
+    ebitda_margin = profitability.get("ebitda_margin_pct")  # Same field for now
+    recurring_revenue_pct = profitability.get("recurring_revenue_pct")
+    revenue_per_employee = profitability.get("revenue_per_employee_eur_k")
+    
     # Extract tier (use classification to infer)
     # FIXED: Phoenix -> Tier 1 (best), Salt -> Tier 2, Lead -> Tier 4 (worst)
     classification = data.get("classification", "Salt")
@@ -172,7 +179,11 @@ def convert_json_to_company(data: dict) -> Company:
             funding_raised=funding_raised,
             funding_confidence=funding_confidence,
             valuation=valuation,
-            valuation_confidence=valuation_confidence
+            valuation_confidence=valuation_confidence,
+            profit_margin=profit_margin,
+            ebitda_margin=ebitda_margin,
+            recurring_revenue_pct=recurring_revenue_pct,
+            revenue_per_employee=revenue_per_employee
         ),
         geographic_presence=data.get("geographic_presence", []),
         key_customers=[],
