@@ -6,24 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from loguru import logger
 
 
-# from temporalio.client import Client as TemporalClient
-class TemporalClient:
-    """Mock-friendly stub for TemporalClient."""
-
-    @classmethod
-    async def connect(cls, *args, **kwargs):
-        return cls()
-
-    async def start_workflow(self, *args, **kwargs):
-        class _Handle:
-            def __init__(self, workflow_id: str):
-                self.id = workflow_id
-
-        workflow_id = kwargs.get("id") or f"workflow-{uuid.uuid4()}"
-        return _Handle(workflow_id)
 
 
-# from ...analytics.workflows import BatchScoreMarketWorkflow
+
 from ...analytics.scoring import GrowthScorer
 from ...analytics.company_loader import unified_score_loader
 from ...core.repositories import CompanyRepository
@@ -94,61 +79,14 @@ async def batch_score_companies_endpoint(
     min_revenue: float | None = Query(None, ge=0, description="Minimum revenue"),
     _: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, Any]:
-    """Batch score multiple companies."""
-    try:
-        filters: dict[str, Any] = {}
-        if industry:
-            filters["industry"] = industry
-        if min_revenue is not None:
-            filters["min_revenue"] = min_revenue
-
-        client = await TemporalClient.connect("localhost:7233")
-        handle = await client.start_workflow(
-            "BatchScoreMarketWorkflow",
-            args=[filters],
-            id=f"batch-{uuid.uuid4()}",
-            task_queue="solstein",
-        )
-
-        return {
-            "status": "running",
-            "workflow_id": getattr(handle, "id", None),
-            "message": "Batch scoring workflow started via Temporal",
-            "filters": filters,
-        }
-    except Exception as e:
-        logger.warning(f"Temporal batch failed, falling back: {e}")
-
-        try:
-            # Synchronous fallback for demo/test purposes
-            from ...analytics.activities import (
-                calculate_company_score,
-                fetch_market_company_ids,
-            )
-
-            filters: dict[str, Any] = {}
-            if industry:
-                filters["industry"] = industry
-            if min_revenue is not None:
-                filters["min_revenue"] = min_revenue
-
-            company_ids = await fetch_market_company_ids(filters)
-            for cid in company_ids:
-                await calculate_company_score(cid)
-
-            return {
-                "processed_count": len(company_ids),
-                "status": "completed",
-                "message": "Batch scoring completed synchronously (Local Fallback)",
-                "filters": filters,
-            }
-        except Exception as fallback_err:
-            logger.error(f"Fallback scoring failed: {fallback_err}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Batch scoring fallback failed: {str(fallback_err)}",
-            ) from fallback_err
-
+    """Batch score multiple companies.
+    
+    NOTE: Temporal integration has been removed. This endpoint is disabled.
+    """
+    raise HTTPException(
+        status_code=status.HTTP_501_NOT_IMPLEMENTED,
+        detail="Batch scoring endpoint disabled - Temporal integration removed. Use individual /company/{id}/score endpoint instead.",
+    )
 
 @router.get("/stats", tags=["Statistics"])
 async def get_statistics(

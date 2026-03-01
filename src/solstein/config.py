@@ -76,12 +76,6 @@ class SupabaseConfig(BaseModel):
     db_url: str = Field(default="")
 
 
-class TemporalConfig(BaseModel):
-    """Temporal orchestration configuration."""
-
-    host_url: str = Field(default="localhost:7233")
-    namespace: str = Field(default="default")
-    api_key: str | None = Field(default=None)
 
 
 class APIConfig(BaseModel):
@@ -195,7 +189,7 @@ class Settings(BaseSettings):
 
     # New Intelligence Engine Backends
     supabase: SupabaseConfig = Field(default_factory=SupabaseConfig)
-    temporal: TemporalConfig = Field(default_factory=TemporalConfig)
+
 
     # External APIs (optional)
     openai_api_key: str | None = Field(default=None)
