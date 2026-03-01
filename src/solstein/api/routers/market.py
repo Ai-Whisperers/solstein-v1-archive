@@ -8,13 +8,14 @@ Provides endpoints for:
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from loguru import logger
 
 from ...analytics.scoring import CompetitiveOverlapCalculator, MarketAnalyzer
 from ...infrastructure.company_repository import CompanyRepository
 from ...domain.models import CompetitiveOverlap, MarketAnalysis
 from ..dependencies import get_current_user, get_company_repository
+from ..exceptions import APIError
 
 router = APIRouter(tags=["Market Analysis"])
 market_analyzer = MarketAnalyzer()
@@ -51,9 +52,11 @@ async def analyze_market(
         return analysis
     except Exception as e:
         logger.error(f"Error analyzing market: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error analyzing market",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error analyzing market: {str(e)}",
+            details=str(e),
         ) from e
 
 
@@ -69,9 +72,10 @@ async def get_competitive_overlap(
         # Get target company with caching
         target = await repo.get_by_id(company_id)
         if not target:
-            raise HTTPException(
+            raise APIError(
+                code="NOT_FOUND",
+                message=f"Company {company_id} not found",
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Company {company_id} not found",
             )
 
         # Get peers from same industry (database-level filtering)
@@ -108,13 +112,15 @@ async def get_competitive_overlap(
         overlaps.sort(key=lambda x: x.overlap_score, reverse=True)
 
         return overlaps
-    except HTTPException:
+    except APIError:
         raise
     except Exception as e:
         logger.error(f"Error calculating overlap: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error calculating competitive overlap",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error calculating competitive overlap: {str(e)}",
+            details=str(e),
         ) from e
 
 
@@ -146,13 +152,16 @@ async def search_companies(
         }
     except ValueError as e:
         logger.warning(f"Invalid search parameters: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="BAD_REQUEST",
+            message=str(e),
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
         ) from e
     except Exception as e:
         logger.error(f"Error searching companies: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error searching companies",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error searching companies: {str(e)}",
+            details=str(e),
         ) from e

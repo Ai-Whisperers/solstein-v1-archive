@@ -28,7 +28,7 @@ from ..core.production_hardening import (
     GracefulShutdown,
     ResponseCache,
 )
-from .exceptions import setup_exception_handlers
+from .exceptions import APIError, setup_exception_handlers
 from .middleware import setup_logging_middleware, setup_security_middleware
 from .routers import (
     async_jobs,

@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, status
 
 from solstein.domain.models import CompanyAnalysisAuditTrail
 
 from ..dependencies import get_drill_down_service
 from ..services.drill_down_service import DrillDownService
+from ..exceptions import APIError
 
 router = APIRouter(prefix="/drill-down", tags=["transparency"])
 
@@ -18,7 +19,11 @@ async def why_signal(
     signals = await service.get_signals(company_id)
 
     if not signals:
-        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
+        raise APIError(
+            code="NOT_FOUND",
+            message=f"No analysis found for {company_id}",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
 
     for signal in signals:
         if signal.signal_name == signal_name:
@@ -32,7 +37,11 @@ async def why_signal(
                 "calculation_method": signal.calculation_method,
             }
 
-    raise HTTPException(status_code=404, detail=f"Signal {signal_name} not found for {company_id}")
+    raise APIError(
+        code="NOT_FOUND",
+        message=f"Signal {signal_name} not found for {company_id}",
+        status_code=status.HTTP_404_NOT_FOUND,
+    )
 
 
 @router.get("/company/{company_id}/sources")
@@ -45,7 +54,11 @@ async def list_sources(
     sources = await service.get_sources(company_id, fact_type)
 
     if sources is None:
-        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
+        raise APIError(
+            code="NOT_FOUND",
+            message=f"No analysis found for {company_id}",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
 
     return {
         "company_id": company_id,
@@ -76,7 +89,11 @@ async def source_details(
     details = await service.get_source_details(company_id, source_id)
 
     if not details:
-        raise HTTPException(status_code=404, detail=f"Source {source_id} not found")
+        raise APIError(
+            code="NOT_FOUND",
+            message=f"Source {source_id} not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
 
     return details
 
@@ -91,7 +108,11 @@ async def list_facts(
     facts = await service.get_facts(company_id, min_confidence)
 
     if facts is None:
-        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
+        raise APIError(
+            code="NOT_FOUND",
+            message=f"No analysis found for {company_id}",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
 
     contradictions = await service.get_contradictions(company_id) or []
 
@@ -125,9 +146,10 @@ async def fact_details(
     details = await service.get_fact_details(company_id, fact_type, value)
 
     if not details:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Fact {fact_type}={value} not found for {company_id}",
+        raise APIError(
+            code="NOT_FOUND",
+            message=f"Fact {fact_type}={value} not found for {company_id}",
+            status_code=status.HTTP_404_NOT_FOUND,
         )
 
     return details
@@ -142,7 +164,11 @@ async def audit_trail(
     trail = await service.get_audit_trail(company_id)
 
     if not trail:
-        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
+        raise APIError(
+            code="NOT_FOUND",
+            message=f"No analysis found for {company_id}",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
 
     return trail
 
@@ -156,7 +182,11 @@ async def list_signals(
     signals = await service.get_signals(company_id)
 
     if signals is None:
-        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
+        raise APIError(
+            code="NOT_FOUND",
+            message=f"No analysis found for {company_id}",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
 
     return {
         "company_id": company_id,
@@ -198,7 +228,11 @@ async def data_quality(
     metrics = await service.get_data_quality(company_id)
 
     if not metrics:
-        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
+        raise APIError(
+            code="NOT_FOUND",
+            message=f"No analysis found for {company_id}",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
 
     return {
         "company_id": company_id,
@@ -215,7 +249,11 @@ async def analysis_timeline(
     trail = await service.get_audit_trail(company_id)
 
     if not trail:
-        raise HTTPException(status_code=404, detail=f"No analysis found for {company_id}")
+        raise APIError(
+            code="NOT_FOUND",
+            message=f"No analysis found for {company_id}",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
 
     return {
         "company_id": company_id,

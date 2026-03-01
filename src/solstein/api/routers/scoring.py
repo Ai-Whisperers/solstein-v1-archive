@@ -1,8 +1,9 @@
+import asyncio
 import uuid
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from loguru import logger
 
 
@@ -13,6 +14,7 @@ from ...analytics.scoring import GrowthScorer
 from ...analytics.company_loader import unified_score_loader
 from ...core.repositories import CompanyRepository
 from ..dependencies import get_current_user, get_company_repository
+from ..exceptions import APIError
 
 router = APIRouter(tags=["Scoring"])
 growth_scorer = GrowthScorer()
@@ -28,15 +30,16 @@ async def score_company(
     try:
         # One high-performance lookup
         # Load company with unified JSON + Markdown data for accurate scoring
-        target_company = unified_score_loader.load_company_for_scoring(company_id)
+        target_company = await asyncio.to_thread(unified_score_loader.load_company_for_scoring, company_id)
         if not target_company:
             # Fallback to repository if unified loader fails
-            target_company = repo.get_by_id(company_id)
+            target_company = await repo.get_by_id(company_id)
 
         if not target_company:
-            raise HTTPException(
+            raise APIError(
+                code="NOT_FOUND",
+                message=f"Company with ID {company_id} not found",
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Company with ID {company_id} not found",
             )
 
         # Calculate scores with explanations
@@ -51,7 +54,7 @@ async def score_company(
             classification = "Salt"
 
         # Save the scores back to the DB to keep it 'magically' up to date
-        repo.save(scored_company)
+        await repo.save(scored_company)
 
         return {
             "company_id": company_id,
@@ -63,13 +66,15 @@ async def score_company(
             "scoring_breakdown": scored_company.scoring_breakdown,
             "calculated_at": datetime.now().isoformat(),
         }
-    except HTTPException:
+    except APIError:
         raise
     except Exception as e:
         logger.error(f"Error scoring company {company_id}: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error scoring company",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error scoring company: {str(e)}",
+            details=str(e),
         ) from e
 
 
@@ -83,9 +88,10 @@ async def batch_score_companies_endpoint(
     
     NOTE: Temporal integration has been removed. This endpoint is disabled.
     """
-    raise HTTPException(
+    raise APIError(
+        code="NOT_IMPLEMENTED",
+        message="Batch scoring endpoint disabled - Temporal integration removed. Use individual /company/{id}/score endpoint instead.",
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Batch scoring endpoint disabled - Temporal integration removed. Use individual /company/{id}/score endpoint instead.",
     )
 
 @router.get("/stats", tags=["Statistics"])
@@ -97,7 +103,7 @@ async def get_statistics(
     try:
         # In a real high-perf scenario, we'd use a SQL AGGREGATE call
         # For now, fetching domain entities is still faster than re-scoring
-        companies = repo.get_all()
+        companies = await repo.get_all()
 
         total_companies = len(companies)
 
@@ -138,7 +144,9 @@ async def get_statistics(
         }
     except Exception as e:
         logger.error(f"Error calculating statistics: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error calculating statistics",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error calculating statistics: {str(e)}",
+            details=str(e),
         ) from e

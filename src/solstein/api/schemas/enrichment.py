@@ -18,12 +18,28 @@ class EnrichmentRequest(BaseModel):
     """Request to enrich a single company."""
 
     sources: Optional[List[str]] = Field(
-        default=["SEC_EDGAR", "COMPANIES_HOUSE", "NEWS_SIGNALS"], description="Data sources to use for enrichment"
+        default=["SEC_EDGAR", "COMPANIES_HOUSE", "NEWS_SIGNALS"],
+        min_length=1,
+        max_length=10,
+        description="Data sources to use for enrichment"
     )
     dry_run: bool = Field(default=False, description="If true, don't persist results")
 
-    model_config = ConfigDict(json_schema_extra={"example": {"sources": ["SEC_EDGAR", "COMPANIES_HOUSE"], "dry_run": False}})
+    @field_validator("sources")
+    @classmethod
+    def validate_sources(cls, v: Optional[List[str]]) -> Optional[List[str]]:
+        """Validate data sources are valid."""
+        if v:
+            valid_sources = {"SEC_EDGAR", "COMPANIES_HOUSE", "NEWS_SIGNALS", "GITHUB", "CRUNCHBASE"}
+            for source in v:
+                if not isinstance(source, str) or not source.strip():
+                    raise ValueError("Each source must be a non-empty string")
+                if source not in valid_sources:
+                    raise ValueError(f"Invalid source '{source}'. Valid: {sorted(valid_sources)}")
+            return [s.strip() for s in v]
+        return v
 
+    model_config = ConfigDict(json_schema_extra={"example": {"sources": ["SEC_EDGAR", "COMPANIES_HOUSE"], "dry_run": False}})
 
 class BatchEnrichmentRequest(BaseModel):
     """Request to batch enrich multiple companies."""
@@ -35,13 +51,25 @@ class BatchEnrichmentRequest(BaseModel):
 
     @field_validator("company_ids")
     @classmethod
-    def validate_company_ids(cls, v):
+    def validate_company_ids(cls, v: List[str]) -> List[str]:
         """Validate company ID format."""
         if not v:
             raise ValueError("company_ids must not be empty")
         for cid in v:
-            if not isinstance(cid, str) or len(cid) > 100:
-                raise ValueError(f"Invalid company ID: {cid}")
+            if not isinstance(cid, str):
+                raise ValueError(f"Each company ID must be a string, got {type(cid).__name__}")
+            if not cid.strip():
+                raise ValueError("Company IDs cannot be empty or whitespace")
+            if len(cid) > 100:
+                raise ValueError(f"Company ID '{cid}' exceeds max length of 100 characters")
+        return [cid.strip() for cid in v]
+
+    @field_validator("batch_size")
+    @classmethod
+    def validate_batch_size(cls, v: int) -> int:
+        """Validate batch size is reasonable."""
+        if v < 1 or v > 100:
+            raise ValueError("batch_size must be between 1 and 100")
         return v
 
     model_config = ConfigDict(json_schema_extra={
@@ -57,10 +85,19 @@ class BatchEnrichmentRequest(BaseModel):
 class HealthCheckResponse(BaseModel):
     """Response from /health endpoint."""
 
-    status: str = Field(..., description="Overall health status")
+    status: str = Field(..., min_length=1, max_length=50, description="Overall health status")
     timestamp: datetime = Field(..., description="Health check timestamp")
-    version: str = Field(..., description="API version")
+    version: str = Field(..., min_length=1, max_length=50, description="API version")
     components: Dict[str, str] = Field(..., description="Component health statuses")
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        """Validate status is a known value."""
+        valid_statuses = {"healthy", "degraded", "unhealthy"}
+        if v not in valid_statuses:
+            raise ValueError(f"Invalid status '{v}'. Must be one of: {sorted(valid_statuses)}")
+        return v
 
     model_config = ConfigDict(json_schema_extra={
         "example": {
@@ -120,12 +157,28 @@ class MetricsResponse(BaseModel):
 class EnrichmentResultData(BaseModel):
     """Enriched company data fields."""
 
-    revenue: Optional[float] = Field(None, description="Company revenue")
-    employees: Optional[int] = Field(None, description="Number of employees")
-    growth_rate: Optional[float] = Field(None, description="Revenue growth rate")
-    profit_margin: Optional[float] = Field(None, description="Profit margin")
-    funding_raised: Optional[float] = Field(None, description="Funding raised")
-    valuation: Optional[float] = Field(None, description="Company valuation")
+    revenue: Optional[float] = Field(None, ge=0, le=1e12, description="Company revenue")
+    employees: Optional[int] = Field(None, ge=1, le=1000000, description="Number of employees")
+    growth_rate: Optional[float] = Field(None, ge=-1.0, le=10.0, description="Revenue growth rate")
+    profit_margin: Optional[float] = Field(None, ge=-1.0, le=1.0, description="Profit margin")
+    funding_raised: Optional[float] = Field(None, ge=0, le=1e12, description="Funding raised")
+    valuation: Optional[float] = Field(None, ge=0, le=1e12, description="Company valuation")
+
+    @field_validator("revenue", "funding_raised", "valuation")
+    @classmethod
+    def validate_positive_amounts(cls, v: Optional[float]) -> Optional[float]:
+        """Validate monetary amounts are non-negative."""
+        if v is not None and v < 0:
+            raise ValueError("Monetary amounts must be non-negative")
+        return v
+
+    @field_validator("growth_rate", "profit_margin")
+    @classmethod
+    def validate_rates(cls, v: Optional[float]) -> Optional[float]:
+        """Validate rates are within reasonable bounds."""
+        if v is not None and not (-1.0 <= v <= 10.0):
+            raise ValueError("Rates must be between -1.0 and 10.0")
+        return v
 
     model_config = ConfigDict(json_schema_extra={
         "example": {
@@ -142,11 +195,36 @@ class EnrichmentResultData(BaseModel):
 class EnrichmentResponse(BaseModel):
     """Response from POST /companies/{id}/enrich endpoint."""
 
-    company_id: str = Field(..., description="Company ID")
-    company_name: str = Field(..., description="Company name")
-    status: str = Field(..., description="Enrichment status (success/failure)")
+    company_id: str = Field(..., min_length=1, max_length=100, description="Company ID")
+    company_name: str = Field(..., min_length=1, max_length=255, description="Company name")
+    status: str = Field(..., min_length=1, max_length=50, description="Enrichment status (success/failure)")
     enrichment: Dict[str, Any] = Field(..., description="Enrichment details")
     data: Optional[EnrichmentResultData] = Field(None, description="Enriched data")
+
+    @field_validator("company_id")
+    @classmethod
+    def validate_company_id(cls, v: str) -> str:
+        """Validate company ID is not empty."""
+        if not v or not v.strip():
+            raise ValueError("company_id cannot be empty or whitespace")
+        return v.strip()
+
+    @field_validator("company_name")
+    @classmethod
+    def validate_company_name(cls, v: str) -> str:
+        """Validate company name is not empty."""
+        if not v or not v.strip():
+            raise ValueError("company_name cannot be empty or whitespace")
+        return v.strip()
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        """Validate status is a known value."""
+        valid_statuses = {"success", "failure", "partial", "pending"}
+        if v not in valid_statuses:
+            raise ValueError(f"Invalid status '{v}'. Must be one of: {sorted(valid_statuses)}")
+        return v
 
     model_config = ConfigDict(json_schema_extra={
         "example": {
@@ -166,23 +244,72 @@ class EnrichmentResponse(BaseModel):
 class BatchEnrichmentResult(BaseModel):
     """Result for single company in batch enrichment."""
 
-    company_id: str = Field(..., description="Company ID")
-    status: str = Field(..., description="Enrichment status")
-    duration_ms: float = Field(..., description="Processing duration")
-    source: Optional[str] = Field(None, description="Data source (cache/SEC_EDGAR/etc)")
-    error: Optional[str] = Field(None, description="Error message if failed")
+    company_id: str = Field(..., min_length=1, max_length=100, description="Company ID")
+    status: str = Field(..., min_length=1, max_length=50, description="Enrichment status")
+    duration_ms: float = Field(..., ge=0, le=3600000, description="Processing duration in milliseconds")
+    source: Optional[str] = Field(None, min_length=1, max_length=100, description="Data source (cache/SEC_EDGAR/etc)")
+    error: Optional[str] = Field(None, max_length=1000, description="Error message if failed")
 
+    @field_validator("company_id")
+    @classmethod
+    def validate_company_id(cls, v: str) -> str:
+        """Validate company ID is not empty."""
+        if not v or not v.strip():
+            raise ValueError("company_id cannot be empty or whitespace")
+        return v.strip()
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        """Validate status is a known value."""
+        valid_statuses = {"success", "failure", "partial", "pending", "skipped"}
+        if v not in valid_statuses:
+            raise ValueError(f"Invalid status '{v}'. Must be one of: {sorted(valid_statuses)}")
+        return v
+
+    @field_validator("duration_ms")
+    @classmethod
+    def validate_duration(cls, v: float) -> float:
+        """Validate duration is non-negative."""
+        if v < 0:
+            raise ValueError("duration_ms must be non-negative")
+        return v
 
 class BatchEnrichmentResponse(BaseModel):
     """Response from POST /companies/enrich/batch endpoint."""
 
-    status: str = Field(..., description="Overall batch status")
-    batch_id: str = Field(..., description="Unique batch ID")
-    total_companies: int = Field(..., description="Total companies requested")
-    enriched_count: int = Field(..., description="Successfully enriched count")
-    failed_count: int = Field(..., description="Failed count")
+    status: str = Field(..., min_length=1, max_length=50, description="Overall batch status")
+    batch_id: str = Field(..., min_length=1, max_length=100, description="Unique batch ID")
+    total_companies: int = Field(..., ge=0, le=1000000, description="Total companies requested")
+    enriched_count: int = Field(..., ge=0, le=1000000, description="Successfully enriched count")
+    failed_count: int = Field(..., ge=0, le=1000000, description="Failed count")
     results: List[BatchEnrichmentResult] = Field(..., description="Per-company results")
     metrics: Dict[str, Any] = Field(..., description="Batch metrics")
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        """Validate status is a known value."""
+        valid_statuses = {"success", "failure", "partial", "pending"}
+        if v not in valid_statuses:
+            raise ValueError(f"Invalid status '{v}'. Must be one of: {sorted(valid_statuses)}")
+        return v
+
+    @field_validator("batch_id")
+    @classmethod
+    def validate_batch_id(cls, v: str) -> str:
+        """Validate batch ID is not empty."""
+        if not v or not v.strip():
+            raise ValueError("batch_id cannot be empty or whitespace")
+        return v.strip()
+
+    @field_validator("enriched_count", "failed_count")
+    @classmethod
+    def validate_counts(cls, v: int) -> int:
+        """Validate counts are non-negative."""
+        if v < 0:
+            raise ValueError("Counts must be non-negative")
+        return v
 
     model_config = ConfigDict(json_schema_extra={
         "example": {
@@ -268,9 +395,18 @@ class CacheCheckResponse(BaseModel):
 class CacheClearResponse(BaseModel):
     """Response from POST /enrichment/cache/clear endpoint."""
 
-    status: str = Field(..., description="Operation status")
-    message: str = Field(..., description="Status message")
-    entries_cleared: int = Field(..., description="Number of cache entries cleared")
+    status: str = Field(..., min_length=1, max_length=50, description="Operation status")
+    message: str = Field(..., min_length=1, max_length=500, description="Status message")
+    entries_cleared: int = Field(..., ge=0, le=1000000, description="Number of cache entries cleared")
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        """Validate status is a known value."""
+        valid_statuses = {"success", "failure", "partial"}
+        if v not in valid_statuses:
+            raise ValueError(f"Invalid status '{v}'. Must be one of: {sorted(valid_statuses)}")
+        return v
 
     model_config = ConfigDict(json_schema_extra={"example": {"status": "success", "message": "Enrichment cache cleared", "entries_cleared": 47}})
 
@@ -278,10 +414,26 @@ class CacheClearResponse(BaseModel):
 class ErrorResponse(BaseModel):
     """Standard error response."""
 
-    error: str = Field(..., description="Error code")
-    message: str = Field(..., description="Error message")
-    code: Optional[str] = Field(None, description="Specific error code")
+    error: str = Field(..., min_length=1, max_length=100, description="Error code")
+    message: str = Field(..., min_length=1, max_length=1000, description="Error message")
+    code: Optional[str] = Field(None, min_length=1, max_length=50, description="Specific error code")
     details: Optional[Dict[str, Any]] = Field(None, description="Additional details")
+
+    @field_validator("error")
+    @classmethod
+    def validate_error(cls, v: str) -> str:
+        """Validate error code is not empty."""
+        if not v or not v.strip():
+            raise ValueError("error cannot be empty or whitespace")
+        return v.strip()
+
+    @field_validator("message")
+    @classmethod
+    def validate_message(cls, v: str) -> str:
+        """Validate message is not empty."""
+        if not v or not v.strip():
+            raise ValueError("message cannot be empty or whitespace")
+        return v.strip()
 
     model_config = ConfigDict(json_schema_extra={
         "example": {
@@ -296,10 +448,26 @@ class ErrorResponse(BaseModel):
 class RateLimitErrorResponse(BaseModel):
     """Rate limit exceeded error response."""
 
-    error: str = Field(..., description="Error code")
-    message: str = Field(..., description="Error message")
-    retry_after_seconds: int = Field(..., description="Seconds to wait before retry")
-    code: Optional[str] = Field(None, description="Error code")
+    error: str = Field(..., min_length=1, max_length=100, description="Error code")
+    message: str = Field(..., min_length=1, max_length=1000, description="Error message")
+    retry_after_seconds: int = Field(..., ge=1, le=3600, description="Seconds to wait before retry")
+    code: Optional[str] = Field(None, min_length=1, max_length=50, description="Error code")
+
+    @field_validator("error", "message")
+    @classmethod
+    def validate_fields(cls, v: str) -> str:
+        """Validate fields are not empty."""
+        if not v or not v.strip():
+            raise ValueError("Field cannot be empty or whitespace")
+        return v.strip()
+
+    @field_validator("retry_after_seconds")
+    @classmethod
+    def validate_retry_seconds(cls, v: int) -> int:
+        """Validate retry seconds is positive."""
+        if v < 1:
+            raise ValueError("retry_after_seconds must be at least 1")
+        return v
 
     model_config = ConfigDict(json_schema_extra={
         "example": {
@@ -314,10 +482,29 @@ class RateLimitErrorResponse(BaseModel):
 class ServiceUnavailableErrorResponse(BaseModel):
     """Service unavailable error response."""
 
-    error: str = Field(..., description="Error code")
-    message: str = Field(..., description="Error message")
-    affected_sources: List[str] = Field(..., description="Affected data sources")
-    code: Optional[str] = Field(None, description="Error code")
+    error: str = Field(..., min_length=1, max_length=100, description="Error code")
+    message: str = Field(..., min_length=1, max_length=1000, description="Error message")
+    affected_sources: List[str] = Field(..., min_length=1, max_length=100, description="Affected data sources")
+    code: Optional[str] = Field(None, min_length=1, max_length=50, description="Error code")
+
+    @field_validator("error", "message")
+    @classmethod
+    def validate_fields(cls, v: str) -> str:
+        """Validate fields are not empty."""
+        if not v or not v.strip():
+            raise ValueError("Field cannot be empty or whitespace")
+        return v.strip()
+
+    @field_validator("affected_sources")
+    @classmethod
+    def validate_affected_sources(cls, v: List[str]) -> List[str]:
+        """Validate affected sources list."""
+        if not v:
+            raise ValueError("affected_sources must not be empty")
+        for source in v:
+            if not isinstance(source, str) or not source.strip():
+                raise ValueError("Each source must be a non-empty string")
+        return [s.strip() for s in v]
 
     model_config = ConfigDict(json_schema_extra={
         "example": {

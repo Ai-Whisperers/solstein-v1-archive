@@ -9,7 +9,7 @@ If Celery is not available, this router will not be functional.
 import logging
 import uuid
 from typing import Optional, List
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, Query, Request, status
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -25,6 +25,7 @@ except ImportError:
     logger.warning("Celery not installed - async job endpoints will return 503 Service Unavailable")
 
 from solstein.data.security_hardening import rate_limiter, input_validator
+from ..exceptions import APIError
 
 
 # ============================================================================
@@ -87,9 +88,10 @@ def _get_client_id(request: Request) -> str:
 def _check_celery_available():
     """Check if Celery is available."""
     if not CELERY_AVAILABLE or celery_app is None:
-        raise HTTPException(
-            status_code=503,
-            detail="Async enrichment service unavailable. Celery/Redis not configured.",
+        raise APIError(
+            code="SERVICE_UNAVAILABLE",
+            message="Async enrichment service unavailable. Celery/Redis not configured.",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
 
 

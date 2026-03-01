@@ -1,12 +1,13 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from loguru import logger
 
 from ...analytics.scoring import GrowthScorer
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...domain.models import Company, CompanyTier
 from ..dependencies import get_current_user, get_company_repository
+from ..exceptions import APIError
 
 router = APIRouter(tags=["Companies"])
 growth_scorer = GrowthScorer()
@@ -27,14 +28,16 @@ async def get_companies(
         filters = CompanyFilter(tier=tier, industry=industry, min_revenue=min_revenue)
 
         # Use server-side pagination in repository
-        filtered_companies = repo.get_all(limit=limit, offset=skip, filters=filters)
+        filtered_companies = await repo.get_all(limit=limit, offset=skip, filters=filters)
 
         return filtered_companies
     except Exception as e:
         logger.error(f"Error getting companies: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error retrieving companies",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error retrieving companies: {str(e)}",
+            details=str(e),
         ) from e
 
 
@@ -46,22 +49,27 @@ async def get_company(
 ) -> Any:
     """Get company by ID."""
     try:
-        company = repo.get_by_id(company_id)
+        company = await repo.get_by_id(company_id)
 
         if not company:
-            raise HTTPException(
+            raise APIError(
+                code="NOT_FOUND",
+                message=f"Company with ID {company_id} not found",
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Company with ID {company_id} not found",
             )
 
         return company
     except HTTPException:
         raise
+    except APIError:
+        raise
     except Exception as e:
         logger.error(f"Error getting company {company_id}: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error retrieving company",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error retrieving company: {str(e)}",
+            details=str(e),
         ) from e
 
 
@@ -83,14 +91,16 @@ async def create_company(
         scored_company = growth_scorer.calculate_scores(company_in)
 
         # Persist to database
-        saved_company = repo.save(scored_company)
+        saved_company = await repo.save(scored_company)
 
         return saved_company
     except Exception as e:
         logger.error(f"Error creating company: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="BAD_REQUEST",
+            message="Error creating company",
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Error creating company: {str(e)}",
+            details=str(e),
         ) from e
 
 
@@ -102,17 +112,22 @@ async def delete_company(
 ) -> None:
     """Delete a company profile."""
     try:
-        success = repo.delete(company_id)
+        success = await repo.delete(company_id)
         if not success:
-            raise HTTPException(
+            raise APIError(
+                code="NOT_FOUND",
+                message=f"Company with ID {company_id} not found",
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Company with ID {company_id} not found",
             )
     except HTTPException:
         raise
+    except APIError:
+        raise
     except Exception as e:
         logger.error(f"Error deleting company {company_id}: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error deleting company",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error deleting company: {str(e)}",
+            details=str(e),
         ) from e

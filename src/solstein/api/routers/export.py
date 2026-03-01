@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 from fastapi.responses import JSONResponse
 from loguru import logger
 
@@ -10,6 +10,7 @@ from ...config import get_settings
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...exporters.excel import ExcelExporter
 from ..dependencies import get_current_user, get_company_repository
+from ..exceptions import APIError
 
 router = APIRouter(tags=["Export"])
 settings = get_settings()
@@ -68,9 +69,11 @@ async def export_to_excel(
         }
     except Exception as e:
         logger.error(f"Error triggering export: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error triggering export",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error triggering export: {str(e)}",
+            details=str(e),
         ) from e
 
 
@@ -93,9 +96,10 @@ async def export_to_json(
             ]
 
         if not filtered_companies:
-            raise HTTPException(
+            raise APIError(
+                code="NOT_FOUND",
+                message=f"No companies found for industry: {industry}",
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No companies found for industry: {industry}",
             )
 
         # Convert to dict with JSON serializable values
@@ -114,13 +118,15 @@ async def export_to_json(
         }
 
         return JSONResponse(content=export_data)
-    except HTTPException:
+    except APIError:
         raise
     except Exception as e:
         logger.error(f"Error exporting to JSON: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error exporting to JSON",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error exporting to JSON: {str(e)}",
+            details=str(e),
         ) from e
 
 

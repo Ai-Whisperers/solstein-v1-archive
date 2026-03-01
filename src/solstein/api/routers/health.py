@@ -11,9 +11,10 @@ Provides Kubernetes-compatible health checks:
 
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, status
 
 from ...core.monitoring import health_monitor
+from ..exceptions import APIError
 
 router = APIRouter(prefix="/health", tags=["health"])
 
@@ -34,7 +35,12 @@ async def health_check() -> dict:
     }
 
     if status.value == "unhealthy":
-        raise HTTPException(status_code=503, detail=response)
+        raise APIError(
+            code="SERVICE_UNAVAILABLE",
+            message="Service is unhealthy",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            details=response,
+        )
 
     return response
 
@@ -62,9 +68,11 @@ async def readiness_check() -> dict:
     }
 
     if not is_ready:
-        raise HTTPException(
-            status_code=503,
-            detail={"message": "Application not ready", **response},
+        raise APIError(
+            code="SERVICE_UNAVAILABLE",
+            message="Application not ready",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            details=response,
         )
 
     return response

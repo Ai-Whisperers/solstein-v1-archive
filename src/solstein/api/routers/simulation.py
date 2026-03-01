@@ -1,12 +1,13 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from loguru import logger
 
 from ...analytics.simulation import SimulationEngine
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...domain.simulation import Scenario, SimulationResult
 from ..dependencies import get_current_user, get_company_repository
+from ..exceptions import APIError
 
 router = APIRouter(tags=["Simulation"])
 simulation_engine = SimulationEngine()
@@ -26,9 +27,10 @@ async def run_simulation(
         companies = repo.get_all(filters=filters)
 
         if not companies:
-            raise HTTPException(
+            raise APIError(
+                code="NOT_FOUND",
+                message="No companies found to simulate",
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No companies found to simulate",
             )
 
         # 3. Run Simulation
@@ -36,11 +38,13 @@ async def run_simulation(
 
         return results
 
-    except HTTPException:
+    except APIError:
         raise
     except Exception as e:
         logger.error(f"Error running simulation: {e}")
-        raise HTTPException(
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error running simulation",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error running simulation: {str(e)}",
+            details=str(e),
         ) from e
