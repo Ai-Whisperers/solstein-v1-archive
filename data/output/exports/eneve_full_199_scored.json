@@ -1,0 +1,613 @@
+[
+  {
+    "id": "eneve",
+    "name": "Eneve",
+    "industry": "Energy Software",
+    "description": "Energy software company",
+    "website": "https://eneve.de",
+    "headquarters": "Germany",
+    "founded_year": 2015,
+    "tier": "Tier 4",
+    "threat_level": "Low",
+    "ai_maturity": "Strong",
+    "saas_maturity": 5,
+    "tech_stack": [],
+    "financials": {
+      "revenue": 5.0,
+      "revenue_confidence": "Unknown",
+      "growth_rate": 35.0,
+      "growth_confidence": "Estimated",
+      "employees": 150,
+      "employees_confidence": "Confirmed",
+      "profit_margin": 15.0,
+      "margin_confidence": "Confirmed",
+      "funding_raised": 2000000.0,
+      "funding_confidence": "Estimated",
+      "valuation": 50000000.0,
+      "valuation_confidence": "Estimated"
+    },
+    "geographic_presence": [
+      "Germany",
+      "France",
+      "UK",
+      "Netherlands",
+      "Belgium",
+      "Austria",
+      "Switzerland"
+    ],
+    "key_customers": [],
+    "parent_company": null,
+    "subsidiaries": [],
+    "acquisitions": [],
+    "last_updated": "2026-03-01T12:54:00.942857Z",
+    "data_source": "SolStein Competitive Intelligence",
+    "notes": null,
+    "source_links": [],
+    "metric_sources": {},
+    "metric_justifications": {},
+    "metric_observations": {},
+    "signal_confidences": {},
+    "enrichment_source_count": 0,
+    "data_quality_tier": "unknown",
+    "ticker": null,
+    "company_number": null,
+    "isin": null,
+    "geography_code": null,
+    "enrichment_sources": [],
+    "enrichment_timestamps": {},
+    "enrichment_errors": [],
+    "enrichment_errors_per_field": {},
+    "enrichment_error_timestamps": {},
+    "enrichment_error_count": 0,
+    "enrichment_error_categories": {},
+    "growth_score": 9.75,
+    "financial_health_score": 6.75,
+    "competitive_position_score": 7.138888888888889,
+    "composite_score": 8.07,
+    "scoring_breakdown": {
+      "growth": {
+        "base_score": 5.0,
+        "components": [
+          {
+            "name": "Revenue Growth",
+            "value": 1.75,
+            "formula": "min(35.0% / 20.0, 4.0)",
+            "reasoning": "High growth rate of 35.0% identified.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Funding Momentum",
+            "value": 2.0,
+            "formula": "funding(2,000,000 EUR) > threshold",
+            "reasoning": "Significant capital injection signals strong market confidence.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Profitability Profile",
+            "value": 1.0,
+            "formula": "margin(15.0%) -> adjustment",
+            "reasoning": "Healthy margins contribute to growth score.",
+            "confidence_weight": 1.0
+          }
+        ],
+        "final_score": 9.75
+      },
+      "financial": {
+        "base_score": 5.0,
+        "components": [
+          {
+            "name": "Revenue Scale",
+            "value": -1.0,
+            "formula": "revenue(5 EUR) -> adjustment",
+            "reasoning": "Scale impacts financial stability scores.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Profitability Health",
+            "value": 1.25,
+            "formula": "margin(15.0%) -> adjustment",
+            "reasoning": "Operating margin is a key indicator of financial health.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Operating Efficiency",
+            "value": -1.0,
+            "formula": "rev_per_emp(0 EUR) -> adjustment",
+            "reasoning": "Resource utilization efficiency.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Funding Cushion",
+            "value": 2.5,
+            "formula": "funding_ratio(400000.00) -> adjustment",
+            "reasoning": "Capital reserves relative to revenue scale.",
+            "confidence_weight": 1.0
+          }
+        ],
+        "final_score": 6.75
+      },
+      "competitive": {
+        "base_score": 5.0,
+        "components": [
+          {
+            "name": "Market Tier",
+            "value": -1.0,
+            "formula": "tier(Tier 4)",
+            "reasoning": "Positioned as a Tier 4 player in the market.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "AI Maturity",
+            "value": 1.5,
+            "formula": "ai_maturity(Strong)",
+            "reasoning": "Technological advantage: AI maturity is Strong.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "SaaS Maturity",
+            "value": 0.8888888888888888,
+            "formula": "(5-1)/9 * 2.0",
+            "reasoning": "SaaS transformation index: 5/10.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Geographic Footprint",
+            "value": 0.75,
+            "formula": "regions(7) > 3",
+            "reasoning": "Regional presence identified.",
+            "confidence_weight": 1.0
+          }
+        ],
+        "final_score": 7.138888888888889
+      }
+    },
+    "classification": "Phoenix",
+    "revenue_timeline": [
+      {
+        "year": 2023,
+        "eur_millions": 5.0,
+        "yoy_growth_pct": 35,
+        "confidence": "high",
+        "source": "Annual report"
+      },
+      {
+        "year": 2022,
+        "eur_millions": 3.7,
+        "yoy_growth_pct": 48,
+        "confidence": "high",
+        "source": "Annual report"
+      },
+      {
+        "year": 2021,
+        "eur_millions": 2.5,
+        "yoy_growth_pct": 67,
+        "confidence": "high",
+        "source": "Annual report"
+      },
+      {
+        "year": 2020,
+        "eur_millions": 1.5,
+        "yoy_growth_pct": 0,
+        "confidence": "high",
+        "source": "Annual report"
+      }
+    ],
+    "revenue_cagr_3yr": 45.0,
+    "revenue_cagr_5yr": 25.0,
+    "profit_margin": 15.0,
+    "ebitda_margin": 30.0,
+    "recurring_revenue_pct": 85.0,
+    "revenue_per_employee_eur_k": 333.0,
+    "profitability_raw_metrics": {},
+    "funding_rounds": [],
+    "total_funding_raised_eur": 2000000.0,
+    "latest_valuation_eur": 50000000.0,
+    "lead_investors": [],
+    "funding_war_chest": null,
+    "employee_count": 150,
+    "employee_cagr_3yr": null,
+    "open_positions": null,
+    "ai_score": 7,
+    "ai_signal_level": null,
+    "ai_key_capabilities": null,
+    "ai_in_production": null,
+    "data_availability": null
+  },
+  {
+    "id": "test-company-2",
+    "name": "Test Company 2",
+    "industry": "Energy Software",
+    "description": "Test company",
+    "website": "https://test2.com",
+    "headquarters": "US",
+    "founded_year": 2016,
+    "tier": "Tier 4",
+    "threat_level": "Low",
+    "ai_maturity": "Moderate",
+    "saas_maturity": 5,
+    "tech_stack": [],
+    "financials": {
+      "revenue": 3.0,
+      "revenue_confidence": "Unknown",
+      "growth_rate": 15.0,
+      "growth_confidence": "Estimated",
+      "employees": 100,
+      "employees_confidence": "Confirmed",
+      "profit_margin": 12.0,
+      "margin_confidence": "Confirmed",
+      "funding_raised": 1500000.0,
+      "funding_confidence": "Estimated",
+      "valuation": 30000000.0,
+      "valuation_confidence": "Estimated"
+    },
+    "geographic_presence": [
+      "US",
+      "Canada"
+    ],
+    "key_customers": [],
+    "parent_company": null,
+    "subsidiaries": [],
+    "acquisitions": [],
+    "last_updated": "2026-03-01T12:54:00.943032Z",
+    "data_source": "SolStein Competitive Intelligence",
+    "notes": null,
+    "source_links": [],
+    "metric_sources": {},
+    "metric_justifications": {},
+    "metric_observations": {},
+    "signal_confidences": {},
+    "enrichment_source_count": 0,
+    "data_quality_tier": "unknown",
+    "ticker": null,
+    "company_number": null,
+    "isin": null,
+    "geography_code": null,
+    "enrichment_sources": [],
+    "enrichment_timestamps": {},
+    "enrichment_errors": [],
+    "enrichment_errors_per_field": {},
+    "enrichment_error_timestamps": {},
+    "enrichment_error_count": 0,
+    "enrichment_error_categories": {},
+    "growth_score": 8.75,
+    "financial_health_score": 6.75,
+    "competitive_position_score": 5.388888888888889,
+    "composite_score": 7.14,
+    "scoring_breakdown": {
+      "growth": {
+        "base_score": 5.0,
+        "components": [
+          {
+            "name": "Revenue Growth",
+            "value": 0.75,
+            "formula": "min(15.0% / 20.0, 4.0)",
+            "reasoning": "Moderate growth rate identified.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Funding Momentum",
+            "value": 2.0,
+            "formula": "funding(1,500,000 EUR) > threshold",
+            "reasoning": "Significant capital injection signals strong market confidence.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Profitability Profile",
+            "value": 1.0,
+            "formula": "margin(12.0%) -> adjustment",
+            "reasoning": "Healthy margins contribute to growth score.",
+            "confidence_weight": 1.0
+          }
+        ],
+        "final_score": 8.75
+      },
+      "financial": {
+        "base_score": 5.0,
+        "components": [
+          {
+            "name": "Revenue Scale",
+            "value": -1.0,
+            "formula": "revenue(3 EUR) -> adjustment",
+            "reasoning": "Scale impacts financial stability scores.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Profitability Health",
+            "value": 1.25,
+            "formula": "margin(12.0%) -> adjustment",
+            "reasoning": "Operating margin is a key indicator of financial health.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Operating Efficiency",
+            "value": -1.0,
+            "formula": "rev_per_emp(0 EUR) -> adjustment",
+            "reasoning": "Resource utilization efficiency.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Funding Cushion",
+            "value": 2.5,
+            "formula": "funding_ratio(500000.00) -> adjustment",
+            "reasoning": "Capital reserves relative to revenue scale.",
+            "confidence_weight": 1.0
+          }
+        ],
+        "final_score": 6.75
+      },
+      "competitive": {
+        "base_score": 5.0,
+        "components": [
+          {
+            "name": "Market Tier",
+            "value": -1.0,
+            "formula": "tier(Tier 4)",
+            "reasoning": "Positioned as a Tier 4 player in the market.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "AI Maturity",
+            "value": 0.5,
+            "formula": "ai_maturity(Moderate)",
+            "reasoning": "Technological advantage: AI maturity is Moderate.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "SaaS Maturity",
+            "value": 0.8888888888888888,
+            "formula": "(5-1)/9 * 2.0",
+            "reasoning": "SaaS transformation index: 5/10.",
+            "confidence_weight": 1.0
+          }
+        ],
+        "final_score": 5.388888888888889
+      }
+    },
+    "classification": "Phoenix",
+    "revenue_timeline": [
+      {
+        "year": 2023,
+        "eur_millions": 3.0,
+        "yoy_growth_pct": 15,
+        "confidence": "high",
+        "source": "Annual report"
+      },
+      {
+        "year": 2022,
+        "eur_millions": 2.6,
+        "yoy_growth_pct": 18,
+        "confidence": "high",
+        "source": "Annual report"
+      },
+      {
+        "year": 2021,
+        "eur_millions": 2.2,
+        "yoy_growth_pct": 22,
+        "confidence": "high",
+        "source": "Annual report"
+      },
+      {
+        "year": 2020,
+        "eur_millions": 1.8,
+        "yoy_growth_pct": 0,
+        "confidence": "high",
+        "source": "Annual report"
+      }
+    ],
+    "revenue_cagr_3yr": 18.0,
+    "revenue_cagr_5yr": 20.0,
+    "profit_margin": 12.0,
+    "ebitda_margin": 15.0,
+    "recurring_revenue_pct": 75.0,
+    "revenue_per_employee_eur_k": 300.0,
+    "profitability_raw_metrics": {},
+    "funding_rounds": [],
+    "total_funding_raised_eur": 1500000.0,
+    "latest_valuation_eur": 30000000.0,
+    "lead_investors": [],
+    "funding_war_chest": null,
+    "employee_count": 100,
+    "employee_cagr_3yr": null,
+    "open_positions": null,
+    "ai_score": 6,
+    "ai_signal_level": null,
+    "ai_key_capabilities": null,
+    "ai_in_production": null,
+    "data_availability": null
+  },
+  {
+    "id": "test-company-3",
+    "name": "Test Company 3",
+    "industry": "Energy Software",
+    "description": "Test company",
+    "website": "https://test3.com",
+    "headquarters": "UK",
+    "founded_year": 2017,
+    "tier": "Tier 4",
+    "threat_level": "Low",
+    "ai_maturity": "Low",
+    "saas_maturity": 5,
+    "tech_stack": [],
+    "financials": {
+      "revenue": 1.5,
+      "revenue_confidence": "Unknown",
+      "growth_rate": -10.0,
+      "growth_confidence": "Estimated",
+      "employees": 80,
+      "employees_confidence": "Confirmed",
+      "profit_margin": 10.0,
+      "margin_confidence": "Confirmed",
+      "funding_raised": 1000000.0,
+      "funding_confidence": "Estimated",
+      "valuation": 20000000.0,
+      "valuation_confidence": "Estimated"
+    },
+    "geographic_presence": [
+      "UK",
+      "Ireland"
+    ],
+    "key_customers": [],
+    "parent_company": null,
+    "subsidiaries": [],
+    "acquisitions": [],
+    "last_updated": "2026-03-01T12:54:00.943066Z",
+    "data_source": "SolStein Competitive Intelligence",
+    "notes": null,
+    "source_links": [],
+    "metric_sources": {},
+    "metric_justifications": {},
+    "metric_observations": {},
+    "signal_confidences": {},
+    "enrichment_source_count": 0,
+    "data_quality_tier": "unknown",
+    "ticker": null,
+    "company_number": null,
+    "isin": null,
+    "geography_code": null,
+    "enrichment_sources": [],
+    "enrichment_timestamps": {},
+    "enrichment_errors": [],
+    "enrichment_errors_per_field": {},
+    "enrichment_error_timestamps": {},
+    "enrichment_error_count": 0,
+    "enrichment_error_categories": {},
+    "growth_score": 6.5,
+    "financial_health_score": 6.75,
+    "competitive_position_score": 4.388888888888889,
+    "composite_score": 5.94,
+    "scoring_breakdown": {
+      "growth": {
+        "base_score": 5.0,
+        "components": [
+          {
+            "name": "Revenue Growth",
+            "value": -0.5,
+            "formula": "min(-10.0% / 20.0, 4.0)",
+            "reasoning": "Moderate growth rate identified.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Funding Momentum",
+            "value": 2.0,
+            "formula": "funding(1,000,000 EUR) > threshold",
+            "reasoning": "Significant capital injection signals strong market confidence.",
+            "confidence_weight": 1.0
+          }
+        ],
+        "final_score": 6.5
+      },
+      "financial": {
+        "base_score": 5.0,
+        "components": [
+          {
+            "name": "Revenue Scale",
+            "value": -1.0,
+            "formula": "revenue(2 EUR) -> adjustment",
+            "reasoning": "Scale impacts financial stability scores.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Profitability Health",
+            "value": 1.25,
+            "formula": "margin(10.0%) -> adjustment",
+            "reasoning": "Operating margin is a key indicator of financial health.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Operating Efficiency",
+            "value": -1.0,
+            "formula": "rev_per_emp(0 EUR) -> adjustment",
+            "reasoning": "Resource utilization efficiency.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "Funding Cushion",
+            "value": 2.5,
+            "formula": "funding_ratio(666666.67) -> adjustment",
+            "reasoning": "Capital reserves relative to revenue scale.",
+            "confidence_weight": 1.0
+          }
+        ],
+        "final_score": 6.75
+      },
+      "competitive": {
+        "base_score": 5.0,
+        "components": [
+          {
+            "name": "Market Tier",
+            "value": -1.0,
+            "formula": "tier(Tier 4)",
+            "reasoning": "Positioned as a Tier 4 player in the market.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "AI Maturity",
+            "value": -0.5,
+            "formula": "ai_maturity(Low)",
+            "reasoning": "Technological advantage: AI maturity is Low.",
+            "confidence_weight": 1.0
+          },
+          {
+            "name": "SaaS Maturity",
+            "value": 0.8888888888888888,
+            "formula": "(5-1)/9 * 2.0",
+            "reasoning": "SaaS transformation index: 5/10.",
+            "confidence_weight": 1.0
+          }
+        ],
+        "final_score": 4.388888888888889
+      }
+    },
+    "classification": "Salt",
+    "revenue_timeline": [
+      {
+        "year": 2023,
+        "eur_millions": 1.5,
+        "yoy_growth_pct": -10,
+        "confidence": "high",
+        "source": "Annual report"
+      },
+      {
+        "year": 2022,
+        "eur_millions": 1.9,
+        "yoy_growth_pct": 9,
+        "confidence": "high",
+        "source": "Annual report"
+      },
+      {
+        "year": 2021,
+        "eur_millions": 1.75,
+        "yoy_growth_pct": 12,
+        "confidence": "high",
+        "source": "Annual report"
+      },
+      {
+        "year": 2020,
+        "eur_millions": 1.56,
+        "yoy_growth_pct": 0,
+        "confidence": "high",
+        "source": "Annual report"
+      }
+    ],
+    "revenue_cagr_3yr": -5.0,
+    "revenue_cagr_5yr": 20.0,
+    "profit_margin": 10.0,
+    "ebitda_margin": 2.0,
+    "recurring_revenue_pct": 65.0,
+    "revenue_per_employee_eur_k": 250.0,
+    "profitability_raw_metrics": {},
+    "funding_rounds": [],
+    "total_funding_raised_eur": 1000000.0,
+    "latest_valuation_eur": 20000000.0,
+    "lead_investors": [],
+    "funding_war_chest": null,
+    "employee_count": 80,
+    "employee_cagr_3yr": null,
+    "open_positions": null,
+    "ai_score": 5,
+    "ai_signal_level": null,
+    "ai_key_capabilities": null,
+    "ai_in_production": null,
+    "data_availability": null
+  }
+]
