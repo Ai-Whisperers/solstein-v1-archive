@@ -134,3 +134,36 @@ async def get_data_quality() -> dict:
         },
         "low_confidence_signals": dq.signals_with_low_confidence,
     }
+
+
+@router.get("/workers", name="worker_health")
+async def worker_health() -> dict:
+    """Celery worker health check (EPIC-025).
+
+    Pings all connected Celery workers and returns their status.
+    Returns degraded (HTTP 200) rather than 503 so it never blocks
+    Kubernetes readiness — worker failures are non-fatal for the API.
+    """
+    import datetime as _dt
+    from ...celery_config import celery_app
+
+    result: dict = {
+        "timestamp": _dt.datetime.utcnow().isoformat(),
+        "workers": [],
+        "status": "degraded",
+    }
+    try:
+        inspect = celery_app.control.inspect(timeout=2.0)
+        ping_result: dict | None = inspect.ping()
+        if ping_result:
+            result["workers"] = [
+                {"name": worker, "status": "online"}
+                for worker in ping_result
+            ]
+            result["status"] = "healthy"
+        else:
+            result["status"] = "no_workers"
+    except Exception as exc:
+        result["error"] = str(exc)
+        result["status"] = "unreachable"
+    return result
