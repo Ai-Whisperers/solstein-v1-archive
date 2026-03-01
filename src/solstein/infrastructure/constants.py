@@ -7,6 +7,8 @@ DATABASE_MAX_OVERFLOW = 10  # Maximum overflow connections
 # Cache Configuration
 CACHE_DEFAULT_TTL_S = 3600  # Default cache TTL (1 hour)
 CACHE_LONG_TTL_S = 86400  # Long cache TTL (24 hours)
+CACHE_SHORT_TTL_S = 300   # Short cache TTL (5 minutes) for volatile data
+CACHE_VERY_LONG_TTL_S = 604800  # Very long cache TTL (7 days) for static data
 CACHE_REDIS_DEFAULT_URL = "redis://localhost:6379/0"  # Default Redis URL
 
 # Refresh Configuration
