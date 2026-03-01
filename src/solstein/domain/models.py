@@ -145,7 +145,6 @@ class Company(BaseModel):
     enrichment_source_count: int = 0
     data_quality_tier: str = "unknown"
     enrichment_quality_metrics: dict[str, Any] = Field(default_factory=dict)  # EPIC-004: Preserve quality metrics
-    data_quality_tier: str = "unknown"
 
 
     # External Identifiers for Connector Lookups
@@ -184,6 +183,92 @@ class Company(BaseModel):
     revenue_timeline: list[dict[str, Any]] = Field(default_factory=list)
     revenue_cagr_3yr: float | None = None
     revenue_cagr_5yr: float | None = None
+
+    # EPIC-010: Standardized field access methods
+    def get_field(self, field_name: str, default: Any = None) -> Any:
+        """Safely get any field by name.
+
+        Args:
+            field_name: Name of the field to get
+            default: Default value if field doesn't exist
+
+        Returns:
+            Field value or default
+        """
+        try:
+            return getattr(self, field_name, default)
+        except AttributeError:
+            return default
+
+    def get_financial_field(self, field_name: str, default: Any = None) -> Any:
+        """Safely get a field from financials.
+
+        Args:
+            field_name: Name of the financial field
+            default: Default value if field doesn't exist
+
+        Returns:
+            Financial field value or default
+        """
+        if self.financials is None:
+            return default
+        return getattr(self.financials, field_name, default)
+
+    def set_field(self, field_name: str, value: Any) -> bool:
+        """Safely set a field value.
+
+        Args:
+            field_name: Name of the field to set
+            value: Value to set
+
+        Returns:
+            True if successful, False if field doesn't exist
+        """
+        try:
+            if hasattr(self, field_name):
+                setattr(self, field_name, value)
+                return True
+            return False
+        except (AttributeError, ValueError):
+            return False
+
+    def has_field(self, field_name: str) -> bool:
+        """Check if a field exists and has a non-None value.
+
+        Args:
+            field_name: Name of the field to check
+
+        Returns:
+            True if field exists and is not None
+        """
+        try:
+            value = getattr(self, field_name, None)
+            return value is not None
+        except AttributeError:
+            return False
+
+    def get_data_completeness(self) -> float:
+        """Calculate data completeness percentage.
+
+        Returns:
+            Percentage of key fields that have values (0-100)
+        """
+        key_fields = [
+            'name', 'industry', 'description', 'website', 'headquarters',
+            'founded_year', 'employees', 'revenue', 'funding_raised'
+        ]
+
+        filled = 0
+        for field in key_fields:
+            if field in ['employees', 'revenue', 'funding_raised']:
+                # These are in financials
+                if self.financials and getattr(self.financials, field, None) is not None:
+                    filled += 1
+            else:
+                if getattr(self, field, None) is not None:
+                    filled += 1
+
+        return (filled / len(key_fields)) * 100 if key_fields else 0.0
 
     profit_margin: float | None = None
     ebitda_margin: float | None = None
