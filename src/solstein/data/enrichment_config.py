@@ -11,12 +11,7 @@ Centralized configuration for the enrichment system with:
 """
 
 import os
-import logging
-from dataclasses import dataclass, field
-from typing import Optional, Set
-from datetime import datetime, timezone
-
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 class ConfigError(Exception):
@@ -151,7 +146,7 @@ NEWS_API_TIMEOUT=30
 MAX_RETRIES=3
 ENRICHMENT_BATCH_SIZE=10
 """
-        print(guide)
+        logger.info("Configuration guide", guide=guide)
 
 
 @dataclass
