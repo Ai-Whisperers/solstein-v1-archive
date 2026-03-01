@@ -200,6 +200,13 @@ class Settings(BaseSettings):
     # External APIs (optional)
     openai_api_key: str | None = Field(default=None)
     perplexity_api_key: str | None = Field(default=None)
+    github_token: str | None = Field(default=None)
+    companies_house_api_key: str | None = Field(default=None)
+    google_api_key: str | None = Field(default=None)
+    sec_user_agent: str | None = Field(default=None)
+    github_token: str | None = Field(default=None)
+    companies_house_api_key: str | None = Field(default=None)
+    google_api_key: str | None = Field(default=None)
 
     # Data source APIs
     exa_api_key: str | None = Field(default=None)
@@ -285,19 +292,16 @@ class Settings(BaseSettings):
             COMPANIES_HOUSE_API_KEY - For Companies House data extraction
             GOOGLE_API_KEY - For web search data extraction
         """
-        github_token = os.getenv("GITHUB_TOKEN")
-        if github_token is None or github_token == "":
+        if self.github_token is None or self.github_token == "":
             raise ConfigurationError(
                 "GITHUB_TOKEN environment variable is required. "
                 "Get a token from: https://github.com/settings/tokens and set it before starting."
             )
 
-        companies_house_key = os.getenv("COMPANIES_HOUSE_API_KEY")
-        if not companies_house_key:
+        if not self.companies_house_api_key:
             logger.warning("COMPANIES_HOUSE_API_KEY not configured. Companies House data gathering will be disabled.")
 
-        google_api_key = os.getenv("GOOGLE_API_KEY")
-        if not google_api_key:
+        if not self.google_api_key:
             logger.warning("GOOGLE_API_KEY not configured. Web search data gathering will be disabled.")
 
         logger.info("Configuration validation passed")

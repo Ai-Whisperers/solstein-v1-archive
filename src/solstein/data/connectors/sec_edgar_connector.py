@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import os
+import time
 import time
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -51,9 +51,9 @@ class SECEdgarConnector:
     DEFAULT_RATE_LIMIT_SLEEP_S: float = 15.0
 
     def __init__(self, user_agent: str | None = None):
-        self.user_agent: str = user_agent or os.getenv(
-            "SEC_USER_AGENT", "Solstein/0.1 (contact: contact@ai-whisperers.com)"
-        )
+        from solstein.config import get_settings
+        settings = get_settings()
+        self.user_agent: str = user_agent or settings.sec_user_agent or "Solstein/0.1 (contact: contact@ai-whisperers.com)"
 
     def _sleep(self, seconds: float) -> None:
         time.sleep(seconds)

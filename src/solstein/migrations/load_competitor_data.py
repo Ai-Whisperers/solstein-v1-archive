@@ -142,16 +142,11 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
 
 async def main():
     """Main entry point for the migration script."""
-    import os
+    from solstein.config import get_settings
 
     # Get database URL from environment or use default
-    db_url = os.getenv(
-        "DATABASE_URL_TEST",
-        os.getenv(
-            "DATABASE_URL",
-            "postgresql+asyncpg://solstein:solstein@localhost:5432/solstein",
-        ),
-    )
+    settings = get_settings()
+    db_url = settings.get_database_url(test=True) or "postgresql+asyncpg://solstein:solstein@localhost:5432/solstein"
 
     # Get JSON path
     json_path = Path(__file__).parent.parent.parent.parent / "data" / "input" / "competitor_data.json"

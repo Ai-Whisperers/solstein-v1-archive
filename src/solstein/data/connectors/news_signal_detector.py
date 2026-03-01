@@ -13,7 +13,7 @@ Features:
 - Confidence scoring (0.70-0.75 for news signals)
 """
 
-import os
+
 import re
 from datetime import datetime, timedelta
 from typing import Any
@@ -73,7 +73,9 @@ class NewsSignalDetector:
         Raises:
             ValueError: If no API key provided and NEWSAPI_KEY not in environment.
         """
-        self.api_key = api_key or os.getenv("NEWSAPI_KEY")
+        from solstein.config import get_settings
+        settings = get_settings()
+        self.api_key = api_key or settings.news_api_key
         if not self.api_key:
             raise ValueError("NewsAPI key required. Set NEWSAPI_KEY env var or pass api_key parameter.")
 

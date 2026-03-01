@@ -7,7 +7,7 @@ AI/ML signals, and code quality indicators.
 import asyncio
 import base64
 import json
-import os
+
 import re
 from collections.abc import Mapping
 from datetime import datetime, timedelta, timezone
@@ -29,7 +29,9 @@ class GitHubAgent(BaseDataGatheringAgent):
             github_token: GitHub API token (optional, increases rate limit)
         """
         super().__init__("GitHubAgent", DataSourceType.GITHUB)
-        self.github_token = github_token or os.getenv("GITHUB_TOKEN")
+        from solstein.config import get_settings
+        settings = get_settings()
+        self.github_token = github_token or settings.github_token
         self.api_base = "https://api.github.com"
         self.headers = {
             "Accept": "application/vnd.github.v3+json",

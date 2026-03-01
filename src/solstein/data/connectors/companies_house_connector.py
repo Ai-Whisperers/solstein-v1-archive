@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import os
+
 
 import httpx
 
@@ -24,7 +24,9 @@ class CompaniesHouseConnector:
         api_base: str | None = None,
         user_agent: str | None = None,
     ):
-        self.api_key: str | None = api_key or os.getenv("COMPANIES_HOUSE_API_KEY")
+        from solstein.config import get_settings
+        settings = get_settings()
+        self.api_key: str | None = api_key or settings.companies_house_api_key
         self.api_base: str = api_base or self.DEFAULT_API_BASE
         self.user_agent: str = user_agent or "Solstein/0.1 (contact: contact@ai-whisperers.com)"
 

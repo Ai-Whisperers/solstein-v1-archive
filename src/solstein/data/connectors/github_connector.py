@@ -3,7 +3,7 @@
 Provides a simple interface to GitHub data retrieval for refresh connectors.
 """
 
-import os
+
 from typing import Any
 
 import requests
@@ -25,7 +25,9 @@ class GitHubConnector:
         Args:
             github_token: GitHub API token (optional, increases rate limit)
         """
-        self.github_token = github_token or os.getenv("GITHUB_TOKEN")
+        from solstein.config import get_settings
+        settings = get_settings()
+        self.github_token = github_token or settings.github_token
         self.api_base = "https://api.github.com"
         self.headers = {
             "Accept": "application/vnd.github.v3+json",
