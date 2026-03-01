@@ -86,21 +86,33 @@ class HealthMonitor:
         self.error_history: list[dict[str, Any]] = []
 
     async def check_database(self) -> HealthCheck:
-        """Check database connectivity.
+        """Check database connectivity with real probe.
 
         Returns:
             HealthCheck result
         """
         start = datetime.now(timezone.utc)
         try:
-            await asyncio.sleep(0.01)
+            from ..infrastructure.database import DatabaseManager
+            from ..config import Settings
+            from sqlalchemy import text
+
+            settings = Settings.load()
+            db_manager = DatabaseManager(settings)
+            db_manager.init_async()
+
+            if db_manager.engine is None:
+                raise RuntimeError("Database engine not initialized")
+
+            async with db_manager.engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
 
             check = HealthCheck(
                 name="database",
                 status=HealthStatus.HEALTHY,
                 message="Database connection successful",
                 duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                details={"connection": "postgresql", "pool_size": 20},
+                details={"connection": "postgresql", "pool_size": settings.database.pool_size},
             )
             self.checks["database"] = check
             return check
@@ -117,15 +129,14 @@ class HealthMonitor:
             return check
 
     async def check_api_responsiveness(self) -> HealthCheck:
-        """Check API responsiveness.
+        """Check API responsiveness (always healthy if process running).
 
         Returns:
             HealthCheck result
         """
         start = datetime.now(timezone.utc)
         try:
-            await asyncio.sleep(0.01)
-
+            # API responsiveness is implicit - if this code runs, API is responsive
             check = HealthCheck(
                 name="api",
                 status=HealthStatus.HEALTHY,
@@ -144,6 +155,54 @@ class HealthMonitor:
                 details={"error": str(e)},
             )
             self.checks["api"] = check
+            return check
+
+    async def check_redis(self) -> HealthCheck:
+        """Check Redis connectivity with real probe.
+
+        Returns:
+            HealthCheck result
+        """
+        start = datetime.now(timezone.utc)
+        try:
+            from ..config import Settings
+            import redis.asyncio as redis
+
+            settings = Settings.load()
+            redis_client = redis.from_url(settings.redis.url, decode_responses=True)
+
+            # Attempt PING to verify connectivity
+            pong = await redis_client.ping()
+            await redis_client.close()
+
+            if pong:
+                check = HealthCheck(
+                    name="redis",
+                    status=HealthStatus.HEALTHY,
+                    message="Redis connection successful",
+                    duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
+                    details={"connection": "redis", "response": str(pong)},
+                )
+            else:
+                check = HealthCheck(
+                    name="redis",
+                    status=HealthStatus.DEGRADED,
+                    message="Redis PING returned unexpected response",
+                    duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
+                    details={"response": str(pong)},
+                )
+            self.checks["redis"] = check
+            return check
+        except Exception as e:
+            check = HealthCheck(
+                name="redis",
+                status=HealthStatus.DEGRADED,
+                message=f"Redis connection failed (optional service): {str(e)}",
+                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
+                details={"error": str(e), "optional": True},
+            )
+            self.checks["redis"] = check
+            logger.warning("Redis health check failed (optional service)", error=str(e))
             return check
 
     async def check_configuration(self) -> HealthCheck:
@@ -275,6 +334,7 @@ class HealthMonitor:
         await asyncio.gather(
             self.check_database(),
             self.check_api_responsiveness(),
+            self.check_redis(),
             self.check_configuration(),
             self.check_llm_services(),
         )
