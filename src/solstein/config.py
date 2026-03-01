@@ -109,6 +109,8 @@ class SecurityConfig(BaseModel):
     secret_key: str = Field(default="change-me-in-production")
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30, ge=1)
+    admin_email: str | None = Field(default=None, description="Admin login email (set ADMIN_EMAIL env var)")
+    admin_password_hash: str | None = Field(default=None, description="SHA-256 hex hash of admin password (set ADMIN_PASSWORD_HASH env var)")
 
     def __init__(self, **data: Any) -> None:
         """Initialize and validate security config."""
