@@ -55,11 +55,12 @@ def convert_json_to_company(data: dict) -> Company:
     ai_maturity = ai_maturity_map.get(ai_maturity_str, AIMaturity.NONE)
     
     # Extract tier (use classification to infer)
+    # FIXED: Phoenix -> Tier 1 (best), Salt -> Tier 2, Lead -> Tier 4 (worst)
     classification = data.get("classification", "Salt")
     tier_map = {
-        "Phoenix": CompanyTier.TIER_4,
-        "Salt": CompanyTier.TIER_3,
-        "Lead": CompanyTier.TIER_4
+        "Phoenix": CompanyTier.TIER_1,  # Best companies get best tier
+        "Salt": CompanyTier.TIER_2,     # Moderate companies
+        "Lead": CompanyTier.TIER_4      # Struggling companies
     }
     tier = tier_map.get(classification, CompanyTier.TIER_3)
     

@@ -22,21 +22,18 @@ from src.solstein.domain.models import Company
 def classify_company_balanced(composite_score: float | None) -> str:
     """Classify company based on balanced score boundaries.
 
+    DEPRECATED: Use solstein.analytics.scoring.classify_company() instead.
+    This function is kept for backward compatibility.
+
     Args:
         composite_score: Composite score (0-10)
 
     Returns:
         Classification: 'Phoenix', 'Salt', or 'Lead'
     """
-    if composite_score is None:
-        return "Salt"  # Default to Salt for unknown scores
-
-    if composite_score >= 7.0:
-        return "Phoenix"
-    elif composite_score >= 5.5:
-        return "Salt"
-    else:
-        return "Lead"
+    # Delegate to the canonical classification function
+    from .scoring import classify_company
+    return classify_company(composite_score)
 
 
 def calculate_classification_confidence(
@@ -83,7 +80,8 @@ def get_classification_with_confidence(
         Tuple of (classification, confidence)
     """
     # Get classification
-    classification = classify_company_balanced(company.composite_score)
+    from .scoring import classify_company
+    classification = classify_company(company.composite_score)
 
     # Estimate data completeness from data_quality_tier
     completeness_map = {
@@ -144,10 +142,11 @@ def get_classification_distribution(companies: list[Company]) -> dict[str, int]:
     Returns:
         Dict with counts: {'Phoenix': N, 'Salt': N, 'Lead': N}
     """
+    from .scoring import classify_company
     distribution = {"Phoenix": 0, "Salt": 0, "Lead": 0}
 
     for company in companies:
-        classification = classify_company_balanced(company.composite_score)
+        classification = classify_company(company.composite_score)
         distribution[classification] += 1
 
     return distribution
