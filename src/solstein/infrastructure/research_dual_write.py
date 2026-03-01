@@ -500,36 +500,44 @@ def persist_research_run(
         artifacts=artifacts,
     )
 
-    outbox = session.execute(select(OutboxRecord).where(OutboxRecord.event_key == event_key)).scalar_one_or_none()
-    if outbox is None:
-        outbox = OutboxRecord(
-            event_key=event_key,
-            event_type=event_type,
-            status="pending",
-            payload=payload,
-            attempt_count=0,
-            available_at=now,
-            created_at=now,
-            updated_at=now,
-            last_error=None,
-        )
-        session.add(outbox)
-    else:
-        outbox.status = "pending"
-        outbox.payload = payload
-        outbox.updated_at = now
+    try:
+        outbox = session.execute(select(OutboxRecord).where(OutboxRecord.event_key == event_key)).scalar_one_or_none()
+        if outbox is None:
+            outbox = OutboxRecord(
+                event_key=event_key,
+                event_type=event_type,
+                status="pending",
+                payload=payload,
+                attempt_count=0,
+                available_at=now,
+                created_at=now,
+                updated_at=now,
+                last_error=None,
+            )
+            session.add(outbox)
+        else:
+            outbox.status = "pending"
+            outbox.payload = payload
+            outbox.updated_at = now
+            outbox.last_error = None
+            outbox.available_at = now
+
+        session.commit()
+
+        in_progress_time = datetime.now(timezone.utc)
+        outbox = session.execute(select(OutboxRecord).where(OutboxRecord.event_key == event_key)).scalar_one()
+        outbox.status = "in_progress"
+        outbox.attempt_count = (outbox.attempt_count or 0) + 1
+        outbox.updated_at = in_progress_time
         outbox.last_error = None
-        outbox.available_at = now
-
-    session.commit()
-
-    in_progress_time = datetime.now(timezone.utc)
-    outbox = session.execute(select(OutboxRecord).where(OutboxRecord.event_key == event_key)).scalar_one()
-    outbox.status = "in_progress"
-    outbox.attempt_count = (outbox.attempt_count or 0) + 1
-    outbox.updated_at = in_progress_time
-    outbox.last_error = None
-    session.commit()
+        session.commit()
+    except Exception as exc:
+        session.rollback()
+        logger.error(
+            "Failed to set up outbox record for research run",
+            extra={"run_id": run_id, "event_key": event_key, "error": str(exc)},
+        )
+        raise
 
     try:
         run_pk = persist_research_run_records(
