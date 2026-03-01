@@ -766,3 +766,38 @@ class EnrichmentJobRecord(Base):
             "duration_ms": self.duration_ms,
             "user_id": self.user_id,
         }
+
+
+
+class TenantRecord(Base):
+    """ORM model for API tenants.
+
+    Each tenant has a unique API key (stored as SHA-256 hash) and owns
+    its own set of enrichment jobs and analysis results.
+    """
+
+    __tablename__ = "tenants"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False, unique=True)
+    api_key_hash = Column(String(64), nullable=False, unique=True)  # SHA-256 hex
+    is_active = Column(Boolean, nullable=False, default=True)
+    plan = Column(String(64), nullable=False, default="standard")  # free|standard|enterprise
+    rate_limit_per_min = Column(Integer, nullable=False, default=60)
+    created_at = Column(DateTime, nullable=False, default=lambda: __import__('datetime').datetime.now(__import__('datetime').timezone.utc))
+    updated_at = Column(DateTime, nullable=False, default=lambda: __import__('datetime').datetime.now(__import__('datetime').timezone.utc), onupdate=lambda: __import__('datetime').datetime.now(__import__('datetime').timezone.utc))
+
+    __table_args__ = (
+        Index("ix_tenants_api_key_hash", "api_key_hash"),
+        Index("ix_tenants_is_active", "is_active"),
+    )
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "id": str(self.id),
+            "name": self.name,
+            "plan": self.plan,
+            "is_active": self.is_active,
+            "rate_limit_per_min": self.rate_limit_per_min,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }

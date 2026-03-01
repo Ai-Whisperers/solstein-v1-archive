@@ -30,6 +30,8 @@ from ..core.production_hardening import (
 )
 from .exceptions import APIError, setup_exception_handlers
 from .middleware import setup_logging_middleware, setup_rate_limiting, setup_security_middleware
+from .middleware.tenant import TenantMiddleware
+from ..infrastructure.cache_warming import warm_cache
 from .routers import (
     async_jobs,
     auth,
@@ -91,6 +93,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info(f"Feature flags available: {len(feature_flags.flags)}")
     logger.info("Response cache initialized with TTL support")
 
+    # EPIC-018: Warm cache in background (non-blocking)
+    try:
+        import asyncio as _asyncio
+        from ..infrastructure.cache import CacheManager as _CacheManager
+        _cache = _CacheManager()
+        _asyncio.create_task(warm_cache(_cache))
+        logger.info("Cache warming task scheduled on startup")
+    except Exception as _exc:
+        logger.warning("Cache warming could not start", error=str(_exc))
+
     yield
 
     logger.info("Executing graceful shutdown sequence")
@@ -130,6 +142,9 @@ setup_exception_handlers(app)
 
 # Setup Security Middleware
 setup_security_middleware(app)
+
+# Multi-tenancy: X-API-Key validation (only when require_api_key=True)
+app.add_middleware(TenantMiddleware)
 
 # Global dependencies configured in lifespan
 
