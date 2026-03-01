@@ -249,3 +249,163 @@ def report_classification_distribution(companies: list[Company]) -> str:
     lines.append("=" * 50)
 
     return "\n".join(lines)
+
+
+def display_confidence_report(company: Company) -> str:
+    """Generate a detailed confidence report for a single company.
+    
+    EPIC-007 Story 7.4: Display confidence - Shows detailed confidence
+    information including data completeness, score certainty, and
+    classification confidence.
+    
+    Args:
+        company: Company object to analyze
+        
+    Returns:
+        Formatted confidence report string
+    """
+    classification, confidence = get_classification_with_confidence(company)
+    
+    # Get data completeness
+    completeness_map = {
+        "COMPLETE": 90.0,
+        "PARTIAL": 65.0,
+        "MINIMAL": 35.0,
+        "INSUFFICIENT": 15.0,
+        "unknown": 50.0,
+    }
+    completeness = completeness_map.get(company.data_quality_tier, 50.0)
+    
+    # Determine confidence level
+    if confidence >= 0.8:
+        confidence_level = "High"
+        confidence_emoji = "✓"
+    elif confidence >= 0.5:
+        confidence_level = "Medium"
+        confidence_emoji = "~"
+    else:
+        confidence_level = "Low"
+        confidence_emoji = "⚠"
+    
+    # Check if near boundary
+    score = company.composite_score or 0
+    boundary_warning = ""
+    if 4.4 <= score <= 4.6:
+        boundary_warning = "\n⚠ Warning: Score near Salt/Lead boundary (less certain)"
+    elif 7.4 <= score <= 7.6:
+        boundary_warning = "\n⚠ Warning: Score near Phoenix boundary (less certain)"
+    
+    lines = [
+        "=" * 60,
+        f"CONFIDENCE REPORT: {company.name}",
+        "=" * 60,
+        "",
+        f"Classification: {classification}",
+        f"Confidence: {confidence_emoji} {confidence_level} ({confidence:.0%})",
+        "",
+        "Data Quality:",
+        f"  Tier: {company.data_quality_tier}",
+        f"  Completeness: {completeness:.0f}%",
+        f"  Enrichment Sources: {company.enrichment_source_count}",
+        "",
+        "Score Information:",
+        f"  Composite Score: {score:.2f}",
+        f"  Growth Score: {getattr(company, 'growth_score', 'N/A')}",
+        f"  Financial Health: {getattr(company, 'financial_health_score', 'N/A')}",
+        f"  Competitive Position: {getattr(company, 'competitive_position_score', 'N/A')}",
+    ]
+    
+    if boundary_warning:
+        lines.append(boundary_warning)
+    
+    lines.extend([
+        "",
+        "Signal Confidences:",
+    ])
+    
+    # Add signal confidences if available
+    if company.signal_confidences:
+        for signal, conf_value in company.signal_confidences.items():
+            conf_pct = conf_value * 100
+            conf_bar = "█" * int(conf_pct / 10) + "░" * (10 - int(conf_pct / 10))
+            lines.append(f"  {signal:20s}: {conf_bar} {conf_pct:.0f}%")
+    else:
+        lines.append("  No signal confidence data available")
+    
+    lines.extend([
+        "",
+        "=" * 60,
+    ])
+    
+    return "\n".join(lines)
+
+
+def display_batch_confidence_report(companies: list[Company]) -> str:
+    """Generate a confidence summary report for multiple companies.
+    
+    Args:
+        companies: List of Company objects
+        
+    Returns:
+        Formatted batch confidence report string
+    """
+    if not companies:
+        return "No companies to analyze."
+    
+    # Calculate statistics
+    total = len(companies)
+    high_conf = 0
+    medium_conf = 0
+    low_conf = 0
+    
+    for company in companies:
+        _, confidence = get_classification_with_confidence(company)
+        if confidence >= 0.8:
+            high_conf += 1
+        elif confidence >= 0.5:
+            medium_conf += 1
+        else:
+            low_conf += 1
+    
+    lines = [
+        "=" * 60,
+        "BATCH CONFIDENCE REPORT",
+        "=" * 60,
+        "",
+        f"Total Companies: {total}",
+        "",
+        "Confidence Distribution:",
+        f"  High Confidence (≥80%):   {high_conf:3d} ({high_conf/total*100:.1f}%)",
+        f"  Medium Confidence (50-80%): {medium_conf:3d} ({medium_conf/total*100:.1f}%)",
+        f"  Low Confidence (<50%):    {low_conf:3d} ({low_conf/total*100:.1f}%)",
+        "",
+        "Data Quality Distribution:",
+    ]
+    
+    # Data quality distribution
+    quality_counts = {}
+    for company in companies:
+        tier = company.data_quality_tier or "unknown"
+        quality_counts[tier] = quality_counts.get(tier, 0) + 1
+    
+    for tier, count in sorted(quality_counts.items()):
+        lines.append(f"  {tier:15s}: {count:3d} ({count/total*100:.1f}%)")
+    
+    lines.extend([
+        "",
+        "Recommendations:",
+    ])
+    
+    if low_conf / total > 0.3:
+        lines.append("  ⚠ High proportion of low-confidence classifications.")
+        lines.append("    Consider enriching data sources for better accuracy.")
+    elif high_conf / total > 0.7:
+        lines.append("  ✓ High confidence in most classifications.")
+        lines.append("    Data quality is good for decision-making.")
+    else:
+        lines.append("  ~ Mixed confidence levels.")
+        lines.append("    Review medium-confidence companies for additional data.")
+    
+    lines.append("=" * 60)
+    
+    return "\n".join(lines)
