@@ -223,7 +223,7 @@ class Settings(BaseSettings):
 
     llm_provider: str = Field(
         default="auto",
-        description="LLM provider selection: auto|ollama|openai|groq|fireworks|mistral|deepinfra|gemini|nvidia|cerebras|kimi|none",
+        description="LLM provider selection: auto|ollama|openai|groq|fireworks|mistral|deepinfra|gemini|nvidia|cerebras|kimi|anthropic|siliconflow|alibaba|none",
     )
     ollama_url: str = Field(default="http://localhost:11434")
     ollama_model: str = Field(default="llama3.2:latest")
@@ -236,6 +236,12 @@ class Settings(BaseSettings):
     nvidia_model: str = Field(default="meta/llama-3.3-70b-instruct")
     cerebras_model: str = Field(default="llama-3.3-70b")
     kimi_model: str = Field(default="kimi-k2-32k")
+    anthropic_api_key: str | None = Field(default=None)
+    anthropic_model: str = Field(default="claude-3-5-haiku-20241022")
+    siliconflow_api_key: str | None = Field(default=None)
+    siliconflow_model: str = Field(default="Qwen/Qwen2.5-72B-Instruct")
+    alibaba_api_key: str | None = Field(default=None)
+    alibaba_model: str = Field(default="qwen-plus")
 
 
     model_config = SettingsConfigDict(

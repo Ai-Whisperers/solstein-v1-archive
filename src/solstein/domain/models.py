@@ -27,6 +27,7 @@ class ConfidenceLevel(StrEnum):
     CONFIRMED = "Confirmed"
     ESTIMATED = "Estimated"
     UNKNOWN = "Unknown"
+    SYNTHETIC = "Synthetic"
 
 
 class AIMaturity(StrEnum):
@@ -144,6 +145,7 @@ class Company(BaseModel):
     signal_confidences: dict[str, float] = Field(default_factory=dict)
     enrichment_source_count: int = 0
     data_quality_tier: str = "unknown"
+    data_source_type: str = "unknown"  # 'synthetic', 'real', 'mixed', 'unknown'
     enrichment_quality_metrics: dict[str, Any] = Field(default_factory=dict)  # EPIC-004: Preserve quality metrics
 
 

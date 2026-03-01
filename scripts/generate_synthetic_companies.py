@@ -159,8 +159,18 @@ class SyntheticCompanyGenerator:
         min_rev, max_rev = revenue_ranges.get(tier, (1, 10))
         base_revenue = round(random.uniform(min_rev, max_rev), 1)
 
-        # Growth rate (higher for smaller companies)
-        if tier == "Tier 4":
+        # Determine company archetype (affects growth, margin, funding)
+        archetype = random.choices(
+            ["struggling", "declining_legacy", "healthy_growth"],
+            weights=[15, 10, 75],  # 15% struggling, 10% declining, 75% healthy
+        )[0]
+
+        # Growth rate based on archetype and tier
+        if archetype == "struggling":
+            growth_rate = random.uniform(-25, -5)  # Negative growth
+        elif archetype == "declining_legacy":
+            growth_rate = random.uniform(-10, 5)  # Near-zero to slightly negative
+        elif tier == "Tier 4":
             growth_rate = random.uniform(20, 80)  # High growth startups
         elif tier == "Tier 3":
             growth_rate = random.uniform(10, 40)
@@ -174,6 +184,7 @@ class SyntheticCompanyGenerator:
 
         # Generate company name first and reuse it
         company_name = self.generate_company_name()
+        industry = random.choice(self.INDUSTRIES)  # Extract before dict for use in description
         
         company = {
             "company_name": company_name,
@@ -184,7 +195,7 @@ class SyntheticCompanyGenerator:
                 "cagr_5yr_pct": round(growth_rate * random.uniform(0.8, 1.2), 1),
             },
             "profitability": {
-                "ebitda_margin_pct": round(random.uniform(5, 35), 1),
+                "ebitda_margin_pct": round(random.uniform(-20, 3) if archetype == "struggling" else random.uniform(2, 12) if archetype == "declining_legacy" else random.uniform(5, 35), 1),
                 "recurring_revenue_pct": round(random.uniform(40, 95), 1),
                 "revenue_per_employee_eur_k": round(base_revenue * 1000 / max(employees, 1), 1),
                 "confidence": "medium",
@@ -193,29 +204,30 @@ class SyntheticCompanyGenerator:
             "employees": employees,
             "founded_year": random.randint(2000, 2020),
             "country": random.choice(self.COUNTRIES),
-            "industry": random.choice(self.INDUSTRIES),
+            "industry": industry,
             "website": f"https://{company_name.lower().replace(' ', '').replace('-', '')}.com",
             "description": self.generate_description(industry),  # EPIC-006: Use improved description generator",
             "ai_maturity_score": round(random.uniform(3, 9), 1),
             "ai_maturity": random.choice(["Strong", "Moderate", "Emerging", "Low"]),
             "ai_score": round(random.uniform(3, 9), 1),
             "growth_rate": round(growth_rate / 100, 2),
-            "profit_margin": round(random.uniform(0.05, 0.25), 2),
-            "funding_raised": round(base_revenue * random.uniform(0.2, 2) * 1000000, 0),
+            "profit_margin": round(random.uniform(-0.15, 0.01) if archetype == "struggling" else random.uniform(0.01, 0.08) if archetype == "declining_legacy" else random.uniform(0.05, 0.25), 2),
+            "funding_raised": round(0.0 if archetype == "struggling" else random.uniform(0, 500000) if archetype == "declining_legacy" else base_revenue * random.uniform(0.2, 2) * 1000000, 0),
             "valuation": round(base_revenue * random.uniform(3, 15) * 1000000, 0),
             "geographic_presence": random.sample(self.COUNTRIES, random.randint(1, 5)),
             # FIXED: growth_rate is stored as decimal (0.25 = 25%), so compare against 0.30 not 30
-            "classification": "Phoenix" if (growth_rate / 100) > 0.30 else "Salt" if (growth_rate / 100) > 0.10 else "Lead",
+            "classification": "Lead" if archetype == "struggling" else "Salt" if archetype == "declining_legacy" else ("Phoenix" if (growth_rate / 100) > 0.30 else "Salt" if (growth_rate / 100) > 0.10 else "Lead"),
             "classification_confidence": round(random.uniform(0.7, 0.95), 2),
             "data_quality_score": round(random.uniform(0.6, 0.9), 2),
-            "enrichment_source_count": random.randint(2, 5),
+            "enrichment_source_count": 0,  # Synthetic data, no real enrichment sources
             "tier": tier,
             "confidence_levels": {
-                "revenue": random.choice(["high", "medium"]),
-                "employees": "confirmed",
-                "growth": random.choice(["high", "medium"]),
-                "funding": random.choice(["high", "medium"]),
+                "revenue": "synthetic",
+                "employees": "synthetic",
+                "growth": "synthetic",
+                "funding": "synthetic",
             },
+            "data_source_type": "synthetic",
         }
 
         return company

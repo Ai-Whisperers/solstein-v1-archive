@@ -8,6 +8,7 @@ import json
 import re
 from pathlib import Path
 from datetime import datetime, timezone
+import time
 
 # Setup paths
 import sys
@@ -16,6 +17,7 @@ sys.path.insert(0, '/home/ai-whisperers/solstein/src')
 from solstein.domain.models import Company, FinancialMetric, CompanyTier, AIMaturity, ThreatLevel, ConfidenceLevel
 from solstein.analytics.scoring import GrowthScorer
 from solstein.exporters.excel import ExcelExporter
+from solstein.analytics.constants import PHOENIX_SCORE_THRESHOLD, SALT_SCORE_THRESHOLD, LEAD_SCORE_THRESHOLD
 
 
 class CompanyIDGenerator:
@@ -193,10 +195,8 @@ def convert_json_to_company(data: dict) -> Company:
         enrichment_source_count=enrichment_source_count,  # NEW: Preserve enrichment count
         enrichment_quality_metrics=data.get("enrichment_quality_metrics", {}),  # NEW: Preserve quality metrics
         data_source="Solstein Competitive Intelligence",
-        last_updated=datetime.now(timezone.utc)
-    )
-        data_source="Solstein Competitive Intelligence",
-        last_updated=datetime.now(timezone.utc)
+        last_updated=datetime.now(timezone.utc),
+        data_source_type=data.get("data_source_type", "unknown"),  # EPIC-003/010: track data source
     )
 
 
@@ -204,6 +204,10 @@ def main():
     print("=" * 60)
     print("ENEVE 199-Company Workflow")
     print("=" * 60)
+    pipeline_start = time.time()
+    print(f"\n{'='*60}")
+    print(f"[STAGE 1/4 - LOAD] {datetime.now().strftime('%H:%M:%S')} Loading and converting company data...")
+    print(f"{'='*60}")
     
     # Load 199 companies
     input_path = Path("data/input/competitor_data_199.json")
@@ -234,6 +238,9 @@ def main():
     print(f"\n✅ Successfully converted {len(companies)} companies")
     
     # Score companies
+    print(f"\n{'='*60}")
+    print(f"[STAGE 2/4 - SCORE] {datetime.now().strftime('%H:%M:%S')} Scoring {len(companies)} companies...")
+    print(f"{'='*60}")
     print("\n🎯 Scoring companies...")
     scorer = GrowthScorer()
     scored = []
@@ -256,6 +263,9 @@ def main():
         print(f"  {company.name}: composite={company.composite_score:.2f}, classification={company.classification}")
     
     # Save scored output
+    print(f"\n{'='*60}")
+    print(f"[STAGE 3/4 - EXPORT] {datetime.now().strftime('%H:%M:%S')} Saving outputs and creating Excel dashboard...")
+    print(f"{'='*60}")
     output_dir = Path("data/output/exports")
     output_dir.mkdir(parents=True, exist_ok=True)
     
@@ -275,6 +285,9 @@ def main():
         traceback.print_exc()
     
     # Summary statistics
+    print(f"\n{'='*60}")
+    print(f"[STAGE 4/4 - SUMMARY] {datetime.now().strftime('%H:%M:%S')} Pipeline completed in {time.time()-pipeline_start:.1f}s")
+    print(f"{'='*60}")
     print("\n" + "=" * 60)
     print("SUMMARY")
     print("=" * 60)
@@ -287,9 +300,9 @@ def main():
     
     print(f"Total Companies: {len(scored)}")
     print(f"Average Composite Score: {avg_score:.2f}")
-    print(f"Phoenix (≥7.0): {phoenix_count}")
-    print(f"Salt (4.0-7.0): {salt_count}")
-    print(f"Lead (≤4.0): {lead_count}")
+    print(f"Phoenix (\u2265{PHOENIX_SCORE_THRESHOLD}): {phoenix_count}")
+    print(f"Salt ({SALT_SCORE_THRESHOLD}\u2013{PHOENIX_SCORE_THRESHOLD}): {salt_count}")
+    print(f"Lead (<{SALT_SCORE_THRESHOLD}): {lead_count}")
     print("=" * 60)
 
 

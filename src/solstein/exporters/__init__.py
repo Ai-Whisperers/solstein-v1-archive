@@ -3,7 +3,8 @@ SolStein Exporter Modules
 """
 
 from .audit_report import PipelineAuditReportGenerator
-from .excel import ExcelExporter, TemplateExporter
+from .excel import ExcelExporter
+from .excel_improved import ImprovedExcelExporter
 from .llm import LLMReportEnhancer
 from .markdown.generator import (
     ClientReportGenerator,
@@ -13,9 +14,9 @@ from .markdown.generator import (
 
 __all__ = [
     "ExcelExporter",
+    "ImprovedExcelExporter",
     "LLMReportEnhancer",
     "PipelineAuditReportGenerator",
-    "TemplateExporter",
     "ClientReportGenerator",
     "LLMEnhancedReportGenerator",
     "generate_enhanced_report",

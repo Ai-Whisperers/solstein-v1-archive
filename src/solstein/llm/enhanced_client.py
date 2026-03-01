@@ -198,6 +198,46 @@ class EnhancedLLMClient:
                 self._clients[provider] = client
                 return client
 
+            if provider == "anthropic":
+                from openai import AsyncOpenAI
+
+                if not self.settings.anthropic_api_key:
+                    logger.debug("anthropic provider skipped: API key not configured")
+                    return None
+                client = AsyncOpenAI(
+                    api_key=self.settings.anthropic_api_key,
+                    base_url="https://api.anthropic.com/v1",
+                    default_headers={"anthropic-version": "2023-06-01"},
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "siliconflow":
+                from openai import AsyncOpenAI
+
+                if not self.settings.siliconflow_api_key:
+                    logger.debug("siliconflow provider skipped: API key not configured")
+                    return None
+                client = AsyncOpenAI(
+                    api_key=self.settings.siliconflow_api_key,
+                    base_url="https://api.siliconflow.cn/v1",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "alibaba":
+                from openai import AsyncOpenAI
+
+                if not self.settings.alibaba_api_key:
+                    logger.debug("alibaba provider skipped: API key not configured")
+                    return None
+                client = AsyncOpenAI(
+                    api_key=self.settings.alibaba_api_key,
+                    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+                )
+                self._clients[provider] = client
+                return client
+
         except Exception as e:
             logger.warning(f"Failed to initialize {provider} client: {e}")
             return None
@@ -217,16 +257,11 @@ class EnhancedLLMClient:
             "nvidia": self.settings.nvidia_model,
             "cerebras": self.settings.cerebras_model,
             "kimi": self.settings.kimi_model,
+            "anthropic": self.settings.anthropic_model,
+            "siliconflow": self.settings.siliconflow_model,
+            "alibaba": self.settings.alibaba_model,
         }
         return models.get(provider, "gpt-4o-mini")  # Default fallback
-        """Get the appropriate model for a provider."""
-        if provider == "fireworks":
-            return self.settings.fireworks_model
-        if provider == "openai":
-            return self.settings.openai_model
-        if provider == "groq":
-            return self.settings.groq_model
-        return "gpt-4o-mini"  # Default fallback
 
     async def _query_ollama(
         self,
@@ -574,6 +609,14 @@ MODEL_COSTS = {
     "qwen2-72b-instruct": {"input": 0.0009, "output": 0.0009},
     # Ollama (local - free)
     "llama3.2:latest": {"input": 0.0, "output": 0.0},
+    # Anthropic
+    "claude-3-5-haiku-20241022": {"input": 0.0008, "output": 0.004},
+    "claude-sonnet-4-5": {"input": 0.003, "output": 0.015},
+    "claude-opus-4-5": {"input": 0.015, "output": 0.075},
+    # SiliconFlow (approximate)
+    "Qwen/Qwen2.5-72B-Instruct": {"input": 0.0004, "output": 0.0004},
+    # Alibaba DashScope (approximate)
+    "qwen-plus": {"input": 0.0004, "output": 0.0012},
 }
 
 

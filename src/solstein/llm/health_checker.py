@@ -107,7 +107,7 @@ class ProviderHealthChecker:
     """
 
     # Provider priority order (highest priority first)
-    PROVIDER_PRIORITY = ["ollama", "groq", "fireworks", "mistral", "deepinfra", "gemini", "nvidia", "cerebras", "kimi", "openai"]
+    PROVIDER_PRIORITY = ["ollama", "groq", "fireworks", "siliconflow", "alibaba", "mistral", "deepinfra", "gemini", "nvidia", "cerebras", "kimi", "anthropic", "openai"]
 
     # Error patterns for classification
     RATE_LIMIT_PATTERNS = [
@@ -266,6 +266,43 @@ class ProviderHealthChecker:
                 client = AsyncOpenAI(
                     api_key=settings.kimi_api_key,
                     base_url="https://api.moonshot.cn/v1",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "anthropic":
+                from openai import AsyncOpenAI
+
+                if not settings.anthropic_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=settings.anthropic_api_key,
+                    base_url="https://api.anthropic.com/v1",
+                    default_headers={"anthropic-version": "2023-06-01"},
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "siliconflow":
+                from openai import AsyncOpenAI
+
+                if not settings.siliconflow_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=settings.siliconflow_api_key,
+                    base_url="https://api.siliconflow.cn/v1",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "alibaba":
+                from openai import AsyncOpenAI
+
+                if not settings.alibaba_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=settings.alibaba_api_key,
+                    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
                 )
                 self._clients[provider] = client
                 return client
@@ -464,12 +501,21 @@ class ProviderHealthChecker:
         settings = self._get_settings()
 
         # Get the appropriate model for this provider
-        if provider == "fireworks":
-            model = settings.fireworks_model
-        elif provider == "openai":
-            model = settings.openai_model
-        else:
-            model = settings.groq_model
+        model_map = {
+            "fireworks": settings.fireworks_model,
+            "openai": settings.openai_model,
+            "groq": settings.groq_model,
+            "mistral": settings.mistral_model,
+            "deepinfra": settings.deepinfra_model,
+            "gemini": settings.gemini_model,
+            "nvidia": settings.nvidia_model,
+            "cerebras": settings.cerebras_model,
+            "kimi": settings.kimi_model,
+            "anthropic": settings.anthropic_model,
+            "siliconflow": settings.siliconflow_model,
+            "alibaba": settings.alibaba_model,
+        }
+        model = model_map.get(provider, settings.groq_model)
 
         try:
             # Make minimal test call (1 token)
@@ -522,12 +568,12 @@ class ProviderHealthChecker:
             providers_to_check.append("cerebras")
         if settings.kimi_api_key and settings.llm_provider in ("auto", "kimi"):
             providers_to_check.append("kimi")
-        if settings.fireworks_api_key and settings.llm_provider in ("auto", "fireworks"):
-            providers_to_check.append("fireworks")
-        if settings.openai_api_key and settings.llm_provider in ("auto", "openai"):
-            providers_to_check.append("openai")
-        if settings.groq_api_key and settings.llm_provider in ("auto", "groq"):
-            providers_to_check.append("groq")
+        if settings.anthropic_api_key and settings.llm_provider in ("auto", "anthropic"):
+            providers_to_check.append("anthropic")
+        if settings.siliconflow_api_key and settings.llm_provider in ("auto", "siliconflow"):
+            providers_to_check.append("siliconflow")
+        if settings.alibaba_api_key and settings.llm_provider in ("auto", "alibaba"):
+            providers_to_check.append("alibaba")
 
         # Run checks in parallel
         results = await asyncio.gather(
