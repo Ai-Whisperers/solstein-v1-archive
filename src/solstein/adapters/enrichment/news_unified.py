@@ -128,7 +128,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
             return articles
 
         except Exception as e:
-            logger.error(f"Error fetching news from API: {e}")
+            logger.error("Error fetching news from API", error=str(e))
             return []
 
     def discover(

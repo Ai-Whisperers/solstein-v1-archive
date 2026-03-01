@@ -58,7 +58,7 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
                     "num_rounds": props.get("funding_rounds", 0),
                 }
         except Exception as e:
-            logger.debug(f"Crunchbase API error: {e}")
+            logger.warning("Crunchbase API error", error=str(e))
 
         return None
 
@@ -84,7 +84,7 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
 
             return rounds
         except Exception as e:
-            logger.debug(f"Public funding search error: {e}")
+            logger.warning("Public funding search error", error=str(e))
             return []
 
     def discover(

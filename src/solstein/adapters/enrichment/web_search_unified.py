@@ -98,7 +98,7 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
             return candidates
 
         except Exception as e:
-            logger.error(f"Web search discovery failed: {e}")
+            logger.error("Web search discovery failed", error=str(e))
             return []
 
     def enrich(
@@ -159,7 +159,7 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
             return raw_data
 
         except Exception as e:
-            logger.error(f"Web search enrichment failed: {e}")
+            logger.error("Web search enrichment failed", error=str(e))
             # Return empty raw data source
             return RawDataSource(
                 source_name=self.source_name,

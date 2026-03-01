@@ -69,7 +69,7 @@ class LinkedInUnifiedAdapter(BaseRefreshConnector):
                 "sentiment": news.sentiment_score,
             }
         except Exception as e:
-            logger.debug(f"LinkedIn signal error: {e}")
+            logger.warning("LinkedIn signal error", error=str(e))
             return {
                 "ai_related_positions": None,
                 "hiring_mentions": 0,
