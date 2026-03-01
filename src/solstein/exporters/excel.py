@@ -333,7 +333,7 @@ class ExcelExporter:
             "Source Count", "Data Quality", "Competitive Positioning",
             "Comp. Overlap Count", "Last Updated", "Description",
         ]
-        self._write_headers(ws, headers, start_row=5)
+        self._write_headers(ws, headers, row=5)
 
         for row_idx, p in enumerate(profiles, start=6):
             # Source / signal counts
