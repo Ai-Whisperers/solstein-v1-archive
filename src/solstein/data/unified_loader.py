@@ -223,14 +223,29 @@ class UnifiedCompanyLoader:
             self.news_detector = None
         
 
-        self.markdown_dir = (
-            Path(__file__).parent.parent.parent.parent
-            / "data"
-            / "input"
-            / "custom_market_runs"
-            / "2026-02-23"
-            / "dutch_market"
-        )
+        # EPIC-FIX-003: Configurable markdown directory (was hardcoded to 2026-02-23/dutch_market)
+        # Use config if available, otherwise use environment variable, then fallback to default
+        import os
+        if hasattr(self.config, 'markdown_dir') and self.config.markdown_dir:
+            self.markdown_dir = Path(self.config.markdown_dir)
+        else:
+            # Check for environment variable override
+            env_market_dir = os.getenv('DUTCH_MARKET_DIR')
+            if env_market_dir:
+                self.markdown_dir = Path(env_market_dir)
+            else:
+                # Fallback: use 'latest' instead of hardcoded date
+                self.markdown_dir = (
+                    Path(__file__).parent.parent.parent.parent
+                    / "data"
+                    / "input"
+                    / "custom_market_runs"
+                    / "latest"
+                    / "dutch_market"
+                )
+        
+        # Log the configured path for debugging
+        logger.info(f"📁 Dutch market directory configured: {self.markdown_dir}")
         
         # Initialize caching and metrics for Phase B (Performance)
         self.cache = CacheService(ttl_hours=24)  # 24-hour TTL for enrichment results
