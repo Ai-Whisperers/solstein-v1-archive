@@ -5,6 +5,7 @@ Provides enhanced LLM clients with:
 - Automatic provider failover
 - Rate limit detection and handling
 - Credit/quota exhaustion detection
+- Cost tracking per request
 
 Usage:
     from ..llm import get_enhanced_llm_client, ProviderHealthChecker
@@ -16,7 +17,10 @@ Usage:
 from .enhanced_client import (
     EnhancedLLMClient,
     LLMGenerationError,
+    UsageTracker,
     get_enhanced_llm_client,
+    get_usage_tracker,
+    reset_usage_tracker,
 )
 from .health_checker import (
     ProviderError,
@@ -33,6 +37,10 @@ __all__ = [
     "EnhancedLLMClient",
     "LLMGenerationError",
     "get_enhanced_llm_client",
+    # Usage tracking
+    "UsageTracker",
+    "get_usage_tracker",
+    "reset_usage_tracker",
     # Health checking
     "ProviderHealthChecker",
     "ProviderHealth",
