@@ -228,12 +228,36 @@ class Settings(BaseSettings):
     # LLM APIs
     groq_api_key: str | None = Field(default=None)
     fireworks_api_key: str | None = Field(default=None)
+    mistral_api_key: str | None = Field(default=None)
+    deepinfra_api_key: str | None = Field(default=None)
+    gemini_api_key: str | None = Field(default=None)
+    nvidia_nim_api_key: str | None = Field(default=None)
+    cerebras_api_key: str | None = Field(default=None)
+    kimi_api_key: str | None = Field(default=None)
+    groq_api_key: str | None = Field(default=None)
+    fireworks_api_key: str | None = Field(default=None)
 
     celery_broker_url: str | None = Field(default=None)
     celery_result_backend: str | None = Field(default=None)
     refresh_schedule: dict | None = Field(default=None)
 
     llm_provider: str = Field(
+        default="auto",
+        description="LLM provider selection: auto|ollama|openai|groq|fireworks|mistral|deepinfra|gemini|nvidia|cerebras|kimi|none",
+    )
+    ollama_url: str = Field(default="http://localhost:11434")
+    ollama_model: str = Field(default="llama3.2:latest")
+    openai_model: str = Field(default="gpt-4o-mini")
+    groq_model: str = Field(default="llama-3.3-70b-versatile")
+    fireworks_model: str = Field(default="accounts/fireworks/models/mixtral-8x22b-instruct")
+    mistral_model: str = Field(default="mistral-large-2411")
+    deepinfra_model: str = Field(default="meta-llama/Llama-3.3-70B-Instruct")
+    gemini_model: str = Field(default="gemini-1.5-flash")
+    nvidia_model: str = Field(default="meta/llama-3.3-70b-instruct")
+    cerebras_model: str = Field(default="llama-3.3-70b")
+    kimi_model: str = Field(default="kimi-k2-32k")
+
+    model_config = SettingsConfigDict(
         default="auto",
         description="LLM provider selection: auto|ollama|fireworks|openai|groq|none",
     )

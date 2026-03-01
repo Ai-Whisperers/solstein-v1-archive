@@ -116,6 +116,89 @@ class EnhancedLLMClient:
                 self._clients[provider] = client
                 return client
 
+            if provider == "mistral":
+                from openai import AsyncOpenAI
+
+                if not self.settings.mistral_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=self.settings.mistral_api_key,
+                    base_url="https://api.mistral.ai/v1",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "deepinfra":
+                from openai import AsyncOpenAI
+
+                if not self.settings.deepinfra_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=self.settings.deepinfra_api_key,
+                    base_url="https://api.deepinfra.com/v1/openai",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "gemini":
+                from openai import AsyncOpenAI
+
+                if not self.settings.gemini_api_key:
+                    return None
+                # Note: Gemini uses a different format, but we'll use the OpenAI compatibility layer
+                client = AsyncOpenAI(
+                    api_key=self.settings.gemini_api_key,
+                    base_url="https://generativelanguage.googleapis.com/v1beta/openai",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "nvidia":
+                from openai import AsyncOpenAI
+
+                if not self.settings.nvidia_nim_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=self.settings.nvidia_nim_api_key,
+                    base_url="https://integrate.api.nvidia.com/v1",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "cerebras":
+                from openai import AsyncOpenAI
+
+                if not self.settings.cerebras_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=self.settings.cerebras_api_key,
+                    base_url="https://api.cerebras.ai/v1",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "kimi":
+                from openai import AsyncOpenAI
+
+                if not self.settings.kimi_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=self.settings.kimi_api_key,
+                    base_url="https://api.moonshot.cn/v1",
+                )
+                self._clients[provider] = client
+                return client
+                from openai import AsyncOpenAI
+
+                if not self.settings.fireworks_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=self.settings.fireworks_api_key,
+                    base_url="https://api.fireworks.ai/inference/v1",
+                )
+                self._clients[provider] = client
+                return client
+
         except Exception as e:
             logger.warning(f"Failed to initialize {provider} client: {e}")
             return None
@@ -123,6 +206,20 @@ class EnhancedLLMClient:
         return None
 
     def _get_model(self, provider: str) -> str:
+        """Get the appropriate model for a provider."""
+        models = {
+            "ollama": self.settings.ollama_model,
+            "openai": self.settings.openai_model,
+            "groq": self.settings.groq_model,
+            "fireworks": self.settings.fireworks_model,
+            "mistral": self.settings.mistral_model,
+            "deepinfra": self.settings.deepinfra_model,
+            "gemini": self.settings.gemini_model,
+            "nvidia": self.settings.nvidia_model,
+            "cerebras": self.settings.cerebras_model,
+            "kimi": self.settings.kimi_model,
+        }
+        return models.get(provider, "gpt-4o-mini")  # Default fallback
         """Get the appropriate model for a provider."""
         if provider == "fireworks":
             return self.settings.fireworks_model

@@ -107,7 +107,7 @@ class ProviderHealthChecker:
     """
 
     # Provider priority order (highest priority first)
-    PROVIDER_PRIORITY = ["ollama", "fireworks", "openai", "groq"]
+    PROVIDER_PRIORITY = ["ollama", "groq", "fireworks", "mistral", "deepinfra", "gemini", "nvidia", "cerebras", "kimi", "openai"]
 
     # Error patterns for classification
     RATE_LIMIT_PATTERNS = [
@@ -193,6 +193,79 @@ class ProviderHealthChecker:
                 client = AsyncOpenAI(
                     api_key=settings.fireworks_api_key,
                     base_url="https://api.fireworks.ai/inference/v1",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "mistral":
+                from openai import AsyncOpenAI
+
+                if not settings.mistral_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=settings.mistral_api_key,
+                    base_url="https://api.mistral.ai/v1",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "deepinfra":
+                from openai import AsyncOpenAI
+
+                if not settings.deepinfra_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=settings.deepinfra_api_key,
+                    base_url="https://api.deepinfra.com/v1/openai",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "gemini":
+                from openai import AsyncOpenAI
+
+                if not settings.gemini_api_key:
+                    return None
+                # Note: Gemini uses a different format, but we'll use the OpenAI compatibility layer
+                client = AsyncOpenAI(
+                    api_key=settings.gemini_api_key,
+                    base_url="https://generativelanguage.googleapis.com/v1beta",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "nvidia":
+                from openai import AsyncOpenAI
+
+                if not settings.nvidia_nim_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=settings.nvidia_nim_api_key,
+                    base_url="https://integrate.api.nvidia.com/v1",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "cerebras":
+                from openai import AsyncOpenAI
+
+                if not settings.cerebras_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=settings.cerebras_api_key,
+                    base_url="https://api.cerebras.ai/v1",
+                )
+                self._clients[provider] = client
+                return client
+
+            if provider == "kimi":
+                from openai import AsyncOpenAI
+
+                if not settings.kimi_api_key:
+                    return None
+                client = AsyncOpenAI(
+                    api_key=settings.kimi_api_key,
+                    base_url="https://api.moonshot.cn/v1",
                 )
                 self._clients[provider] = client
                 return client
@@ -431,6 +504,24 @@ class ProviderHealthChecker:
             providers_to_check.append("ollama")
 
         # Check configured cloud providers
+        if settings.fireworks_api_key and settings.llm_provider in ("auto", "fireworks"):
+            providers_to_check.append("fireworks")
+        if settings.openai_api_key and settings.llm_provider in ("auto", "openai"):
+            providers_to_check.append("openai")
+        if settings.groq_api_key and settings.llm_provider in ("auto", "groq"):
+            providers_to_check.append("groq")
+        if settings.mistral_api_key and settings.llm_provider in ("auto", "mistral"):
+            providers_to_check.append("mistral")
+        if settings.deepinfra_api_key and settings.llm_provider in ("auto", "deepinfra"):
+            providers_to_check.append("deepinfra")
+        if settings.gemini_api_key and settings.llm_provider in ("auto", "gemini"):
+            providers_to_check.append("gemini")
+        if settings.nvidia_nim_api_key and settings.llm_provider in ("auto", "nvidia"):
+            providers_to_check.append("nvidia")
+        if settings.cerebras_api_key and settings.llm_provider in ("auto", "cerebras"):
+            providers_to_check.append("cerebras")
+        if settings.kimi_api_key and settings.llm_provider in ("auto", "kimi"):
+            providers_to_check.append("kimi")
         if settings.fireworks_api_key and settings.llm_provider in ("auto", "fireworks"):
             providers_to_check.append("fireworks")
         if settings.openai_api_key and settings.llm_provider in ("auto", "openai"):
