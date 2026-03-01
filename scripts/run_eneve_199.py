@@ -63,11 +63,16 @@ _id_generator = CompanyIDGenerator()
 def convert_json_to_company(data: dict) -> Company:
     """Convert competitor_data.json format to Company model."""
     # Extract revenue data from timeline
-    revenue_timeline = data.get("revenue", {}).get("timeline", [])
+    revenue_data = data.get("revenue", {})
+    revenue_timeline = revenue_data.get("timeline", [])
     latest_revenue = revenue_timeline[0] if revenue_timeline else {}
     
     revenue = latest_revenue.get("eur_millions")
     growth_rate = latest_revenue.get("yoy_growth_pct")
+    
+    # Extract CAGR data (3-year and 5-year)
+    revenue_cagr_3yr = revenue_data.get("cagr_3yr_pct")
+    revenue_cagr_5yr = revenue_data.get("cagr_5yr_pct")
     
     # Get confidence from timeline entry
     confidence_map = {
@@ -155,6 +160,8 @@ def convert_json_to_company(data: dict) -> Company:
         saas_maturity=5,  # Default mid-range
         tech_stack=[],
         signal_confidences=signal_confidences,  # NEW: Populate signal confidences
+        revenue_cagr_3yr=revenue_cagr_3yr,  # NEW: Preserve CAGR data
+        revenue_cagr_5yr=revenue_cagr_5yr,  # NEW: Preserve CAGR data
         financials=FinancialMetric(
             revenue=revenue,
             revenue_confidence=revenue_confidence,
