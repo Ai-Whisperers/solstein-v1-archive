@@ -13,6 +13,11 @@ from loguru import logger
 
 from ...domain.models import Company
 
+# Import decomposed modules for delegation (EPIC-008)
+from .base import ReportFormatter, ScoreInterpreter, BaseReportGenerator
+from .company import CompanyReportGenerator
+from .market import MarketReportGenerator
+
 
 class ReportGenerator:
     """Generate markdown intelligence reports from Company data."""
@@ -53,17 +58,22 @@ class ReportGenerator:
         return generated
 
     def generate_company_reports(self, company: Company, output_dir: Path | None = None) -> dict[str, Path]:
-        """Generate all report types for a single company."""
+        """Generate all report types for a single company.
+
+        EPIC-008: Delegates to CompanyReportGenerator for maintainability.
+        """
         output_dir = output_dir or self.output_dir
 
         # Create company-specific directory
         company_dir = output_dir / self._sanitize_filename(company.name)
         company_dir.mkdir(parents=True, exist_ok=True)
 
+        # Delegate to specialized generator (EPIC-008 decomposition)
+        company_gen = CompanyReportGenerator(output_dir)
         generated = {
-            "corporate_history": self.generate_corporate_history(company, company_dir),
-            "deep_analysis": self.generate_deep_analysis(company, company_dir),
-            "financial_growth": self.generate_financial_growth(company, company_dir),
+            "corporate_history": company_gen.generate_corporate_history(company, company_dir),
+            "deep_analysis": company_gen.generate_deep_analysis(company, company_dir),
+            "financial_growth": company_gen.generate_financial_growth(company, company_dir),
         }
 
         return generated
@@ -430,7 +440,16 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
         return output_path
 
     def generate_market_overview(self, companies: list[Company], output_dir: Path) -> Path:
-        """Generate market overview report with all companies."""
+        """Generate market overview report with all companies.
+
+        EPIC-008: Delegates to MarketReportGenerator for maintainability.
+        """
+        # Delegate to specialized generator (EPIC-008 decomposition)
+        market_gen = MarketReportGenerator(output_dir)
+        return market_gen.generate_market_overview(companies, output_dir)
+
+    def _legacy_generate_market_overview(self, companies: list[Company], output_dir: Path) -> Path:
+        """Legacy implementation kept for reference."""
         # Sort by composite score
         sorted_companies = sorted(companies, key=lambda c: c.composite_score or 0, reverse=True)
 
