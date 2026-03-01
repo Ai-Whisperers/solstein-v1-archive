@@ -47,15 +47,25 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
 
     EXCLUDED_PATHS = {"/health", "/ready", "/docs", "/openapi.json", "/redoc", "/metrics"}
 
+    def __init__(self, app, token_validator=None):
+        """Initialize with optional token validator."""
+        super().__init__(app)
+        self.token_validator = token_validator
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Validate authentication on protected endpoints."""
-        # Skip authentication for health checks, docs, and enrichment endpoints
-        if request.url.path in self.EXCLUDED_PATHS or request.url.path.startswith(("/companies", "/enrichment")):
+        # Skip authentication for health checks and docs
+        if request.url.path in self.EXCLUDED_PATHS:
+            return await call_next(request)
+
+        # Skip authentication for public endpoints
+        if request.url.path.startswith(("/companies", "/enrichment")):
             return await call_next(request)
 
         # For any other path, let it through to get a proper 404 from FastAPI
         # instead of blocking with 401
-        return await call_next(request)
+        if not request.url.path.startswith(("/api", "/admin")):
+            return await call_next(request)
 
         # Get authorization header
         auth_header = request.headers.get("Authorization")
@@ -78,10 +88,17 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
 
         token = parts[1]
 
-        # TODO: Validate token against auth provider
-        # For now, accept any non-empty token
-        if not token or len(token) < 10:
-            logger.warning(f"Invalid token for {request.url.path}")
+        # Validate token using provided validator or basic check
+        if self.token_validator:
+            is_valid = await self.token_validator(token)
+            if not is_valid:
+                logger.warning(f"Invalid token for {request.url.path}")
+                return JSONResponse(
+                    status_code=401,
+                    content={"error": "unauthorized", "message": "Invalid or expired token", "code": "AUTH_003"},
+                )
+        elif not token or len(token) < 10:
+            logger.warning(f"Invalid token format for {request.url.path}")
             return JSONResponse(
                 status_code=401,
                 content={"error": "unauthorized", "message": "Invalid or expired token", "code": "AUTH_003"},
@@ -89,7 +106,6 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
 
         logger.debug(f"Authenticated request to {request.url.path}")
         return await call_next(request)
-
 
 class InputSanitizationMiddleware(BaseHTTPMiddleware):
     """Sanitize and validate incoming requests."""

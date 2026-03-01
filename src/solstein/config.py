@@ -23,6 +23,22 @@ class ConfigurationError(Exception):
 class DatabaseConfig(BaseModel):
     """Database configuration."""
 
+    url: str = Field(...)
+    pool_size: int = Field(default=20, ge=1, le=100)
+    echo: bool = Field(default=False)
+
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v: str) -> str:
+        """Validate database URL."""
+        if not v:
+            raise ValueError("Database URL cannot be empty")
+        # Check for placeholder/insecure default
+        if "postgres:postgres@" in v or "password" in v.lower():
+            logger.warning("Database URL may contain default credentials - ensure this is for development only")
+        return v
+    """Database configuration."""
+
     url: str = Field(default="postgresql://postgres:postgres@localhost:5432/solstein")
     pool_size: int = Field(default=20, ge=1, le=100)
     echo: bool = Field(default=False)
@@ -37,6 +53,18 @@ class DatabaseConfig(BaseModel):
 
 
 class RedisConfig(BaseModel):
+    """Redis configuration for caching and job queues."""
+
+    url: str = Field(...)
+    cache_ttl: int = Field(default=3600, ge=60, description="Cache TTL in seconds")
+
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v: str) -> str:
+        """Validate Redis URL."""
+        if not v:
+            raise ValueError("Redis URL cannot be empty")
+        return v
     """Redis configuration for caching and job queues."""
 
     url: str = Field(default="redis://localhost:6379/0")

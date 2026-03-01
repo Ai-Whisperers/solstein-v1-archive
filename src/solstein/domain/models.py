@@ -144,8 +144,6 @@ class Company(BaseModel):
     signal_confidences: dict[str, float] = Field(default_factory=dict)
     enrichment_source_count: int = 0
     data_quality_tier: str = "unknown"
-    data_quality_tier: str = "unknown"
-
 
 
     # External Identifiers for Connector Lookups
