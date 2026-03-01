@@ -195,7 +195,8 @@ class SyntheticCompanyGenerator:
             "funding_raised": round(base_revenue * random.uniform(0.2, 2) * 1000000, 0),
             "valuation": round(base_revenue * random.uniform(3, 15) * 1000000, 0),
             "geographic_presence": random.sample(self.COUNTRIES, random.randint(1, 5)),
-            "classification": "Phoenix" if growth_rate > 30 else "Salt" if growth_rate > 10 else "Lead",
+            # FIXED: growth_rate is stored as decimal (0.25 = 25%), so compare against 0.30 not 30
+            "classification": "Phoenix" if (growth_rate / 100) > 0.30 else "Salt" if (growth_rate / 100) > 0.10 else "Lead",
             "classification_confidence": round(random.uniform(0.7, 0.95), 2),
             "data_quality_score": round(random.uniform(0.6, 0.9), 2),
             "enrichment_source_count": random.randint(2, 5),
