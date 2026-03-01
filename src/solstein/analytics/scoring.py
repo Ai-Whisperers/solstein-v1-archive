@@ -17,6 +17,7 @@ from ..domain.models import (
     ScoreComponent,
     ScoringExplanation,
 )
+from .constants import LEAD_SCORE_THRESHOLD, MAX_SCORE, MIN_SCORE, PHOENIX_SCORE_THRESHOLD
 from .scorers.competitive_position import CompetitivePositionScorer
 from .scorers.financial_health import FinancialHealthScorer
 from .scorers.growth_momentum import GrowthMomentumScorer
@@ -75,7 +76,7 @@ def _apply_confidence_weights(
         component.confidence_weight = weight
         component.value = round(component.value * weight, 4)
         score += component.value
-    final = max(0.0, min(score, 10.0))
+    final = max(MIN_SCORE, min(score, MAX_SCORE))
     explanation.final_score = final
     return final, explanation
 
@@ -84,9 +85,9 @@ def classify_company(score: float | None) -> str:
     """Central logic to classify a company based on its composite or growth score."""
     if score is None:
         return "Salt"
-    if score >= 7.0:
+    if score >= PHOENIX_SCORE_THRESHOLD:
         return "Phoenix"
-    elif score <= 3.9:
+    elif score <= LEAD_SCORE_THRESHOLD:
         return "Lead"
     return "Salt"
 
@@ -223,7 +224,7 @@ class GrowthScorer:
                     )
                 )
 
-        final_score = max(0.0, min(score, 10.0))
+        final_score = max(MIN_SCORE, min(score, MAX_SCORE))
         explanation.final_score = final_score
         return final_score, explanation
 
@@ -321,7 +322,7 @@ class GrowthScorer:
                     )
                 )
 
-        final_score = max(0.0, min(score, 10.0))
+        final_score = max(MIN_SCORE, min(score, MAX_SCORE))
         explanation.final_score = final_score
         return final_score, explanation
 
@@ -404,7 +405,7 @@ class GrowthScorer:
                 )
             )
 
-        final_score = max(0.0, min(score, 10.0))
+        final_score = max(MIN_SCORE, min(score, MAX_SCORE))
         explanation.final_score = final_score
         return final_score, explanation
 

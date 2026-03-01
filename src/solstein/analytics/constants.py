@@ -3,7 +3,11 @@
 # Classification Score Thresholds
 PHOENIX_SCORE_THRESHOLD = 7.0  # High-growth companies (top 15-25%)
 SALT_SCORE_THRESHOLD = 5.5  # Stable companies (middle 60-70%)
-LEAD_SCORE_THRESHOLD = 5.5  # Legacy/opportunity companies (bottom 10-20%)
+LEAD_SCORE_THRESHOLD = 3.9  # Legacy/opportunity companies (bottom 10-20%)
+
+# Score Range Bounds
+MAX_SCORE = 10.0  # Maximum possible composite score
+MIN_SCORE = 0.0   # Minimum possible composite score
 
 # Confidence Thresholds
 CONFIDENCE_HIGH = 0.9  # High confidence threshold
