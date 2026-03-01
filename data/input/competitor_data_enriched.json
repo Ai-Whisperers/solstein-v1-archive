@@ -1,0 +1,285 @@
+{
+  "competitors": [
+    {
+      "company_name": "Eneve",
+      "folder": "eneve",
+      "revenue": {
+        "timeline": [
+          {
+            "year": 2023,
+            "eur_millions": 5.0,
+            "yoy_growth_pct": 35,
+            "confidence": "high",
+            "source": "Annual report"
+          },
+          {
+            "year": 2022,
+            "eur_millions": 3.7,
+            "yoy_growth_pct": 48,
+            "confidence": "high",
+            "source": "Annual report"
+          },
+          {
+            "year": 2021,
+            "eur_millions": 2.5,
+            "yoy_growth_pct": 67,
+            "confidence": "high",
+            "source": "Annual report"
+          },
+          {
+            "year": 2020,
+            "eur_millions": 1.5,
+            "yoy_growth_pct": 0,
+            "confidence": "high",
+            "source": "Annual report"
+          }
+        ],
+        "cagr_3yr_pct": 45.0,
+        "cagr_5yr_pct": 25.0
+      },
+      "profitability": {
+        "ebitda_margin_pct": 30.0,
+        "recurring_revenue_pct": 85.0,
+        "revenue_per_employee_eur_k": 333.0,
+        "confidence": "medium",
+        "source": "Industry estimate"
+      },
+      "employees": 150,
+      "founded_year": 2015,
+      "country": "Germany",
+      "industry": "Energy Software",
+      "website": "https://eneve.de",
+      "github_url": "https://github.com/eneve",
+      "description": "Energy software company",
+      "ai_maturity_score": 7.5,
+      "ai_maturity": "Strong",
+      "ai_score": 7.5,
+      "growth_rate": 0.25,
+      "profit_margin": 0.15,
+      "funding_raised": 2000000.0,
+      "valuation": 50000000.0,
+      "geographic_presence": [
+        "Germany",
+        "France",
+        "UK",
+        "Netherlands",
+        "Belgium",
+        "Austria",
+        "Switzerland"
+      ],
+      "classification": "Phoenix",
+      "classification_confidence": 0.95,
+      "employees_confidence": "confirmed",
+      "employees_source": "LinkedIn",
+      "ai_confidence": "medium",
+      "ai_source": "Website analysis",
+      "funding_confidence": "high",
+      "funding_source": "Crunchbase",
+      "valuation_confidence": "medium",
+      "valuation_source": "Industry multiple",
+      "data_quality_score": 0.95,
+      "enrichment_source_count": 3,
+      "source_links": [
+        {
+          "source": "LinkedIn",
+          "type": "linkedin",
+          "confidence": "medium"
+        },
+        {
+          "source": "Website",
+          "type": "website",
+          "confidence": "medium"
+        },
+        {
+          "source": "Crunchbase",
+          "type": "crunchbase",
+          "confidence": "medium"
+        }
+      ]
+    },
+    {
+      "company_name": "Test Company 2",
+      "folder": "test-company-2",
+      "revenue": {
+        "timeline": [
+          {
+            "year": 2023,
+            "eur_millions": 3.0,
+            "yoy_growth_pct": 15,
+            "confidence": "high",
+            "source": "Annual report"
+          },
+          {
+            "year": 2022,
+            "eur_millions": 2.6,
+            "yoy_growth_pct": 18,
+            "confidence": "high",
+            "source": "Annual report"
+          },
+          {
+            "year": 2021,
+            "eur_millions": 2.2,
+            "yoy_growth_pct": 22,
+            "confidence": "high",
+            "source": "Annual report"
+          },
+          {
+            "year": 2020,
+            "eur_millions": 1.8,
+            "yoy_growth_pct": 0,
+            "confidence": "high",
+            "source": "Annual report"
+          }
+        ],
+        "cagr_3yr_pct": 18.0,
+        "cagr_5yr_pct": 20.0
+      },
+      "profitability": {
+        "ebitda_margin_pct": 15.0,
+        "recurring_revenue_pct": 75.0,
+        "revenue_per_employee_eur_k": 300.0,
+        "confidence": "medium",
+        "source": "Industry estimate"
+      },
+      "employees": 100,
+      "founded_year": 2016,
+      "country": "US",
+      "industry": "Energy Software",
+      "website": "https://test2.com",
+      "github_url": "https://github.com/test2",
+      "description": "Test company",
+      "ai_maturity_score": 6.0,
+      "ai_maturity": "Moderate",
+      "ai_score": 6.0,
+      "growth_rate": 0.2,
+      "profit_margin": 0.12,
+      "funding_raised": 1500000.0,
+      "valuation": 30000000.0,
+      "geographic_presence": [
+        "US",
+        "Canada"
+      ],
+      "classification": "Salt",
+      "classification_confidence": 0.85,
+      "employees_confidence": "confirmed",
+      "employees_source": "LinkedIn",
+      "ai_confidence": "medium",
+      "ai_source": "Website analysis",
+      "funding_confidence": "high",
+      "funding_source": "Crunchbase",
+      "valuation_confidence": "medium",
+      "valuation_source": "Industry multiple",
+      "data_quality_score": 0.95,
+      "enrichment_source_count": 3,
+      "source_links": [
+        {
+          "source": "LinkedIn",
+          "type": "linkedin",
+          "confidence": "medium"
+        },
+        {
+          "source": "Website",
+          "type": "website",
+          "confidence": "medium"
+        },
+        {
+          "source": "Crunchbase",
+          "type": "crunchbase",
+          "confidence": "medium"
+        }
+      ]
+    },
+    {
+      "company_name": "Test Company 3",
+      "folder": "test-company-3",
+      "revenue": {
+        "timeline": [
+          {
+            "year": 2023,
+            "eur_millions": 1.5,
+            "yoy_growth_pct": -10,
+            "confidence": "high",
+            "source": "Annual report"
+          },
+          {
+            "year": 2022,
+            "eur_millions": 1.9,
+            "yoy_growth_pct": 9,
+            "confidence": "high",
+            "source": "Annual report"
+          },
+          {
+            "year": 2021,
+            "eur_millions": 1.75,
+            "yoy_growth_pct": 12,
+            "confidence": "high",
+            "source": "Annual report"
+          },
+          {
+            "year": 2020,
+            "eur_millions": 1.56,
+            "yoy_growth_pct": 0,
+            "confidence": "high",
+            "source": "Annual report"
+          }
+        ],
+        "cagr_3yr_pct": -5.0,
+        "cagr_5yr_pct": 20.0
+      },
+      "profitability": {
+        "ebitda_margin_pct": 2.0,
+        "recurring_revenue_pct": 65.0,
+        "revenue_per_employee_eur_k": 250.0,
+        "confidence": "medium",
+        "source": "Industry estimate"
+      },
+      "employees": 80,
+      "founded_year": 2017,
+      "country": "UK",
+      "industry": "Energy Software",
+      "website": "https://test3.com",
+      "github_url": "https://github.com/test3",
+      "description": "Test company",
+      "ai_maturity_score": 5.0,
+      "ai_maturity": "Emerging",
+      "ai_score": 5.0,
+      "growth_rate": 0.15,
+      "profit_margin": 0.1,
+      "funding_raised": 1000000.0,
+      "valuation": 20000000.0,
+      "geographic_presence": [
+        "UK",
+        "Ireland"
+      ],
+      "classification": "Lead",
+      "classification_confidence": 0.75,
+      "employees_confidence": "confirmed",
+      "employees_source": "LinkedIn",
+      "ai_confidence": "medium",
+      "ai_source": "Website analysis",
+      "funding_confidence": "high",
+      "funding_source": "Crunchbase",
+      "valuation_confidence": "medium",
+      "valuation_source": "Industry multiple",
+      "data_quality_score": 0.95,
+      "enrichment_source_count": 3,
+      "source_links": [
+        {
+          "source": "LinkedIn",
+          "type": "linkedin",
+          "confidence": "medium"
+        },
+        {
+          "source": "Website",
+          "type": "website",
+          "confidence": "medium"
+        },
+        {
+          "source": "Crunchbase",
+          "type": "crunchbase",
+          "confidence": "medium"
+        }
+      ]
+    }
+  ]
+}
