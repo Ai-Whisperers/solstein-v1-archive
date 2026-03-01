@@ -162,6 +162,10 @@ app.include_router(drill_down.router)
 app.include_router(simulation.router, prefix="/simulation")
 app.include_router(async_jobs.router)
 
+# Dashboard API (EPIC-031)
+from .routers.dashboard import router as dashboard_router
+app.include_router(dashboard_router)
+
 
 # Custom docs endpoint
 @app.get("/docs", include_in_schema=False)

@@ -135,3 +135,32 @@ class DatabaseManager:
 
 
 db_manager = DatabaseManager(Settings.load())
+
+
+async def get_async_session():
+    """FastAPI dependency that yields an async SQLAlchemy session.
+
+    Usage::
+
+        from fastapi import Depends
+        from solstein.infrastructure.database import get_async_session
+        from sqlalchemy.ext.asyncio import AsyncSession
+
+        @router.get("/")
+        async def my_route(session: AsyncSession = Depends(get_async_session)):
+            ...
+    """
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    engine = db_manager.engine
+    if engine is None:
+        # Initialise lazily in dev when DB is not yet connected
+        await db_manager.init_async()
+        engine = db_manager.engine
+    async with AsyncSession(engine, expire_on_commit=False) as session:
+        yield session
+
+
+def get_async_engine():
+    """Return the shared async engine (initialised lazily)."""
+    return db_manager.engine
