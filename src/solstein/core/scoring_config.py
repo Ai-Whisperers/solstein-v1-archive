@@ -22,7 +22,7 @@ class GrowthScoringConfig(BaseModel):
     efficiency_med_threshold: float = 200_000.0
     efficiency_med_bonus: float = 1.0
 
-    # Funding thresholds (in Millions)
+    # Funding thresholds (in Millions EUR - matches data format)
     funding_high_threshold: float = 50.0
     funding_high_bonus: float = 2.0
     funding_med_threshold: float = 10.0
@@ -41,12 +41,13 @@ class FinancialHealthConfig(BaseModel):
 
     base_score: float | None = 5.0
 
-    # Revenue Scale (in EUR)
-    revenue_large_threshold: float = 100_000_000.0  # EUR 100M
+    # Revenue Scale (in Millions EUR - matches data format)
+    # Data stores revenue as 5.0 for €5M, so thresholds must be in millions
+    revenue_large_threshold: float = 100.0  # €100M
     revenue_large_bonus: float = 2.5
-    revenue_med_threshold: float = 10_000_000.0  # EUR 10M
+    revenue_med_threshold: float = 10.0  # €10M
     revenue_med_bonus: float = 1.25
-    revenue_small_threshold: float = 1_000_000.0  # EUR 1M
+    revenue_small_threshold: float = 1.0  # €1M
     revenue_small_penalty: float = -1.0
 
     # Profitability
@@ -56,18 +57,20 @@ class FinancialHealthConfig(BaseModel):
     margin_med_bonus: float = 1.25
     margin_negative_penalty: float = -2.5
 
-    # Efficiency (Rev/Emp - Absolute EUR)
-    efficiency_exceptional_threshold: float = 1_000_000.0
+    # Efficiency (Rev/Emp - in EUR per employee)
+    # Revenue is in millions, so rev_per_emp = (revenue * 1_000_000) / employees
+    efficiency_exceptional_threshold: float = 1_000_000.0  # €1M per employee
     efficiency_exceptional_bonus: float = 2.5
-    efficiency_good_threshold: float = 500_000.0
+    efficiency_good_threshold: float = 500_000.0  # €500K per employee
     efficiency_good_bonus: float = 1.25
-    efficiency_low_threshold: float = 100_000.0
+    efficiency_low_threshold: float = 100_000.0  # €100K per employee
     efficiency_low_penalty: float = -1.0
 
-    # Funding Cushion
+    # Funding Cushion (ratio - funding_raised / revenue)
+    # Both in millions, so ratio is unitless
     cushion_high_ratio: float = 10.0
     cushion_high_bonus: float = 2.5
-    cushion_med_ratio: float = 2.0
+    cushion_med_ratio: float = 3.0
     cushion_med_bonus: float = 1.25
     cushion_thin_ratio: float = 0.5
     cushion_thin_penalty: float = -1.0
