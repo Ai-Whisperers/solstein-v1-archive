@@ -200,9 +200,6 @@ class Settings(BaseSettings):
     companies_house_api_key: str | None = Field(default=None)
     google_api_key: str | None = Field(default=None)
     sec_user_agent: str | None = Field(default=None)
-    github_token: str | None = Field(default=None)
-    companies_house_api_key: str | None = Field(default=None)
-    google_api_key: str | None = Field(default=None)
 
     # Data source APIs
     exa_api_key: str | None = Field(default=None)
