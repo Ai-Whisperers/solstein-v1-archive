@@ -5,9 +5,9 @@ Implements balanced classification (Phoenix/Salt/Lead) with confidence scoring
 based on data quality and score distribution.
 
 Classification Boundaries (based on percentile analysis):
-- Phoenix (High Growth): >= 7.0 (top 15-25%)
-- Salt (Stable): 5.5 - 6.99 (middle 60-70%)
-- Lead (Legacy/Opportunity): < 5.5 (bottom 10-20%)
+- Phoenix (High Growth): >= 7.5 (top 15-20%)
+- Salt (Stable): 4.5 - 7.49 (middle 60-70%)
+- Lead (Legacy/Opportunity): < 4.5 (bottom 15-20%)
 
 Classification Confidence:
 - Based on data completeness (from Task 3)
@@ -17,6 +17,14 @@ Classification Confidence:
 """
 
 from src.solstein.domain.models import Company
+from .constants import (
+    CLASSIFICATION_PHOENIX_MIN,
+    CLASSIFICATION_PHOENIX_MAX,
+    CLASSIFICATION_SALT_MIN,
+    CLASSIFICATION_SALT_MAX,
+    CLASSIFICATION_LEAD_MIN,
+    CLASSIFICATION_LEAD_MAX,
+)
 
 
 def classify_company_balanced(composite_score: float | None) -> str:
@@ -56,9 +64,9 @@ def calculate_classification_confidence(
     completeness_factor = data_completeness / 100.0
 
     # Score certainty: higher scores are more certain
-    # Scores near boundaries (5.5, 7.0) are less certain
+    # Scores near boundaries (4.5, 7.5) are less certain
     score_certainty = 1.0
-    if 5.4 <= composite_score <= 5.6 or 6.9 <= composite_score <= 7.1:  # Near Salt/Lead boundary
+    if 4.4 <= composite_score <= 4.6 or 7.4 <= composite_score <= 7.6:  # Near Salt/Lead or Phoenix boundary
         score_certainty = 0.7
 
     # Combine factors: 70% data quality, 30% score certainty
@@ -154,12 +162,12 @@ def get_classification_distribution(companies: list[Company]) -> dict[str, int]:
 
 def validate_classification_distribution(
     companies: list[Company],
-    phoenix_min: float = 0.15,
-    phoenix_max: float = 0.25,
-    salt_min: float = 0.60,
-    salt_max: float = 0.70,
-    lead_min: float = 0.10,
-    lead_max: float = 0.20,
+    phoenix_min: float = CLASSIFICATION_PHOENIX_MIN,
+    phoenix_max: float = CLASSIFICATION_PHOENIX_MAX,
+    salt_min: float = CLASSIFICATION_SALT_MIN,
+    salt_max: float = CLASSIFICATION_SALT_MAX,
+    lead_min: float = CLASSIFICATION_LEAD_MIN,
+    lead_max: float = CLASSIFICATION_LEAD_MAX,
 ) -> dict[str, bool]:
     """Validate that classification distribution meets targets.
 
@@ -191,3 +199,53 @@ def validate_classification_distribution(
         "lead_count": dist["Lead"],
         "total": total,
     }
+
+
+def report_classification_distribution(companies: list[Company]) -> str:
+    """Generate a human-readable report of classification distribution.
+
+    Args:
+        companies: List of Company objects
+
+    Returns:
+        Formatted string with distribution report
+    """
+    validation = validate_classification_distribution(companies)
+
+    lines = [
+        "=" * 50,
+        "CLASSIFICATION DISTRIBUTION REPORT",
+        "=" * 50,
+        "",
+        f"Total Companies: {validation['total']}",
+        "",
+        "Distribution:",
+        f"  Phoenix: {validation['phoenix_count']} ({validation['phoenix_pct']*100:.1f}%) "
+        f"{'✓' if validation['phoenix_valid'] else '✗'}",
+        f"  Salt:    {validation['salt_count']} ({validation['salt_pct']*100:.1f}%) "
+        f"{'✓' if validation['salt_valid'] else '✗'}",
+        f"  Lead:    {validation['lead_count']} ({validation['lead_pct']*100:.1f}%) "
+        f"{'✓' if validation['lead_valid'] else '✗'}",
+        "",
+        "Target Ranges:",
+        f"  Phoenix: {CLASSIFICATION_PHOENIX_MIN*100:.0f}% - {CLASSIFICATION_PHOENIX_MAX*100:.0f}%",
+        f"  Salt:    {CLASSIFICATION_SALT_MIN*100:.0f}% - {CLASSIFICATION_SALT_MAX*100:.0f}%",
+        f"  Lead:    {CLASSIFICATION_LEAD_MIN*100:.0f}% - {CLASSIFICATION_LEAD_MAX*100:.0f}%",
+        "",
+        "Status:",
+    ]
+
+    if all([validation['phoenix_valid'], validation['salt_valid'], validation['lead_valid']]):
+        lines.append("  ✓ All classifications within target ranges")
+    else:
+        lines.append("  ✗ Some classifications outside target ranges:")
+        if not validation['phoenix_valid']:
+            lines.append(f"    - Phoenix: {validation['phoenix_pct']*100:.1f}% (target: {CLASSIFICATION_PHOENIX_MIN*100:.0f}%-{CLASSIFICATION_PHOENIX_MAX*100:.0f}%)")
+        if not validation['salt_valid']:
+            lines.append(f"    - Salt: {validation['salt_pct']*100:.1f}% (target: {CLASSIFICATION_SALT_MIN*100:.0f}%-{CLASSIFICATION_SALT_MAX*100:.0f}%)")
+        if not validation['lead_valid']:
+            lines.append(f"    - Lead: {validation['lead_pct']*100:.1f}% (target: {CLASSIFICATION_LEAD_MIN*100:.0f}%-{CLASSIFICATION_LEAD_MAX*100:.0f}%)")
+
+    lines.append("=" * 50)
+
+    return "\n".join(lines)
