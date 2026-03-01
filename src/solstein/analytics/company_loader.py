@@ -56,7 +56,7 @@ class UnifiedCompanyScoreLoader:
             logger.error(f"Failed to load unified companies: {e}")
             self._unified_companies_cache = {}
 
-    def clear_cache(self):
+    def clear_cache(self) -> None:
         """Clear the unified companies cache."""
         self._unified_companies_cache = None
         logger.debug("Cleared unified companies cache")

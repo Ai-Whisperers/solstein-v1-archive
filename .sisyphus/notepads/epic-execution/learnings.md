@@ -936,3 +936,89 @@ Fixes EPIC-011
 
 - **Testability**: ✅ Improved (constants can be mocked in tests)
 
+
+
+## 2026-03-01 — EPIC-017: Add rate limiting to FastAPI app
+
+### What Was Done
+
+**Objective**: Implement rate limiting middleware for the FastAPI app with per-route configuration.
+
+**Implementation**:
+1. **Enhanced `src/solstein/api/middleware/rate_limit.py`** (286 lines):
+   - Added `ROUTE_LIMITS` dict with per-route configuration
+   - Added `get_rate_limit_for_path()` function for dynamic limit lookup
+   - Enhanced `RateLimitMiddleware` to support per-route limits
+   - Updated `dispatch()` method to use route-specific limits
+   - Changed error response format to match standardized error shape: `{"error": {"code": "RATE_LIMIT_EXCEEDED", "message": "Too many requests", "details": null}, "request_id": "uuid"}`
+
+2. **Updated `src/solstein/api/main.py`**:
+   - Added `setup_rate_limiting` to imports from `.middleware`
+   - Added `setup_rate_limiting(app)` call in middleware setup chain
+
+3. **Rate limit configuration**:
+   - **Default**: 60 requests/minute for general routes
+   - **Expensive routes** (10/minute):
+     * `/api/v1/companies/analyze`
+     * `/api/v1/research/`
+     * `/api/v1/export/`
+     * `/scoring/`
+     * `/market/analysis`
+     * `/export/`
+   - **Excluded paths**: `/health`, `/healthz`, `/docs`, `/openapi.json`, `/redoc`, `/ready`, `/metrics`
+
+### Key Patterns
+
+- **Token bucket algorithm**: Sliding window with per-IP tracking
+- **Per-route configuration**: ROUTE_LIMITS dict allows easy tuning
+- **Standardized error format**: Matches existing APIError response shape
+- **Request ID tracking**: Includes request_id in 429 response for tracing
+- **Excluded paths**: Health checks and docs not rate limited
+
+### Verification
+
+✅ **Import test passed**:
+```bash
+python3 -c "import sys; sys.path.insert(0,'src'); from solstein.api.main import app; print('OK')"
+```
+
+Output shows:
+```
+INFO | solstein.api.middleware.rate_limit:setup_rate_limiting:285 - Rate limiting enabled: 60 requests/minute (with per-route overrides)
+```
+
+### Commit
+
+```
+a5bd4b5 feat(api): add rate limiting middleware
+
+- Enhanced rate_limit.py with per-route configuration
+- Default: 60 requests/minute for general routes
+- Expensive routes (/scoring, /export, /market/analysis): 10/minute
+- Returns HTTP 429 with standardized error format
+- Supports IP-based rate limiting with sliding window algorithm
+- Integrated into main.py middleware stack
+
+Fixes EPIC-017
+```
+
+### Files Modified
+
+- `src/solstein/api/middleware/rate_limit.py` — Enhanced with per-route limits (286 lines)
+- `src/solstein/api/main.py` — Added setup_rate_limiting call
+
+### Lessons Learned
+
+1. **Middleware package structure**: `middleware/` is a package with `__init__.py` that exports functions
+2. **Per-route configuration**: Dict-based lookup is cleaner than decorator-based approach
+3. **Error format consistency**: Rate limit errors must match existing APIError shape for client compatibility
+4. **Excluded paths**: Health checks should never be rate limited (they're monitoring endpoints)
+5. **Request ID propagation**: Middleware can access request_id from request.state (set by LoggingMiddleware)
+
+### Result
+
+- **Lines added**: 337 (rate_limit.py enhancements + main.py updates)
+- **Files modified**: 2
+- **Rate limit configuration**: Fully configurable via ROUTE_LIMITS dict
+- **Breaking changes**: None (rate limiting is transparent to clients)
+- **API status**: ✅ Rate limiting enabled with per-route configuration
