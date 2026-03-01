@@ -109,6 +109,9 @@ def convert_json_to_company(data: dict) -> Company:
     recurring_revenue_pct = profitability.get("recurring_revenue_pct")
     revenue_per_employee = profitability.get("revenue_per_employee_eur_k")
     
+    # Extract enrichment source count
+    enrichment_source_count = data.get("enrichment_source_count", 0)
+    
     # Extract tier (use classification to infer)
     # FIXED: Phoenix -> Tier 1 (best), Salt -> Tier 2, Lead -> Tier 4 (worst)
     classification = data.get("classification", "Salt")
@@ -187,6 +190,7 @@ def convert_json_to_company(data: dict) -> Company:
         ),
         geographic_presence=data.get("geographic_presence", []),
         key_customers=[],
+        enrichment_source_count=enrichment_source_count,  # NEW: Preserve enrichment count
         data_source="Solstein Competitive Intelligence",
         last_updated=datetime.now(timezone.utc)
     )
