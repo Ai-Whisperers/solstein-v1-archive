@@ -11,6 +11,7 @@ Centralized configuration for the enrichment system with:
 """
 
 import os
+from dataclasses import dataclass
 from loguru import logger
 
 
