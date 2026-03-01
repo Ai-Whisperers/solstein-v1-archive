@@ -36,13 +36,13 @@ class RateLimitEntry:
     blocked_until: float | None = None
 
     def is_blocked(self) -> bool:
-        """Check if client is currently blocked.""""
+        """Check if client is currently blocked."""
         if self.blocked_until is None:
             return False
         return time.time() < self.blocked_until
 
     def clean_old_requests(self, window_seconds: int) -> None:
-        """Remove requests outside the time window.""""
+        """Remove requests outside the time window."""
         cutoff = time.time() - window_seconds
         self.requests = [t for t in self.requests if t > cutoff]
 

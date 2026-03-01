@@ -241,7 +241,7 @@ class Settings(BaseSettings):
     ollama_model: str = Field(default="llama3.2:latest")
     openai_model: str = Field(default="gpt-4o-mini")
     groq_model: str = Field(default="llama-3.3-70b-versatile")
-    fireworks_model: str = Field(default="qwen2-72b-instruct")
+    fireworks_model: str = Field(default="accounts/fireworks/models/mixtral-8x22b-instruct")
 
     model_config = SettingsConfigDict(
         env_file=".env",

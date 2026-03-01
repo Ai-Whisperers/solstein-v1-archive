@@ -207,3 +207,11 @@ markers = [
     "slow: long-running tests",
     "e2e: end-to-end tests",
 ]
+
+[dependency-groups]
+dev = [
+    "factory-boy>=3.3.3",
+    "pytest-randomly>=4.0.1",
+    "syrupy>=5.1.0",
+    "testcontainers>=4.14.1",
+]
