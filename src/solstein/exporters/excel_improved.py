@@ -264,7 +264,11 @@ class ImprovedExcelExporter:
         scores = [getattr(p, 'composite_score', None) for p in profiles]
         valid_scores = [s for s in scores if s is not None]
         avg_score = sum(valid_scores) / len(valid_scores) if valid_scores else 0
-        
+        min_score = min(valid_scores) if valid_scores else 0
+        max_score = max(valid_scores) if valid_scores else 0
+        synthetic_cnt = sum(1 for p in profiles if getattr(p, 'data_source_type', '') == 'synthetic')
+        real_cnt = total - synthetic_cnt
+
         # Create summary data
         summary_data = [
             ["Metric", "Value"],
@@ -273,6 +277,9 @@ class ImprovedExcelExporter:
             ["Salt Companies", f"{salt_count} ({self._format_percentage(salt_count/total*100 if total else 0, 0)})"],
             ["Lead Companies", f"{lead_count} ({self._format_percentage(lead_count/total*100 if total else 0, 0)})"],
             ["Average Composite Score", self._format_number(avg_score, 2)],
+            ["Score Range", f"{min_score:.2f} – {max_score:.2f}" if valid_scores else "N/A"],
+            ["Synthetic Companies", f"{synthetic_cnt} ({self._format_percentage(synthetic_cnt/total*100 if total else 0, 0)})"],
+            ["Real Companies", f"{real_cnt}"],
             ["Report Generated", datetime.now().strftime("%Y-%m-%d %H:%M")],
         ]
         
@@ -303,7 +310,7 @@ class ImprovedExcelExporter:
         headers = [
             "Rank", "Company", "Classification", "Composite Score",
             "Growth Score", "Financial Health", "Competitive Position",
-            "Revenue (M)", "Growth Rate (%)", "Employees"
+            "Revenue (M)", "Growth Rate (%)", "Employees", "Data Source"
         ]
         self._write_headers(ws, headers)
         
@@ -330,6 +337,7 @@ class ImprovedExcelExporter:
                 self._format_number(self._safe_get_financial(profile, 'revenue'), 1),
                 self._format_percentage(self._safe_get_financial(profile, 'growth_rate')),
                 self._safe_get_financial(profile, 'employees', 0),
+                getattr(profile, 'data_source_type', 'unknown').capitalize(),
             ]
             
             for col_idx, value in enumerate(row_data, 1):

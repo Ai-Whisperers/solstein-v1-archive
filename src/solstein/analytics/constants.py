@@ -1,10 +1,10 @@
 """Constants for analytics, scoring, and classification thresholds."""
 
-# Classification Score Thresholds (adjusted for better distribution)
-# Phoenix (High Growth): >= 7.5 (top 15-20%) - Raised to reduce Phoenix count
+# Classification Score Thresholds (calibrated to actual score distribution)
+# Phoenix (High Growth): >= 8.1 (top ~20%) - raised from 7.5 to reflect actual distribution
 # Salt (Stable): 4.5 - 7.49 (middle 60-70%) - Widened middle band
 # Lead (Legacy/Opportunity): < 4.5 (bottom 15-20%) - Raised to increase Lead count
-PHOENIX_SCORE_THRESHOLD = 7.5  # High-growth companies (top 15-20%)
+PHOENIX_SCORE_THRESHOLD = 8.1  # High-growth companies (top ~20% of actual distribution)
 SALT_SCORE_THRESHOLD = 4.5  # Stable companies (middle 60-70%)
 LEAD_SCORE_THRESHOLD = 4.49  # Legacy/opportunity companies (bottom 15-20%)
 
