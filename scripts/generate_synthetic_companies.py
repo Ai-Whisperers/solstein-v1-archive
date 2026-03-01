@@ -166,8 +166,11 @@ class SyntheticCompanyGenerator:
         # Employees (roughly €100K-€200K per employee)
         employees = int(base_revenue * 1000000 / random.uniform(100000, 200000))
 
+        # Generate company name first and reuse it
+        company_name = self.generate_company_name()
+        
         company = {
-            "company_name": self.generate_company_name(),
+            "company_name": company_name,
             "folder": f"company_{random.randint(1000, 9999)}",
             "revenue": {
                 "timeline": self.generate_revenue_timeline(base_revenue, growth_rate),
@@ -185,7 +188,7 @@ class SyntheticCompanyGenerator:
             "founded_year": random.randint(2000, 2020),
             "country": random.choice(self.COUNTRIES),
             "industry": random.choice(self.INDUSTRIES),
-            "website": f"https://{self.generate_company_name().lower().replace(' ', '').replace('-', '')}.com",
+            "website": f"https://{company_name.lower().replace(' ', '').replace('-', '')}.com",
             "description": f"{random.choice(self.INDUSTRIES)} company focused on {random.choice(['renewable energy', 'smart grids', 'carbon tracking', 'energy trading'])}",
             "ai_maturity_score": round(random.uniform(3, 9), 1),
             "ai_maturity": random.choice(["Strong", "Moderate", "Emerging", "Low"]),
