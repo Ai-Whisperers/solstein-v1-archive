@@ -89,6 +89,7 @@ class EnhancedLLMClient:
                 from openai import AsyncOpenAI
 
                 if not self.settings.openai_api_key:
+                    logger.debug("openai provider skipped: API key not configured")
                     return None
                 client = AsyncOpenAI(api_key=self.settings.openai_api_key)
                 self._clients[provider] = client
@@ -98,6 +99,7 @@ class EnhancedLLMClient:
                 import importlib
 
                 if not self.settings.groq_api_key:
+                    logger.debug("groq provider skipped: API key not configured")
                     return None
                 groq_mod = importlib.import_module("groq")
                 client = groq_mod.AsyncGroq(api_key=self.settings.groq_api_key)
@@ -108,6 +110,7 @@ class EnhancedLLMClient:
                 from openai import AsyncOpenAI
 
                 if not self.settings.fireworks_api_key:
+                    logger.debug("fireworks provider skipped: API key not configured")
                     return None
                 client = AsyncOpenAI(
                     api_key=self.settings.fireworks_api_key,
@@ -120,6 +123,7 @@ class EnhancedLLMClient:
                 from openai import AsyncOpenAI
 
                 if not self.settings.mistral_api_key:
+                    logger.debug("mistral provider skipped: API key not configured")
                     return None
                 client = AsyncOpenAI(
                     api_key=self.settings.mistral_api_key,
@@ -132,6 +136,7 @@ class EnhancedLLMClient:
                 from openai import AsyncOpenAI
 
                 if not self.settings.deepinfra_api_key:
+                    logger.debug("deepinfra provider skipped: API key not configured")
                     return None
                 client = AsyncOpenAI(
                     api_key=self.settings.deepinfra_api_key,
@@ -144,6 +149,7 @@ class EnhancedLLMClient:
                 from openai import AsyncOpenAI
 
                 if not self.settings.gemini_api_key:
+                    logger.debug("gemini provider skipped: API key not configured")
                     return None
                 # Note: Gemini uses a different format, but we'll use the OpenAI compatibility layer
                 client = AsyncOpenAI(
@@ -157,6 +163,7 @@ class EnhancedLLMClient:
                 from openai import AsyncOpenAI
 
                 if not self.settings.nvidia_nim_api_key:
+                    logger.debug("nvidia provider skipped: API key not configured")
                     return None
                 client = AsyncOpenAI(
                     api_key=self.settings.nvidia_nim_api_key,
@@ -169,6 +176,7 @@ class EnhancedLLMClient:
                 from openai import AsyncOpenAI
 
                 if not self.settings.cerebras_api_key:
+                    logger.debug("cerebras provider skipped: API key not configured")
                     return None
                 client = AsyncOpenAI(
                     api_key=self.settings.cerebras_api_key,
@@ -181,20 +189,11 @@ class EnhancedLLMClient:
                 from openai import AsyncOpenAI
 
                 if not self.settings.kimi_api_key:
+                    logger.debug("kimi provider skipped: API key not configured")
                     return None
                 client = AsyncOpenAI(
                     api_key=self.settings.kimi_api_key,
                     base_url="https://api.moonshot.cn/v1",
-                )
-                self._clients[provider] = client
-                return client
-                from openai import AsyncOpenAI
-
-                if not self.settings.fireworks_api_key:
-                    return None
-                client = AsyncOpenAI(
-                    api_key=self.settings.fireworks_api_key,
-                    base_url="https://api.fireworks.ai/inference/v1",
                 )
                 self._clients[provider] = client
                 return client
