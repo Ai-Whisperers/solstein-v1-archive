@@ -144,6 +144,8 @@ class Company(BaseModel):
     signal_confidences: dict[str, float] = Field(default_factory=dict)
     enrichment_source_count: int = 0
     data_quality_tier: str = "unknown"
+    enrichment_quality_metrics: dict[str, Any] = Field(default_factory=dict)  # EPIC-004: Preserve quality metrics
+    data_quality_tier: str = "unknown"
 
 
     # External Identifiers for Connector Lookups

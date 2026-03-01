@@ -191,6 +191,10 @@ def convert_json_to_company(data: dict) -> Company:
         geographic_presence=data.get("geographic_presence", []),
         key_customers=[],
         enrichment_source_count=enrichment_source_count,  # NEW: Preserve enrichment count
+        enrichment_quality_metrics=data.get("enrichment_quality_metrics", {}),  # NEW: Preserve quality metrics
+        data_source="Solstein Competitive Intelligence",
+        last_updated=datetime.now(timezone.utc)
+    )
         data_source="Solstein Competitive Intelligence",
         last_updated=datetime.now(timezone.utc)
     )
