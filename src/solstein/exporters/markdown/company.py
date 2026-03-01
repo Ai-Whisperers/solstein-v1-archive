@@ -37,7 +37,7 @@ class CompanyReportGenerator(BaseReportGenerator):
 
 {company.name} is a{" " if company.industry else ""}{company.industry or "company"}
 {"operating from " + company.headquarters if company.headquarters else ""}.
-With {formatter.format_large_number(company.employees)} employees and {formatter.format_currency(getattr(company.financials, "revenue", None))} revenue,
+With {formatter.format_large_number(company.financials.employees if company.financials else None)} employees and {formatter.format_currency(getattr(company.financials, "revenue", None))} revenue,
 the company demonstrates a {self._classify_trajectory(company)} trajectory.
 
 **Composite Score**: {company.composite_score or "N/A"} | **Classification**: {company.classification or "N/A"}
@@ -52,7 +52,7 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
 | Industry | {company.industry or "N/A"} |
 | Headquarters | {company.headquarters or "N/A"} |
 | Founded | {company.founded_year or "N/A"} |
-| Employees | {formatter.format_large_number(company.employees)} |
+| Employees | {formatter.format_large_number(company.financials.employees if company.financials else None)} |
 | Website | {company.website or "N/A"} |
 
 ---
