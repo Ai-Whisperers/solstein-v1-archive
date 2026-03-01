@@ -63,37 +63,72 @@ class EneveEnricher:
     async def _enrich_company(self, company_data: Dict[str, Any]) -> List[RawDataSource]:
         """Run enrichment pipeline for a single company.
 
-        Since the full pipeline requires async DB operations,
-        we simulate enrichment with available adapters.
+        Uses the real enrichment pipeline to gather data from multiple sources.
+        Falls back to available adapters if pipeline fails.
         """
         sources = []
-
-        # Get all enrichment sources from registry
-        enrichment_sources = self.registry.all_enrichment_sources
-
-        logger.debug(f"Found {len(enrichment_sources)} enrichment sources")
-
-        # EPIC-FIX-006: Simulate enrichment with 3 mock sources
-        # In production, these would be real API calls to registered adapters
-        # For now, we simulate successful enrichment using valid enum values
-        mock_sources = [
-            ("LinkedIn", "linkedin"),
-            ("Website", "website"),
-            ("Crunchbase", "crunchbase"),
-        ]
+        company_name = company_data.get("company_name", "Unknown")
         
-        for source_name, source_type in mock_sources:
+        try:
+            # Try to use the real enrichment pipeline
+            result = await self.pipeline.enrich(
+                company_id=company_name.lower().replace(" ", "-"),
+                company_name=company_name,
+                website=company_data.get("website"),
+                industry=company_data.get("industry"),
+            )
+            
+            if result and result.sources:
+                sources = result.sources
+                logger.info(f"✅ Pipeline enrichment successful for {company_name}: {len(sources)} sources")
+            else:
+                logger.warning(f"⚠️ Pipeline returned no sources for {company_name}, using fallback")
+                sources = await self._fallback_enrichment(company_data)
+                
+        except Exception as e:
+            logger.error(f"❌ Pipeline enrichment failed for {company_name}: {e}")
+            logger.info(f"🔄 Using fallback enrichment for {company_name}")
+            sources = await self._fallback_enrichment(company_data)
+
+        return sources
+    
+    async def _fallback_enrichment(self, company_data: Dict[str, Any]) -> List[RawDataSource]:
+        """Fallback enrichment when pipeline fails.
+        
+        Uses available adapters from registry to gather basic data.
+        """
+        sources = []
+        company_name = company_data.get("company_name", "Unknown")
+        
+        # Get enrichment sources from registry
+        enrichment_sources = self.registry.all_enrichment_sources
+        logger.debug(f"Found {len(enrichment_sources)} enrichment sources for fallback")
+        
+        # Try each available adapter
+        for source in enrichment_sources[:3]:  # Limit to first 3 to avoid rate limits
+            try:
+                # Attempt to enrich with this source
+                source_result = await source.enrich(company_data)
+                if source_result:
+                    sources.append(source_result)
+                    logger.debug(f"✅ Fallback source added: {source_result.source_name}")
+            except Exception as e:
+                logger.debug(f"⚠️ Fallback source {source} failed: {e}")
+                continue
+        
+        # If no sources worked, create minimal source from existing data
+        if not sources:
+            logger.warning(f"⚠️ All enrichment failed for {company_name}, using minimal source")
             sources.append(
                 RawDataSource(
-                    source_name=source_name,
-                    source_type=source_type,
-                    entity_id=company_data.get("company_name", ""),
-                    entity_name=company_data.get("company_name", ""),
-                    raw_content={"enriched": True, "source": source_name},
+                    source_name="Input Data",
+                    source_type="input",
+                    entity_id=company_name,
+                    entity_name=company_name,
+                    raw_content=company_data,
                 )
             )
-            logger.debug(f"Added enrichment source: {source_name}")
-
+        
         return sources
 
     def _merge_enrichment(self, company_data: Dict[str, Any], raw_sources: List[RawDataSource]) -> Dict[str, Any]:
