@@ -15,55 +15,21 @@ from typing import Dict, List, Any
 class SyntheticCompanyGenerator:
     """Generate realistic synthetic company data."""
 
-    # Realistic company name components
+    # Realistic company name components (EPIC-006: Removed duplicate "Grid")
     PREFIXES = [
-        "Green",
-        "Eco",
-        "Smart",
-        "Clean",
-        "Power",
-        "Energy",
-        "Grid",
-        "Solar",
-        "Wind",
-        "Hydro",
-        "Bio",
-        "Net",
-        "Flux",
-        "Volt",
-        "Amp",
-        "Watt",
-        "Core",
-        "Nexus",
-        "Pulse",
-        "Spark",
-        "Flow",
-        "Sync",
-        "Link",
-        "Grid",
+        "Green", "Eco", "Smart", "Clean", "Power", "Energy", "Grid",
+        "Solar", "Wind", "Hydro", "Bio", "Net", "Flux", "Volt",
+        "Amp", "Watt", "Core", "Nexus", "Pulse", "Spark", "Flow",
+        "Sync", "Link", "Data", "Digital", "Intelli", "Auto", "Cyber",
     ]
 
+    # EPIC-006: Added more diverse suffixes
     SUFFIXES = [
-        "Tech",
-        "Systems",
-        "Solutions",
-        "Energy",
-        "Power",
-        "Grid",
-        "Soft",
-        "Ware",
-        "Dynamics",
-        "Labs",
-        "Hub",
-        "Cloud",
-        "AI",
-        "IO",
-        "ify",
-        "Flow",
-        "Stream",
-        "Base",
-        "Core",
-        "Nexus",
+        "Tech", "Systems", "Solutions", "Energy", "Power", "Grid",
+        "Soft", "Ware", "Dynamics", "Labs", "Hub", "Cloud", "AI",
+        "IO", "ify", "Flow", "Stream", "Base", "Core", "Nexus",
+        "Platform", "Analytics", "Network", "Exchange", "Market",
+        "Optimizer", "Controller", "Manager", "Tracker", "Monitor",
     ]
 
     COUNTRIES = [
@@ -100,18 +66,58 @@ class SyntheticCompanyGenerator:
         """Initialize generator with random seed for reproducibility."""
         random.seed(seed)
 
+    # EPIC-006: Enhanced description templates for more variety
+    DESCRIPTION_TEMPLATES = [
+        "{industry} company specializing in {focus_area} for {target_market}",
+        "Leading provider of {focus_area} solutions in the {industry} sector",
+        "Innovative {industry} platform enabling {focus_area} across {target_market}",
+        "Enterprise-grade {focus_area} software for {industry} applications",
+        "AI-powered {industry} solution for optimizing {focus_area} in {target_market}",
+        "Cloud-based {focus_area} platform serving the {industry} market",
+        "Next-generation {industry} technology for {focus_area} and sustainability",
+        "Comprehensive {focus_area} suite designed for {target_market} in {industry}",
+    ]
+    
+    FOCUS_AREAS = [
+        "renewable energy management", "smart grid optimization", "carbon tracking",
+        "energy trading", "demand response", "distributed energy resources",
+        "energy storage management", "electric vehicle charging", "building energy management",
+        "industrial energy efficiency", "predictive maintenance", "asset performance management",
+        "energy procurement", "sustainability reporting", "ESG compliance",
+    ]
+    
+    TARGET_MARKETS = [
+        "utilities", "enterprises", "industrial facilities", "commercial buildings",
+        "residential customers", "municipalities", "data centers", "manufacturing",
+        "healthcare facilities", "educational institutions", "retail chains",
+        "transportation networks", "agricultural operations", "smart cities",
+    ]
+
     def generate_company_name(self) -> str:
         """Generate a realistic company name."""
         prefix = random.choice(self.PREFIXES)
         suffix = random.choice(self.SUFFIXES)
 
-        # Sometimes add a connector
-        if random.random() > 0.7:
-            connectors = ["", " ", "-", ""]
+        # EPIC-006: Fixed connector probability - 25% chance of connector
+        if random.random() < 0.25:
+            # Only use actual connectors (no empty strings)
+            connectors = [" ", "-"]
             connector = random.choice(connectors)
             return f"{prefix}{connector}{suffix}"
 
         return f"{prefix}{suffix}"
+    
+    def generate_description(self, industry: str) -> str:
+        """Generate a detailed, varied company description."""
+        template = random.choice(self.DESCRIPTION_TEMPLATES)
+        focus_area = random.choice(self.FOCUS_AREAS)
+        target_market = random.choice(self.TARGET_MARKETS)
+        
+        return template.format(
+            industry=industry,
+            focus_area=focus_area,
+            target_market=target_market
+        )
 
     def generate_revenue_timeline(self, base_revenue: float, growth_rate: float) -> List[Dict[str, Any]]:
         """Generate 4-year revenue timeline."""
@@ -189,7 +195,7 @@ class SyntheticCompanyGenerator:
             "country": random.choice(self.COUNTRIES),
             "industry": random.choice(self.INDUSTRIES),
             "website": f"https://{company_name.lower().replace(' ', '').replace('-', '')}.com",
-            "description": f"{random.choice(self.INDUSTRIES)} company focused on {random.choice(['renewable energy', 'smart grids', 'carbon tracking', 'energy trading'])}",
+            "description": self.generate_description(industry),  # EPIC-006: Use improved description generator",
             "ai_maturity_score": round(random.uniform(3, 9), 1),
             "ai_maturity": random.choice(["Strong", "Moderate", "Emerging", "Low"]),
             "ai_score": round(random.uniform(3, 9), 1),
