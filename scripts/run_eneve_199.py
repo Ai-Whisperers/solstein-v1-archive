@@ -5,6 +5,7 @@ Converts JSON data to Company models and generates outputs.
 """
 
 import json
+import re
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -15,6 +16,48 @@ sys.path.insert(0, '/home/ai-whisperers/solstein/src')
 from solstein.domain.models import Company, FinancialMetric, CompanyTier, AIMaturity, ThreatLevel, ConfidenceLevel
 from solstein.analytics.scoring import GrowthScorer
 from solstein.exporters.excel import ExcelExporter
+
+
+class CompanyIDGenerator:
+    """Generate unique, deterministic company IDs."""
+    
+    def __init__(self):
+        self.generated_ids = set()
+    
+    def generate_id(self, company_name: str) -> str:
+        """Generate unique ID for company.
+        
+        Args:
+            company_name: Name of the company
+        
+        Returns:
+            Unique company ID
+        """
+        # Create base ID from company name
+        base_id = company_name.lower().strip()
+        base_id = re.sub(r'[^\w\s-]', '', base_id)  # Remove special chars
+        base_id = re.sub(r'\s+', '-', base_id)  # Replace spaces with hyphens
+        base_id = base_id[:50]  # Limit length
+        
+        if not base_id:
+            base_id = "unknown"
+        
+        # Check for uniqueness
+        if base_id not in self.generated_ids:
+            self.generated_ids.add(base_id)
+            return base_id
+        
+        # Handle collision with numeric suffix
+        counter = 2
+        while f"{base_id}-{counter}" in self.generated_ids:
+            counter += 1
+        unique_id = f"{base_id}-{counter}"
+        self.generated_ids.add(unique_id)
+        return unique_id
+
+
+# Global ID generator instance
+_id_generator = CompanyIDGenerator()
 
 
 def convert_json_to_company(data: dict) -> Company:
@@ -64,9 +107,12 @@ def convert_json_to_company(data: dict) -> Company:
     }
     tier = tier_map.get(classification, CompanyTier.TIER_3)
     
+    # Generate unique company ID
+    company_id = _id_generator.generate_id(data.get("company_name", "unknown"))
+    
     # Build Company object
     return Company(
-        id=data.get("company_name", "unknown").lower().replace(" ", "-").replace(".", ""),
+        id=company_id,
         name=data.get("company_name", "Unknown"),
         industry=data.get("industry", "Energy Software"),
         description=data.get("description"),
