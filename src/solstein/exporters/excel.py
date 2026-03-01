@@ -105,6 +105,10 @@ class ExcelExporter:
         ws_tech = wb.create_sheet("Tech & AI Maturity")
         self._add_tech_maturity(ws_tech, profiles)
 
+        # 5. Company Details — 20 fields missing from other sheets (EPIC-033)
+        ws_details = wb.create_sheet("Company Details")
+        self._add_company_details(ws_details, profiles)
+
         # Auto-adjust column widths for all sheets
         for sheet in wb.worksheets:
             self._auto_adjust_columns(sheet)
@@ -318,6 +322,64 @@ class ExcelExporter:
 
         # Set column width for AI capabilities
         ws.column_dimensions["F"].width = 40
+
+    def _add_company_details(self, ws: Any, profiles: list[Company]) -> None:
+        """Company Details sheet — 20 fields not covered in other sheets (EPIC-033)."""
+        self._add_top_banner(ws, "Company Details", "Full profile including identifiers and metadata")
+        headers = [
+            "Company", "Website", "Headquarters", "Founded Year", "Employees",
+            "Ticker", "Company Number", "ISIN", "Geography Code", "Industry",
+            "Sub Sector", "AI Maturity", "Confidence Level", "Signal Count",
+            "Source Count", "Data Quality", "Competitive Positioning",
+            "Comp. Overlap Count", "Last Updated", "Description",
+        ]
+        self._write_headers(ws, headers, start_row=5)
+
+        for row_idx, p in enumerate(profiles, start=6):
+            # Source / signal counts
+            source_count = len(p.sources) if hasattr(p, "sources") and p.sources else 0
+            signal_count = getattr(p, "signal_count", 0)
+
+            # Data quality — compute from confidence if not directly available
+            dq_raw = getattr(p, "data_quality", None)
+            data_quality = f"{dq_raw:.0%}" if isinstance(dq_raw, float) else "N/A"
+
+            # Confidence level
+            conf = getattr(p, "confidence_level", None)
+            confidence = conf.value if hasattr(conf, "value") else str(conf) if conf else "N/A"
+
+            # Competitive positioning / overlap
+            comp_pos = getattr(p, "competitive_positioning", "")
+            overlaps = getattr(p, "competitive_overlaps", [])
+            overlap_count = len(overlaps) if overlaps else 0
+
+            # Sub-sector
+            sub_sector = getattr(p, "sub_sector", "") or ""
+
+            row = [
+                p.name,
+                getattr(p, "website", "") or "",
+                getattr(p, "headquarters", "") or "",
+                getattr(p, "founded_year", "") or "",
+                getattr(p, "employees", "") or "",
+                getattr(p, "ticker", "") or "",
+                getattr(p, "company_number", "") or "",
+                getattr(p, "isin", "") or "",
+                getattr(p, "geography_code", "") or "",
+                getattr(p, "industry", "") or "",
+                sub_sector,
+                str(getattr(p, "ai_maturity", "") or ""),
+                confidence,
+                signal_count,
+                source_count,
+                data_quality,
+                comp_pos or "",
+                overlap_count,
+                getattr(p, "updated_at", "") or "",
+                (getattr(p, "description", "") or "")[:200],  # truncate long descriptions
+            ]
+            for col, value in enumerate(row, start=1):
+                ws.cell(row=row_idx, column=col, value=value)
 
     def _auto_adjust_columns(self, ws: Any) -> None:
         """Auto-adjust column widths based on content."""
