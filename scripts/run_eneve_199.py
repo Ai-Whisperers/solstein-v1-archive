@@ -110,6 +110,36 @@ def convert_json_to_company(data: dict) -> Company:
     # Generate unique company ID
     company_id = _id_generator.generate_id(data.get("company_name", "unknown"))
     
+    # Extract confidence from all input fields
+    # Map confidence levels to numeric weights (0.0-1.0)
+    confidence_weights = {
+        ConfidenceLevel.CONFIRMED: 1.0,
+        ConfidenceLevel.ESTIMATED: 0.7,
+        ConfidenceLevel.UNKNOWN: 0.3,
+    }
+    
+    # Extract employee confidence
+    employees_confidence = confidence_map.get(data.get("employees_confidence", ""), ConfidenceLevel.UNKNOWN)
+    
+    # Extract funding confidence
+    funding_confidence = confidence_map.get(data.get("funding_confidence", ""), ConfidenceLevel.UNKNOWN)
+    
+    # Extract valuation confidence
+    valuation_confidence = confidence_map.get(data.get("valuation_confidence", ""), ConfidenceLevel.UNKNOWN)
+    
+    # Extract AI confidence
+    ai_confidence = confidence_map.get(data.get("ai_confidence", ""), ConfidenceLevel.UNKNOWN)
+    
+    # Build signal_confidences dictionary for scoring weighting
+    signal_confidences = {
+        "revenue": confidence_weights.get(revenue_confidence, 0.3),
+        "growth_rate": confidence_weights.get(revenue_confidence, 0.3),
+        "employees": confidence_weights.get(employees_confidence, 0.3),
+        "funding": confidence_weights.get(funding_confidence, 0.3),
+        "valuation": confidence_weights.get(valuation_confidence, 0.3),
+        "ai_maturity": confidence_weights.get(ai_confidence, 0.3),
+    }
+    
     # Build Company object
     return Company(
         id=company_id,
@@ -124,17 +154,18 @@ def convert_json_to_company(data: dict) -> Company:
         ai_maturity=ai_maturity,
         saas_maturity=5,  # Default mid-range
         tech_stack=[],
+        signal_confidences=signal_confidences,  # NEW: Populate signal confidences
         financials=FinancialMetric(
             revenue=revenue,
             revenue_confidence=revenue_confidence,
             growth_rate=growth_rate,
             growth_confidence=revenue_confidence,
             employees=employees,
-            employees_confidence=ConfidenceLevel.UNKNOWN,
+            employees_confidence=employees_confidence,
             funding_raised=funding_raised,
-            funding_confidence=ConfidenceLevel.UNKNOWN,
+            funding_confidence=funding_confidence,
             valuation=valuation,
-            valuation_confidence=ConfidenceLevel.UNKNOWN
+            valuation_confidence=valuation_confidence
         ),
         geographic_presence=data.get("geographic_presence", []),
         key_customers=[],
