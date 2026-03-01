@@ -1,9 +1,9 @@
 """Central registry for data source adapters.
 
-The registry collects DiscoverySource and EnrichmentSource adapters
-and provides them to the pipeline stages.  ``build_default_registry``
-constructs a registry with all available sources based on the current
-Settings (API keys present → adapter registered).
+The registry collects DiscoverySource, EnrichmentSource, and
+UnifiedDataSource adapters and provides them to the pipeline stages.
+``build_default_registry`` constructs a registry with all available
+sources based on the current Settings (API keys present → adapter registered).
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from solstein.adapters.protocols import (
     DiscoverySource,
     EnrichmentSource,
+    UnifiedDataSource,
 )
 from solstein.config import Settings
 
@@ -23,12 +24,17 @@ class SourceRegistry:
 
     _discovery_sources: list[DiscoverySource] = field(default_factory=list)
     _enrichment_sources: list[EnrichmentSource] = field(default_factory=list)
+    _unified_sources: list[UnifiedDataSource] = field(default_factory=list)
 
     def register_discovery(self, source: DiscoverySource) -> None:
         self._discovery_sources.append(source)
 
     def register_enrichment(self, source: EnrichmentSource) -> None:
         self._enrichment_sources.append(source)
+
+    def register_unified(self, source: UnifiedDataSource) -> None:
+        """Register a full UnifiedDataSource adapter (discover+enrich+refresh)."""
+        self._unified_sources.append(source)
 
     @property
     def discovery_sources(self) -> list[DiscoverySource]:
@@ -37,6 +43,22 @@ class SourceRegistry:
     @property
     def enrichment_sources(self) -> list[EnrichmentSource]:
         return list(self._enrichment_sources)
+
+    @property
+    def unified_sources(self) -> list[UnifiedDataSource]:
+        """All registered UnifiedDataSource adapters."""
+        return list(self._unified_sources)
+
+    @property
+    def all_enrichment_sources(self) -> list[EnrichmentSource]:
+        """Combined legacy + unified enrichment sources.
+
+        UnifiedDataSource structurally satisfies EnrichmentSource so the
+        unified adapters are exposed here for backwards-compatible pipeline use.
+        """
+        combined: list[EnrichmentSource] = list(self._enrichment_sources)
+        combined.extend(self._unified_sources)  # type: ignore[arg-type]
+        return combined
 
 
 def build_default_registry(settings: Settings) -> SourceRegistry:
@@ -99,7 +121,8 @@ def build_default_registry(settings: Settings) -> SourceRegistry:
 
     registry.register_enrichment(GlobalMarketEnrichment())
 
-    # Unified adapters from dead module revival (Tasks 15-17)
+    # Unified adapters — satisfy the full UnifiedDataSource protocol
+    # (discover + enrich + refresh) and are also exposed via all_enrichment_sources.
     from solstein.adapters.enrichment.funding_unified import FundingUnifiedAdapter
     from solstein.adapters.enrichment.linkedin_unified import LinkedInUnifiedAdapter
     from solstein.adapters.enrichment.news_unified import NewsUnifiedAdapter
