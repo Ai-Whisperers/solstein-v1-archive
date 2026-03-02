@@ -8,12 +8,11 @@
 
 | Requirement | Version | Notes |
 |-------------|---------|-------|
-| Python | 3.11+ | Required |
-| PostgreSQL | 15+ | Required |
-| Node.js | 18+ | Required for dashboard |
+| Python | 3.10+ | Required |
+| PostgreSQL | 14+ | Required |
+| Redis | 6+ | Required (cache + Celery) |
 | uv | Latest | Recommended package manager |
-| Redis | 7+ | Optional (in-memory fallback available) |
-| Ollama | Latest | Optional (local LLM) |
+| Ollama | Latest | Optional (local LLM, privacy-first) |
 
 ---
 
@@ -26,7 +25,7 @@
 uv sync
 
 # Alternative: pip
-pip install -r requirements.txt
+pip install -e .
 
 # Development extras
 pip install -e ".[dev]"
@@ -57,7 +56,7 @@ FIREWORKS_API_KEY=fw_...
 ### 3. Setup Database
 
 ```bash
-python scripts/setup_db.py
+export PYTHONPATH=src && python -c "import asyncio; from solstein.infrastructure.database import init_db; asyncio.run(init_db())"
 ```
 
 ### 4. Start the API
@@ -126,10 +125,10 @@ black .
 ruff check --fix .
 
 # Type check
-mypy . --strict
+mypy .
 
 # All at once
-black . && ruff check --fix . && mypy . --strict
+black . && ruff check --fix . && mypy .
 ```
 
 ### Database
@@ -152,10 +151,10 @@ PYTHONPATH=src alembic current
 
 ```bash
 # Run research pipeline
-PYTHONPATH=src python run_research.py
+solstein --help  # See available CLI commands
 
 # With specific company
-PYTHONPATH=src python run_research.py --company "Acme Corp"
+# Use API: POST /scoring/company/{id}/score (run_research.py no longer exists)
 ```
 
 ---
@@ -226,7 +225,7 @@ logger.info("Processing company", company_id=company_id, stage="scoring")
 
 ## Testing Strategy
 
-Solstein follows a **4-layer testing pyramid**:
+Solstein follows a **6-layer testing strategy**:
 
 ### Layer 1: Unit Tests (`tests/unit/`)
 - Domain models and scoring math
@@ -273,7 +272,7 @@ def test_lead_threshold():
 LLM_PROVIDER=auto  # Tries providers in fallback order
 ```
 
-Fallback chain: **Ollama → Fireworks → OpenAI → Groq → Template**
+Fallback chain: **Ollama → Groq → Fireworks → SiliconFlow → Alibaba → Mistral → DeepInfra → Gemini → NVIDIA → Cerebras → Kimi → Anthropic → OpenAI → Template**
 
 ### Pinning a Provider
 
@@ -329,7 +328,7 @@ test: Add unit tests for Phoenix classification
 black . && ruff check --fix .
 
 # 2. Type check
-mypy . --strict
+mypy .
 
 # 3. Tests
 PYTHONPATH=src pytest tests/unit -q

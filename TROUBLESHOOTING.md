@@ -14,9 +14,9 @@ ConnectionRefusedError: [Errno 111] Connection refused
 
 **Solutions**:
 
-1. **Verify your DATABASE_URL**
+1. **Verify your DATABASE__URL** (note: double underscore — pydantic-settings nested model convention)
    ```bash
-   echo $DATABASE_URL
+   echo $DATABASE__URL
    # Should be: postgresql://postgres:[password]@db.[project].supabase.co:5432/postgres?sslmode=require
    ```
 
@@ -42,7 +42,7 @@ FATAL: SSL connection is required
 
 **Solution**: Add `sslmode=require` to your connection URL:
 ```bash
-DATABASE_URL="postgresql://...?sslmode=require"
+DATABASE__URL="postgresql://...?sslmode=require"
 ```
 
 ### "Too many connections"
@@ -423,7 +423,7 @@ If you're stuck:
 ## Quick Fixes Checklist
 
 - [ ] Database URL correct with `sslmode=require`
-- [ ] Environment variables exported: `export DATABASE_URL="..."`
+- [ ] Environment variables exported: `export DATABASE__URL="..."`
 - [ ] Using `uv run` not direct python
 - [ ] All dependencies installed: `uv sync`
 - [ ] Supabase project is active (not paused)

@@ -6,7 +6,7 @@
 
 ## Overview
 
-Solstein uses a **4-layer testing pyramid** with real Supabase PostgreSQL for database tests (no mocks in the test layer). This ensures tests verify actual behavior, not mock behavior.
+Solstein uses a **6-layer testing pyramid** with real PostgreSQL for database integration tests (no mocks in the integration layer). This ensures tests verify actual behavior, not mock behavior.
 
 | Layer | Location | Count | Purpose |
 |-------|----------|-------|---------|

@@ -47,6 +47,19 @@ class MarketReportGenerator(BaseReportGenerator):
             tier = getattr(c, "tier", None)
             tier_str = tier.value if hasattr(tier, "value") else str(tier) if tier else "Unknown"
             tier_counts[tier_str] = tier_counts.get(tier_str, 0) + 1
+        # Tier distribution
+        tier_counts = {}
+        for c in companies:
+            tier = getattr(c, "tier", None)
+            tier_str = tier.value if hasattr(tier, "value") else str(tier) if tier else "Unknown"
+            tier_counts[tier_str] = tier_counts.get(tier_str, 0) + 1
+
+        # Classification distribution
+        classification_counts = {}
+        for c in companies:
+            classification = getattr(c, "classification", None)
+            if classification:
+                classification_counts[classification] = classification_counts.get(classification, 0) + 1
 
         # Top performers
         top_companies = sorted(
@@ -72,12 +85,9 @@ AI readiness.
 ### Key Metrics
 
 | Metric | Value |
-|---|---|
-| Average Composite Score | {avg_score:.2f}/10 |
-| Average Growth Rate | {formatter.format_percentage(avg_growth)} |
-| Phoenix Tier Companies | {tier_counts.get("Phoenix", 0)} |
-| Salt Tier Companies | {tier_counts.get("Salt", 0)} |
-| Lead Tier Companies | {tier_counts.get("Lead", 0)} |
+|| Phoenix Tier Companies | {classification_counts.get('Phoenix', 0)} |
+|| Salt Tier Companies | {classification_counts.get('Salt', 0)} |
+|| Lead Tier Companies | {classification_counts.get('Lead', 0)} |
 
 ---
 
@@ -89,7 +99,7 @@ AI readiness.
         for i, company in enumerate(top_companies, 1):
             tier = getattr(company, "tier", None)
             tier_str = tier.value if hasattr(tier, "value") else str(tier) if tier else "N/A"
-            report += f"| {i} | {company.name} | {company.composite_score or 'N/A'} | {tier_str} | {getattr(company, 'industry', 'N/A') or 'N/A'} |\n"
+            report += f"| {i} | {company.name} | {formatter.format_score(company.composite_score)} | {tier_str} | {getattr(company, 'industry', 'N/A') or 'N/A'} |\n"
 
         report += """
 ---

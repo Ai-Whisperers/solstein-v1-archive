@@ -23,10 +23,10 @@
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.10+
 - uv package manager (recommended) or pip
-- Node.js 18+ (for MCP servers)
-- PostgreSQL 15+ (optional, for data storage)
+- Redis 6+ (required for cache and Celery task queue)
+- PostgreSQL 14+ (optional, for data storage)
 
 ### Installation
 
@@ -39,10 +39,10 @@ cd solstein
 uv sync
 
 # Or with pip
-pip install -r requirements.txt
+pip install -e .
 
 # Setup database (optional)
-python scripts/setup_db.py
+export PYTHONPATH=src && python -c "import asyncio; from solstein.infrastructure.database import init_db; asyncio.run(init_db())"
 ```
 
 ### Environment Setup
@@ -268,8 +268,8 @@ The system supports these models per provider:
 ### Fallback Priority
 
 ```
-1. Ollama (local) → 2. Groq → 3. Fireworks → 4. Mistral → 5. DeepInfra
-→ 6. Gemini → 7. NVIDIA → 8. Cerebras → 9. Kimi → 10. OpenAI
+1. Ollama → 2. Groq → 3. Fireworks → 4. SiliconFlow → 5. Alibaba → 6. Mistral → 7. DeepInfra
+→ 8. Gemini → 9. NVIDIA → 10. Cerebras → 11. Kimi → 12. Anthropic → 13. OpenAI
 ```
 
 ### Rate Limits & Quotas

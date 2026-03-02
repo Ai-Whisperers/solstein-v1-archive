@@ -59,8 +59,8 @@ Platform health check.
 }
 ```
 
-#### `GET /health/metrics`
-Prometheus-compatible metrics endpoint.
+#### `GET /metrics`
+Prometheus-compatible metrics. Also available: `GET /metrics/data-quality` for data quality metrics.
 
 #### `GET /healthz`
 Kubernetes liveness probe alias. Returns `{"status": "healthy"}`.
@@ -110,7 +110,7 @@ Retrieve a single company profile with full scoring detail.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `id` | UUID | Company identifier |
+| `id` | int or string | Integer company `id`, or string `company_id` (e.g. `acme-corp`) |
 
 **Response:**
 ```json
@@ -143,7 +143,7 @@ Trigger scoring for a specific company.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `id` | UUID | Company identifier |
+| `id` | int or string | Integer company `id`, or string `company_id` |
 
 **Response:**
 ```json
@@ -227,7 +227,7 @@ Competitive overlap analysis for a company.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `id` | UUID | Company identifier |
+| `id` | int or string | Integer company `id`, or string `company_id` |
 
 **Response:**
 ```json
@@ -248,56 +248,52 @@ Competitive overlap analysis for a company.
 
 ### Export
 
-#### `POST /export/`
-Generate an Excel intelligence report.
+#### `GET /export`
+Generate an intelligence report in the requested format.
 
-**Request Body:**
-```json
-{
-  "company_ids": ["uuid1", "uuid2"],
-  "format": "excel",
-  "include_signals": true,
-  "include_scoring_detail": true
-}
-```
+> **Note**: This is a `GET` endpoint with query parameters, not `POST /export/`.
 
-**Response:** Binary Excel file (`.xlsx`) download.
+**Query Parameters:**
 
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `format` | string | `excel` | `excel`, `csv`, `pdf`, `markdown`, `llm` |
+| `tier` | string | — | Filter by company tier |
+| `industry` | string | — | Filter by industry |
+| `limit` | int | `100` | Max companies to export |
+| `include_signals` | bool | `false` | Include signal details |
+| `include_audit` | bool | `false` | Include audit trail |
+
+**Response:** File download (content-type depends on `format`).
 ---
 
 ### Jobs
 
-#### `GET /jobs`
-List background jobs.
+#### `GET /jobs/{workflow_id}`
 
-**Response:**
+> **⚠️ DISABLED**: Returns `501 Not Implemented`. The Temporal workflow engine has been removed.
+
+**Response `501`:**
 ```json
-{
-  "jobs": [
-    {
-      "id": "job-uuid",
-      "type": "research_run",
-      "status": "completed",
-      "created_at": "2026-03-01T10:00:00Z",
-      "completed_at": "2026-03-01T10:05:00Z"
-    }
-  ]
-}
+{"detail": "Jobs endpoint not implemented"}
 ```
 
 ---
 
 ### Enrichment
 
-#### `POST /enrichment/company/{id}`
-Trigger data enrichment for a company.
+#### `POST /companies/{id}/enrich`
+Trigger data enrichment for a company. Requires Celery + Redis (returns `503` without them).
 
+> **Note**: Use `POST /companies/{id}/enrich` or `POST /companies/enrich/batch` (not `/enrichment/company/{id}`).
 ---
 
 ### Simulation
 
-#### `GET /simulation`
-Run market simulation scenarios.
+#### `POST /simulation/run`
+Run a market simulation scenario.
+
+> **Note**: This is a `POST` endpoint at `/simulation/run`, not `GET /simulation`.
 
 ---
 

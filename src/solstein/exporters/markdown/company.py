@@ -40,7 +40,7 @@ class CompanyReportGenerator(BaseReportGenerator):
 With {formatter.format_large_number(company.financials.employees if company.financials else None)} employees and {formatter.format_currency(getattr(company.financials, "revenue", None))} revenue,
 the company demonstrates a {self._classify_trajectory(company)} trajectory.
 
-**Composite Score**: {company.composite_score or "N/A"} | **Classification**: {company.classification or "N/A"}
+**Composite Score**: {formatter.format_score(company.composite_score)} | **Classification**: {company.classification or "N/A"}
 
 ---
 
@@ -81,16 +81,16 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
 
 ## Executive Assessment
 
-**Overall Rating**: {company.composite_score or "N/A"}/10
+**Overall Rating**: {formatter.format_score(company.composite_score)}/10
 **Strategic Classification**: {company.classification or "N/A"}
 
 ### Score Breakdown
 
 | Dimension | Score | Assessment |
 |---|---|---|
-| Growth | {company.growth_score or "N/A"} | {interpreter.interpret_growth(company.growth_score)} |
-| Financial Health | {company.financial_health_score or "N/A"} | {interpreter.interpret_health(company.financial_health_score)} |
-| Competitive Position | {company.competitive_position_score or "N/A"} | {interpreter.interpret_position(company.competitive_position_score)} |
+| Growth | {formatter.format_score(company.growth_score)} | {interpreter.interpret_growth(company.growth_score)} |
+| Financial Health | {formatter.format_score(company.financial_health_score)} | {interpreter.interpret_health(company.financial_health_score)} |
+| Competitive Position | {formatter.format_score(company.competitive_position_score)} | {interpreter.interpret_position(company.competitive_position_score)} |
 
 ## Strategic Analysis
 
@@ -124,7 +124,7 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
 - **3-Year CAGR**: {getattr(company, "revenue_cagr_3yr", "N/A") or "N/A"}%
 
 ### Funding History
-{self._format_funding_rounds(getattr(company, "funding_rounds", []) or [])}
+{self._format_funding_rounds(company)}
 
 ### Growth Vectors
 {self._analyze_growth_vectors(company)}
@@ -203,17 +203,63 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
         return "\n".join(strengths)
 
     def _generate_weaknesses(self, company: Company) -> str:
-        """Generate weaknesses section."""
+        """Generate weaknesses section based on actual company data."""
         weaknesses = []
-        if (company.composite_score or 0) < 5:
-            weaknesses.append("- Below-average competitive position")
-        if (getattr(company.financials, "growth_rate", 0) or 0) < 5:
-            weaknesses.append("- Low growth trajectory")
-        if (getattr(company, "profit_margin", 0) or 0) < 0:
-            weaknesses.append("- Negative profit margins")
+        score = company.composite_score or 0
+        
+        # Tier-based weakness (only for non-Phoenix companies)
+        tier = getattr(company, 'tier', None)
+        classification = getattr(company, 'classification', None)
+        if tier and '4' in str(tier) and classification != 'Phoenix':
+            weaknesses.append(f"- **Revenue-based tier ({tier})** — €{revenue:.1f}M revenue places company in Tier 4 (revenue-based tier, not performance-based classification)")
+        
+        # Score-based weaknesses
+        if score < 7:
+            weaknesses.append(f"- **Below Phoenix threshold** — Composite score {score:.2f}/10 (needs ≥7.0 for Phoenix classification)")
+        if score < 5:
+            weaknesses.append(f"- **Low competitive position** — Score {score:.2f}/10 indicates significant competitive pressure")
+        
+        # Financial weaknesses
+        growth_rate = getattr(company.financials, 'growth_rate', 0) or 0
+        if growth_rate < 10:
+            weaknesses.append(f"- **Low growth trajectory** — {growth_rate:.1f}% growth rate (below 10% threshold)")
+        
+        profit_margin = getattr(company, 'profit_margin', 0) or getattr(company.financials, 'profit_margin', 0) or 0
+        if profit_margin < 0:
+            weaknesses.append(f"- **Unprofitable operations** — {profit_margin:.1f}% profit margin")
+        elif profit_margin < 5:
+            weaknesses.append(f"- **Thin margins** — {profit_margin:.1f}% profit margin (below 5% healthy threshold)")
+        
+        # Size/scale weaknesses (contextual based on classification)
+        revenue = getattr(company.financials, 'revenue', 0) or 0
+        if revenue < 10 and classification != 'Phoenix':
+            weaknesses.append(f"- **Small scale** — €{revenue:.1f}M revenue limits market influence")
+        elif revenue < 10 and classification == 'Phoenix':
+            # For Phoenix companies, reframe as opportunity rather than weakness
+            pass  # High-growth Phoenix companies can have small revenue
+        
+        employees = getattr(company, 'employee_count', 0) or getattr(company.financials, 'employees', 0) or 0
+        if employees < 100:
+            weaknesses.append(f"- **Limited workforce** — {employees} employees constrains execution capacity")
+        
+        # AI/Technology weaknesses
+        ai_score = getattr(company, 'ai_score', 0) or 0
+        if ai_score < 5:
+            weaknesses.append(f"- **Limited AI capabilities** — AI score {ai_score:.1f}/10 (below 5.0 competitive threshold)")
+        
+        # Funding weakness (contextual)
+        funding = getattr(company, 'funding_raised', 0) or getattr(company, 'total_funding_raised_eur', 0) or 0
+        if funding < 5_000_000 and classification != 'Phoenix':
+            weaknesses.append(f"- **Undercapitalized** — €{funding/1_000_000:.1f}M total funding (below €5M threshold)")
+        elif funding < 5_000_000 and classification == 'Phoenix':
+            # Phoenix companies with lower funding are efficiently capitalized
+            pass
+        
         if not weaknesses:
-            weaknesses.append("- No critical weaknesses identified")
+            weaknesses.append(f"- **Strong competitive position** — Composite score {score:.2f}/10 with no major identified weaknesses")
+        
         return "\n".join(weaknesses)
+
 
     def _generate_strategic_assessment(self, company: Company) -> str:
         """Generate strategic assessment."""
@@ -226,17 +272,37 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
             return f"{company.name} faces competitive pressures but has viable market position."
         return f"{company.name} requires strategic repositioning to improve competitive standing."
 
-    def _format_funding_rounds(self, rounds: list) -> str:
+    def _format_funding_rounds(self, company: Company) -> str:
         """Format funding rounds as markdown."""
-        if not rounds:
-            return "No funding data available."
+        # Check both total_funding_raised_eur and funding_raised fields
+        total_funding = company.total_funding_raised_eur or getattr(company, 'funding_raised', None)
+        
+        # Show total funding even when no detailed rounds are available
+        if total_funding:
+            total_str = f"**€{total_funding / 1e6:.0f}M total raised**"
+            rounds = getattr(company, "funding_rounds", []) or []
+            if not rounds:
+                return f"{total_str} (detailed rounds not disclosed)"
+            # Has both total and rounds - show both
+            lines = [f"{total_str}", "", "| Round | Amount | Date |", "|---|---|---|"]
+            for r in rounds[:10]:
+                amount = r.get("amount", "N/A") if isinstance(r, dict) else getattr(r, "amount", "N/A")
+                date = r.get("date", "N/A") if isinstance(r, dict) else getattr(r, "date", "N/A")
+                round_name = r.get("round", "N/A") if isinstance(r, dict) else getattr(r, "round", "N/A")
+                lines.append(f"| {round_name} | {amount} | {date} |")
+            return "\n".join(lines)
+        elif not getattr(company, "funding_rounds", None):
+            return "No funding rounds recorded"
+        
+        # Only have rounds, no total
         lines = ["| Round | Amount | Date |", "|---|---|---|"]
-        for r in rounds[:10]:  # Show last 10 rounds
+        for r in company.funding_rounds[:10]:
             amount = r.get("amount", "N/A") if isinstance(r, dict) else getattr(r, "amount", "N/A")
             date = r.get("date", "N/A") if isinstance(r, dict) else getattr(r, "date", "N/A")
             round_name = r.get("round", "N/A") if isinstance(r, dict) else getattr(r, "round", "N/A")
             lines.append(f"| {round_name} | {amount} | {date} |")
         return "\n".join(lines)
+
 
     def _analyze_growth_vectors(self, company: Company) -> str:
         """Analyze growth vectors."""

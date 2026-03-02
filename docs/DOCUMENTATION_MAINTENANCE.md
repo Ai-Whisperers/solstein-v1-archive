@@ -20,7 +20,7 @@ This document establishes the governance framework, update triggers, maintenance
 | Code Examples | Core use cases | 9 examples | ✅ Complete |
 | Extension Patterns | 4+ templates | 4 templates | ✅ Complete |
 | Code Conventions | 11 formalized rules | 11 rules | ✅ Complete |
-| Testing Guide | 4-layer pyramid | 4 layers documented | ✅ Complete |
+| Testing Guide | 6-layer strategy | 6 layers documented | ✅ Complete |
 | **Overall Coverage** | **90%+** | **85%** | 🟡 In Progress |
 
 ---

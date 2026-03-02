@@ -1,468 +1,321 @@
-# Solstein - Database Documentation
+# Solstein — Database Documentation
 
-This document describes the Solstein database schema and how to work with it.
+This document covers the database layer: connection setup, ORM overview, working with models, and practical query patterns. For the complete schema reference (all 18 tables with every column, index, and constraint), see [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md).
 
-## Database Overview
+---
 
-- **Type**: PostgreSQL (Supabase managed)
-- **ORM**: SQLAlchemy 2.0 with async support
-- **Driver**: asyncpg
-- **Connection Pooling**: Configured in conftest.py
+## Overview
 
-## Connection Configuration
+| Property | Value |
+|---|---|
+| **Engine** | PostgreSQL 14+ |
+| **ORM** | SQLAlchemy 2.0 (async) |
+| **Driver** | asyncpg |
+| **Tables** | 18 |
+| **Connection pool** | pool_size=20, max_overflow=10, timeout=30s |
+| **Migrations** | Manual (see `src/solstein/migrations/`) |
 
-### Environment Variables
+---
 
-```bash
-# Required
-DATABASE_URL=postgresql://postgres:[password]@db.[project].supabase.co:5432/postgres?sslmode=require
+## Connection Setup
 
-# Optional (for specific environments)
-DATABASE_URL_TEST=postgresql://... # Test database
-DATABASE_URL_DEV=postgresql://...  # Development database  
-DATABASE_URL_PROD=postgresql://... # Production database
+### Environment Variable
+
+Solstein uses `pydantic-settings` with nested model configuration. The database URL uses **double underscores** as the separator:
+
+```env
+# .env
+DATABASE__URL=postgresql+asyncpg://user:password@localhost:5432/solstein
+
+# Optional tuning
+DATABASE__POOL_SIZE=20
+DATABASE__MAX_OVERFLOW=10
+DATABASE__ECHO=false
 ```
 
-### Connection Pool Settings
+> **Important:** Use `DATABASE__URL` (double underscore), not `DATABASE_URL` (single underscore). The double underscore is the pydantic-settings v2 nested model separator.
 
-Configured in `tests/conftest.py`:
+### Async Session Usage
 
 ```python
-engine = create_async_engine(
-    async_url,
-    pool_size=5,           # Max connections in pool
-    max_overflow=10,       # Additional connections if needed
-    pool_recycle=3600,     # Recycle connections after 1 hour
-    pool_pre_ping=True,    # Test connections before use
-)
+from solstein.infrastructure.database import get_async_session
+
+async with get_async_session() as session:
+    result = await session.execute(select(CompanyRecord).limit(10))
+    companies = result.scalars().all()
 ```
+
+---
 
 ## Schema Overview
 
-### Core Tables
+Solstein has **18 tables** organized into three functional groups:
 
-#### companies
-Company information table.
+### Group 1: Competitive Intelligence (Integer PKs)
 
-```sql
-CREATE TABLE companies (
-    company_id VARCHAR PRIMARY KEY,
-    name VARCHAR NOT NULL,
-    industry VARCHAR,
-    country VARCHAR,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
+| Table | Model Class | Purpose |
+|---|---|---|
+| `companies` | `CompanyRecord` | Core company profiles + scoring (~42 columns) |
+| `scoring_records` | `ScoringRecord` | Point-in-time scoring snapshots |
+| `signal_records` | `SignalRecord` | Individual signals driving scores |
+| `market_snapshots` | `MarketSnapshot` | Aggregate market state snapshots |
+| `audit_trails` | `AuditTrailRecord` | Full analysis audit trail per company |
+| `enrichment_cache` | `EnrichmentCacheRecord` | Cached enrichment data (TTL-based) |
+| `enrichment_audit_trail` | `EnrichmentAuditRecord` | Enrichment operation audit log |
+| `enrichment_jobs` | `EnrichmentJobRecord` | Celery enrichment task tracking |
 
-#### gathering_batches
-Tracks data gathering operations for companies.
+### Group 2: Research Pipeline (UUID PKs)
 
-```sql
-CREATE TABLE gathering_batches (
-    batch_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id VARCHAR REFERENCES companies(company_id),
-    status VARCHAR DEFAULT 'in_progress',
-    created_at TIMESTAMP DEFAULT NOW(),
-    completed_at TIMESTAMP
-);
-```
+| Table | Model Class | Purpose |
+|---|---|---|
+| `research_runs` | `ResearchRunRecord` | Top-level research run metadata |
+| `research_stages` | `ResearchStageRecord` | Per-stage execution within a run |
+| `research_artifacts` | `ResearchArtifactRecord` | Artifacts produced by a run |
+| `source_documents` | `SourceDocumentRecord` | Source URLs observed per company |
+| `metric_observations` | `MetricObservationRecord` | Individual metric values from sources |
+| `evidence_readiness` | `EvidenceReadinessRecord` | Evidence quality scores per company |
+| `research_contradictions` | `ContradictionRecord` | Detected data conflicts |
+| `research_contradiction_transitions` | `ContradictionTransitionRecord` | Contradiction status change history |
 
-#### facts
-Stores extracted facts about companies.
+### Group 3: Infrastructure (Mixed PKs)
 
-```sql
-CREATE TABLE facts (
-    fact_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id VARCHAR REFERENCES companies(company_id),
-    batch_id UUID REFERENCES gathering_batches(batch_id),
-    fact_type VARCHAR NOT NULL,
-    value NUMERIC,
-    value_str VARCHAR,
-    confidence NUMERIC CHECK (confidence BETWEEN 0 AND 1),
-    source VARCHAR,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
+| Table | Model Class | Purpose |
+|---|---|---|
+| `outbox_records` | `OutboxRecord` | Transactional outbox for event reliability (UUID) |
+| `tenants` | `TenantRecord` | Multi-tenant API key management (UUID) |
 
-#### fact_sources
-Links facts to their original sources.
+---
 
-```sql
-CREATE TABLE fact_sources (
-    source_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    fact_id UUID REFERENCES facts(fact_id) ON DELETE CASCADE,
-    source_type VARCHAR,
-    url VARCHAR,
-    title VARCHAR,
-    retrieved_at TIMESTAMP DEFAULT NOW()
-);
-```
+## Key Design Decisions
 
-### Analysis Tables
+### Two PK Strategies
 
-#### company_scoring_records
-Stores AI-generated company scores.
+- **Integer PKs** — competitive intelligence tables (companies, scoring_records, signal_records, market_snapshots, audit_trails, enrichment_*)
+- **UUID PKs** — research pipeline tables (research_runs, source_documents, etc.) and infrastructure tables (tenants, outbox_records)
 
-```sql
-CREATE TABLE company_scoring_records (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id VARCHAR REFERENCES companies(company_id),
-    company_name VARCHAR,
-    growth_score NUMERIC,
-    financial_health_score NUMERIC,
-    competitive_position_score NUMERIC,
-    overall_score NUMERIC,
-    classification VARCHAR,
-    scoring_timestamp TIMESTAMP DEFAULT NOW(),
-    scorer_version VARCHAR
-);
-```
+This reflects the system's history: the scoring system predates the research pipeline.
 
-#### signal_records
-Stores extracted signals about companies.
+### company_id vs id
 
-```sql
-CREATE TABLE signal_records (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id VARCHAR REFERENCES companies(company_id),
-    signal_type VARCHAR,
-    signal_value NUMERIC,
-    confidence NUMERIC,
-    scoring_id UUID REFERENCES company_scoring_records(id),
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
+In the `companies` table:
+- `id` — Integer auto-increment PK (database-internal)
+- `company_id` — String (unique) — the application-level identifier (slug or external ID)
 
-#### market_snapshots
-Stores market segment analysis.
+Always query companies by `company_id` in application code, not by `id`.
 
-```sql
-CREATE TABLE market_snapshots (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    market_segment VARCHAR NOT NULL,
-    snapshot_data JSONB,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
+### JSON Columns
 
-#### company_analysis_audit_trail
-Audit trail for company analysis.
+Many columns store structured data as JSON (PostgreSQL JSON type):
+- `companies.revenue_timeline` — historical revenue data points
+- `companies.funding_rounds` — funding history
+- `companies.scoring_breakdown` — per-dimension score details
+- `research_runs.summary` — full research run summary
+- `enrichment_cache.enriched_data` — complete enrichment payload
 
-```sql
-CREATE TABLE company_analysis_audit_trail (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id VARCHAR REFERENCES companies(company_id),
-    company_name VARCHAR,
-    scoring_timestamp TIMESTAMP,
-    scorer_version VARCHAR,
-    data_sources_used JSONB,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
+### Outbox Pattern
 
-### Enrichment Tables
+`outbox_records` implements the transactional outbox pattern for reliable event delivery. Events are written to the outbox in the same transaction as business data, then processed by `OutboxWorker` asynchronously.
 
-#### enrichment_audit_records
-Audit trail for data enrichment operations.
-
-```sql
-CREATE TABLE enrichment_audit_records (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id VARCHAR REFERENCES companies(company_id),
-    operation_type VARCHAR,
-    status VARCHAR,
-    details JSONB,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-#### enrichment_cache
-Caches enrichment data to avoid re-fetching.
-
-```sql
-CREATE TABLE enrichment_cache (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id VARCHAR REFERENCES companies(company_id),
-    cache_data JSONB,
-    expires_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-## Entity Relationship Diagram
-
-```
-companies
-    │
-    ├── gathering_batches (1:N)
-    │       │
-    │       └── facts (1:N)
-    │               │
-    │               └── fact_sources (1:N)
-    │
-    ├── company_scoring_records (1:N)
-    │       │
-    │       └── signal_records (1:N)
-    │
-    ├── company_analysis_audit_trail (1:N)
-    │
-    ├── enrichment_audit_records (1:N)
-    │
-    └── enrichment_cache (1:1)
-
-market_snapshots (independent)
-```
+---
 
 ## ORM Models
 
-### Domain Models (src/solstein/domain/facts.py)
+All models are in `src/solstein/infrastructure/database_models.py`.
 
 ```python
-class GatheringBatch:
-    batch_id: UUID
-    company_id: str
-    status: str  # 'in_progress', 'completed', 'failed'
-    created_at: datetime
-
-class Fact:
-    fact_id: UUID
-    company_id: str
-    batch_id: UUID
-    fact_type: str
-    value: Optional[float]
-    value_str: Optional[str]
-    confidence: float  # 0.0 to 1.0
-    source: Optional[str]
-    created_at: datetime
-
-class FactSource:
-    source_id: UUID
-    fact_id: UUID
-    source_type: str
-    url: Optional[str]
-    title: Optional[str]
-    retrieved_at: datetime
+from solstein.infrastructure.database_models import (
+    CompanyRecord,
+    ScoringRecord,
+    SignalRecord,
+    MarketSnapshot,
+    AuditTrailRecord,
+    ResearchRunRecord,
+    ResearchStageRecord,
+    ResearchArtifactRecord,
+    SourceDocumentRecord,
+    MetricObservationRecord,
+    EvidenceReadinessRecord,
+    ContradictionRecord,
+    ContradictionTransitionRecord,
+    OutboxRecord,
+    EnrichmentAuditRecord,
+    EnrichmentCacheRecord,
+    EnrichmentJobRecord,
+    TenantRecord,
+)
 ```
 
-### Database Models (src/solstein/infrastructure/database_models.py)
-
-SQLAlchemy ORM models for database tables.
-
-## Foreign Key Constraints
-
-1. **gathering_batches.company_id** → companies.company_id
-2. **facts.company_id** → companies.company_id
-3. **facts.batch_id** → gathering_batches.batch_id
-4. **fact_sources.fact_id** → facts.fact_id (CASCADE delete)
-5. **company_scoring_records.company_id** → companies.company_id
-6. **signal_records.company_id** → companies.company_id
-7. **signal_records.scoring_id** → company_scoring_records.id
-8. **company_analysis_audit_trail.company_id** → companies.company_id
-9. **enrichment_audit_records.company_id** → companies.company_id
-10. **enrichment_cache.company_id** → companies.company_id
-
-## Indexes
-
-Recommended indexes for performance:
-
-```sql
--- Fact lookups by company
-CREATE INDEX idx_facts_company_id ON facts(company_id);
-CREATE INDEX idx_facts_company_type ON facts(company_id, fact_type);
-
--- Batch lookups
-CREATE INDEX idx_batches_company_id ON gathering_batches(company_id);
-CREATE INDEX idx_batches_status ON gathering_batches(status);
-
--- Scoring lookups
-CREATE INDEX idx_scoring_company_id ON company_scoring_records(company_id);
-CREATE INDEX idx_scoring_timestamp ON company_scoring_records(scoring_timestamp);
-
--- Audit trail lookups
-CREATE INDEX idx_audit_company_id ON company_analysis_audit_trail(company_id);
-```
+---
 
 ## Common Queries
 
-### Get all facts for a company
+### Get a company by company_id
 
 ```python
-result = await session.execute(
-    select(Fact).where(Fact.company_id == "comp-123")
-)
-facts = result.scalars().all()
-```
+from sqlalchemy import select
+from solstein.infrastructure.database_models import CompanyRecord
 
-### Get facts by type
-
-```python
-result = await session.execute(
-    select(Fact).where(
-        Fact.company_id == "comp-123",
-        Fact.fact_type == "revenue"
+async def get_company(session: AsyncSession, company_id: str) -> CompanyRecord | None:
+    result = await session.execute(
+        select(CompanyRecord).where(CompanyRecord.company_id == company_id)
     )
-)
-revenue_facts = result.scalars().all()
+    return result.scalar_one_or_none()
 ```
 
-### Get latest scoring for company
+### List companies by tier with scoring
 
 ```python
-result = await session.execute(
-    select(CompanyScoringRecord)
-    .where(CompanyScoringRecord.company_id == "comp-123")
-    .order_by(CompanyScoringRecord.scoring_timestamp.desc())
-    .limit(1)
-)
-latest_score = result.scalar_one_or_none()
-```
+from sqlalchemy import select, desc
+from solstein.infrastructure.database_models import CompanyRecord
 
-### Get batches with facts count
-
-```python
-from sqlalchemy import func
-
-result = await session.execute(
-    select(
-        GatheringBatch,
-        func.count(Fact.fact_id).label("fact_count")
+async def get_top_companies(session: AsyncSession, tier: str, limit: int = 20):
+    result = await session.execute(
+        select(CompanyRecord)
+        .where(CompanyRecord.tier == tier)
+        .order_by(desc(CompanyRecord.composite_score))
+        .limit(limit)
     )
-    .outerjoin(Fact, Fact.batch_id == GatheringBatch.batch_id)
-    .group_by(GatheringBatch.batch_id)
-)
-batches = result.all()  # List of (batch, fact_count) tuples
+    return result.scalars().all()
 ```
 
-## Testing with Database
-
-See [TESTING.md](TESTING.md) for detailed testing documentation.
-
-### Test Data Cleanup
+### Get latest scoring record with signals
 
 ```python
-from solstein.infrastructure.test_cleanup import cleanup_test_database
+from sqlalchemy import select, desc
+from sqlalchemy.orm import selectinload
+from solstein.infrastructure.database_models import ScoringRecord
 
-async def test_something(db_session):
-    # Test code here
-    
-    # Cleanup after test
-    await cleanup_test_database(db_session)
+async def get_latest_score(session: AsyncSession, company_id: str) -> ScoringRecord | None:
+    result = await session.execute(
+        select(ScoringRecord)
+        .where(ScoringRecord.company_id == company_id)
+        .options(selectinload(ScoringRecord.signals))
+        .order_by(desc(ScoringRecord.scored_at))
+        .limit(1)
+    )
+    return result.scalar_one_or_none()
 ```
 
-### Creating Test Data
+### Get research run with all related data
 
 ```python
-from tests.factories import create_test_batch, create_test_fact
+from sqlalchemy.orm import selectinload
+from solstein.infrastructure.database_models import ResearchRunRecord
 
-batch = await create_test_batch(db_session, "comp-123")
-fact = await create_test_fact(
-    db_session,
-    batch_id=str(batch.batch_id),
-    company_id="comp-123",
-    fact_type="revenue",
-    value=5000000.0
-)
+async def get_run_full(session: AsyncSession, run_id: str) -> ResearchRunRecord | None:
+    result = await session.execute(
+        select(ResearchRunRecord)
+        .where(ResearchRunRecord.run_id == run_id)
+        .options(
+            selectinload(ResearchRunRecord.stages),
+            selectinload(ResearchRunRecord.artifacts),
+            selectinload(ResearchRunRecord.sources),
+        )
+    )
+    return result.scalar_one_or_none()
 ```
 
-## Migration Notes
+### Check enrichment cache
 
-When changing the schema:
+```python
+from solstein.infrastructure.database_models import EnrichmentCacheRecord
+from datetime import datetime
 
-1. Update ORM models in `src/solstein/infrastructure/database_models.py`
-2. Create migration script (if using Alembic)
-3. Update factories if needed
-4. Update tests to match new schema
-5. Run tests to verify changes
+async def get_cached_enrichment(session: AsyncSession, company_id: str):
+    result = await session.execute(
+        select(EnrichmentCacheRecord)
+        .where(
+            EnrichmentCacheRecord.company_id == company_id,
+            EnrichmentCacheRecord.expires_at > datetime.utcnow(),
+        )
+    )
+    record = result.scalar_one_or_none()
+    if record:
+        record.hits += 1
+        record.last_accessed_at = datetime.utcnow()
+        await session.commit()
+    return record
+```
 
-## Backup and Restore
+---
 
-### Supabase Backup
+## Repository Pattern
 
-Supabase provides automatic daily backups. For manual backup:
+Application code accesses the database through repositories, not directly:
 
-1. Go to Supabase Dashboard → Database → Backups
-2. Click "Create backup"
+```
+src/solstein/infrastructure/
+├── company_repository.py      # CompanyRepository
+├── repositories.py            # ScoringRepository, SignalRepository, etc.
+├── enrichment_repositories.py # EnrichmentRepository
+└── research_dual_write.py     # ResearchRunRepository (dual-write support)
+```
 
-### Export Data
+Use repositories from the application layer instead of raw SQLAlchemy sessions.
+
+---
+
+## Database Initialization
 
 ```bash
-pg_dump "postgresql://postgres:[password]@db.[project].supabase.co:5432/postgres" \
-  --schema-only > schema.sql
+# Set PYTHONPATH first
+export PYTHONPATH=src
 
-pg_dump "postgresql://postgres:[password]@db.[project].supabase.co:5432/postgres" \
-  --data-only > data.sql
+# Create all tables (development)
+python -c "
+import asyncio
+from solstein.infrastructure.database import init_db
+asyncio.run(init_db())
+"
+
+# Or load seed data
+python -m solstein.data.seed_db
 ```
 
-### Import Data
+---
 
-```bash
-psql "postgresql://postgres:[password]@db.[project].supabase.co:5432/postgres" \
-  < schema.sql
+## Indexes
 
-psql "postgresql://postgres:[password]@db.[project].supabase.co:5432/postgres" \
-  < data.sql
-```
+The `companies` table has performance-optimized indexes for common query patterns:
 
-## Security
+| Index | Columns | Use Case |
+|---|---|---|
+| `idx_companies_name` | name | Name-based lookup |
+| `idx_companies_industry` | industry | Industry filter |
+| `idx_companies_headquarters` | headquarters | Geographic filter |
+| `idx_companies_tier` | tier | Tier filter |
+| `idx_companies_classification` | classification | Classification filter |
+| `idx_companies_ai_score` | ai_score | AI score range queries |
+| `idx_companies_composite_score` | composite_score | Top-N queries |
+| `idx_companies_revenue` | revenue_eur_m | Revenue range queries |
+| `idx_companies_growth` | growth_rate_pct | Growth range queries |
+| `idx_companies_updated` | last_updated | Freshness queries |
+| `idx_companies_industry_hq` | (industry, headquarters) | Combined filter |
 
-### Row Level Security (RLS)
+---
 
-Enable RLS on tables for production:
+## Multi-Tenancy
 
-```sql
--- Enable RLS
-ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
-
--- Create policy
-CREATE POLICY "Enable read access for all users" ON companies
-    FOR SELECT USING (true);
-```
-
-### Connection Security
-
-- Always use SSL (`sslmode=require`)
-- Store credentials in environment variables
-- Never commit `.env` files to git
-- Rotate credentials periodically
-
-## Performance Optimization
-
-### Query Optimization
-
-1. Use indexes for frequently queried columns
-2. Use `selectinload()` for relationships to avoid N+1 queries
-3. Batch inserts when possible
-4. Use connection pooling
-
-### Connection Pool Tuning
-
-For high-traffic scenarios:
+The `tenants` table controls API access:
 
 ```python
-engine = create_async_engine(
-    url,
-    pool_size=20,        # Increase for more concurrent connections
-    max_overflow=30,     # More overflow connections
-    pool_timeout=30,     # Wait longer for connection
-    pool_recycle=1800,   # Recycle every 30 minutes
-)
+# Tenant record structure
+class TenantRecord:
+    id: UUID                  # PK
+    name: str                 # Unique tenant name
+    api_key_hash: str         # SHA-256 hash of API key (64 chars, unique)
+    is_active: bool           # Enable/disable tenant
+    plan: str                 # 'free' | 'standard' | 'enterprise'
+    rate_limit_per_min: int   # Default: 60 req/min
 ```
 
-## Troubleshooting
+All API requests include `X-API-Key` header. The `TenantMiddleware` hashes the key and looks up the tenant. Rate limiting is enforced per-tenant.
 
-### Connection Issues
+---
 
-See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common connection problems.
+## See Also
 
-### Query Performance
-
-1. Check query plan: `EXPLAIN ANALYZE`
-2. Add indexes for slow queries
-3. Consider partitioning for large tables
-4. Monitor connection pool usage
-
-## Related Documentation
-
-- [SETUP.md](SETUP.md) - Project setup guide
-- [TESTING.md](TESTING.md) - Testing guide
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Troubleshooting guide
+- **[DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)** — Complete table-by-table schema reference with all columns, types, and constraints
+- **`src/solstein/infrastructure/database_models.py`** — SQLAlchemy model definitions (single source of truth)
+- **`src/solstein/infrastructure/database.py`** — Async engine and session factory
+- **`src/solstein/infrastructure/repositories.py`** — Repository implementations

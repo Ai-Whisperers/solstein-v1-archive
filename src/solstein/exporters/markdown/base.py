@@ -44,6 +44,13 @@ class ReportFormatter:
         if value is None:
             return "N/A"
         return f"{value:,}"
+    @staticmethod
+    def format_score(value: float | None) -> str:
+        """Format a score value to 2 decimal places."""
+        if value is None:
+            return "N/A"
+        return f"{value:.2f}"
+
 
     @staticmethod
     def get_tier_emoji(tier: str | None) -> str:

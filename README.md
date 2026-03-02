@@ -8,7 +8,7 @@
 > *Solstein reveals the competitive landscape through market fog.*
 > *Built by the Guild of Architects — not engineers. Wizards.*
 
-[![Python](https://img.shields.io/badge/Python-3.11+-4b0082?style=for-the-badge&logo=python&logoColor=ffd700)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.10+-4b0082?style=for-the-badge&logo=python&logoColor=ffd700)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Live-4b0082?style=for-the-badge&logo=fastapi&logoColor=ffd700)](https://fastapi.tiangolo.com)
 [![Tests](https://img.shields.io/badge/Tests-1434+%20Collected-4b0082?style=for-the-badge&logo=pytest&logoColor=ffd700)](tests/)
 [![Coverage](https://img.shields.io/badge/Coverage-~28%25-ffd700?style=for-the-badge&logo=codecov&logoColor=4b0082)](tests/)
@@ -131,35 +131,49 @@ The score is calculated across three dimensions:
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
-| **Language** | Python | 3.11+ |
+| **Language** | Python | 3.10+ |
 | **Framework** | FastAPI | Latest |
 | **Package Manager** | uv / pip | — |
-| **Database** | PostgreSQL | 15+ |
+| **Database** | PostgreSQL | 14+ |
 | **ORM** | SQLAlchemy | 2.0+ (async) |
 | **Data Processing** | Pandas | 2.x |
 | **Excel Export** | OpenPyXL | 3.x |
 | **Testing** | pytest | 8.x |
 | **Linting** | ruff + black + mypy | Latest |
-| **Frontend** | Next.js | 18+ |
+| **Task Queue** | Celery + Redis | Latest |
 
 ### Directory Structure
 
 ```
 solstein/
 ├── src/solstein/
-│   ├── api/                 # FastAPI endpoints & routers
-│   ├── domain/              # Domain models & scoring logic
-│   ├── infrastructure/      # Database, cache, repositories
-│   ├── application/         # Application services
-│   ├── exporters/           # LLM, Excel, Markdown exports
-│   ├── analytics/           # Analysis tools & filters
-│   ├── llm/                 # LLM client with health checking
-│   ├── security/            # JWT auth & caching layer
-│   └── config.py            # Application settings
-├── tests/                   # Test suites (Unit, Integration, DQ)
+│   ├── adapters/            # Data source adapters (11 adapters)
+│   ├── agents/              # Research agents (coordinator, GitHub, web…)
+│   ├── analytics/           # Analysis tools, scorers, signals
+│   ├── api/                 # FastAPI endpoints & 13 routers
+│   ├── application/         # Application orchestration layer
+│   ├── config/              # Pydantic-settings configuration (directory)
+│   ├── core/                # Hexagonal architecture ports
+│   ├── data/                # Data access layer (fetchers, connectors)
+│   ├── domain/              # Domain models & value objects (DDD)
+│   ├── exporters/           # LLM, Excel, CSV, PDF, Markdown exports
+│   ├── extractors/          # LLM financial & markdown extractors
+│   ├── infrastructure/      # Database, cache, repositories (18 tables)
+│   ├── llm/                 # 13-provider LLM client with health checking
+│   ├── migrations/          # Data migration scripts
+│   ├── monitoring/          # Continuous monitoring
+│   ├── presentation/        # Report templates & narrative generation
+│   ├── research/            # Core research pipeline
+│   ├── security/            # JWT handler
+│   ├── utils/               # Shared utilities (logging)
+│   ├── validation/          # Input validation
+│   ├── celery_config.py     # Celery task queue configuration
+│   ├── cli.py               # CLI entry point
+│   ├── worker.py            # Background task worker
+│   └── worker_tasks.py      # Celery task definitions
+├── tests/                   # 6-layer test strategy (1,434+ tests)
 ├── docs/                    # Documentation
-├── scripts/                 # Utility scripts
-└── dashboard/               # Next.js frontend
+└── scripts/                 # Utility scripts
 ```
 
 ---
@@ -169,14 +183,14 @@ solstein/
 ```bash
 # 1. Clone and install
 git clone <repo> && cd solstein
-uv sync  # or: pip install -r requirements.txt
+uv sync  # or: pip install -e .
 
 # 2. Configure environment
 cp .env.example .env
 # Edit .env — set GITHUB_TOKEN and DATABASE__URL at minimum
 
 # 3. Setup database
-python scripts/setup_db.py
+export PYTHONPATH=src && python -c "import asyncio; from solstein.infrastructure.database import init_db; asyncio.run(init_db())"
 
 # 4. Start the API
 PYTHONPATH=src python -m uvicorn solstein.api.main:app --reload
@@ -205,17 +219,27 @@ The API will be available at **http://localhost:8000** with interactive docs at 
 Solstein features a robust LLM provider fallback chain to ensure high availability:
 
 ```
-Ollama (local) → Fireworks → OpenAI → Groq → Template Fallback
+Ollama (local) → Groq → Fireworks → SiliconFlow → Alibaba Cloud → Mistral → DeepInfra
 ```
+  → Gemini → NVIDIA NIM → Cerebras → Kimi → Anthropic → OpenAI → Template Fallback
 
 Set `LLM_PROVIDER=auto` (default) to enable automatic fallback, or pin a specific provider:
 
 ```bash
-LLM_PROVIDER=ollama    # Local Ollama (llama3.2:latest)
-LLM_PROVIDER=openai    # OpenAI (gpt-4o-mini)
-LLM_PROVIDER=groq      # Groq (llama-3.3-70b-versatile)
-LLM_PROVIDER=fireworks # Fireworks (mixtral-8x22b-instruct)
-LLM_PROVIDER=none      # Disable LLM, use template fallback
+LLM_PROVIDER=ollama      # Local Ollama (llama3.2:latest, privacy-first)
+LLM_PROVIDER=groq        # Groq (llama-3.3-70b-versatile, fast)
+LLM_PROVIDER=fireworks   # Fireworks (mixtral-8x22b-instruct, cost-effective)
+LLM_PROVIDER=siliconflow # SiliconFlow (Chinese cloud)
+LLM_PROVIDER=alibaba     # Alibaba Cloud
+LLM_PROVIDER=mistral     # Mistral (European LLM)
+LLM_PROVIDER=deepinfra   # DeepInfra (cost-effective inference)
+LLM_PROVIDER=gemini      # Google Gemini
+LLM_PROVIDER=nvidia      # NVIDIA NIM (enterprise inference)
+LLM_PROVIDER=cerebras    # Cerebras (fast chips)
+LLM_PROVIDER=kimi        # Kimi / Moonshot
+LLM_PROVIDER=anthropic   # Anthropic Claude (premium reasoning)
+LLM_PROVIDER=openai      # OpenAI (gpt-4o-mini)
+LLM_PROVIDER=none        # Disable LLM, use template fallback
 ```
 
 ---
@@ -225,7 +249,7 @@ LLM_PROVIDER=none      # Disable LLM, use template fallback
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/health` | Platform health check |
-| `GET` | `/health/metrics` | Prometheus metrics |
+| `GET` | `/metrics` | Prometheus metrics |
 | `GET` | `/healthz` | K8s liveness probe alias |
 | `POST` | `/auth/login` | JWT authentication |
 | `GET` | `/companies` | List all profiled companies |
@@ -235,9 +259,9 @@ LLM_PROVIDER=none      # Disable LLM, use template fallback
 | `GET` | `/market/analysis` | Full market landscape analysis |
 | `GET` | `/market/search` | Search companies by query |
 | `GET` | `/market/overlap/{id}` | Competitive overlap analysis |
-| `POST` | `/export/` | Generate Excel intelligence report |
-| `GET` | `/jobs` | List background jobs |
-| `GET` | `/simulation` | Run market simulation |
+| `GET` | `/export` | Generate intelligence report (excel/csv/pdf/markdown) |
+| `GET` | `/jobs/{workflow_id}` | Job status — **501 Not Implemented** (disabled) |
+| `POST` | `/simulation/run` | Run market simulation scenario |
 
 > Full API reference → [`docs/api/reference.md`](docs/api/reference.md) | Interactive docs → `/docs`
 
@@ -275,25 +299,33 @@ LLM_PROVIDER=none      # Disable LLM, use template fallback
 
 ## 🧪 Testing
 
-Solstein follows a **4-layer testing pyramid**:
+Solstein follows a **6-layer testing strategy**:
 
-1. **Unit** — Domain models and scoring math, `pytest.approx` precision
+1. **Unit** — Isolated component tests; domain models and scoring math
 2. **Integration** — All API endpoints with deterministic mock repositories
-3. **Worker** — Background tasks verified synchronously
-4. **Data Quality** — Golden Dataset regression to protect classification boundaries
+3. **Data Quality** — Golden Dataset regression to protect classification boundaries
+4. **Performance** — Benchmarks and load tests for critical paths
+5. **Property** — Hypothesis-based property testing
+6. **Agents** — AI agent behavior tests
 
 ```bash
 pytest tests/unit/          # Fast, pure logic
 pytest tests/integration/   # API contract tests
 pytest tests/data_quality/  # Golden dataset regressions
-pytest tests/ --cov         # Full suite with coverage
+pytest tests/performance/   # Benchmarks
+pytest tests/property/      # Property-based tests
+pytest -m agents            # AI agent behavior tests
+pytest                      # Full suite (auto-runs coverage per pyproject.toml)
 ```
 
-| Category | Location | Count |
-|----------|----------|-------|
-| Unit | `tests/unit/` | 80+ test files |
-| Integration | `tests/integration/` | 15+ test files |
-| Data Quality | `tests/data_quality/` | Golden dataset regression |
+| Category | Location | Purpose |
+|----------|----------|---------|
+| Unit | `tests/unit/` | Isolated component tests |
+| Integration | `tests/integration/` | Cross-component tests |
+| Data Quality | `tests/data_quality/` | Classification boundary regressions |
+| Performance | `tests/performance/` | Benchmarks and load tests |
+| Property | `tests/property/` | Hypothesis-based property tests |
+| Agents | `tests/test_agents/` | AI agent behavior tests |
 | **Total** | `tests/` | **1,434+ collected** |
 
 ---

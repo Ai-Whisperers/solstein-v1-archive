@@ -32,7 +32,7 @@ def calculate_score(revenue: float, growth_rate, employees) -> float:
 
 ### mypy Strict Mode
 
-All code must pass `mypy --strict`:
+All code must pass `mypy` (partial coverage; strict mode is aspirational):
 
 ```bash
 mypy src/solstein/

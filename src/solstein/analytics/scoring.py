@@ -17,7 +17,13 @@ from ..domain.models import (
     ScoreComponent,
     ScoringExplanation,
 )
-from .constants import LEAD_SCORE_THRESHOLD, MAX_SCORE, MIN_SCORE, PHOENIX_SCORE_THRESHOLD
+from .constants import (
+    LEAD_SCORE_THRESHOLD,
+    MAX_SCORE,
+    MIN_SCORE,
+    PHOENIX_SCORE_THRESHOLD,
+    derive_threat_level,
+)
 from .scorers.competitive_position import CompetitivePositionScorer
 from .scorers.financial_health import FinancialHealthScorer
 from .scorers.growth_momentum import GrowthMomentumScorer
@@ -132,282 +138,27 @@ class GrowthScorer:
         # Always calculate classification
         profile.classification = classify_company(profile.composite_score)
 
+        # Derive threat level from classification and score
+        profile.threat_level = derive_threat_level(
+            profile.classification, profile.composite_score
+        )
+        profile.classification = classify_company(profile.composite_score)
+
         profile.scoring_breakdown["growth"] = growth_expl
         profile.scoring_breakdown["financial"] = fin_expl
         profile.scoring_breakdown["competitive"] = comp_expl
 
         return profile
 
-    def _calculate_growth_score(self, financials: FinancialMetric) -> tuple[float, ScoringExplanation]:  # noqa: E501
-        """Calculate growth score (0-10) with explanation."""
-        cfg = self.config.growth
-        score = cfg.base_score
-        explanation = ScoringExplanation(base_score=score)
-
-        # Revenue growth
-        if financials.growth_rate is not None:
-            growth_factor = min(
-                financials.growth_rate / cfg.revenue_growth_divisor,
-                cfg.revenue_growth_cap,
-            )
-            score += growth_factor
-            explanation.components.append(
-                ScoreComponent(
-                    name="Revenue Growth",
-                    value=growth_factor,
-                    formula=f"min({financials.growth_rate}% / {cfg.revenue_growth_divisor}, {cfg.revenue_growth_cap})",  # noqa: E501
-                    reasoning=f"High growth rate of {financials.growth_rate}% identified."
-                    if financials.growth_rate > 15
-                    else "Moderate growth rate identified.",  # noqa: E501
-                )
-            )
-
-        # Employee productivity (Revenue per Employee)
-        if financials.employees and financials.revenue:
-            rev_per_emp = financials.revenue / financials.employees
-            bonus = 0.0
-            if rev_per_emp > cfg.efficiency_high_threshold:
-                bonus = cfg.efficiency_high_bonus
-            elif rev_per_emp > cfg.efficiency_med_threshold:
-                bonus = cfg.efficiency_med_bonus
-
-            if bonus > 0:
-                score += bonus
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Employee Efficiency",
-                        value=bonus,
-                        formula=f"rev_per_emp({rev_per_emp:,.0f} EUR) > threshold",
-                        reasoning="Revenue per employee is above efficiency benchmarks.",
-                    )
-                )
-
-        # Funding momentum
-        if financials.funding_raised:
-            bonus = 0.0
-            if financials.funding_raised > cfg.funding_high_threshold:
-                bonus = cfg.funding_high_bonus
-            elif financials.funding_raised > cfg.funding_med_threshold:
-                bonus = cfg.funding_med_bonus
-
-            if bonus > 0:
-                score += bonus
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Funding Momentum",
-                        value=bonus,
-                        formula=f"funding({financials.funding_raised:,.0f} EUR) > threshold",  # noqa: E501
-                        reasoning="Significant capital injection signals strong market confidence.",  # noqa: E501
-                    )
-                )
-
-        # Profitability growth
-        if financials.profit_margin is not None:
-            adj = 0.0
-            if financials.profit_margin > cfg.margin_high_threshold:
-                adj = cfg.margin_high_bonus
-            elif financials.profit_margin > cfg.margin_med_threshold:
-                adj = cfg.margin_med_bonus
-            elif financials.profit_margin < 0:
-                adj = cfg.margin_negative_penalty
-
-            if adj != 0:
-                score += adj
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Profitability Profile",
-                        value=adj,
-                        formula=f"margin({financials.profit_margin}%) -> adjustment",
-                        reasoning="Healthy margins contribute to growth score."
-                        if adj > 0
-                        else "Negative margins penalize growth score.",  # noqa: E501
-                    )
-                )
-
-        final_score = max(MIN_SCORE, min(score, MAX_SCORE))
-        explanation.final_score = final_score
-        return final_score, explanation
-
-    def _calculate_financial_health_score(self, financials: FinancialMetric) -> tuple[float, ScoringExplanation]:  # noqa: E501
-        """Calculate financial health score (0-10) with explanation."""
-        cfg = self.config.financial
-        score = cfg.base_score
-        explanation = ScoringExplanation(base_score=score)
-
-        # Revenue scale
-        if financials.revenue:
-            adj = 0.0
-            if financials.revenue > cfg.revenue_large_threshold:
-                adj = cfg.revenue_large_bonus
-            elif financials.revenue > cfg.revenue_med_threshold:
-                adj = cfg.revenue_med_bonus
-            elif financials.revenue < cfg.revenue_small_threshold:
-                adj = cfg.revenue_small_penalty
-
-            if adj != 0:
-                score += adj
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Revenue Scale",
-                        value=adj,
-                        formula=f"revenue({financials.revenue:,.0f} EUR) -> adjustment",
-                        reasoning="Scale impacts financial stability scores.",
-                    )
-                )
-
-        # Profitability
-        if financials.profit_margin is not None:
-            adj = 0.0
-            if financials.profit_margin > cfg.margin_high_threshold:
-                adj = cfg.margin_high_bonus
-            elif financials.profit_margin > cfg.margin_med_threshold:
-                adj = cfg.margin_med_bonus
-            elif financials.profit_margin < 0:
-                adj = cfg.margin_negative_penalty
-
-            if adj != 0:
-                score += adj
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Profitability Health",
-                        value=adj,
-                        formula=f"margin({financials.profit_margin}%) -> adjustment",
-                        reasoning="Operating margin is a key indicator of financial health.",
-                    )
-                )
-
-        # Employee efficiency
-        if financials.employees and financials.revenue:
-            rev_per_emp = financials.revenue / financials.employees
-            adj = 0.0
-            if rev_per_emp > cfg.efficiency_exceptional_threshold:
-                adj = cfg.efficiency_exceptional_bonus
-            elif rev_per_emp > cfg.efficiency_good_threshold:
-                adj = cfg.efficiency_good_bonus
-            elif rev_per_emp < cfg.efficiency_low_threshold:
-                adj = cfg.efficiency_low_penalty
-
-            if adj != 0:
-                score += adj
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Operating Efficiency",
-                        value=adj,
-                        formula=f"rev_per_emp({rev_per_emp:,.0f} EUR) -> adjustment",
-                        reasoning="Resource utilization efficiency.",
-                    )
-                )
-
-        # Funding cushion
-        if financials.funding_raised and financials.revenue:
-            ratio = financials.funding_raised / financials.revenue
-            adj = 0.0
-            if ratio > cfg.cushion_high_ratio:
-                adj = cfg.cushion_high_bonus
-            elif ratio > cfg.cushion_med_ratio:
-                adj = cfg.cushion_med_bonus
-            elif (
-                ratio < cfg.cushion_thin_ratio and financials.profit_margin is not None and financials.profit_margin < 5
-            ):  # noqa: E501
-                adj = cfg.cushion_thin_penalty
-
-            if adj != 0:
-                score += adj
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Funding Cushion",
-                        value=adj,
-                        formula=f"funding_ratio({ratio:.2f}) -> adjustment",
-                        reasoning="Capital reserves relative to revenue scale.",
-                    )
-                )
-
-        final_score = max(MIN_SCORE, min(score, MAX_SCORE))
-        explanation.final_score = final_score
-        return final_score, explanation
-
-    def _calculate_competitive_position_score(self, profile: Company) -> tuple[float, ScoringExplanation]:  # noqa: E501
-        """Calculate competitive position score (0-10) with explanation."""
-        cfg = self.config.competitive
-        score = cfg.base_score
-        explanation = ScoringExplanation(base_score=score)
-
-        # Tier positioning
-        tier_adj = cfg.tier_scores.get(profile.tier, 0.0)
-        score += tier_adj
-        explanation.components.append(
-            ScoreComponent(
-                name="Market Tier",
-                value=tier_adj,
-                formula=f"tier({profile.tier})",
-                reasoning=f"Positioned as a {profile.tier} player in the market.",
-            )
-        )
-
-        # AI maturity
-        ai_adj = cfg.ai_maturity_scores.get(profile.ai_maturity, 0.0)
-        score += ai_adj
-        explanation.components.append(
-            ScoreComponent(
-                name="AI Maturity",
-                value=ai_adj,
-                formula=f"ai_maturity({profile.ai_maturity})",
-                reasoning=f"Technological advantage: AI maturity is {profile.ai_maturity}.",
-            )
-        )
-
-        # SaaS maturity
-        saas_adj = (profile.saas_maturity - 1) / 9 * 2.0
-        score += saas_adj
-        explanation.components.append(
-            ScoreComponent(
-                name="SaaS Maturity",
-                value=saas_adj,
-                formula=f"({profile.saas_maturity}-1)/9 * 2.0",
-                reasoning=f"SaaS transformation index: {profile.saas_maturity}/10.",
-            )
-        )
-
-        # Geographic presence
-        if len(profile.geographic_presence) > cfg.geo_global_count:
-            adj = cfg.geo_global_bonus
-            score += adj
-            explanation.components.append(
-                ScoreComponent(
-                    name="Geographic Footprint",
-                    value=adj,
-                    formula=f"regions({len(profile.geographic_presence)}) > {cfg.geo_global_count}",  # noqa: E501
-                    reasoning="Global presence identified.",
-                )
-            )
-        elif len(profile.geographic_presence) > cfg.geo_regional_count:
-            adj = cfg.geo_regional_bonus
-            score += adj
-            explanation.components.append(
-                ScoreComponent(
-                    name="Geographic Footprint",
-                    value=adj,
-                    formula=f"regions({len(profile.geographic_presence)}) > {cfg.geo_regional_count}",  # noqa: E501
-                    reasoning="Regional presence identified.",
-                )
-            )
-
-        # Tech stack
-        if len(profile.tech_stack) > cfg.tech_diverse_count:
-            adj = cfg.tech_diverse_bonus
-            score += adj
-            explanation.components.append(
-                ScoreComponent(
-                    name="Stack Diversity",
-                    value=adj,
-                    formula=f"tech_count({len(profile.tech_stack)}) > {cfg.tech_diverse_count}",  # noqa: E501
-                    reasoning="Diverse technical capabilities identified.",
-                )
-            )
-
-        final_score = max(MIN_SCORE, min(score, MAX_SCORE))
-        explanation.final_score = final_score
-        return final_score, explanation
+# NOTE: The following private methods were removed as dead code:
+# - _calculate_growth_score (lines ~153-241)
+# - _calculate_financial_health_score (lines ~243-339)
+# - _calculate_competitive_position_score (lines ~341-434)
+#
+# These methods were never called. The live scoring path uses:
+# - GrowthMomentumScorer (scorers/growth_momentum.py)
+# - FinancialHealthScorer (scorers/financial_health.py)
+# - CompetitivePositionScorer (scorers/competitive_position.py)
 
 
 class MarketAnalyzer:

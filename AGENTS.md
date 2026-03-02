@@ -1,8 +1,8 @@
 # Solstein - AI-Powered Competitive Intelligence Platform
 
-> **AGENTS.md v2.0** | OpenCode v1.0+ Standard  
-> Last Updated: 2026-02-28  
-> Auto-generated: Partial (manual enhancements applied)
+> **AGENTS.md v3.0** | Claude Code v1.0+ Standard  
+> Last Updated: 2026-03-01  
+> Source of truth: verified against actual codebase
 
 ## Quick Reference
 
@@ -10,35 +10,41 @@
 project: solstein
 language: python
 framework: fastapi
-architecture: domain-driven
+architecture: domain-driven + hexagonal
 ai_ready: true
 mcp_servers: [filesystem, sequential-thinking, memory]
+python_min: "3.10"
 ```
 
 ## Project Identity
 
 **What is this?**  
-AI-powered competitive intelligence platform for PE/VC professionals. Analyzes market data, company financials, competitive positioning, and generates strategic insights.
+AI-powered competitive intelligence platform for PE/VC professionals. Analyzes market data, company financials, competitive positioning, and generates strategic insights using 13 LLM providers with automatic failover.
 
 **Why does it exist?**  
 Private equity and venture capital firms need rapid, data-driven competitive analysis. Traditional research is slow and expensive. Solstein automates this with AI.
 
 **Who maintains it?**  
-Core team with AI-assisted development via OpenCode.
+Core team with AI-assisted development via Claude Code.
 
 ## Tech Stack
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
-| **Language** | Python | 3.11+ |
+| **Language** | Python | 3.10+ |
 | **Framework** | FastAPI | Latest |
 | **Package Manager** | uv / pip | - |
-| **Database** | PostgreSQL | 15+ |
-| **ORM** | SQLAlchemy | 2.0+ |
+| **Database** | PostgreSQL | 14+ |
+| **ORM** | SQLAlchemy | 2.0+ (async) |
+| **Driver** | asyncpg | Latest |
+| **Task Queue** | Celery + Redis | Latest |
+| **LLM Orchestration** | LangGraph | 0.0.20+ |
 | **Data Processing** | Pandas | 2.x |
 | **Excel Export** | OpenPyXL | 3.x |
+| **Supabase** | supabase-py | 2.3+ |
 | **Testing** | pytest | 8.x |
-| **Linting** | ruff + black + mypy | Latest |
+| **Linting** | ruff + black | Latest |
+| **Type Check** | mypy | Latest (partial coverage) |
 | **CLI** | Click | 8.x |
 
 ## Architecture
@@ -46,28 +52,28 @@ Core team with AI-assisted development via OpenCode.
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        API Layer                             │
-│              (FastAPI + Async Endpoints)                     │
+│    FastAPI · 13 Routers · WebSocket · TenantMiddleware       │
 └─────────────────────────────────────────────────────────────┘
                               │
         ┌─────────────────────┼─────────────────────┐
         ▼                     ▼                     ▼
 ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
 │   Research   │    │  Analytics   │    │   Export     │
-│   Engine     │    │   Engine     │    │   Engine     │
+│   Pipeline   │    │   Engine     │    │   Engine     │
 └──────────────┘    └──────────────┘    └──────────────┘
         │                     │                     │
         └─────────────────────┼─────────────────────┘
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              Domain Layer (Business Logic)                   │
-│     Models • Services • Repositories • Scoring              │
+│     Models · Value Objects · Repository Interfaces          │
 └─────────────────────────────────────────────────────────────┘
                               │
         ┌─────────────────────┼─────────────────────┐
         ▼                     ▼                     ▼
 ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│ PostgreSQL   │    │    Redis     │    │ File System  │
-│   (Data)     │    │   (Cache)    │    │  (Exports)   │
+│ PostgreSQL   │    │    Redis     │    │  LLM Layer   │
+│  14+ (async) │    │ Cache+Celery │    │ 13 providers │
 └──────────────┘    └──────────────┘    └──────────────┘
 ```
 
@@ -76,68 +82,122 @@ Core team with AI-assisted development via OpenCode.
 ```
 solstein/
 ├── src/solstein/
-│   ├── api/                 # FastAPI endpoints
-│   │   ├── routes/         # API route handlers
-│   │   ├── schemas/        # Pydantic models
-│   │   └── dependencies/   # FastAPI dependencies
-│   ├── domain/             # Domain models
-│   │   ├── models/        # Business entities
-│   │   └── scoring/       # Scoring algorithms
-│   ├── infrastructure/     # External adapters
-│   │   ├── database/      # SQLAlchemy models
-│   │   ├── cache/         # Redis client
-│   │   └── company_repository.py
-│   ├── application/        # Application services
-│   │   └── services/
-│   ├── exporters/          # Export formats
-│   │   ├── llm.py         # LLM-powered reports
-│   │   ├── excel.py       # Excel generation
-│   │   └── markdown.py
-│   ├── analytics/          # Analysis tools
-│   │   └── filters/
-│   ├── llm/               # LLM client with health checking
-│   │   ├── health_checker.py
-│   │   └── enhanced_client.py
-│   └── config.py          # Application settings
-├── tests/                  # Test suites
-├── docs/                   # Documentation
-├── scripts/                # Utility scripts
-└── dashboard/             # Next.js frontend
+│   ├── adapters/            # Data source adapters
+│   │   ├── aggregation/     # Multi-source data aggregation
+│   │   ├── discovery/       # Company discovery strategies
+│   │   ├── enrichment/      # Per-source enrichment adapters (11 adapters)
+│   │   └── signals/         # Signal extraction adapters
+│   ├── agents/              # Research agents (coordinator, GitHub, web, etc.)
+│   ├── analytics/           # Analysis tools
+│   │   ├── filters/         # Data filters
+│   │   ├── scorers/         # Scoring: growth, financial_health, competitive_position
+│   │   ├── signals/         # Signal extractors and models
+│   │   ├── simulation/      # Market simulation
+│   │   └── valuation/       # Valuation models
+│   ├── api/                 # FastAPI application
+│   │   ├── middleware/      # Request middleware (logging, rate_limit, security, tenant)
+│   │   ├── routers/         # 13 route handlers (auth, companies, scoring, market…)
+│   │   ├── schemas/         # Pydantic request/response models
+│   │   ├── services/        # API-layer services (drill_down, enrichment)
+│   │   ├── websocket/       # WebSocket support
+│   │   └── dependencies.py, main.py, exceptions.py
+│   ├── application/         # Application orchestration layer
+│   ├── config/              # Pydantic-settings configuration (directory)
+│   ├── core/                # Hexagonal architecture ports
+│   ├── data/                # Data access layer (fetchers, loaders, connectors)
+│   ├── domain/              # Business entities (DDD)
+│   │   ├── models.py        # Company, FinancialMetric, MarketAnalysis, etc.
+│   │   ├── facts.py         # Fact-related domain objects
+│   │   ├── value_objects.py # Value objects
+│   │   └── repository_interfaces.py
+│   ├── exceptions.py        # Top-level exception hierarchy
+│   ├── exporters/           # Export format generators
+│   │   ├── markdown/        # Markdown export (directory with 4 files)
+│   │   ├── excel.py, excel_improved.py, csv.py, pdf.py, llm.py, audit_report.py
+│   ├── extractors/          # LLM financial extractor, markdown extractor
+│   ├── infrastructure/      # External infrastructure adapters
+│   │   ├── connectors/      # 11 data connectors (sec_edgar, linkedin, github…)
+│   │   ├── database.py      # Async engine and session factory
+│   │   ├── database_models.py  # All 18 SQLAlchemy ORM models
+│   │   ├── cache.py         # Redis cache client
+│   │   ├── company_repository.py
+│   │   └── repositories.py, enrichment_repositories.py, outbox_worker.py…
+│   ├── llm/                 # 13-provider LLM client with health checking
+│   │   ├── health_checker.py, enhanced_client.py, structured_client.py, tracing.py
+│   ├── migrations/          # Data migration scripts
+│   ├── monitoring/          # Continuous monitoring
+│   ├── presentation/        # Report templates and narrative generation
+│   ├── research/            # Core research pipeline (gather, aggregate, reconcile…)
+│   ├── security/            # JWT handler
+│   ├── utils/               # Shared utilities (logging)
+│   ├── validation/          # Input validation (company, financial sanity)
+│   ├── cli.py               # CLI entry point
+│   ├── celery_config.py     # Celery task queue configuration
+│   ├── worker.py            # Background task worker
+│   └── worker_tasks.py      # Celery task definitions
+├── tests/
+│   ├── unit/                # Unit tests (adapters, agents, analytics, domain, research)
+│   ├── integration/         # Integration tests (real DB)
+│   ├── data_quality/        # Data validation tests
+│   ├── performance/         # Benchmarks and load tests
+│   ├── property/            # Property-based tests (Hypothesis)
+│   ├── test_agents/         # AI agent behavior tests
+│   ├── factories/           # Test data factories (factory-boy)
+│   ├── fixtures/            # Shared pytest fixtures
+│   ├── mocks/               # Mock objects
+│   └── snapshots/           # Snapshot test data (syrupy)
+├── docs/                    # Documentation
+└── scripts/                 # Utility scripts
 ```
 
 ## Development Commands
 
 ### Setup
 ```bash
-# Install dependencies
+# Install dependencies (preferred)
 uv sync
-# or
-pip install -r requirements.txt
 
-# Setup database
-python scripts/setup_db.py
+# Or with pip (editable install)
+pip install -e .
+
+# Set PYTHONPATH (required for all commands)
+export PYTHONPATH=src
+
+# Initialize database
+python -c "import asyncio; from solstein.infrastructure.database import init_db; asyncio.run(init_db())"
 ```
 
 ### Development
 ```bash
+# Set PYTHONPATH first
+export PYTHONPATH=src
+
 # Run API server
-python -m uvicorn solstein.api.main:app --reload
+uvicorn solstein.api.main:app --reload --host 0.0.0.0 --port 8000
 
 # Run CLI
-python run_research.py
+solstein --help
 
-# Run dashboard
-cd dashboard && npm run dev
+# Start Celery worker (required for enrichment tasks)
+celery -A solstein.celery_config worker --loglevel=info
 ```
 
 ### Quality
 ```bash
 # Run tests
-pytest -v
+pytest
+
+# With coverage
 pytest --cov=. --cov-report=html
 
-# Type check
-mypy . --strict
+# Specific test layer
+pytest -m unit
+pytest -m integration
+pytest -m data_quality
+pytest -m agents
+
+# Type check (partial coverage)
+mypy .
 
 # Format and lint
 black . && ruff check --fix .
@@ -146,16 +206,16 @@ black . && ruff check --fix .
 make check-all
 ```
 
-### OpenCode Integration
+### Claude Code Integration
 ```bash
 # Check MCP servers
 make mcp-check
 
 # Run smoke tests
-./scripts/opencode-mcp-smoke-test.sh
+./scripts/Claude-mcp-smoke-test.sh
 
 # Doctor check
-./scripts/opencode-mcp-doctor.sh
+./scripts/Claude-mcp-doctor.sh
 ```
 
 ## Code Standards
@@ -163,7 +223,7 @@ make mcp-check
 ### Formatting
 - **Line Length**: 120 characters (Black)
 - **Import Order**: isort (stdlib → third-party → local)
-- **Type Hints**: Required for all functions
+- **Type Hints**: Required for functions under mypy coverage
 - **Docstrings**: Google style
 
 ### Naming
@@ -219,38 +279,66 @@ driver: asyncpg
 orm: sqlalchemy 2.0
 pool_size: 20
 max_overflow: 10
+timeout: 30s
 ```
 
-### Key Models
-- `Company` - Core entity with financials
-- `FinancialData` - Revenue, growth, employees
-- `Signal` - Data source observations
-- `Analysis` - Generated insights
+### Key ORM Models (18 tables total)
+
+**Competitive Intelligence (Integer PKs):**
+- `CompanyRecord` — Core company profiles (~42 columns incl. financials, AI scores)
+- `ScoringRecord` — Point-in-time scoring snapshots per company
+- `SignalRecord` — Individual signals driving each scoring record
+- `MarketSnapshot` — Aggregate market state snapshots
+- `AuditTrailRecord` — Full per-company analysis audit trail
+- `EnrichmentCacheRecord` — TTL-based enrichment cache (default 24h)
+- `EnrichmentAuditRecord` — Per-operation enrichment audit log
+- `EnrichmentJobRecord` — Celery enrichment task tracking
+
+**Research Pipeline (UUID PKs):**
+- `ResearchRunRecord` — Top-level research run metadata
+- `ResearchStageRecord` — Per-stage execution tracking
+- `ResearchArtifactRecord` — Artifacts produced by a run
+- `SourceDocumentRecord` — Source URLs observed per company
+- `MetricObservationRecord` — Individual metric values from sources
+- `EvidenceReadinessRecord` — Evidence quality scores
+- `ContradictionRecord` — Detected data conflicts
+- `ContradictionTransitionRecord` — Contradiction status history
+
+**Infrastructure:**
+- `OutboxRecord` — Transactional outbox for event reliability (UUID)
+- `TenantRecord` — Multi-tenant API key registry (UUID)
+
+See [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for the complete schema reference.
 
 ## Testing Strategy
 
-| Type | Location | Coverage Target |
-|------|----------|-----------------|
-| Unit | `tests/unit/` | 80% |
-| Integration | `tests/integration/` | 60% |
-| E2E | `tests/e2e/` | Critical paths |
+| Type | Location | Purpose |
+|------|----------|---------|
+| Unit | `tests/unit/` | Isolated component tests |
+| Integration | `tests/integration/` | Cross-component tests (real DB) |
+| Data Quality | `tests/data_quality/` | Data validation tests |
+| Performance | `tests/performance/` | Benchmarks and load tests |
+| Property | `tests/property/` | Property-based tests (Hypothesis) |
+| Agent | `tests/test_agents/` | AI agent behavior tests |
 
 ### Test Commands
 ```bash
-# All tests
+# All tests (auto-runs coverage per pyproject.toml)
 pytest
 
-# With coverage
-pytest --cov=. --cov-report=html
-
-# Specific test
-pytest tests/unit/test_scoring.py -v
+# By layer
+pytest -m unit
+pytest -m integration
+pytest -m data_quality
+pytest -m agents
+pytest -m slow
+pytest -m e2e
 
 # Parallel execution
 pytest -n auto
 ```
 
-## OpenCode Configuration
+## Claude Code Configuration
 
 ### MCP Servers
 ```json
@@ -282,36 +370,33 @@ pytest -n auto
 | `@test` | Test generation | 200 | write, test |
 | `@docs` | Documentation | 150 | write, read |
 
-### Usage Patterns
-
-```markdown
-# Plan Phase (Read-Only)
-@plan Analyze the scoring algorithm and propose improvements
-
-# Build Phase (Implementation)
-@build Implement the proposed scoring changes with tests
-
-# Review Phase (Quality Check)
-@review Check the implementation against our standards
-```
-
 ## LLM Providers
 
-### Supported Providers
-| Provider | Model | Use Case |
-|----------|-------|----------|
-| Ollama | llama3.2 | Local, sensitive data |
-| OpenAI | gpt-4o-mini | General purpose |
-| Groq | llama-3.3-70b | Fast inference |
-| Fireworks | qwen2-72b | Cost-effective |
+### Supported Providers (13 total)
+| Priority | Provider | Notes |
+|----------|----------|-------|
+| 1 | Ollama (local) | Privacy-first, llama3.2, no API key |
+| 2 | Groq | Fast inference |
+| 3 | Fireworks | Cost-effective |
+| 4 | SiliconFlow | Chinese cloud |
+| 5 | Alibaba Cloud | |
+| 6 | Mistral | European LLM |
+| 7 | DeepInfra | Cost-effective inference |
+| 8 | Gemini | Google |
+| 9 | NVIDIA NIM | Enterprise inference |
+| 10 | Cerebras | Fast chips |
+| 11 | Kimi (Moonshot) | |
+| 12 | Anthropic | Premium reasoning |
+| 13 | OpenAI | General purpose |
 
 ### Provider Fallback Chain
 ```
-Ollama (local) → Fireworks → OpenAI → Groq → Template Fallback
+Ollama → Groq → Fireworks → SiliconFlow → Alibaba → Mistral → DeepInfra
+  → Gemini → NVIDIA → Cerebras → Kimi → Anthropic → OpenAI → Template Fallback
 ```
 
 ### Health Checking
-All LLM providers now have proactive health checking:
+All LLM providers have proactive health checking:
 - Rate limit detection (429)
 - Quota exhaustion detection (402)
 - Authentication failure detection (401)
@@ -325,6 +410,7 @@ See: `src/solstein/llm/health_checker.py`
 - `.env` files are git-ignored
 - Use `pydantic-settings` for config
 - Never log API keys
+- Multi-tenant: API keys hashed with SHA-256 before storage
 
 ### Security Checks
 ```bash
@@ -379,13 +465,18 @@ pytest tests/unit -q
 # Check PostgreSQL is running
 pg_isready -h localhost -p 5432
 
-# Verify credentials in .env
+# Verify credentials in .env (use double underscore for nested pydantic-settings)
+echo $DATABASE__URL
 ```
 
 **LLM providers unavailable**
 ```bash
 # Check health
-python -c "from solstein.llm import get_health_checker; import asyncio; asyncio.run(get_health_checker().check_all_providers())"
+PYTHONPATH=src python -c "
+from solstein.llm import get_health_checker
+import asyncio
+asyncio.run(get_health_checker().check_all_providers())
+"
 
 # Verify API keys in .env
 ```
@@ -399,13 +490,22 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
 pip install -e .
 ```
 
+**Celery worker not starting**
+```bash
+# Verify Redis is running
+redis-cli ping
+
+# Start worker with explicit app
+PYTHONPATH=src celery -A solstein.celery_config worker --loglevel=debug
+```
+
 ## Context Rules
 
 ### For Build Agent
 - Always write tests for new features
 - Follow existing patterns in codebase
-- Use type hints everywhere
-- Handle errors explicitly
+- Use type hints everywhere (especially for files under mypy coverage)
+- Handle errors explicitly, never silent catches
 
 ### For Plan Agent
 - Read existing code before proposing changes
@@ -422,42 +522,30 @@ pip install -e .
 ## Performance Guidelines
 
 ### Database
-- Use async queries for I/O
+- Use async queries for all I/O
 - Batch inserts where possible
 - Index frequently queried fields
+- Use connection pool (pool_size=20, max_overflow=10)
 
 ### API
 - Paginate large result sets
-- Cache expensive computations
-- Use background tasks for long operations
+- Cache expensive computations (Redis)
+- Use background tasks for long operations (Celery)
 
 ### LLM
 - Use cheaper models for simple tasks
 - Cache LLM responses when appropriate
-- Implement provider fallback for reliability
+- Implement provider fallback for reliability (13-provider chain)
 
 ## External Dependencies
 
 ### Required
-- Python 3.11+
-- PostgreSQL 15+
-- Node.js 18+ (for dashboard)
+- Python 3.10+
+- PostgreSQL 14+
+- Redis (cache + Celery task queue)
 
 ### Optional
-- Redis (for caching)
-- Ollama (for local LLM)
-
-## Resources
-
-### Documentation
-- API Docs: `/docs` (when running)
-- Architecture: `docs/architecture/`
-- Data Sources: `docs/data-sources/`
-
-### Monitoring
-- Health endpoint: `/health`
-- Metrics: `/metrics`
-- OpenAPI: `/openapi.json`
+- Ollama (for local LLM inference)
 
 ---
 
@@ -465,11 +553,10 @@ pip install -e .
 
 | Version | Date | Changes |
 |---------|------|---------|
-| v2.0 | 2026-02-28 | OpenCode v1.0+ standard, LLM health checking |
-| v1.9 | 2026-02-15 | Enhanced provider failover |
+| v3.0 | 2026-03-01 | Accurate documentation: 21 modules, 18 DB tables, 13 LLM providers, Celery |
+| v2.0 | 2026-02-28 | Claude Code v1.0+ standard, LLM health checking |
 | v1.8 | 2026-02-01 | Initial multi-provider support |
 
 ---
 
-*This AGENTS.md follows the OpenCode v1.0+ standard for project context.*  
-*For OpenCode documentation: https://docs.opencode.ai*
+*This AGENTS.md follows the Claude Code v1.0+ standard for project context.*

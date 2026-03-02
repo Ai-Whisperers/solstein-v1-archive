@@ -76,3 +76,39 @@ SIMULATION_INFLATION_THRESHOLD = 0.02  # Normal inflation < 2%
 READINESS_SCORE_EXCELLENT = 85  # Excellent readiness
 READINESS_SCORE_GOOD = 70  # Good readiness
 READINESS_SCORE_FAIR = 50  # Fair readiness
+
+
+
+# Classification to Threat Level Mapping
+# Maps company classification and composite score to threat level
+CLASSIFICATION_THREAT_MAPPING = {
+    # Phoenix (high growth) = High or Critical threat
+    ("Phoenix", 9.0): "CRITICAL",  # Phoenix with score >= 9.0
+    ("Phoenix", 7.0): "HIGH",      # Phoenix with score >= 7.0
+    # Salt (stable) = Medium or Low threat depending on score
+    ("Salt", 6.0): "MEDIUM",       # Salt with score >= 6.0
+    ("Salt", 0.0): "LOW",          # Salt with score < 6.0
+    # Lead (legacy) = Low threat
+    ("Lead", 0.0): "LOW",          # All Lead companies
+}
+
+
+def derive_threat_level(classification: str, composite_score: float) -> str:
+    """Derive threat level from classification and composite score.
+
+    Args:
+        classification: Company classification (Phoenix, Salt, Lead)
+        composite_score: Composite score (0-10)
+
+    Returns:
+        Threat level string matching ThreatLevel enum values (Critical, High, Medium, Low)
+    """
+    classification = classification.upper() if classification else "LEAD"
+
+    if classification == "PHOENIX":
+        return "Critical" if composite_score >= 9.0 else "High"
+    elif classification == "SALT":
+        return "Medium" if composite_score >= 6.0 else "Low"
+    else:  # Lead or unknown
+        return "Low"
+        return "LOW"

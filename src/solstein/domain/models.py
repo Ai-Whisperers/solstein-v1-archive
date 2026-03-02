@@ -87,6 +87,10 @@ class FinancialMetric(BaseModel):
     employees_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
     profit_margin: float | None = None
     margin_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
+    ebitda_margin: float | None = None
+    recurring_revenue_pct: float | None = None
+    funding_raised: float | None = None
+    margin_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
     funding_raised: float | None = None
     funding_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
     valuation: float | None = None
@@ -288,7 +292,7 @@ class Company(BaseModel):
     employee_cagr_3yr: float | None = None
     open_positions: int | None = None
 
-    ai_score: int | None = None
+    ai_score: float | None = None
     ai_signal_level: str | None = None
     ai_key_capabilities: str | None = None
     ai_in_production: bool | None = None
@@ -296,6 +300,11 @@ class Company(BaseModel):
     data_availability: str | None = None
 
     @field_validator("ai_score")
+    @classmethod
+    def validate_ai_score(cls, v: float | None) -> float | None:
+        if v is not None and (v < 0 or v > 10):
+            raise ValueError("AI score must be between 0 and 10")
+        return v
     @classmethod
     def validate_ai_score(cls, v: int | None) -> int | None:
         if v is not None and (v < 0 or v > 10):

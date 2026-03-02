@@ -53,7 +53,7 @@ Solstein has evolved through 13 phases of development, from initial concept thro
 - 🔐 Audit logging and input validation framework
 - 🔌 Data connectors for GitHub, Companies House, SEC EDGAR
 - 📊 Standardized score normalization and explainability
-- 🧪 Comprehensive 4-layer testing pyramid
+- 🧪 Comprehensive 6-layer testing strategy
 
 **Reference Files**: 
 - `src/solstein/analytics/` — Scoring engine

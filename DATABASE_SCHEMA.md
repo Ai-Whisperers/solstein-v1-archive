@@ -1,869 +1,687 @@
-# Solstein — Database Schema Reference
+# Solstein Database Schema Reference
 
-> Complete reference for all ORM models, relationships, constraints, and indexes.
-
----
-
-## Overview
-
-Solstein uses **PostgreSQL** (Supabase managed) with **SQLAlchemy 2.0 async** ORM.
-
-| Attribute | Value |
-|-----------|-------|
-| Database | PostgreSQL 15+ |
-| ORM | SQLAlchemy 2.0 (async) |
-| Driver | asyncpg |
-| Migrations | Alembic |
-| Total Tables | 23 |
-| Total ORM Models | 23 (across 2 files) |
-| Migration Files | 12 |
+> **Version**: 2026-03-01  
+> **Source of truth**: `src/solstein/infrastructure/database_models.py`  
+> **Engine**: PostgreSQL 14+ via SQLAlchemy 2.0 (async) + asyncpg  
+> **Tables**: 18 total across 3 functional groups
 
 ---
 
 ## Table of Contents
 
-1. [Core Tables](#core-tables)
-2. [Facts & Data Collection Tables](#facts--data-collection-tables)
-3. [Scoring & Analysis Tables](#scoring--analysis-tables)
-4. [Research Pipeline Tables](#research-pipeline-tables)
-5. [Enrichment Tables](#enrichment-tables)
-6. [Audit & Reliability Tables](#audit--reliability-tables)
-7. [Entity Relationship Diagram](#entity-relationship-diagram)
-8. [Foreign Key Constraints](#foreign-key-constraints)
-9. [Indexes & Performance](#indexes--performance)
-10. [CHECK Constraints](#check-constraints)
-11. [Migration History](#migration-history)
+1. [Connection & Configuration](#connection--configuration)
+2. [Competitive Intelligence Tables (Integer PKs)](#competitive-intelligence-tables)
+3. [Research Pipeline Tables (UUID PKs)](#research-pipeline-tables)
+4. [Infrastructure Tables (UUID PKs)](#infrastructure-tables)
+5. [Indexes Summary](#indexes-summary)
+6. [Relationships Diagram](#relationships-diagram)
+7. [ORM Import Reference](#orm-import-reference)
 
 ---
 
-## Core Tables
+## Connection & Configuration
 
-### `companies`
+```env
+# .env (double underscore = pydantic-settings nested model)
+DATABASE__URL=postgresql+asyncpg://user:password@localhost:5432/solstein
+DATABASE__POOL_SIZE=20       # default
+DATABASE__MAX_OVERFLOW=10    # default
+DATABASE__POOL_TIMEOUT=30    # seconds, default
+```
 
-The central table. All other tables reference this via `company_id`.
+```python
+# src/solstein/infrastructure/database.py
+from solstein.infrastructure.database import get_async_session, init_db
 
-**ORM Model**: `CompanyRecord` in `src/solstein/infrastructure/database_models.py`
+# Initialize all tables
+import asyncio
+asyncio.run(init_db())
+```
+
+---
+
+## Competitive Intelligence Tables
+
+Eight tables with **Integer** primary keys. These form the core analytics domain.
+
+---
+
+### 1. `companies` — `CompanyRecord`
+
+Core company profiles with AI scores, financial metrics, and competitive classification.
 
 ```sql
 CREATE TABLE companies (
-    company_id   VARCHAR PRIMARY KEY,
-    name         VARCHAR NOT NULL,
-    industry     VARCHAR,
-    country      VARCHAR,
-    website      VARCHAR,
-    description  TEXT,
-    metadata     JSONB,
-    created_at   TIMESTAMP DEFAULT NOW(),
-    updated_at   TIMESTAMP DEFAULT NOW()
+    id                          SERIAL PRIMARY KEY,
+    company_id                  TEXT UNIQUE NOT NULL,           -- e.g. "acme-corp"
+    name                        TEXT NOT NULL,
+    industry                    TEXT DEFAULT 'Energy Software',
+    hq                          TEXT,
+    website                     TEXT,
+    description                 TEXT,
+
+    -- Classification
+    tier                        TEXT,                           -- TIER_1..TIER_4
+    threat_level                TEXT,                           -- LOW/MEDIUM/HIGH/CRITICAL
+    classification              TEXT,                           -- Phoenix/Salt/Lead
+
+    -- AI Maturity
+    ai_maturity                 TEXT,                           -- NONE/LOW/MODERATE/STRONG/VERY_STRONG
+    saas_maturity               TEXT,
+    ai_score                    FLOAT,
+    ai_signal_level             TEXT,
+    ai_key_capabilities         TEXT[],                         -- ARRAY
+    ai_in_production            BOOLEAN,
+
+    -- Revenue Metrics
+    revenue_eur_m               FLOAT,
+    revenue_confidence          TEXT,                           -- ConfidenceLevel enum
+    growth_rate_pct             FLOAT,
+    growth_confidence           TEXT,
+    profit_margin_pct           FLOAT,
+    ebitda_margin_pct           FLOAT,
+    recurring_revenue_pct       FLOAT,
+    revenue_per_employee_eur_k  FLOAT,
+    revenue_timeline            JSONB,                          -- {year: revenue_m}
+    revenue_cagr_3yr            FLOAT,
+    revenue_cagr_5yr            FLOAT,
+
+    -- Funding
+    funding_rounds              JSONB,                          -- [{round, amount, date}]
+    total_funding_raised_eur    FLOAT,
+    latest_valuation_eur        FLOAT,
+    lead_investors              TEXT[],
+    funding_war_chest           FLOAT,
+
+    -- Workforce
+    employee_count              INTEGER,
+    employee_cagr_3yr           FLOAT,
+    open_positions              INTEGER,
+
+    -- Financial Details
+    profitability_raw_metrics   JSONB,
+
+    -- Data Provenance
+    data_availability           TEXT,
+    data_source                 TEXT,
+
+    -- Composite Scores
+    growth_score                FLOAT,
+    financial_health_score      FLOAT,
+    competitive_position_score  FLOAT,
+    composite_score             FLOAT,
+    scoring_breakdown           JSONB,
+
+    -- Timestamps
+    last_updated                TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    created_at                  TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 ```
 
-**Key Fields**:
-- `company_id` — Business identifier (e.g., `"eneve-001"`, `"sap-001"`)
-- `metadata` — JSONB blob for flexible additional data (revenue timelines, funding rounds)
-- `industry` — Market segment (e.g., `"energy_software"`, `"fintech"`)
-
-**Example**:
-```python
-from solstein.infrastructure.database_models import CompanyRecord
-
-company = CompanyRecord(
-    company_id="eneve-001",
-    name="Eneve Energy",
-    industry="energy_software",
-    country="DE",
-)
-session.add(company)
-await session.commit()
-```
-
----
-
-## Facts & Data Collection Tables
-
-### `gathering_batches`
-
-Tracks data gathering sessions for companies. Each batch represents one run of the data collection pipeline.
-
-**ORM Model**: `GatheringBatch` in `src/solstein/domain/facts.py`
-
+**Indexes:**
 ```sql
-CREATE TABLE gathering_batches (
-    batch_id     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id   VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    status       VARCHAR NOT NULL DEFAULT 'in_progress'
-                 CHECK (status IN ('in_progress', 'completed', 'failed')),
-    created_at   TIMESTAMP DEFAULT NOW(),
-    completed_at TIMESTAMP
-);
+CREATE INDEX ix_companies_name               ON companies (name);
+CREATE INDEX ix_companies_industry           ON companies (industry);
+CREATE INDEX ix_companies_hq                 ON companies (hq);
+CREATE INDEX ix_companies_tier               ON companies (tier);
+CREATE INDEX ix_companies_classification     ON companies (classification);
+CREATE INDEX ix_companies_ai_score           ON companies (ai_score);
+CREATE INDEX ix_companies_composite_score    ON companies (composite_score);
+CREATE INDEX ix_companies_revenue_eur_m      ON companies (revenue_eur_m);
+CREATE INDEX ix_companies_growth_rate_pct    ON companies (growth_rate_pct);
+CREATE INDEX ix_companies_last_updated       ON companies (last_updated);
+CREATE INDEX ix_companies_industry_hq        ON companies (industry, hq);
 ```
 
-**Indexes**:
-- `idx_batches_company_id` on `(company_id)`
-- `idx_batches_status` on `(status)`
+**Domain Enums (stored as TEXT):**
+
+| Column | Valid Values |
+|--------|-------------|
+| `tier` | `TIER_1`, `TIER_2`, `TIER_3`, `TIER_4` |
+| `threat_level` | `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` |
+| `ai_maturity` | `NONE`, `LOW`, `MODERATE`, `STRONG`, `VERY_STRONG` |
+| `revenue_confidence` | `CONFIRMED`, `ESTIMATED`, `UNKNOWN`, `SYNTHETIC` |
 
 ---
 
-### `facts`
+### 2. `scoring_records` — `ScoringRecord`
 
-Stores extracted facts about companies with confidence scores. The core data unit of the intelligence pipeline.
-
-**ORM Model**: `Fact` in `src/solstein/domain/facts.py`
-
-```sql
-CREATE TABLE facts (
-    fact_id    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    batch_id   UUID NOT NULL REFERENCES gathering_batches(batch_id) ON DELETE CASCADE,
-    fact_type  VARCHAR NOT NULL,
-    value      NUMERIC,
-    value_str  VARCHAR,
-    confidence NUMERIC CHECK (confidence BETWEEN 0 AND 1),
-    source     VARCHAR,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-**Fact Types** (common values):
-| Type | Description | Value Field |
-|------|-------------|-------------|
-| `revenue` | Annual revenue in EUR | `value` (numeric) |
-| `employees` | Headcount | `value` (numeric) |
-| `growth_rate` | YoY revenue growth % | `value` (numeric) |
-| `funding_total` | Total funding raised | `value` (numeric) |
-| `github_stars` | GitHub repository stars | `value` (numeric) |
-| `ai_maturity` | AI adoption score 0–10 | `value` (numeric) |
-| `description` | Company description | `value_str` (text) |
-| `tech_stack` | Technology stack | `value_str` (JSON array) |
-
-**Indexes**:
-- `idx_facts_company_id` on `(company_id)`
-- `idx_facts_company_type` on `(company_id, fact_type)` — compound for filtered queries
-
-**Example**:
-```python
-from solstein.domain.facts import Fact
-
-fact = Fact(
-    company_id="eneve-001",
-    batch_id=batch.batch_id,
-    fact_type="revenue",
-    value=5_000_000.0,
-    confidence=0.92,
-    source="sec_edgar",
-)
-session.add(fact)
-await session.commit()
-```
-
----
-
-### `fact_sources`
-
-Source attribution for each fact. Links facts to their original data sources.
-
-**ORM Model**: `FactSource` in `src/solstein/domain/facts.py`
-
-```sql
-CREATE TABLE fact_sources (
-    source_id    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    fact_id      UUID NOT NULL REFERENCES facts(fact_id) ON DELETE CASCADE,
-    source_type  VARCHAR,
-    url          VARCHAR,
-    title        VARCHAR,
-    retrieved_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-**Source Types**:
-- `sec_edgar` — SEC EDGAR financial filings
-- `companies_house` — UK Companies House
-- `github` — GitHub repository data
-- `news` — News articles
-- `yahoo_finance` — Yahoo Finance market data
-- `web_search` — General web search results
-
----
-
-### `refresh_metadata`
-
-Tracks data freshness for each company/source combination.
-
-**ORM Model**: `RefreshMetadata` in `src/solstein/domain/facts.py`
-
-```sql
-CREATE TABLE refresh_metadata (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id   VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    source_type  VARCHAR NOT NULL,
-    last_refresh TIMESTAMP,
-    next_refresh TIMESTAMP,
-    refresh_count INTEGER DEFAULT 0,
-    created_at   TIMESTAMP DEFAULT NOW()
-);
-```
-
----
-
-### `data_source_conflicts`
-
-Records conflicts when two data sources disagree on the same fact.
-
-**ORM Model**: `DataSourceConflict` in `src/solstein/domain/facts.py`
-
-```sql
-CREATE TABLE data_source_conflicts (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id   VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    fact_type    VARCHAR NOT NULL,
-    source_a     VARCHAR NOT NULL,
-    source_b     VARCHAR NOT NULL,
-    value_a      NUMERIC,
-    value_b      NUMERIC,
-    delta_pct    NUMERIC,
-    resolved     BOOLEAN DEFAULT FALSE,
-    resolution   VARCHAR,
-    created_at   TIMESTAMP DEFAULT NOW()
-);
-```
-
----
-
-### `confidence_calibration`
-
-Stores calibration data for confidence score adjustments per source type.
-
-**ORM Model**: `ConfidenceCalibration` in `src/solstein/domain/facts.py`
-
-```sql
-CREATE TABLE confidence_calibration (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    source_type  VARCHAR NOT NULL,
-    fact_type    VARCHAR NOT NULL,
-    base_confidence NUMERIC CHECK (base_confidence BETWEEN 0 AND 1),
-    calibration_factor NUMERIC,
-    sample_size  INTEGER,
-    updated_at   TIMESTAMP DEFAULT NOW()
-);
-```
-
----
-
-## Scoring & Analysis Tables
-
-### `scoring_records`
-
-Stores AI-generated company scores. Each row is one scoring run for one company.
-
-**ORM Model**: `ScoringRecord` in `src/solstein/infrastructure/database_models.py`
+Point-in-time scoring snapshots for each company.
 
 ```sql
 CREATE TABLE scoring_records (
-    id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id                  VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    company_name                VARCHAR,
-    growth_score                NUMERIC CHECK (growth_score BETWEEN 0 AND 10),
-    financial_health_score      NUMERIC CHECK (financial_health_score BETWEEN 0 AND 10),
-    competitive_position_score  NUMERIC CHECK (competitive_position_score BETWEEN 0 AND 10),
-    overall_score               NUMERIC CHECK (overall_score BETWEEN 0 AND 10),
-    classification              VARCHAR CHECK (classification IN ('Phoenix', 'Salt', 'Lead')),
-    scoring_timestamp           TIMESTAMP DEFAULT NOW(),
-    scorer_version              VARCHAR,
-    signal_breakdown            JSONB
+    id                          SERIAL PRIMARY KEY,
+    company_id                  INTEGER,                        -- logical ref (not FK)
+    company_name                TEXT,
+    growth_score                FLOAT,
+    financial_health_score      FLOAT,
+    competitive_position_score  FLOAT,
+    overall_score               FLOAT,
+    classification              TEXT,                           -- Phoenix/Salt/Lead
+    scored_at                   TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    data_sources_used           JSONB                           -- list of source names
 );
+
+CREATE INDEX ix_scoring_records_company_id ON scoring_records (company_id);
 ```
 
-**Classification Thresholds**:
-| Classification | Overall Score | Meaning |
-|---|---|---|
-| 🔥 Phoenix | ≥ 7.0 | High-growth, AI-native |
-| 🧂 Salt | 4.0 – 7.0 | Stable, watch for signals |
-| ⚖️ Lead | ≤ 4.0 | Legacy weight |
-
-**Indexes**:
-- `idx_scoring_company_id` on `(company_id)`
-- `idx_scoring_timestamp` on `(scoring_timestamp DESC)`
+**Relationships:**
+- `signals` → one-to-many → `SignalRecord` (FK: `signal_records.scoring_record_id`)
 
 ---
 
-### `signal_records`
+### 3. `signal_records` — `SignalRecord`
 
-Individual signals that contribute to a company's score.
-
-**ORM Model**: `SignalRecord` in `src/solstein/infrastructure/database_models.py`
+Individual signals that drive each scoring record.
 
 ```sql
 CREATE TABLE signal_records (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id   VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    scoring_id   UUID REFERENCES scoring_records(id) ON DELETE CASCADE,
-    signal_type  VARCHAR NOT NULL,
-    signal_value NUMERIC,
-    confidence   NUMERIC CHECK (confidence BETWEEN 0 AND 1),
-    created_at   TIMESTAMP DEFAULT NOW()
+    id                  SERIAL PRIMARY KEY,
+    scoring_record_id   INTEGER NOT NULL REFERENCES scoring_records(id) ON DELETE CASCADE,
+    signal_name         TEXT,
+    signal_category     TEXT,
+    signal_value        FLOAT,
+    signal_text         TEXT CHECK (length(signal_text) <= 2000),
+    source_agent        TEXT,
+    evidence            JSONB,                                  -- supporting evidence
+    confidence          FLOAT,
+    extracted_at        TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 ```
-
-**Signal Types**:
-- `revenue_growth` — YoY revenue growth rate
-- `github_velocity` — Commit frequency trend
-- `ai_adoption` — AI/ML technology adoption score
-- `funding_momentum` — Recent funding activity
-- `team_growth` — Headcount growth rate
 
 ---
 
-### `market_snapshots`
+### 4. `market_snapshots` — `MarketSnapshot`
 
-Stores market segment analysis snapshots.
-
-**ORM Model**: `MarketSnapshot` in `src/solstein/infrastructure/database_models.py`
+Aggregate market state at a point in time.
 
 ```sql
 CREATE TABLE market_snapshots (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    market_segment  VARCHAR NOT NULL,
-    snapshot_data   JSONB NOT NULL,
-    company_count   INTEGER,
-    avg_score       NUMERIC,
-    created_at      TIMESTAMP DEFAULT NOW()
+    id                          SERIAL PRIMARY KEY,
+    snapshot_date               TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    total_companies_scored      INTEGER,
+    average_growth_score        FLOAT,
+    average_financial_score     FLOAT,
+    average_competitive_score   FLOAT,
+    phoenix_count               INTEGER,                        -- high-threat classifications
+    salt_count                  INTEGER,                        -- declining companies
+    lead_count                  INTEGER,                        -- lead/prospect companies
+    market_metadata             JSONB
 );
 ```
+
+---
+
+### 5. `audit_trails` — `AuditTrailRecord`
+
+Full per-company analysis audit trail capturing raw data through to final scores.
+
+```sql
+CREATE TABLE audit_trails (
+    id                          SERIAL PRIMARY KEY,
+    company_id                  INTEGER,
+    gathering_batch_id          TEXT,
+    company_name                TEXT,
+
+    -- Data at each pipeline stage
+    raw_data                    JSONB,
+    aggregated_facts            JSONB,
+    extracted_signals           JSONB,
+
+    -- Scores
+    growth_score                FLOAT,
+    financial_health_score      FLOAT,
+    competitive_position_score  FLOAT,
+    classification              TEXT,
+    scoring_breakdown           JSONB,
+
+    -- Execution Metadata
+    analysis_started_at         TIMESTAMP WITH TIME ZONE,
+    analysis_completed_at       TIMESTAMP WITH TIME ZONE,
+    analysis_duration_seconds   FLOAT,
+    data_completeness           FLOAT,
+    confidence_level            TEXT DEFAULT 'unknown',         -- ConfidenceLevel
+    errors                      JSONB,                          -- list of error strings
+    warnings                    JSONB,                          -- list of warning strings
+    created_at                  TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+```
+
+---
+
+### 6. `enrichment_cache` — `EnrichmentCacheRecord`
+
+TTL-based enrichment result cache keyed by company.
+
+```sql
+CREATE TABLE enrichment_cache (
+    id              SERIAL PRIMARY KEY,
+    company_id      TEXT UNIQUE NOT NULL,                       -- cache key
+    enriched_data   JSONB,                                      -- merged enrichment payload
+    sources_used    JSONB,                                      -- list of adapter names
+    fields_enriched JSONB,                                      -- list of field names updated
+    cached_at       TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    ttl_seconds     INTEGER DEFAULT 86400,                      -- 24 hours default
+    expires_at      TIMESTAMP WITH TIME ZONE,
+    hits            INTEGER DEFAULT 0,                          -- access counter
+    last_accessed_at TIMESTAMP WITH TIME ZONE
+);
+```
+
+---
+
+### 7. `enrichment_audit_trail` — `EnrichmentAuditRecord`
+
+Per-operation enrichment audit log.
+
+```sql
+CREATE TABLE enrichment_audit_trail (
+    id              SERIAL PRIMARY KEY,
+    company_id      TEXT,
+    company_name    TEXT,
+    operation       TEXT,   -- 'enrich_start'|'enrich_success'|'enrich_failure'|'cache_hit'|'cache_miss'
+    source          TEXT,   -- e.g. 'SEC_EDGAR', 'LINKEDIN', 'GITHUB'
+    status          TEXT,   -- 'SUCCESS'|'FAILURE'|'SKIPPED'
+    duration_ms     INTEGER,
+    fields_enriched JSONB,
+    error_message   TEXT,
+    user_id         TEXT,
+    client_id       TEXT,
+    timestamp       TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+CREATE INDEX ix_enrichment_audit_company_ts  ON enrichment_audit_trail (company_id, timestamp);
+CREATE INDEX ix_enrichment_audit_operation_ts ON enrichment_audit_trail (operation, timestamp);
+```
+
+**Valid `operation` values:** `enrich_start`, `enrich_success`, `enrich_failure`, `cache_hit`, `cache_miss`  
+**Valid `status` values:** `SUCCESS`, `FAILURE`, `SKIPPED`  
+**Valid `source` values** (from `DataSourceType`): `GITHUB`, `COMPANY_FILINGS`, `NEWS`, `CRUNCHBASE`, `LINKEDIN`, `PATENTS`, `WEBSITE`, `PRESS_RELEASE`, `YAHOO_FINANCE`, `EXA_SEARCH`, `GOOGLE_SEARCH`, `USPTO`, `GOOGLE_PATENTS`, `NEWSAPI`, `COMPETITOR_JSON`, `STATIC_CATALOG`
+
+---
+
+### 8. `enrichment_jobs` — `EnrichmentJobRecord`
+
+Celery enrichment task tracking. **Note: `id` is a String (Celery task_id), not auto-increment.**
+
+```sql
+CREATE TABLE enrichment_jobs (
+    id              TEXT PRIMARY KEY,                           -- Celery task_id (UUID string)
+    company_id      TEXT,
+    company_name    TEXT,
+    job_type        TEXT,                                       -- 'single'|'batch'
+    status          TEXT,                                       -- 'PENDING'|'RUNNING'|'SUCCESS'|'FAILED'
+    progress        INTEGER DEFAULT 0,                          -- 0-100
+    sources         JSONB,                                      -- list of source names to use
+    batch_size      INTEGER,
+    result_data     JSONB,
+    error_message   TEXT,
+    created_at      TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    started_at      TIMESTAMP WITH TIME ZONE,
+    completed_at    TIMESTAMP WITH TIME ZONE,
+    duration_ms     INTEGER,
+    user_id         TEXT
+);
+```
+
+**Note:** The `id` column stores the Celery task UUID (e.g. `"a1b2c3d4-..."`), not a database-generated integer.
 
 ---
 
 ## Research Pipeline Tables
 
-### `research_runs`
+Eight tables with **UUID** primary keys. These track the full research lifecycle.
 
-Tracks complete research pipeline executions.
+---
 
-**ORM Model**: `ResearchRunRecord` in `src/solstein/infrastructure/database_models.py`
+### 9. `research_runs` — `ResearchRunRecord`
+
+Top-level research run metadata. Parent of all other research tables.
 
 ```sql
 CREATE TABLE research_runs (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id   VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    run_type     VARCHAR NOT NULL,
-    status       VARCHAR NOT NULL DEFAULT 'pending'
-                 CHECK (status IN ('pending', 'in_progress', 'completed', 'failed')),
-    started_at   TIMESTAMP,
-    completed_at TIMESTAMP,
-    error_msg    TEXT,
-    metadata     JSONB,
-    created_at   TIMESTAMP DEFAULT NOW()
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    run_id                  TEXT UNIQUE NOT NULL,               -- human-readable identifier
+    market                  TEXT,
+    seed_company            TEXT,
+    status                  TEXT DEFAULT 'completed',
+    strict_provenance       BOOLEAN,
+    min_readiness_score     FLOAT,
+    max_contradictions      INTEGER,
+    min_total_sources       INTEGER,
+    summary                 JSONB,
+    created_at              TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 ```
 
-**Indexes**:
-- `idx_research_runs_company_id` on `(company_id)`
+**Relationships (all cascade delete):**
+- `stages` → `research_stages.run_id`
+- `artifacts` → `research_artifacts.run_id`
+- `sources` → `source_documents.run_id`
 
 ---
 
-### `research_stages`
+### 10. `research_stages` — `ResearchStageRecord`
 
-Individual stages within a research run (e.g., GitHub fetch, news fetch, scoring).
-
-**ORM Model**: `ResearchStageRecord` in `src/solstein/infrastructure/database_models.py`
+Per-stage execution tracking within a run.
 
 ```sql
 CREATE TABLE research_stages (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    run_id       UUID NOT NULL REFERENCES research_runs(id) ON DELETE CASCADE,
-    stage_name   VARCHAR NOT NULL,
-    status       VARCHAR NOT NULL DEFAULT 'pending',
-    started_at   TIMESTAMP,
-    completed_at TIMESTAMP,
-    output       JSONB,
-    created_at   TIMESTAMP DEFAULT NOW()
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    run_id      UUID NOT NULL REFERENCES research_runs(id) ON DELETE CASCADE,
+    stage_name  TEXT,
+    stage_order INTEGER,
+    status      TEXT,
+    metrics     JSONB,
+    created_at  TIMESTAMP WITH TIME ZONE DEFAULT now(),
+
+    CONSTRAINT uq_research_stages_run_stage UNIQUE (run_id, stage_name)
 );
 ```
 
 ---
 
-### `research_artifacts`
+### 11. `research_artifacts` — `ResearchArtifactRecord`
 
-Output artifacts produced by research stages (reports, data files, etc.).
-
-**ORM Model**: `ResearchArtifactRecord` in `src/solstein/infrastructure/database_models.py`
+Artifacts (files, exports, reports) produced by a research run.
 
 ```sql
 CREATE TABLE research_artifacts (
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    run_id        UUID NOT NULL REFERENCES research_runs(id) ON DELETE CASCADE,
-    artifact_type VARCHAR NOT NULL,
-    content       JSONB,
-    file_path     VARCHAR,
-    created_at    TIMESTAMP DEFAULT NOW()
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    run_id          UUID NOT NULL REFERENCES research_runs(id) ON DELETE CASCADE,
+    artifact_name   TEXT,
+    artifact_path   TEXT,
+    payload         JSONB,
+    created_at      TIMESTAMP WITH TIME ZONE DEFAULT now(),
+
+    CONSTRAINT uq_research_artifacts_run_name UNIQUE (run_id, artifact_name)
 );
 ```
 
 ---
 
-### `source_documents`
+### 12. `source_documents` — `SourceDocumentRecord`
 
-Raw source documents retrieved during research (HTML pages, PDFs, API responses).
-
-**ORM Model**: `SourceDocumentRecord` in `src/solstein/infrastructure/database_models.py`
+Source URLs observed per company during a research run.
 
 ```sql
 CREATE TABLE source_documents (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id   VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    source_type  VARCHAR NOT NULL,
-    url          VARCHAR,
-    content      TEXT,
-    retrieved_at TIMESTAMP DEFAULT NOW()
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    run_id          UUID NOT NULL REFERENCES research_runs(id) ON DELETE CASCADE,
+    company_id      TEXT,
+    source_url      TEXT,
+    source_domain   TEXT,
+    source_type     TEXT,                                       -- DataSourceType enum
+    observed_at     TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    status          TEXT DEFAULT 'observed',
+    fetched_at      TIMESTAMP WITH TIME ZONE,
+    content_hash    TEXT,
+    extract_hash    TEXT,
+
+    CONSTRAINT uq_source_documents_run_company_url UNIQUE (run_id, company_id, source_url)
 );
 ```
 
 ---
 
-### `metric_observations`
+### 13. `metric_observations` — `MetricObservationRecord`
 
-Time-series metric observations for companies.
-
-**ORM Model**: `MetricObservationRecord` in `src/solstein/infrastructure/database_models.py`
+Individual metric values extracted from sources.
 
 ```sql
 CREATE TABLE metric_observations (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id   VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    metric_name  VARCHAR NOT NULL,
-    metric_value NUMERIC,
-    observed_at  TIMESTAMP NOT NULL,
-    source       VARCHAR,
-    created_at   TIMESTAMP DEFAULT NOW()
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    run_id              UUID NOT NULL REFERENCES research_runs(id) ON DELETE CASCADE,
+    company_id          TEXT,
+    metric_key          TEXT,
+    metric_value        TEXT,
+    metric_value_raw    JSONB,                                  -- original parsed value
+    source_url          TEXT,
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+
+    CONSTRAINT uq_metric_obs_run_company_metric_url_val
+        UNIQUE (run_id, company_id, metric_key, source_url, metric_value)
 );
 ```
 
-**Indexes**:
-- `idx_metric_observations_company_id` on `(company_id)`
-
 ---
 
-### `evidence_readiness`
+### 14. `evidence_readiness` — `EvidenceReadinessRecord`
 
-Tracks evidence quality and readiness for scoring decisions.
-
-**ORM Model**: `EvidenceReadinessRecord` in `src/solstein/infrastructure/database_models.py`
+Evidence quality scores per company per run.
 
 ```sql
 CREATE TABLE evidence_readiness (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id      VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    dimension       VARCHAR NOT NULL,
-    readiness_score NUMERIC CHECK (readiness_score BETWEEN 0 AND 1),
-    fact_count      INTEGER DEFAULT 0,
-    source_count    INTEGER DEFAULT 0,
-    assessed_at     TIMESTAMP DEFAULT NOW()
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    run_id                  UUID NOT NULL REFERENCES research_runs(id) ON DELETE CASCADE,
+    company_id              TEXT,
+    company_name            TEXT,
+    readiness_score         FLOAT,
+    readiness_level         TEXT,                               -- e.g. 'high', 'medium', 'low'
+    source_count            INTEGER,
+    source_domain_count     INTEGER,
+    metric_source_coverage  FLOAT,
+    metric_explainability   FLOAT,
+    unsupported_metrics     JSONB,                              -- metrics with no evidence
+    created_at              TIMESTAMP WITH TIME ZONE DEFAULT now(),
+
+    CONSTRAINT uq_evidence_readiness_run_company UNIQUE (run_id, company_id)
 );
 ```
 
 ---
 
-### `research_contradictions`
+### 15. `research_contradictions` — `ContradictionRecord`
 
-Records contradictions detected between data sources.
-
-**ORM Model**: `ContradictionRecord` in `src/solstein/infrastructure/database_models.py`
+Detected data conflicts between sources.
 
 ```sql
 CREATE TABLE research_contradictions (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id   VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    fact_type    VARCHAR NOT NULL,
-    source_a     VARCHAR NOT NULL,
-    source_b     VARCHAR NOT NULL,
-    value_a      JSONB,
-    value_b      JSONB,
-    severity     VARCHAR CHECK (severity IN ('low', 'medium', 'high', 'critical')),
-    status       VARCHAR DEFAULT 'open',
-    created_at   TIMESTAMP DEFAULT NOW()
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    run_id              UUID NOT NULL REFERENCES research_runs(id) ON DELETE CASCADE,
+    company_id          TEXT,
+    metric_key          TEXT,
+    contradiction_type  TEXT,
+    details             JSONB,
+    status              TEXT DEFAULT 'open',                    -- 'open'|'resolved'|'ignored'
+    updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    resolved_at         TIMESTAMP WITH TIME ZONE,
+    ignored_at          TIMESTAMP WITH TIME ZONE,
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+
+    CONSTRAINT uq_contradiction_run_company_metric_type
+        UNIQUE (run_id, company_id, metric_key, contradiction_type)
 );
 ```
 
+**Relationships:**
+- `transitions` → one-to-many → `ContradictionTransitionRecord`
+
 ---
 
-### `research_contradiction_transitions`
+### 16. `research_contradiction_transitions` — `ContradictionTransitionRecord`
 
-Audit trail for contradiction resolution state changes.
-
-**ORM Model**: `ContradictionTransitionRecord` in `src/solstein/infrastructure/database_models.py`
+Status change history for contradictions.
 
 ```sql
 CREATE TABLE research_contradiction_transitions (
-    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    contradiction_id  UUID NOT NULL REFERENCES research_contradictions(id) ON DELETE CASCADE,
-    from_status       VARCHAR,
-    to_status         VARCHAR NOT NULL,
-    reason            TEXT,
-    transitioned_at   TIMESTAMP DEFAULT NOW()
-);
-```
-
----
-
-## Enrichment Tables
-
-### `enrichment_audit_trail`
-
-Audit trail for all enrichment operations.
-
-**ORM Model**: `EnrichmentAuditRecord` in `src/solstein/infrastructure/database_models.py`
-
-```sql
-CREATE TABLE enrichment_audit_trail (
-    id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id     VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    operation_type VARCHAR NOT NULL,
-    status         VARCHAR NOT NULL,
-    details        JSONB,
-    duration_ms    INTEGER,
-    created_at     TIMESTAMP DEFAULT NOW()
-);
-```
-
-**Indexes**:
-- `idx_enrichment_company_id` on `(company_id)`
-
----
-
-### `enrichment_cache`
-
-Caches enrichment data to avoid redundant API calls.
-
-**ORM Model**: `EnrichmentCacheRecord` in `src/solstein/infrastructure/database_models.py`
-
-```sql
-CREATE TABLE enrichment_cache (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id   VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    cache_key    VARCHAR NOT NULL,
-    cache_data   JSONB NOT NULL,
-    expires_at   TIMESTAMP NOT NULL,
-    created_at   TIMESTAMP DEFAULT NOW(),
-    UNIQUE (company_id, cache_key)
-);
-```
-
----
-
-### `enrichment_jobs`
-
-Job queue for enrichment operations.
-
-**ORM Model**: `EnrichmentJobRecord` in `src/solstein/infrastructure/database_models.py`
-
-```sql
-CREATE TABLE enrichment_jobs (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id   VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    job_type     VARCHAR NOT NULL,
-    status       VARCHAR NOT NULL DEFAULT 'pending'
-                 CHECK (status IN ('pending', 'in_progress', 'completed', 'failed')),
-    priority     INTEGER DEFAULT 5,
-    payload      JSONB,
-    result       JSONB,
-    error_msg    TEXT,
-    scheduled_at TIMESTAMP,
-    started_at   TIMESTAMP,
-    completed_at TIMESTAMP,
-    created_at   TIMESTAMP DEFAULT NOW()
-);
-```
-
----
-
-## Audit & Reliability Tables
-
-### `audit_trails`
-
-General audit trail for company analysis operations.
-
-**ORM Model**: `AuditTrailRecord` in `src/solstein/infrastructure/database_models.py`
-
-```sql
-CREATE TABLE audit_trails (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id          VARCHAR NOT NULL REFERENCES companies(company_id) ON DELETE CASCADE,
-    company_name        VARCHAR,
-    scoring_timestamp   TIMESTAMP,
-    scorer_version      VARCHAR,
-    data_sources_used   JSONB,
-    created_at          TIMESTAMP DEFAULT NOW()
+    contradiction_id    UUID NOT NULL REFERENCES research_contradictions(id) ON DELETE CASCADE,
+    from_status         TEXT,
+    to_status           TEXT,
+    changed_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    changed_by          TEXT,
+    reason              TEXT
 );
 ```
 
-**Indexes**:
-- `idx_audit_company_id` on `(company_id)`
+---
+
+## Infrastructure Tables
+
+Two tables with **UUID** primary keys for platform reliability and multi-tenancy.
 
 ---
 
-### `outbox_records`
+### 17. `outbox_records` — `OutboxRecord`
 
-Transactional outbox for reliable event publishing (prevents lost events on crash).
-
-**ORM Model**: `OutboxRecord` in `src/solstein/infrastructure/database_models.py`
+Transactional outbox for reliable event publishing (at-least-once delivery).
 
 ```sql
 CREATE TABLE outbox_records (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    event_type   VARCHAR NOT NULL,
-    payload      JSONB NOT NULL,
-    status       VARCHAR NOT NULL DEFAULT 'pending'
-                 CHECK (status IN ('pending', 'processing', 'published', 'failed')),
-    attempts     INTEGER DEFAULT 0,
-    last_error   TEXT,
-    created_at   TIMESTAMP DEFAULT NOW(),
-    published_at TIMESTAMP
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_key       TEXT UNIQUE NOT NULL,                       -- idempotency key
+    event_type      TEXT,
+    status          TEXT DEFAULT 'pending',                     -- 'pending'|'processing'|'done'|'failed'
+    payload         JSONB,
+    attempt_count   INTEGER DEFAULT 0,
+    available_at    TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    created_at      TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    updated_at      TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    last_error      JSONB
+);
+
+CREATE INDEX ix_outbox_status_available ON outbox_records (status, available_at);
+```
+
+---
+
+### 18. `tenants` — `TenantRecord`
+
+Multi-tenant API key registry.
+
+```sql
+CREATE TABLE tenants (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name                TEXT UNIQUE NOT NULL,
+    api_key_hash        TEXT UNIQUE NOT NULL,                   -- SHA-256 hex (64 chars)
+    is_active           BOOLEAN DEFAULT TRUE,
+    plan                TEXT DEFAULT 'free',                    -- 'free'|'standard'|'enterprise'
+    rate_limit_per_min  INTEGER DEFAULT 60,
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    updated_at          TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 ```
 
-**Indexes**:
-- `idx_outbox_status` on `(status)` — for outbox processor polling
+**Security:** API keys are hashed with SHA-256 before storage. The raw key is only returned at creation time and never stored.
+
+**Rate limits by plan:**
+
+| Plan | Default Rate Limit |
+|------|--------------------|
+| `free` | 60 req/min |
+| `standard` | 60 req/min (configurable) |
+| `enterprise` | 60 req/min (configurable) |
 
 ---
 
-## Entity Relationship Diagram
+## Indexes Summary
+
+| Table | Index | Columns |
+|-------|-------|---------|
+| `companies` | `ix_companies_name` | `name` |
+| `companies` | `ix_companies_industry` | `industry` |
+| `companies` | `ix_companies_hq` | `hq` |
+| `companies` | `ix_companies_tier` | `tier` |
+| `companies` | `ix_companies_classification` | `classification` |
+| `companies` | `ix_companies_ai_score` | `ai_score` |
+| `companies` | `ix_companies_composite_score` | `composite_score` |
+| `companies` | `ix_companies_revenue_eur_m` | `revenue_eur_m` |
+| `companies` | `ix_companies_growth_rate_pct` | `growth_rate_pct` |
+| `companies` | `ix_companies_last_updated` | `last_updated` |
+| `companies` | `ix_companies_industry_hq` | `(industry, hq)` |
+| `scoring_records` | `ix_scoring_records_company_id` | `company_id` |
+| `enrichment_audit_trail` | `ix_enrichment_audit_company_ts` | `(company_id, timestamp)` |
+| `enrichment_audit_trail` | `ix_enrichment_audit_operation_ts` | `(operation, timestamp)` |
+| `outbox_records` | `ix_outbox_status_available` | `(status, available_at)` |
+| All UUID tables | Automatic PK index | `id` (UUID) |
+| `tenants` | Unique constraint | `name`, `api_key_hash` |
+| `research_runs` | Unique constraint | `run_id` |
+
+---
+
+## Relationships Diagram
 
 ```
-companies (PK: company_id)
-    │
-    ├── gathering_batches (FK: company_id)
-    │       │
-    │       └── facts (FK: company_id, batch_id)
-    │               │
-    │               └── fact_sources (FK: fact_id, CASCADE)
-    │
-    ├── scoring_records (FK: company_id)
-    │       │
-    │       └── signal_records (FK: company_id, scoring_id)
-    │
-    ├── research_runs (FK: company_id)
-    │       ├── research_stages (FK: run_id, CASCADE)
-    │       └── research_artifacts (FK: run_id, CASCADE)
-    │
-    ├── research_contradictions (FK: company_id)
-    │       └── research_contradiction_transitions (FK: contradiction_id, CASCADE)
-    │
-    ├── enrichment_audit_trail (FK: company_id)
-    ├── enrichment_cache (FK: company_id, UNIQUE: company_id+cache_key)
-    ├── enrichment_jobs (FK: company_id)
-    │
-    ├── audit_trails (FK: company_id)
-    ├── source_documents (FK: company_id)
-    ├── metric_observations (FK: company_id)
-    ├── evidence_readiness (FK: company_id)
-    ├── refresh_metadata (FK: company_id)
-    └── data_source_conflicts (FK: company_id)
+companies (Integer PK)
+    └── (logical reference by company_id TEXT) ──► scoring_records
+                                                        └── signal_records
 
-market_snapshots (independent — no FK to companies)
-outbox_records (independent — event bus)
-confidence_calibration (independent — calibration data)
-```
+scoring_records (Integer PK)
+    └── signal_records (FK: scoring_record_id)
 
----
+research_runs (UUID PK)
+    ├── research_stages         (FK: run_id, UNIQUE: run_id+stage_name)
+    ├── research_artifacts      (FK: run_id, UNIQUE: run_id+artifact_name)
+    ├── source_documents        (FK: run_id, UNIQUE: run_id+company_id+source_url)
+    ├── metric_observations     (FK: run_id)
+    ├── evidence_readiness      (FK: run_id, UNIQUE: run_id+company_id)
+    └── research_contradictions (FK: run_id, UNIQUE: run_id+company_id+metric_key+type)
+            └── research_contradiction_transitions (FK: contradiction_id)
 
-## Foreign Key Constraints
-
-All foreign keys are defined with explicit constraint names for easy identification in error messages.
-
-| Constraint Name | Child Table | Child Column | Parent Table | Parent Column | On Delete |
-|-----------------|-------------|--------------|--------------|---------------|-----------|
-| `fk_batches_companies` | `gathering_batches` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_facts_companies` | `facts` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_facts_batches` | `facts` | `batch_id` | `gathering_batches` | `batch_id` | CASCADE |
-| `fk_fact_sources_facts` | `fact_sources` | `fact_id` | `facts` | `fact_id` | CASCADE |
-| `fk_scoring_companies` | `scoring_records` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_signals_companies` | `signal_records` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_signals_scoring` | `signal_records` | `scoring_id` | `scoring_records` | `id` | CASCADE |
-| `fk_research_runs_companies` | `research_runs` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_research_stages_runs` | `research_stages` | `run_id` | `research_runs` | `id` | CASCADE |
-| `fk_research_artifacts_runs` | `research_artifacts` | `run_id` | `research_runs` | `id` | CASCADE |
-| `fk_contradictions_companies` | `research_contradictions` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_contradiction_transitions` | `research_contradiction_transitions` | `contradiction_id` | `research_contradictions` | `id` | CASCADE |
-| `fk_enrichment_audit_companies` | `enrichment_audit_trail` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_enrichment_cache_companies` | `enrichment_cache` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_enrichment_jobs_companies` | `enrichment_jobs` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_audit_trails_companies` | `audit_trails` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_source_docs_companies` | `source_documents` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_metric_obs_companies` | `metric_observations` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_evidence_companies` | `evidence_readiness` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_refresh_metadata_companies` | `refresh_metadata` | `company_id` | `companies` | `company_id` | CASCADE |
-| `fk_conflicts_companies` | `data_source_conflicts` | `company_id` | `companies` | `company_id` | CASCADE |
-
----
-
-## Indexes & Performance
-
-All indexes were added in migration `011_optimize_database_indexes.py`.
-
-| Index Name | Table | Columns | Purpose |
-|------------|-------|---------|---------|
-| `idx_facts_company_id` | `facts` | `(company_id)` | Fact lookups by company |
-| `idx_facts_company_type` | `facts` | `(company_id, fact_type)` | Filtered fact queries |
-| `idx_batches_company_id` | `gathering_batches` | `(company_id)` | Batch lookups |
-| `idx_batches_status` | `gathering_batches` | `(status)` | Status filtering |
-| `idx_scoring_company_id` | `scoring_records` | `(company_id)` | Scoring lookups |
-| `idx_scoring_timestamp` | `scoring_records` | `(scoring_timestamp DESC)` | Time-series queries |
-| `idx_audit_company_id` | `audit_trails` | `(company_id)` | Audit trail queries |
-| `idx_enrichment_company_id` | `enrichment_audit_trail` | `(company_id)` | Enrichment lookups |
-| `idx_research_runs_company_id` | `research_runs` | `(company_id)` | Research run queries |
-| `idx_metric_observations_company_id` | `metric_observations` | `(company_id)` | Metric queries |
-| `idx_outbox_status` | `outbox_records` | `(status)` | Outbox processor polling |
-
-### Query Performance Targets
-
-| Query Pattern | Index Used | Target |
-|---------------|-----------|--------|
-| `SELECT * FROM companies WHERE company_id = ?` | PK | <5ms |
-| `SELECT * FROM facts WHERE company_id = ?` | `idx_facts_company_id` | <20ms |
-| `SELECT * FROM facts WHERE company_id = ? AND fact_type = ?` | `idx_facts_company_type` | <10ms |
-| `SELECT * FROM scoring_records WHERE company_id = ? ORDER BY scoring_timestamp DESC LIMIT 1` | `idx_scoring_company_id` + `idx_scoring_timestamp` | <15ms |
-| `SELECT * FROM outbox_records WHERE status = 'pending'` | `idx_outbox_status` | <10ms |
-
----
-
-## CHECK Constraints
-
-Added in migration `010_add_database_constraints.py`.
-
-| Table | Column | Constraint |
-|-------|--------|------------|
-| `facts` | `confidence` | `BETWEEN 0 AND 1` |
-| `signal_records` | `confidence` | `BETWEEN 0 AND 1` |
-| `scoring_records` | `growth_score` | `BETWEEN 0 AND 10` |
-| `scoring_records` | `financial_health_score` | `BETWEEN 0 AND 10` |
-| `scoring_records` | `competitive_position_score` | `BETWEEN 0 AND 10` |
-| `scoring_records` | `overall_score` | `BETWEEN 0 AND 10` |
-| `scoring_records` | `classification` | `IN ('Phoenix', 'Salt', 'Lead')` |
-| `gathering_batches` | `status` | `IN ('in_progress', 'completed', 'failed')` |
-| `research_runs` | `status` | `IN ('pending', 'in_progress', 'completed', 'failed')` |
-| `enrichment_jobs` | `status` | `IN ('pending', 'in_progress', 'completed', 'failed')` |
-| `outbox_records` | `status` | `IN ('pending', 'processing', 'published', 'failed')` |
-| `evidence_readiness` | `readiness_score` | `BETWEEN 0 AND 1` |
-| `confidence_calibration` | `base_confidence` | `BETWEEN 0 AND 1` |
-| `research_contradictions` | `severity` | `IN ('low', 'medium', 'high', 'critical')` |
-
----
-
-## Migration History
-
-| File | Revision | Description |
-|------|----------|-------------|
-| `001_initial_schema.py` | 001 | Initial schema setup |
-| `002_add_companies_table.py` | 002 | Core companies table |
-| `003_add_facts_tables.py` | 003 | gathering_batches, facts, fact_sources |
-| `004_add_enrichment_audit_cache_tables.py` | 004 | enrichment_audit_trail, enrichment_cache |
-| `005_add_research_tables.py` | 005 | research_runs, research_stages, research_artifacts |
-| `006_add_enrichment_job_table.py` | 006 | enrichment_jobs |
-| `007_add_evidence_readiness_table.py` | 007 | evidence_readiness |
-| `008_add_metric_outbox_contradiction_tables.py` | 008 | metric_observations, outbox_records, research_contradictions, research_contradiction_transitions |
-| `009_add_foreign_key_constraints.py` | 009 | FK constraints on enrichment tables |
-| `010_add_database_constraints.py` | 010 | CHECK constraints, standardized PKs |
-| `011_optimize_database_indexes.py` | 011 | 11 performance indexes |
-| `E2a_add_refresh_conflict_confidence_tables.py` | E2a | refresh_metadata, data_source_conflicts, confidence_calibration |
-
-### Running Migrations
-
-```bash
-# Apply all pending migrations
-alembic upgrade head
-
-# Check current revision
-alembic current
-
-# Show migration history
-alembic history
-
-# Rollback one step
-alembic downgrade -1
+tenants (UUID PK) ── rate_limit_per_min enforced by API middleware
+outbox_records (UUID PK) ── processed by src/solstein/infrastructure/outbox_worker.py
+enrichment_jobs (Text PK = Celery task_id) ── processed by Celery worker
 ```
 
 ---
 
-## Common Query Patterns
-
-### Get all facts for a company
+## ORM Import Reference
 
 ```python
-from sqlalchemy import select
-from solstein.domain.facts import Fact
+# All 18 models from one import
+from solstein.infrastructure.database_models import (
+    # Competitive Intelligence (Integer PKs)
+    CompanyRecord,
+    ScoringRecord,
+    SignalRecord,
+    MarketSnapshot,
+    AuditTrailRecord,
+    EnrichmentCacheRecord,
+    EnrichmentAuditRecord,
+    EnrichmentJobRecord,
 
-result = await session.execute(
-    select(Fact).where(Fact.company_id == "eneve-001")
+    # Research Pipeline (UUID PKs)
+    ResearchRunRecord,
+    ResearchStageRecord,
+    ResearchArtifactRecord,
+    SourceDocumentRecord,
+    MetricObservationRecord,
+    EvidenceReadinessRecord,
+    ContradictionRecord,
+    ContradictionTransitionRecord,
+
+    # Infrastructure (UUID PKs)
+    OutboxRecord,
+    TenantRecord,
+
+    # SQLAlchemy base
+    Base,
 )
-facts = result.scalars().all()
-```
 
-### Get facts by type with confidence filter
+# Session usage
+from solstein.infrastructure.database import get_async_session
 
-```python
-result = await session.execute(
-    select(Fact).where(
-        Fact.company_id == "eneve-001",
-        Fact.fact_type == "revenue",
-        Fact.confidence >= 0.8,
-    ).order_by(Fact.created_at.desc())
-)
-revenue_facts = result.scalars().all()
-```
-
-### Get latest scoring for a company
-
-```python
-from solstein.infrastructure.database_models import ScoringRecord
-
-result = await session.execute(
-    select(ScoringRecord)
-    .where(ScoringRecord.company_id == "eneve-001")
-    .order_by(ScoringRecord.scoring_timestamp.desc())
-    .limit(1)
-)
-latest_score = result.scalar_one_or_none()
-```
-
-### Get pending enrichment jobs
-
-```python
-from solstein.infrastructure.database_models import EnrichmentJobRecord
-
-result = await session.execute(
-    select(EnrichmentJobRecord)
-    .where(EnrichmentJobRecord.status == "pending")
-    .order_by(EnrichmentJobRecord.priority.desc(), EnrichmentJobRecord.created_at.asc())
-    .limit(10)
-)
-jobs = result.scalars().all()
-```
-
-### Get market snapshot with company count
-
-```python
-from sqlalchemy import func
-from solstein.infrastructure.database_models import MarketSnapshot
-
-result = await session.execute(
-    select(MarketSnapshot)
-    .where(MarketSnapshot.market_segment == "energy_software")
-    .order_by(MarketSnapshot.created_at.desc())
-    .limit(1)
-)
-snapshot = result.scalar_one_or_none()
+async def example():
+    async with get_async_session() as session:
+        result = await session.execute(
+            select(CompanyRecord).where(CompanyRecord.tier == "TIER_1")
+        )
+        companies = result.scalars().all()
 ```
 
 ---
 
-## Related Documentation
+## Quick Reference: Table Count by Group
 
-- [DATABASE.md](DATABASE.md) — Connection configuration, pool settings, backup/restore
-- [TESTING.md](TESTING.md) — How to write database tests
-- [PROFESSIONALIZATION.md](PROFESSIONALIZATION.md) — Schema evolution history
-- [SETUP.md](SETUP.md) — Project setup including database configuration
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — Common database issues
+| Group | Tables | PK Type |
+|-------|--------|---------|
+| Competitive Intelligence | 8 | Integer (SERIAL) |
+| Research Pipeline | 8 | UUID |
+| Infrastructure | 2 | UUID |
+| **Total** | **18** | — |
 
 ---
 
-*Schema documented: February 2026*  
-*Built by AI Whisperers — finding the diamonds nobody knew were there.*
+*Schema source: `src/solstein/infrastructure/database_models.py`*  
+*Last verified: 2026-03-01*

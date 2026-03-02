@@ -2,7 +2,7 @@
 
 > *The authoritative tracking document for the Solstein architectural remediation programme. All work originates here.*
 
-> Last Updated: 2026-03-01 | Audit Version: 2.0 | Status: 🔴 DO NOT SHIP
+| Last Updated: 2026-03-01 | Audit Version: 2.0 | Status: 🔴 DO NOT SHIP |
 
 ---
 
@@ -10,7 +10,12 @@
 
 | Metric | Value | Trend |
 |--------|-------|-------|
-| Total Epics | 43 | — |
+| Total Epics | 49 | +6 |
+| Total Stories | 189 | +21 |
+| P0 Stories (Ship Blockers) | 15 | 🔴 Unresolved (+2) |
+| P1 Stories (Current Sprint) | 74 | 🟠 Queued (+12) |
+| P2 Stories (Next Quarter) | 78 | 🟡 Backlogged (+5) |
+| P3 Stories (Sustaining) | 22 | 🟢 Deferred (+2) |
 | Total Stories | 168 | — |
 | P0 Stories (Ship Blockers) | 13 | 🔴 Unresolved |
 | P1 Stories (Current Sprint) | 62 | 🟠 Queued |
@@ -120,15 +125,20 @@ EPIC-002: Configuration Integrity
 | [EPIC-042](EPICS/EPIC-042-rapid-market-validation/README.md) | Rapid Market Validation Methodology | P2 | 4 | 🔴 Open |
 | [EPIC-043](EPICS/EPIC-043-repository-cleanup/README.md) | Repository Cleanup & Organization | P2 | 4 | 🔴 Open |
 | [EPIC-044](EPICS/EPIC-044-quick-wins/README.md) | Quick Wins — High Impact, Low Effort | P1 | 10 | 🔴 Open |
+|| [EPIC-045](EPICS/EPIC-045-cli-runtime-correctness/README.md) | CLI Runtime Correctness | P0 | 4 | 🔴 Open |
+|| [EPIC-046](EPICS/EPIC-046-scoring-engine-correctness/README.md) | Scoring Engine Correctness | P0 | 4 | 🔴 Open |
+|| [EPIC-047](EPICS/EPIC-047-data-loading-fidelity/README.md) | Data Loading Fidelity | P1 | 4 | 🔴 Open |
+|| [EPIC-048](EPICS/EPIC-048-report-generation-quality/README.md) | Report Generation Quality | P1 | 5 | 🔴 Open |
+|| [EPIC-049](EPICS/EPIC-049-infrastructure-dev-environment/README.md) | Infrastructure & Dev Environment | P1 | 4 | 🔴 Open |
 
 ---
 
 ## Story Index
 
 <details>
-<summary>Click to expand full story index (168 stories)</summary>
+<summary>Click to expand full story index (189 stories)</summary>
 
-### P0 — Ship Blockers (13 stories)
+### P0 — Ship Blockers (15 stories)
 
 | Story | Title | Epic | Status |
 |-------|-------|------|--------|

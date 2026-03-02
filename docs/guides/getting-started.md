@@ -27,7 +27,7 @@ Solstein is an AI-powered competitive intelligence platform built for PE/VC prof
 
 **Goal**: Get the API running locally and verify it responds.
 
-**Prerequisites**: Python 3.12+, Redis 5.0+ (see [Developer Guide](developer.md#redis-dependency) for Redis setup options).
+**Prerequisites**: Python 3.10+, Redis 5.0+ (see [Developer Guide](developer.md#redis-dependency) for Redis setup options).
 
 ### 1. Clone and install
 
@@ -50,7 +50,7 @@ redis-cli ping   # Expected: PONG
 ### 3. Start the API
 
 ```bash
-uvicorn solstein.api.main:app --reload
+PYTHONPATH=src uvicorn solstein.api.main:app --reload
 ```
 
 ### 4. Verify it's alive
@@ -103,7 +103,7 @@ Pick the path that matches your role. Each path builds knowledge progressively.
 | 3 | **[Async Patterns Guide](async-patterns.md)** | Celery tasks, async/await, task chaining | 15 min |
 | 4 | **[Connector Enrichment Guide](connector-enrichment.md)** | Data sources, enrichment pipeline, adding connectors | 10 min |
 | 5 | **[Extending Solstein](extending-solstein.md)** | Add scoring dimensions, exporters, data sources | 15 min |
-| 6 | **[Architecture Decisions](../architecture/decisions.md)** | Why FastAPI, Celery, JSON files, 4-layer testing | 10 min |
+| 6 | **[Architecture Decisions](../architecture/decisions.md)** | Why FastAPI, Celery, JSON files, 6-layer testing | 10 min |
 
 ### 👨‍✈️ Operators — "I need to deploy and monitor Solstein"
 

@@ -41,8 +41,8 @@
 1. **Database-First** — All data stored in PostgreSQL with proper constraints and indexes
 2. **Async-First** — All I/O operations use `async/await` pattern via `asyncpg`
 3. **Repository Pattern** — Unified repository layer for data access; no direct DB calls in business logic
-4. **Type Safety** — Full type hints throughout; `mypy --strict` enforced
-5. **Test Coverage** — 4-layer testing pyramid (unit → integration → worker → data quality)
+4. **Type Safety** — Full type hints throughout; mypy type checking (partial coverage)
+5. **Test Coverage** — 6-layer testing strategy (unit, integration, data quality, performance, property, agents)
 6. **LLM Resilience** — Provider fallback chain with health checking; never a single point of failure
 
 ---
@@ -51,10 +51,10 @@
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
-| **Language** | Python | 3.11+ |
+| **Language** | Python | 3.10+ |
 | **Framework** | FastAPI | Latest |
 | **Package Manager** | uv / pip | — |
-| **Database** | PostgreSQL | 15+ |
+| **Database** | PostgreSQL | 14+ |
 | **ORM** | SQLAlchemy | 2.0+ (async) |
 | **Data Processing** | Pandas | 2.x |
 | **Excel Export** | OpenPyXL | 3.x |
@@ -102,8 +102,8 @@ solstein/
 │   ├── data_quality/        # Golden dataset regression tests
 │   └── performance/         # Load tests
 ├── docs/                    # Documentation
-├── scripts/                 # Utility scripts (setup_db.py, …)
-├── dashboard/               # Next.js frontend
+├── scripts/                 # Utility scripts
+
 └── data/                    # Market intelligence datasets
 ```
 
@@ -111,9 +111,9 @@ solstein/
 
 ## Database Layer
 
-**PostgreSQL 15+** with the following characteristics:
+**PostgreSQL 14+** with the following characteristics:
 
-- **21 Tables** organized by domain
+- **18 Tables** organized by domain
 - **40+ Indexes** for query optimization
 - **20+ Foreign Keys** for referential integrity
 - **50+ Constraints** for data quality

@@ -19,12 +19,16 @@ from .company import CompanyReportGenerator
 from .market import MarketReportGenerator
 
 
+from ...data.web_research_pipeline import SyntheticDataDetector
+
+
 class ReportGenerator:
     """Generate markdown intelligence reports from Company data."""
 
     def __init__(self, output_dir: Path | None = None, use_llm: bool = True):
         self.output_dir = output_dir or Path("data/output/reports")
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.formatter = ReportFormatter()
         self.use_llm = use_llm
         self._llm_enhancer = None
         if use_llm:
@@ -33,6 +37,51 @@ class ReportGenerator:
 
                 self._llm_enhancer = LLMReportEnhancer()
             except Exception as e:
+                logger.warning(f"LLM enhancer not available: {e}")
+
+    def _check_data_authenticity(self, companies: list[Company]) -> tuple[bool, str]:
+        """Check if company data is authentic (not synthetic).
+        
+        Returns:
+            Tuple of (is_authentic, warning_message)
+        """
+        synthetic_count = 0
+        total = len(companies)
+        
+        for company in companies:
+            # Check for synthetic indicators
+            data_source = getattr(company, 'data_source_type', None)
+            if data_source == 'synthetic':
+                synthetic_count += 1
+                continue
+            
+            # Check company name patterns
+            name = getattr(company, 'name', '').lower()
+            if any(pattern in name for pattern in ['test-company', 'test_company', 'synthetic', 'fake']):
+                synthetic_count += 1
+                continue
+        
+        if synthetic_count == 0:
+            return True, ""
+        
+        synthetic_pct = (synthetic_count / total * 100) if total > 0 else 0
+        
+        warning = f"""⚠️  **DATA QUALITY WARNING** ⚠️
+
+**{synthetic_count} out of {total} companies ({synthetic_pct:.1f}%) appear to be synthetic/research data.**
+
+This report contains:
+- ⚠️  Computer-generated company profiles
+- ⚠️  Estimated (not verified) financial data
+- ⚠️  No web-based data sources
+
+**RECOMMENDATION**: Run 'solstein replace-synthetic' to replace with real web-researched data before using this report for investment decisions.
+
+---
+"""
+        return False, warning
+
+    def generate_all_reports(self, companies: list[Company], output_subdir: str | None = None) -> dict[str, Path]:
                 logger.warning(f"LLM enhancer not available: {e}")
 
     def generate_all_reports(self, companies: list[Company], output_subdir: str | None = None) -> dict[str, Path]:
@@ -64,9 +113,14 @@ class ReportGenerator:
         """
         output_dir = output_dir or self.output_dir
 
-        # Create company-specific directory
-        company_dir = output_dir / self._sanitize_filename(company.name)
-        company_dir.mkdir(parents=True, exist_ok=True)
+        # Create company-specific directory (avoid double nesting)
+        sanitized_name = self._sanitize_filename(company.name)
+        if output_dir.name == sanitized_name:
+            # Already in company directory, don't nest further
+            company_dir = output_dir
+        else:
+            company_dir = output_dir / sanitized_name
+            company_dir.mkdir(parents=True, exist_ok=True)
 
         # Delegate to specialized generator (EPIC-008 decomposition)
         company_gen = CompanyReportGenerator(output_dir)
@@ -95,7 +149,7 @@ class ReportGenerator:
 With {company.financials.employees or "N/A"} employees and €{company.financials.revenue or 0:.1f}M revenue,
 the company demonstrates a {self._classify_trajectory(company)} trajectory.
 
-**Composite Score**: {company.composite_score or "N/A"} | **Classification**: {company.classification or "N/A"}
+**Composite Score**: {self.formatter.format_score(company.composite_score)} | **Classification**: {company.classification or "N/A"}
 
 ---
 
@@ -143,7 +197,7 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
 
 ### Funding Rounds
 
-{self._format_funding_rounds(company.funding_rounds)}
+{self._format_funding_rounds(company)}
 
 ---
 
@@ -178,10 +232,10 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
 
 | Score Type | Value | Interpretation |
 |---|---|---|
-| Growth Score | {company.growth_score or "N/A"}/10 | {self._interpret_growth(company.growth_score)} |
-| Financial Health | {company.financial_health_score or "N/A"}/10 | {self._interpret_health(company.financial_health_score)} |
+| Growth Score | {self.formatter.format_score(company.growth_score)}/10 | {self._interpret_growth(company.growth_score)} |
+| Financial Health | {self.formatter.format_score(company.financial_health_score)}/10 | {self._interpret_health(company.financial_health_score)} |
 | Competitive Position | {company.competitive_position_score or "N/A"}/10 | {self._interpret_position(company.competitive_position_score)} |
-| **Composite** | **{company.composite_score or "N/A"}/10** | **{company.classification or "N/A"}** |
+| **Composite** | **{self.formatter.format_score(company.composite_score)}/10** | **{company.classification or "N/A"}** |
 
 ---
 
@@ -294,10 +348,10 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
 
 | Dimension | Score | Max | Assessment |
 |---|---|---|---|
-| Growth Score | {company.growth_score or "N/A"} | 10 | {self._interpret_growth(company.growth_score)} |
-| Financial Health | {company.financial_health_score or "N/A"} | 10 | {self._interpret_health(company.financial_health_score)} |
+| Growth Score | {self.formatter.format_score(company.growth_score)} | 10 | {self._interpret_growth(company.growth_score)} |
+| Financial Health | {self.formatter.format_score(company.financial_health_score)} | 10 | {self._interpret_health(company.financial_health_score)} |
 | Competitive Position | {company.competitive_position_score or "N/A"} | 10 | {self._interpret_position(company.competitive_position_score)} |
-| **Composite Score** | **{company.composite_score or "N/A"}** | 10 | **{company.classification or "N/A"}** |
+| **Composite Score** | **{self.formatter.format_score(company.composite_score)}** | 10 | **{company.classification or "N/A"}** |
 
 ### Classification Criteria
 
@@ -335,7 +389,7 @@ the company demonstrates a {self._classify_trajectory(company)} trajectory.
 
 ## Strategic Assessment
 
-**Position**: {company.classification or "N/A"} ({company.composite_score or "N/A"}/10)
+**Position**: {company.classification or "N/A"} ({self.formatter.format_score(company.composite_score)}/10)
 
 {self._generate_strategic_assessment(company)}
 
@@ -698,7 +752,7 @@ revenue growth, funding, technology maturity, and market positioning.
         if not funding_rounds:
             return "**Funding Details**: No rounds disclosed"
 
-        return "### Funding Rounds\n\n" + self._format_funding_rounds(funding_rounds)
+        return "### Funding Rounds\n\n" + self._format_funding_rounds(company)
 
     def _score_funding(self, company: Company) -> int:
         """Calculate funding score."""
@@ -856,8 +910,9 @@ class ClientReportGenerator(ReportGenerator):
         # Find direct competitors (similar tier/score)
         direct = [c for c in sorted_comp if c.tier == client.tier and c.id != client.id][:5]
 
-        # Find threats (higher score competitors)
+        # Find threats (higher score competitors) and all competitors for landscape view
         threats = [c for c in sorted_comp if (c.composite_score or 0) > (client.composite_score or 0)][:5]
+        all_competitors = [c for c in sorted_comp if c.id != client.id][:5]
 
         def _fmt_float(value: float | None) -> str:
             if value is None:
@@ -894,7 +949,13 @@ class ClientReportGenerator(ReportGenerator):
         )
         composite_top = max([c.composite_score or 0 for c in competitors], default=None) if competitors else None
 
+        # Check data authenticity and add warning if synthetic data detected
+        is_authentic, warning = self._check_data_authenticity([client] + competitors)
+        
         report = f"""# Competitive Analysis - {client.name}
+
+{warning if warning else ""}
+**Report Date**: {datetime.now().strftime("%B %Y")}
 
 **Report Date**: {datetime.now().strftime("%B %Y")}
 **Client**: {client.name}
@@ -936,8 +997,9 @@ companies in the {client.industry or "energy software"} market.
 |---|---|---|---|
 | Growth Score | {client.growth_score or "N/A"} | {_fmt_float(growth_market_avg)} | {_fmt_float(growth_top)} |
 | Financial Health | {client.financial_health_score or "N/A"} | {_fmt_float(health_market_avg)} | {_fmt_float(health_top)} |
-| Competitive Position | {client.competitive_position_score or "N/A"} | {_fmt_float(position_market_avg)} | {_fmt_float(position_top)} |
+| Competitive Position | {self.formatter.format_score(client.competitive_position_score)} | {_fmt_float(position_market_avg)} | {_fmt_float(position_top)} |
 | Composite | {client.composite_score or "N/A"} | {_fmt_float(composite_market_avg)} | {_fmt_float(composite_top)} |
+| Revenue CAGR | {client.revenue_cagr_3yr or 'N/A'}% | {self._avg([c.revenue_cagr_3yr for c in sorted_comp if c.revenue_cagr_3yr]):.1f}% | {max([c.revenue_cagr_3yr for c in sorted_comp if c.revenue_cagr_3yr], default=0):.1f}% |
 
 ---
 
@@ -945,11 +1007,42 @@ companies in the {client.industry or "energy software"} market.
 
 These companies operate in the same tier with similar market positioning:
 
-| Company | Revenue | CAGR | Score | Classification |
-|---|---|---|---|---|
+| Company | Revenue | CAGR | Score | AI | SaaS | Classification |
+|---|---|---|---|---|---|---|---|
 """
         for c in direct:
-            report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {c.classification or 'N/A'} |\n"
+            report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {c.ai_score or 'N/A'}/10 | {c.saas_maturity or 'N/A'}/10 | {c.classification or 'N/A'} |\n"
+        
+        # Add detailed competitor analysis
+        if direct:
+            report += """
+
+### Competitor Details
+
+"""
+            for c in direct:
+                report += f"""**{c.name}** ({c.classification or 'Unknown'})
+- Revenue: €{c.financials.revenue or 0:.1f}M | CAGR: {c.revenue_cagr_3yr or 'N/A'}% | Score: {c.composite_score or 'N/A'}/10
+- AI Maturity: {c.ai_score or 'N/A'}/10 | SaaS Maturity: {c.saas_maturity or 'N/A'}/10
+"""
+                # Add relative positioning
+                if c.composite_score and client.composite_score:
+                    diff = c.composite_score - client.composite_score
+                    if diff > 0:
+                        report += f"- **{diff:.2f} points higher** composite score\n"
+                    elif diff < 0:
+                        report += f"- **{abs(diff):.2f} points lower** composite score\n"
+                
+                # Add key differentiator
+                if c.ai_score and client.ai_score and c.ai_score > client.ai_score:
+                    report += f"- **AI Advantage**: {c.ai_score}/10 vs your {client.ai_score}/10\n"
+                if c.saas_maturity and client.saas_maturity and c.saas_maturity > client.saas_maturity:
+                    report += f"- **SaaS Advantage**: {c.saas_maturity}/10 vs your {client.saas_maturity}/10\n"
+                if c.revenue_cagr_3yr and client.revenue_cagr_3yr and c.revenue_cagr_3yr > client.revenue_cagr_3yr:
+                    report += f"- **Growth Advantage**: {c.revenue_cagr_3yr}% CAGR vs your {client.revenue_cagr_3yr}%\n"
+                
+                report += "\n"
+
 
         report += """
 
@@ -960,10 +1053,34 @@ Companies with superior composite scores that could disrupt market position:
 | Company | Revenue | CAGR | Score | Threat Level |
 |---|---|---|---|---|
 """
-        for c in threats:
+        if threats:
+            for c in threats:
+                score_diff = (c.composite_score or 0) - (client.composite_score or 0)
+                threat = "High" if score_diff > 2 else "Medium" if score_diff > 1 else "Low"
+                report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {threat} |\n"
+        else:
+            report += "| *No companies with higher scores* | - | - | - | *N/A* |\n"
+
+        # Add all competitors section
+        report += """
+
+## Competitive Landscape
+
+All competitors ranked by composite score:
+
+| Company | Revenue | CAGR | Score | vs Client |
+|---|---|---|---|---|
+"""
+        all_comp = [c for c in sorted_comp if c.id != client.id][:5]
+        for c in all_comp:
             score_diff = (c.composite_score or 0) - (client.composite_score or 0)
-            threat = "High" if score_diff > 2 else "Medium" if score_diff > 1 else "Low"
-            report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {threat} |\n"
+            if score_diff > 0:
+                diff_str = f"+{score_diff:.2f} (higher)"
+            elif score_diff < 0:
+                diff_str = f"{score_diff:.2f} (lower)"
+            else:
+                diff_str = "0.00 (equal)"
+            report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {diff_str} |\n"
 
         report += f"""
 
@@ -992,11 +1109,13 @@ Companies with superior composite scores that could disrupt market position:
 
 ## Appendix: All Competitors
 
-| Company | Revenue | CAGR | AI | SaaS | Classification |
-|---|---|---|---|---|---|
+| Company | Revenue | CAGR | AI | SaaS | Classification | Threat Level |
+|---|---|---|---|---|---|---|
 """
         for c in sorted_comp:
-            report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.ai_score or 'N/A'} | {c.saas_maturity or 'N/A'} | {c.classification or 'N/A'} |\n"
+            from solstein.analytics.constants import derive_threat_level
+            threat = derive_threat_level(c.classification, c.composite_score or 0)
+            report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.ai_score or 'N/A'}/10 | {c.saas_maturity or 'N/A'}/10 | {c.classification or 'N/A'} | {threat} |\n"
 
         report += f"""
 
@@ -1088,21 +1207,63 @@ Companies with superior composite scores that could disrupt market position:
     def _generate_client_weaknesses(self, client: Company, competitors: list[Company]) -> str:
         """Generate client weaknesses."""
         weaknesses = []
+        classification = getattr(client, 'classification', None)
 
+        # AI gap analysis
         if client.ai_score is not None:
             avg_ai = self._avg([c.ai_score for c in competitors if c.ai_score is not None])
             if client.ai_score < avg_ai - 1:
-                weaknesses.append(f"AI gap ({client.ai_score}/10 vs {avg_ai:.1f} market avg)")
+                weaknesses.append(f"AI capability gap ({client.ai_score}/10 vs {avg_ai:.1f} market avg)")
+            elif client.ai_score < avg_ai - 0.5:
+                weaknesses.append(f"Below-average AI maturity ({client.ai_score}/10)")
+            elif client.ai_score < 5:
+                weaknesses.append(f"Limited AI adoption ({client.ai_score}/10) - opportunity for digital transformation")
 
+        # SaaS maturity gaps
         if client.saas_maturity:
             avg_saas = self._avg([c.saas_maturity for c in competitors if c.saas_maturity])
             if client.saas_maturity < avg_saas - 1:
                 weaknesses.append(f"SaaS maturity gap ({client.saas_maturity} vs {avg_saas:.1f} avg)")
+            elif client.saas_maturity < 5:
+                weaknesses.append(f"Legacy technology stack (SaaS: {client.saas_maturity}/10)")
+
+        # Financial/market position gaps
+        client_score = client.composite_score or 0
+        market_avg = self._avg([c.composite_score for c in competitors if c.composite_score])
+        if client_score < market_avg - 1:
+            weaknesses.append(f"Below-market composite score ({client_score:.1f} vs {market_avg:.1f} avg)")
+        elif classification == "Lead":
+            weaknesses.append(f"Legacy classification ({client_score:.1f}/10) - transformation opportunity")
 
         if not client.latest_valuation_eur:
             weaknesses.append("No disclosed valuation (competitors have clearer market positioning)")
 
-        return "\n".join([f"- {w}" for w in weaknesses]) if weaknesses else "- No significant weaknesses identified"
+        if not client.total_funding_raised_eur and any(c.total_funding_raised_eur for c in competitors):
+            weaknesses.append("Bootstrapped/unfunded vs. funded competitors")
+
+        # Growth concerns
+        if client.revenue_cagr_3yr is not None and client.revenue_cagr_3yr < 5:
+            weaknesses.append(f"Low growth trajectory ({client.revenue_cagr_3yr}% CAGR)")
+
+        # For Phoenix/high-performing companies, show strategic considerations instead of weaknesses
+        if classification == "Phoenix" and not weaknesses:
+            weaknesses.append(f"**Strategic Position**: Phoenix-class company ({client_score:.1f}/10)")
+            # Add market leadership risks
+            threats = [c for c in competitors if (c.composite_score or 0) > (client.composite_score or 0)]
+            if threats:
+                weaknesses.append(f"Market leadership challenged by {len(threats)} higher-scoring competitor(s)")
+            else:
+                weaknesses.append("Market leader - maintain innovation edge to defend position")
+            
+            # Add scale-based considerations
+            revenue = getattr(client.financials, 'revenue', 0) or 0
+            if revenue < 10:
+                weaknesses.append(f"High-growth but small scale (€{revenue:.1f}M) - execution risk at scale")
+
+        if weaknesses:
+            return "\n".join([f"- {w}" for w in weaknesses])
+        else:
+            return f"- Market-competitive position across key metrics (score: {client_score:.1f}/10)"
 
 
 class LLMEnhancedReportGenerator(ClientReportGenerator):

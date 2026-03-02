@@ -13,7 +13,7 @@
 
 ## Prerequisites
 
-- Python 3.12+
+- Python 3.10+
 - Redis (for Celery workers)
 - Git
 
@@ -111,7 +111,7 @@ pytest tests/ --cov=src/solstein --cov-report=term-missing
 
 # By layer
 pytest tests/unit/          # Domain model + scoring tests
-pytest tests/integration/   # API endpoint + worker tests
+pytest tests/integration/   # API endpoint + integration tests
 pytest tests/data_quality/  # Golden dataset regressions
 
 # Verbose output
@@ -226,7 +226,7 @@ Always use `factories.py` rather than constructing domain objects directly in te
 
 ### Testing Strategy (4-Layer Pyramid)
 
-Solstein uses **4 layers of testing** ensuring reliability without brittleness:
+Solstein uses **6 layers of testing** ensuring reliability without brittleness:
 
 ```
                     ▲
@@ -532,7 +532,7 @@ pytest tests/
 # Run specific layer
 pytest tests/unit/               # Only unit tests
 pytest tests/test_fastapi.py    # Only API tests
-pytest tests/integration/       # Only worker tests
+pytest tests/integration/       # Integration tests (API, database, services)
 pytest tests/data_quality/      # Only golden dataset
 
 # Run with coverage

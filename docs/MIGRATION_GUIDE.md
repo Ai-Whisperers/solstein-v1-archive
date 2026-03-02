@@ -18,7 +18,7 @@ Before starting the migration, ensure you have:
 
 1. **PostgreSQL 14+** installed or access to a PostgreSQL instance
 2. **Database URL** configured in environment variables
-3. **Python 3.11+** with dependencies installed
+3. **Python 3.10+** with dependencies installed
 4. **Backup** of any existing data
 
 ## Environment Setup

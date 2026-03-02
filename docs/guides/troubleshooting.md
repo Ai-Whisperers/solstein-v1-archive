@@ -86,10 +86,10 @@ python -c "import solstein; print('✓ solstein imported')"
 
 ```bash
 # Check Python version
-python --version  # Must be 3.12+
+python --version  # Must be 3.10+ (3.12 recommended)
 
 # Use virtual environment with correct Python
-python3.12 -m venv venv
+python3 -m venv venv  # Use python3.10, python3.11, or python3.12
 source venv/bin/activate
 pip install -e ".[dev]"
 ```
@@ -510,7 +510,7 @@ PGPASSWORD=YOUR_PASSWORD psql -h db.PROJECT_ID.supabase.co -U postgres -d postgr
 
 ```bash
 # 1. Ensure correct Python version
-python --version  # Must be 3.12+
+python --version  # Must be 3.10+ (3.12 recommended)
 
 # 2. Install test dependencies
 pip install -e ".[dev]"

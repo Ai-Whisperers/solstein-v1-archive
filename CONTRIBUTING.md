@@ -47,7 +47,7 @@ refactor: move settings into function scope for testability
 
 ## Code Standards
 
-- **Python 3.12+** — use type hints everywhere
+- **Python 3.10+** — use type hints everywhere
 - **Ruff** for linting and formatting: `make lint && make format`
 - **Pydantic** for all data validation and configuration
 - **No silent failures** — every exception must be caught, logged, or raised

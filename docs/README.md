@@ -28,7 +28,7 @@ Navigate using the tabs above.
 | ⚡️ [Case Study](PITCH/case-study.md) | Skeptics | 29 companies, 3 days, full classification — live cast |
 | ⚙️ [Operator Guide](guides/operator.md) | DevOps | Deployment, monitoring, and operations |
 | ⚙️ [API Reference](api/reference.md) | Integrators | All REST endpoints, schemas, and error codes (41/42 documented) |
-| 🏗️ [Decision Records](architecture/decisions.md) | Architects | Why FastAPI, Celery, JSON files, and the 4-layer test pyramid |
+| 🏗️ [Decision Records](architecture/decisions.md) | Architects | Why FastAPI, Celery, JSON files, and the 6-layer testing strategy |
 | 🏗️ [Health Routing](architecture/health-endpoint-routing.md) | Architects | Health endpoint routing clarification and conflict resolution |
 | 📊 [Analysis & Reports](analysis/README.md) | Analysts | Market intelligence, company analysis, session reports |
 ---

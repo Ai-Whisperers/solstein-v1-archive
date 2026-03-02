@@ -4,7 +4,7 @@ This guide walks you through setting up the Solstein project with Supabase Postg
 
 ## Prerequisites
 
-- Python 3.11+
+- Python 3.10+
 - [uv](https://docs.astral.sh/uv/) package manager
 - Git
 - Supabase account (free tier works)

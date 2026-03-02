@@ -260,7 +260,7 @@ Test that verifies behavior doesn't regress after code changes. In Solstein:
 - Scoring precision tests (using `pytest.approx`)
 
 ### **Test Pyramid**
-4-layer testing strategy:
+6-layer testing strategy:
 1. **Unit** — Pure logic, no I/O
 2. **Integration** — API contracts with mocked repos
 3. **Worker** — Celery tasks

@@ -37,7 +37,7 @@
 
 | Service | Version | Notes |
 |---------|---------|-------|
-| Python | 3.12+ | |
+| Python | 3.10+ | |
 | Redis | 5.0+ | Required for Celery task broker |
 | (Optional) Docker | 24+ | For containerised deployment |
 

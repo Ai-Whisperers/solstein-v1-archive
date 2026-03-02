@@ -20,9 +20,9 @@ This guide covers both cloud (Supabase) and local PostgreSQL setups.
 
 ## Prerequisites
 
-- Python 3.12+ (from main setup)
+- Python 3.10+ (from main setup)
 - `psycopg2-binary` (included in `requirements.txt`)
-- PostgreSQL 12+ **or** Supabase account
+- PostgreSQL 14+ **or** Supabase account
 - Redis 5.0+ (for Celery tasks)
 
 ---

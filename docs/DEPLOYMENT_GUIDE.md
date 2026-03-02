@@ -7,7 +7,7 @@ This guide covers deploying Solstein to production environments.
 ## Prerequisites
 
 - PostgreSQL 14+ database
-- Python 3.11+
+- Python 3.10+
 - Environment with sufficient resources (see Sizing)
 - SSL certificates for HTTPS
 - Domain name (optional but recommended)
@@ -26,7 +26,7 @@ This guide covers deploying Solstein to production environments.
 - **CPU**: 4+ cores
 - **RAM**: 8GB+
 - **Storage**: 100GB SSD
-- **Database**: PostgreSQL 15+ with 4GB+ RAM
+- **Database**: PostgreSQL 14+ with 4GB+ RAM
 - **Read Replica**: For scaling reads
 
 ## Pre-Deployment Checklist
@@ -64,7 +64,7 @@ git clone https://github.com/yourorg/solstein.git
 cd solstein
 
 # Install dependencies
-pip install -r requirements.txt
+pip install -e .
 
 # Run tests
 pytest tests/ -v
@@ -145,12 +145,12 @@ sudo systemctl status solstein
 Using Docker:
 
 ```dockerfile
-FROM python:3.11-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install -e .
 
 COPY . .
 
