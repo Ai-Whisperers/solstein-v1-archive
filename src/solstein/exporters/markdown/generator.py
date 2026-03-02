@@ -19,7 +19,7 @@ from .company import CompanyReportGenerator
 from .market import MarketReportGenerator
 
 
-from ...data.web_research_pipeline import SyntheticDataDetector
+from ...exceptions import SyntheticDataBlockingError
 
 
 class ReportGenerator:
@@ -41,45 +41,47 @@ class ReportGenerator:
 
     def _check_data_authenticity(self, companies: list[Company]) -> tuple[bool, str]:
         """Check if company data is authentic (not synthetic).
-        
+
+        Raises:
+            SyntheticDataBlockingError: If any synthetic data is detected
+
         Returns:
             Tuple of (is_authentic, warning_message)
         """
         synthetic_count = 0
         total = len(companies)
-        
+        synthetic_company_names = []
+
         for company in companies:
             # Check for synthetic indicators
             data_source = getattr(company, 'data_source_type', None)
             if data_source == 'synthetic':
                 synthetic_count += 1
+                synthetic_company_names.append(company.name or "Unknown")
                 continue
-            
-            # Check company name patterns
-            name = getattr(company, 'name', '').lower()
-            if any(pattern in name for pattern in ['test-company', 'test_company', 'synthetic', 'fake']):
+
+            # Check company name patterns - only match at start of name (case insensitive)
+            name = (getattr(company, 'name', '') or '').lower()
+            # Only flag if name starts with these patterns (exact prefix match)
+            synthetic_patterns = ['test-company', 'test_company', 'synthetic', 'fake']
+            if any(name.startswith(pattern) for pattern in synthetic_patterns):
                 synthetic_count += 1
+                synthetic_company_names.append(company.name or "Unknown")
                 continue
-        
+
         if synthetic_count == 0:
             return True, ""
-        
+
+        # Raise exception instead of just warning
         synthetic_pct = (synthetic_count / total * 100) if total > 0 else 0
-        
-        warning = f"""⚠️  **DATA QUALITY WARNING** ⚠️
+        synthetic_names_str = ", ".join(synthetic_company_names[:5])  # Show first 5
+        if len(synthetic_company_names) > 5:
+            synthetic_names_str += f" and {len(synthetic_company_names) - 5} more"
 
-**{synthetic_count} out of {total} companies ({synthetic_pct:.1f}%) appear to be synthetic/research data.**
-
-This report contains:
-- ⚠️  Computer-generated company profiles
-- ⚠️  Estimated (not verified) financial data
-- ⚠️  No web-based data sources
-
-**RECOMMENDATION**: Run 'solstein replace-synthetic' to replace with real web-researched data before using this report for investment decisions.
-
----
-"""
-        return False, warning
+        raise SyntheticDataBlockingError(
+            f"Found {synthetic_count} out of {total} companies ({synthetic_pct:.1f}%) with synthetic data. "
+            f"Synthetic companies: {synthetic_names_str}"
+        )
 
     def generate_all_reports(self, companies: list[Company], output_subdir: str | None = None) -> dict[str, Path]:
                 logger.warning(f"LLM enhancer not available: {e}")
@@ -951,7 +953,7 @@ class ClientReportGenerator(ReportGenerator):
 
         # Check data authenticity and add warning if synthetic data detected
         is_authentic, warning = self._check_data_authenticity([client] + competitors)
-        
+
         report = f"""# Competitive Analysis - {client.name}
 
 {warning if warning else ""}
@@ -1012,7 +1014,7 @@ These companies operate in the same tier with similar market positioning:
 """
         for c in direct:
             report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {c.ai_score or 'N/A'}/10 | {c.saas_maturity or 'N/A'}/10 | {c.classification or 'N/A'} |\n"
-        
+
         # Add detailed competitor analysis
         if direct:
             report += """
@@ -1032,7 +1034,7 @@ These companies operate in the same tier with similar market positioning:
                         report += f"- **{diff:.2f} points higher** composite score\n"
                     elif diff < 0:
                         report += f"- **{abs(diff):.2f} points lower** composite score\n"
-                
+
                 # Add key differentiator
                 if c.ai_score and client.ai_score and c.ai_score > client.ai_score:
                     report += f"- **AI Advantage**: {c.ai_score}/10 vs your {client.ai_score}/10\n"
@@ -1040,7 +1042,7 @@ These companies operate in the same tier with similar market positioning:
                     report += f"- **SaaS Advantage**: {c.saas_maturity}/10 vs your {client.saas_maturity}/10\n"
                 if c.revenue_cagr_3yr and client.revenue_cagr_3yr and c.revenue_cagr_3yr > client.revenue_cagr_3yr:
                     report += f"- **Growth Advantage**: {c.revenue_cagr_3yr}% CAGR vs your {client.revenue_cagr_3yr}%\n"
-                
+
                 report += "\n"
 
 
@@ -1254,7 +1256,7 @@ All competitors ranked by composite score:
                 weaknesses.append(f"Market leadership challenged by {len(threats)} higher-scoring competitor(s)")
             else:
                 weaknesses.append("Market leader - maintain innovation edge to defend position")
-            
+
             # Add scale-based considerations
             revenue = getattr(client.financials, 'revenue', 0) or 0
             if revenue < 10:

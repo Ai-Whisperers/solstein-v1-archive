@@ -41,3 +41,10 @@ class ExportError(SolsteinError):
     """Export generation error."""
 
     pass
+
+
+
+
+class SyntheticDataBlockingError(SolsteinError):
+    """Raised when synthetic data is detected and should block execution."""
+    pass
