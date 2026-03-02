@@ -28,7 +28,7 @@ Solstein is designed for extensibility through **interface-based architecture**:
 Growth      Excel        Supabase      JSON Files
 Financial   PDF          PostgreSQL    CSV
 Competitive JSON         Redis Cache   API
-Position    CSV          
+Position    CSV
 ```
 
 Each layer implements an **abstract interface**, allowing swappable implementations without touching other code.
@@ -46,13 +46,13 @@ Each layer implements an **abstract interface**, allowing swappable implementati
 ```python
 class EnvironmentalScoringConfig(BaseModel):
     """Configuration for environmental impact score."""
-    
+
     base_score: float = 5.0
-    
+
     # ESG certification bonus
     has_esg_cert_bonus: float = 2.0
     has_iso_cert_bonus: float = 1.5
-    
+
     # Carbon footprint thresholds (tons CO2 per year)
     carbon_low_threshold: float = 100.0  # < 100 tons
     carbon_low_bonus: float = 2.5
@@ -62,7 +62,7 @@ class EnvironmentalScoringConfig(BaseModel):
 
 class ScoringSettings(BaseModel):
     """Main scoring configuration."""
-    
+
     growth: GrowthScoringConfig = Field(default_factory=GrowthScoringConfig)
     financial_health: FinancialHealthConfig = Field(default_factory=FinancialHealthConfig)
     competitive_position: CompetitivePositionConfig = Field(default_factory=CompetitivePositionConfig)
@@ -77,19 +77,19 @@ class ScoringSettings(BaseModel):
 @dataclass
 class Company:
     """Company domain entity."""
-    
+
     # ... existing fields ...
-    
+
     # Scoring dimensions
     growth_score: float | None = None
     financial_health_score: float | None = None
     competitive_position_score: float | None = None
     environmental_score: float | None = None  # NEW
-    
+
     # Classifications
     classification: str = "Salt"  # Phoenix/Salt/Lead
     environmental_classification: str = "Unknown"  # Eco/Standard/Heavy  # NEW
-    
+
     # Explanations
     scoring_breakdown: dict[str, Any] = field(default_factory=dict)
     environmental_breakdown: dict[str, Any] = field(default_factory=dict)  # NEW
@@ -102,28 +102,28 @@ class Company:
 ```python
 class GrowthScorer:
     """Calculate growth scores for companies."""
-    
+
     def calculate_scores(self, profile: Company) -> Company:
         """Calculate all scores for a company profile."""
-        
+
         # ... existing scoring logic ...
-        
+
         # Calculate environmental score
         env_score, env_expl = self._calculate_environmental_score(profile)
         profile.environmental_score = env_score
         profile.scoring_breakdown["environmental"] = env_expl
-        
+
         # Apply environmental classification
         profile.environmental_classification = self._classify_environmental(env_score)
-        
+
         return profile
-    
+
     def _calculate_environmental_score(self, profile: Company) -> tuple[float, ScoringExplanation]:
         """Calculate environmental score (0-10) with explanation."""
         cfg = self.config.environmental
         score = cfg.base_score
         explanation = ScoringExplanation(base_score=score)
-        
+
         # ESG Certifications
         if hasattr(profile, 'has_esg_cert') and profile.has_esg_cert:
             score += cfg.has_esg_cert_bonus
@@ -133,7 +133,7 @@ class GrowthScorer:
                 formula=f"+{cfg.has_esg_cert_bonus}",
                 reasoning="Company has ESG certification"
             ))
-        
+
         # Carbon Footprint
         if hasattr(profile, 'annual_carbon_emissions'):
             emissions = profile.annual_carbon_emissions
@@ -153,12 +153,12 @@ class GrowthScorer:
                     formula=f"{cfg.carbon_high_penalty} (> {cfg.carbon_high_threshold} tons CO2/year)",
                     reasoning=f"Carbon emissions: {emissions} tons/year"
                 ))
-        
+
         # Cap score at 10
         score = min(score, 10.0)
-        
+
         return score, explanation
-    
+
     def _classify_environmental(self, score: float | None) -> str:
         """Classify based on environmental score."""
         if score is None:
@@ -177,14 +177,14 @@ class GrowthScorer:
 ```python
 class CompanySchema(BaseModel):
     """Company API response schema."""
-    
+
     # ... existing fields ...
-    
+
     growth_score: float | None = None
     financial_health_score: float | None = None
     competitive_position_score: float | None = None
     environmental_score: float | None = None  # NEW
-    
+
     classification: str = "Salt"
     environmental_classification: str = "Unknown"  # NEW
 ```
@@ -200,11 +200,11 @@ async def environmental_scoring_stats(
 ) -> dict[str, Any]:
     """Get environmental scoring statistics."""
     companies = repo.find_all()
-    
+
     eco_leaders = sum(1 for c in companies if c.environmental_score and c.environmental_score >= 7.0)
     standard = sum(1 for c in companies if c.environmental_score and 4.0 <= c.environmental_score < 7.0)
     high_impact = sum(1 for c in companies if c.environmental_score and c.environmental_score <= 4.0)
-    
+
     return {
         "eco_leaders": eco_leaders,
         "standard": standard,
@@ -237,9 +237,9 @@ def test_environmental_score_with_esg_cert(scorer):
     company = Company(id="eco-corp", name="Eco Corp")
     company.financials = FinancialMetric()
     company.has_esg_cert = True
-    
+
     result = scorer.calculate_scores(company)
-    
+
     assert result.environmental_score is not None
     assert result.environmental_score > 5.0  # Above base score
     assert "ESG Certification" in str(result.environmental_breakdown)
@@ -251,9 +251,9 @@ def test_environmental_classification(scorer):
     company.financials = FinancialMetric()
     company.annual_carbon_emissions = 50.0  # Low
     company.has_esg_cert = True
-    
+
     result = scorer.calculate_scores(company)
-    
+
     assert result.environmental_classification == "Eco-Leader"
     assert result.environmental_score >= 7.0
 
@@ -262,16 +262,16 @@ def test_environmental_score_without_data(scorer):
     """Should use base score when data missing."""
     company = Company(id="unknown", name="Unknown Corp")
     company.financials = FinancialMetric()
-    
+
     result = scorer.calculate_scores(company)
-    
+
     assert result.environmental_score == 5.0  # Base score
     assert result.environmental_classification == "Standard"
 ```
 
 ### Step 7: Update Documentation
 
-**File:** `docs/architecture/decisions.md`
+**File:** `../architecture/decisions.md`
 
 Add new ADR:
 
@@ -291,7 +291,7 @@ Add new ADR:
 - Classification hierarchy mirrors growth/financial/competitive dimensions
 - Optional fields (has_esg_cert, annual_carbon_emissions) won't break existing data
 
-**Consequences:** 
+**Consequences:**
 - Company model has 4 scores instead of 3
 - API responses include environmental data
 - Tests require new assertions for environmental classification
@@ -318,7 +318,7 @@ Add new ADR:
 - `Company` domain model now includes `environmental_score`, `environmental_classification`, `environmental_breakdown`
 
 ### Technical
-- See [ADR-009](docs/architecture/decisions.md) for design rationale
+- See [ADR-009](../architecture/decisions.md) for design rationale
 ```
 
 ---
@@ -349,23 +349,23 @@ from ..domain.models import Company
 
 class PDFExporter:
     """Export company profiles as PDF reports."""
-    
+
     def __init__(self):
         self.settings = Settings()
-    
+
     def export(self, companies: list[Company], output_path: Path | None = None) -> Path:
         """Generate PDF report from company list."""
-        
+
         if output_path is None:
             output_path = (
-                self.settings.data.export_dir / 
+                self.settings.data.export_dir /
                 f"solstein_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
             )
-        
+
         # Create PDF
         doc = SimpleDocTemplate(str(output_path), pagesize=letter)
         elements = []
-        
+
         # Title
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
@@ -378,12 +378,12 @@ class PDFExporter:
         title = Paragraph("SolStein Market Intelligence Report", title_style)
         elements.append(title)
         elements.append(Spacer(1, 0.3 * inch))
-        
+
         # Create summary table
         data = [
             ["Company", "Industry", "Growth Score", "Classification"]
         ]
-        
+
         for company in companies:
             data.append([
                 company.name,
@@ -391,7 +391,7 @@ class PDFExporter:
                 f"{company.growth_score:.1f}" if company.growth_score else "N/A",
                 company.classification or "Unknown"
             ])
-        
+
         table = Table(data)
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('366092')),
@@ -403,12 +403,12 @@ class PDFExporter:
             ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ]))
-        
+
         elements.append(table)
-        
+
         # Build PDF
         doc.build(elements)
-        
+
         return output_path
 ```
 
@@ -425,12 +425,12 @@ async def export_pdf(
     repo: CompanyRepository = Depends(get_repository),
 ) -> dict[str, Any]:
     """Export market analysis as PDF."""
-    
+
     companies = repo.find_all(filters)
-    
+
     exporter = PDFExporter()
     pdf_path = exporter.export(companies)
-    
+
     return {
         "status": "success",
         "format": "pdf",
@@ -462,30 +462,30 @@ from ..domain.models import Company, FinancialMetric
 
 class CrunchbaseLoader:
     """Fetch company data from Crunchbase."""
-    
+
     def __init__(self, api_key: str | None = None):
         self.api_key = api_key or os.getenv("CRUNCHBASE_API_KEY")
         self.base_url = "https://api.crunchbase.com/v4"
-        
+
         if not self.api_key:
             raise ValueError("CRUNCHBASE_API_KEY not set in environment")
-    
+
     def fetch_company(self, company_name: str) -> Company | None:
         """Fetch company by name from Crunchbase."""
-        
+
         endpoint = f"{self.base_url}/searches/entities"
-        
+
         headers = {
             "X-Crunchbase-API-Key": self.api_key,
             "Accept": "application/json",
         }
-        
+
         payload = {
             "entity_types": ["Company"],
             "limit": 1,
             "query": company_name
         }
-        
+
         try:
             response = requests.post(
                 endpoint,
@@ -494,26 +494,26 @@ class CrunchbaseLoader:
                 timeout=10
             )
             response.raise_for_status()
-            
+
             data = response.json()
-            
+
             if not data.get("entities"):
                 logger.warning(f"Company not found in Crunchbase: {company_name}")
                 return None
-            
+
             entity = data["entities"][0]
-            
+
             return self._parse_crunchbase_entity(entity)
-            
+
         except requests.RequestException as e:
             logger.error(f"Crunchbase API error: {e}")
             return None
-    
+
     def _parse_crunchbase_entity(self, entity: dict[str, Any]) -> Company:
         """Convert Crunchbase data to Company domain model."""
-        
+
         properties = entity.get("properties", {})
-        
+
         company = Company(
             id=entity.get("uuid", "unknown"),
             name=properties.get("name", "Unknown"),
@@ -523,7 +523,7 @@ class CrunchbaseLoader:
             founded_year=properties.get("founded_year"),
             description=properties.get("short_description"),
         )
-        
+
         # Financial data
         company.financials = FinancialMetric(
             revenue=properties.get("revenue_usd"),
@@ -531,14 +531,14 @@ class CrunchbaseLoader:
             valuation=properties.get("valuation", {}).get("value_usd"),
             employees=properties.get("employee_count"),
         )
-        
+
         # Tech stack
         if "technology" in properties:
             company.tech_stack = [
-                tech.get("name", "") 
+                tech.get("name", "")
                 for tech in properties.get("technology", [])
             ]
-        
+
         return company
 ```
 
@@ -551,15 +551,15 @@ from .crunchbase_loader import CrunchbaseLoader
 
 class CompetitorDataLoader:
     """Load company data from multiple sources."""
-    
+
     def load_companies(self) -> list[Company]:
         """Load from all available sources."""
         companies = []
-        
+
         # Load from JSON
         json_companies = self._load_json()
         companies.extend(json_companies)
-        
+
         # Load from Crunchbase (if API key available)
         try:
             cb_loader = CrunchbaseLoader()
@@ -572,9 +572,9 @@ class CompetitorDataLoader:
             companies = [self._merge_companies(c, cb_company) for c in companies]
         except ValueError:
             logger.info("Crunchbase API key not set, skipping enrichment")
-        
+
         return companies
-    
+
     def _merge_companies(self, primary: Company, enrichment: Company) -> Company:
         """Merge two company records."""
         # Keep primary data, fill in gaps from enrichment
@@ -605,7 +605,7 @@ from ..domain.models import Company
 
 class CompanyClassifier(Protocol):
     """Protocol for company classification strategies."""
-    
+
     def classify(self, company: Company) -> str:
         """Classify company based on its profile."""
         ...
@@ -613,10 +613,10 @@ class CompanyClassifier(Protocol):
 
 class MaturityLevelClassifier:
     """Classify by technology maturity: Emerging, Growth, Mature."""
-    
+
     def classify(self, company: Company) -> str:
         """Classify based on tech stack and AI adoption."""
-        
+
         if company.ai_maturity == "Very Strong" or company.saas_maturity >= 8:
             return "Mature"
         elif company.saas_maturity >= 5:
@@ -627,22 +627,22 @@ class MaturityLevelClassifier:
 
 class InvestmentRiskClassifier:
     """Classify by investment risk: Low, Medium, High."""
-    
+
     def classify(self, company: Company) -> str:
         """Assess investment risk profile."""
-        
+
         risk_factors = 0
-        
+
         # Profitability risk
         if company.financials.profit_margin and company.financials.profit_margin < 0:
             risk_factors += 2
         elif not company.financials.profit_margin:
             risk_factors += 1
-        
+
         # Growth risk
         if company.financials.growth_rate and company.financials.growth_rate < 5:
             risk_factors += 1
-        
+
         # Funding cushion risk
         if company.financials.funding_raised:
             monthly_burn = (company.financials.revenue or 0) * 0.1 / 12
@@ -650,7 +650,7 @@ class InvestmentRiskClassifier:
                 runway_months = company.financials.funding_raised / monthly_burn
                 if runway_months < 12:
                     risk_factors += 2
-        
+
         if risk_factors >= 4:
             return "High"
         elif risk_factors >= 2:
@@ -662,10 +662,10 @@ class InvestmentRiskClassifier:
 # Use custom classifier in scoring
 class CustomScorer:
     """Scorer using custom classification."""
-    
+
     def __init__(self, classifier: CompanyClassifier):
         self.classifier = classifier
-    
+
     def classify_company(self, company: Company) -> str:
         """Use injected classifier."""
         return self.classifier.classify(company)
@@ -798,4 +798,3 @@ See `/docs/examples/custom_scoring_dimension_example.py` *(coming soon)* for a c
 
 *Last Updated: February 20, 2026*
 *Maintained by: Architecture & Extensions Team*
-

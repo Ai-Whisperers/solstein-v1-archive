@@ -1,7 +1,7 @@
 # Solstein Documentation Style Guide
 
-**Version:** 1.0  
-**Last Updated:** February 24, 2026  
+**Version:** 1.0
+**Last Updated:** February 24, 2026
 **Applies To:** All documentation in the Solstein repository
 
 ---
@@ -315,17 +315,17 @@ scoring:
 
 **Link Format:**
 ```markdown
-[Link Text](relative/path/to/file.md)
-[Link Text](relative/path/to/file.md#section-anchor)
+`Link Text -> relative/path/to/file.md`
+`Link Text -> relative/path/to/file.md#section-anchor`
 ```
 
 **Internal Link Patterns:**
 
 | Target | Format | Example |
 |--------|--------|---------|
-| Other guides | `[Developer Guide](guides/developer.md)` | `[Developer Guide](guides/developer.md)` |
-| API reference | `[API Reference](api/reference.md)` | `[API Reference](api/reference.md)` |
-| Specific section | `[Scoring Section](guides/developer.md#scoring-pipeline)` | `[Scoring Section](guides/developer.md#scoring-pipeline)` |
+| Other guides | `[Developer Guide](../guides/developer.md)` | `[Developer Guide](../guides/developer.md)` |
+| API reference | `[API Reference](../api/reference.md)` | `[API Reference](../api/reference.md)` |
+| Specific section | `[Scoring Section](../guides/developer.md#scoring-pipeline)` | `[Scoring Section](../guides/developer.md#scoring-pipeline)` |
 | README sections | `[Quick Start](../README.md#quick-start)` | `[Quick Start](../README.md#quick-start)` |
 
 **Internal Link Rules:**
@@ -362,8 +362,8 @@ scoring:
 ```markdown
 | Scroll | Contents |
 |--------|----------|
-| 📜 [`docs/LORE/origin.md`](LORE/origin.md) | The origin story |
-| 📜 [`docs/guides/developer.md`](guides/developer.md) | Developer setup guide |
+| 📜 [`docs/LORE/origin.md`](../LORE/origin.md) | The origin story |
+| 📜 [`docs/guides/developer.md`](../guides/developer.md) | Developer setup guide |
 ```
 
 **Rules:**
@@ -563,7 +563,7 @@ Content continues.
 
 | Document | Description |
 |----------|-------------|
-| [Related Doc](path.md) | Brief description |
+| `Related Doc -> path.md` | Brief description |
 ```
 
 ### 6.4 ADR (Architecture Decision Record) Template
@@ -571,7 +571,7 @@ Content continues.
 ```markdown
 ## ADR-XXX: Decision Title
 
-**Date:** YYYY-QX  
+**Date:** YYYY-QX
 **Status:** Proposed | Accepted | Deprecated | Superseded
 
 **Context:**
@@ -743,8 +743,8 @@ docs/
 *Italic text*
 `Code text`
 
-[Link text](path/to/file.md)
-![Alt text](image.png)
+`Link text -> path/to/file.md`
+`Alt text image -> image.png`
 
 - Bullet item
 - Another bullet
@@ -800,6 +800,6 @@ Description.
 
 *This style guide is a living document. Updates should be proposed via PR and reviewed according to the Quality Checklist.*
 
-**Last Updated:** February 24, 2026  
-**Version:** 1.0  
+**Last Updated:** February 24, 2026
+**Version:** 1.0
 **Maintained by:** AI Whisperers Documentation Guild

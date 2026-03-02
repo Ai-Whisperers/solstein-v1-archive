@@ -14,12 +14,12 @@ Usage:
 import asyncio
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import click
 from loguru import logger
 
-from ..research.ai_research_orchestrator import AIResearchOrchestrator, ResearchReport
+from .research.ai_research_orchestrator import AIResearchOrchestrator, ResearchReport
 
 
 @click.command(name="ai-research")
@@ -167,15 +167,15 @@ def ai_research_batch(input_file: Path, output_dir: Path, workers: int, format: 
 def ai_research_server(host: str, port: int, reload: bool):
     """
     Start API server for AI research.
-    
+
     Provides HTTP endpoints for:
       POST /research - Research a single company
       POST /research/batch - Research multiple companies
       GET  /research/{id} - Get research results
-    
+
     Examples:
         solstein ai-research-server --port 8080
-        
+
         # Then use curl:
         curl -X POST http://localhost:8080/research \\
           -H "Content-Type: application/json" \\
@@ -189,7 +189,7 @@ def ai_research_server(host: str, port: int, reload: bool):
         orchestrator = AIResearchOrchestrator()
 
         @app.post("/research")
-        async def research(request: dict):
+        async def research(request: dict[str, Any]):
             report = await orchestrator.research_company(
                 company_name=request["company_name"],
                 industry=request.get("industry"),
@@ -198,7 +198,7 @@ def ai_research_server(host: str, port: int, reload: bool):
             return _report_to_dict(report)
 
         @app.post("/research/batch")
-        async def research_batch(request: dict):
+        async def research_batch(request: dict[str, Any]):
             companies = request.get("companies", [])
             results = []
 
@@ -301,7 +301,7 @@ def _display_report(report: ResearchReport, verbose: bool):
     click.echo(f"\n{'=' * 60}")
 
 
-def _report_to_dict(report: ResearchReport) -> dict:
+def _report_to_dict(report: ResearchReport) -> dict[str, Any]:
     """Convert ResearchReport to dictionary."""
     return {
         "company_name": report.company_name,

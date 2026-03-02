@@ -83,7 +83,15 @@ For implementation and operations workflows:
 
 ## Documentation Scope
 
-Primary docs are curated in navigation. Historical and proposal material is retained for context under `docs/archive/proposals/` and `docs/archive/plans/` but is intentionally not part of the primary docs flow.
+Primary docs are curated in navigation. Canonical technical docs are organized by buckets:
+- `docs/research/`
+- `docs/operations/`
+- `docs/sessions/`
+- `docs/reference/`
+- `docs/documentation/`
+- `docs/archive/`
+
+Historical and proposal material is retained for context under `docs/archive/proposals/` and `docs/archive/plans/` but is intentionally not part of the primary docs flow.
 
 ---
 

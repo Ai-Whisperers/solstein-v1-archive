@@ -403,6 +403,27 @@ def version() -> None:
     click.echo("AI-Powered Competitive Intelligence Platform")
 
 
+# Import and register research commands
+try:
+    from .cli_research import register_commands
+
+    register_commands(cli)
+except ImportError as e:
+    import warnings
+
+    warnings.warn(f"Research commands not available: {e}")
+
+# Register AI research commands
+try:
+    from .cli_ai_research import register_ai_research_commands
+
+    register_ai_research_commands(cli)
+except ImportError as e:
+    import warnings
+
+    warnings.warn(f"AI research commands not available: {e}")
+
+
 def main() -> None:
     """Main entry point."""
     cli()
@@ -410,24 +431,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
-
-# Import and register research commands
-try:
-    from .cli_research import register_commands
-    register_commands(cli)
-except ImportError as e:
-    import warnings
-    warnings.warn(f"Research commands not available: {e}")
-
-
-
-# Register AI research commands
-try:
-    from .cli_ai_research import register_ai_research_commands
-    register_ai_research_commands(cli)
-except ImportError as e:
-    import warnings
-    warnings.warn(f"AI research commands not available: {e}")
-

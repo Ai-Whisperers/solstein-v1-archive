@@ -12,14 +12,15 @@ Usage:
 
 import asyncio
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 import click
 from loguru import logger
 
-from ..data.real_data_integration import RealDataLoader, fix_scoring_calculations
-from ..data.web_research_pipeline import SyntheticDataDetector
+from .data.real_data_integration import RealDataLoader, fix_scoring_calculations
+from .data.web_research_pipeline import SyntheticDataDetector
 
 
 @click.command(name="research-companies")
@@ -37,7 +38,7 @@ from ..data.web_research_pipeline import SyntheticDataDetector
     default=0.3,
     help="Minimum confidence threshold (0.0-1.0)",
 )
-def research_companies(company_names: tuple, output: Path, min_confidence: float):
+def research_companies(company_names: tuple[str, ...], output: Path, min_confidence: float):
     """
     Research real companies using web search and save to JSON.
 
@@ -61,7 +62,7 @@ def research_companies(company_names: tuple, output: Path, min_confidence: float
             "competitors": companies,
             "metadata": {
                 "data_source": "web_research",
-                "collection_date": asyncio.run(asyncio.sleep(0.0001)) or None,
+                "collection_date": datetime.utcnow().isoformat(),
                 "is_synthetic": False,
                 "real_data_percentage": "100%",
                 "companies_researched": len(company_names),
@@ -159,7 +160,7 @@ def validate_data(input: Path, detailed: bool):
         if validation["synthetic_count"] > validation["total_companies"] * 0.5:
             click.echo(f"\n❌ ERROR: More than 50% synthetic data detected!")
             click.echo("Run 'solstein replace-synthetic' to replace with real data.")
-            raise click.Exit(code=1)
+            raise click.exceptions.Exit(1)
 
     asyncio.run(_validate())
 
@@ -185,7 +186,7 @@ def validate_data(input: Path, detailed: bool):
     multiple=True,
     help="Specific companies to research (can be used multiple times)",
 )
-def replace_synthetic(input: Path, output: Path, companies: tuple):
+def replace_synthetic(input: Path, output: Path, companies: tuple[str, ...]):
     """
     Replace synthetic data with real web-researched company data.
 

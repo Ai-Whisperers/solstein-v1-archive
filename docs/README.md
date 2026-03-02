@@ -31,7 +31,24 @@ Navigate using the tabs above.
 | 🏗️ [Decision Records](architecture/decisions.md) | Architects | Why FastAPI, Celery, JSON files, and the 6-layer testing strategy |
 | 🏗️ [Health Routing](architecture/health-endpoint-routing.md) | Architects | Health endpoint routing clarification and conflict resolution |
 | 📊 [Analysis & Reports](analysis/README.md) | Analysts | Market intelligence, company analysis, session reports |
+| 🧭 [Session Dossier 2026-03-02](sessions/SESSION_IMPLEMENTATION_DOSSIER_2026-03-02.md) | Engineers | Verified findings, repairs, and implementation-ready backlog continuity |
+| 🧭 [Next Session Runbook](continuation/NEXT_SESSION_RUNBOOK.md) | Engineers | Fast restart checklist and first actions for continuation |
+| 🧭 [Implementation Backlog](continuation/IMPLEMENTATION_BACKLOG.md) | Engineers | Execution-ready prioritized backlog with done criteria |
+| 🧭 [Architecture Guardrails](continuation/ARCHITECTURE_GUARDRAILS.md) | Engineers | Non-negotiable reliability/provenance constraints |
+| 🧭 [Verification Cookbook](continuation/VERIFICATION_COOKBOOK.md) | Engineers | Command matrix and evidence logging format |
 ---
+
+## Canonical Buckets
+- `research/` - AI research architecture, plans, and real-data transition docs
+- `operations/` - deployment, migration, rollback, readiness
+- `sessions/` - implementation dossiers and continuity backups
+- `reference/` - glossary, schema, quick-reference, structure docs
+- `documentation/` - documentation governance and maintenance docs
+- `archive/` - historical and superseded docs
+
+## Compatibility Notes
+- Several root files are redirect stubs to preserve existing links.
+- Canonical content is maintained in the bucket folders above.
 
 ## The Classification System
 

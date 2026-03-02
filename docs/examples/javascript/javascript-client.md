@@ -53,9 +53,9 @@ class SolsteinClient {
   async scoreCompany(companyId) {
     const response = await fetch(
       `${this.baseUrl}/scoring/company/${companyId}/score`,
-      { 
+      {
         method: 'POST',
-        headers: this.headers 
+        headers: this.headers
       }
     );
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -193,9 +193,9 @@ class SolsteinClient {
   async scoreCompany(companyId: string): Promise<ScoreResponse> {
     const response = await fetch(
       `${this.baseUrl}/scoring/company/${companyId}/score`,
-      { 
+      {
         method: 'POST',
-        headers: this.headers 
+        headers: this.headers
       }
     );
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -316,7 +316,7 @@ export function useSolstein(baseUrl = 'http://localhost:8000') {
   const loading = ref(false);
   const error = ref(null);
 
-  const phoenixCompanies = computed(() => 
+  const phoenixCompanies = computed(() =>
     companies.value.filter(c => c.classification === 'Phoenix')
   );
 
@@ -353,13 +353,13 @@ async function fetchWithRetry(url, options = {}, maxRetries = 3) {
     try {
       const response = await fetch(url, options);
       if (response.ok) return response.json();
-      
+
       if (response.status === 500 && i < maxRetries - 1) {
         console.log(`Retry ${i + 1}/${maxRetries}...`);
         await new Promise(r => setTimeout(r, 1000 * (i + 1)));
         continue;
       }
-      
+
       throw new Error(`HTTP ${response.status}`);
     } catch (err) {
       if (i === maxRetries - 1) throw err;
@@ -380,7 +380,7 @@ async function batchScoreCompanies(client, companyIds) {
   const results = await Promise.allSettled(
     companyIds.map(id => client.scoreCompany(id))
   );
-  
+
   return results.map((result, index) => ({
     companyId: companyIds[index],
     status: result.status,
@@ -399,4 +399,4 @@ console.log(`Scored ${successCount}/${ids.length} companies`);
 
 ---
 
-**Next:** See [cURL Examples](curl-examples.md) for command-line usage
+**Next:** See the [Examples README](../README.md) for command-line and workflow references

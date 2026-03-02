@@ -1,53 +1,38 @@
 """
-AI-Powered Autonomous Research System
-======================================
+AI-powered autonomous research orchestration.
 
-Multi-agent research orchestration using Ollama LLMs and web search.
-Replaces synthetic data with real web-researched company data.
-
-Architecture:
-1. Planner Agent - Creates research strategy
-2. Search Agent - Finds relevant sources
-3. Extractor Agent - Parses content with LLM
-4. Validator Agent - Checks data sanity
-5. CrossRef Agent - Multi-source reconciliation
-6. Synthesizer Agent - Final structured output
+This module performs company research by combining an LLM planning/extraction
+stage with web search and deterministic validation.
 """
 
 import asyncio
+import importlib
+import importlib.util
 import json
-import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional, TypedDict
-from urllib.parse import urljoin, urlparse
+from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 from bs4 import BeautifulSoup
 from loguru import logger
 
-# Optional: DuckDuckGo search
+# Optional: DuckDuckGo search backend (loaded lazily)
+_ddgs_class: Any | None = None
+_duckduckgo_available = False
+
 try:
-    from duckduckgo_search import DDGS
-    DUCKDUCKGO_AVAILABLE = True
-except ImportError:
-    DUCKDUCKGO_AVAILABLE = False
-    logger.warning("duckduckgo_search not installed. Web search will use fallback method.")
+    if importlib.util.find_spec("duckduckgo_search") is not None:
+        module = importlib.import_module("duckduckgo_search")
+        _ddgs_class = getattr(module, "DDGS", None)
+        _duckduckgo_available = _ddgs_class is not None
+    else:
+        logger.warning("duckduckgo_search not installed. Web search will be disabled.")
+except Exception as error:
+    logger.warning(f"duckduckgo_search failed to initialize: {error}")
 
 from ..llm.enhanced_client import EnhancedLLMClient
-from ..domain.models import Company, DataSourceType
-from bs4 import BeautifulSoup
-from duckduckgo_search import DDGS
-from loguru import logger
-
-from ..llm.enhanced_client import EnhancedLLMClient
-from ..domain.models import Company, DataSourceType
-
-
-# ============================================================================
-# DATA MODELS
-# ============================================================================
 
 
 @dataclass
@@ -55,7 +40,7 @@ class ResearchPlan:
     """Research strategy for a company."""
 
     company_name: str
-    queries: List[Dict[str, Any]]  # [{"query": str, "priority": int, "intent": str}]
+    queries: list[dict[str, Any]]
     estimated_sources: int
     created_at: datetime = field(default_factory=datetime.now)
 
@@ -78,7 +63,7 @@ class ExtractedData:
 
     source_url: str
     source_type: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
     confidence: float
     extraction_method: str
     extracted_at: datetime = field(default_factory=datetime.now)
@@ -90,9 +75,9 @@ class ValidationResult:
     """Data validation outcome."""
 
     is_valid: bool
-    issues: List[str]
+    issues: list[str]
     confidence_adjustment: float
-    recommendations: List[str]
+    recommendations: list[str]
 
 
 @dataclass
@@ -102,78 +87,53 @@ class ResearchReport:
     company_name: str
     is_synthetic: bool = False
     confidence_score: float = 0.0
-    basic_info: Dict[str, Any] = field(default_factory=dict)
-    financials: Dict[str, Any] = field(default_factory=dict)
-    funding: Dict[str, Any] = field(default_factory=dict)
-    data_sources: List[Dict[str, Any]] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    errors: List[str] = field(default_factory=list)
-
-
-# ============================================================================
-# AGENT 1: RESEARCH PLANNER
-# ============================================================================
+    basic_info: dict[str, Any] = field(default_factory=dict)
+    financials: dict[str, Any] = field(default_factory=dict)
+    funding: dict[str, Any] = field(default_factory=dict)
+    data_sources: list[dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
 
 
 class ResearchPlannerAgent:
-    """Creates intelligent research strategies using LLM."""
+    """Creates research strategies using the configured LLM provider."""
 
-    def __init__(self, llm_client: Optional[EnhancedLLMClient] = None):
+    def __init__(self, llm_client: EnhancedLLMClient | None = None) -> None:
         self.llm = llm_client or EnhancedLLMClient()
 
-    async def create_plan(self, company_name: str, industry: Optional[str] = None) -> ResearchPlan:
-        """Generate research plan with prioritized search queries."""
-
+    async def create_plan(self, company_name: str, industry: str | None = None) -> ResearchPlan:
+        """Generate a research plan with prioritized search queries."""
         industry_context = f"in the {industry} industry" if industry else ""
-
         prompt = f"""Create a detailed web research plan for: {company_name} {industry_context}
 
-Your goal is to find real, factual information about this company from web sources.
+Your goal is to find factual information about this company from web sources.
+Generate 6-8 specific search queries for website, funding, financials,
+headcount, news, social presence, and industry positioning.
 
-Generate 6-8 specific search queries to find:
-1. Official website and about page
-2. Funding rounds and investors
-3. Revenue and financial performance  
-4. Employee count and headcount growth
-5. Recent news and press releases
-6. LinkedIn/social media presence
-7. Industry classification and competitors
-
-For each query, assign:
-- priority: 1 (critical), 2 (important), or 3 (nice-to-have)
-- intent: what type of data we expect to find
-
-Return ONLY valid JSON in this exact format:
+Return ONLY valid JSON in this format:
 {{
   "queries": [
     {{"query": "...", "priority": 1, "intent": "website"}},
-    {{"query": "...", "priority": 1, "intent": "funding"}},
-    {{"query": "...", "priority": 2, "intent": "financials"}},
-    {{"query": "...", "priority": 2, "intent": "employees"}},
-    {{"query": "...", "priority": 2, "intent": "news"}},
-    {{"query": "...", "priority": 3, "intent": "social"}},
-    {{"query": "...", "priority": 3, "intent": "industry"}}
+    {{"query": "...", "priority": 1, "intent": "funding"}}
   ],
   "estimated_sources": 5
 }}
-
-Be specific in queries - include years, funding round types, and company-specific terms."""
+"""
 
         try:
             response = await self.llm.generate(prompt)
-            plan_data = json.loads(self._extract_json(response))
-
-            queries = sorted(plan_data.get("queries", []), key=lambda x: x.get("priority", 3))
-
-            logger.info(f"📋 Created research plan for {company_name} with {len(queries)} queries")
-
+            if response is None or response == "":
+                raise ValueError("Planner returned empty response")
+            response_text = str(response)
+            plan_data = json.loads(self._extract_json(response_text))
+            queries = sorted(plan_data.get("queries", []), key=lambda item: item.get("priority", 3))
             return ResearchPlan(
-                company_name=company_name, queries=queries, estimated_sources=plan_data.get("estimated_sources", 5)
+                company_name=company_name,
+                queries=queries,
+                estimated_sources=plan_data.get("estimated_sources", 5),
             )
-
-        except Exception as e:
-            logger.error(f"Failed to create research plan: {e}")
-            # Fallback to basic plan
+        except Exception as error:
+            logger.error(f"Failed to create plan for {company_name}: {error}")
             return ResearchPlan(
                 company_name=company_name,
                 queries=[
@@ -186,129 +146,74 @@ Be specific in queries - include years, funding round types, and company-specifi
             )
 
     def _extract_json(self, text: str) -> str:
-        """Extract JSON from LLM response."""
-        # Try to find JSON block
+        """Extract JSON payload from an LLM response."""
         if "```json" in text:
             start = text.find("```json") + 7
             end = text.find("```", start)
             return text[start:end].strip()
-        elif "```" in text:
+
+        if "```" in text:
             start = text.find("```") + 3
             end = text.find("```", start)
             return text[start:end].strip()
-        else:
-            # Find first { and last }
-            start = text.find("{")
-            end = text.rfind("}")
-            if start >= 0 and end > start:
-                return text[start : end + 1]
+
+        start = text.find("{")
+        end = text.rfind("}")
+        if start >= 0 and end > start:
+            return text[start : end + 1]
+
         return text
 
 
-# ============================================================================
-# AGENT 2: WEB SEARCH
-# ============================================================================
-
-
 class WebSearchAgent:
-    """Performs intelligent web searches across multiple backends."""
+    """Performs web searches and relevance ranking."""
 
-    def __init__(self):
-        self.ddgs = DDGS() if DUCKDUCKGO_AVAILABLE else None
-        self.cache: Dict[str, List[SearchResult]] = {}
+    def __init__(self) -> None:
+        self.ddgs = _ddgs_class() if _duckduckgo_available and _ddgs_class is not None else None
+        self.cache: dict[str, list[SearchResult]] = {}
 
-    async def search(self, query: str, intent: str, max_results: int = 10) -> List[SearchResult]:
+    async def search(self, query: str, intent: str, max_results: int = 10) -> list[SearchResult]:
         """Execute search and return ranked results."""
-
         cache_key = f"{query}_{intent}"
         if cache_key in self.cache:
-            logger.debug(f"Cache hit for: {query}")
             return self.cache[cache_key]
 
-        results = []
+        results: list[SearchResult] = []
 
-        # Try DuckDuckGo if available
-        if DUCKDUCKGO_AVAILABLE and self.ddgs:
+        if self.ddgs is not None:
             try:
-                ddgs_results = await asyncio.to_thread(self._search_duckduckgo, query, max_results)
-                results.extend(ddgs_results)
-                logger.debug(f"DuckDuckGo found {len(ddgs_results)} results for: {query}")
-            except Exception as e:
-                logger.warning(f"DuckDuckGo search failed: {e}")
+                ddg_results = await asyncio.to_thread(self._search_duckduckgo, query, max_results)
+                results.extend(ddg_results)
+            except Exception as error:
+                logger.warning(f"DuckDuckGo search failed for '{query}': {error}")
         else:
-            logger.warning("DuckDuckGo not available. Install with: pip install duckduckgo-search")
+            logger.warning("DuckDuckGo backend unavailable; returning empty search results")
 
-        # Rank results by relevance to intent
-        ranked = await self._rank_by_relevance(results, intent)
-
+        ranked = self._rank_by_relevance(results, intent)
         self.cache[cache_key] = ranked
         return ranked
 
-    def _search_duckduckgo(self, query: str, max_results: int) -> List[SearchResult]:
+    def _search_duckduckgo(self, query: str, max_results: int) -> list[SearchResult]:
         """Search using DuckDuckGo."""
-        results = []
+        if self.ddgs is None:
+            return []
 
-        if not DUCKDUCKGO_AVAILABLE or not self.ddgs:
-            return results
-
-        for r in self.ddgs.text(query, max_results=max_results):
+        results: list[SearchResult] = []
+        for result in self.ddgs.text(query, max_results=max_results):
+            href = result.get("href", "")
             results.append(
                 SearchResult(
-                    title=r.get("title", ""),
-                    url=r.get("href", ""),
-                    snippet=r.get("body", ""),
-                    source=urlparse(r.get("href", "")).netloc,
-    """Performs intelligent web searches across multiple backends."""
-
-    def __init__(self):
-        self.ddgs = DDGS()
-        self.cache: Dict[str, List[SearchResult]] = {}
-
-    async def search(self, query: str, intent: str, max_results: int = 10) -> List[SearchResult]:
-        """Execute search and return ranked results."""
-
-        cache_key = f"{query}_{intent}"
-        if cache_key in self.cache:
-            logger.debug(f"Cache hit for: {query}")
-            return self.cache[cache_key]
-
-        results = []
-
-        # Try DuckDuckGo
-        try:
-            ddgs_results = await asyncio.to_thread(self._search_duckduckgo, query, max_results)
-            results.extend(ddgs_results)
-            logger.debug(f"DuckDuckGo found {len(ddgs_results)} results for: {query}")
-        except Exception as e:
-            logger.warning(f"DuckDuckGo search failed: {e}")
-
-        # Rank results by relevance to intent
-        ranked = await self._rank_by_relevance(results, intent)
-
-        self.cache[cache_key] = ranked
-        return ranked
-
-    def _search_duckduckgo(self, query: str, max_results: int) -> List[SearchResult]:
-        """Search using DuckDuckGo."""
-        results = []
-
-        for r in self.ddgs.text(query, max_results=max_results):
-            results.append(
-                SearchResult(
-                    title=r.get("title", ""),
-                    url=r.get("href", ""),
-                    snippet=r.get("body", ""),
-                    source=urlparse(r.get("href", "")).netloc,
-                    intent_match="",
+                    title=result.get("title", ""),
+                    url=href,
+                    snippet=result.get("body", ""),
+                    source=urlparse(href).netloc,
                 )
             )
-
         return results
 
-    async def _rank_by_relevance(self, results: List[SearchResult], intent: str) -> List[SearchResult]:
-        """Rank search results by relevance to intent."""
-        # Simple keyword-based scoring
-        intent_keywords = {
+    def _rank_by_relevance(self, results: list[SearchResult], intent: str) -> list[SearchResult]:
+        """Rank search results by intent relevance and source quality."""
+        intent_keywords: dict[str, list[str]] = {
             "website": ["official", "about", "company", "home"],
             "funding": ["funding", "investment", "raised", "series", "valuation"],
             "financials": ["revenue", "financial", "sales", "growth", "profit"],
@@ -316,76 +221,49 @@ class WebSearchAgent:
             "news": ["news", "press", "announces", "launches"],
             "social": ["linkedin", "twitter", "social", "media"],
         }
-
         keywords = intent_keywords.get(intent, [])
 
         for result in results:
             text = f"{result.title} {result.snippet}".lower()
             score = 0.0
 
-            # Keyword matching
-            for kw in keywords:
-                if kw in text:
+            for keyword in keywords:
+                if keyword in text:
                     score += 0.2
 
-            # Domain authority
-            if any(x in result.source for x in ["crunchbase.com", "linkedin.com", "bloomberg.com"]):
+            if any(domain in result.source for domain in ["crunchbase.com", "linkedin.com", "bloomberg.com"]):
                 score += 0.3
-            elif any(x in result.source for x in ["techcrunch.com", "forbes.com", "reuters.com"]):
+            elif any(domain in result.source for domain in ["techcrunch.com", "forbes.com", "reuters.com"]):
                 score += 0.25
             elif ".gov" in result.source:
                 score += 0.2
 
-            # Recent content bonus
             if any(year in text for year in ["2024", "2025", "2026"]):
                 score += 0.1
 
             result.relevance_score = min(score, 1.0)
             result.intent_match = intent
 
-        # Sort by relevance
-        return sorted(results, key=lambda x: x.relevance_score, reverse=True)
-
-
-# ============================================================================
-# AGENT 3: CONTENT EXTRACTOR
-# ============================================================================
+        return sorted(results, key=lambda item: item.relevance_score, reverse=True)
 
 
 class ContentExtractorAgent:
-    """Extracts structured data from web pages using LLM."""
+    """Extracts structured data from web pages using an LLM."""
 
-    def __init__(self, llm_client: Optional[EnhancedLLMClient] = None):
+    def __init__(self, llm_client: EnhancedLLMClient | None = None) -> None:
         self.llm = llm_client or EnhancedLLMClient()
         self.http = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
 
     async def extract(self, url: str, company_name: str) -> ExtractedData:
-        """Extract structured data from a URL."""
-
-        logger.info(f"🔍 Extracting data from: {url}")
-
+        """Extract structured data from a single URL."""
         try:
-            # Fetch page
             html = await self._fetch_page(url)
             text = self._clean_html(html)
-
             if len(text) < 100:
-                return ExtractedData(
-                    source_url=url,
-                    source_type="error",
-                    data={},
-                    confidence=0.0,
-                    extraction_method="fetch_failed",
-                    raw_content="",
-                )
+                return ExtractedData(url, "error", {}, 0.0, "fetch_too_short", raw_content="")
 
-            # Use LLM to extract structured data
             data = await self._llm_extract(text[:8000], company_name, url)
-
-            # Determine source type
             source_type = self._classify_source(url)
-
-            # Calculate confidence based on data completeness
             confidence = self._calculate_confidence(data)
 
             return ExtractedData(
@@ -394,187 +272,120 @@ class ContentExtractorAgent:
                 data=data,
                 confidence=confidence,
                 extraction_method="llm_parsing",
-                raw_content=text[:2000],  # Store preview
+                raw_content=text[:2000],
             )
-
-        except Exception as e:
-            logger.error(f"Extraction failed for {url}: {e}")
-            return ExtractedData(
-                source_url=url,
-                source_type="error",
-                data={},
-                confidence=0.0,
-                extraction_method=f"error: {str(e)}",
-                raw_content="",
-            )
+        except Exception as error:
+            logger.error(f"Extraction failed for {url}: {error}")
+            return ExtractedData(url, "error", {}, 0.0, f"error: {error}", raw_content="")
 
     async def _fetch_page(self, url: str) -> str:
-        """Fetch page HTML."""
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; SolsteinResearchBot/1.0)"}
         response = await self.http.get(url, headers=headers)
         response.raise_for_status()
         return response.text
 
     def _clean_html(self, html: str) -> str:
-        """Extract clean text from HTML."""
         soup = BeautifulSoup(html, "html.parser")
-
-        # Remove script and style elements
-        for script in soup(["script", "style", "nav", "footer"]):
-            script.decompose()
-
-        # Get text
+        for node in soup(["script", "style", "nav", "footer"]):
+            node.decompose()
         text = soup.get_text(separator="\n")
-
-        # Clean up
         lines = (line.strip() for line in text.splitlines())
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-        text = "\n".join(chunk for chunk in chunks if chunk)
+        return "\n".join(chunk for chunk in chunks if chunk)
 
-        return text
-
-    async def _llm_extract(self, text: str, company_name: str, url: str) -> Dict[str, Any]:
-        """Use LLM to extract structured data."""
-
-        prompt = f"""Extract structured company information from this web content.
-
+    async def _llm_extract(self, text: str, company_name: str, url: str) -> dict[str, Any]:
+        prompt = f"""Extract structured company information from this content.
 Company: {company_name}
 Source: {url}
 
+Return ONLY valid JSON with keys:
+company_name, website, description, industry, headquarters, founded_year,
+employees, revenue, revenue_currency, funding_raised, valuation,
+funding_rounds, key_executives, products, is_public.
+Use null for unknown values.
+
 Content:
 {text[:6000]}
-
-Extract these fields (use null if not found):
-{{
-  "company_name": "official company name",
-  "website": "company website URL",
-  "description": "brief description (1-2 sentences)",
-  "industry": "industry/sector",
-  "headquarters": "city, country",
-  "founded_year": number or null,
-  "employees": number or null,
-  "revenue": number (in millions) or null,
-  "revenue_currency": "EUR|USD|GBP",
-  "funding_raised": number (in millions) or null,
-  "valuation": number (in millions) or null,
-  "funding_rounds": [
-    {{"round": "Series A", "amount": number, "date": "YYYY-MM", "lead_investor": "name"}}
-  ],
-  "key_executives": ["CEO Name", "CTO Name"],
-  "products": ["product 1", "product 2"],
-  "is_public": true/false
-}}
-
-Return ONLY valid JSON. No markdown, no explanation. Use null for unknown values."""
-
+"""
         try:
             response = await self.llm.generate(prompt)
-            return json.loads(response)
-        except Exception as e:
-            logger.error(f"LLM extraction failed: {e}")
+            if response is None or response == "":
+                raise ValueError("Extractor returned empty response")
+            response_text = str(response)
+            return json.loads(response_text)
+        except Exception as error:
+            logger.error(f"LLM extraction failed for {url}: {error}")
             return {}
 
     def _classify_source(self, url: str) -> str:
-        """Classify the type of source."""
         domain = urlparse(url).netloc.lower()
-
-        if any(x in domain for x in ["crunchbase.com"]):
+        if "crunchbase.com" in domain:
             return "crunchbase"
-        elif any(x in domain for x in ["linkedin.com"]):
+        if "linkedin.com" in domain:
             return "linkedin"
-        elif any(x in domain for x in ["bloomberg.com", "reuters.com", "forbes.com", "techcrunch.com"]):
+        if any(name in domain for name in ["bloomberg.com", "reuters.com", "forbes.com", "techcrunch.com"]):
             return "news"
-        elif any(x in domain for x in ["wikipedia.org"]):
+        if "wikipedia.org" in domain:
             return "wikipedia"
-        else:
-            return "company_website"
+        return "company_website"
 
-    def _calculate_confidence(self, data: Dict[str, Any]) -> float:
-        """Calculate confidence based on data completeness."""
+    def _calculate_confidence(self, data: dict[str, Any]) -> float:
         critical_fields = ["company_name", "website", "description"]
         important_fields = ["industry", "headquarters", "founded_year", "employees"]
         financial_fields = ["revenue", "funding_raised"]
 
         score = 0.0
-
-        # Critical fields (0.6 total)
-        for field in critical_fields:
-            if data.get(field):
-                score += 0.2
-
-        # Important fields (0.3 total)
-        for field in important_fields:
-            if data.get(field):
-                score += 0.075
-
-        # Financial fields (0.1 total)
-        for field in financial_fields:
-            if data.get(field):
-                score += 0.05
-
+        score += sum(0.2 for key in critical_fields if data.get(key))
+        score += sum(0.075 for key in important_fields if data.get(key))
+        score += sum(0.05 for key in financial_fields if data.get(key))
         return min(score, 1.0)
-
-
-# ============================================================================
-# AGENT 4: DATA VALIDATOR
-# ============================================================================
 
 
 class DataValidatorAgent:
     """Validates extracted data for sanity and consistency."""
 
     VALIDATION_RULES = {
-        "revenue": {"min": 0, "max": 1_000_000, "unit": "millions"},
-        "employees": {"min": 1, "max": 1_000_000, "unit": "count"},
-        "founded_year": {"min": 1800, "max": 2026, "unit": "year"},
-        "funding_raised": {"min": 0, "max": 100_000, "unit": "millions"},
-        "valuation": {"min": 0, "max": 1_000_000, "unit": "millions"},
+        "revenue": {"min": 0, "max": 1_000_000},
+        "employees": {"min": 1, "max": 1_000_000},
+        "founded_year": {"min": 1800, "max": 2026},
+        "funding_raised": {"min": 0, "max": 100_000},
+        "valuation": {"min": 0, "max": 1_000_000},
     }
 
     async def validate(self, data: ExtractedData) -> ValidationResult:
-        """Validate extracted data."""
-        issues = []
+        issues: list[str] = []
+        recommendations: list[str] = []
         confidence_adjustment = 0.0
-        recommendations = []
+        payload = data.data
 
-        company_data = data.data
-
-        # Rule-based validation
-        for field, rules in self.VALIDATION_RULES.items():
-            value = company_data.get(field)
+        for field, rule in self.VALIDATION_RULES.items():
+            value = payload.get(field)
             if value is None:
                 continue
-
             if not isinstance(value, (int, float)):
-                issues.append(f"{field} is not a number: {value}")
+                issues.append(f"{field} is not numeric: {value}")
                 confidence_adjustment -= 0.1
                 continue
-
-            if value < rules["min"] or value > rules["max"]:
-                issues.append(f"{field}={value} outside valid range [{rules['min']}, {rules['max']}] {rules['unit']}")
+            if value < rule["min"] or value > rule["max"]:
+                issues.append(f"{field}={value} outside [{rule['min']}, {rule['max']}]")
                 confidence_adjustment -= 0.15
 
-        # Cross-field validation
-        funding = company_data.get("funding_raised", 0) or 0
-        valuation = company_data.get("valuation", 0) or 0
+        funding = payload.get("funding_raised") or 0
+        valuation = payload.get("valuation") or 0
+        if funding > 0 and valuation > 0 and funding > valuation * 0.9:
+            issues.append(f"Funding ({funding}M) unusually high vs valuation ({valuation}M)")
+            recommendations.append("Verify funding and valuation values")
+            confidence_adjustment -= 0.1
 
-        if funding > 0 and valuation > 0:
-            if funding > valuation * 0.9:
-                issues.append(f"Funding ({funding}M) unusually high vs valuation ({valuation}M)")
-                recommendations.append("Verify funding and valuation data")
-                confidence_adjustment -= 0.1
-
-        # Check for suspicious patterns
-        employees = company_data.get("employees")
-        revenue = company_data.get("revenue")
-
+        employees = payload.get("employees")
+        revenue = payload.get("revenue")
         if employees and revenue:
             revenue_per_employee = revenue / employees
-            if revenue_per_employee > 10:  # >€10M per employee
-                issues.append(f"Revenue per employee ({revenue_per_employee:.1f}M) unusually high")
+            if revenue_per_employee > 10:
+                issues.append(f"Revenue per employee unusually high: {revenue_per_employee:.2f}M")
                 confidence_adjustment -= 0.1
-            elif revenue_per_employee < 0.01:  # <€10K per employee
-                issues.append(f"Revenue per employee ({revenue_per_employee:.3f}M) unusually low")
+            elif revenue_per_employee < 0.01:
+                issues.append(f"Revenue per employee unusually low: {revenue_per_employee:.3f}M")
                 confidence_adjustment -= 0.1
 
         return ValidationResult(
@@ -585,83 +396,68 @@ class DataValidatorAgent:
         )
 
 
-# ============================================================================
-# ORCHESTRATOR
-# ============================================================================
-
-
 class AIResearchOrchestrator:
-    """Orchestrates multi-agent research workflow."""
+    """Orchestrates the multi-agent research workflow."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.planner = ResearchPlannerAgent()
         self.searcher = WebSearchAgent()
         self.extractor = ContentExtractorAgent()
         self.validator = DataValidatorAgent()
 
     async def research_company(
-        self, company_name: str, industry: Optional[str] = None, max_sources: int = 8
+        self, company_name: str, industry: str | None = None, max_sources: int = 8
     ) -> ResearchReport:
         """Perform full autonomous research on a company."""
-
-        logger.info(f"🚀 Starting AI research for: {company_name}")
         start_time = datetime.now()
-
         report = ResearchReport(company_name=company_name)
 
         try:
-            # Step 1: Create research plan
             plan = await self.planner.create_plan(company_name, industry)
-            logger.info(f"📋 Research plan: {len(plan.queries)} queries")
 
-            # Step 2: Execute searches
-            all_search_results = []
-            for query_info in plan.queries[:6]:  # Top 6 queries
-                results = await self.searcher.search(query_info["query"], query_info["intent"], max_results=5)
-                all_search_results.extend(results)
-                await asyncio.sleep(0.5)  # Rate limiting
-
-            # Deduplicate and select top sources
-            seen_urls = set()
-            unique_results = []
-            for r in all_search_results:
-                if r.url not in seen_urls and len(unique_results) < max_sources:
-                    seen_urls.add(r.url)
-                    unique_results.append(r)
-
-            logger.info(f"🔍 Found {len(unique_results)} unique sources")
-
-            # Step 3: Extract data from each source
-            extracted_data_list = []
-            for result in unique_results:
-                extracted = await self.extractor.extract(result.url, company_name)
-                if extracted.confidence > 0.2:  # Minimum confidence threshold
-                    extracted_data_list.append(extracted)
+            all_search_results: list[SearchResult] = []
+            for query_info in plan.queries[:6]:
+                query = query_info.get("query", "")
+                intent = query_info.get("intent", "general")
+                if not query:
+                    continue
+                all_search_results.extend(await self.searcher.search(query, intent, max_results=5))
                 await asyncio.sleep(0.3)
 
-            logger.info(f"📊 Extracted data from {len(extracted_data_list)} sources")
+            unique_results: list[SearchResult] = []
+            seen_urls: set[str] = set()
+            for result in all_search_results:
+                if result.url and result.url not in seen_urls:
+                    seen_urls.add(result.url)
+                    unique_results.append(result)
+                if len(unique_results) >= max_sources:
+                    break
 
-            # Step 4: Validate each extraction
-            validated_data = []
+            extracted_data_list: list[ExtractedData] = []
+            for result in unique_results:
+                extracted = await self.extractor.extract(result.url, company_name)
+                if extracted.confidence > 0.2:
+                    extracted_data_list.append(extracted)
+                await asyncio.sleep(0.2)
+
+            validated_data: list[dict[str, Any]] = []
             for extraction in extracted_data_list:
                 validation = await self.validator.validate(extraction)
-
-                # Adjust confidence based on validation
-                adjusted_confidence = max(0, min(1, extraction.confidence + validation.confidence_adjustment))
-
+                adjusted_confidence = max(0.0, min(1.0, extraction.confidence + validation.confidence_adjustment))
                 if adjusted_confidence > 0.3:
                     validated_data.append(
-                        {"extraction": extraction, "validation": validation, "confidence": adjusted_confidence}
+                        {
+                            "extraction": extraction,
+                            "validation": validation,
+                            "confidence": adjusted_confidence,
+                        }
                     )
 
-            # Step 5: Cross-reference and synthesize
-            final_data = self._synthesize_data(validated_data, company_name)
-
-            # Build report
+            final_data = self._synthesize_data(validated_data)
             report = ResearchReport(
                 company_name=company_name,
                 is_synthetic=False,
-                confidence_score=final_data.get("_confidence", 0.5),
+                confidence_score=final_data.get("_confidence", 0.0),
                 basic_info={
                     "website": final_data.get("website"),
                     "description": final_data.get("description"),
@@ -681,11 +477,11 @@ class AIResearchOrchestrator:
                 },
                 data_sources=[
                     {
-                        "url": d["extraction"].source_url,
-                        "type": d["extraction"].source_type,
-                        "confidence": d["confidence"],
+                        "url": item["extraction"].source_url,
+                        "type": item["extraction"].source_type,
+                        "confidence": item["confidence"],
                     }
-                    for d in validated_data
+                    for item in validated_data
                 ],
                 metadata={
                     "research_date": datetime.now().isoformat(),
@@ -695,46 +491,32 @@ class AIResearchOrchestrator:
                     "research_time_seconds": (datetime.now() - start_time).total_seconds(),
                 },
             )
-
-            logger.info(f"✅ Research complete for {company_name}: confidence={report.confidence_score:.2f}")
-
-        except Exception as e:
-            logger.error(f"Research failed for {company_name}: {e}")
-            report.errors.append(str(e))
+        except Exception as error:
+            logger.error(f"Research failed for {company_name}: {error}")
+            report.errors.append(str(error))
 
         return report
 
-    def _synthesize_data(self, validated_data: List[Dict], company_name: str) -> Dict[str, Any]:
-        """Merge data from multiple sources, preferring high-confidence values."""
-
-        # Group by field
-        field_values = {}
+    def _synthesize_data(self, validated_data: list[dict[str, Any]]) -> dict[str, Any]:
+        """Merge data from multiple sources, preferring higher-confidence values."""
+        field_values: dict[str, list[dict[str, Any]]] = {}
 
         for item in validated_data:
-            data = item["extraction"].data
+            extraction = item["extraction"]
             confidence = item["confidence"]
-
-            for field, value in data.items():
+            for field, value in extraction.data.items():
                 if value is None:
                     continue
-
-                if field not in field_values:
-                    field_values[field] = []
-
-                field_values[field].append(
-                    {"value": value, "confidence": confidence, "source": item["extraction"].source_url}
+                field_values.setdefault(field, []).append(
+                    {"value": value, "confidence": confidence, "source": extraction.source_url}
                 )
 
-        # Select best value for each field
-        final_data = {"_confidence": 0.0}
+        final_data: dict[str, Any] = {"_confidence": 0.0}
         total_confidence = 0.0
         field_count = 0
 
         for field, values in field_values.items():
-            # Sort by confidence
-            values.sort(key=lambda x: x["confidence"], reverse=True)
-
-            # Take highest confidence value
+            values.sort(key=lambda item: item["confidence"], reverse=True)
             best = values[0]
             final_data[field] = best["value"]
             total_confidence += best["confidence"]
@@ -745,10 +527,6 @@ class AIResearchOrchestrator:
 
         return final_data
 
-
-# ============================================================================
-# EXPORT
-# ============================================================================
 
 __all__ = [
     "AIResearchOrchestrator",
