@@ -91,8 +91,6 @@ class FinancialMetric(BaseModel):
     ebitda_margin: float | None = None
     recurring_revenue_pct: float | None = None
     funding_raised: float | None = None
-    margin_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
-    funding_raised: float | None = None
     funding_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
     valuation: float | None = None
     valuation_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
@@ -426,6 +424,7 @@ class MarketAnalysis(BaseModel):
     model_config = ConfigDict(validate_assignment=True)
 
     market_name: str
+    market_segment: str | None = None  # NEW
     analysis_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     companies: list[Company] = Field(default_factory=list)
 

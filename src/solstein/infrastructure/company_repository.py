@@ -89,12 +89,14 @@ class CompanyRepository:
 
         return record
 
-    async def create(self, **company_data) -> CompanyRecord:
+    async def create(self, company_data: dict[str, Any] | None = None, **kwargs) -> CompanyRecord:
         """Create a new company record.
 
+        Handles both a single dictionary argument or keyword arguments.
+
         Args:
-            **company_data: Company attributes.
-                Must include 'company_id' and 'name' at minimum.
+            company_data: Optional dictionary containing company attributes.
+            **kwargs: Company attributes passed as keyword arguments.
 
         Returns:
             Created CompanyRecord object.
@@ -102,10 +104,14 @@ class CompanyRepository:
         Raises:
             ValueError: If required fields are missing.
         """
-        if "company_id" not in company_data or "name" not in company_data:
+        # Merge dictionary and keyword arguments
+        data = company_data.copy() if company_data else {}
+        data.update(kwargs)
+
+        if "company_id" not in data or "name" not in data:
             raise ValueError("company_id and name are required fields")
 
-        record = CompanyRecord(**company_data)
+        record = CompanyRecord(**data)
         self.session.add(record)
         await self.session.flush()
         return record
@@ -123,7 +129,9 @@ class CompanyRepository:
         Raises:
             ValueError: If company not found.
         """
-        record = await self.get_by_id(company_id)
+        result = await self.session.execute(select(CompanyRecord).where(CompanyRecord.company_id == company_id))
+        record = result.scalar_one_or_none()
+
         if not record:
             raise ValueError(f"Company with id {company_id} not found")
 
@@ -144,7 +152,9 @@ class CompanyRepository:
         Returns:
             True if deletion was successful, False if company not found.
         """
-        record = await self.get_by_id(company_id)
+        result = await self.session.execute(select(CompanyRecord).where(CompanyRecord.company_id == company_id))
+        record = result.scalar_one_or_none()
+
         if not record:
             return False
 

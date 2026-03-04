@@ -16,7 +16,7 @@ from ..security.jwt_handler import UserPayload, jwt_handler
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Dependency to get a database session."""
-    async for session in db_manager.get_session():
+    async with db_manager.get_session() as session:
         yield session
 
 

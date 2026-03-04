@@ -21,12 +21,7 @@ from .database import Base
 
 
 class CompanyRecord(Base):
-    """Stores comprehensive company data for PE intelligence.
-
-    This is the main entity for storing detailed company information
-    extracted from various sources. All detailed data is stored here
-    even if not displayed in Excel exports.
-    """
+    """Stores comprehensive company data for PE intelligence."""
 
     __tablename__ = "companies"
 
@@ -64,7 +59,7 @@ class CompanyRecord(Base):
     recurring_revenue_pct = Column(Float, nullable=True)
     revenue_per_employee_eur_k = Column(Float, nullable=True)
 
-    # Revenue timeline (stored as JSON for full history)
+    # Revenue timeline
     revenue_timeline = Column(JSON, nullable=True)
     revenue_cagr_3yr = Column(Float, nullable=True)
     revenue_cagr_5yr = Column(Float, nullable=True)
@@ -81,7 +76,7 @@ class CompanyRecord(Base):
     employee_cagr_3yr = Column(Float, nullable=True)
     open_positions = Column(Integer, nullable=True)
 
-    # Raw profitability metrics (from source)
+    # Raw profitability metrics
     profitability_raw_metrics = Column(JSON, nullable=True)
 
     # Data quality
@@ -96,22 +91,21 @@ class CompanyRecord(Base):
     scoring_breakdown = Column(JSON, nullable=True)
 
     # Metadata
-    last_updated = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    last_updated = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         Index("ix_company_name", "name"),
-        Index("ix_company_industry", "industry"),  # NEW: For industry filtering
-        Index("ix_company_headquarters", "headquarters"),  # NEW: For region filtering
+        Index("ix_company_industry", "industry"),
+        Index("ix_company_headquarters", "headquarters"),
         Index("ix_company_tier", "tier"),
         Index("ix_company_classification", "classification"),
         Index("ix_company_ai_score", "ai_score"),
-        Index("ix_company_composite_score", "composite_score"),  # NEW: For sorting by score
-        Index("ix_company_revenue_eur_m", "revenue_eur_m"),  # NEW: For revenue filtering
-        Index("ix_company_growth_rate", "growth_rate_pct"),  # NEW: For growth filtering
-        Index("ix_company_last_updated", "last_updated"),  # NEW: For recency queries
-        # Composite index for common filter combinations
-        Index("ix_company_industry_headquarters", "industry", "headquarters"),  # NEW: Combined filter
+        Index("ix_company_composite_score", "composite_score"),
+        Index("ix_company_revenue_eur_m", "revenue_eur_m"),
+        Index("ix_company_growth_rate", "growth_rate_pct"),
+        Index("ix_company_last_updated", "last_updated"),
+        Index("ix_company_industry_headquarters", "industry", "headquarters"),
     )
 
     def to_dict(self) -> dict[str, object]:
@@ -181,7 +175,7 @@ class ScoringRecord(Base):
 
     classification = Column(String(50), nullable=False)
 
-    scored_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    scored_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
     data_sources_used = Column(JSON, nullable=True)
 
     signals = relationship("SignalRecord", back_populates="scoring_record", cascade="all, delete-orphan")
@@ -193,7 +187,6 @@ class ScoringRecord(Base):
     )
 
     def to_dict(self) -> dict[str, object]:
-        """Convert to dictionary representation."""
         return {
             "id": self.id,
             "company_id": self.company_id,
@@ -210,15 +203,13 @@ class ScoringRecord(Base):
 
 
 class SignalRecord(Base):
-    """Stores individual signals extracted from data sources.
-
-    Each signal represents a data point that contributed to a score.
-    """
+    """Stores individual signals extracted from data sources."""
 
     __tablename__ = "signal_records"
 
     id = Column(Integer, primary_key=True, index=True)
     scoring_record_id = Column(Integer, ForeignKey("scoring_records.id"), nullable=False, index=True)
+    company_id = Column(String(255), index=True, nullable=True)  # NEW
 
     signal_name = Column(String(255), nullable=False, index=True)
     signal_category = Column(String(50), nullable=False)
@@ -230,16 +221,16 @@ class SignalRecord(Base):
 
     confidence = Column(Float, nullable=False)
 
-    extracted_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    extracted_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     scoring_record = relationship("ScoringRecord", back_populates="signals")
 
     __table_args__ = (Index("ix_signal_name_category", "signal_name", "signal_category"),)
 
     def to_dict(self) -> dict[str, object]:
-        """Convert to dictionary representation."""
         return {
             "id": self.id,
+            "company_id": self.company_id,
             "signal_name": self.signal_name,
             "signal_category": self.signal_category,
             "signal_value": self.signal_value,
@@ -252,15 +243,13 @@ class SignalRecord(Base):
 
 
 class MarketSnapshot(Base):
-    """Snapshot of market state at a point in time.
-
-    Used for trend analysis and historical comparison.
-    """
+    """Snapshot of market state at a point in time."""
 
     __tablename__ = "market_snapshots"
 
     id = Column(Integer, primary_key=True, index=True)
-    snapshot_date = Column(DateTime, nullable=False, index=True, default=lambda: datetime.now(timezone.utc))
+    snapshot_date = Column(DateTime(timezone=True), nullable=False, index=True, default=lambda: datetime.now(timezone.utc))
+    market_segment = Column(String(255), index=True, nullable=True)  # NEW
 
     total_companies_scored = Column(Integer, nullable=False)
     average_growth_score = Column(Float, nullable=False)
@@ -276,10 +265,10 @@ class MarketSnapshot(Base):
     __table_args__ = (Index("ix_snapshot_date", "snapshot_date"),)
 
     def to_dict(self) -> dict[str, object]:
-        """Convert to dictionary representation."""
         return {
             "id": self.id,
             "snapshot_date": (self.snapshot_date.isoformat() if self.snapshot_date is not None else None),
+            "market_segment": self.market_segment,
             "total_companies_scored": self.total_companies_scored,
             "average_growth_score": self.average_growth_score,
             "average_financial_score": self.average_financial_score,
@@ -301,7 +290,7 @@ class AuditTrailRecord(Base):
     gathering_batch_id = Column(String(255), index=True, nullable=False)
     company_name = Column(String(500), nullable=False)
 
-    # Analysis artifacts (Stored as JSON for transparency)
+    # Analysis artifacts
     raw_data = Column(JSON, nullable=True)
     aggregated_facts = Column(JSON, nullable=True)
     extracted_signals = Column(JSON, nullable=True)
@@ -312,9 +301,10 @@ class AuditTrailRecord(Base):
     classification = Column(String(50), nullable=True)
 
     scoring_breakdown = Column(JSON, nullable=True)
+    scoring_timestamp = Column(DateTime(timezone=True), nullable=True)  # NEW
 
-    analysis_started_at = Column(DateTime, nullable=True)
-    analysis_completed_at = Column(DateTime, nullable=True)
+    analysis_started_at = Column(DateTime(timezone=True), nullable=True)
+    analysis_completed_at = Column(DateTime(timezone=True), nullable=True)
     analysis_duration_seconds = Column(Float, nullable=True)
 
     data_completeness = Column(Float, default=0.0)
@@ -323,12 +313,11 @@ class AuditTrailRecord(Base):
     errors = Column(JSON, default=list)
     warnings = Column(JSON, default=list)
 
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (Index("ix_audit_company_batch", "company_id", "gathering_batch_id"),)
 
     def to_dict(self) -> dict[str, object]:
-        """Convert to dictionary representation."""
         return {
             "id": self.id,
             "company_id": self.company_id,
@@ -341,6 +330,7 @@ class AuditTrailRecord(Base):
             "financial_health_score": self.financial_health_score,
             "competitive_position_score": self.competitive_position_score,
             "classification": self.classification,
+            "scoring_timestamp": (self.scoring_timestamp.isoformat() if self.scoring_timestamp is not None else None),
             "analysis_started_at": (
                 self.analysis_started_at.isoformat() if self.analysis_started_at is not None else None
             ),
@@ -368,7 +358,7 @@ class ResearchRunRecord(Base):
     min_total_sources: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     summary: Mapped[object | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     stages: Mapped[list["ResearchStageRecord"]] = relationship(
         "ResearchStageRecord", back_populates="run", cascade="all, delete-orphan"
@@ -391,10 +381,10 @@ class OutboxRecord(Base):
     payload: Mapped[object] = mapped_column(JSON, nullable=False)
     attempt_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     available_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), index=True
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc), index=True
     )
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
     last_error: Mapped[object | None] = mapped_column(JSON, nullable=True)
 
     __table_args__ = (Index("ix_outbox_status_available_at", "status", "available_at"),)
@@ -414,7 +404,7 @@ class ResearchStageRecord(Base):
     stage_order: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str | None] = mapped_column(String(50), nullable=True)
     metrics: Mapped[object | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     run: Mapped["ResearchRunRecord"] = relationship("ResearchRunRecord", back_populates="stages")
 
@@ -437,7 +427,7 @@ class ResearchArtifactRecord(Base):
     artifact_name: Mapped[str] = mapped_column(String(255), nullable=False)
     artifact_path: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     payload: Mapped[object | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     run: Mapped["ResearchRunRecord"] = relationship("ResearchRunRecord", back_populates="artifacts")
 
@@ -464,9 +454,9 @@ class SourceDocumentRecord(Base):
     source_url: Mapped[str] = mapped_column(String(2000), nullable=False)
     source_domain: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     source_type: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
-    observed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="observed")
-    fetched_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    fetched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     content_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
     extract_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
@@ -497,7 +487,7 @@ class MetricObservationRecord(Base):
     metric_value: Mapped[float | None] = mapped_column(Float, nullable=True)
     metric_value_raw: Mapped[object | None] = mapped_column(JSON, nullable=True)
     source_url: Mapped[str | None] = mapped_column(String(2000), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         UniqueConstraint(
@@ -535,7 +525,7 @@ class EvidenceReadinessRecord(Base):
     metric_source_coverage: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     metric_explainability: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     unsupported_metrics: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         UniqueConstraint(
@@ -561,10 +551,10 @@ class ContradictionRecord(Base):
     contradiction_type: Mapped[str] = mapped_column(String(100), nullable=False)
     details: Mapped[object | None] = mapped_column(JSON, nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="open")
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
-    resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    ignored_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    ignored_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     transitions: Mapped[list["ContradictionTransitionRecord"]] = relationship(
         "ContradictionTransitionRecord",
@@ -595,7 +585,7 @@ class ContradictionTransitionRecord(Base):
     )
     from_status: Mapped[str] = mapped_column(String(50), nullable=False)
     to_status: Mapped[str] = mapped_column(String(50), nullable=False)
-    changed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
     changed_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
@@ -603,10 +593,7 @@ class ContradictionTransitionRecord(Base):
 
 
 class EnrichmentAuditRecord(Base):
-    """Stores audit trail for enrichment operations (Phase 11).
-
-    Tracks all enrichment requests, successes, failures, and cache hits.
-    """
+    """Stores audit trail for enrichment operations (Phase 11)."""
 
     __tablename__ = "enrichment_audit_trail"
 
@@ -615,17 +602,15 @@ class EnrichmentAuditRecord(Base):
     company_name = Column(String(500), nullable=True)
 
     # Operation details
-    operation = Column(
-        String(50), nullable=False, index=True
-    )  # 'enrich_start', 'enrich_success', 'enrich_failure', 'cache_hit', 'cache_miss'
-    source = Column(String(255), nullable=True)  # 'SEC_EDGAR', 'Companies_House', 'News_Signals'
-    status = Column(String(50), nullable=False)  # 'SUCCESS', 'FAILURE', 'SKIPPED'
+    operation = Column(String(50), nullable=False, index=True)
+    source = Column(String(255), nullable=True)
+    status = Column(String(50), nullable=False)
 
     # Performance tracking
     duration_ms = Column(Float, nullable=True)
 
     # Results
-    fields_enriched = Column(JSON, nullable=True)  # List of fields that were enriched
+    fields_enriched = Column(JSON, nullable=True)
     error_message = Column(Text, nullable=True)
 
     # User/API context
@@ -633,7 +618,7 @@ class EnrichmentAuditRecord(Base):
     client_id = Column(String(255), nullable=True)
 
     # Metadata
-    timestamp = Column(DateTime, nullable=False, index=True, default=lambda: datetime.now(timezone.utc))
+    timestamp = Column(DateTime(timezone=True), nullable=False, index=True, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         Index("ix_enrichment_audit_company_timestamp", "company_id", "timestamp"),
@@ -641,7 +626,6 @@ class EnrichmentAuditRecord(Base):
     )
 
     def to_dict(self) -> dict[str, object]:
-        """Convert to dictionary representation."""
         return {
             "id": self.id,
             "company_id": self.company_id,
@@ -659,10 +643,7 @@ class EnrichmentAuditRecord(Base):
 
 
 class EnrichmentCacheRecord(Base):
-    """Stores enriched company data cache (Phase 11).
-
-    Caches enrichment results with TTL for performance.
-    """
+    """Stores enriched company data cache (Phase 11)."""
 
     __tablename__ = "enrichment_cache"
 
@@ -670,27 +651,29 @@ class EnrichmentCacheRecord(Base):
     company_id = Column(String(255), unique=True, index=True, nullable=False)
 
     # Cached enrichment data
-    enriched_data = Column(JSON, nullable=False)  # Full UnifiedCompany serialized as JSON
-    sources_used = Column(JSON, nullable=True)  # List of sources used for enrichment
-    fields_enriched = Column(JSON, nullable=True)  # List of fields that were enriched
+    enriched_data = Column(JSON, nullable=False)
+    sources_used = Column(JSON, nullable=True)
+    fields_enriched = Column(JSON, nullable=True)
 
     # Cache metadata
-    cached_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
-    ttl_seconds = Column(Integer, default=86400)  # 24 hours default
-    expires_at = Column(DateTime, nullable=False, index=True)
+    cached_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    ttl_seconds = Column(Integer, default=86400)
+    expires_at = Column(DateTime(timezone=True), nullable=False, index=True)
 
     # Hit tracking
-    hits = Column(Integer, default=0)  # Number of cache hits
-    last_accessed_at = Column(DateTime, nullable=True)
+    hits = Column(Integer, default=0)
+    last_accessed_at = Column(DateTime(timezone=True), nullable=True)
 
     __table_args__ = (Index("ix_enrichment_cache_expires", "expires_at"),)
 
     def is_expired(self) -> bool:
         """Check if cache entry has expired."""
-        return datetime.now(timezone.utc) > self.expires_at
+        expires = self.expires_at
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        return datetime.now(timezone.utc) > expires
 
     def to_dict(self) -> dict[str, object]:
-        """Convert to dictionary representation."""
         return {
             "id": self.id,
             "company_id": self.company_id,
@@ -706,36 +689,33 @@ class EnrichmentCacheRecord(Base):
 
 
 class EnrichmentJobRecord(Base):
-    """Stores async enrichment job tracking (Phase 12).
-
-    Tracks the status and results of async enrichment tasks.
-    """
+    """Stores async enrichment job tracking (Phase 12)."""
 
     __tablename__ = "enrichment_jobs"
 
-    id = Column(String(255), primary_key=True, index=True)  # Celery task_id
+    id = Column(String(255), primary_key=True, index=True)
 
     # Job details
     company_id = Column(String(255), index=True, nullable=False)
     company_name = Column(String(500), nullable=True)
-    job_type = Column(String(50), nullable=False)  # 'single', 'batch'
+    job_type = Column(String(50), nullable=False)
 
     # Status tracking
-    status = Column(String(50), nullable=False, index=True)  # 'PENDING', 'RUNNING', 'SUCCESS', 'FAILED'
-    progress = Column(Integer, default=0)  # 0-100 for batch jobs
+    status = Column(String(50), nullable=False, index=True)
+    progress = Column(Integer, default=0)
 
     # Job parameters
     sources = Column(JSON, nullable=True)
     batch_size = Column(Integer, nullable=True)
 
     # Results
-    result_data = Column(JSON, nullable=True)  # Full result
+    result_data = Column(JSON, nullable=True)
     error_message = Column(Text, nullable=True)
 
     # Timing
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
-    started_at = Column(DateTime, nullable=True)
-    completed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
     duration_ms = Column(Float, nullable=True)
 
     # User context
@@ -747,7 +727,6 @@ class EnrichmentJobRecord(Base):
     )
 
     def to_dict(self) -> dict[str, object]:
-        """Convert to dictionary representation."""
         return {
             "id": self.id,
             "company_id": self.company_id,
@@ -767,30 +746,22 @@ class EnrichmentJobRecord(Base):
 
 
 class TenantRecord(Base):
-    """ORM model for API tenants.
-
-    Each tenant has a unique API key (stored as SHA-256 hash) and owns
-    its own set of enrichment jobs and analysis results.
-    """
+    """ORM model for API tenants."""
 
     __tablename__ = "tenants"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(255), nullable=False, unique=True)
-    api_key_hash = Column(String(64), nullable=False, unique=True)  # SHA-256 hex
+    api_key_hash = Column(String(64), nullable=False, unique=True)
     is_active = Column(Boolean, nullable=False, default=True)
-    plan = Column(String(64), nullable=False, default="standard")  # free|standard|enterprise
+    plan = Column(String(64), nullable=False, default="standard")
     rate_limit_per_min = Column(Integer, nullable=False, default=60)
-    created_at = Column(
-        DateTime,
-        nullable=False,
-        default=lambda: __import__("datetime").datetime.now(__import__("datetime").timezone.utc),
-    )
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
-        DateTime,
+        DateTime(timezone=True),
         nullable=False,
-        default=lambda: __import__("datetime").datetime.now(__import__("datetime").timezone.utc),
-        onupdate=lambda: __import__("datetime").datetime.now(__import__("datetime").timezone.utc),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
     )
 
     __table_args__ = (
@@ -814,12 +785,12 @@ class FactRecord(Base):
     status: Mapped[str] = mapped_column(String(50), default="active", nullable=False)
     confidence: Mapped[float] = mapped_column(Float, default=0.5, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime,
+        DateTime(timezone=True),
         nullable=False,
         default=lambda: datetime.now(timezone.utc),
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
+        DateTime(timezone=True),
         nullable=False,
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),

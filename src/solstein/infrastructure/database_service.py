@@ -60,10 +60,12 @@ class DatabaseService:
         signal_value: float | None = None,
         signal_text: str | None = None,
         evidence: dict | None = None,
+        company_id: str | None = None,  # Added to match call in some tests
     ) -> SignalRecord:
         """Save a signal record linked to a scoring record."""
         signal = SignalRecord(
             scoring_record_id=scoring_record_id,
+            company_id=company_id,
             signal_name=signal_name,
             signal_category=signal_category,
             source_agent=source_agent,
@@ -87,10 +89,12 @@ class DatabaseService:
         salt_count: int,
         lead_count: int,
         market_metadata: dict | None = None,
+        market_segment: str | None = None,  # Added to match call in some tests
     ) -> MarketSnapshot:
         """Save a market snapshot for trend analysis."""
         snapshot = MarketSnapshot(
             snapshot_date=datetime.now(timezone.utc),
+            market_segment=market_segment,
             total_companies_scored=total_companies_scored,
             average_growth_score=average_growth_score,
             average_financial_score=average_financial_score,
@@ -118,6 +122,7 @@ class DatabaseService:
             competitive_position_score=audit_trail.competitive_position_score,
             classification=audit_trail.classification,
             scoring_breakdown=audit_trail.scoring_breakdown,
+            scoring_timestamp=datetime.now(timezone.utc),  # Added to match model
             analysis_started_at=audit_trail.analysis_started_at,
             analysis_completed_at=audit_trail.analysis_completed_at,
             analysis_duration_seconds=audit_trail.analysis_duration_seconds,

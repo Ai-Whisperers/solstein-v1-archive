@@ -61,7 +61,7 @@ async def get_audit_repo_if_available():
     """Get audit repository if database is initialized, else None."""
     try:
         if hasattr(db_manager, "initialized") and db_manager.initialized:
-            async for session in db_manager.get_session():
+            async with db_manager.get_session() as session:
                 return EnrichmentAuditRepository(session)
     except Exception as e:
         logger.debug(f"Could not initialize audit repository: {e}")
@@ -72,7 +72,7 @@ async def get_cache_repo_if_available():
     """Get cache repository if database is initialized, else None."""
     try:
         if hasattr(db_manager, "initialized") and db_manager.initialized:
-            async for session in db_manager.get_session():
+            async with db_manager.get_session() as session:
                 return EnrichmentCacheRepository(session)
     except Exception as e:
         logger.debug(f"Could not initialize cache repository: {e}")
@@ -89,7 +89,7 @@ async def check_database_health() -> tuple[str, bool]:
     try:
         if hasattr(db_manager, "initialized") and db_manager.initialized:
             # Try to execute a simple query
-            async for session in db_manager.get_session():
+            async with db_manager.get_session() as session:
                 await session.execute(text("SELECT 1"))
             return "operational", True
         else:
