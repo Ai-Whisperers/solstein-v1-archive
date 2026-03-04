@@ -20,11 +20,12 @@ Phase 13.4: Async Job Retry Logic
 - Logging with [RETRY-ATTEMPT-N] and [RETRY-FAILED] prefixes
 """
 
-from celery import shared_task, Task
-from celery.exceptions import MaxRetriesExceededError, SoftTimeLimitExceeded
+from datetime import datetime, timezone
+
+from celery import Task, shared_task
+from celery.exceptions import MaxRetriesExceededError
 from loguru import logger
 from sqlalchemy import select
-from datetime import datetime, timezone
 
 from solstein.config import get_settings
 
@@ -109,9 +110,7 @@ class DeadLetterQueue:
 
     def record_failure(self, task_name: str, task_id: str, error: str, attempt: int):
         """Record a permanently failed job."""
-        logger.info(
-            f"[RETRY-FAILED] {task_name} (task_id={task_id}): {error} after {attempt} attempts"
-        )
+        logger.info(f"[RETRY-FAILED] {task_name} (task_id={task_id}): {error} after {attempt} attempts")
         self.failed_jobs.append(
             {
                 "task_name": task_name,
@@ -720,8 +719,6 @@ def refresh_all_sources(self):
 # PHASE 12: ENRICHMENT ASYNC TASKS (with Phase 13.4 retry logic)
 # ============================================================================
 
-from celery import Celery
-from datetime import datetime, timezone
 
 # Import celery_app from config
 from solstein.celery_config import celery_app
@@ -757,8 +754,9 @@ def enrich_company_async(
         Dict with enrichment results
     """
     try:
-        from solstein.data.unified_loader import unified_loader, UnifiedCompany
         import time
+
+        from solstein.data.unified_loader import UnifiedCompany, unified_loader
 
         sources = sources or ["SEC_EDGAR"]
         start_time = time.time()
@@ -836,8 +834,9 @@ def enrich_companies_batch_async(
         Dict with batch enrichment results
     """
     try:
-        from solstein.data.unified_loader import unified_loader, UnifiedCompany
         import time
+
+        from solstein.data.unified_loader import UnifiedCompany, unified_loader
 
         sources = sources or ["SEC_EDGAR"]
         start_time = time.time()

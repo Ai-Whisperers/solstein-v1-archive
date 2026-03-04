@@ -358,16 +358,16 @@ class DataValidatorAgent:
         confidence_adjustment = 0.0
         payload = data.data
 
-        for field, rule in self.VALIDATION_RULES.items():
-            value = payload.get(field)
+        for field_name, rule in self.VALIDATION_RULES.items():
+            value = payload.get(field_name)
             if value is None:
                 continue
             if not isinstance(value, (int, float)):
-                issues.append(f"{field} is not numeric: {value}")
+                issues.append(f"{field_name} is not numeric: {value}")
                 confidence_adjustment -= 0.1
                 continue
             if value < rule["min"] or value > rule["max"]:
-                issues.append(f"{field}={value} outside [{rule['min']}, {rule['max']}]")
+                issues.append(f"{field_name}={value} outside [{rule['min']}, {rule['max']}]")
                 confidence_adjustment -= 0.15
 
         funding = payload.get("funding_raised") or 0
@@ -504,10 +504,10 @@ class AIResearchOrchestrator:
         for item in validated_data:
             extraction = item["extraction"]
             confidence = item["confidence"]
-            for field, value in extraction.data.items():
+            for f_name, value in extraction.data.items():
                 if value is None:
                     continue
-                field_values.setdefault(field, []).append(
+                field_values.setdefault(f_name, []).append(
                     {"value": value, "confidence": confidence, "source": extraction.source_url}
                 )
 
@@ -515,10 +515,10 @@ class AIResearchOrchestrator:
         total_confidence = 0.0
         field_count = 0
 
-        for field, values in field_values.items():
+        for f_name, values in field_values.items():
             values.sort(key=lambda item: item["confidence"], reverse=True)
             best = values[0]
-            final_data[field] = best["value"]
+            final_data[f_name] = best["value"]
             total_confidence += best["confidence"]
             field_count += 1
 

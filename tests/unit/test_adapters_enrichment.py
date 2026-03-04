@@ -1,11 +1,11 @@
 """Tests for enrichment adapters (funding, news, web_search_news)."""
 
 from unittest.mock import MagicMock, patch
-import pytest
-from solstein.domain.models import DataSourceType
+
 from solstein.adapters.enrichment.funding import FundingEnrichment
 from solstein.adapters.enrichment.news import NewsEnrichment
 from solstein.adapters.enrichment.web_search_news import WebSearchNewsEnrichment
+from solstein.domain.models import DataSourceType
 
 
 class TestFundingEnrichment:

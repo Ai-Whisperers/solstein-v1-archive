@@ -1,7 +1,8 @@
 """Tests for CompaniesHouseRefreshConnector."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from solstein.infrastructure.connectors.companies_house_refresh import CompaniesHouseRefreshConnector
 from solstein.infrastructure.database import DatabaseManager
@@ -23,7 +24,7 @@ class TestCompaniesHouseRefreshConnector:
 
     @pytest.mark.asyncio
     async def test_fetch_facts_success(self, mock_db_manager):
-        with patch("solstein.infrastructure.connectors.companies_house_refresh.CompaniesHouseConnector") as mock_class:
+        with patch("solstein.infrastructure.connectors.companies_house_refresh.CompaniesHouseConnector"):
             connector = CompaniesHouseRefreshConnector(mock_db_manager)
             connector.ch_connector = MagicMock()
             connector.ch_connector.get_company = MagicMock(

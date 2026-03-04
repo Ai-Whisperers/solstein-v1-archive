@@ -1,7 +1,8 @@
 """Tests for GlobalMarketRefreshConnector."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from solstein.infrastructure.connectors.global_market_refresh import GlobalMarketRefreshConnector
 from solstein.infrastructure.database import DatabaseManager

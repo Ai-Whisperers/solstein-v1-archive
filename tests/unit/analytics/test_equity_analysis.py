@@ -10,11 +10,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
-import pytest
-import math
 from unittest.mock import MagicMock
 
-from solstein.analytics.equity_analysis import EquityAnalyzer, DealParams, EquityResult
+import pytest
+
+from solstein.analytics.equity_analysis import DealParams, EquityAnalyzer, EquityResult
 from solstein.domain.models import Company
 
 

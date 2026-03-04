@@ -1,8 +1,8 @@
 """Tests for GitHubRefreshConnector."""
 
-import pytest
-from datetime import datetime
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from solstein.infrastructure.connectors.github_refresh import GitHubRefreshConnector
 from solstein.infrastructure.database import DatabaseManager

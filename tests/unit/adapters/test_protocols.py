@@ -1,11 +1,8 @@
 """Tests for adapter protocols."""
 
-import pytest
-
 from solstein.adapters.protocols import (
     DiscoverySource,
     EnrichmentSource,
-    FactAggregator,
     UnifiedDataSource,
 )
 from solstein.domain.models import DataSourceType, RawDataSource
@@ -54,6 +51,7 @@ class MockEnrichmentSource:
             raw_content={},
         )
 
+
 class TestDiscoverySourceProtocol:
     """Test DiscoverySource protocol runtime checkability."""
 
@@ -96,6 +94,7 @@ class TestEnrichmentSourceProtocol:
 
         incomplete = IncompleteEnrichment()
         assert not isinstance(incomplete, EnrichmentSource)
+
 
 class TestUnifiedDataSourceProtocol:
     """Test UnifiedDataSource protocol."""

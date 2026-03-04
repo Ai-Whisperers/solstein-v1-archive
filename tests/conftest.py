@@ -1,4 +1,3 @@
-import asyncio
 import os
 from unittest.mock import MagicMock
 
@@ -9,15 +8,12 @@ from sqlalchemy.orm import sessionmaker
 
 os.environ.setdefault("GITHUB_TOKEN", "test-github-token-12345")
 
-from tests.factories import make_company
-
-
-
-from solstein.api.dependencies import get_current_user, get_company_repository
+from solstein.api.dependencies import get_company_repository, get_current_user
 from solstein.api.main import app
 from solstein.core.repositories import CompanyRepository
+from solstein.database_config import convert_to_async_url, get_test_database_url
 from solstein.domain.models import AIMaturity
-from solstein.database_config import get_test_database_url, convert_to_async_url
+from tests.factories import make_company
 
 
 @pytest.fixture
@@ -74,13 +70,13 @@ def unauthenticated_client():
 def patch_competitor_data_loader(monkeypatch):
     """
     Auto-use fixture that patches CompetitorDataLoader globally.
-    
+
     This ensures ALL tests that use UnifiedCompanyLoader will get mock data
     instead of trying to load from the missing data/input/competitor_data.json file.
     """
-    from solstein.domain.models import Company
     from solstein.data.loaders import CompetitorDataLoader
-    
+    from solstein.domain.models import Company
+
     # Create comprehensive test companies with all required financial fields
     test_companies = [
         Company(
@@ -101,7 +97,12 @@ def patch_competitor_data_loader(monkeypatch):
             ai_maturity=AIMaturity.STRONG,
             ai_maturity_score=7.5,
             geographic_presence=["Germany", "France", "UK", "Netherlands", "Belgium", "Austria", "Switzerland"],
-            revenue_timeline=[{"year": 2020, "eur_millions": 2.0, "yoy_growth_pct": 0}, {"year": 2021, "eur_millions": 3.0, "yoy_growth_pct": 50}, {"year": 2022, "eur_millions": 4.0, "yoy_growth_pct": 33}, {"year": 2023, "eur_millions": 5.0, "yoy_growth_pct": 25}],
+            revenue_timeline=[
+                {"year": 2020, "eur_millions": 2.0, "yoy_growth_pct": 0},
+                {"year": 2021, "eur_millions": 3.0, "yoy_growth_pct": 50},
+                {"year": 2022, "eur_millions": 4.0, "yoy_growth_pct": 33},
+                {"year": 2023, "eur_millions": 5.0, "yoy_growth_pct": 25},
+            ],
             revenue_cagr_3yr=40.0,
             revenue_cagr_5yr=25.0,
             ebitda_margin=30.0,
@@ -127,7 +128,12 @@ def patch_competitor_data_loader(monkeypatch):
             ai_maturity=AIMaturity.MODERATE,
             ai_maturity_score=6.0,
             geographic_presence=["US", "Canada"],
-            revenue_timeline=[{"year": 2020, "eur_millions": 1.5, "yoy_growth_pct": 0}, {"year": 2021, "eur_millions": 2.0, "yoy_growth_pct": 33}, {"year": 2022, "eur_millions": 2.5, "yoy_growth_pct": 25}, {"year": 2023, "eur_millions": 3.0, "yoy_growth_pct": 20}],
+            revenue_timeline=[
+                {"year": 2020, "eur_millions": 1.5, "yoy_growth_pct": 0},
+                {"year": 2021, "eur_millions": 2.0, "yoy_growth_pct": 33},
+                {"year": 2022, "eur_millions": 2.5, "yoy_growth_pct": 25},
+                {"year": 2023, "eur_millions": 3.0, "yoy_growth_pct": 20},
+            ],
             revenue_cagr_3yr=20.0,
             revenue_cagr_5yr=20.0,
             ebitda_margin=15.0,
@@ -153,7 +159,12 @@ def patch_competitor_data_loader(monkeypatch):
             ai_maturity=AIMaturity.LOW,
             ai_maturity_score=5.0,
             geographic_presence=["UK", "Ireland"],
-            revenue_timeline=[{"year": 2020, "eur_millions": 1.0, "yoy_growth_pct": 0}, {"year": 2021, "eur_millions": 1.2, "yoy_growth_pct": 20}, {"year": 2022, "eur_millions": 1.5, "yoy_growth_pct": 25}, {"year": 2023, "eur_millions": 2.0, "yoy_growth_pct": 33}],
+            revenue_timeline=[
+                {"year": 2020, "eur_millions": 1.0, "yoy_growth_pct": 0},
+                {"year": 2021, "eur_millions": 1.2, "yoy_growth_pct": 20},
+                {"year": 2022, "eur_millions": 1.5, "yoy_growth_pct": 25},
+                {"year": 2023, "eur_millions": 2.0, "yoy_growth_pct": 33},
+            ],
             revenue_cagr_3yr=15.0,
             revenue_cagr_5yr=20.0,
             ebitda_margin=12.0,
@@ -162,22 +173,17 @@ def patch_competitor_data_loader(monkeypatch):
             classification="Lead",
         ),
     ]
-    
+
     # Patch CompetitorDataLoader.load_companies to return test data
     def mock_load_companies(self, limit=None):
         return test_companies[:limit] if limit else test_companies
-    
+
     monkeypatch.setattr(CompetitorDataLoader, "load_companies", mock_load_companies)
 
 
 # ============================================================================
 # DATABASE FIXTURES FOR REAL SUPABASE TESTING (Wave 2, Task 6)
 # ============================================================================
-
-import asyncio
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from src.solstein.database_config import get_test_database_url, convert_to_async_url
 
 
 # Note: pytest-asyncio handles event_loop automatically with mode=auto
@@ -187,11 +193,11 @@ from src.solstein.database_config import get_test_database_url, convert_to_async
 @pytest.fixture(scope="function")
 async def db_engine():
     """Shared async engine with connection pooling.
-    
+
     This fixture creates a single SQLAlchemy async engine for the entire
     test session. It uses connection pooling to efficiently manage database
     connections across all tests.
-    
+
     Configuration:
     - pool_size=5: Maximum 5 connections in the pool
     - max_overflow=10: Allow up to 10 additional connections if needed
@@ -200,7 +206,7 @@ async def db_engine():
     """
     db_url = get_test_database_url()
     async_url = convert_to_async_url(db_url)
-    
+
     engine = create_async_engine(
         async_url,
         echo=False,
@@ -209,9 +215,9 @@ async def db_engine():
         pool_recycle=3600,
         pool_pre_ping=True,
     )
-    
+
     yield engine
-    
+
     # Cleanup: dispose of all connections
     await engine.dispose()
 
@@ -219,11 +225,11 @@ async def db_engine():
 @pytest.fixture
 async def db_session(db_engine):
     """Per-test database session.
-    
+
     This fixture provides a fresh AsyncSession for each test. The session
     is automatically rolled back after the test completes, ensuring test
     isolation and preventing data leakage between tests.
-    
+
     Usage in tests:
         async def test_something(db_session):
             # db_session is an AsyncSession
@@ -234,7 +240,7 @@ async def db_session(db_engine):
         class_=AsyncSession,
         expire_on_commit=False,
     )
-    
+
     async with async_session() as session:
         yield session
         # Session is automatically rolled back after test

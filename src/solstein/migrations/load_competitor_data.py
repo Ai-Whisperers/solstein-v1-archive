@@ -17,7 +17,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from solstein.infrastructure.database import Base
 from solstein.infrastructure.database_models import CompanyRecord
 
 logger = logging.getLogger(__name__)
@@ -43,7 +42,7 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
 
     # Load JSON data
     logger.info(f"Loading JSON from {json_path}")
-    with open(json_path, "r") as f:
+    with open(json_path) as f:
         data = json.load(f)
 
     if "competitors" not in data:
@@ -58,7 +57,7 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
 
     async with async_session() as session:
         companies_to_add = []
-        
+
         for competitor in competitors:
             try:
                 # Check if company already exists
@@ -115,10 +114,10 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
             except Exception as e:
                 logger.error(f"Error processing company {competitor.get('company_name')}: {e}")
                 raise
-        
+
         # Add all companies at once
         session.add_all(companies_to_add)
-        
+
         # Commit all changes
         await session.commit()
         logger.info("All companies committed to database")

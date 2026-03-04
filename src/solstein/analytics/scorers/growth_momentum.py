@@ -53,18 +53,24 @@ class GrowthMomentumScorer:
             # Slow growth penalty: stagnant companies penalized
             if 0 <= financials.growth_rate < 0.05:  # 0-5% growth (decimal format)
                 score -= 0.75  # Stagnant growth penalty
-                explanation.components.append(ScoreComponent(
-                    name="Stagnant Growth Penalty", value=-0.75,
-                    formula="growth_rate < 5% (decimal: < 0.05) → -0.75",
-                    reasoning="Growth rate below 5% indicates stagnation.",
-                ))
+                explanation.components.append(
+                    ScoreComponent(
+                        name="Stagnant Growth Penalty",
+                        value=-0.75,
+                        formula="growth_rate < 5% (decimal: < 0.05) → -0.75",
+                        reasoning="Growth rate below 5% indicates stagnation.",
+                    )
+                )
             elif 0.05 <= financials.growth_rate < 0.10:  # 5-10% growth (decimal format)
                 score -= 0.25  # Below-average growth penalty
-                explanation.components.append(ScoreComponent(
-                    name="Below-Average Growth Penalty", value=-0.25,
-                    formula="growth_rate 5-10% (decimal: 0.05-0.10) → -0.25",
-                    reasoning="Growth rate below 10% is below sector average.",
-                ))
+                explanation.components.append(
+                    ScoreComponent(
+                        name="Below-Average Growth Penalty",
+                        value=-0.25,
+                        formula="growth_rate 5-10% (decimal: 0.05-0.10) → -0.25",
+                        reasoning="Growth rate below 10% is below sector average.",
+                    )
+                )
             explanation.components.append(
                 ScoreComponent(
                     name="Revenue Growth",
@@ -138,17 +144,16 @@ class GrowthMomentumScorer:
                 )
 
         # Compound penalty: negative growth + no funding = high-risk signal
-        if (
-            financials.growth_rate is not None
-            and financials.growth_rate < 0
-            and not financials.funding_raised
-        ):
+        if financials.growth_rate is not None and financials.growth_rate < 0 and not financials.funding_raised:
             score -= 1.0  # Compound penalty: burning cash with no investor support
-            explanation.components.append(ScoreComponent(
-                name="Compound Risk Penalty", value=-1.0,
-                formula="growth_rate < 0 AND no_funding → -1.0",
-                reasoning="Negative growth with no funding raises serious viability concerns.",
-            ))
+            explanation.components.append(
+                ScoreComponent(
+                    name="Compound Risk Penalty",
+                    value=-1.0,
+                    formula="growth_rate < 0 AND no_funding → -1.0",
+                    reasoning="Negative growth with no funding raises serious viability concerns.",
+                )
+            )
 
         final_score = max(0.0, min(score, 10.0))
         explanation.final_score = final_score

@@ -4,17 +4,19 @@ This test suite uses an actual Supabase PostgreSQL connection to test
 the DatabaseService against real database operations.
 """
 
-import pytest
 from datetime import datetime
+
+import pytest
 from sqlalchemy import select
 
-from solstein.infrastructure.database_service import DatabaseService
 from solstein.infrastructure.database_models import (
+    AuditTrailRecord,
+    MarketSnapshot,
     ScoringRecord,
     SignalRecord,
-    MarketSnapshot,
-    AuditTrailRecord,
 )
+from solstein.infrastructure.database_service import DatabaseService
+
 
 @pytest.mark.asyncio
 class TestDatabaseService:
@@ -52,9 +54,7 @@ class TestDatabaseService:
         assert record.classification == "Phoenix"
 
         # Verify in database
-        result = await db_session.execute(
-            select(ScoringRecord).where(ScoringRecord.company_id == "comp-123")
-        )
+        result = await db_session.execute(select(ScoringRecord).where(ScoringRecord.company_id == "comp-123"))
         persisted = result.scalar_one()
         assert persisted.company_name == "Test Company"
 
@@ -110,9 +110,7 @@ class TestDatabaseService:
         assert record.scorer_version == "1.0"
 
         # Verify in database
-        result = await db_session.execute(
-            select(AuditTrailRecord).where(AuditTrailRecord.company_id == "comp-123")
-        )
+        result = await db_session.execute(select(AuditTrailRecord).where(AuditTrailRecord.company_id == "comp-123"))
         persisted = result.scalar_one()
         assert persisted.data_sources_used == ["github", "news"]
 
@@ -259,6 +257,6 @@ class TestDatabaseService:
 
         # Data should not be persisted
         result = await db_session.execute(select(SignalRecord).where(SignalRecord.company_id == "comp-rollback-test"))
-        persisted = result.scalar_one_or_none()
+        result.scalar_one_or_none()
         # Note: Depending on implementation, rollback may or may not work
         # with the current session. This test documents the behavior.

@@ -10,7 +10,6 @@ Provides aggregated summary data for the Next.js front-end dashboard:
 
 from __future__ import annotations
 
-from collections import Counter
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query

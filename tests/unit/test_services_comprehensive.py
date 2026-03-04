@@ -10,8 +10,6 @@ All tests follow async patterns and use pytest fixtures.
 """
 
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -31,7 +29,6 @@ from solstein.domain.models import (
     SignalExtraction,
     SignalExtractionRecord,
 )
-
 
 # ============================================================================
 # ENRICHMENT SERVICE TESTS

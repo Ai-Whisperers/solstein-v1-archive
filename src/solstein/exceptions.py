@@ -43,8 +43,7 @@ class ExportError(SolsteinError):
     pass
 
 
-
-
 class SyntheticDataBlockingError(SolsteinError):
     """Raised when synthetic data is detected and should block execution."""
+
     pass

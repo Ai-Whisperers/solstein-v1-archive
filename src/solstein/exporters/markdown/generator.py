@@ -12,14 +12,12 @@ from pathlib import Path
 from loguru import logger
 
 from ...domain.models import Company
+from ...exceptions import SyntheticDataBlockingError
 
 # Import decomposed modules for delegation (EPIC-008)
-from .base import ReportFormatter, ScoreInterpreter, BaseReportGenerator
+from .base import ReportFormatter
 from .company import CompanyReportGenerator
 from .market import MarketReportGenerator
-
-
-from ...exceptions import SyntheticDataBlockingError
 
 
 class ReportGenerator:
@@ -54,16 +52,16 @@ class ReportGenerator:
 
         for company in companies:
             # Check for synthetic indicators
-            data_source = getattr(company, 'data_source_type', None)
-            if data_source == 'synthetic':
+            data_source = getattr(company, "data_source_type", None)
+            if data_source == "synthetic":
                 synthetic_count += 1
                 synthetic_company_names.append(company.name or "Unknown")
                 continue
 
             # Check company name patterns - only match at start of name (case insensitive)
-            name = (getattr(company, 'name', '') or '').lower()
+            name = (getattr(company, "name", "") or "").lower()
             # Only flag if name starts with these patterns (exact prefix match)
-            synthetic_patterns = ['test-company', 'test_company', 'synthetic', 'fake']
+            synthetic_patterns = ["test-company", "test_company", "synthetic", "fake"]
             if any(name.startswith(pattern) for pattern in synthetic_patterns):
                 synthetic_count += 1
                 synthetic_company_names.append(company.name or "Unknown")
@@ -82,9 +80,6 @@ class ReportGenerator:
             f"Found {synthetic_count} out of {total} companies ({synthetic_pct:.1f}%) with synthetic data. "
             f"Synthetic companies: {synthetic_names_str}"
         )
-
-    def generate_all_reports(self, companies: list[Company], output_subdir: str | None = None) -> dict[str, Path]:
-                logger.warning(f"LLM enhancer not available: {e}")
 
     def generate_all_reports(self, companies: list[Company], output_subdir: str | None = None) -> dict[str, Path]:
         """Generate all report types for all companies."""
@@ -754,7 +749,7 @@ revenue growth, funding, technology maturity, and market positioning.
         if not funding_rounds:
             return "**Funding Details**: No rounds disclosed"
 
-        return "### Funding Rounds\n\n" + self._format_funding_rounds(company)
+        return "### Funding Rounds\n\n" + self._format_funding_rounds(funding_rounds)
 
     def _score_funding(self, company: Company) -> int:
         """Calculate funding score."""
@@ -914,7 +909,7 @@ class ClientReportGenerator(ReportGenerator):
 
         # Find threats (higher score competitors) and all competitors for landscape view
         threats = [c for c in sorted_comp if (c.composite_score or 0) > (client.composite_score or 0)][:5]
-        all_competitors = [c for c in sorted_comp if c.id != client.id][:5]
+        [c for c in sorted_comp if c.id != client.id][:5]
 
         def _fmt_float(value: float | None) -> str:
             if value is None:
@@ -1001,7 +996,7 @@ companies in the {client.industry or "energy software"} market.
 | Financial Health | {client.financial_health_score or "N/A"} | {_fmt_float(health_market_avg)} | {_fmt_float(health_top)} |
 | Competitive Position | {self.formatter.format_score(client.competitive_position_score)} | {_fmt_float(position_market_avg)} | {_fmt_float(position_top)} |
 | Composite | {client.composite_score or "N/A"} | {_fmt_float(composite_market_avg)} | {_fmt_float(composite_top)} |
-| Revenue CAGR | {client.revenue_cagr_3yr or 'N/A'}% | {self._avg([c.revenue_cagr_3yr for c in sorted_comp if c.revenue_cagr_3yr]):.1f}% | {max([c.revenue_cagr_3yr for c in sorted_comp if c.revenue_cagr_3yr], default=0):.1f}% |
+| Revenue CAGR | {client.revenue_cagr_3yr or "N/A"}% | {self._avg([c.revenue_cagr_3yr for c in sorted_comp if c.revenue_cagr_3yr]):.1f}% | {max([c.revenue_cagr_3yr for c in sorted_comp if c.revenue_cagr_3yr], default=0):.1f}% |
 
 ---
 
@@ -1023,9 +1018,9 @@ These companies operate in the same tier with similar market positioning:
 
 """
             for c in direct:
-                report += f"""**{c.name}** ({c.classification or 'Unknown'})
-- Revenue: €{c.financials.revenue or 0:.1f}M | CAGR: {c.revenue_cagr_3yr or 'N/A'}% | Score: {c.composite_score or 'N/A'}/10
-- AI Maturity: {c.ai_score or 'N/A'}/10 | SaaS Maturity: {c.saas_maturity or 'N/A'}/10
+                report += f"""**{c.name}** ({c.classification or "Unknown"})
+- Revenue: €{c.financials.revenue or 0:.1f}M | CAGR: {c.revenue_cagr_3yr or "N/A"}% | Score: {c.composite_score or "N/A"}/10
+- AI Maturity: {c.ai_score or "N/A"}/10 | SaaS Maturity: {c.saas_maturity or "N/A"}/10
 """
                 # Add relative positioning
                 if c.composite_score and client.composite_score:
@@ -1044,7 +1039,6 @@ These companies operate in the same tier with similar market positioning:
                     report += f"- **Growth Advantage**: {c.revenue_cagr_3yr}% CAGR vs your {client.revenue_cagr_3yr}%\n"
 
                 report += "\n"
-
 
         report += """
 
@@ -1116,6 +1110,7 @@ All competitors ranked by composite score:
 """
         for c in sorted_comp:
             from solstein.analytics.constants import derive_threat_level
+
             threat = derive_threat_level(c.classification, c.composite_score or 0)
             report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.ai_score or 'N/A'}/10 | {c.saas_maturity or 'N/A'}/10 | {c.classification or 'N/A'} | {threat} |\n"
 
@@ -1209,7 +1204,7 @@ All competitors ranked by composite score:
     def _generate_client_weaknesses(self, client: Company, competitors: list[Company]) -> str:
         """Generate client weaknesses."""
         weaknesses = []
-        classification = getattr(client, 'classification', None)
+        classification = getattr(client, "classification", None)
 
         # AI gap analysis
         if client.ai_score is not None:
@@ -1219,7 +1214,9 @@ All competitors ranked by composite score:
             elif client.ai_score < avg_ai - 0.5:
                 weaknesses.append(f"Below-average AI maturity ({client.ai_score}/10)")
             elif client.ai_score < 5:
-                weaknesses.append(f"Limited AI adoption ({client.ai_score}/10) - opportunity for digital transformation")
+                weaknesses.append(
+                    f"Limited AI adoption ({client.ai_score}/10) - opportunity for digital transformation"
+                )
 
         # SaaS maturity gaps
         if client.saas_maturity:
@@ -1258,7 +1255,7 @@ All competitors ranked by composite score:
                 weaknesses.append("Market leader - maintain innovation edge to defend position")
 
             # Add scale-based considerations
-            revenue = getattr(client.financials, 'revenue', 0) or 0
+            revenue = getattr(client.financials, "revenue", 0) or 0
             if revenue < 10:
                 weaknesses.append(f"High-growth but small scale (€{revenue:.1f}M) - execution risk at scale")
 

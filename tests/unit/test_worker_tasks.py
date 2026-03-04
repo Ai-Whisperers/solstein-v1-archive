@@ -8,8 +8,10 @@ Tests cover:
 - Database operations with mocked SQLAlchemy session
 """
 
-from unittest.mock import AsyncMock, MagicMock, patch
+import contextlib
 import sys
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 
 # ============================================================================
@@ -17,89 +19,95 @@ import pytest
 # ============================================================================
 
 # Mock all Celery modules (Celery is not installed in test environment)
-sys.modules['celery'] = MagicMock()
-sys.modules['celery.exceptions'] = MagicMock()
-sys.modules['celery.schedules'] = MagicMock()
-sys.modules['celery.signals'] = MagicMock()
-sys.modules['celery.app'] = MagicMock()
-sys.modules['celery.app.task'] = MagicMock()
+sys.modules["celery"] = MagicMock()
+sys.modules["celery.exceptions"] = MagicMock()
+sys.modules["celery.schedules"] = MagicMock()
+sys.modules["celery.signals"] = MagicMock()
+sys.modules["celery.app"] = MagicMock()
+sys.modules["celery.app.task"] = MagicMock()
 
 # Mock missing connector modules (not yet implemented in codebase)
-sys.modules['solstein.data.connectors.github_connector'] = MagicMock()
-sys.modules['solstein.data.connectors.yahoo_finance_connector'] = MagicMock()
-sys.modules['solstein.data.connectors.patents_connector'] = MagicMock()
-sys.modules['solstein.data.connectors.news_connector'] = MagicMock()
-sys.modules['solstein.data.connectors.website_connector'] = MagicMock()
-sys.modules['solstein.data.connectors.linkedin_connector'] = MagicMock()
-sys.modules['solstein.data.connectors.funding_connector'] = MagicMock()
-sys.modules['solstein.data.connectors.global_market_connector'] = MagicMock()
-sys.modules['solstein.data.connectors.web_search_connector'] = MagicMock()
+sys.modules["solstein.data.connectors.github_connector"] = MagicMock()
+sys.modules["solstein.data.connectors.yahoo_finance_connector"] = MagicMock()
+sys.modules["solstein.data.connectors.patents_connector"] = MagicMock()
+sys.modules["solstein.data.connectors.news_connector"] = MagicMock()
+sys.modules["solstein.data.connectors.website_connector"] = MagicMock()
+sys.modules["solstein.data.connectors.linkedin_connector"] = MagicMock()
+sys.modules["solstein.data.connectors.funding_connector"] = MagicMock()
+sys.modules["solstein.data.connectors.global_market_connector"] = MagicMock()
+sys.modules["solstein.data.connectors.web_search_connector"] = MagicMock()
 
 # Mock refresh connector modules
-sys.modules['solstein.infrastructure.connectors'] = MagicMock()
-sys.modules['solstein.infrastructure.connectors.companies_house_refresh'] = MagicMock()
-sys.modules['solstein.infrastructure.connectors.funding_refresh'] = MagicMock()
-sys.modules['solstein.infrastructure.connectors.github_refresh'] = MagicMock()
-sys.modules['solstein.infrastructure.connectors.global_market_refresh'] = MagicMock()
-sys.modules['solstein.infrastructure.connectors.linkedin_refresh'] = MagicMock()
-sys.modules['solstein.infrastructure.connectors.news_refresh'] = MagicMock()
-sys.modules['solstein.infrastructure.connectors.news_signal_refresh'] = MagicMock()
-sys.modules['solstein.infrastructure.connectors.patents_refresh'] = MagicMock()
-sys.modules['solstein.infrastructure.connectors.sec_edgar_refresh'] = MagicMock()
-sys.modules['solstein.infrastructure.connectors.web_search_refresh'] = MagicMock()
-sys.modules['solstein.infrastructure.connectors.website_refresh'] = MagicMock()
-sys.modules['solstein.infrastructure.connectors.yahoo_finance_refresh'] = MagicMock()
+sys.modules["solstein.infrastructure.connectors"] = MagicMock()
+sys.modules["solstein.infrastructure.connectors.companies_house_refresh"] = MagicMock()
+sys.modules["solstein.infrastructure.connectors.funding_refresh"] = MagicMock()
+sys.modules["solstein.infrastructure.connectors.github_refresh"] = MagicMock()
+sys.modules["solstein.infrastructure.connectors.global_market_refresh"] = MagicMock()
+sys.modules["solstein.infrastructure.connectors.linkedin_refresh"] = MagicMock()
+sys.modules["solstein.infrastructure.connectors.news_refresh"] = MagicMock()
+sys.modules["solstein.infrastructure.connectors.news_signal_refresh"] = MagicMock()
+sys.modules["solstein.infrastructure.connectors.patents_refresh"] = MagicMock()
+sys.modules["solstein.infrastructure.connectors.sec_edgar_refresh"] = MagicMock()
+sys.modules["solstein.infrastructure.connectors.web_search_refresh"] = MagicMock()
+sys.modules["solstein.infrastructure.connectors.website_refresh"] = MagicMock()
+sys.modules["solstein.infrastructure.connectors.yahoo_finance_refresh"] = MagicMock()
 
 # Mock celery_config module
-sys.modules['solstein.celery_config'] = MagicMock()
+sys.modules["solstein.celery_config"] = MagicMock()
+
 
 # Define mock exception classes
 class MaxRetriesExceededError(Exception):
     """Mock Celery MaxRetriesExceededError."""
+
     pass
 
 
-class SoftTimeLimitExceeded(Exception):
+class SoftTimeLimitExceeded(Exception):  # noqa: N818
     """Mock Celery SoftTimeLimitExceeded."""
+
     pass
 
 
 # Inject exception mocks into sys.modules
-sys.modules['celery'].exceptions = MagicMock()
-sys.modules['celery'].exceptions.MaxRetriesExceededError = MaxRetriesExceededError
-sys.modules['celery'].exceptions.SoftTimeLimitExceeded = SoftTimeLimitExceeded
-sys.modules['celery.exceptions'].MaxRetriesExceededError = MaxRetriesExceededError
-sys.modules['celery.exceptions'].SoftTimeLimitExceeded = SoftTimeLimitExceeded
+sys.modules["celery"].exceptions = MagicMock()
+sys.modules["celery"].exceptions.MaxRetriesExceededError = MaxRetriesExceededError
+sys.modules["celery"].exceptions.SoftTimeLimitExceeded = SoftTimeLimitExceeded
+sys.modules["celery.exceptions"].MaxRetriesExceededError = MaxRetriesExceededError
+sys.modules["celery.exceptions"].SoftTimeLimitExceeded = SoftTimeLimitExceeded
+
 
 # Mock shared_task decorator
 def mock_shared_task(*args, **kwargs):
     """Mock decorator for @shared_task."""
+
     def decorator(func):
         return func
+
     return decorator
 
 
-sys.modules['celery'].shared_task = mock_shared_task
-sys.modules['celery'].Task = MagicMock()
+sys.modules["celery"].shared_task = mock_shared_task
+sys.modules["celery"].Task = MagicMock()
 
 # ============================================================================
 # NOW SAFE TO IMPORT worker_tasks
 # ============================================================================
 
 from solstein.worker_tasks import (
-    refresh_sec_edgar,
-    refresh_companies_house,
-    refresh_news_signals,
-    refresh_github,
-    refresh_yahoo_finance,
-    refresh_patents,
-    refresh_news,
-    refresh_website,
-    refresh_linkedin,
-    refresh_funding,
-    refresh_global_market,
-    refresh_web_search,
     refresh_all_sources,
+    refresh_companies_house,
+    refresh_funding,
+    refresh_github,
+    refresh_global_market,
+    refresh_linkedin,
+    refresh_news,
+    refresh_news_signals,
+    refresh_patents,
+    refresh_sec_edgar,
+    refresh_web_search,
+    refresh_website,
+    refresh_yahoo_finance,
 )
 
 
@@ -145,7 +153,9 @@ class TestRefreshTasks:
             assert result is not None
             assert result["status"] == "completed"
 
-    def test_refresh_companies_house_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
+    def test_refresh_companies_house_success(
+        self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts
+    ):
         """Test successful Companies House refresh task execution."""
         with patch("solstein.worker_tasks.CompaniesHouseRefreshConnector") as mock_connector:
             instance = MagicMock()
@@ -154,7 +164,9 @@ class TestRefreshTasks:
             result = refresh_companies_house(mock_task_self)
             assert result is not None
 
-    def test_refresh_news_signals_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
+    def test_refresh_news_signals_success(
+        self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts
+    ):
         """Test successful News Signals refresh task execution."""
         with patch("solstein.worker_tasks.NewsSignalRefreshConnector") as mock_connector:
             instance = MagicMock()
@@ -172,7 +184,9 @@ class TestRefreshTasks:
             result = refresh_github(mock_task_self)
             assert result is not None
 
-    def test_refresh_yahoo_finance_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
+    def test_refresh_yahoo_finance_success(
+        self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts
+    ):
         """Test successful Yahoo Finance refresh task execution."""
         with patch("solstein.worker_tasks.YahooFinanceRefreshConnector") as mock_connector:
             instance = MagicMock()
@@ -226,7 +240,9 @@ class TestRefreshTasks:
             result = refresh_funding(mock_task_self)
             assert result is not None
 
-    def test_refresh_global_market_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
+    def test_refresh_global_market_success(
+        self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts
+    ):
         """Test successful Global Market refresh task execution."""
         with patch("solstein.worker_tasks.GlobalMarketRefreshConnector") as mock_connector:
             instance = MagicMock()
@@ -235,7 +251,9 @@ class TestRefreshTasks:
             result = refresh_global_market(mock_task_self)
             assert result is not None
 
-    def test_refresh_web_search_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
+    def test_refresh_web_search_success(
+        self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts
+    ):
         """Test successful Web Search refresh task execution."""
         with patch("solstein.worker_tasks.WebSearchRefreshConnector") as mock_connector:
             instance = MagicMock()
@@ -247,24 +265,37 @@ class TestRefreshTasks:
     def test_refresh_all_sources_success(self, mock_task_self, mock_db_manager):
         """Test successful refresh_all_sources task execution."""
         # Mock apply_async for all refresh tasks
-        with patch("solstein.worker_tasks.refresh_sec_edgar") as mock_sec, \
-             patch("solstein.worker_tasks.refresh_companies_house") as mock_ch, \
-             patch("solstein.worker_tasks.refresh_news_signals") as mock_ns, \
-             patch("solstein.worker_tasks.refresh_github") as mock_gh, \
-             patch("solstein.worker_tasks.refresh_yahoo_finance") as mock_yf, \
-             patch("solstein.worker_tasks.refresh_patents") as mock_pt, \
-             patch("solstein.worker_tasks.refresh_news") as mock_nw, \
-             patch("solstein.worker_tasks.refresh_website") as mock_ws, \
-             patch("solstein.worker_tasks.refresh_linkedin") as mock_li, \
-             patch("solstein.worker_tasks.refresh_funding") as mock_fn, \
-             patch("solstein.worker_tasks.refresh_global_market") as mock_gm, \
-             patch("solstein.worker_tasks.refresh_web_search") as mock_ws2:
-            
+        with (
+            patch("solstein.worker_tasks.refresh_sec_edgar") as mock_sec,
+            patch("solstein.worker_tasks.refresh_companies_house") as mock_ch,
+            patch("solstein.worker_tasks.refresh_news_signals") as mock_ns,
+            patch("solstein.worker_tasks.refresh_github") as mock_gh,
+            patch("solstein.worker_tasks.refresh_yahoo_finance") as mock_yf,
+            patch("solstein.worker_tasks.refresh_patents") as mock_pt,
+            patch("solstein.worker_tasks.refresh_news") as mock_nw,
+            patch("solstein.worker_tasks.refresh_website") as mock_ws,
+            patch("solstein.worker_tasks.refresh_linkedin") as mock_li,
+            patch("solstein.worker_tasks.refresh_funding") as mock_fn,
+            patch("solstein.worker_tasks.refresh_global_market") as mock_gm,
+            patch("solstein.worker_tasks.refresh_web_search") as mock_ws2,
+        ):
             # Create mock AsyncResult objects
-            for mock in [mock_sec, mock_ch, mock_ns, mock_gh, mock_yf, mock_pt, 
-                        mock_nw, mock_ws, mock_li, mock_fn, mock_gm, mock_ws2]:
+            for mock in [
+                mock_sec,
+                mock_ch,
+                mock_ns,
+                mock_gh,
+                mock_yf,
+                mock_pt,
+                mock_nw,
+                mock_ws,
+                mock_li,
+                mock_fn,
+                mock_gm,
+                mock_ws2,
+            ]:
                 mock.apply_async = MagicMock(return_value=MagicMock(id=f"task_{mock.name}"))
-            
+
             result = refresh_all_sources(mock_task_self)
             assert result is not None
 
@@ -279,17 +310,17 @@ class TestRetryLogic:
         mock_task.request.retries = 0
         mock_task.retry = MagicMock()
 
-        with patch("solstein.worker_tasks.SECEDGARRefreshConnector") as mock_connector, \
-             patch("solstein.worker_tasks._get_tracked_company_ids", new_callable=AsyncMock, return_value=["comp_001"]), \
-             patch("solstein.worker_tasks._store_facts", new_callable=AsyncMock, return_value=0):
+        with (
+            patch("solstein.worker_tasks.SECEDGARRefreshConnector") as mock_connector,
+            patch("solstein.worker_tasks._get_tracked_company_ids", new_callable=AsyncMock, return_value=["comp_001"]),
+            patch("solstein.worker_tasks._store_facts", new_callable=AsyncMock, return_value=0),
+        ):
             instance = MagicMock()
             instance.fetch_facts = AsyncMock(side_effect=Exception("API Error"))
             mock_connector.return_value = instance
 
-            try:
+            with contextlib.suppress(Exception):
                 refresh_sec_edgar(mock_task)
-            except Exception:
-                pass  # Expected
 
     def test_max_retries_exceeded_logging(self):
         """Test that MaxRetriesExceededError is logged with [RETRY-FAILED] prefix."""
@@ -298,17 +329,17 @@ class TestRetryLogic:
         mock_task.request.retries = 3
         mock_task.retry = MagicMock(side_effect=MaxRetriesExceededError("Max retries exceeded"))
 
-        with patch("solstein.worker_tasks.SECEDGARRefreshConnector") as mock_connector, \
-             patch("solstein.worker_tasks._get_tracked_company_ids", new_callable=AsyncMock, return_value=["comp_001"]), \
-             patch("solstein.worker_tasks._store_facts", new_callable=AsyncMock, return_value=0):
+        with (
+            patch("solstein.worker_tasks.SECEDGARRefreshConnector") as mock_connector,
+            patch("solstein.worker_tasks._get_tracked_company_ids", new_callable=AsyncMock, return_value=["comp_001"]),
+            patch("solstein.worker_tasks._store_facts", new_callable=AsyncMock, return_value=0),
+        ):
             instance = MagicMock()
             instance.fetch_facts = AsyncMock(side_effect=Exception("API Error"))
             mock_connector.return_value = instance
 
-            try:
+            with contextlib.suppress(MaxRetriesExceededError):
                 refresh_sec_edgar(mock_task)
-            except MaxRetriesExceededError:
-                pass  # Expected
 
 
 class TestEnrichTasks:

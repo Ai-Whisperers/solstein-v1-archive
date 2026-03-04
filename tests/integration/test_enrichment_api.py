@@ -15,11 +15,7 @@ Tests cover:
 """
 
 import pytest
-import json
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, MagicMock
 from fastapi.testclient import TestClient
-
 
 # ============================================================================
 # FIXTURES (Setup)
@@ -655,7 +651,7 @@ class TestIntegration:
         client.post("/companies/001/enrich", json={"sources": ["SEC_EDGAR"]})
 
         # Get metrics before second call
-        metrics_before = client.get("/metrics").json()
+        client.get("/metrics").json()
 
         # Second enrichment (should hit cache)
         client.post("/companies/001/enrich", json={"sources": ["SEC_EDGAR"]})
@@ -682,7 +678,7 @@ class TestIntegration:
         client.post("/companies/001/enrich", json={"sources": ["SEC_EDGAR"]})
 
         # Check cached
-        cached_before = client.get("/companies/001/enrichment/cache").json()
+        client.get("/companies/001/enrichment/cache").json()
 
         # Clear cache
         client.post("/enrichment/cache/clear")

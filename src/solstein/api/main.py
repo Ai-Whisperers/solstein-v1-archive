@@ -28,10 +28,10 @@ from ..core.production_hardening import (
     GracefulShutdown,
     ResponseCache,
 )
-from .exceptions import APIError, setup_exception_handlers
+from ..infrastructure.cache_warming import warm_cache
+from .exceptions import setup_exception_handlers
 from .middleware import setup_logging_middleware, setup_rate_limiting, setup_security_middleware
 from .middleware.tenant import TenantMiddleware
-from ..infrastructure.cache_warming import warm_cache
 from .routers import (
     async_jobs,
     auth,
@@ -96,7 +96,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # EPIC-018: Warm cache in background (non-blocking)
     try:
         import asyncio as _asyncio
+
         from ..infrastructure.cache import CacheManager as _CacheManager
+
         _cache = _CacheManager()
         _asyncio.create_task(warm_cache(_cache))
         logger.info("Cache warming task scheduled on startup")
@@ -164,6 +166,7 @@ app.include_router(async_jobs.router)
 
 # Dashboard API (EPIC-031)
 from .routers.dashboard import router as dashboard_router
+
 app.include_router(dashboard_router)
 
 

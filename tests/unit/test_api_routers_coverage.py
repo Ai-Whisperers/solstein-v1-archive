@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from solstein.api.dependencies import get_current_user, get_company_repository
+from solstein.api.dependencies import get_company_repository, get_current_user
 from solstein.api.main import app
 from solstein.domain.models import (
     AIMaturity,

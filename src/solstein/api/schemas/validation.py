@@ -3,11 +3,10 @@
 Pydantic models for request validation and response serialization.
 """
 
-from typing import Optional
-
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator
 
 from solstein.domain.constants import ALLOWED_SEARCH_FIELDS, INDUSTRY_VALID_VALUES
+
 
 class SearchRequest(BaseModel):
     """Search request with validation."""
@@ -47,6 +46,7 @@ class SearchRequest(BaseModel):
             raise ValueError(f"Invalid model_type '{v}'. Allowed: {list(ALLOWED_SEARCH_FIELDS.keys())}")
         return v.strip()
 
+
 class PaginationParams(BaseModel):
     """Pagination parameters with validation."""
 
@@ -62,15 +62,15 @@ class PaginationParams(BaseModel):
 class CompanyFilterRequest(BaseModel):
     """Company filter request with validation."""
 
-    industry: Optional[str] = Field(default=None, min_length=2, max_length=100, description="Industry name")
-    headquarters: Optional[str] = Field(default=None, min_length=2, max_length=100, description="Headquarters location")
-    tier: Optional[str] = Field(default=None, pattern=r"^[A-E]$", description="Company tier (A-E)")
-    min_score: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Minimum score filter")
-    max_score: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Maximum score filter")
+    industry: str | None = Field(default=None, min_length=2, max_length=100, description="Industry name")
+    headquarters: str | None = Field(default=None, min_length=2, max_length=100, description="Headquarters location")
+    tier: str | None = Field(default=None, pattern=r"^[A-E]$", description="Company tier (A-E)")
+    min_score: float | None = Field(default=None, ge=0.0, le=1.0, description="Minimum score filter")
+    max_score: float | None = Field(default=None, ge=0.0, le=1.0, description="Maximum score filter")
 
     @field_validator("industry")
     @classmethod
-    def validate_industry(cls, v: Optional[str]) -> Optional[str]:
+    def validate_industry(cls, v: str | None) -> str | None:
         """Validate industry is known."""
         if v:
             if not v.strip():
@@ -82,7 +82,7 @@ class CompanyFilterRequest(BaseModel):
 
     @field_validator("headquarters")
     @classmethod
-    def validate_headquarters(cls, v: Optional[str]) -> Optional[str]:
+    def validate_headquarters(cls, v: str | None) -> str | None:
         """Validate headquarters is not empty."""
         if v:
             if not v.strip():
@@ -92,17 +92,18 @@ class CompanyFilterRequest(BaseModel):
 
     @field_validator("min_score", "max_score")
     @classmethod
-    def validate_scores(cls, v: Optional[float]) -> Optional[float]:
+    def validate_scores(cls, v: float | None) -> float | None:
         """Validate score bounds."""
         if v is not None and not (0.0 <= v <= 1.0):
             raise ValueError("Score must be between 0.0 and 1.0")
         return v
 
+
 class MarketAnalysisRequest(BaseModel):
     """Market analysis request with validation."""
 
     industry: str = Field(..., min_length=2, max_length=100, description="Industry to analyze")
-    region: Optional[str] = Field(default=None, min_length=2, max_length=100, description="Geographic region")
+    region: str | None = Field(default=None, min_length=2, max_length=100, description="Geographic region")
 
     @field_validator("industry")
     @classmethod
@@ -116,13 +117,14 @@ class MarketAnalysisRequest(BaseModel):
 
     @field_validator("region")
     @classmethod
-    def validate_region(cls, v: Optional[str]) -> Optional[str]:
+    def validate_region(cls, v: str | None) -> str | None:
         """Validate region is not empty."""
         if v:
             if not v.strip():
                 raise ValueError("region cannot be empty or whitespace")
             return v.strip()
         return v
+
 
 class ScoreUpdateRequest(BaseModel):
     """Score update request with validation."""
@@ -145,10 +147,10 @@ class CompanyCreateRequest(BaseModel):
 
     name: str = Field(..., min_length=2, max_length=255, description="Company name")
     industry: str = Field(..., min_length=2, max_length=100, description="Industry")
-    headquarters: Optional[str] = Field(default=None, min_length=2, max_length=100, description="Headquarters location")
-    revenue_eur_m: Optional[float] = Field(default=None, ge=0, le=1000000, description="Revenue in millions EUR")
-    employees: Optional[int] = Field(default=None, ge=1, le=1000000, description="Number of employees")
-    website: Optional[str] = Field(default=None, pattern=r"^https?://", description="Company website URL")
+    headquarters: str | None = Field(default=None, min_length=2, max_length=100, description="Headquarters location")
+    revenue_eur_m: float | None = Field(default=None, ge=0, le=1000000, description="Revenue in millions EUR")
+    employees: int | None = Field(default=None, ge=1, le=1000000, description="Number of employees")
+    website: str | None = Field(default=None, pattern=r"^https?://", description="Company website URL")
 
     @field_validator("name")
     @classmethod
@@ -170,7 +172,7 @@ class CompanyCreateRequest(BaseModel):
 
     @field_validator("headquarters")
     @classmethod
-    def validate_headquarters(cls, v: Optional[str]) -> Optional[str]:
+    def validate_headquarters(cls, v: str | None) -> str | None:
         """Validate headquarters is not empty."""
         if v:
             if not v.strip():
@@ -180,7 +182,7 @@ class CompanyCreateRequest(BaseModel):
 
     @field_validator("revenue_eur_m")
     @classmethod
-    def validate_revenue(cls, v: Optional[float]) -> Optional[float]:
+    def validate_revenue(cls, v: float | None) -> float | None:
         """Validate revenue is non-negative."""
         if v is not None and v < 0:
             raise ValueError("revenue_eur_m must be non-negative")
@@ -188,7 +190,7 @@ class CompanyCreateRequest(BaseModel):
 
     @field_validator("employees")
     @classmethod
-    def validate_employees(cls, v: Optional[int]) -> Optional[int]:
+    def validate_employees(cls, v: int | None) -> int | None:
         """Validate employee count is positive."""
         if v is not None and v < 1:
             raise ValueError("employees must be at least 1")
@@ -196,7 +198,7 @@ class CompanyCreateRequest(BaseModel):
 
     @field_validator("website")
     @classmethod
-    def validate_website(cls, v: Optional[str]) -> Optional[str]:
+    def validate_website(cls, v: str | None) -> str | None:
         """Validate website URL format."""
         if v:
             if not v.startswith(("http://", "https://")):

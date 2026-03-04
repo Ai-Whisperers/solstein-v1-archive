@@ -15,7 +15,6 @@ from typing import Any
 from loguru import logger
 
 from solstein.infrastructure.constants import (
-    CACHE_DEFAULT_TTL_S,
     CACHE_LONG_TTL_S,
     CACHE_SHORT_TTL_S,
 )
@@ -69,7 +68,8 @@ async def _warm_static_config(cache: Any) -> None:
 async def _warm_top_companies(cache: Any, db_session_factory: Any) -> None:
     """Warm the top-50 companies list (by composite score) to speed up /companies."""
     try:
-        from sqlalchemy import select, desc
+        from sqlalchemy import desc, select
+
         from solstein.infrastructure.database_models import CompanyRecord
 
         async with db_session_factory() as session:

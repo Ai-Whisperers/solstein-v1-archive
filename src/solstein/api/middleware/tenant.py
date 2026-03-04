@@ -17,7 +17,7 @@ Usage::
 from __future__ import annotations
 
 import hashlib
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 from fastapi import status
 from fastapi.responses import JSONResponse

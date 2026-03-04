@@ -12,13 +12,6 @@ from typing import Any
 
 from loguru import logger
 
-from .llm_financial_extractor import LLMFinancialExtractor
-import re
-from pathlib import Path
-from typing import Any
-
-from loguru import logger
-
 from ..domain.models import (
     AIMaturity,
     Company,
@@ -28,6 +21,7 @@ from ..domain.models import (
     ThreatLevel,
 )
 from ..research.sources import canonicalize_url, is_probably_url
+from .llm_financial_extractor import LLMFinancialExtractor
 
 REQUIRED_PROVENANCE_METRICS = [
     "revenue",
@@ -354,7 +348,7 @@ class MarkdownExtractor:
 
     def _determine_tier_from_revenue(self, revenue: float | None) -> CompanyTier:
         """Determine company tier based on revenue (in euros).
-        
+
         Tier boundaries:
         - Tier 1: > €1B (1,000,000,000)
         - Tier 2: €100M - €1B (100,000,000 - 1,000,000,000)
@@ -363,7 +357,7 @@ class MarkdownExtractor:
         """
         if revenue is None:
             return CompanyTier.TIER_3
-        
+
         if revenue >= 1_000_000_000:  # >= €1B
             return CompanyTier.TIER_1
         elif revenue >= 100_000_000:  # >= €100M

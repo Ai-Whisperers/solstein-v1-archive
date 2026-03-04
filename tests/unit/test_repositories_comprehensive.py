@@ -5,23 +5,21 @@ integrity for CompanyRepository, FactRepository, EnrichmentAuditRepository,
 and EnrichmentCacheRepository.
 """
 
+from datetime import datetime, timezone
+
 import pytest
-from datetime import datetime, timezone, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from solstein.domain.facts import Fact
 from solstein.infrastructure.company_repository import CompanyRepository
-from solstein.infrastructure.repositories import FactRepository
+from solstein.infrastructure.database_models import (
+    CompanyRecord,
+)
 from solstein.infrastructure.enrichment_repositories import (
     EnrichmentAuditRepository,
     EnrichmentCacheRepository,
 )
-from solstein.infrastructure.database_models import (
-    CompanyRecord,
-    EnrichmentAuditRecord,
-    EnrichmentCacheRecord,
-)
-from solstein.domain.facts import Fact, GatheringBatch
-
+from solstein.infrastructure.repositories import FactRepository
 
 # ============================================================================
 # COMPANY REPOSITORY TESTS
@@ -92,7 +90,7 @@ class TestCompanyRepository:
             "website": "https://testcompany.com",
         }
 
-        created = await repo.create(company_data)
+        await repo.create(company_data)
         await db_session.commit()
 
         # Fetch by ID
@@ -512,7 +510,7 @@ class TestFactRepository:
         repo = FactRepository(db_session)
 
         # Create batch and fact
-        batch = await repo.create_batch("comp-006", status="in_progress")
+        await repo.create_batch("comp-006", status="in_progress")
         await db_session.commit()
 
         fact = Fact(
@@ -546,7 +544,7 @@ class TestFactRepository:
         repo = FactRepository(db_session)
 
         # Create batch and fact
-        batch = await repo.create_batch("comp-007", status="in_progress")
+        await repo.create_batch("comp-007", status="in_progress")
         await db_session.commit()
 
         fact = Fact(

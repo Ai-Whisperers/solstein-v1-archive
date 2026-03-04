@@ -163,7 +163,7 @@ class TestDeterministicScoring:
         batch2 = [scorer.calculate_scores(c).composite_score for c in unified_companies[:50]]
 
         # All scores should match
-        for i, (score1, score2) in enumerate(zip(batch1, batch2)):
+        for i, (score1, score2) in enumerate(zip(batch1, batch2, strict=False)):
             assert score1 == score2, f"Batch score {i} variance: {score1} vs {score2}"
 
     def test_scoring_explanation_deterministic(self, scorer, eneve):

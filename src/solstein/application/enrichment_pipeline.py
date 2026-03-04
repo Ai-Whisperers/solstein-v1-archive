@@ -151,7 +151,7 @@ class EnrichmentPipeline:
 
                 logger.debug("Adapter succeeded", adapter=adapter_name)
                 return result if isinstance(result, RawDataSource) else None
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning("Adapter timed out", adapter=adapter_name, timeout_s=self._timeout_s)
                 return None
             except Exception as exc:

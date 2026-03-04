@@ -26,7 +26,6 @@ from solstein.research.aggregate import (
     _extract_yahoo_finance,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixtures — realistic model_dump() outputs
 # ---------------------------------------------------------------------------

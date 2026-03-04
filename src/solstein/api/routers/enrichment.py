@@ -21,33 +21,31 @@ Also includes:
 import logging
 import time
 from datetime import datetime, timezone
+
 from fastapi import APIRouter, HTTPException, Query, Request
-from typing import Optional, List, Dict, Any
 
 # Import schemas
 from solstein.api.schemas.enrichment import (
-    HealthCheckResponse,
-    ReadinessCheckResponse,
-    MetricsResponse,
-    EnrichmentRequest,
-    EnrichmentResponse,
-    EnrichmentResultData,
+    AuditEntry,
+    AuditTrailResponse,
     BatchEnrichmentRequest,
     BatchEnrichmentResponse,
     BatchEnrichmentResult,
-    AuditTrailResponse,
-    AuditEntry,
     CacheCheckResponse,
     CacheClearResponse,
-    ErrorResponse,
-    RateLimitErrorResponse,
+    EnrichmentRequest,
+    EnrichmentResponse,
+    EnrichmentResultData,
+    HealthCheckResponse,
+    MetricsResponse,
+    ReadinessCheckResponse,
 )
+from solstein.data.security_hardening import audit_logger, input_validator, rate_limiter
 
 # Import enrichment infrastructure
-from solstein.data.unified_loader import unified_loader, UnifiedCompany
-from solstein.data.security_hardening import audit_logger, rate_limiter, input_validator, security_headers
-from solstein.infrastructure.enrichment_repositories import EnrichmentAuditRepository, EnrichmentCacheRepository
+from solstein.data.unified_loader import UnifiedCompany, unified_loader
 from solstein.infrastructure.database import db_manager
+from solstein.infrastructure.enrichment_repositories import EnrichmentAuditRepository, EnrichmentCacheRepository
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -57,10 +55,11 @@ router = APIRouter()
 # LAZY-LOAD HELPERS FOR DATABASE REPOSITORIES
 # ============================================================================
 
+
 async def get_audit_repo_if_available():
     """Get audit repository if database is initialized, else None."""
     try:
-        if hasattr(db_manager, 'initialized') and db_manager.initialized:
+        if hasattr(db_manager, "initialized") and db_manager.initialized:
             async for session in db_manager.get_session():
                 return EnrichmentAuditRepository(session)
     except Exception as e:
@@ -71,7 +70,7 @@ async def get_audit_repo_if_available():
 async def get_cache_repo_if_available():
     """Get cache repository if database is initialized, else None."""
     try:
-        if hasattr(db_manager, 'initialized') and db_manager.initialized:
+        if hasattr(db_manager, "initialized") and db_manager.initialized:
             async for session in db_manager.get_session():
                 return EnrichmentCacheRepository(session)
     except Exception as e:
@@ -83,10 +82,11 @@ async def get_cache_repo_if_available():
 # HEALTH CHECK HELPER FUNCTIONS
 # ============================================================================
 
+
 async def check_database_health() -> tuple[str, bool]:
     """Check database connectivity."""
     try:
-        if hasattr(db_manager, 'initialized') and db_manager.initialized:
+        if hasattr(db_manager, "initialized") and db_manager.initialized:
             # Try to execute a simple query
             async for session in db_manager.get_session():
                 await session.execute("SELECT 1")
@@ -102,7 +102,7 @@ async def check_sec_edgar_health() -> tuple[str, bool]:
     """Check SEC EDGAR connector health."""
     try:
         # Check if connector is available
-        if hasattr(unified_loader, 'sec_connector') and unified_loader.sec_connector:
+        if hasattr(unified_loader, "sec_connector") and unified_loader.sec_connector:
             return "operational", True
         else:
             return "not_initialized", False
@@ -115,7 +115,7 @@ async def check_companies_house_health() -> tuple[str, bool]:
     """Check Companies House connector health."""
     try:
         # Check if connector is available
-        if hasattr(unified_loader, 'companies_house_connector') and unified_loader.companies_house_connector:
+        if hasattr(unified_loader, "companies_house_connector") and unified_loader.companies_house_connector:
             return "operational", True
         else:
             return "not_initialized", False
@@ -128,7 +128,7 @@ async def check_news_signals_health() -> tuple[str, bool]:
     """Check News Signals connector health."""
     try:
         # Check if detector is available
-        if hasattr(unified_loader, 'news_detector') and unified_loader.news_detector:
+        if hasattr(unified_loader, "news_detector") and unified_loader.news_detector:
             return "operational", True
         else:
             return "not_initialized", False
@@ -144,7 +144,7 @@ async def check_cache_health() -> tuple[str, bool]:
         cache_repo = await get_cache_repo_if_available()
         if cache_repo:
             return "operational", True
-        elif hasattr(unified_loader, 'cache') and unified_loader.cache:
+        elif hasattr(unified_loader, "cache") and unified_loader.cache:
             # In-memory cache available
             return "operational", True
         else:
@@ -152,6 +152,8 @@ async def check_cache_health() -> tuple[str, bool]:
     except Exception as e:
         logger.debug(f"Cache health check failed: {e}")
         return "unavailable", False
+
+
 # ============================================================================
 # HEALTH & READINESS ENDPOINTS
 # ============================================================================
@@ -171,22 +173,22 @@ async def health_check(request: Request) -> HealthCheckResponse:
     """
     # Phase 13.5: Health check BEFORE rate limit - always accessible
     logger.info(f"🏥 Health check from {request.client.host if request.client else 'unknown'}")
-    
+
     # Perform actual health checks
     db_status, db_healthy = await check_database_health()
     sec_status, sec_healthy = await check_sec_edgar_health()
     ch_status, ch_healthy = await check_companies_house_health()
     news_status, news_healthy = await check_news_signals_health()
     cache_status, cache_healthy = await check_cache_health()
-    
+
     # Determine overall health (database and cache are required)
     all_healthy = db_healthy and cache_healthy
     overall_status = "healthy" if all_healthy else "unhealthy"
-    
+
     # Log if unhealthy
     if not all_healthy:
         logger.warning(f"Health check failed: db={db_status}, cache={cache_status}")
-    
+
     response = HealthCheckResponse(
         status=overall_status,
         timestamp=datetime.now(timezone.utc),
@@ -199,16 +201,17 @@ async def health_check(request: Request) -> HealthCheckResponse:
             "news_signals": news_status,
         },
     )
-    
+
     # Return 503 if unhealthy
     if not all_healthy:
-        from fastapi import status
+        pass
         # Note: We can't directly return 503 from a normal endpoint
         # The caller should check the "status" field and treat "unhealthy" as 503
         # For now we return 200 with unhealthy status
         # In production, use middleware to convert unhealthy to 503
-    
+
     return response
+
 
 @router.get("/ready", response_model=ReadinessCheckResponse)
 async def readiness_check(request: Request) -> ReadinessCheckResponse:
@@ -228,20 +231,19 @@ async def readiness_check(request: Request) -> ReadinessCheckResponse:
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
     logger.info(f"📋 Readiness check from {client_id}")
-    
+
     # Perform health checks
     db_status, db_healthy = await check_database_health()
     sec_status, sec_healthy = await check_sec_edgar_health()
     ch_status, ch_healthy = await check_companies_house_health()
     news_status, news_healthy = await check_news_signals_health()
     cache_status, cache_healthy = await check_cache_health()
-    
+
     # System is ready if all components are operational or at least initialized
-    system_ready = (
-        (db_status in ["operational", "not_initialized"]) and
-        (cache_status in ["operational", "not_initialized"])
+    system_ready = (db_status in ["operational", "not_initialized"]) and (
+        cache_status in ["operational", "not_initialized"]
     )
-    
+
     return ReadinessCheckResponse(
         ready=system_ready,
         timestamp=datetime.now(timezone.utc),
@@ -253,6 +255,7 @@ async def readiness_check(request: Request) -> ReadinessCheckResponse:
             "database_ready": db_healthy,
         },
     )
+
 
 @router.get("/metrics", response_model=MetricsResponse)
 async def get_metrics(request: Request) -> MetricsResponse:
@@ -282,7 +285,7 @@ async def get_metrics(request: Request) -> MetricsResponse:
         "avg_duration_ms": enrichment_metrics.get("avg_duration_ms", 0),
         "total_duration_ms": enrichment_metrics.get("total_duration_ms", 0),
     }
-    
+
     return MetricsResponse(
         timestamp=datetime.now(timezone.utc),
         enrichment=enrichment_data,
@@ -307,6 +310,7 @@ async def get_metrics(request: Request) -> MetricsResponse:
 
 
 # Updated enrichment endpoint with cache and audit database support
+
 
 @router.post("/companies/{company_id}/enrich", response_model=EnrichmentResponse)
 async def enrich_single_company(
@@ -348,11 +352,11 @@ async def enrich_single_company(
         raise HTTPException(status_code=400, detail=error)
 
     logger.info(f"💼 Enriching company {company_id} from {request_data.sources}")
-    
+
     # Get repositories if available (lazy-load)
     audit_repo = await get_audit_repo_if_available()
     cache_repo = await get_cache_repo_if_available()
-    
+
     # Log enrichment start
     if audit_repo:
         await audit_repo.log_operation(
@@ -387,7 +391,7 @@ async def enrich_single_company(
                         )
             except Exception as e:
                 logger.debug(f"Cache read failed for {company_id}: {e}")
-        
+
         # If not cached, create a minimal company object from the ID
         company = UnifiedCompany(id=company_id, name=company_id)
 
@@ -400,9 +404,17 @@ async def enrich_single_company(
 
         # Track enriched fields
         fields_enriched = []
-        if enriched.financials and enriched.financials.revenue and (not company.financials or not company.financials.revenue):
+        if (
+            enriched.financials
+            and enriched.financials.revenue
+            and (not company.financials or not company.financials.revenue)
+        ):
             fields_enriched.append("revenue")
-        if enriched.financials and enriched.financials.employees and (not company.financials or not company.financials.employees):
+        if (
+            enriched.financials
+            and enriched.financials.employees
+            and (not company.financials or not company.financials.employees)
+        ):
             fields_enriched.append("employees")
 
         # Cache the enriched data if available
@@ -476,7 +488,7 @@ async def enrich_single_company(
                 source=",".join(request_data.sources),
                 error=str(e),
             )
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/companies/enrich/batch", response_model=BatchEnrichmentResponse)
@@ -548,7 +560,7 @@ async def enrich_batch(request_data: BatchEnrichmentRequest, request: Request) -
 
     except Exception as e:
         logger.error(f"Batch enrichment failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # ============================================================================
@@ -558,10 +570,7 @@ async def enrich_batch(request_data: BatchEnrichmentRequest, request: Request) -
 
 @router.get("/companies/{company_id}/enrichment/audit", response_model=AuditTrailResponse)
 async def get_audit_trail(
-    company_id: str,
-    limit: int = Query(50, ge=1, le=1000),
-    offset: int = Query(0, ge=0),
-    request: Request = None
+    company_id: str, limit: int = Query(50, ge=1, le=1000), offset: int = Query(0, ge=0), request: Request = None
 ) -> AuditTrailResponse:
     """Get enrichment audit trail for company."""
     if not request:
@@ -572,24 +581,20 @@ async def get_audit_trail(
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
     logger.info(f"📜 Audit trail request for {company_id}")
-    
+
     # Validate company ID
     is_valid, error = input_validator.validate_company_id(company_id)
     if not is_valid:
         raise HTTPException(status_code=404, detail="Company not found")
-    
+
     # Try to get audit entries from database first
     audit_repo = await get_audit_repo_if_available()
     mapped_entries = []
-    
+
     if audit_repo:
         try:
             # Get from database with pagination
-            db_entries = await audit_repo.get_audit_trail(
-                company_id=company_id,
-                limit=limit,
-                offset=offset
-            )
+            db_entries = await audit_repo.get_audit_trail(company_id=company_id, limit=limit, offset=offset)
             for entry in db_entries:
                 mapped_entries.append(
                     AuditEntry(
@@ -611,10 +616,11 @@ async def get_audit_trail(
                     ts = entry.get("timestamp")
                     if isinstance(ts, str):
                         from datetime import datetime as dt
+
                         ts = dt.fromisoformat(ts)
                     else:
                         ts = ts or datetime.now(timezone.utc)
-                    
+
                     mapped_entries.append(
                         AuditEntry(
                             timestamp=ts,
@@ -634,10 +640,11 @@ async def get_audit_trail(
                 ts = entry.get("timestamp")
                 if isinstance(ts, str):
                     from datetime import datetime as dt
+
                     ts = dt.fromisoformat(ts)
                 else:
                     ts = ts or datetime.now(timezone.utc)
-                
+
                 mapped_entries.append(
                     AuditEntry(
                         timestamp=ts,
@@ -672,7 +679,7 @@ async def check_cache(company_id: str, request: Request) -> CacheCheckResponse:
 
     # Try to check database cache first
     cache_repo = await get_cache_repo_if_available()
-    
+
     if cache_repo:
         try:
             cache_record = await cache_repo.get_cached(company_id)
@@ -720,7 +727,7 @@ async def clear_all_cache(request: Request) -> CacheClearResponse:
     logger.info(f"🧹 Cache clear requested by {client_id}")
 
     entries_cleared = 0
-    
+
     # Try to clear database cache first
     cache_repo = await get_cache_repo_if_available()
     if cache_repo:
@@ -728,7 +735,7 @@ async def clear_all_cache(request: Request) -> CacheClearResponse:
             entries_cleared = await cache_repo.delete_cache(company_id=None)  # Delete all expired
         except Exception as e:
             logger.warning(f"Failed to clear database cache: {e}")
-    
+
     # Also clear in-memory cache
     if hasattr(unified_loader, "clear_enrichment_cache"):
         unified_loader.clear_enrichment_cache()
@@ -750,7 +757,7 @@ async def clear_company_cache(company_id: str, request: Request) -> CacheClearRe
     logger.info(f"🧹 Cache clear for {company_id} by {client_id}")
 
     entries_cleared = 0
-    
+
     # Try to clear database cache first
     cache_repo = await get_cache_repo_if_available()
     if cache_repo:
@@ -758,7 +765,7 @@ async def clear_company_cache(company_id: str, request: Request) -> CacheClearRe
             entries_cleared = await cache_repo.delete_cache(company_id=company_id)
         except Exception as e:
             logger.warning(f"Failed to clear database cache for {company_id}: {e}")
-    
+
     # Also clear in-memory cache
     if hasattr(unified_loader, "cache") and unified_loader.cache:
         cache_key = f"company_{company_id}"

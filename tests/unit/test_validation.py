@@ -7,12 +7,12 @@ import pytest
 from pydantic import ValidationError
 
 from solstein.api.schemas.validation import (
-    SearchRequest,
-    PaginationParams,
+    CompanyCreateRequest,
     CompanyFilterRequest,
     MarketAnalysisRequest,
+    PaginationParams,
     ScoreUpdateRequest,
-    CompanyCreateRequest,
+    SearchRequest,
 )
 
 

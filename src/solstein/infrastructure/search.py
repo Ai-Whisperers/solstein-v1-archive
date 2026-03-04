@@ -13,17 +13,13 @@ Usage::
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from loguru import logger
 from sqlalchemy import func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from solstein.infrastructure.database_models import CompanyRecord
-
-if TYPE_CHECKING:
-    pass
-
 
 # PostgreSQL full-text search configuration (English language stemming)
 _TS_CONFIG = "english"

@@ -4,7 +4,6 @@ Task 3: Unit Tests for Data Completeness Scoring
 Tests the completeness calculator for scoring and tier assignment.
 """
 
-
 from solstein.analytics.completeness import CompletenessCalculator, DataQualityTier
 from solstein.domain.models import AIMaturity, Company, CompanyTier, FinancialMetric
 from tests.factories import make_company, make_financial_metric
@@ -89,6 +88,7 @@ class TestCompletenessCalculator:
     def test_global_instance(self):
         """Global instance should exist."""
         from solstein.analytics.completeness import completeness_calculator
+
         assert completeness_calculator is not None
         assert isinstance(completeness_calculator, CompletenessCalculator)
 

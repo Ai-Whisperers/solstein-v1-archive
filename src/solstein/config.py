@@ -4,7 +4,6 @@ Configuration management for SolStein.
 Handles environment variables, configuration files, and settings.
 """
 
-import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -52,6 +51,7 @@ class RedisConfig(BaseModel):
         if not v:
             raise ValueError("Redis URL cannot be empty")
         return v
+
     @property
     def host(self) -> str:
         """Extract host from URL."""
@@ -76,8 +76,6 @@ class SupabaseConfig(BaseModel):
     db_url: str = Field(default="")
 
 
-
-
 class APIConfig(BaseModel):
     """API configuration."""
 
@@ -86,22 +84,17 @@ class APIConfig(BaseModel):
     debug: bool = Field(default=False)
     cors_origins: list[str] = Field(
         default=["http://localhost:3000", "http://localhost:8000"],
-        description="Comma-separated list of allowed CORS origins"
+        description="Comma-separated list of allowed CORS origins",
     )
-    cors_methods: list[str] = Field(
-        default=["GET", "POST", "PUT", "DELETE"],
-        description="Allowed HTTP methods"
-    )
-    cors_headers: list[str] = Field(
-        default=["Authorization", "Content-Type"],
-        description="Allowed request headers"
-    )
+    cors_methods: list[str] = Field(default=["GET", "POST", "PUT", "DELETE"], description="Allowed HTTP methods")
+    cors_headers: list[str] = Field(default=["Authorization", "Content-Type"], description="Allowed request headers")
     api_prefix: str = Field(default="/api/v1")
 
     @property
     def base_url(self) -> str:
         """Get base URL for API."""
         return f"http://{self.host}:{self.port}{self.api_prefix}"
+
 
 class SecurityConfig(BaseModel):
     """Security configuration."""
@@ -110,7 +103,9 @@ class SecurityConfig(BaseModel):
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30, ge=1)
     admin_email: str | None = Field(default=None, description="Admin login email (set ADMIN_EMAIL env var)")
-    admin_password_hash: str | None = Field(default=None, description="SHA-256 hex hash of admin password (set ADMIN_PASSWORD_HASH env var)")
+    admin_password_hash: str | None = Field(
+        default=None, description="SHA-256 hex hash of admin password (set ADMIN_PASSWORD_HASH env var)"
+    )
 
     def __init__(self, **data: Any) -> None:
         """Initialize and validate security config."""
@@ -118,8 +113,7 @@ class SecurityConfig(BaseModel):
         # Fail startup in production if using default secret key
         if data.get("environment") == "production" and self.secret_key == "change-me-in-production":
             raise ValueError(
-                "FATAL: secret_key must be set to a strong value in production. "
-                "Set SECRET_KEY environment variable."
+                "FATAL: secret_key must be set to a strong value in production. Set SECRET_KEY environment variable."
             )
 
     @field_validator("secret_key")
@@ -129,6 +123,7 @@ class SecurityConfig(BaseModel):
         if v == "change-me-in-production":
             logger.warning("Using default secret key - change in production!")
         return v
+
 
 class LoggingConfig(BaseModel):
     """Logging configuration."""
@@ -192,7 +187,6 @@ class Settings(BaseSettings):
     # New Intelligence Engine Backends
     supabase: SupabaseConfig = Field(default_factory=SupabaseConfig)
 
-
     # External APIs (optional)
     openai_api_key: str | None = Field(default=None)
     perplexity_api_key: str | None = Field(default=None)
@@ -242,7 +236,6 @@ class Settings(BaseSettings):
     siliconflow_model: str = Field(default="Qwen/Qwen2.5-72B-Instruct")
     alibaba_api_key: str | None = Field(default=None)
     alibaba_model: str = Field(default="qwen-plus")
-
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -66,7 +66,7 @@ class TestCompanyRepository:
             "name": "Retrieve Test Company",
             "industry": "Energy Software",
         }
-        created = await repo.create(company_data)
+        await repo.create(company_data)
         await db_session.commit()
 
         # Retrieve it

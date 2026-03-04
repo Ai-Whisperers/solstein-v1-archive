@@ -19,9 +19,9 @@ Usage::
 from __future__ import annotations
 
 import textwrap
+from collections.abc import Sequence
 from datetime import datetime
 from pathlib import Path
-from typing import Sequence
 
 from loguru import logger
 

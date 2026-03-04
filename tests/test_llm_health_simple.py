@@ -209,20 +209,20 @@ def test_retry_delays():
 async def test_ollama_check():
     """Test Ollama health check (will fail if Ollama not running)."""
     print("Testing Ollama health check...")
-    
+
     # Skip if aiohttp not installed
     try:
-        import aiohttp
+        import aiohttp  # noqa: F401
     except ImportError:
         print("  ⚠ Skipping Ollama test (aiohttp not installed)")
         print("Ollama check test skipped!\n")
         return
-    
+
     checker = ProviderHealthChecker()
-    
+
     # This will likely fail since Ollama isn't running in test environment
     health = await checker.check_ollama()
-    
+
     # Should still return a valid health object
     assert health.provider == "ollama"
     # Status will depend on whether Ollama is running

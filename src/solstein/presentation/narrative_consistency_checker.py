@@ -5,7 +5,6 @@ Validates report narratives for contradictions and ensures consistency
 between data, classification, and narrative tone.
 """
 
-
 from solstein.domain.models import AIMaturity, Company
 
 

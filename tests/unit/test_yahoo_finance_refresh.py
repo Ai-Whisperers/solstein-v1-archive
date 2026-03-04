@@ -1,8 +1,8 @@
 """Tests for YahooFinanceRefreshConnector."""
 
-import pytest
-from datetime import datetime
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from solstein.infrastructure.connectors.yahoo_finance_refresh import YahooFinanceRefreshConnector
 from solstein.infrastructure.database import DatabaseManager

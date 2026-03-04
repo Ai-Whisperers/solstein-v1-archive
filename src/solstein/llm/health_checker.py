@@ -107,7 +107,21 @@ class ProviderHealthChecker:
     """
 
     # Provider priority order (highest priority first)
-    PROVIDER_PRIORITY = ["ollama", "groq", "fireworks", "siliconflow", "alibaba", "mistral", "deepinfra", "gemini", "nvidia", "cerebras", "kimi", "anthropic", "openai"]
+    PROVIDER_PRIORITY = [
+        "ollama",
+        "groq",
+        "fireworks",
+        "siliconflow",
+        "alibaba",
+        "mistral",
+        "deepinfra",
+        "gemini",
+        "nvidia",
+        "cerebras",
+        "kimi",
+        "anthropic",
+        "openai",
+    ]
 
     # Error patterns for classification
     RATE_LIMIT_PATTERNS = [
@@ -427,7 +441,6 @@ class ProviderHealthChecker:
         health = self._health[provider]
 
         # Reset failure counters
-        was_healthy = health.status == ProviderStatus.HEALTHY
         health.consecutive_failures = 0
         health.total_successes += 1
         health.last_checked = now
@@ -455,7 +468,7 @@ class ProviderHealthChecker:
         provider = "ollama"
 
         try:
-            async with aiohttp.ClientSession() as session:
+            async with aiohttp.ClientSession() as session:  # noqa: SIM117
                 async with session.get(f"{url}/api/version", timeout=aiohttp.ClientTimeout(total=2)) as response:
                     if response.status == 200:
                         return self._update_health_on_success(provider)
@@ -467,7 +480,7 @@ class ProviderHealthChecker:
                             provider=provider,
                         )
                         return self._update_health_on_error(provider, error)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             error = ProviderError(
                 error_type=ProviderErrorType.TIMEOUT,
                 message="Ollama connection timeout",
@@ -520,7 +533,7 @@ class ProviderHealthChecker:
         try:
             # Make minimal test call (1 token)
             if hasattr(client, "chat") and hasattr(client.chat, "completions"):
-                response = await client.chat.completions.create(
+                await client.chat.completions.create(
                     model=model,
                     messages=[{"role": "user", "content": "hi"}],
                     max_tokens=1,
@@ -581,7 +594,7 @@ class ProviderHealthChecker:
             return_exceptions=True,
         )
 
-        for provider, result in zip(providers_to_check, results):
+        for provider, result in zip(providers_to_check, results, strict=False):
             if isinstance(result, Exception):
                 # Check failed with exception
                 error = ProviderError(

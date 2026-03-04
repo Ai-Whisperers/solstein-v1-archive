@@ -1,7 +1,8 @@
 """Tests for NewsSignalRefreshConnector."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from solstein.infrastructure.connectors.news_signal_refresh import NewsSignalRefreshConnector
 from solstein.infrastructure.database import DatabaseManager
@@ -30,7 +31,7 @@ class TestNewsSignalRefreshConnector:
                 return_value=[{"signal": "acquisition", "confidence": 0.8, "date": "2023-01-01"}]
             )
             mock_detector.return_value = mock_detector_instance
-            
+
             connector = NewsSignalRefreshConnector(mock_db_manager)
             facts = await connector.fetch_facts(["company"])
             assert len(facts) >= 0
@@ -41,7 +42,7 @@ class TestNewsSignalRefreshConnector:
             mock_detector_instance = MagicMock()
             mock_detector_instance.detect_signals = MagicMock(side_effect=Exception("Error"))
             mock_detector.return_value = mock_detector_instance
-            
+
             connector = NewsSignalRefreshConnector(mock_db_manager)
             facts = await connector.fetch_facts(["company"])
             assert facts == []
@@ -52,7 +53,7 @@ class TestNewsSignalRefreshConnector:
             mock_detector_instance = MagicMock()
             mock_detector_instance.detect_signals = MagicMock(return_value=[])
             mock_detector.return_value = mock_detector_instance
-            
+
             connector = NewsSignalRefreshConnector(mock_db_manager)
             facts = await connector.fetch_facts(["company"])
             assert facts == []

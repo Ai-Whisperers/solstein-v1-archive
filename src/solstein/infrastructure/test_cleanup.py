@@ -30,7 +30,7 @@ async def cleanup_test_database(session: AsyncSession) -> None:
         await session.execute(delete(Fact))
         await session.execute(delete(GatheringBatch))
         await session.commit()
-    except Exception as e:
+    except Exception:
         await session.rollback()
         raise
 
@@ -48,7 +48,7 @@ async def cleanup_specific_table(session: AsyncSession, table_name: str) -> None
     try:
         await session.execute(text(f"DELETE FROM {table_name}"))
         await session.commit()
-    except Exception as e:
+    except Exception:
         await session.rollback()
         raise
 
@@ -77,7 +77,7 @@ async def cleanup_company_data(session: AsyncSession, company_id: str) -> None:
         # Delete batches for this company
         await session.execute(delete(GatheringBatch).where(GatheringBatch.company_id == company_id))
         await session.commit()
-    except Exception as e:
+    except Exception:
         await session.rollback()
         raise
 
@@ -106,7 +106,7 @@ async def cleanup_batch_data(session: AsyncSession, batch_id: str) -> None:
         # Delete the batch itself
         await session.execute(delete(GatheringBatch).where(GatheringBatch.batch_id == batch_id))
         await session.commit()
-    except Exception as e:
+    except Exception:
         await session.rollback()
         raise
 

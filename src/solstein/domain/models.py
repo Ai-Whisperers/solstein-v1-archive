@@ -74,6 +74,7 @@ class ErrorSeverity(StrEnum):
     WARNING = "WARNING"
     INFO = "INFO"
 
+
 class FinancialMetric(BaseModel):
     """Financial metrics domain entity."""
 
@@ -152,7 +153,6 @@ class Company(BaseModel):
     data_source_type: str = "unknown"  # 'synthetic', 'real', 'mixed', 'unknown'
     enrichment_quality_metrics: dict[str, Any] = Field(default_factory=dict)  # EPIC-004: Preserve quality metrics
 
-
     # External Identifiers for Connector Lookups
 
     ticker: str | None = None
@@ -162,8 +162,6 @@ class Company(BaseModel):
     isin: str | None = None
 
     geography_code: str | None = None
-
-
 
     # Enrichment Tracking
 
@@ -177,7 +175,9 @@ class Company(BaseModel):
     enrichment_errors_per_field: dict[str, list[str]] = Field(default_factory=dict)  # Track errors by field
     enrichment_error_timestamps: dict[str, datetime] = Field(default_factory=dict)  # When each error occurred
     enrichment_error_count: int = 0  # Total error count for metrics
-    enrichment_error_categories: dict[str, int] = Field(default_factory=dict)  # Count by category (API_ERROR, DATA_ERROR, etc)
+    enrichment_error_categories: dict[str, int] = Field(
+        default_factory=dict
+    )  # Count by category (API_ERROR, DATA_ERROR, etc)
     # Scores (Calculated)
     growth_score: float | None = None
     financial_health_score: float | None = None
@@ -260,13 +260,20 @@ class Company(BaseModel):
             Percentage of key fields that have values (0-100)
         """
         key_fields = [
-            'name', 'industry', 'description', 'website', 'headquarters',
-            'founded_year', 'employees', 'revenue', 'funding_raised'
+            "name",
+            "industry",
+            "description",
+            "website",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "funding_raised",
         ]
 
         filled = 0
         for field in key_fields:
-            if field in ['employees', 'revenue', 'funding_raised']:
+            if field in ["employees", "revenue", "funding_raised"]:
                 # These are in financials
                 if self.financials and getattr(self.financials, field, None) is not None:
                     filled += 1
@@ -302,11 +309,6 @@ class Company(BaseModel):
     @field_validator("ai_score")
     @classmethod
     def validate_ai_score(cls, v: float | None) -> float | None:
-        if v is not None and (v < 0 or v > 10):
-            raise ValueError("AI score must be between 0 and 10")
-        return v
-    @classmethod
-    def validate_ai_score(cls, v: int | None) -> int | None:
         if v is not None and (v < 0 or v > 10):
             raise ValueError("AI score must be between 0 and 10")
         return v
@@ -401,6 +403,7 @@ class Company(BaseModel):
         if v not in valid_codes:
             raise ValueError(f"Geography code must be one of {valid_codes}, got '{v}'")
         return v
+
     @property
     def is_large_cap(self) -> bool:
         """Domain logic: Check if company is large cap (valuation > €100M)."""

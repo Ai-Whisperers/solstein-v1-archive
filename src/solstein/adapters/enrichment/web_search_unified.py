@@ -42,6 +42,7 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
             db_manager=db_manager,
             confidence=0.70,
         )
+
     def discover(
         self,
         market: str,

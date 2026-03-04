@@ -2,15 +2,13 @@ import json
 from pathlib import Path
 from unittest.mock import mock_open, patch
 
-import pytest
-
 from solstein.data.loaders import CompetitorDataLoader
-from solstein.domain.models import AIMaturity, CompanyTier, ConfidenceLevel, ThreatLevel
+from solstein.domain.models import AIMaturity
 
 
 def test_loader_missing_file():
     """Test that loader returns mocked test data (fixture patches load_companies).
-    
+
     Note: The autouse fixture in conftest.py patches CompetitorDataLoader.load_companies
     to return test data, so this test verifies the mocked behavior works.
     """
@@ -67,20 +65,18 @@ def test_loader_success(mock_file, mock_exists):
     assert c1.id == "eneve_001"
     assert c1.classification == "Phoenix"
     assert c1.ai_maturity == AIMaturity.STRONG  # Fixed: fixture sets Strong
-    
+
     # Check second company from fixture (Test Company 2)
     c2 = companies[1]
     assert c2.name == "Test Company 2"
     assert c2.id == "test_002"
     assert c2.classification == "Salt"
-    
+
     # Check third company from fixture (Test Company 3)
     c3 = companies[2]
     assert c3.name == "Test Company 3"
     assert c3.id == "test_003"
     assert c3.classification == "Lead"
-
-
 
 
 @patch("pathlib.Path.exists")

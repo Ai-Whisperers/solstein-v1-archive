@@ -40,23 +40,20 @@ class TestAIMaturityConsistency:
 
     def test_no_strong_maturity_with_zero_score(self, companies):
         """Test that no 'Strong' or 'Very Strong' maturity companies have 0 score."""
-        strong_or_very_strong = [
-            c for c in companies 
-            if c.ai_maturity in [AIMaturity.STRONG, AIMaturity.VERY_STRONG]
-        ]
+        strong_or_very_strong = [c for c in companies if c.ai_maturity in [AIMaturity.STRONG, AIMaturity.VERY_STRONG]]
 
         for company in strong_or_very_strong:
             # If AI score is present, it should not be 0
             if company.ai_score is not None:
-                assert company.ai_score != 0, \
+                assert company.ai_score != 0, (
                     f"{company.name} has {company.ai_maturity} maturity but 0 AI score (contradiction)"
+                )
 
     def test_ai_score_range_valid(self, companies):
         """Test that all AI scores are in valid 0-10 range."""
         for company in companies:
             if company.ai_score is not None:
-                assert 0 <= company.ai_score <= 10, \
-                    f"{company.name} has invalid AI score {company.ai_score}"
+                assert 0 <= company.ai_score <= 10, f"{company.name} has invalid AI score {company.ai_score}"
 
     def test_ai_maturity_consistency_across_dataset(self, companies):
         """Test that AI maturity and score are generally consistent."""
@@ -68,7 +65,13 @@ class TestAIMaturityConsistency:
             by_maturity[company.ai_maturity].append(company)
 
         # Check that higher maturity levels have higher average scores
-        maturity_order = [AIMaturity.NONE, AIMaturity.LOW, AIMaturity.MODERATE, AIMaturity.STRONG, AIMaturity.VERY_STRONG]
+        maturity_order = [
+            AIMaturity.NONE,
+            AIMaturity.LOW,
+            AIMaturity.MODERATE,
+            AIMaturity.STRONG,
+            AIMaturity.VERY_STRONG,
+        ]
 
         avg_scores = {}
         for maturity in maturity_order:
@@ -81,6 +84,7 @@ class TestAIMaturityConsistency:
         prev_avg = -1
         for maturity in maturity_order:
             if maturity in avg_scores:
-                assert avg_scores[maturity] >= prev_avg, \
+                assert avg_scores[maturity] >= prev_avg, (
                     f"Average AI score for {maturity} ({avg_scores[maturity]}) should be >= previous ({prev_avg})"
+                )
                 prev_avg = avg_scores[maturity]

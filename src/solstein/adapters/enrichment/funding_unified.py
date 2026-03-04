@@ -36,6 +36,7 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
             confidence=0.65,
         )
         self.crunchbase_api_key = crunchbase_api_key
+
     def _get_crunchbase_data(self, company_name: str) -> dict[str, Any] | None:
         """Get funding data from Crunchbase API."""
         if not self.crunchbase_api_key:

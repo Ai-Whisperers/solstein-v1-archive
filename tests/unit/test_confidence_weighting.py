@@ -138,7 +138,6 @@ class TestPopulateSignalConfidences:
         assert result.signal_confidences == {}
 
 
-
 class TestGetConfidenceSummary:
     """Test getting confidence summary."""
 

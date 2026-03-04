@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import jwt
 import pytest
 
-from solstein.security.jwt_handler import jwt_handler, UserPayload
+from solstein.security.jwt_handler import UserPayload, jwt_handler
 
 
 class TestJWTHandler:
@@ -45,16 +45,17 @@ class TestJWTHandler:
         # Verify expiration timestamp exists
         assert "exp" in decoded
         exp_timestamp = decoded["exp"]
-        
+
         # Convert to datetime for comparison
         exp_datetime = datetime.utcfromtimestamp(exp_timestamp)
-        
+
         # Should be approximately 2 hours after creation
         expected_min = before_create + timedelta(hours=2) - timedelta(seconds=10)
         expected_max = after_create + timedelta(hours=2) + timedelta(seconds=10)
-        
-        assert expected_min <= exp_datetime <= expected_max, \
+
+        assert expected_min <= exp_datetime <= expected_max, (
             f"Expected expiry between {expected_min} and {expected_max}, got {exp_datetime}"
+        )
 
     def test_create_access_token_empty_data_raises_error(self):
         """Should raise error when creating token with empty data."""
@@ -123,7 +124,7 @@ class TestJWTHandler:
         # Create initial token
         token_data = {"user_id": "test_user", "email": "test@example.com", "role": "user"}
         original_token = jwt_handler.create_access_token(token_data)
-        
+
         original_exp = jwt.decode(original_token, jwt_handler.secret_key, algorithms=[jwt_handler.algorithm])["exp"]
 
         # Refresh the token
@@ -177,8 +178,9 @@ class TestJWTHandler:
         expected_min = before_create + timedelta(minutes=30) - timedelta(seconds=10)
         expected_max = after_create + timedelta(minutes=30) + timedelta(seconds=10)
 
-        assert expected_min <= exp_datetime <= expected_max, \
+        assert expected_min <= exp_datetime <= expected_max, (
             f"Expected expiry between {expected_min} and {expected_max}, got {exp_datetime}"
+        )
 
 
 class TestUserPayload:

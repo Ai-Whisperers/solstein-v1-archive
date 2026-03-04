@@ -12,7 +12,8 @@ from pathlib import Path
 from loguru import logger
 
 from solstein.domain.models import Company
-from .base import BaseReportGenerator, ReportFormatter, ScoreInterpreter
+
+from .base import BaseReportGenerator
 
 
 class MarketReportGenerator(BaseReportGenerator):
@@ -29,17 +30,14 @@ class MarketReportGenerator(BaseReportGenerator):
     ) -> Path:
         """Generate comprehensive market overview report."""
         formatter = self.formatter
-        interpreter = self.interpreter
 
         if not companies:
             logger.warning("No companies provided for market overview")
             return output_dir / "market_overview_empty.md"
 
         # Calculate aggregate statistics
-        avg_score = formatter.avg([c.composite_score or 0 for c in companies])
-        avg_growth = formatter.avg(
-            [getattr(c.financials, "growth_rate", 0) or 0 for c in companies if hasattr(c, "financials")]
-        )
+        formatter.avg([c.composite_score or 0 for c in companies])
+        formatter.avg([getattr(c.financials, "growth_rate", 0) or 0 for c in companies if hasattr(c, "financials")])
 
         # Tier distribution
         tier_counts = {}
@@ -85,9 +83,9 @@ AI readiness.
 ### Key Metrics
 
 | Metric | Value |
-|| Phoenix Tier Companies | {classification_counts.get('Phoenix', 0)} |
-|| Salt Tier Companies | {classification_counts.get('Salt', 0)} |
-|| Lead Tier Companies | {classification_counts.get('Lead', 0)} |
+|| Phoenix Tier Companies | {classification_counts.get("Phoenix", 0)} |
+|| Salt Tier Companies | {classification_counts.get("Salt", 0)} |
+|| Lead Tier Companies | {classification_counts.get("Lead", 0)} |
 
 ---
 

@@ -5,7 +5,6 @@ environments (test, dev, prod) with support for both sync and async SQLAlchemy.
 """
 
 import os
-from typing import Optional
 
 
 class DatabaseURLError(Exception):
@@ -84,7 +83,7 @@ def get_test_database_url() -> str:
         if validate_database_url(test_url):
             return test_url
         raise DatabaseURLError(
-            f"Invalid DATABASE_URL_TEST format. Expected: postgresql://user:password@host:port/database"
+            "Invalid DATABASE_URL_TEST format. Expected: postgresql://user:password@host:port/database"
         )
 
     # Fall back to main DATABASE_URL
@@ -108,7 +107,7 @@ def get_dev_database_url() -> str:
         if validate_database_url(dev_url):
             return dev_url
         raise DatabaseURLError(
-            f"Invalid DATABASE_URL_DEV format. Expected: postgresql://user:password@host:port/database"
+            "Invalid DATABASE_URL_DEV format. Expected: postgresql://user:password@host:port/database"
         )
 
     # Fall back to main DATABASE_URL
@@ -132,7 +131,7 @@ def get_prod_database_url() -> str:
         if validate_database_url(prod_url):
             return prod_url
         raise DatabaseURLError(
-            f"Invalid DATABASE_URL_PROD format. Expected: postgresql://user:password@host:port/database"
+            "Invalid DATABASE_URL_PROD format. Expected: postgresql://user:password@host:port/database"
         )
 
     # Fall back to main DATABASE_URL
@@ -152,7 +151,7 @@ def convert_to_async_url(sync_url: str) -> str:
         DatabaseURLError: If URL is not a valid PostgreSQL URL
     """
     if not validate_database_url(sync_url):
-        raise DatabaseURLError(f"Invalid database URL format. Expected: postgresql://user:password@host:port/database")
+        raise DatabaseURLError("Invalid database URL format. Expected: postgresql://user:password@host:port/database")
 
     # Replace postgresql:// with postgresql+asyncpg://
     if sync_url.startswith("postgresql://"):

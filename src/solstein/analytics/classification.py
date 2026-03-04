@@ -17,13 +17,14 @@ Classification Confidence:
 """
 
 from src.solstein.domain.models import Company
+
 from .constants import (
-    CLASSIFICATION_PHOENIX_MIN,
-    CLASSIFICATION_PHOENIX_MAX,
-    CLASSIFICATION_SALT_MIN,
-    CLASSIFICATION_SALT_MAX,
-    CLASSIFICATION_LEAD_MIN,
     CLASSIFICATION_LEAD_MAX,
+    CLASSIFICATION_LEAD_MIN,
+    CLASSIFICATION_PHOENIX_MAX,
+    CLASSIFICATION_PHOENIX_MIN,
+    CLASSIFICATION_SALT_MAX,
+    CLASSIFICATION_SALT_MIN,
 )
 
 
@@ -41,6 +42,7 @@ def classify_company_balanced(composite_score: float | None) -> str:
     """
     # Delegate to the canonical classification function
     from .scoring import classify_company
+
     return classify_company(composite_score)
 
 
@@ -89,6 +91,7 @@ def get_classification_with_confidence(
     """
     # Get classification
     from .scoring import classify_company
+
     classification = classify_company(company.composite_score)
 
     # Estimate data completeness from data_quality_tier
@@ -151,6 +154,7 @@ def get_classification_distribution(companies: list[Company]) -> dict[str, int]:
         Dict with counts: {'Phoenix': N, 'Salt': N, 'Lead': N}
     """
     from .scoring import classify_company
+
     distribution = {"Phoenix": 0, "Salt": 0, "Lead": 0}
 
     for company in companies:
@@ -220,31 +224,37 @@ def report_classification_distribution(companies: list[Company]) -> str:
         f"Total Companies: {validation['total']}",
         "",
         "Distribution:",
-        f"  Phoenix: {validation['phoenix_count']} ({validation['phoenix_pct']*100:.1f}%) "
+        f"  Phoenix: {validation['phoenix_count']} ({validation['phoenix_pct'] * 100:.1f}%) "
         f"{'✓' if validation['phoenix_valid'] else '✗'}",
-        f"  Salt:    {validation['salt_count']} ({validation['salt_pct']*100:.1f}%) "
+        f"  Salt:    {validation['salt_count']} ({validation['salt_pct'] * 100:.1f}%) "
         f"{'✓' if validation['salt_valid'] else '✗'}",
-        f"  Lead:    {validation['lead_count']} ({validation['lead_pct']*100:.1f}%) "
+        f"  Lead:    {validation['lead_count']} ({validation['lead_pct'] * 100:.1f}%) "
         f"{'✓' if validation['lead_valid'] else '✗'}",
         "",
         "Target Ranges:",
-        f"  Phoenix: {CLASSIFICATION_PHOENIX_MIN*100:.0f}% - {CLASSIFICATION_PHOENIX_MAX*100:.0f}%",
-        f"  Salt:    {CLASSIFICATION_SALT_MIN*100:.0f}% - {CLASSIFICATION_SALT_MAX*100:.0f}%",
-        f"  Lead:    {CLASSIFICATION_LEAD_MIN*100:.0f}% - {CLASSIFICATION_LEAD_MAX*100:.0f}%",
+        f"  Phoenix: {CLASSIFICATION_PHOENIX_MIN * 100:.0f}% - {CLASSIFICATION_PHOENIX_MAX * 100:.0f}%",
+        f"  Salt:    {CLASSIFICATION_SALT_MIN * 100:.0f}% - {CLASSIFICATION_SALT_MAX * 100:.0f}%",
+        f"  Lead:    {CLASSIFICATION_LEAD_MIN * 100:.0f}% - {CLASSIFICATION_LEAD_MAX * 100:.0f}%",
         "",
         "Status:",
     ]
 
-    if all([validation['phoenix_valid'], validation['salt_valid'], validation['lead_valid']]):
+    if all([validation["phoenix_valid"], validation["salt_valid"], validation["lead_valid"]]):
         lines.append("  ✓ All classifications within target ranges")
     else:
         lines.append("  ✗ Some classifications outside target ranges:")
-        if not validation['phoenix_valid']:
-            lines.append(f"    - Phoenix: {validation['phoenix_pct']*100:.1f}% (target: {CLASSIFICATION_PHOENIX_MIN*100:.0f}%-{CLASSIFICATION_PHOENIX_MAX*100:.0f}%)")
-        if not validation['salt_valid']:
-            lines.append(f"    - Salt: {validation['salt_pct']*100:.1f}% (target: {CLASSIFICATION_SALT_MIN*100:.0f}%-{CLASSIFICATION_SALT_MAX*100:.0f}%)")
-        if not validation['lead_valid']:
-            lines.append(f"    - Lead: {validation['lead_pct']*100:.1f}% (target: {CLASSIFICATION_LEAD_MIN*100:.0f}%-{CLASSIFICATION_LEAD_MAX*100:.0f}%)")
+        if not validation["phoenix_valid"]:
+            lines.append(
+                f"    - Phoenix: {validation['phoenix_pct'] * 100:.1f}% (target: {CLASSIFICATION_PHOENIX_MIN * 100:.0f}%-{CLASSIFICATION_PHOENIX_MAX * 100:.0f}%)"
+            )
+        if not validation["salt_valid"]:
+            lines.append(
+                f"    - Salt: {validation['salt_pct'] * 100:.1f}% (target: {CLASSIFICATION_SALT_MIN * 100:.0f}%-{CLASSIFICATION_SALT_MAX * 100:.0f}%)"
+            )
+        if not validation["lead_valid"]:
+            lines.append(
+                f"    - Lead: {validation['lead_pct'] * 100:.1f}% (target: {CLASSIFICATION_LEAD_MIN * 100:.0f}%-{CLASSIFICATION_LEAD_MAX * 100:.0f}%)"
+            )
 
     lines.append("=" * 50)
 
@@ -253,19 +263,19 @@ def report_classification_distribution(companies: list[Company]) -> str:
 
 def display_confidence_report(company: Company) -> str:
     """Generate a detailed confidence report for a single company.
-    
+
     EPIC-007 Story 7.4: Display confidence - Shows detailed confidence
     information including data completeness, score certainty, and
     classification confidence.
-    
+
     Args:
         company: Company object to analyze
-        
+
     Returns:
         Formatted confidence report string
     """
     classification, confidence = get_classification_with_confidence(company)
-    
+
     # Get data completeness
     completeness_map = {
         "COMPLETE": 90.0,
@@ -275,7 +285,7 @@ def display_confidence_report(company: Company) -> str:
         "unknown": 50.0,
     }
     completeness = completeness_map.get(company.data_quality_tier, 50.0)
-    
+
     # Determine confidence level
     if confidence >= 0.8:
         confidence_level = "High"
@@ -286,7 +296,7 @@ def display_confidence_report(company: Company) -> str:
     else:
         confidence_level = "Low"
         confidence_emoji = "⚠"
-    
+
     # Check if near boundary
     score = company.composite_score or 0
     boundary_warning = ""
@@ -294,7 +304,7 @@ def display_confidence_report(company: Company) -> str:
         boundary_warning = "\n⚠ Warning: Score near Salt/Lead boundary (less certain)"
     elif 7.4 <= score <= 7.6:
         boundary_warning = "\n⚠ Warning: Score near Phoenix boundary (less certain)"
-    
+
     lines = [
         "=" * 60,
         f"CONFIDENCE REPORT: {company.name}",
@@ -314,15 +324,17 @@ def display_confidence_report(company: Company) -> str:
         f"  Financial Health: {getattr(company, 'financial_health_score', 'N/A')}",
         f"  Competitive Position: {getattr(company, 'competitive_position_score', 'N/A')}",
     ]
-    
+
     if boundary_warning:
         lines.append(boundary_warning)
-    
-    lines.extend([
-        "",
-        "Signal Confidences:",
-    ])
-    
+
+    lines.extend(
+        [
+            "",
+            "Signal Confidences:",
+        ]
+    )
+
     # Add signal confidences if available
     if company.signal_confidences:
         for signal, conf_value in company.signal_confidences.items():
@@ -331,33 +343,35 @@ def display_confidence_report(company: Company) -> str:
             lines.append(f"  {signal:20s}: {conf_bar} {conf_pct:.0f}%")
     else:
         lines.append("  No signal confidence data available")
-    
-    lines.extend([
-        "",
-        "=" * 60,
-    ])
-    
+
+    lines.extend(
+        [
+            "",
+            "=" * 60,
+        ]
+    )
+
     return "\n".join(lines)
 
 
 def display_batch_confidence_report(companies: list[Company]) -> str:
     """Generate a confidence summary report for multiple companies.
-    
+
     Args:
         companies: List of Company objects
-        
+
     Returns:
         Formatted batch confidence report string
     """
     if not companies:
         return "No companies to analyze."
-    
+
     # Calculate statistics
     total = len(companies)
     high_conf = 0
     medium_conf = 0
     low_conf = 0
-    
+
     for company in companies:
         _, confidence = get_classification_with_confidence(company)
         if confidence >= 0.8:
@@ -366,7 +380,7 @@ def display_batch_confidence_report(companies: list[Company]) -> str:
             medium_conf += 1
         else:
             low_conf += 1
-    
+
     lines = [
         "=" * 60,
         "BATCH CONFIDENCE REPORT",
@@ -375,27 +389,29 @@ def display_batch_confidence_report(companies: list[Company]) -> str:
         f"Total Companies: {total}",
         "",
         "Confidence Distribution:",
-        f"  High Confidence (≥80%):   {high_conf:3d} ({high_conf/total*100:.1f}%)",
-        f"  Medium Confidence (50-80%): {medium_conf:3d} ({medium_conf/total*100:.1f}%)",
-        f"  Low Confidence (<50%):    {low_conf:3d} ({low_conf/total*100:.1f}%)",
+        f"  High Confidence (≥80%):   {high_conf:3d} ({high_conf / total * 100:.1f}%)",
+        f"  Medium Confidence (50-80%): {medium_conf:3d} ({medium_conf / total * 100:.1f}%)",
+        f"  Low Confidence (<50%):    {low_conf:3d} ({low_conf / total * 100:.1f}%)",
         "",
         "Data Quality Distribution:",
     ]
-    
+
     # Data quality distribution
     quality_counts = {}
     for company in companies:
         tier = company.data_quality_tier or "unknown"
         quality_counts[tier] = quality_counts.get(tier, 0) + 1
-    
+
     for tier, count in sorted(quality_counts.items()):
-        lines.append(f"  {tier:15s}: {count:3d} ({count/total*100:.1f}%)")
-    
-    lines.extend([
-        "",
-        "Recommendations:",
-    ])
-    
+        lines.append(f"  {tier:15s}: {count:3d} ({count / total * 100:.1f}%)")
+
+    lines.extend(
+        [
+            "",
+            "Recommendations:",
+        ]
+    )
+
     if low_conf / total > 0.3:
         lines.append("  ⚠ High proportion of low-confidence classifications.")
         lines.append("    Consider enriching data sources for better accuracy.")
@@ -405,7 +421,7 @@ def display_batch_confidence_report(companies: list[Company]) -> str:
     else:
         lines.append("  ~ Mixed confidence levels.")
         lines.append("    Review medium-confidence companies for additional data.")
-    
+
     lines.append("=" * 60)
-    
+
     return "\n".join(lines)

@@ -97,7 +97,7 @@ class FinancialHealthScorer:
             # revenue is in millions (e.g., 5.0 = €5M), so multiply by 1,000,000
             revenue_eur = financials.revenue * 1_000_000
             rev_per_emp = revenue_eur / financials.employees
-            
+
             adj = 0.0
             if rev_per_emp > cfg.efficiency_exceptional_threshold:
                 adj = cfg.efficiency_exceptional_bonus

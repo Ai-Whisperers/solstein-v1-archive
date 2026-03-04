@@ -8,8 +8,9 @@ from ...domain.models import (
     RawDataRecord,
     SignalExtractionRecord,
 )
-from ...infrastructure.database_service import DatabaseService
 from ...infrastructure.company_repository import CompanyRepository
+from ...infrastructure.database_service import DatabaseService
+
 # Shared in-memory storage for non-persistent mode, ensuring consistency across instances
 _shared_audit_trails: dict[str, CompanyAnalysisAuditTrail] = {}
 

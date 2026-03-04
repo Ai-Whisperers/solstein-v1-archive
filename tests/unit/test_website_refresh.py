@@ -1,7 +1,8 @@
 """Tests for WebsiteRefreshConnector."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from solstein.infrastructure.connectors.website_refresh import WebsiteRefreshConnector
 from solstein.infrastructure.database import DatabaseManager

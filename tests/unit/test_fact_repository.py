@@ -5,11 +5,8 @@ the FactRepository against real database operations. Database is cleaned
 up after each test.
 """
 
-import uuid
-
 import pytest
-from sqlalchemy import select, text
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from solstein.domain.facts import Fact, FactSource, GatheringBatch
 from solstein.infrastructure.repositories import FactRepository

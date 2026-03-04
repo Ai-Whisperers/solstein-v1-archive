@@ -5,17 +5,17 @@ Run with: pytest tests/unit/domain/test_value_objects.py -v
 
 from __future__ import annotations
 
-import pytest
-from datetime import date
-from decimal import Decimal
-
 # Adjust path for imports
 import sys
+from datetime import date
+from decimal import Decimal
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
-from solstein.domain.value_objects import Money, Percentage, Score, CompanyId, DateRange
+from solstein.domain.value_objects import CompanyId, DateRange, Money, Percentage, Score
 
 
 class TestMoney:

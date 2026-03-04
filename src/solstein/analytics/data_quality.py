@@ -3,8 +3,8 @@
 Provides data quality scoring and reporting for company profiles.
 """
 
-from typing import Dict, Any, List
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -15,9 +15,9 @@ class DataQualityReport:
     overall_score: float  # 0.0 - 1.0
     fields_present: int
     fields_total: int
-    category_scores: Dict[str, float]
-    missing_fields: List[str]
-    recommendations: List[str]
+    category_scores: dict[str, float]
+    missing_fields: list[str]
+    recommendations: list[str]
 
 
 class DataQualityCalculator:
@@ -37,7 +37,7 @@ class DataQualityCalculator:
         for fields in self.FIELD_CATEGORIES.values():
             self.all_fields.extend(fields)
 
-    def calculate_quality(self, company: Dict[str, Any]) -> DataQualityReport:
+    def calculate_quality(self, company: dict[str, Any]) -> DataQualityReport:
         """Calculate data quality for a company."""
         fields_present = 0
         fields_total = len(self.all_fields)
@@ -78,7 +78,7 @@ class DataQualityCalculator:
             recommendations=recommendations,
         )
 
-    def _has_value(self, company: Dict[str, Any], field: str) -> bool:
+    def _has_value(self, company: dict[str, Any], field: str) -> bool:
         """Check if a field has a meaningful value."""
         value = company.get(field)
         if value is None:
@@ -92,7 +92,7 @@ class DataQualityCalculator:
             return field in ["growth_rate", "profit_margin"]
         return True
 
-    def generate_market_report(self, companies: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def generate_market_report(self, companies: list[dict[str, Any]]) -> dict[str, Any]:
         """Generate aggregate data quality report for a market."""
         reports = [self.calculate_quality(c) for c in companies]
 
@@ -133,13 +133,13 @@ class DataQualityCalculator:
 
 
 # Convenience function
-def calculate_company_quality(company: Dict[str, Any]) -> DataQualityReport:
+def calculate_company_quality(company: dict[str, Any]) -> DataQualityReport:
     """Calculate data quality for a single company."""
     calculator = DataQualityCalculator()
     return calculator.calculate_quality(company)
 
 
-def calculate_market_quality(companies: List[Dict[str, Any]]) -> Dict[str, Any]:
+def calculate_market_quality(companies: list[dict[str, Any]]) -> dict[str, Any]:
     """Calculate data quality for a market of companies."""
     calculator = DataQualityCalculator()
     return calculator.generate_market_report(companies)

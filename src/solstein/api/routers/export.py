@@ -9,7 +9,7 @@ from ...analytics.scoring import GrowthScorer
 from ...config import get_settings
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...exporters.excel import ExcelExporter
-from ..dependencies import get_current_user, get_company_repository
+from ..dependencies import get_company_repository, get_current_user
 from ..exceptions import APIError
 
 router = APIRouter(tags=["Export"])
@@ -151,7 +151,6 @@ async def search_with_llm(
         limit=limit,
     )
     if not companies:
-
         return JSONResponse(
             content={
                 "criteria": criteria,

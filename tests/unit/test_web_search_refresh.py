@@ -1,7 +1,8 @@
 """Tests for WebSearchRefreshConnector."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from solstein.infrastructure.connectors.web_search_refresh import WebSearchRefreshConnector
 from solstein.infrastructure.database import DatabaseManager

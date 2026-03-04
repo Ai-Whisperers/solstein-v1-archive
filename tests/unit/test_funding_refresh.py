@@ -1,7 +1,8 @@
 """Tests for FundingRefreshConnector."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from solstein.infrastructure.connectors.funding_refresh import FundingRefreshConnector
 from solstein.infrastructure.database import DatabaseManager

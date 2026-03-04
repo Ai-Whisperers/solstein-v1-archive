@@ -11,11 +11,10 @@ Implements security patterns for:
 """
 
 import logging
-import hashlib
-from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Optional, List
-from dataclasses import dataclass, field
 from collections import defaultdict, deque
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -26,12 +25,12 @@ class AuditLogEntry:
 
     timestamp: datetime
     operation: str  # 'enrich', 'validate', 'enrich_batch', etc.
-    company_id: Optional[str] = None
-    company_name: Optional[str] = None
-    source: Optional[str] = None  # 'SEC_EDGAR', 'Companies House', 'News Signals'
+    company_id: str | None = None
+    company_name: str | None = None
+    source: str | None = None  # 'SEC_EDGAR', 'Companies House', 'News Signals'
     status: str = "SUCCESS"  # 'SUCCESS', 'FAILURE', 'SKIPPED'
-    reason: Optional[str] = None
-    user_id: Optional[str] = None
+    reason: str | None = None
+    user_id: str | None = None
     duration_ms: float = 0.0
     data_sensitivity: str = "PUBLIC"  # 'PUBLIC', 'CONFIDENTIAL', 'RESTRICTED'
 
@@ -54,7 +53,7 @@ class AuditLogger:
         company_name: str,
         company_id: str,
         source: str,
-        user_id: Optional[str] = None,
+        user_id: str | None = None,
     ) -> None:
         """Log start of enrichment operation."""
         entry = AuditLogEntry(
@@ -78,8 +77,8 @@ class AuditLogger:
         company_id: str,
         source: str,
         duration_ms: float,
-        fields_enriched: List[str],
-        user_id: Optional[str] = None,
+        fields_enriched: list[str],
+        user_id: str | None = None,
     ) -> None:
         """Log successful enrichment completion."""
         entry = AuditLogEntry(
@@ -106,7 +105,7 @@ class AuditLogger:
         source: str,
         error: str,
         duration_ms: float = 0.0,
-        user_id: Optional[str] = None,
+        user_id: str | None = None,
     ) -> None:
         """Log enrichment failure."""
         entry = AuditLogEntry(
@@ -132,7 +131,7 @@ class AuditLogger:
         company_id: str,
         validation_rule: str,
         reason: str,
-        user_id: Optional[str] = None,
+        user_id: str | None = None,
     ) -> None:
         """Log validation failure."""
         entry = AuditLogEntry(
@@ -151,7 +150,7 @@ class AuditLogger:
             extra={"audit": entry},
         )
 
-    def get_audit_trail(self, company_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_audit_trail(self, company_id: str | None = None) -> list[dict[str, Any]]:
         """Get audit trail for specific company or all operations."""
         if company_id:
             entries = [e for e in self.entries if e.company_id == company_id]
@@ -172,7 +171,7 @@ class AuditLogger:
             for e in entries
         ]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get audit logging statistics."""
         entries_list = list(self.entries)
         if not entries_list:
@@ -203,20 +202,20 @@ class AuditLogger:
 
 class RedisRateLimiter:
     """Redis-backed rate limiter for API protection (Phase 13.5).
-    
+
     IMPORTANT: Redis is OPTIONAL. If redis_client=None, automatically falls back to
     in-memory rate limiting. This means:
-    
+
     - With Redis: Distributed rate limiting across multiple servers (shared state)
     - Without Redis (redis_client=None): Per-server rate limiting (no shared state)
-    
+
     Current production uses memory fallback (redis_client=None), so rate limits are
     per-server, not distributed across servers.
     """
 
     def __init__(self, requests_per_minute: int = 60, redis_client=None):
         """Initialize Redis-backed rate limiter.
-        
+
         Args:
             requests_per_minute: Max requests per minute per client (default: 60)
             redis_client: Redis client instance (optional, uses memory fallback if None)
@@ -228,6 +227,7 @@ class RedisRateLimiter:
         self.memory_fallback = SimpleRateLimiter(requests_per_minute)
         # Expose memory fallback's client_requests for test compatibility
         self.client_requests = self.memory_fallback.client_requests
+
     def is_allowed(self, client_id: str) -> bool:
         """Check if client is allowed to make request."""
         if self.redis_client:
@@ -281,7 +281,7 @@ class SimpleRateLimiter:
             requests_per_minute: Max requests per minute per client
         """
         self.requests_per_minute = requests_per_minute
-        self.client_requests: Dict[str, deque] = defaultdict(deque)
+        self.client_requests: dict[str, deque] = defaultdict(deque)
 
     def is_allowed(self, client_id: str) -> bool:
         """Check if client is allowed to make request."""
@@ -319,7 +319,7 @@ class InputValidator:
     """Enhanced input validation for API endpoints (Phase 9 - Security item 1)."""
 
     @staticmethod
-    def validate_company_id(company_id: str) -> tuple[bool, Optional[str]]:
+    def validate_company_id(company_id: str) -> tuple[bool, str | None]:
         """Validate company ID format."""
         if not company_id or not isinstance(company_id, str):
             return False, "Company ID must be non-empty string"
@@ -341,7 +341,7 @@ class InputValidator:
         return True, None
 
     @staticmethod
-    def validate_ticker(ticker: str) -> tuple[bool, Optional[str]]:
+    def validate_ticker(ticker: str) -> tuple[bool, str | None]:
         """Validate stock ticker format."""
         if not ticker or not isinstance(ticker, str):
             return False, "Ticker must be non-empty string"
@@ -356,7 +356,7 @@ class InputValidator:
         return True, None
 
     @staticmethod
-    def validate_company_number(company_number: str) -> tuple[bool, Optional[str]]:
+    def validate_company_number(company_number: str) -> tuple[bool, str | None]:
         """Validate UK company number format."""
         if not company_number or not isinstance(company_number, str):
             return False, "Company number must be non-empty string"
@@ -387,7 +387,7 @@ class SecurityHeadersConfig:
     """Security headers configuration for API responses (Phase 9 - Security item 9)."""
 
     @staticmethod
-    def get_security_headers() -> Dict[str, str]:
+    def get_security_headers() -> dict[str, str]:
         """Get recommended security headers."""
         return {
             "X-Content-Type-Options": "nosniff",  # Prevent MIME sniffing

@@ -53,6 +53,7 @@ def instrumented_registry(real_settings):
 def reset_rate_limiter():
     """Reset rate limiter before each test to avoid cross-test pollution."""
     from solstein.data.security_hardening import rate_limiter
+
     rate_limiter.client_requests.clear()
     yield
     rate_limiter.client_requests.clear()

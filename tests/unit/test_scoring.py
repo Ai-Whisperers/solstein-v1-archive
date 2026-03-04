@@ -9,7 +9,6 @@ Covers:
 """
 
 import pytest
-from tests.factories import make_company, make_lead_company, make_phoenix_company
 
 from solstein.analytics.scoring import (
     CompetitiveOverlapCalculator,
@@ -23,6 +22,7 @@ from solstein.domain.models import (
     CompanyTier,
     FinancialMetric,
 )
+from tests.factories import make_company, make_lead_company, make_phoenix_company
 
 # ---------------------------------------------------------------------------
 # Fixtures

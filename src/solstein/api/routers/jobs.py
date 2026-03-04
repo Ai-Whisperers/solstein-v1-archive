@@ -9,9 +9,9 @@ from typing import Any
 from fastapi import APIRouter, status
 from loguru import logger
 
-
 router = APIRouter(tags=["Jobs"])
 from ..exceptions import APIError
+
 router = APIRouter(tags=["Jobs"])
 
 

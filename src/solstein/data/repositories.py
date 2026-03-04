@@ -1,7 +1,7 @@
+import warnings
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-import warnings
 
 from loguru import logger
 
@@ -9,7 +9,6 @@ from ..config import get_settings
 from ..core.repositories import CompanyFilter, CompanyRepository
 from ..data.loaders import CompetitorDataLoader
 from ..domain.models import Company, FinancialMetric
-
 
 # ============================================================================
 # MIGRATION GUIDE: JsonFileRepository Deprecation
@@ -41,7 +40,7 @@ from ..domain.models import Company, FinancialMetric
 class JsonFileRepository(CompanyRepository):
     """
     Repository implementation that reads from JSON files.
-    
+
     .. deprecated:: 1.0.0
         Use :class:`SupabaseRepository` or :class:`SqlAlchemyRepository` instead.
     """
@@ -143,7 +142,7 @@ class JsonFileRepository(CompanyRepository):
 
     def save(self, company: Company) -> Company:
         """Simulate saving to JSON.
-        
+
         .. deprecated:: 1.0.0
             JsonFileRepository does not persist data. Use SupabaseRepository instead.
         """
@@ -157,7 +156,7 @@ class JsonFileRepository(CompanyRepository):
 
     def delete(self, company_id: str) -> bool:
         """Simulate deletion.
-        
+
         .. deprecated:: 1.0.0
             JsonFileRepository does not persist data. Use SupabaseRepository instead.
         """

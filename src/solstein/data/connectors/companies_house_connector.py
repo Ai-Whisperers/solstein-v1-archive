@@ -1,26 +1,16 @@
 from __future__ import annotations
 
-
-
 import httpx
 
-
-
 from solstein.data.connectors.constants import (
-
     COMPANIES_HOUSE_DEFAULT_CONFIDENCE,
-
     COMPANIES_HOUSE_REQUEST_TIMEOUT_S,
-
     HTTP_STATUS_NOT_FOUND,
-
     HTTP_STATUS_RATE_LIMITED,
-
     HTTP_STATUS_SERVER_ERROR_MIN,
-
     HTTP_STATUS_UNAUTHORIZED,
-
 )
+
 
 class CompaniesHouseNotConfiguredError(RuntimeError):
     pass
@@ -42,6 +32,7 @@ class CompaniesHouseConnector:
         user_agent: str | None = None,
     ):
         from solstein.config import get_settings
+
         settings = get_settings()
         self.api_key: str | None = api_key or settings.companies_house_api_key
         self.api_base: str = api_base or self.DEFAULT_API_BASE

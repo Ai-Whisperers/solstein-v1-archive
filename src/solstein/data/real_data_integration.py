@@ -14,13 +14,13 @@ Usage:
 
 import asyncio
 import json
-from pathlib import Path
-from typing import List, Dict, Any, Optional
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 from loguru import logger
 
-from .web_research_pipeline import WebResearcher, SyntheticDataDetector, ResearchResult
+from .web_research_pipeline import SyntheticDataDetector, WebResearcher
 
 
 class RealDataLoader:
@@ -28,9 +28,9 @@ class RealDataLoader:
 
     def __init__(self, min_confidence: float = 0.3):
         self.min_confidence = min_confidence
-        self.validation_errors: List[str] = []
+        self.validation_errors: list[str] = []
 
-    async def load_companies(self, company_names: List[str]) -> List[Dict[str, Any]]:
+    async def load_companies(self, company_names: list[str]) -> list[dict[str, Any]]:
         """Load real data for multiple companies."""
         logger.info(f"Loading real data for {len(company_names)} companies...")
 
@@ -71,7 +71,7 @@ class RealDataLoader:
         logger.info(f"✅ Loaded {len(valid_companies)}/{len(company_names)} companies with real data")
         return valid_companies
 
-    async def validate_existing_data(self, data_path: Path) -> Dict[str, Any]:
+    async def validate_existing_data(self, data_path: Path) -> dict[str, Any]:
         """Validate existing competitor_data.json and flag synthetic entries."""
         logger.info(f"Validating existing data from {data_path}...")
 
@@ -129,12 +129,12 @@ class RealDataLoader:
 
         return summary
 
-    async def replace_synthetic_data(self, input_path: Path, output_path: Path) -> Dict[str, Any]:
+    async def replace_synthetic_data(self, input_path: Path, output_path: Path) -> dict[str, Any]:
         """Replace synthetic data in competitor_data.json with real web data."""
         logger.info(f"Replacing synthetic data: {input_path} -> {output_path}")
 
         # First validate existing data
-        validation = await self.validate_existing_data(input_path)
+        await self.validate_existing_data(input_path)
 
         # Load existing data
         with open(input_path) as f:
@@ -214,7 +214,7 @@ class RealDataLoader:
 
 
 # Fix for scoring unit-mismatch bug
-def fix_scoring_calculations(company_data: Dict[str, Any]) -> Dict[str, Any]:
+def fix_scoring_calculations(company_data: dict[str, Any]) -> dict[str, Any]:
     """
     Fix the unit-mismatch bug in scoring calculations.
 

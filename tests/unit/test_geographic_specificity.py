@@ -24,35 +24,33 @@ class TestGeographicSpecificity:
         assert eneve is not None, "Eneve not found in companies"
 
         # Should have exactly 7 countries
-        assert len(eneve.geographic_presence) == 7, \
+        assert len(eneve.geographic_presence) == 7, (
             f"Expected 7 countries, got {len(eneve.geographic_presence)}: {eneve.geographic_presence}"
+        )
 
         # Should NOT contain continent-level entries
-        assert "Europe" not in eneve.geographic_presence, \
+        assert "Europe" not in eneve.geographic_presence, (
             "Geographic presence should not contain 'Europe' (continent-level)"
-        assert "EU" not in eneve.geographic_presence, \
-            "Geographic presence should not contain 'EU'"
+        )
+        assert "EU" not in eneve.geographic_presence, "Geographic presence should not contain 'EU'"
 
         # Should contain specific countries (actual data from loader)
-        expected_countries = {
-            "Germany", "France", "UK", "Netherlands",
-            "Belgium", "Austria", "Switzerland"
-        }
+        expected_countries = {"Germany", "France", "UK", "Netherlands", "Belgium", "Austria", "Switzerland"}
         actual_countries = set(eneve.geographic_presence)
-        assert actual_countries == expected_countries, \
-            f"Expected {expected_countries}, got {actual_countries}"
+        assert actual_countries == expected_countries, f"Expected {expected_countries}, got {actual_countries}"
 
     def test_geographic_presence_is_list_of_strings(self, companies):
         """All geographic_presence fields should be lists of country strings."""
         for company in companies:
-            assert isinstance(company.geographic_presence, list), \
+            assert isinstance(company.geographic_presence, list), (
                 f"{company.name}: geographic_presence should be a list"
+            )
 
             for country in company.geographic_presence:
-                assert isinstance(country, str), \
+                assert isinstance(country, str), (
                     f"{company.name}: geographic_presence items should be strings, got {type(country)}"
-                assert len(country) > 0, \
-                    f"{company.name}: geographic_presence items should not be empty"
+                )
+                assert len(country) > 0, f"{company.name}: geographic_presence items should not be empty"
 
     def test_no_continent_level_entries(self, companies):
         """No company should have continent-level entries like 'Europe', 'Asia', etc."""
@@ -60,8 +58,9 @@ class TestGeographicSpecificity:
 
         for company in companies:
             for country in company.geographic_presence:
-                assert country not in continents, \
+                assert country not in continents, (
                     f"{company.name}: contains continent-level entry '{country}' instead of specific countries"
+                )
 
     def test_geographic_data_source_tracked(self, companies):
         """Geographic presence data source should be tracked."""
@@ -69,15 +68,12 @@ class TestGeographicSpecificity:
         assert eneve is not None
 
         # Should have data_source_per_field tracking
-        assert hasattr(eneve, 'data_source_per_field'), \
-            "Company should have data_source_per_field attribute"
+        assert hasattr(eneve, "data_source_per_field"), "Company should have data_source_per_field attribute"
 
         # Geographic presence source should be documented
-        geo_source = eneve.data_source_per_field.get('geographic_presence')
-        assert geo_source is not None, \
-            "geographic_presence data source should be tracked"
-        assert geo_source in ["JSON", "Markdown"], \
-            f"Data source should be JSON or Markdown, got {geo_source}"
+        geo_source = eneve.data_source_per_field.get("geographic_presence")
+        assert geo_source is not None, "geographic_presence data source should be tracked"
+        assert geo_source in ["JSON", "Markdown"], f"Data source should be JSON or Markdown, got {geo_source}"
 
     def test_geographic_specificity_deterministic(self):
         """Geographic data should be deterministic across multiple loads."""
@@ -91,13 +87,12 @@ class TestGeographicSpecificity:
                 results.append(tuple(sorted(eneve.geographic_presence)))
 
         # All runs should produce identical results
-        assert len(set(results)) == 1, \
-            f"Geographic data should be deterministic, got different results: {results}"
+        assert len(set(results)) == 1, f"Geographic data should be deterministic, got different results: {results}"
 
     def test_all_companies_have_geographic_presence(self, companies):
         """All companies should have a geographic_presence field (even if empty)."""
         for company in companies:
-            assert hasattr(company, 'geographic_presence'), \
-                f"{company.name}: missing geographic_presence attribute"
-            assert isinstance(company.geographic_presence, list), \
+            assert hasattr(company, "geographic_presence"), f"{company.name}: missing geographic_presence attribute"
+            assert isinstance(company.geographic_presence, list), (
                 f"{company.name}: geographic_presence should be a list"
+            )

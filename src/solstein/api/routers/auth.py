@@ -4,8 +4,6 @@ Phase 1, Item 1.2: JWT Authentication Endpoints
 """
 
 import hashlib
-from datetime import timedelta
-from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -13,7 +11,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 from ...config import get_settings
-from ...security.jwt_handler import jwt_handler, TokenResponse, UserPayload
+from ...security.jwt_handler import TokenResponse, UserPayload, jwt_handler
 from ..dependencies import get_current_user
 
 router = APIRouter(tags=["Authentication"])
@@ -22,10 +20,10 @@ security = HTTPBearer()
 
 class LoginRequest(BaseModel):
     """Request model for login endpoint."""
-    
+
     email: str
     password: str
-    
+
     class Config:
         json_schema_extra = {"example": {"email": "user@example.com", "password": "securepassword123"}}
 
@@ -56,8 +54,8 @@ async def login(request: LoginRequest) -> TokenResponse:
         HTTPException: 401 if authentication fails or not configured
     """
     settings = get_settings()
-    admin_email: Optional[str] = settings.security.admin_email
-    admin_password_hash: Optional[str] = settings.security.admin_password_hash
+    admin_email: str | None = settings.security.admin_email
+    admin_password_hash: str | None = settings.security.admin_password_hash
 
     logger.info(f"Login attempt for user: {request.email}")
 
@@ -102,7 +100,7 @@ async def login(request: LoginRequest) -> TokenResponse:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Token generation failed",
-        )
+        ) from e
 
 
 @router.post("/auth/refresh", response_model=TokenResponse)
@@ -139,7 +137,7 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Depends(secu
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
 
 @router.get("/auth/me", response_model=UserPayload)

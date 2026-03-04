@@ -1,7 +1,8 @@
 """Tests for SECEDGARRefreshConnector."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from solstein.infrastructure.connectors.sec_edgar_refresh import SECEDGARRefreshConnector
 from solstein.infrastructure.database import DatabaseManager

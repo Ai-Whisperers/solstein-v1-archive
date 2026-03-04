@@ -15,13 +15,14 @@ Data Sources:
 """
 
 import asyncio
+import contextlib
 import json
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional, List, Dict
-from urllib.parse import urljoin, urlparse
+from typing import Any
+from urllib.parse import urljoin
 
 import httpx
 from bs4 import BeautifulSoup
@@ -33,25 +34,25 @@ class ResearchResult:
     """Result from web research for a company."""
 
     company_name: str
-    website: Optional[str] = None
-    description: Optional[str] = None
-    industry: Optional[str] = None
-    founded_year: Optional[int] = None
-    employees: Optional[int] = None
-    headquarters: Optional[str] = None
-    revenue: Optional[float] = None  # in millions
-    funding_raised: Optional[float] = None  # in millions
-    valuation: Optional[float] = None  # in millions
-    github_url: Optional[str] = None
-    linkedin_url: Optional[str] = None
-    twitter_url: Optional[str] = None
-    ai_score: Optional[float] = None
-    data_sources: List[str] = field(default_factory=list)
+    website: str | None = None
+    description: str | None = None
+    industry: str | None = None
+    founded_year: int | None = None
+    employees: int | None = None
+    headquarters: str | None = None
+    revenue: float | None = None  # in millions
+    funding_raised: float | None = None  # in millions
+    valuation: float | None = None  # in millions
+    github_url: str | None = None
+    linkedin_url: str | None = None
+    twitter_url: str | None = None
+    ai_score: float | None = None
+    data_sources: list[str] = field(default_factory=list)
     confidence: float = 0.0
     last_updated: datetime = field(default_factory=datetime.now)
-    raw_data: Dict[str, Any] = field(default_factory=dict)
+    raw_data: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary format."""
         return {
             "company_name": self.company_name,
@@ -104,7 +105,7 @@ class WebResearcher:
         safe_name = re.sub(r"[^\w]", "_", company_name.lower())
         return self.cache_dir / f"{safe_name}.json"
 
-    def _load_from_cache(self, company_name: str) -> Optional[ResearchResult]:
+    def _load_from_cache(self, company_name: str) -> ResearchResult | None:
         """Load cached research result if fresh (< 7 days)."""
         cache_path = self._get_cache_path(company_name)
         if not cache_path.exists():
@@ -148,7 +149,7 @@ class WebResearcher:
         cache_path = self._get_cache_path(result.company_name)
         cache_path.write_text(json.dumps(result.__dict__, default=str, indent=2))
 
-    async def search_web(self, query: str) -> List[Dict[str, str]]:
+    async def search_web(self, query: str) -> list[dict[str, str]]:
         """Search the web for information."""
         # Use Brave Search API or similar
         try:
@@ -164,7 +165,7 @@ class WebResearcher:
             logger.warning(f"Web search failed: {e}")
             return []
 
-    async def scrape_website(self, url: str) -> Dict[str, Any]:
+    async def scrape_website(self, url: str) -> dict[str, Any]:
         """Scrape a company website for information."""
         try:
             response = await self.client.get(url, follow_redirects=True)
@@ -201,7 +202,7 @@ class WebResearcher:
                             addr = json_data["address"]
                             if isinstance(addr, dict):
                                 data["headquarters"] = addr.get("addressLocality", addr.get("addressCountry"))
-                except:
+                except Exception:
                     pass
 
             # Look for About page
@@ -215,7 +216,7 @@ class WebResearcher:
             logger.warning(f"Failed to scrape {url}: {e}")
             return {}
 
-    async def extract_funding_info(self, search_results: List[Dict]) -> Dict[str, Any]:
+    async def extract_funding_info(self, search_results: list[dict]) -> dict[str, Any]:
         """Extract funding information from search results."""
         funding_data = {"funding_raised": None, "valuation": None, "funding_rounds": []}
 
@@ -243,12 +244,12 @@ class WebResearcher:
                             funding_data["valuation"] = amount
                         else:
                             funding_data["funding_raised"] = amount
-                    except:
+                    except Exception:
                         pass
 
         return funding_data
 
-    async def research_company(self, company_name: str) -> Optional[ResearchResult]:
+    async def research_company(self, company_name: str) -> ResearchResult | None:
         """Research a company using web sources."""
         logger.info(f"🔍 Researching {company_name}...")
 
@@ -290,10 +291,8 @@ class WebResearcher:
             if website_data.get("employees"):
                 result.employees = website_data["employees"]
             if website_data.get("founded"):
-                try:
+                with contextlib.suppress(BaseException):
                     result.founded_year = int(str(website_data["founded"])[:4])
-                except:
-                    pass
             if website_data.get("headquarters"):
                 result.headquarters = website_data["headquarters"]
 
@@ -352,7 +351,7 @@ class WebResearcher:
 
         return result
 
-    async def research_companies(self, company_names: List[str]) -> List[ResearchResult]:
+    async def research_companies(self, company_names: list[str]) -> list[ResearchResult]:
         """Research multiple companies concurrently."""
         tasks = [self.research_company(name) for name in company_names]
         results = await asyncio.gather(*tasks)
@@ -377,7 +376,7 @@ class SyntheticDataDetector:
     }
 
     @classmethod
-    def is_synthetic(cls, company_data: Dict[str, Any]) -> bool:
+    def is_synthetic(cls, company_data: dict[str, Any]) -> bool:
         """Check if company data appears synthetic."""
         name = company_data.get("company_name", "").lower()
 
@@ -404,7 +403,7 @@ class SyntheticDataDetector:
         return False
 
     @classmethod
-    def validate_data_authenticity(cls, company_data: Dict[str, Any]) -> List[str]:
+    def validate_data_authenticity(cls, company_data: dict[str, Any]) -> list[str]:
         """Validate data authenticity and return issues."""
         issues = []
 
@@ -433,7 +432,7 @@ class SyntheticDataDetector:
                 updated = datetime.fromisoformat(last_updated.replace("Z", "+00:00"))
                 if datetime.now() - updated > timedelta(days=90):
                     issues.append("Data is >90 days old")
-            except:
+            except Exception:
                 pass
 
         return issues

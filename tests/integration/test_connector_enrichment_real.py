@@ -10,12 +10,10 @@ not fake fixtures. Verifies that:
 5. Enrichment sources are recorded
 """
 
-import pytest
-from datetime import datetime, timezone
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock
 
-from solstein.domain.models import Company, FinancialMetric, ConfidenceLevel
 from solstein.data.unified_loader import UnifiedCompany, UnifiedCompanyLoader
+from solstein.domain.models import ConfidenceLevel, FinancialMetric
 
 
 class TestSECEdgarEnrichment:

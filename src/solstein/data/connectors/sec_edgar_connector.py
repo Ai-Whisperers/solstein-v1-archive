@@ -1,37 +1,20 @@
 from __future__ import annotations
 
-
-
 import time
-
 from collections.abc import Iterable
-
 from dataclasses import dataclass
-
 from datetime import date
-
 from typing import Protocol, cast, runtime_checkable
 
-
-
 import pandas as pd
-
 from loguru import logger
 
-
-
 from solstein.data.connectors.constants import (
-
     SEC_EDGAR_DEFAULT_BASE_SLEEP_S,
-
     SEC_EDGAR_DEFAULT_CONFIDENCE,
-
     SEC_EDGAR_DEFAULT_MAX_ATTEMPTS,
-
     SEC_EDGAR_DEFAULT_MAX_SLEEP_S,
-
     SEC_EDGAR_DEFAULT_RATE_LIMIT_SLEEP_S,
-
 )
 
 
@@ -80,8 +63,11 @@ class SECEdgarConnector:
 
     def __init__(self, user_agent: str | None = None):
         from solstein.config import get_settings
+
         settings = get_settings()
-        self.user_agent: str = user_agent or settings.sec_user_agent or "Solstein/0.1 (contact: contact@ai-whisperers.com)"
+        self.user_agent: str = (
+            user_agent or settings.sec_user_agent or "Solstein/0.1 (contact: contact@ai-whisperers.com)"
+        )
 
     def _sleep(self, seconds: float) -> None:
         time.sleep(seconds)

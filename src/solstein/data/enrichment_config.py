@@ -13,8 +13,6 @@ Centralized configuration for the enrichment system with:
 import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Optional, Any, Dict, List, Union
-
 
 from loguru import logger
 
@@ -97,7 +95,7 @@ COMPANIES_HOUSE_API_KEY
   - Purpose: Access UK company financial data
   - Value: Your Companies House API key
   - Get it: https://www.register.companieshouse.gov.uk/developers/
-  
+
 ## Optional Environment Variables
 
 SEC_EDGAR_API_KEY
@@ -105,41 +103,41 @@ SEC_EDGAR_API_KEY
   - Value: Your SEC EDGAR API key
   - Get it: https://www.sec.gov/cgi-bin/browse-edgar
   - Default: Uses public tier without key
-  
+
 NEWS_API_KEY
   - Purpose: News signal detection
   - Value: Your NewsAPI key
   - Get it: https://newsapi.org/
   - Default: Signal detection disabled without key
-  
+
 ## Configuration Parameters
 
 SEC_EDGAR_TIMEOUT
   - Purpose: API timeout in seconds
   - Default: 30
   - Range: 1-300
-  
+
 COMPANIES_HOUSE_TIMEOUT
   - Purpose: API timeout in seconds
   - Default: 30
   - Range: 1-300
-  
+
 NEWS_API_TIMEOUT
   - Purpose: API timeout in seconds
   - Default: 30
   - Range: 1-300
-  
+
 MAX_RETRIES
   - Purpose: Max retry count for failed API calls
   - Default: 3
   - Range: 1-10
-  
+
 ENRICHMENT_BATCH_SIZE
   - Purpose: Batch size for processing
   - Default: 10
   - Range: 1-1000
   - Note: Higher batch size = faster but more memory
-  
+
 ## Example .env file
 
 COMPANIES_HOUSE_API_KEY=your-api-key-here
@@ -161,7 +159,7 @@ class ConnectorConfig:
     enabled: bool = True
     timeout_seconds: int = 30
     max_retries: int = 3
-    api_key: Optional[str] = None
+    api_key: str | None = None
     batch_size: int = 10
     cache_ttl_hours: int = 24
 
@@ -325,7 +323,7 @@ class UnifiedCompanyLoaderConfig:
 
 
 # Global configuration instance
-_global_config: Optional[UnifiedCompanyLoaderConfig] = None
+_global_config: UnifiedCompanyLoaderConfig | None = None
 
 
 def get_config() -> UnifiedCompanyLoaderConfig:

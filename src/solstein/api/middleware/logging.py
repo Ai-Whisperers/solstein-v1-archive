@@ -8,13 +8,14 @@ Logs all API requests and responses with:
 - Error details (if failed)
 """
 
+import json
 import logging
 import time
 import uuid
+from collections.abc import Callable
+
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from typing import Callable
-import json
 
 logger = logging.getLogger(__name__)
 

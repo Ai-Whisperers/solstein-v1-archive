@@ -3,11 +3,13 @@
 Run with: pytest tests/test_llm_health.py -v
 """
 
-import asyncio
-import pytest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
+from src.solstein.llm.enhanced_client import (
+    EnhancedLLMClient,
+)
 from src.solstein.llm.health_checker import (
     ProviderError,
     ProviderErrorType,
@@ -16,10 +18,6 @@ from src.solstein.llm.health_checker import (
     ProviderStatus,
     get_health_checker,
     reset_health_checker,
-)
-from src.solstein.llm.enhanced_client import (
-    EnhancedLLMClient,
-    LLMGenerationError,
 )
 
 

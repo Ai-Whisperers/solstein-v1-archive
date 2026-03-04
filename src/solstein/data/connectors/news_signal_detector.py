@@ -26,31 +26,19 @@ Features:
 
 """
 
-
-
 import re
-
 from datetime import datetime, timedelta
-
 from typing import Any
 
-
-
 import requests
-
 from loguru import logger
 
-
-
 from solstein.data.connectors.constants import (
-
     HTTP_STATUS_RATE_LIMITED,
-
     NEWS_SIGNAL_DAILY_QUERY_LIMIT,
-
     NEWS_SIGNAL_REQUEST_TIMEOUT_S,
-
 )
+
 
 class NewsSignalDetector:
     """
@@ -104,6 +92,7 @@ class NewsSignalDetector:
             ValueError: If no API key provided and NEWSAPI_KEY not in environment.
         """
         from solstein.config import get_settings
+
         settings = get_settings()
         self.api_key = api_key or settings.news_api_key
         if not self.api_key:

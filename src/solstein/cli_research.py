@@ -14,13 +14,10 @@ import asyncio
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import click
-from loguru import logger
 
-from .data.real_data_integration import RealDataLoader, fix_scoring_calculations
-from .data.web_research_pipeline import SyntheticDataDetector
+from .data.real_data_integration import RealDataLoader
 
 
 @click.command(name="research-companies")
@@ -78,7 +75,7 @@ def research_companies(company_names: tuple[str, ...], output: Path, min_confide
         click.echo(f"✅ Saved {len(companies)} companies to {output}")
 
         # Show summary
-        click.echo(f"\n📊 Research Summary:")
+        click.echo("\n📊 Research Summary:")
         click.echo(f"  Requested: {len(company_names)}")
         click.echo(f"  Found: {len(companies)}")
         click.echo(f"  Success rate: {len(companies) / len(company_names) * 100:.1f}%")
@@ -158,7 +155,7 @@ def validate_data(input: Path, detailed: bool):
 
         # Exit with error code if too much synthetic data
         if validation["synthetic_count"] > validation["total_companies"] * 0.5:
-            click.echo(f"\n❌ ERROR: More than 50% synthetic data detected!")
+            click.echo("\n❌ ERROR: More than 50% synthetic data detected!")
             click.echo("Run 'solstein replace-synthetic' to replace with real data.")
             raise click.exceptions.Exit(1)
 
@@ -283,10 +280,10 @@ def replace_synthetic(input: Path, output: Path, companies: tuple[str, ...]):
         with open(output, "w") as f:
             json.dump(output_data, f, indent=2)
 
-        click.echo(f"\n✅ Successfully replaced synthetic data!")
+        click.echo("\n✅ Successfully replaced synthetic data!")
         click.echo(f"   Real companies saved: {len(real_companies)}")
         click.echo(f"   Output: {output}")
-        click.echo(f"\n📊 Quality Report:")
+        click.echo("\n📊 Quality Report:")
 
         for c in real_companies:
             dq = c.get("data_quality", {})
@@ -298,10 +295,10 @@ def replace_synthetic(input: Path, output: Path, companies: tuple[str, ...]):
                 f"  • {c['company_name']}: {click.style(f'{confidence:.0%}', fg=conf_color)} confidence, {sources} sources"
             )
 
-        click.echo(f"\n💡 Next steps:")
+        click.echo("\n💡 Next steps:")
         click.echo(f"   1. Review the output file: {output}")
         click.echo(f"   2. Update your config to use: {output}")
-        click.echo(f"   3. Regenerate reports with: solstein generate-report [COMPANY]")
+        click.echo("   3. Regenerate reports with: solstein generate-report [COMPANY]")
 
     asyncio.run(_replace())
 

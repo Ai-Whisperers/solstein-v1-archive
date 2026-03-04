@@ -5,7 +5,6 @@ and provides tools to measure and verify performance.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List
 
 
 @dataclass
@@ -19,7 +18,7 @@ class QuerySLA:
 
 
 # Define SLAs for common queries
-QUERY_SLAS: Dict[str, QuerySLA] = {
+QUERY_SLAS: dict[str, QuerySLA] = {
     "get_company_by_id": QuerySLA(
         name="Get company by ID",
         description="Fetch a single company record by ID",
@@ -82,7 +81,7 @@ def get_sla(query_name: str) -> QuerySLA | None:
     return QUERY_SLAS.get(query_name)
 
 
-def list_all_slas() -> List[QuerySLA]:
+def list_all_slas() -> list[QuerySLA]:
     """List all defined SLAs.
 
     Returns:

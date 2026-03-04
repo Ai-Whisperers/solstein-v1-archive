@@ -122,17 +122,20 @@ class TestLoadMarkdownCompanies:
                 Path("dexter-energy.md"),
             ]
 
-            with patch.object(
-                loader.markdown_extractor,
-                "extract_from_file",
-                side_effect=[
-                    {"name": "Eneve"},
-                    {"name": "Dexter Energy"},
-                ],
-            ), patch.object(
-                loader.markdown_extractor,
-                "to_company_profile",
-                side_effect=[mock_company_1, mock_company_2],
+            with (
+                patch.object(
+                    loader.markdown_extractor,
+                    "extract_from_file",
+                    side_effect=[
+                        {"name": "Eneve"},
+                        {"name": "Dexter Energy"},
+                    ],
+                ),
+                patch.object(
+                    loader.markdown_extractor,
+                    "to_company_profile",
+                    side_effect=[mock_company_1, mock_company_2],
+                ),
             ):
                 result = loader._load_markdown_companies()
                 assert len(result) == 2
@@ -152,17 +155,20 @@ class TestLoadMarkdownCompanies:
             ]
 
             # First succeeds, second raises exception
-            with patch.object(
-                loader.markdown_extractor,
-                "extract_from_file",
-                side_effect=[
-                    {"name": "Eneve"},
-                    Exception("Parse error"),
-                ],
-            ), patch.object(
-                loader.markdown_extractor,
-                "to_company_profile",
-                return_value=mock_company,
+            with (
+                patch.object(
+                    loader.markdown_extractor,
+                    "extract_from_file",
+                    side_effect=[
+                        {"name": "Eneve"},
+                        Exception("Parse error"),
+                    ],
+                ),
+                patch.object(
+                    loader.markdown_extractor,
+                    "to_company_profile",
+                    return_value=mock_company,
+                ),
             ):
                 result = loader._load_markdown_companies()
                 # Should only have the successful one
@@ -469,10 +475,12 @@ class TestLoadUnifiedCompanies:
         """load_unified_companies should return a list."""
         loader = UnifiedCompanyLoader()
 
-        with patch.object(loader.json_loader, "load_companies", return_value=[]):
-            with patch.object(loader, "_load_markdown_companies", return_value=[]):
-                result = loader.load_unified_companies()
-                assert isinstance(result, list)
+        with (
+            patch.object(loader.json_loader, "load_companies", return_value=[]),
+            patch.object(loader, "_load_markdown_companies", return_value=[]),
+        ):
+            result = loader.load_unified_companies()
+            assert isinstance(result, list)
 
     def test_load_unified_companies_json_only(self):
         """load_unified_companies should handle JSON-only companies."""
@@ -480,13 +488,15 @@ class TestLoadUnifiedCompanies:
 
         json_company = make_company(id="test-1", name="Test Corp")
 
-        with patch.object(loader.json_loader, "load_companies", return_value=[json_company]):
-            with patch.object(loader, "_load_markdown_companies", return_value=[]):
-                result = loader.load_unified_companies()
+        with (
+            patch.object(loader.json_loader, "load_companies", return_value=[json_company]),
+            patch.object(loader, "_load_markdown_companies", return_value=[]),
+        ):
+            result = loader.load_unified_companies()
 
-                assert len(result) == 1
-                assert result[0].id == "test-1"
-                assert result[0].data_source_per_field["revenue"] == "JSON"
+            assert len(result) == 1
+            assert result[0].id == "test-1"
+            assert result[0].data_source_per_field["revenue"] == "JSON"
 
     def test_load_unified_companies_markdown_only(self):
         """load_unified_companies should handle Markdown-only companies."""
@@ -494,13 +504,15 @@ class TestLoadUnifiedCompanies:
 
         markdown_company = make_company(id="eneve", name="Eneve")
 
-        with patch.object(loader.json_loader, "load_companies", return_value=[]):
-            with patch.object(loader, "_load_markdown_companies", return_value=[markdown_company]):
-                result = loader.load_unified_companies()
+        with (
+            patch.object(loader.json_loader, "load_companies", return_value=[]),
+            patch.object(loader, "_load_markdown_companies", return_value=[markdown_company]),
+        ):
+            result = loader.load_unified_companies()
 
-                assert len(result) == 1
-                assert result[0].id == "eneve"
-                assert result[0].data_source_per_field["revenue"] == "Markdown"
+            assert len(result) == 1
+            assert result[0].id == "eneve"
+            assert result[0].data_source_per_field["revenue"] == "Markdown"
 
     def test_load_unified_companies_merges_overlapping(self):
         """load_unified_companies should merge overlapping companies."""
@@ -519,17 +531,19 @@ class TestLoadUnifiedCompanies:
             financials=make_financial_metric(revenue=30.0),
         )
 
-        with patch.object(loader.json_loader, "load_companies", return_value=[json_company]):
-            with patch.object(loader, "_load_markdown_companies", return_value=[markdown_company]):
-                result = loader.load_unified_companies()
+        with (
+            patch.object(loader.json_loader, "load_companies", return_value=[json_company]),
+            patch.object(loader, "_load_markdown_companies", return_value=[markdown_company]),
+        ):
+            result = loader.load_unified_companies()
 
-                assert len(result) == 1
-                assert result[0].id == "eneve"
-                # Markdown priority: should use Markdown tier and revenue
-                assert result[0].tier == CompanyTier.TIER_3
-                assert result[0].financials.revenue == 30.0
-                assert "tier" in result[0].merge_conflicts
-                assert "revenue" in result[0].merge_conflicts
+            assert len(result) == 1
+            assert result[0].id == "eneve"
+            # Markdown priority: should use Markdown tier and revenue
+            assert result[0].tier == CompanyTier.TIER_3
+            assert result[0].financials.revenue == 30.0
+            assert "tier" in result[0].merge_conflicts
+            assert "revenue" in result[0].merge_conflicts
 
     def test_load_unified_companies_handles_multiple_companies(self):
         """load_unified_companies should handle multiple companies correctly."""
@@ -545,19 +559,21 @@ class TestLoadUnifiedCompanies:
             make_company(id="dexter", name="Dexter Energy"),
         ]
 
-        with patch.object(loader.json_loader, "load_companies", return_value=json_companies):
-            with patch.object(loader, "_load_markdown_companies", return_value=markdown_companies):
-                result = loader.load_unified_companies()
+        with (
+            patch.object(loader.json_loader, "load_companies", return_value=json_companies),
+            patch.object(loader, "_load_markdown_companies", return_value=markdown_companies),
+        ):
+            result = loader.load_unified_companies()
 
-                # Should have: test-1 (JSON), test-2 (JSON), eneve (merged), dexter (Markdown)
-                assert len(result) == 4
+            # Should have: test-1 (JSON), test-2 (JSON), eneve (merged), dexter (Markdown)
+            assert len(result) == 4
 
-                ids = {c.id for c in result}
-                assert ids == {"test-1", "test-2", "eneve", "dexter"}
+            ids = {c.id for c in result}
+            assert ids == {"test-1", "test-2", "eneve", "dexter"}
 
-                # Verify eneve is merged
-                eneve = next(c for c in result if c.id == "eneve")
-                assert isinstance(eneve, UnifiedCompany)
+            # Verify eneve is merged
+            eneve = next(c for c in result if c.id == "eneve")
+            assert isinstance(eneve, UnifiedCompany)
 
 
 class TestEneve4CountryScenario:
@@ -640,21 +656,23 @@ class TestEneve4CountryScenario:
                 )
                 markdown_companies.append(markdown_company)
 
-        with patch.object(loader.json_loader, "load_companies", return_value=json_companies):
-            with patch.object(loader, "_load_markdown_companies", return_value=markdown_companies):
-                result = loader.load_unified_companies()
+        with (
+            patch.object(loader.json_loader, "load_companies", return_value=json_companies),
+            patch.object(loader, "_load_markdown_companies", return_value=markdown_companies),
+        ):
+            result = loader.load_unified_companies()
 
-                assert len(result) == 4
+            assert len(result) == 4
 
-                # Verify each company
-                eneve = next(c for c in result if c.id == "eneve")
-                assert eneve.financials.revenue == 30.0  # Markdown priority
+            # Verify each company
+            eneve = next(c for c in result if c.id == "eneve")
+            assert eneve.financials.revenue == 30.0  # Markdown priority
 
-                dexter = next(c for c in result if c.id == "dexter-energy")
-                assert dexter.financials.revenue == 3.2  # Markdown priority
+            dexter = next(c for c in result if c.id == "dexter-energy")
+            assert dexter.financials.revenue == 3.2  # Markdown priority
 
-                energyworx = next(c for c in result if c.id == "energyworx")
-                assert energyworx.financials.revenue == 4.2  # Markdown priority
+            energyworx = next(c for c in result if c.id == "energyworx")
+            assert energyworx.financials.revenue == 4.2  # Markdown priority
 
-                withthegrid = next(c for c in result if c.id == "withthegrid")
-                assert withthegrid.financials.revenue == 5.0  # JSON (Markdown is None)
+            withthegrid = next(c for c in result if c.id == "withthegrid")
+            assert withthegrid.financials.revenue == 5.0  # JSON (Markdown is None)

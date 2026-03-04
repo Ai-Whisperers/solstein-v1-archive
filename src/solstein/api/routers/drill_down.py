@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, status
 from solstein.domain.models import CompanyAnalysisAuditTrail
 
 from ..dependencies import get_drill_down_service
-from ..services.drill_down_service import DrillDownService
 from ..exceptions import APIError
+from ..services.drill_down_service import DrillDownService
 
 router = APIRouter(prefix="/drill-down", tags=["transparency"])
 

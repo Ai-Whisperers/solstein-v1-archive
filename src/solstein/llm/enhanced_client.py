@@ -17,14 +17,6 @@ Usage:
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass, field
-from typing import Any, TypeVar
-
-from loguru import logger
-from pydantic import BaseModel
-
-
-import asyncio
 from typing import Any, TypeVar
 
 from loguru import logger
@@ -32,7 +24,6 @@ from pydantic import BaseModel
 
 from ..config import get_settings
 from .health_checker import (
-    ProviderError,
     ProviderErrorType,
     ProviderHealthChecker,
     get_health_checker,
@@ -315,8 +306,8 @@ class EnhancedLLMClient:
                     return content
                 else:
                     raise Exception(f"Ollama returned {response.status}")
-        except asyncio.TimeoutError:
-            raise Exception("Ollama request timeout")
+        except TimeoutError as e:
+            raise Exception("Ollama request timeout") from e
         except Exception:
             raise
 
@@ -596,7 +587,6 @@ def get_enhanced_llm_client() -> EnhancedLLMClient:
     return _enhanced_client
 
 
-
 # Cost tracking per model (USD per 1K tokens)
 MODEL_COSTS = {
     # OpenAI
@@ -618,5 +608,3 @@ MODEL_COSTS = {
     # Alibaba DashScope (approximate)
     "qwen-plus": {"input": 0.0004, "output": 0.0012},
 }
-
-

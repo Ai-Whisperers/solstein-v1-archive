@@ -5,7 +5,6 @@ for UK-registered companies and their subsidiaries.
 """
 
 import asyncio
-
 from datetime import datetime, timezone
 
 import requests
@@ -22,6 +21,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
         """Initialize Companies House agent."""
         super().__init__("CompaniesHouseAgent", DataSourceType.COMPANY_FILINGS)
         from solstein.config import get_settings
+
         settings = get_settings()
         self.api_key = settings.companies_house_api_key
         self.api_base = "https://api.company-information.service.gov.uk"

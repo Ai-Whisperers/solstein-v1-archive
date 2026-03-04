@@ -145,6 +145,7 @@ async def worker_health() -> dict:
     Kubernetes readiness — worker failures are non-fatal for the API.
     """
     import datetime as _dt
+
     from ...celery_config import celery_app
 
     result: dict = {
@@ -156,10 +157,7 @@ async def worker_health() -> dict:
         inspect = celery_app.control.inspect(timeout=2.0)
         ping_result: dict | None = inspect.ping()
         if ping_result:
-            result["workers"] = [
-                {"name": worker, "status": "online"}
-                for worker in ping_result
-            ]
+            result["workers"] = [{"name": worker, "status": "online"} for worker in ping_result]
             result["status"] = "healthy"
         else:
             result["status"] = "no_workers"

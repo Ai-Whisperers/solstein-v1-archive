@@ -12,27 +12,30 @@ This test suite verifies that:
 
 import json
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from solstein.database_config import get_test_database_url, convert_to_async_url
+
+from solstein.database_config import get_test_database_url
 from solstein.infrastructure.company_repository import CompanyRepository
 from solstein.infrastructure.database_models import CompanyRecord
 from solstein.migrations.load_competitor_data import load_competitor_data
+
 
 @pytest.fixture
 def test_db_url() -> str:
     """Provide test database URL in async format."""
     db_url = get_test_database_url()
     # Convert to async format for asyncpg, handling SSL parameters
-    async_url = db_url.replace('postgresql://', 'postgresql+asyncpg://')
+    async_url = db_url.replace("postgresql://", "postgresql+asyncpg://")
     # asyncpg doesn't support sslmode in URL, it uses ssl parameter instead
-    async_url = async_url.replace('?sslmode=require', '')
+    async_url = async_url.replace("?sslmode=require", "")
     return async_url
+
 
 # ============================================================================
 # TEST FIXTURES
@@ -383,7 +386,7 @@ class TestMigrationIdempotency:
         assert len(first_run) == len(second_run)
 
         # Verify data is identical
-        for c1, c2 in zip(first_run, second_run):
+        for c1, c2 in zip(first_run, second_run, strict=False):
             assert c1.name == c2.name
             assert c1.revenue_eur_m == c2.revenue_eur_m
             assert c1.ai_score == c2.ai_score

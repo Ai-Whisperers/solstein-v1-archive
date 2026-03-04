@@ -6,8 +6,9 @@ properly enrich company data without replacing existing values.
 """
 
 import pytest
-from solstein.data.unified_loader import UnifiedCompanyLoader, UnifiedCompany
-from solstein.domain.models import Company, FinancialMetric, ConfidenceLevel
+
+from solstein.data.unified_loader import UnifiedCompany, UnifiedCompanyLoader
+from solstein.domain.models import ConfidenceLevel, FinancialMetric
 
 
 @pytest.fixture

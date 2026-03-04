@@ -4,7 +4,6 @@ Task 4: Unit Tests for NULL Handling & Interpolation
 Tests the interpolation engine for revenue, growth, and employee estimation.
 """
 
-
 from solstein.data.interpolation import InterpolationConfig, InterpolationEngine
 
 
@@ -247,5 +246,6 @@ class TestInterpolationEngine:
     def test_global_instance(self):
         """Global interpolation_engine instance should exist."""
         from solstein.data.interpolation import interpolation_engine
+
         assert interpolation_engine is not None
         assert isinstance(interpolation_engine, InterpolationEngine)

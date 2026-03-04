@@ -411,7 +411,7 @@ try:
 except ImportError as e:
     import warnings
 
-    warnings.warn(f"Research commands not available: {e}")
+    warnings.warn(f"Research commands not available: {e}", stacklevel=2)
 
 # Register AI research commands
 try:
@@ -421,7 +421,7 @@ try:
 except ImportError as e:
     import warnings
 
-    warnings.warn(f"AI research commands not available: {e}")
+    warnings.warn(f"AI research commands not available: {e}", stacklevel=2)
 
 
 def main() -> None:

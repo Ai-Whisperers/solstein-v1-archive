@@ -10,7 +10,7 @@ EPIC-009: Scoring Config Improvements
 """
 
 import os
-from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -124,22 +124,16 @@ class CompetitivePositionConfig(BaseModel):
 
 class CompositeScoringConfig(BaseModel):
     """Configuration for composite score calculation.
-    
+
     EPIC-009 Story 9.2: Make weights configurable.
     Weights can be set via environment variables or config file.
     """
-    
+
     # Default weights (must sum to 1.0)
-    growth_weight: float = Field(
-        default_factory=lambda: float(os.getenv("SCORING_GROWTH_WEIGHT", "0.40"))
-    )
-    financial_weight: float = Field(
-        default_factory=lambda: float(os.getenv("SCORING_FINANCIAL_WEIGHT", "0.30"))
-    )
-    competitive_weight: float = Field(
-        default_factory=lambda: float(os.getenv("SCORING_COMPETITIVE_WEIGHT", "0.30"))
-    )
-    
+    growth_weight: float = Field(default_factory=lambda: float(os.getenv("SCORING_GROWTH_WEIGHT", "0.40")))
+    financial_weight: float = Field(default_factory=lambda: float(os.getenv("SCORING_FINANCIAL_WEIGHT", "0.30")))
+    competitive_weight: float = Field(default_factory=lambda: float(os.getenv("SCORING_COMPETITIVE_WEIGHT", "0.30")))
+
     # SaaS-specific adjustments (EPIC-009 Story 9.4)
     saas_recurring_revenue_bonus: float = Field(
         default_factory=lambda: float(os.getenv("SCORING_SAAS_RECURRING_BONUS", "0.5"))
@@ -147,15 +141,13 @@ class CompositeScoringConfig(BaseModel):
     saas_high_margin_threshold: float = Field(
         default_factory=lambda: float(os.getenv("SCORING_SAAS_MARGIN_THRESHOLD", "20.0"))
     )
-    saas_high_margin_bonus: float = Field(
-        default_factory=lambda: float(os.getenv("SCORING_SAAS_MARGIN_BONUS", "1.0"))
-    )
-    
+    saas_high_margin_bonus: float = Field(default_factory=lambda: float(os.getenv("SCORING_SAAS_MARGIN_BONUS", "1.0")))
+
     def validate_weights(self) -> bool:
         """Validate that weights sum to approximately 1.0."""
         total = self.growth_weight + self.financial_weight + self.competitive_weight
         return 0.99 <= total <= 1.01
-    
+
     def normalize_weights(self) -> None:
         """Normalize weights to sum to 1.0."""
         total = self.growth_weight + self.financial_weight + self.competitive_weight
@@ -167,7 +159,7 @@ class CompositeScoringConfig(BaseModel):
 
 class ScoringSettings(BaseModel):
     """Root configuration for all scoring.
-    
+
     EPIC-009: All scoring parameters can be configured via:
     1. Environment variables (SCORING_* prefix)
     2. Config file (scoring_config.json)
@@ -178,11 +170,11 @@ class ScoringSettings(BaseModel):
     financial: FinancialHealthConfig = Field(default_factory=FinancialHealthConfig)
     competitive: CompetitivePositionConfig = Field(default_factory=CompetitivePositionConfig)
     composite: CompositeScoringConfig = Field(default_factory=CompositeScoringConfig)
-    
+
     @classmethod
     def from_env(cls) -> "ScoringSettings":
         """Create settings from environment variables.
-        
+
         Environment variables:
         - SCORING_GROWTH_WEIGHT: Weight for growth score (default: 0.40)
         - SCORING_FINANCIAL_WEIGHT: Weight for financial score (default: 0.30)
@@ -190,17 +182,19 @@ class ScoringSettings(BaseModel):
         - SCORING_*: Various other scoring parameters
         """
         return cls()
-    
+
     @classmethod
     def from_file(cls, path: str) -> "ScoringSettings":
         """Load settings from JSON config file."""
         import json
+
         with open(path) as f:
             data = json.load(f)
         return cls(**data)
-    
+
     def save_to_file(self, path: str) -> None:
         """Save current settings to JSON config file."""
         import json
+
         with open(path, "w") as f:
             json.dump(self.model_dump(), f, indent=2)

@@ -4,10 +4,12 @@ These tests use dependency injection and proper mocking
 without sys.modules manipulation.
 """
 
+import contextlib
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 
-from tests.mocks import CeleryMockFactory, MaxRetriesExceededError
+from tests.mocks import MaxRetriesExceededError
 
 
 class TestRefreshTasksIsolated:
@@ -37,23 +39,24 @@ class TestRefreshTasksIsolated:
         """Mock store facts function."""
         return AsyncMock(return_value=5)
 
-    def test_refresh_sec_edgar_success(
-        self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts
-    ):
+    def test_refresh_sec_edgar_success(self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts):
         """Test successful SEC EDGAR refresh task execution."""
         # Use dependency injection instead of patching imports
         with patch("solstein.worker_tasks.SECEDGARRefreshConnector") as mock_connector:
             instance = MagicMock()
             instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
-            
-            with patch("solstein.worker_tasks._get_tracked_company_ids", return_value=mock_tracked_companies):
-                with patch("solstein.worker_tasks._store_facts", mock_store_facts):
-                    # Import here to avoid module-level import issues
-                    from solstein.worker_tasks import refresh_sec_edgar
-                    result = refresh_sec_edgar(mock_task_self)
-                    assert result is not None
-                    assert result["status"] == "completed"
+
+            with (
+                patch("solstein.worker_tasks._get_tracked_company_ids", return_value=mock_tracked_companies),
+                patch("solstein.worker_tasks._store_facts", mock_store_facts),
+            ):
+                # Import here to avoid module-level import issues
+                from solstein.worker_tasks import refresh_sec_edgar
+
+                result = refresh_sec_edgar(mock_task_self)
+                assert result is not None
+                assert result["status"] == "completed"
 
     def test_refresh_companies_house_success(
         self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts
@@ -63,12 +66,15 @@ class TestRefreshTasksIsolated:
             instance = MagicMock()
             instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
-            
-            with patch("solstein.worker_tasks._get_tracked_company_ids", return_value=mock_tracked_companies):
-                with patch("solstein.worker_tasks._store_facts", mock_store_facts):
-                    from solstein.worker_tasks import refresh_companies_house
-                    result = refresh_companies_house(mock_task_self)
-                    assert result is not None
+
+            with (
+                patch("solstein.worker_tasks._get_tracked_company_ids", return_value=mock_tracked_companies),
+                patch("solstein.worker_tasks._store_facts", mock_store_facts),
+            ):
+                from solstein.worker_tasks import refresh_companies_house
+
+                result = refresh_companies_house(mock_task_self)
+                assert result is not None
 
     def test_refresh_news_signals_success(
         self, mock_task_self, mock_db_manager, mock_tracked_companies, mock_store_facts
@@ -78,12 +84,15 @@ class TestRefreshTasksIsolated:
             instance = MagicMock()
             instance.fetch_facts = AsyncMock(return_value=[{"fact": 1}])
             mock_connector.return_value = instance
-            
-            with patch("solstein.worker_tasks._get_tracked_company_ids", return_value=mock_tracked_companies):
-                with patch("solstein.worker_tasks._store_facts", mock_store_facts):
-                    from solstein.worker_tasks import refresh_news_signals
-                    result = refresh_news_signals(mock_task_self)
-                    assert result is not None
+
+            with (
+                patch("solstein.worker_tasks._get_tracked_company_ids", return_value=mock_tracked_companies),
+                patch("solstein.worker_tasks._store_facts", mock_store_facts),
+            ):
+                from solstein.worker_tasks import refresh_news_signals
+
+                result = refresh_news_signals(mock_task_self)
+                assert result is not None
 
 
 class TestRetryLogicIsolated:
@@ -101,13 +110,14 @@ class TestRetryLogicIsolated:
             instance.fetch_facts = AsyncMock(side_effect=Exception("API Error"))
             mock_connector.return_value = instance
 
-            with patch("solstein.worker_tasks._get_db_manager"):
-                with patch("solstein.worker_tasks._get_tracked_company_ids", return_value=["comp_001"]):
-                    from solstein.worker_tasks import refresh_sec_edgar
-                    try:
-                        refresh_sec_edgar(mock_task)
-                    except Exception:
-                        pass  # Expected
+            with (
+                patch("solstein.worker_tasks._get_db_manager"),
+                patch("solstein.worker_tasks._get_tracked_company_ids", return_value=["comp_001"]),
+            ):
+                from solstein.worker_tasks import refresh_sec_edgar
+
+                with contextlib.suppress(Exception):
+                    refresh_sec_edgar(mock_task)
 
     def test_max_retries_exceeded_logging(self):
         """Test that MaxRetriesExceededError is logged."""
@@ -121,10 +131,11 @@ class TestRetryLogicIsolated:
             instance.fetch_facts = AsyncMock(side_effect=Exception("API Error"))
             mock_connector.return_value = instance
 
-            with patch("solstein.worker_tasks._get_db_manager"):
-                with patch("solstein.worker_tasks._get_tracked_company_ids", return_value=["comp_001"]):
-                    from solstein.worker_tasks import refresh_sec_edgar
-                    try:
-                        refresh_sec_edgar(mock_task)
-                    except MaxRetriesExceededError:
-                        pass  # Expected
+            with (
+                patch("solstein.worker_tasks._get_db_manager"),
+                patch("solstein.worker_tasks._get_tracked_company_ids", return_value=["comp_001"]),
+            ):
+                from solstein.worker_tasks import refresh_sec_edgar
+
+                with contextlib.suppress(MaxRetriesExceededError):
+                    refresh_sec_edgar(mock_task)

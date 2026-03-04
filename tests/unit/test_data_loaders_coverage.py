@@ -107,7 +107,6 @@ def test_loader_success_and_cache(temp_data_dir):
     assert c3.tier == CompanyTier.TIER_4
     assert c3.headquarters == "Germany"
 
-
     # Test limit
     loader.clear_cache()
     assert len(loader._cache) == 0

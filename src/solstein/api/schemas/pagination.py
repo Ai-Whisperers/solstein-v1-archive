@@ -15,14 +15,14 @@ Usage::
 
 from __future__ import annotations
 
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel, Field, computed_field
 
 T = TypeVar("T")
 
 
-class PaginatedResponse(BaseModel, Generic[T]):
+class PaginatedResponse[T](BaseModel):
     """Generic paginated API response envelope.
 
     Attributes:
@@ -73,14 +73,14 @@ class PaginatedResponse(BaseModel, Generic[T]):
         total: int,
         limit: int,
         offset: int,
-    ) -> "PaginatedResponse[T]":
+    ) -> PaginatedResponse[T]:
         """Convenience factory — avoids repeated keyword args at call sites."""
         return cls(items=items, total=total, limit=limit, offset=offset)
 
     model_config = {"arbitrary_types_allowed": True}
 
 
-class CursorPage(BaseModel, Generic[T]):
+class CursorPage[T](BaseModel):
     """Cursor-based pagination for streaming/real-time endpoints.
 
     Attributes:

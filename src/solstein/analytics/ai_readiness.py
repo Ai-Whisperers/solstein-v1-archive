@@ -21,9 +21,8 @@ Usage::
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
-from solstein.domain.models import AIMaturity, Company
+from solstein.domain.models import Company
 
 # Weights for each dimension
 _WEIGHTS = {

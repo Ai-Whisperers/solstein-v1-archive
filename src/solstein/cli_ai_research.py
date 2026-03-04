@@ -14,7 +14,7 @@ Usage:
 import asyncio
 import json
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import click
 from loguru import logger
@@ -28,7 +28,7 @@ from .research.ai_research_orchestrator import AIResearchOrchestrator, ResearchR
 @click.option("--max-sources", "-s", type=int, default=8, help="Maximum number of sources to research")
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for results (JSON)")
 @click.option("--verbose", "-v", is_flag=True, help="Show detailed progress")
-def ai_research(company_name: str, industry: Optional[str], max_sources: int, output: Optional[Path], verbose: bool):
+def ai_research(company_name: str, industry: str | None, max_sources: int, output: Path | None, verbose: bool):
     """
     Perform autonomous AI-powered research on a company.
 
@@ -67,7 +67,7 @@ def ai_research(company_name: str, industry: Optional[str], max_sources: int, ou
 
         except Exception as e:
             logger.error(f"Research failed: {e}")
-            raise click.ClickException(str(e))
+            raise click.ClickException(str(e)) from e
 
     asyncio.run(_research())
 
@@ -114,7 +114,7 @@ def ai_research_batch(input_file: Path, output_dir: Path, workers: int, format: 
         # Process with semaphore for concurrency control
         semaphore = asyncio.Semaphore(workers)
 
-        async def research_one(name: str, industry: Optional[str]):
+        async def research_one(name: str, industry: str | None):
             async with semaphore:
                 try:
                     report = await orchestrator.research_company(name, industry)
@@ -148,7 +148,7 @@ def ai_research_batch(input_file: Path, output_dir: Path, workers: int, format: 
             with open(output_file, "w") as f:
                 json.dump(data, f, indent=2)
 
-        click.echo(f"\n📊 Summary:")
+        click.echo("\n📊 Summary:")
         click.echo(f"   Total: {len(companies)}")
         click.echo(f"   Successful: {len(results)}")
         click.echo(f"   Failed: {len(errors)}")
@@ -215,10 +215,10 @@ def ai_research_server(host: str, port: int, reload: bool):
         click.echo(f"🚀 Starting AI Research API server on {host}:{port}")
         run(app, host=host, port=port, reload=reload)
 
-    except ImportError:
+    except ImportError as e:
         raise click.ClickException(
             "FastAPI and uvicorn required for server mode. Install with: pip install fastapi uvicorn"
-        )
+        ) from e
 
 
 # ============================================================================
@@ -239,7 +239,7 @@ def _display_report(report: ResearchReport, verbose: bool):
     click.echo(f"📡 Data Sources: {len(report.data_sources)}")
 
     # Basic Info
-    click.echo(f"\n🏢 Basic Information:")
+    click.echo("\n🏢 Basic Information:")
     basic = report.basic_info
     if basic.get("website"):
         click.echo(f"   Website: {basic['website']}")
@@ -257,7 +257,7 @@ def _display_report(report: ResearchReport, verbose: bool):
 
     # Financials
     if report.financials:
-        click.echo(f"\n💰 Financials:")
+        click.echo("\n💰 Financials:")
         fin = report.financials
         if fin.get("revenue"):
             click.echo(f"   Revenue: €{fin['revenue']:.1f}M ({fin.get('revenue_currency', 'EUR')})")
@@ -266,7 +266,7 @@ def _display_report(report: ResearchReport, verbose: bool):
 
     # Funding
     if report.funding and report.funding.get("total_raised"):
-        click.echo(f"\n💸 Funding:")
+        click.echo("\n💸 Funding:")
         fund = report.funding
         click.echo(f"   Total Raised: €{fund['total_raised']:.1f}M")
         if fund.get("rounds"):
@@ -274,7 +274,7 @@ def _display_report(report: ResearchReport, verbose: bool):
 
     # Data Sources
     if verbose and report.data_sources:
-        click.echo(f"\n📚 Data Sources:")
+        click.echo("\n📚 Data Sources:")
         for source in report.data_sources[:5]:
             conf = source.get("confidence", 0)
             conf_str = f"{conf:.0%}"
@@ -285,7 +285,7 @@ def _display_report(report: ResearchReport, verbose: bool):
 
     # Metadata
     if report.metadata:
-        click.echo(f"\n⚙️  Research Metadata:")
+        click.echo("\n⚙️  Research Metadata:")
         if "research_time_seconds" in report.metadata:
             click.echo(f"   Time: {report.metadata['research_time_seconds']:.1f}s")
         if "queries_executed" in report.metadata:
@@ -294,7 +294,7 @@ def _display_report(report: ResearchReport, verbose: bool):
             click.echo(f"   Sources Found: {report.metadata['sources_found']}")
 
     if report.errors:
-        click.echo(f"\n⚠️  Errors:")
+        click.echo("\n⚠️  Errors:")
         for error in report.errors:
             click.echo(f"   • {error}")
 
@@ -316,7 +316,7 @@ def _report_to_dict(report: ResearchReport) -> dict[str, Any]:
     }
 
 
-def _parse_company_list(file_path: Path) -> list[tuple[str, Optional[str]]]:
+def _parse_company_list(file_path: Path) -> list[tuple[str, str | None]]:
     """Parse company list from file."""
     companies = []
 

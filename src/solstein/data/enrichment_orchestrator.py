@@ -17,12 +17,13 @@ Handles robust, configurable enrichment with proper decision-making:
 - Dry-run mode
 """
 
-import logging
 import copy
+import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 from datetime import datetime, timezone
+from enum import Enum
+from typing import TYPE_CHECKING, Any
 
 from ..domain.models import ConfidenceLevel
 
@@ -62,7 +63,7 @@ class EnrichmentCost:
     api_calls: int = 0
     duration_ms: float = 0.0
     success: bool = False
-    error: Optional[str] = None
+    error: str | None = None
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -71,10 +72,10 @@ class EnrichmentResult:
     """Result of enrichment operation."""
 
     company: "UnifiedCompany"
-    sources_used: List[EnrichmentSource] = field(default_factory=list)
-    fields_enriched: List[EnrichmentField] = field(default_factory=list)
-    costs: List[EnrichmentCost] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
+    sources_used: list[EnrichmentSource] = field(default_factory=list)
+    fields_enriched: list[EnrichmentField] = field(default_factory=list)
+    costs: list[EnrichmentCost] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
     total_api_calls: int = 0
     total_duration_ms: float = 0.0
     idempotent: bool = True  # Same input = same output on retries
@@ -89,14 +90,14 @@ class EnrichmentConfig:
     dry_run: bool = False
 
     # Source configuration
-    source_order: List[EnrichmentSource] = field(
+    source_order: list[EnrichmentSource] = field(
         default_factory=lambda: [
             EnrichmentSource.SEC_EDGAR,
             EnrichmentSource.COMPANIES_HOUSE,
             EnrichmentSource.NEWS_SIGNALS,
         ]
     )
-    enabled_sources: Set[EnrichmentSource] = field(
+    enabled_sources: set[EnrichmentSource] = field(
         default_factory=lambda: {
             EnrichmentSource.SEC_EDGAR,
             EnrichmentSource.COMPANIES_HOUSE,
@@ -105,7 +106,7 @@ class EnrichmentConfig:
     )
 
     # Field selection
-    fields_to_enrich: Optional[Set[EnrichmentField]] = None  # None = all fields
+    fields_to_enrich: set[EnrichmentField] | None = None  # None = all fields
 
     # Confidence thresholds
     min_confidence_to_overwrite: ConfidenceLevel = ConfidenceLevel.ESTIMATED
@@ -134,10 +135,10 @@ class EnrichmentConfig:
 class EnrichmentOrchestrator:
     """Orchestrates enrichment operations with proper decision-making."""
 
-    def __init__(self, config: Optional[EnrichmentConfig] = None):
+    def __init__(self, config: EnrichmentConfig | None = None):
         """Initialize orchestrator with configuration."""
         self.config = config or EnrichmentConfig()
-        self._progress_callbacks: List[Callable[[str, int, int], None]] = []
+        self._progress_callbacks: list[Callable[[str, int, int], None]] = []
 
     def register_progress_callback(self, callback: Callable[[str, int, int], None]) -> None:
         """Register callback for progress tracking.
@@ -173,7 +174,6 @@ class EnrichmentOrchestrator:
             logger.debug(f"Enrichment disabled for {company.name}")
             return True
 
-
         # Check if we have any valid identifiers
         has_ticker = company.ticker and company.ticker.strip()
         has_company_number = company.company_number and company.company_number.strip()
@@ -200,7 +200,7 @@ class EnrichmentOrchestrator:
 
         return has_revenue and has_growth and has_employees and has_margin
 
-    def get_enrichment_order(self, company: "UnifiedCompany") -> List[EnrichmentSource]:
+    def get_enrichment_order(self, company: "UnifiedCompany") -> list[EnrichmentSource]:
         """Get prioritized enrichment order for company.
 
         Prioritization:
@@ -233,7 +233,7 @@ class EnrichmentOrchestrator:
 
         return order
 
-    def get_fields_to_enrich(self, company: "UnifiedCompany") -> List[EnrichmentField]:
+    def get_fields_to_enrich(self, company: "UnifiedCompany") -> list[EnrichmentField]:
         """Get list of fields that need enrichment.
 
         Args:
@@ -359,9 +359,9 @@ class EnrichmentOrchestrator:
 
     def enrich_batch(
         self,
-        companies: List["UnifiedCompany"],
-        enrichment_fn: Callable[["UnifiedCompany", EnrichmentSource, List[EnrichmentField]], "UnifiedCompany"],
-    ) -> List[EnrichmentResult]:
+        companies: list["UnifiedCompany"],
+        enrichment_fn: Callable[["UnifiedCompany", EnrichmentSource, list[EnrichmentField]], "UnifiedCompany"],
+    ) -> list[EnrichmentResult]:
         """Enrich multiple companies efficiently.
 
         Processes in batches with progress tracking and cancellation support.
@@ -392,7 +392,7 @@ class EnrichmentOrchestrator:
     def enrich_single(
         self,
         company: "UnifiedCompany",
-        enrichment_fn: Callable[["UnifiedCompany", EnrichmentSource, List[EnrichmentField]], "UnifiedCompany"],
+        enrichment_fn: Callable[["UnifiedCompany", EnrichmentSource, list[EnrichmentField]], "UnifiedCompany"],
     ) -> EnrichmentResult:
         """Enrich single company with orchestration logic.
 
@@ -462,7 +462,7 @@ class EnrichmentOrchestrator:
         api_calls: int = 1,
         duration_ms: float = 0.0,
         success: bool = True,
-        error: Optional[str] = None,
+        error: str | None = None,
     ) -> EnrichmentCost:
         """Track cost of enrichment operation.
 
@@ -499,7 +499,7 @@ class EnrichmentOrchestrator:
         value2: Any,
         source2: EnrichmentSource,
         confidence2: ConfidenceLevel,
-    ) -> Tuple[Any, EnrichmentSource, ConfidenceLevel]:
+    ) -> tuple[Any, EnrichmentSource, ConfidenceLevel]:
         """Compare two enrichment results and pick the best.
 
         Priority:

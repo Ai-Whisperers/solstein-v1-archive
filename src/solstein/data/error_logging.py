@@ -5,7 +5,7 @@ Standardized logging, error alerting integration, and error metrics collection.
 """
 
 import logging
-from typing import Optional, Callable
+from collections.abc import Callable
 from datetime import datetime, timezone
 from enum import Enum
 
@@ -35,7 +35,7 @@ class ErrorType(str, Enum):
 class ErrorLogger:
     """Centralized error logging with standardized levels and alerting."""
 
-    def __init__(self, logger: logging.Logger, alert_callback: Optional[Callable] = None):
+    def __init__(self, logger: logging.Logger, alert_callback: Callable | None = None):
         """Initialize error logger.
 
         Args:

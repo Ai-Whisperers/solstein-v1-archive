@@ -5,88 +5,89 @@ It includes both Factory Boy classes and manual 'make_x' functions for legacy su
 
 Usage:
     from tests.factories import CompanyFactory, make_company
-    
+
     # Using Factory Boy
     company = CompanyFactory()
-    
+
     # Using manual function
     company = make_company()
 """
 
+from uuid import uuid4
+
 import factory
 from factory import Faker, Sequence
-from datetime import datetime, timezone
-from uuid import uuid4
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from solstein.domain.facts import Fact, FactSource, GatheringBatch
 from solstein.domain.models import (
+    AIMaturity,
     Company,
     CompanyTier,
-    AIMaturity,
-    ThreatLevel,
-    FinancialMetric,
     ConfidenceLevel,
+    FinancialMetric,
+    ThreatLevel,
 )
-from solstein.domain.facts import Fact, FactSource, GatheringBatch
 
 
 class FinancialMetricFactory(factory.Factory):
     """Factory for creating FinancialMetric instances."""
-    
+
     class Meta:
         model = FinancialMetric
-    
-    revenue = factory.Faker('pydecimal', left_digits=6, right_digits=2, positive=True)
+
+    revenue = factory.Faker("pydecimal", left_digits=6, right_digits=2, positive=True)
     revenue_confidence = ConfidenceLevel.CONFIRMED
-    growth_rate = factory.Faker('pydecimal', left_digits=2, right_digits=2, positive=True)
+    growth_rate = factory.Faker("pydecimal", left_digits=2, right_digits=2, positive=True)
     growth_confidence = ConfidenceLevel.ESTIMATED
-    employees = factory.Faker('random_int', min=10, max=10000)
+    employees = factory.Faker("random_int", min=10, max=10000)
     employees_confidence = ConfidenceLevel.CONFIRMED
 
 
 class CompanyFactory(factory.Factory):
     """Factory for creating Company instances.
-    
+
     Creates realistic company data with sensible defaults.
     All fields can be overridden.
     """
-    
+
     class Meta:
         model = Company
-    
+
     id = Sequence(lambda n: f"comp_{n:03d}")
-    name = Faker('company')
-    industry = Faker('bs')
-    description = Faker('catch_phrase')
-    website = Faker('url')
-    headquarters = Faker('city')
-    founded_year = Faker('year')
-    
+    name = Faker("company")
+    industry = Faker("bs")
+    description = Faker("catch_phrase")
+    website = Faker("url")
+    headquarters = Faker("city")
+    founded_year = Faker("year")
+
     tier = factory.Iterator(CompanyTier)
     ai_maturity = factory.Iterator(AIMaturity)
     threat_level = factory.Iterator(ThreatLevel)
-    
+
     financials = factory.SubFactory(FinancialMetricFactory)
-    
-    geographic_presence = factory.List([
-        factory.Faker('country'),
-        factory.Faker('country'),
-        factory.Faker('country'),
-    ])
-    
+
+    geographic_presence = factory.List(
+        [
+            factory.Faker("country"),
+            factory.Faker("country"),
+            factory.Faker("country"),
+        ]
+    )
+
     @factory.post_generation
-    def set_composite_score(obj, create, extracted, **kwargs):
+    def set_composite_score(self, create, extracted, **kwargs):
         """Calculate composite score after creation."""
-        if obj.growth_score and obj.financial_health_score:
-            obj.composite_score = (
-                obj.growth_score * 0.4 +
-                obj.financial_health_score * 0.3 +
-                obj.competitive_position_score * 0.3
+        if self.growth_score and self.financial_health_score:
+            self.composite_score = (
+                self.growth_score * 0.4 + self.financial_health_score * 0.3 + self.competitive_position_score * 0.3
             )
 
 
 class CompanyFactoryHighGrowth(CompanyFactory):
     """Factory for high-growth companies (Phoenix type)."""
+
     growth_score = 8.5
     financial_health_score = 7.0
     tier = CompanyTier.TIER_1
@@ -95,6 +96,7 @@ class CompanyFactoryHighGrowth(CompanyFactory):
 
 class CompanyFactoryDistressed(CompanyFactory):
     """Factory for distressed companies."""
+
     growth_score = 2.0
     financial_health_score = 3.0
     tier = CompanyTier.TIER_4
@@ -102,6 +104,7 @@ class CompanyFactoryDistressed(CompanyFactory):
 
 
 # --- Manual Factory Functions (Legacy Support) ---
+
 
 def make_financial_metric(**overrides) -> FinancialMetric:
     """Build a FinancialMetric with sensible defaults."""
@@ -168,15 +171,14 @@ def make_lead_company(**overrides) -> Company:
 
 # --- Database Factories ---
 
+
 async def create_test_company(session: AsyncSession, **overrides) -> str:
     """Create and persist a test company in the database."""
     company_id = overrides.get("company_id", f"test-company-{uuid4()}")
     return company_id
 
 
-async def create_test_batch(
-    session: AsyncSession, company_id: str, **overrides
-) -> GatheringBatch:
+async def create_test_batch(session: AsyncSession, company_id: str, **overrides) -> GatheringBatch:
     """Create and persist a gathering batch in the database."""
     batch_data = {
         "company_id": company_id,
@@ -190,9 +192,7 @@ async def create_test_batch(
     return batch
 
 
-async def create_test_fact(
-    session: AsyncSession, batch_id: str, company_id: str, **overrides
-) -> Fact:
+async def create_test_fact(session: AsyncSession, batch_id: str, company_id: str, **overrides) -> Fact:
     """Create and persist a fact in the database."""
     fact_data = {
         "batch_id": batch_id,
@@ -209,9 +209,7 @@ async def create_test_fact(
     return fact
 
 
-async def create_test_fact_source(
-    session: AsyncSession, fact_id: str, **overrides
-) -> FactSource:
+async def create_test_fact_source(session: AsyncSession, fact_id: str, **overrides) -> FactSource:
     """Create and persist a fact source in the database."""
     source_data = {
         "fact_id": fact_id,
@@ -227,16 +225,16 @@ async def create_test_fact_source(
 
 
 __all__ = [
-    'CompanyFactory',
-    'CompanyFactoryHighGrowth',
-    'CompanyFactoryDistressed',
-    'FinancialMetricFactory',
-    'make_financial_metric',
-    'make_company',
-    'make_phoenix_company',
-    'make_lead_company',
-    'create_test_company',
-    'create_test_batch',
-    'create_test_fact',
-    'create_test_fact_source',
+    "CompanyFactory",
+    "CompanyFactoryHighGrowth",
+    "CompanyFactoryDistressed",
+    "FinancialMetricFactory",
+    "make_financial_metric",
+    "make_company",
+    "make_phoenix_company",
+    "make_lead_company",
+    "create_test_company",
+    "create_test_batch",
+    "create_test_fact",
+    "create_test_fact_source",
 ]

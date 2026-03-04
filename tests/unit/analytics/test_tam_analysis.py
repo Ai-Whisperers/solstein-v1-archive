@@ -10,10 +10,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
-import pytest
 from unittest.mock import MagicMock
 
-from solstein.analytics.tam_analysis import TamAnalyzer, MarketParams, TamResult
+import pytest
+
+from solstein.analytics.tam_analysis import MarketParams, TamAnalyzer, TamResult
 from solstein.domain.models import Company
 
 

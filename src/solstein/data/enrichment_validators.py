@@ -6,14 +6,13 @@ Covers revenue, growth rate, employees, profit margin, and general data validati
 """
 
 import math
-from typing import Any, Optional
 from datetime import datetime, timezone
-
+from typing import Any
 
 # Revenue Validation (Items 62-64)
 
 
-def validate_revenue(revenue: Any, existing_revenue: Optional[float] = None) -> tuple[bool, Optional[str]]:
+def validate_revenue(revenue: Any, existing_revenue: float | None = None) -> tuple[bool, str | None]:
     """Validate revenue value.
 
     Args:
@@ -50,7 +49,7 @@ def validate_revenue(revenue: Any, existing_revenue: Optional[float] = None) -> 
 # Growth Rate Validation (Items 65-66)
 
 
-def validate_growth_rate(growth_rate: Any, company_age_years: Optional[int] = None) -> tuple[bool, Optional[str]]:
+def validate_growth_rate(growth_rate: Any, company_age_years: int | None = None) -> tuple[bool, str | None]:
     """Validate growth rate value.
 
     Args:
@@ -83,7 +82,7 @@ def validate_growth_rate(growth_rate: Any, company_age_years: Optional[int] = No
 # Employee Count Validation (Items 67-69)
 
 
-def validate_employee_count(employees: Any) -> tuple[bool, Optional[str]]:
+def validate_employee_count(employees: Any) -> tuple[bool, str | None]:
     """Validate employee count value.
 
     Args:
@@ -128,7 +127,7 @@ def validate_employee_count(employees: Any) -> tuple[bool, Optional[str]]:
 # Profit Margin Validation (Items 70-71)
 
 
-def validate_profit_margin(margin: Any, industry: Optional[str] = None) -> tuple[bool, Optional[str]]:
+def validate_profit_margin(margin: Any, industry: str | None = None) -> tuple[bool, str | None]:
     """Validate profit margin value.
 
     Args:
@@ -160,7 +159,7 @@ def validate_profit_margin(margin: Any, industry: Optional[str] = None) -> tuple
 # General Data Validation (Items 72-86)
 
 
-def validate_required_keys(data: dict, required_keys: list[str]) -> tuple[bool, Optional[str]]:
+def validate_required_keys(data: dict, required_keys: list[str]) -> tuple[bool, str | None]:
     """Validate that dict has required keys (Item 72).
 
     Args:
@@ -180,7 +179,7 @@ def validate_required_keys(data: dict, required_keys: list[str]) -> tuple[bool, 
     return True, None
 
 
-def validate_field_types(data: dict, type_map: dict[str, type]) -> tuple[bool, Optional[str]]:
+def validate_field_types(data: dict, type_map: dict[str, type]) -> tuple[bool, str | None]:
     """Validate field types (Item 73).
 
     Args:
@@ -198,7 +197,7 @@ def validate_field_types(data: dict, type_map: dict[str, type]) -> tuple[bool, O
     return True, None
 
 
-def validate_no_nan_inf(value: Any, field_name: str = "value") -> tuple[bool, Optional[str]]:
+def validate_no_nan_inf(value: Any, field_name: str = "value") -> tuple[bool, str | None]:
     """Validate value is not NaN or Infinity (Item 74).
 
     Args:
@@ -217,7 +216,7 @@ def validate_no_nan_inf(value: Any, field_name: str = "value") -> tuple[bool, Op
     return True, None
 
 
-def validate_enum_value(value: Any, valid_values: list[str], field_name: str = "value") -> tuple[bool, Optional[str]]:
+def validate_enum_value(value: Any, valid_values: list[str], field_name: str = "value") -> tuple[bool, str | None]:
     """Validate value is in enum (Item 75).
 
     Args:
@@ -234,7 +233,7 @@ def validate_enum_value(value: Any, valid_values: list[str], field_name: str = "
     return True, None
 
 
-def validate_object_not_none(obj: Any, field_name: str = "object") -> tuple[bool, Optional[str]]:
+def validate_object_not_none(obj: Any, field_name: str = "object") -> tuple[bool, str | None]:
     """Validate object is not None (Item 76).
 
     Args:
@@ -250,7 +249,7 @@ def validate_object_not_none(obj: Any, field_name: str = "object") -> tuple[bool
     return True, None
 
 
-def validate_no_duplicates(items: list[str], field_name: str = "items") -> tuple[bool, Optional[str]]:
+def validate_no_duplicates(items: list[str], field_name: str = "items") -> tuple[bool, str | None]:
     """Validate list has no duplicates (Item 77).
 
     Args:
@@ -267,7 +266,7 @@ def validate_no_duplicates(items: list[str], field_name: str = "items") -> tuple
     return True, None
 
 
-def validate_datetime_values(timestamps: dict[str, Any], field_name: str = "timestamps") -> tuple[bool, Optional[str]]:
+def validate_datetime_values(timestamps: dict[str, Any], field_name: str = "timestamps") -> tuple[bool, str | None]:
     """Validate all values in dict are datetime (Item 78).
 
     Args:
@@ -284,7 +283,7 @@ def validate_datetime_values(timestamps: dict[str, Any], field_name: str = "time
     return True, None
 
 
-def validate_data_freshness(filing_date: Optional[datetime], max_age_months: int = 18) -> tuple[bool, Optional[str]]:
+def validate_data_freshness(filing_date: datetime | None, max_age_months: int = 18) -> tuple[bool, str | None]:
     """Validate data is not too old (Items 85-86).
 
     Args:
@@ -306,7 +305,7 @@ def validate_data_freshness(filing_date: Optional[datetime], max_age_months: int
     return True, None
 
 
-def validate_cross_field_consistency(revenue: Optional[float], employees: Optional[int]) -> tuple[bool, Optional[str]]:
+def validate_cross_field_consistency(revenue: float | None, employees: int | None) -> tuple[bool, str | None]:
     """Validate cross-field consistency (Item 81).
 
     Args:
@@ -329,7 +328,7 @@ def validate_cross_field_consistency(revenue: Optional[float], employees: Option
 
 def validate_against_existing_data(
     new_value: Any, existing_value: Any, max_ratio: float = 10.0
-) -> tuple[bool, Optional[str]]:
+) -> tuple[bool, str | None]:
     """Validate new data against existing (Item 82).
 
     Args:
@@ -353,7 +352,7 @@ def validate_against_existing_data(
     return True, None
 
 
-def validate_source_format(source: str, valid_sources: list[str]) -> tuple[bool, Optional[str]]:
+def validate_source_format(source: str, valid_sources: list[str]) -> tuple[bool, str | None]:
     """Validate data source format (Item 83).
 
     Args:
@@ -369,7 +368,7 @@ def validate_source_format(source: str, valid_sources: list[str]) -> tuple[bool,
     return True, None
 
 
-def validate_enrichment_required(existing_data: dict[str, Any]) -> tuple[bool, Optional[str]]:
+def validate_enrichment_required(existing_data: dict[str, Any]) -> tuple[bool, str | None]:
     """Validate enrichment is actually needed (Item 84).
 
     Args:

@@ -8,8 +8,8 @@ Verifies that CORS middleware is properly configured:
 - Headers are explicitly defined
 """
 
-import pytest
 from fastapi.testclient import TestClient
+
 from solstein.api.main import app
 from solstein.config import Settings
 
@@ -201,7 +201,7 @@ class TestCORSSecurityCompliance:
         env_example_path = os.path.join(os.path.dirname(__file__), "../../.env.example")
 
         if os.path.exists(env_example_path):
-            with open(env_example_path, "r") as f:
+            with open(env_example_path) as f:
                 content = f.read()
                 # Should document CORS variables
                 assert "CORS" in content or "cors" in content, ".env.example should document CORS configuration"

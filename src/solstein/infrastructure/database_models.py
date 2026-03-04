@@ -604,40 +604,42 @@ class ContradictionTransitionRecord(Base):
 
 class EnrichmentAuditRecord(Base):
     """Stores audit trail for enrichment operations (Phase 11).
-    
+
     Tracks all enrichment requests, successes, failures, and cache hits.
     """
-    
+
     __tablename__ = "enrichment_audit_trail"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(String(255), index=True, nullable=False)
     company_name = Column(String(500), nullable=True)
-    
+
     # Operation details
-    operation = Column(String(50), nullable=False, index=True)  # 'enrich_start', 'enrich_success', 'enrich_failure', 'cache_hit', 'cache_miss'
+    operation = Column(
+        String(50), nullable=False, index=True
+    )  # 'enrich_start', 'enrich_success', 'enrich_failure', 'cache_hit', 'cache_miss'
     source = Column(String(255), nullable=True)  # 'SEC_EDGAR', 'Companies_House', 'News_Signals'
     status = Column(String(50), nullable=False)  # 'SUCCESS', 'FAILURE', 'SKIPPED'
-    
+
     # Performance tracking
     duration_ms = Column(Float, nullable=True)
-    
+
     # Results
     fields_enriched = Column(JSON, nullable=True)  # List of fields that were enriched
     error_message = Column(Text, nullable=True)
-    
+
     # User/API context
     user_id = Column(String(255), nullable=True)
     client_id = Column(String(255), nullable=True)
-    
+
     # Metadata
     timestamp = Column(DateTime, nullable=False, index=True, default=lambda: datetime.now(timezone.utc))
-    
+
     __table_args__ = (
         Index("ix_enrichment_audit_company_timestamp", "company_id", "timestamp"),
         Index("ix_enrichment_audit_operation", "operation", "timestamp"),
     )
-    
+
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary representation."""
         return {
@@ -658,37 +660,35 @@ class EnrichmentAuditRecord(Base):
 
 class EnrichmentCacheRecord(Base):
     """Stores enriched company data cache (Phase 11).
-    
+
     Caches enrichment results with TTL for performance.
     """
-    
+
     __tablename__ = "enrichment_cache"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(String(255), unique=True, index=True, nullable=False)
-    
+
     # Cached enrichment data
     enriched_data = Column(JSON, nullable=False)  # Full UnifiedCompany serialized as JSON
     sources_used = Column(JSON, nullable=True)  # List of sources used for enrichment
     fields_enriched = Column(JSON, nullable=True)  # List of fields that were enriched
-    
+
     # Cache metadata
     cached_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     ttl_seconds = Column(Integer, default=86400)  # 24 hours default
     expires_at = Column(DateTime, nullable=False, index=True)
-    
+
     # Hit tracking
     hits = Column(Integer, default=0)  # Number of cache hits
     last_accessed_at = Column(DateTime, nullable=True)
-    
-    __table_args__ = (
-        Index("ix_enrichment_cache_expires", "expires_at"),
-    )
-    
+
+    __table_args__ = (Index("ix_enrichment_cache_expires", "expires_at"),)
+
     def is_expired(self) -> bool:
         """Check if cache entry has expired."""
         return datetime.now(timezone.utc) > self.expires_at
-    
+
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary representation."""
         return {
@@ -705,49 +705,47 @@ class EnrichmentCacheRecord(Base):
         }
 
 
-
-
 class EnrichmentJobRecord(Base):
     """Stores async enrichment job tracking (Phase 12).
-    
+
     Tracks the status and results of async enrichment tasks.
     """
-    
+
     __tablename__ = "enrichment_jobs"
-    
+
     id = Column(String(255), primary_key=True, index=True)  # Celery task_id
-    
+
     # Job details
     company_id = Column(String(255), index=True, nullable=False)
     company_name = Column(String(500), nullable=True)
     job_type = Column(String(50), nullable=False)  # 'single', 'batch'
-    
+
     # Status tracking
     status = Column(String(50), nullable=False, index=True)  # 'PENDING', 'RUNNING', 'SUCCESS', 'FAILED'
     progress = Column(Integer, default=0)  # 0-100 for batch jobs
-    
+
     # Job parameters
     sources = Column(JSON, nullable=True)
     batch_size = Column(Integer, nullable=True)
-    
+
     # Results
     result_data = Column(JSON, nullable=True)  # Full result
     error_message = Column(Text, nullable=True)
-    
+
     # Timing
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
     duration_ms = Column(Float, nullable=True)
-    
+
     # User context
     user_id = Column(String(255), nullable=True)
-    
+
     __table_args__ = (
         Index("ix_enrichment_job_status_created", "status", "created_at"),
         Index("ix_enrichment_job_company_created", "company_id", "created_at"),
     )
-    
+
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary representation."""
         return {
@@ -768,7 +766,6 @@ class EnrichmentJobRecord(Base):
         }
 
 
-
 class TenantRecord(Base):
     """ORM model for API tenants.
 
@@ -784,8 +781,17 @@ class TenantRecord(Base):
     is_active = Column(Boolean, nullable=False, default=True)
     plan = Column(String(64), nullable=False, default="standard")  # free|standard|enterprise
     rate_limit_per_min = Column(Integer, nullable=False, default=60)
-    created_at = Column(DateTime, nullable=False, default=lambda: __import__('datetime').datetime.now(__import__('datetime').timezone.utc))
-    updated_at = Column(DateTime, nullable=False, default=lambda: __import__('datetime').datetime.now(__import__('datetime').timezone.utc), onupdate=lambda: __import__('datetime').datetime.now(__import__('datetime').timezone.utc))
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: __import__("datetime").datetime.now(__import__("datetime").timezone.utc),
+    )
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: __import__("datetime").datetime.now(__import__("datetime").timezone.utc),
+        onupdate=lambda: __import__("datetime").datetime.now(__import__("datetime").timezone.utc),
+    )
 
     __table_args__ = (
         Index("ix_tenants_api_key_hash", "api_key_hash"),

@@ -8,8 +8,8 @@ If Celery is not available, this router will not be functional.
 
 import logging
 import uuid
-from typing import Optional, List
-from fastapi import APIRouter, Query, Request, status
+
+from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -18,62 +18,69 @@ router = APIRouter(prefix="/async", tags=["async-jobs"])
 # Try to import Celery, but don't fail if it's not available
 try:
     from solstein.celery_config import celery_app
+
     CELERY_AVAILABLE = True
 except ImportError:
     CELERY_AVAILABLE = False
     celery_app = None
     logger.warning("Celery not installed - async job endpoints will return 503 Service Unavailable")
 
-from solstein.data.security_hardening import rate_limiter, input_validator
-from ..exceptions import APIError
+from solstein.data.security_hardening import input_validator, rate_limiter
 
+from ..exceptions import APIError
 
 # ============================================================================
 # REQUEST/RESPONSE MODELS
 # ============================================================================
 
+
 class AsyncEnrichmentRequest(BaseModel):
     """Request to enrich a company asynchronously."""
+
     company_id: str
-    company_name: Optional[str] = None
-    sources: Optional[List[str]] = None
+    company_name: str | None = None
+    sources: list[str] | None = None
     use_cache: bool = True
 
 
 class AsyncBatchEnrichmentRequest(BaseModel):
     """Request to enrich multiple companies asynchronously."""
-    companies: List[dict]  # List of {id, name} dicts
-    sources: Optional[List[str]] = None
+
+    companies: list[dict]  # List of {id, name} dicts
+    sources: list[str] | None = None
     batch_size: int = 10
 
 
 class JobStatusResponse(BaseModel):
     """Response with job status."""
+
     job_id: str
     company_id: str
-    company_name: Optional[str]
+    company_name: str | None
     job_type: str
     status: str
     progress: int
     created_at: str
-    started_at: Optional[str]
-    completed_at: Optional[str]
-    duration_ms: Optional[float]
-    result_data: Optional[dict]
-    error_message: Optional[str]
+    started_at: str | None
+    completed_at: str | None
+    duration_ms: float | None
+    result_data: dict | None
+    error_message: str | None
 
 
 class JobResultResponse(BaseModel):
     """Response with job result."""
+
     job_id: str
     status: str
     result_data: dict
-    error_message: Optional[str]
+    error_message: str | None
 
 
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
+
 
 def _get_client_id(request: Request) -> str:
     """Extract client ID from request headers."""
@@ -99,25 +106,26 @@ def _check_celery_available():
 # ENDPOINTS
 # ============================================================================
 
+
 @router.post("/enrich/single")
 async def enrich_single_async(request_data: AsyncEnrichmentRequest, request: Request):
     """Submit async single company enrichment job.
-    
+
     Returns:
         Dict with job_id and status
     """
     _check_celery_available()
-    
+
     # Rate limiting
     client_id = _get_client_id(request)
     if not rate_limiter.is_allowed(client_id):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
-    
+
     # Validation
     is_valid, error = input_validator.validate_company_id(request_data.company_id)
     if not is_valid:
         raise HTTPException(status_code=400, detail=error)
-    
+
     # Submit async task
     task = celery_app.send_task(
         "solstein.worker_tasks.enrich_company_async",
@@ -129,9 +137,9 @@ async def enrich_single_async(request_data: AsyncEnrichmentRequest, request: Req
         ],
         task_id=str(uuid.uuid4()),
     )
-    
+
     logger.info(f"📨 Submitted async enrichment job {task.id} for {request_data.company_id}")
-    
+
     return {
         "job_id": task.id,
         "company_id": request_data.company_id,
@@ -143,24 +151,24 @@ async def enrich_single_async(request_data: AsyncEnrichmentRequest, request: Req
 @router.post("/enrich/batch")
 async def enrich_batch_async(request_data: AsyncBatchEnrichmentRequest, request: Request):
     """Submit async batch company enrichment job.
-    
+
     Returns:
         Dict with job_id and status
     """
     _check_celery_available()
-    
+
     # Rate limiting
     client_id = _get_client_id(request)
     if not rate_limiter.is_allowed(client_id):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
-    
+
     # Validation
     if not request_data.companies:
         raise HTTPException(status_code=400, detail="Companies list cannot be empty")
-    
+
     if len(request_data.companies) > 1000:
         raise HTTPException(status_code=400, detail="Batch size limited to 1000 companies")
-    
+
     # Submit async task
     task = celery_app.send_task(
         "solstein.worker_tasks.enrich_companies_batch_async",
@@ -172,9 +180,9 @@ async def enrich_batch_async(request_data: AsyncBatchEnrichmentRequest, request:
         ],
         task_id=str(uuid.uuid4()),
     )
-    
+
     logger.info(f"📨 Submitted async batch enrichment job {task.id} for {len(request_data.companies)} companies")
-    
+
     return {
         "job_id": task.id,
         "total_companies": len(request_data.companies),
@@ -186,23 +194,23 @@ async def enrich_batch_async(request_data: AsyncBatchEnrichmentRequest, request:
 @router.get("/jobs/{job_id}/status")
 async def get_job_status(job_id: str, request: Request):
     """Get status of an async job.
-    
+
     Args:
         job_id: Celery task ID
-    
+
     Returns:
         Dict with job status and progress
     """
     _check_celery_available()
-    
+
     # Rate limiting
     client_id = _get_client_id(request)
     if not rate_limiter.is_allowed(client_id):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
-    
+
     # Get task
     task = celery_app.AsyncResult(job_id)
-    
+
     if task.state == "PENDING":
         response = {
             "job_id": job_id,
@@ -235,30 +243,30 @@ async def get_job_status(job_id: str, request: Request):
             "status": task.state,
             "progress": 0,
         }
-    
+
     return response
 
 
 @router.get("/jobs/{job_id}/result")
 async def get_job_result(job_id: str, request: Request):
     """Get result of a completed async job.
-    
+
     Args:
         job_id: Celery task ID
-    
+
     Returns:
         Dict with job result and enrichment data
     """
     _check_celery_available()
-    
+
     # Rate limiting
     client_id = _get_client_id(request)
     if not rate_limiter.is_allowed(client_id):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
-    
+
     # Get task
     task = celery_app.AsyncResult(job_id)
-    
+
     if task.state == "PENDING":
         raise HTTPException(status_code=202, detail="Job still pending")
     elif task.state == "RUNNING":

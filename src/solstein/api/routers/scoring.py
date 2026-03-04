@@ -1,19 +1,14 @@
 import asyncio
-import uuid
 from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query, status
 from loguru import logger
 
-
-
-
-
-from ...analytics.scoring import GrowthScorer
 from ...analytics.company_loader import unified_score_loader
+from ...analytics.scoring import GrowthScorer
 from ...core.repositories import CompanyRepository
-from ..dependencies import get_current_user, get_company_repository
+from ..dependencies import get_company_repository, get_current_user
 from ..exceptions import APIError
 
 router = APIRouter(tags=["Scoring"])
@@ -85,7 +80,7 @@ async def batch_score_companies_endpoint(
     _: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Batch score multiple companies.
-    
+
     NOTE: Temporal integration has been removed. This endpoint is disabled.
     """
     raise APIError(
@@ -93,6 +88,7 @@ async def batch_score_companies_endpoint(
         message="Batch scoring endpoint disabled - Temporal integration removed. Use individual /company/{id}/score endpoint instead.",
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
     )
+
 
 @router.get("/stats", tags=["Statistics"])
 async def get_statistics(

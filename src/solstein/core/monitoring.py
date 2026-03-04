@@ -93,9 +93,10 @@ class HealthMonitor:
         """
         start = datetime.now(timezone.utc)
         try:
-            from ..infrastructure.database import DatabaseManager
-            from ..config import Settings
             from sqlalchemy import text
+
+            from ..config import Settings
+            from ..infrastructure.database import DatabaseManager
 
             settings = Settings.load()
             db_manager = DatabaseManager(settings)
@@ -165,8 +166,9 @@ class HealthMonitor:
         """
         start = datetime.now(timezone.utc)
         try:
-            from ..config import Settings
             import redis.asyncio as redis
+
+            from ..config import Settings
 
             settings = Settings.load()
             redis_client = redis.from_url(settings.redis.url, decode_responses=True)
@@ -251,7 +253,7 @@ class HealthMonitor:
         """
         start = datetime.now(timezone.utc)
         try:
-            from ..llm.health_checker import get_health_checker, ProviderStatus
+            from ..llm.health_checker import ProviderStatus, get_health_checker
 
             health_checker = get_health_checker()
             health = await health_checker.check_all_providers()

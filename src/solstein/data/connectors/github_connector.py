@@ -6,33 +6,19 @@ Provides a simple interface to GitHub data retrieval for refresh connectors.
 
 """
 
-
-
 from typing import Any
 
-
-
 import requests
-
 from loguru import logger
 
-
-
 from solstein.data.connectors.constants import (
-
-    GITHUB_DEFAULT_CONFIDENCE,
-
     GITHUB_DEFAULT_PER_PAGE,
-
     GITHUB_REQUEST_TIMEOUT_S,
-
     HTTP_STATUS_FORBIDDEN,
-
     HTTP_STATUS_NOT_FOUND,
-
     HTTP_STATUS_OK,
-
 )
+
 
 class GitHubConnector:
     """GitHub API connector for fetching repository and commit data.
@@ -50,6 +36,7 @@ class GitHubConnector:
             github_token: GitHub API token (optional, increases rate limit)
         """
         from solstein.config import get_settings
+
         settings = get_settings()
         self.github_token = github_token or settings.github_token
         self.api_base = "https://api.github.com"

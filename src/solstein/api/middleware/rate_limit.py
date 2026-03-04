@@ -10,14 +10,13 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
 from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
-
 
 # Route-specific rate limits: requests per minute
 ROUTE_LIMITS = {
@@ -47,9 +46,7 @@ def get_rate_limit_for_path(path: str) -> int:
 
     # Check for prefix matches
     for route_pattern, limit in ROUTE_LIMITS.items():
-        if route_pattern.endswith("/") and path.startswith(route_pattern):
-            return limit
-        elif path.startswith(route_pattern):
+        if route_pattern.endswith("/") and path.startswith(route_pattern) or path.startswith(route_pattern):
             return limit
 
     # Default: 60 requests per minute

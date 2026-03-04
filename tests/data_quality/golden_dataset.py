@@ -6,7 +6,6 @@ for regression testing to prevent score drift.
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -24,9 +23,9 @@ class GoldenCompanyExpectation:
     expected_financial_health_max: float
     expected_competitive_position_min: float
     expected_competitive_position_max: float
-    expected_ai_score_min: Optional[int] = None
-    expected_ai_score_max: Optional[int] = None
-    expected_ai_maturity: Optional[str] = None
+    expected_ai_score_min: int | None = None
+    expected_ai_score_max: int | None = None
+    expected_ai_maturity: str | None = None
     notes: str = ""
 
     def validate_composite_score(self, actual_score: float) -> bool:
@@ -49,7 +48,7 @@ class GoldenCompanyExpectation:
         """Check if actual classification matches expected."""
         return actual_classification == self.expected_classification
 
-    def validate_ai_score(self, actual_score: Optional[int]) -> bool:
+    def validate_ai_score(self, actual_score: int | None) -> bool:
         """Check if actual AI score is within expected range."""
         if self.expected_ai_score_min is None or self.expected_ai_score_max is None:
             return True  # No expectation set
@@ -57,7 +56,7 @@ class GoldenCompanyExpectation:
             return False  # Expected a score but got None
         return self.expected_ai_score_min <= actual_score <= self.expected_ai_score_max
 
-    def validate_ai_maturity(self, actual_maturity: Optional[str]) -> bool:
+    def validate_ai_maturity(self, actual_maturity: str | None) -> bool:
         """Check if actual AI maturity matches expected."""
         if self.expected_ai_maturity is None:
             return True  # No expectation set
@@ -248,7 +247,7 @@ def get_golden_dataset() -> list[GoldenCompanyExpectation]:
     return GOLDEN_DATASET
 
 
-def get_golden_company_by_id(company_id: str) -> Optional[GoldenCompanyExpectation]:
+def get_golden_company_by_id(company_id: str) -> GoldenCompanyExpectation | None:
     """Get a golden company expectation by ID."""
     for company in GOLDEN_DATASET:
         if company.company_id == company_id:
@@ -256,7 +255,7 @@ def get_golden_company_by_id(company_id: str) -> Optional[GoldenCompanyExpectati
     return None
 
 
-def get_golden_company_by_name(company_name: str) -> Optional[GoldenCompanyExpectation]:
+def get_golden_company_by_name(company_name: str) -> GoldenCompanyExpectation | None:
     """Get a golden company expectation by name."""
     for company in GOLDEN_DATASET:
         if company.company_name.lower() == company_name.lower():

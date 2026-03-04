@@ -5,13 +5,14 @@ Provides Redis-based caching with fallback to in-memory cache when Redis is unav
 
 import json
 import logging
-from datetime import timedelta
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, Optional
+from typing import Any
 
 try:
     import redis
     from redis.asyncio import Redis as AsyncRedis
+
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
@@ -35,20 +36,21 @@ class CacheManager:
             logger.warning("Redis not installed, using in-memory cache")
             self.redis = None
             self.available = False
-            self._memory_cache: dict[str, tuple[Any, Optional[float]]] = {}
+            self._memory_cache: dict[str, tuple[Any, float | None]] = {}
             return
 
         try:
             # Try async Redis client first
-            self.redis: Optional[AsyncRedis] = AsyncRedis.from_url(redis_url, decode_responses=True)
+            self.redis: AsyncRedis | None = AsyncRedis.from_url(redis_url, decode_responses=True)
             self.available = True
             logger.info("Redis cache configured")
         except Exception as e:
             logger.warning(f"Redis unavailable: {e}, using in-memory cache")
             self.redis = None
             self.available = False
-            self._memory_cache: dict[str, tuple[Any, Optional[float]]] = {}
-    async def get(self, key: str) -> Optional[Any]:
+            self._memory_cache: dict[str, tuple[Any, float | None]] = {}
+
+    async def get(self, key: str) -> Any | None:
         """
         Get value from cache.
 
@@ -173,7 +175,7 @@ cache_manager = CacheManager()
 def cached(
     key_prefix: str,
     ttl: int = 3600,
-    key_builder: Optional[Callable[..., str]] = None,
+    key_builder: Callable[..., str] | None = None,
 ):
     """
     Decorator to cache function results.
@@ -246,7 +248,7 @@ def company_key(company_id: str) -> str:
     return f"company:{company_id}"
 
 
-def market_analysis_key(industry: Optional[str], region: Optional[str]) -> str:
+def market_analysis_key(industry: str | None, region: str | None) -> str:
     """Build cache key for market analysis."""
     parts = ["market_analysis"]
     if industry:

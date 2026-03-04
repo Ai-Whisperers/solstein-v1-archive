@@ -1,7 +1,8 @@
 """Tests for PatentsRefreshConnector."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from solstein.infrastructure.connectors.patents_refresh import PatentsRefreshConnector
 from solstein.infrastructure.database import DatabaseManager

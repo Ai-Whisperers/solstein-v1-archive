@@ -1,11 +1,13 @@
 """Tests for synthetic data detection and blocking functionality."""
 
-import pytest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-from solstein.exporters.markdown.generator import ReportGenerator
-from solstein.exceptions import SyntheticDataBlockingError
+from unittest.mock import Mock
+
+import pytest
+
 from solstein.domain.models import Company
+from solstein.exceptions import SyntheticDataBlockingError
+from solstein.exporters.markdown.generator import ReportGenerator
 
 
 class TestSyntheticDataGate:

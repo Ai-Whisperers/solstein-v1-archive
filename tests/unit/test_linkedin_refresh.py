@@ -1,7 +1,8 @@
 """Tests for LinkedInRefreshConnector."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from solstein.infrastructure.connectors.linkedin_refresh import LinkedInRefreshConnector
 from solstein.infrastructure.database import DatabaseManager

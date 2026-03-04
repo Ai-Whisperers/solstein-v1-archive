@@ -20,22 +20,22 @@ Each test verifies:
 
 from __future__ import annotations
 
-import pytest
 from datetime import datetime, timezone
 from typing import Any
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
-from solstein.domain.models import (
-    Company,
-    CompanyTier,
-    AIMaturity,
-    ThreatLevel,
-    FinancialMetric,
-    ConfidenceLevel,
-)
+import pytest
+
 from solstein.analytics.scoring import GrowthScorer
 from solstein.core.repositories import CompanyRepository
-
+from solstein.domain.models import (
+    AIMaturity,
+    Company,
+    CompanyTier,
+    ConfidenceLevel,
+    FinancialMetric,
+    ThreatLevel,
+)
 
 # ============================================================================
 # FIXTURES

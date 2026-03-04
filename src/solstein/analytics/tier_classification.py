@@ -5,7 +5,6 @@ to address the "all Tier 4" UX issue.
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 from solstein.domain.models import Company, CompanyTier
 
@@ -20,7 +19,7 @@ class TierClassification:
     explanation: str  # Why this tier was assigned
     revenue_range: str  # e.g., "€5M - €10M"
     trajectory: str  # "↑ Growing", "→ Stable", "↓ Declining"
-    next_tier_threshold: Optional[str]  # What it takes to reach next tier
+    next_tier_threshold: str | None  # What it takes to reach next tier
 
 
 class EnhancedTierClassifier:
@@ -155,7 +154,7 @@ class EnhancedTierClassifier:
 
         return base
 
-    def _get_next_tier_threshold(self, tier: CompanyTier, revenue: float) -> Optional[str]:
+    def _get_next_tier_threshold(self, tier: CompanyTier, revenue: float) -> str | None:
         """Get description of what it takes to reach next tier."""
         thresholds = {
             CompanyTier.TIER_4: f"Reach €{10 - revenue:.1f}M more revenue for Tier 3",

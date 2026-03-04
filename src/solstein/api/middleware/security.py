@@ -9,11 +9,11 @@ Implements:
 """
 
 import logging
+from collections.abc import Callable
+
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.middleware.cors import CORSMiddleware
-from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +106,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
 
         logger.debug(f"Authenticated request to {request.url.path}")
         return await call_next(request)
+
 
 class InputSanitizationMiddleware(BaseHTTPMiddleware):
     """Sanitize and validate incoming requests."""

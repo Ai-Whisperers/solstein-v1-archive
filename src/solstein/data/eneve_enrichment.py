@@ -1,8 +1,5 @@
 """Enrichment utilities for eneve competitive intelligence pipeline."""
 
-from typing import Optional
-from loguru import logger
-
 from ..domain.models import Company
 
 
@@ -12,10 +9,10 @@ class EnveEnrichmentService:
     @staticmethod
     def enrich_company_with_confidence(company: Company) -> Company:
         """Add confidence scores to company metrics based on data completeness.
-        
+
         Args:
             company: Company object to enrich
-            
+
         Returns:
             Company object with confidence scores added
         """
@@ -28,64 +25,64 @@ class EnveEnrichmentService:
 
         if company.financials and company.financials.revenue is not None:
             metrics_present += 1
-            company.signal_confidences['revenue'] = 0.9
+            company.signal_confidences["revenue"] = 0.9
         else:
-            company.signal_confidences['revenue'] = 0.0
+            company.signal_confidences["revenue"] = 0.0
 
         if company.financials and company.financials.growth_rate is not None:
             metrics_present += 1
-            company.signal_confidences['growth_rate'] = 0.85
+            company.signal_confidences["growth_rate"] = 0.85
         else:
-            company.signal_confidences['growth_rate'] = 0.0
+            company.signal_confidences["growth_rate"] = 0.0
 
         if company.financials and company.financials.employees is not None:
             metrics_present += 1
-            company.signal_confidences['employees'] = 0.95
+            company.signal_confidences["employees"] = 0.95
         else:
-            company.signal_confidences['employees'] = 0.0
+            company.signal_confidences["employees"] = 0.0
 
         if company.financials and company.financials.profit_margin is not None:
             metrics_present += 1
-            company.signal_confidences['profit_margin'] = 0.8
+            company.signal_confidences["profit_margin"] = 0.8
         else:
-            company.signal_confidences['profit_margin'] = 0.0
+            company.signal_confidences["profit_margin"] = 0.0
 
         if company.financials and company.financials.funding_raised is not None:
             metrics_present += 1
-            company.signal_confidences['funding'] = 0.85
+            company.signal_confidences["funding"] = 0.85
         else:
-            company.signal_confidences['funding'] = 0.0
+            company.signal_confidences["funding"] = 0.0
 
         if company.financials and company.financials.valuation is not None:
             metrics_present += 1
-            company.signal_confidences['valuation'] = 0.75
+            company.signal_confidences["valuation"] = 0.75
         else:
-            company.signal_confidences['valuation'] = 0.0
+            company.signal_confidences["valuation"] = 0.0
 
         if company.ai_maturity is not None:
             metrics_present += 1
-            company.signal_confidences['ai_maturity'] = 0.7
+            company.signal_confidences["ai_maturity"] = 0.7
         else:
-            company.signal_confidences['ai_maturity'] = 0.0
+            company.signal_confidences["ai_maturity"] = 0.0
 
         if company.threat_level is not None:
             metrics_present += 1
-            company.signal_confidences['threat_level'] = 0.7
+            company.signal_confidences["threat_level"] = 0.7
         else:
-            company.signal_confidences['threat_level'] = 0.0
+            company.signal_confidences["threat_level"] = 0.0
 
         # Overall data completeness score
-        company.signal_confidences['data_completeness'] = metrics_present / total_metrics
+        company.signal_confidences["data_completeness"] = metrics_present / total_metrics
 
         return company
 
     @staticmethod
     def calculate_enrichment_source_count(company: Company) -> int:
         """Calculate number of enrichment sources for a company.
-        
+
         Args:
             company: Company object
-            
+
         Returns:
             Count of unique enrichment sources
         """
@@ -104,12 +101,12 @@ class EnveEnrichmentService:
         return len(sources)
 
     @staticmethod
-    def validate_enriched_data(company: Company) -> tuple[bool, Optional[str]]:
+    def validate_enriched_data(company: Company) -> tuple[bool, str | None]:
         """Validate enriched company data.
-        
+
         Args:
             company: Company object to validate
-            
+
         Returns:
             Tuple of (is_valid, error_message)
         """
@@ -119,19 +116,23 @@ class EnveEnrichmentService:
         # Check for at least some data
         has_data = False
         if company.financials:
-            has_data = any([
-                company.financials.revenue is not None,
-                company.financials.employees is not None,
-                company.financials.growth_rate is not None,
-                company.financials.profit_margin is not None,
-                company.financials.funding_raised is not None,
-                company.financials.valuation is not None,
-            ])
+            has_data = any(
+                [
+                    company.financials.revenue is not None,
+                    company.financials.employees is not None,
+                    company.financials.growth_rate is not None,
+                    company.financials.profit_margin is not None,
+                    company.financials.funding_raised is not None,
+                    company.financials.valuation is not None,
+                ]
+            )
 
-        has_data = has_data or any([
-            company.ai_maturity is not None,
-            company.threat_level is not None,
-        ])
+        has_data = has_data or any(
+            [
+                company.ai_maturity is not None,
+                company.threat_level is not None,
+            ]
+        )
 
         if not has_data:
             return False, f"No enrichment data found for {company.name}"
@@ -144,10 +145,14 @@ class EnveEnrichmentService:
             if company.financials.employees is not None and company.financials.employees < 0:
                 return False, f"Employees cannot be negative: {company.financials.employees}"
 
-            if company.financials.growth_rate is not None and (company.financials.growth_rate < -100 or company.financials.growth_rate > 1000):
+            if company.financials.growth_rate is not None and (
+                company.financials.growth_rate < -100 or company.financials.growth_rate > 1000
+            ):
                 return False, f"Growth rate out of reasonable range: {company.financials.growth_rate}%"
 
-            if company.financials.profit_margin is not None and (company.financials.profit_margin < -100 or company.financials.profit_margin > 100):
+            if company.financials.profit_margin is not None and (
+                company.financials.profit_margin < -100 or company.financials.profit_margin > 100
+            ):
                 return False, f"Profit margin out of range: {company.financials.profit_margin}%"
 
         return True, None
@@ -155,11 +160,11 @@ class EnveEnrichmentService:
     @staticmethod
     def merge_enrichment_data(primary: Company, secondary: Company) -> Company:
         """Merge enrichment data from secondary company into primary.
-        
+
         Args:
             primary: Primary company object
             secondary: Secondary company object with additional data
-            
+
         Returns:
             Merged company object
         """

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from typing import Any, TypeVar
 
-from loguru import logger
 from pydantic import BaseModel, Field
 
 from ..config import get_settings

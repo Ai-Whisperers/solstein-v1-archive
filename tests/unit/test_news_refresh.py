@@ -1,7 +1,8 @@
 """Tests for NewsRefreshConnector."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from solstein.infrastructure.connectors.news_refresh import NewsRefreshConnector
 from solstein.infrastructure.database import DatabaseManager

@@ -4,10 +4,11 @@ Provides high-level enrichment operations that interact with database.
 """
 
 from datetime import datetime, timezone
-from typing import Optional, List, Dict, Any
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from solstein.data.unified_loader import unified_loader, UnifiedCompany
+from solstein.data.unified_loader import UnifiedCompany, unified_loader
 from solstein.infrastructure.enrichment_repositories import (
     EnrichmentAuditRepository,
     EnrichmentCacheRepository,
@@ -25,12 +26,12 @@ class EnrichmentService:
     async def enrich_company(
         self,
         company_id: str,
-        company_name: Optional[str] = None,
-        sources: Optional[List[str]] = None,
+        company_name: str | None = None,
+        sources: list[str] | None = None,
         use_cache: bool = True,
-        user_id: Optional[str] = None,
-        client_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        user_id: str | None = None,
+        client_id: str | None = None,
+    ) -> dict[str, Any]:
         """Enrich a single company with caching and audit logging."""
         start_time = datetime.now(timezone.utc)
         sources = sources or ["SEC_EDGAR"]
@@ -155,9 +156,9 @@ class EnrichmentService:
 
     async def get_audit_trail(
         self,
-        company_id: Optional[str] = None,
+        company_id: str | None = None,
         limit: int = 50,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get audit trail for a company."""
         entries = await self.audit_repo.get_audit_trail(company_id=company_id, limit=limit)
         stats = await self.audit_repo.get_company_stats(company_id) if company_id else {}
@@ -167,7 +168,7 @@ class EnrichmentService:
             "stats": stats,
         }
 
-    async def clear_cache(self, company_id: Optional[str] = None) -> Dict[str, Any]:
+    async def clear_cache(self, company_id: str | None = None) -> dict[str, Any]:
         """Clear cache entries."""
         deleted_count = await self.cache_repo.delete_cache(company_id=company_id)
         cache_stats = await self.cache_repo.get_cache_stats()

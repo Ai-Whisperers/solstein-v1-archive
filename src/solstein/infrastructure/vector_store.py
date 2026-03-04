@@ -22,16 +22,14 @@ Usage::
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from loguru import logger
-from sqlalchemy import Column, Float, Index, String, Text, select
+from sqlalchemy import Column, Float, Index, String, Text, func, select
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import declarative_base
-
-if TYPE_CHECKING:
-    pass
 
 Base = declarative_base()
 

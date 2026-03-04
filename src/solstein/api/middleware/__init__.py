@@ -1,19 +1,19 @@
 """API Middleware for SolStein platform."""
 
 from .logging import setup_logging_middleware
-from .security import (
-    setup_security_middleware,
-    AuthenticationMiddleware,
-)
 from .rate_limit import (
+    RateLimitConfig,
     RateLimitMiddleware,
     UserRateLimitMiddleware,
-    RateLimitConfig,
     setup_rate_limiting,
 )
+from .security import (
+    AuthenticationMiddleware,
+    setup_security_middleware,
+)
 from .tracing import (
-    RequestTracingMiddleware,
     PerformanceMetricsMiddleware,
+    RequestTracingMiddleware,
     get_correlation_id,
 )
 

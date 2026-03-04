@@ -10,10 +10,12 @@ This module provides backwards compatibility while using the improved implementa
 
 # Re-export from improved implementation for backwards compatibility
 from .excel_improved import (
-    ImprovedExcelExporter as ExcelExporter,
-    LayoutConstants,
     ColorPalette,
     ExcelStyles,
+    LayoutConstants,
+)
+from .excel_improved import (
+    ImprovedExcelExporter as ExcelExporter,
 )
 
 __all__ = ["ExcelExporter", "LayoutConstants", "ColorPalette", "ExcelStyles"]

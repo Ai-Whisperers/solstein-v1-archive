@@ -11,6 +11,6 @@ Stories:
 - 12.4: CI/CD testing
 """
 
-from .companies import *
-from .financials import *
-from .scoring import *
+from .companies import *  # noqa: F403
+from .financials import *  # noqa: F403
+from .scoring import *  # noqa: F403

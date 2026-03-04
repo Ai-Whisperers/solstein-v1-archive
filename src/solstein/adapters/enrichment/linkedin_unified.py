@@ -36,6 +36,7 @@ class LinkedInUnifiedAdapter(BaseRefreshConnector):
             confidence=0.60,
         )
         self.news_api_key = news_api_key
+
     def _get_hiring_signals(self, company_name: str) -> dict[str, Any]:
         """Get hiring signals from news."""
         try:

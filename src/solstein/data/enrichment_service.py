@@ -9,21 +9,19 @@ Separates enrichment logic from loading logic into focused service classes:
 """
 
 import logging
-from typing import Optional, List
 from datetime import datetime, timezone
 
-from ..domain.models import ConfidenceLevel
 from .enrichment_config import UnifiedCompanyLoaderConfig, get_config
 from .enrichment_orchestrator import (
-    EnrichmentOrchestrator,
     EnrichmentConfig,
+    EnrichmentOrchestrator,
     EnrichmentSource,
 )
 from .enrichment_validators import (
-    validate_revenue,
-    validate_growth_rate,
     validate_employee_count,
+    validate_growth_rate,
     validate_profit_margin,
+    validate_revenue,
 )
 
 logger = logging.getLogger(__name__)
@@ -64,7 +62,7 @@ class DataValidationService:
     """Service for data validation (Phase 7 item 128)."""
 
     @staticmethod
-    def validate_enrichment_data(data: dict) -> tuple[bool, Optional[str]]:
+    def validate_enrichment_data(data: dict) -> tuple[bool, str | None]:
         """
         Validate enriched data before accepting.
 
@@ -202,7 +200,7 @@ class EnrichmentService:
     Encapsulates all enrichment logic, separate from loading.
     """
 
-    def __init__(self, config: Optional[UnifiedCompanyLoaderConfig] = None):
+    def __init__(self, config: UnifiedCompanyLoaderConfig | None = None):
         """
         Initialize enrichment service.
 
@@ -299,7 +297,7 @@ class CacheService:
         self.ttl_hours = ttl_hours
         self.cache = {}
 
-    def get(self, key: str) -> Optional[dict]:
+    def get(self, key: str) -> dict | None:
         """Get cached value if not expired."""
         if key not in self.cache:
             return None

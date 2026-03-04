@@ -1,6 +1,7 @@
 import time
 import uuid
 from collections.abc import Awaitable, Callable
+from typing import Any
 
 from fastapi import Request, Response
 from loguru import logger
@@ -45,7 +46,6 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # Inject request ID into response for client traceability
             response.headers["X-Request-ID"] = request_id
             return response
-
 
 
 def setup_rate_limit_middleware(app: Any) -> None:

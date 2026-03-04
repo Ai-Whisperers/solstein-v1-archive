@@ -1,7 +1,5 @@
 """Identifier lookup service for connector enrichment."""
 
-from typing import Optional
-
 
 class IdentifierLookupService:
     """Look up company identifiers (ticker, company_number, isin, geography)."""
@@ -10,7 +8,7 @@ class IdentifierLookupService:
         """Initialize the lookup service."""
         pass
 
-    def lookup_ticker(self, company_name: str) -> Optional[str]:
+    def lookup_ticker(self, company_name: str) -> str | None:
         """
         Look up US stock ticker for a company by name.
 
@@ -22,7 +20,7 @@ class IdentifierLookupService:
         """
         return None  # Stub - will be implemented in Phase 5
 
-    def lookup_company_number(self, company_name: str) -> Optional[str]:
+    def lookup_company_number(self, company_name: str) -> str | None:
         """
         Look up UK Companies House registration number.
 
@@ -34,7 +32,7 @@ class IdentifierLookupService:
         """
         return None  # Stub - will be implemented in Phase 5
 
-    def infer_geography(self, company_name: str, headquarters: Optional[str] = None) -> Optional[str]:
+    def infer_geography(self, company_name: str, headquarters: str | None = None) -> str | None:
         """
         Infer company geography (US, UK, EU, etc) from name/HQ.
 

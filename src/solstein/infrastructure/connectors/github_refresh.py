@@ -2,8 +2,8 @@ from datetime import datetime
 from typing import Any
 
 from loguru import logger
-from solstein.data.connectors.github_connector import GitHubConnector
 
+from solstein.data.connectors.github_connector import GitHubConnector
 from solstein.infrastructure.database import DatabaseManager
 from solstein.infrastructure.refresh import BaseRefreshConnector
 

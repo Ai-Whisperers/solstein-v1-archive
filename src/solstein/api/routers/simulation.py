@@ -6,7 +6,7 @@ from loguru import logger
 from ...analytics.simulation import SimulationEngine
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...domain.simulation import Scenario, SimulationResult
-from ..dependencies import get_current_user, get_company_repository
+from ..dependencies import get_company_repository, get_current_user
 from ..exceptions import APIError
 
 router = APIRouter(tags=["Simulation"])

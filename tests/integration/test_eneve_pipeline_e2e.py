@@ -1,14 +1,10 @@
 """End-to-end integration tests for eneve competitive intelligence pipeline."""
 
 import json
-import tempfile
-from pathlib import Path
 
 import pytest
-
-from src.solstein.cli import cli
-from src.solstein.data.loaders import CompetitorDataLoader
 from src.solstein.data.eneve_enrichment import EnveEnrichmentService
+from src.solstein.data.loaders import CompetitorDataLoader
 from src.solstein.domain.models import Company
 from src.solstein.extractors.markdown_extractor import BatchExtractor, MarkdownExtractor
 

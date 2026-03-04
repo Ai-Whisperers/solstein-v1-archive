@@ -12,9 +12,7 @@ from loguru import logger
 from ..core.scoring_config import ScoringSettings
 from ..domain.models import (
     Company,
-    FinancialMetric,
     MarketAnalysis,
-    ScoreComponent,
     ScoringExplanation,
 )
 from .constants import (
@@ -139,9 +137,7 @@ class GrowthScorer:
         profile.classification = classify_company(profile.composite_score)
 
         # Derive threat level from classification and score
-        profile.threat_level = derive_threat_level(
-            profile.classification, profile.composite_score
-        )
+        profile.threat_level = derive_threat_level(profile.classification, profile.composite_score)
         profile.classification = classify_company(profile.composite_score)
 
         profile.scoring_breakdown["growth"] = growth_expl
@@ -149,6 +145,7 @@ class GrowthScorer:
         profile.scoring_breakdown["competitive"] = comp_expl
 
         return profile
+
 
 # NOTE: The following private methods were removed as dead code:
 # - _calculate_growth_score (lines ~153-241)

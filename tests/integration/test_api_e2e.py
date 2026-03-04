@@ -15,8 +15,6 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from datetime import datetime
-from unittest.mock import Mock, patch, AsyncMock
 
 from solstein.api.main import app
 

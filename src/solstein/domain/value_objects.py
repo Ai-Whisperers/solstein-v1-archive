@@ -23,7 +23,6 @@ from pydantic import BaseModel, field_validator, model_validator
 
 from solstein.analytics.constants import MAX_SCORE, MIN_SCORE
 
-
 # ---------------------------------------------------------------------------
 # Money
 # ---------------------------------------------------------------------------
@@ -90,11 +89,11 @@ class Money(BaseModel):
             raise ValueError(f"Unsupported currency code: {v!r}. Expected ISO 4217.")
         return upper
 
-    def to_eur(self, exchange_rate: Decimal) -> "Money":
+    def to_eur(self, exchange_rate: Decimal) -> Money:
         """Return equivalent in EUR given the EUR/currency exchange rate."""
         return Money(amount=self.amount / exchange_rate, currency="EUR")
 
-    def __add__(self, other: "Money") -> "Money":
+    def __add__(self, other: Money) -> Money:
         if self.currency != other.currency:
             raise ValueError(f"Cannot add {self.currency} and {other.currency}")
         return Money(amount=self.amount + other.amount, currency=self.currency)
@@ -183,7 +182,7 @@ class CompanyId(str):
     expected, and enforces non-empty constraint at construction time.
     """
 
-    def __new__(cls, value: str) -> "CompanyId":
+    def __new__(cls, value: str) -> CompanyId:
         stripped = str(value).strip()
         if not stripped:
             raise ValueError("CompanyId must not be blank")
@@ -212,7 +211,7 @@ class DateRange(BaseModel):
     end: date
 
     @model_validator(mode="after")
-    def end_after_start(self) -> "DateRange":
+    def end_after_start(self) -> DateRange:
         if self.end < self.start:
             raise ValueError(f"end ({self.end}) must be >= start ({self.start})")
         return self

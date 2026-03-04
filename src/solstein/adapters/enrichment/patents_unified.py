@@ -44,6 +44,7 @@ class PatentsUnifiedAdapter(BaseRefreshConnector):
             db_manager=db_manager,
             confidence=0.80,
         )
+
     def discover(
         self,
         market: str,

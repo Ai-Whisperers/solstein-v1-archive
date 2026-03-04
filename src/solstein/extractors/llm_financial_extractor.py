@@ -17,7 +17,7 @@ class LLMFinancialExtractor:
 
     def extract_financial_metrics(self, prose_text: str) -> dict[str, Any]:
         """Extract financial metrics from prose text.
-        
+
         Returns dict with keys: revenue, growth_rate, employees, profit_margin, funding, valuation
         """
         if not prose_text or not prose_text.strip():
@@ -45,10 +45,10 @@ Text:
 Return ONLY valid JSON, no other text."""
 
             response = self.llm_client.invoke(prompt)
-            
+
             # Parse JSON response
             try:
-                result = json.loads(response.content if hasattr(response, 'content') else str(response))
+                result = json.loads(response.content if hasattr(response, "content") else str(response))
                 return {k: v for k, v in result.items() if v is not None}
             except json.JSONDecodeError:
                 logger.warning("Failed to parse LLM response as JSON, falling back to regex")
@@ -63,60 +63,40 @@ Return ONLY valid JSON, no other text."""
 
         # Revenue patterns: "$100M", "100 million", "$100M revenue"
         revenue_match = re.search(
-            r'\$?([\d.]+)\s*(?:million|M|bn|billion)(?:\s+(?:in\s+)?revenue)?',
-            prose_text,
-            re.IGNORECASE
+            r"\$?([\d.]+)\s*(?:million|M|bn|billion)(?:\s+(?:in\s+)?revenue)?", prose_text, re.IGNORECASE
         )
         if revenue_match:
-            result['revenue'] = float(revenue_match.group(1))
+            result["revenue"] = float(revenue_match.group(1))
 
         # Growth rate patterns: "25% growth", "growing at 25%"
-        growth_match = re.search(
-            r'(?:growth|growing|growth rate).*?([\d.]+)%',
-            prose_text,
-            re.IGNORECASE
-        )
+        growth_match = re.search(r"(?:growth|growing|growth rate).*?([\d.]+)%", prose_text, re.IGNORECASE)
         if growth_match:
-            result['growth_rate'] = float(growth_match.group(1))
+            result["growth_rate"] = float(growth_match.group(1))
 
         # Employee patterns: "500 employees", "has 500 staff"
-        employee_match = re.search(
-            r'([\d,]+)\s+(?:employees?|staff|headcount)',
-            prose_text,
-            re.IGNORECASE
-        )
+        employee_match = re.search(r"([\d,]+)\s+(?:employees?|staff|headcount)", prose_text, re.IGNORECASE)
         if employee_match:
-            result['employees'] = int(employee_match.group(1).replace(',', ''))
+            result["employees"] = int(employee_match.group(1).replace(",", ""))
 
         # Profit margin patterns: "20% profit margin", "20% margin"
-        margin_match = re.search(
-            r'([\d.]+)%\s+(?:profit\s+)?margin',
-            prose_text,
-            re.IGNORECASE
-        )
+        margin_match = re.search(r"([\d.]+)%\s+(?:profit\s+)?margin", prose_text, re.IGNORECASE)
         if margin_match:
-            result['profit_margin'] = float(margin_match.group(1))
+            result["profit_margin"] = float(margin_match.group(1))
 
         # Funding patterns: "raised $50M", "$50M in funding"
-        funding_match = re.search(
-            r'(?:raised|funding).*?\$?([\d.]+)\s*(?:million|M)',
-            prose_text,
-            re.IGNORECASE
-        )
+        funding_match = re.search(r"(?:raised|funding).*?\$?([\d.]+)\s*(?:million|M)", prose_text, re.IGNORECASE)
         if funding_match:
-            result['funding'] = float(funding_match.group(1))
+            result["funding"] = float(funding_match.group(1))
 
         # Valuation patterns: "valued at $1B", "$1B valuation"
         valuation_match = re.search(
-            r'(?:valued\s+at|valuation).*?\$?([\d.]+)\s*(?:billion|B|million|M)',
-            prose_text,
-            re.IGNORECASE
+            r"(?:valued\s+at|valuation).*?\$?([\d.]+)\s*(?:billion|B|million|M)", prose_text, re.IGNORECASE
         )
         if valuation_match:
             value = float(valuation_match.group(1))
             # Convert billions to millions if needed
-            if 'billion' in prose_text[valuation_match.start():valuation_match.end()].lower():
+            if "billion" in prose_text[valuation_match.start() : valuation_match.end()].lower():
                 value *= 1000
-            result['valuation'] = value
+            result["valuation"] = value
 
         return result

@@ -18,7 +18,6 @@ from typing import Any
 from solstein.domain.models import Company, RawDataSource
 from solstein.domain.value_objects import CompanyId, DateRange
 
-
 # ---------------------------------------------------------------------------
 # Query filter / sort helpers
 # ---------------------------------------------------------------------------

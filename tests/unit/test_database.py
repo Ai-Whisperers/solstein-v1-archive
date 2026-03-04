@@ -7,8 +7,8 @@ the DatabaseManager against real database operations where applicable.
 import pytest
 from sqlalchemy import text
 
+from solstein.database_config import convert_to_async_url, get_test_database_url
 from solstein.infrastructure.database import DatabaseManager
-from solstein.database_config import get_test_database_url, convert_to_async_url
 
 
 @pytest.mark.asyncio

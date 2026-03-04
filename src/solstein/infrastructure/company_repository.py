@@ -4,13 +4,14 @@ Provides a clean data access layer for all company-related database operations
 with comprehensive CRUD functionality and search capabilities.
 """
 
-from typing import Any, Optional
+from typing import Any
 
-from sqlalchemy import select, and_
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database_models import CompanyRecord
 from .cache import cache_manager, company_key
+from .database_models import CompanyRecord
+
 
 class CompanyRepository:
     """Repository for company data access and manipulation.
@@ -40,7 +41,7 @@ class CompanyRepository:
         result = await self.session.execute(select(CompanyRecord).offset(skip).limit(limit))
         return list(result.scalars().all())
 
-    async def get_by_id(self, company_id: str) -> Optional[CompanyRecord]:
+    async def get_by_id(self, company_id: str) -> CompanyRecord | None:
         """Retrieve a single company by company_id with caching.
 
         Args:
@@ -62,25 +63,29 @@ class CompanyRepository:
 
         # Cache the result
         if record:
-            await cache_manager.set(cache_key, {
-                "company_id": record.company_id,
-                "name": record.name,
-                "industry": record.industry,
-                "headquarters": record.headquarters,
-                "revenue_eur_m": record.revenue_eur_m,
-                "employees": record.employees,
-                "growth_rate_pct": record.growth_rate_pct,
-                "ai_score": record.ai_score,
-                "tier": record.tier,
-                "classification": record.classification,
-                "market_position": record.market_position,
-                "strategic_position": record.strategic_position,
-                "ai_maturity": record.ai_maturity,
-                "description": record.description,
-                "website": record.website,
-                "founded_year": record.founded_year,
-                "last_updated": str(record.last_updated) if record.last_updated else None,
-            }, ttl=3600)
+            await cache_manager.set(
+                cache_key,
+                {
+                    "company_id": record.company_id,
+                    "name": record.name,
+                    "industry": record.industry,
+                    "headquarters": record.headquarters,
+                    "revenue_eur_m": record.revenue_eur_m,
+                    "employees": record.employees,
+                    "growth_rate_pct": record.growth_rate_pct,
+                    "ai_score": record.ai_score,
+                    "tier": record.tier,
+                    "classification": record.classification,
+                    "market_position": record.market_position,
+                    "strategic_position": record.strategic_position,
+                    "ai_maturity": record.ai_maturity,
+                    "description": record.description,
+                    "website": record.website,
+                    "founded_year": record.founded_year,
+                    "last_updated": str(record.last_updated) if record.last_updated else None,
+                },
+                ttl=3600,
+            )
 
         return record
 
@@ -193,7 +198,6 @@ class CompanyRepository:
 
         result = await self.session.execute(select(CompanyRecord).where(and_(*conditions)))
         return list(result.scalars().all())
-
 
     async def get_all_filtered(
         self,

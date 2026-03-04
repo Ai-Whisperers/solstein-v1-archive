@@ -4,12 +4,13 @@ This test suite uses an actual Supabase PostgreSQL connection to test
 the enrichment repositories against real database operations.
 """
 
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 from sqlalchemy import select
 
-from solstein.infrastructure.enrichment_repositories import EnrichmentAuditRepository, EnrichmentCacheRepository
 from solstein.infrastructure.database_models import EnrichmentAuditRecord, EnrichmentCacheRecord
+from solstein.infrastructure.enrichment_repositories import EnrichmentAuditRepository, EnrichmentCacheRepository
 
 
 @pytest.mark.asyncio
@@ -166,7 +167,7 @@ class TestEnrichmentCacheRepository:
         await db_session.commit()
 
         # Should not return expired cache
-        cached = await repository.get_cached("comp-expired-test")
+        await repository.get_cached("comp-expired-test")
 
         # Behavior depends on repository implementation
         # May return None or may return expired data
@@ -184,7 +185,7 @@ class TestEnrichmentCacheRepository:
         assert result.scalar_one_or_none() is not None
 
         # Delete it
-        count = await repository.delete_cache(company_id="comp-delete-test")
+        await repository.delete_cache(company_id="comp-delete-test")
 
         # Verify deleted
         result = await db_session.execute(
@@ -199,7 +200,7 @@ class TestEnrichmentCacheRepository:
         await repository.cache_enrichment(company_id="comp-delete-all-2", cache_data={"data": "2"}, ttl_hours=24)
 
         # Delete all
-        count = await repository.delete_cache()
+        await repository.delete_cache()
 
         # Verify all deleted
         result = await db_session.execute(select(EnrichmentCacheRecord))

@@ -22,18 +22,19 @@ logger = logging.getLogger(__name__)
 
 class CompetitorDataLoader:
     """Load competitor data from JSON files and convert to domain entities.
-    
+
     DEPRECATED: This loader is being consolidated. For new code, use UnifiedCompanyLoader
     from solstein.data.unified_loader which provides enriched data with conflict resolution.
     """
 
     def __init__(self, data_dir: Path | None = None):
         import warnings
+
         warnings.warn(
             "CompetitorDataLoader is deprecated. Use UnifiedCompanyLoader from "
             "solstein.data.unified_loader for enriched data with conflict resolution.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         settings = get_settings()
         self.data_dir = data_dir or Path(settings.data.data_dir)
@@ -62,6 +63,7 @@ class CompetitorDataLoader:
 
         self._cache[cache_key] = companies
         return companies
+
     def load_from_json(self, json_path: Path, limit: int | None = None) -> list[Company]:
         """Load companies from scored JSON file (e.g., from pipeline output)."""
         return self._load_from_json(json_path, limit)
@@ -608,7 +610,7 @@ class CompetitorDataLoader:
 
     def _extract_geographic_presence(self, raw_data: dict[str, Any]) -> list[str]:
         """Extract geographic presence from raw data.
-        
+
         Handles both nested format ({"geographic": {"major_offices": [...]}}) and
         flat format ({"geographic_presence": ["Germany", "France"]}).
         Returns a list of countries/regions. If geographic data is not available,
@@ -618,27 +620,26 @@ class CompetitorDataLoader:
         flat_presence = raw_data.get("geographic_presence")
         if isinstance(flat_presence, list) and flat_presence:
             return flat_presence
-        
+
         # Original nested format
         geographic = raw_data.get("geographic", {})
-        
+
         if not geographic or not isinstance(geographic, dict):
             return []
-        
+
         # If major_offices are available, extract countries from them
         major_offices = geographic.get("major_offices", [])
         if major_offices:
             # Return first 3 offices as proxy for countries
             return major_offices[:3]
-        
+
         # If headquarters is available, use it
         headquarters = geographic.get("headquarters")
         if headquarters:
             return [headquarters]
-        
+
         # Default: return empty list (don't default to 'Europe')
         return []
-
 
     def clear_cache(self) -> None:
         """Clear the data cache."""
@@ -769,5 +770,3 @@ class SP500MembershipLoader:
         logger.info(f"Loaded S&P 500 membership data for {len(memberships)} tickers")
 
         return SP500MembershipData(memberships=memberships)
-
-

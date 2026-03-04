@@ -8,20 +8,17 @@ Tests for all 17 Phase 5 items:
 - Edge Case Tests (6)
 """
 
-import pytest
 import threading
-from datetime import datetime, timezone
-from unittest.mock import Mock, patch, MagicMock
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone
+from unittest.mock import Mock
 
-from solstein.domain.models import Company, FinancialMetric, ConfidenceLevel
-from solstein.data.unified_loader import UnifiedCompany, UnifiedCompanyLoader
 from solstein.data.enrichment_orchestrator import (
     EnrichmentOrchestrator,
-    EnrichmentConfig,
     EnrichmentSource,
-    EnrichmentField,
 )
+from solstein.data.unified_loader import UnifiedCompany, UnifiedCompanyLoader
+from solstein.domain.models import Company, ConfidenceLevel, FinancialMetric
 
 
 class TestModelInheritance:
@@ -504,9 +501,9 @@ class TestEnrichmentTimestamps:
         }
 
         loader = UnifiedCompanyLoader(sec_connector=mock_sec)
-        before = datetime.now(timezone.utc)
+        datetime.now(timezone.utc)
         result = loader.fill_nulls_from_sec_edgar(company)
-        after = datetime.now(timezone.utc)
+        datetime.now(timezone.utc)
 
         assert hasattr(result, "enrichment_timestamps") or hasattr(result, "enrichment_error_timestamps")
 
@@ -546,7 +543,7 @@ class TestEmptyDataset:
         loader = UnifiedCompanyLoader(sec_connector=mock_sec)
 
         for company in companies:
-            result = loader.fill_nulls_from_sec_edgar(company)
+            loader.fill_nulls_from_sec_edgar(company)
 
         assert len(companies) == 0
 
@@ -585,7 +582,7 @@ class TestLargeDataset:
         loader = UnifiedCompanyLoader(sec_connector=mock_sec)
         count = 0
         for company in companies:
-            result = loader.fill_nulls_from_sec_edgar(company)
+            loader.fill_nulls_from_sec_edgar(company)
             count += 1
 
         assert count == 100
