@@ -1,4 +1,3 @@
-import pytest
 from fastapi.testclient import TestClient
 from pydantic import BaseModel, ConfigDict
 from starlette.exceptions import HTTPException

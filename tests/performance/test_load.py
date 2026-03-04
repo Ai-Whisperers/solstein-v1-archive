@@ -2,11 +2,11 @@
 Performance and load tests for database operations.
 """
 
+import asyncio
 import os
 import sys
 import time
-import asyncio
-from datetime import datetime, timezone
+
 import pytest
 import pytest_asyncio
 from sqlalchemy import text
@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from solstein.config import Settings
 from solstein.infrastructure.database import DatabaseManager
-from solstein.infrastructure.database_models import CompanyRecord, FactRecord, ResearchRunRecord
+from solstein.infrastructure.database_models import CompanyRecord, FactRecord
 
 
 @pytest_asyncio.fixture
@@ -156,7 +156,7 @@ class TestStressTests:
             count += 1
 
         duration = time.time() - start_time
-        print(f"\nExecuted {count} queries in {duration:.2f}s ({count/duration:.1f} qps)")
+        print(f"\nExecuted {count} queries in {duration:.2f}s ({count / duration:.1f} qps)")
         assert count > 10
 
 

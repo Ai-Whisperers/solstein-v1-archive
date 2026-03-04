@@ -2,8 +2,7 @@
 Integration tests for Export and Jobs API endpoints.
 """
 
-from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 from tests.factories import make_company
 
