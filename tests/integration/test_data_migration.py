@@ -9,13 +9,10 @@ These tests verify that:
 
 import os
 import sys
-from datetime import datetime, timezone
-from pathlib import Path
-import uuid
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import text, select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
@@ -105,7 +102,7 @@ class TestDataMigration:
         company_id = "test-company-3"
         company = CompanyRecord(company_id=company_id, name="Test Company 3", status="active")
         db_session.add(company)
-        
+
         run_id = "test-run-2"
         run = ResearchRunRecord(run_id=run_id, market="market", seed_company="seed", status="completed")
         db_session.add(run)
@@ -223,7 +220,9 @@ class TestDataMigration:
         db_session.add(contradiction)
         await db_session.commit()
 
-        result = await db_session.execute(select(ContradictionRecord).where(ContradictionRecord.company_id == company_id))
+        result = await db_session.execute(
+            select(ContradictionRecord).where(ContradictionRecord.company_id == company_id)
+        )
         fetched = result.scalar_one_or_none()
         assert fetched is not None
         assert fetched.status == "open"
@@ -233,9 +232,7 @@ class TestDataMigration:
         """Test batch insertion of multiple records."""
         companies = []
         for i in range(10):
-            companies.append(
-                CompanyRecord(company_id=f"batch-company-{i}", name=f"Batch Company {i}", status="active")
-            )
+            companies.append(CompanyRecord(company_id=f"batch-company-{i}", name=f"Batch Company {i}", status="active"))
 
         db_session.add_all(companies)
         await db_session.commit()
@@ -260,7 +257,7 @@ class TestDataIntegrity:
         # Try to insert another with same company_id
         c2 = CompanyRecord(company_id="dup-1", name="Company 2", status="active")
         db_session.add(c2)
-        
+
         with pytest.raises(Exception):
             await db_session.commit()
         await db_session.rollback()

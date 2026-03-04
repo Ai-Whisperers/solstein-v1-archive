@@ -138,11 +138,9 @@ def test_settings_get_database_url():
 
 
 @patch("solstein.config.logger.warning")
-@patch("solstein.config.Settings.load")
 @patch("solstein.config.Path.exists")
-def test_get_settings_no_env(mock_exists, mock_load, mock_warning):
+def test_get_settings_no_env(mock_exists, mock_warning):
     mock_exists.return_value = False
-    mock_load.return_value = Settings()
     get_settings.cache_clear()
     get_settings()
     mock_warning.assert_any_call("No .env file found, using defaults")

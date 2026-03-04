@@ -806,7 +806,9 @@ class FactRecord(Base):
 
     id: Mapped[str] = mapped_column(String(255), primary_key=True, default=lambda: str(uuid.uuid4()))
     company_id: Mapped[str] = mapped_column(String(255), ForeignKey("companies.company_id"), nullable=False, index=True)
-    run_id: Mapped[str | None] = mapped_column(String(255), ForeignKey("research_runs.run_id"), nullable=True, index=True)
+    run_id: Mapped[str | None] = mapped_column(
+        String(255), ForeignKey("research_runs.run_id"), nullable=True, index=True
+    )
     fact_key: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     fact_value: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(50), default="active", nullable=False)
