@@ -16,7 +16,7 @@ Classification Confidence:
 - Low completeness (<50%) → low confidence (0.3-0.5)
 """
 
-from src.solstein.domain.models import Company
+from solstein.domain.models import Company
 
 from .constants import (
     CLASSIFICATION_LEAD_MAX,

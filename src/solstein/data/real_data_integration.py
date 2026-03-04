@@ -6,7 +6,7 @@ Integrates web research pipeline with ENEVE data loading system.
 Replaces synthetic data with real web-researched data.
 
 Usage:
-    from src.solstein.data.real_data_integration import RealDataLoader
+    from solstein.data.real_data_integration import RealDataLoader
 
     loader = RealDataLoader()
     companies = await loader.load_companies(["Tesla", "Octopus Energy"])

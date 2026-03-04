@@ -10,7 +10,7 @@ Confidence Mapping:
 - UNKNOWN: 0.3 (minimal weight - data source is unknown)
 """
 
-from src.solstein.domain.models import Company, ConfidenceLevel
+from solstein.domain.models import Company, ConfidenceLevel
 
 
 def confidence_level_to_weight(confidence: ConfidenceLevel) -> float:

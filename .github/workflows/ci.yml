@@ -44,7 +44,7 @@ jobs:
       - name: Install dependencies
         run: uv pip install -e ".[dev]"
       - name: Run mypy
-        run: mypy -p solstein
+        run: mypy
 
   security-scan:
     name: Security Scan
@@ -96,7 +96,7 @@ jobs:
           echo "GITHUB_TOKEN=test-token" >> .env
           echo "SECURITY__SECRET_KEY=test-secret" >> .env
       - name: Install dependencies
-        run: uv pip install -e ".[dev]"
+        run: uv pip install -e ".[dev]" && uv pip install factory-boy pytest-randomly syrupy testcontainers
       - name: Run pytest with coverage
         run: |
           pytest tests/ -v --cov=solstein --cov-report=xml --cov-report=term-missing
