@@ -10,8 +10,17 @@ on:
 env:
   PYTHONPATH: src
   UV_SYSTEM_PYTHON: 1
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/solstein
+  DATABASE__URL: postgresql://postgres:postgres@localhost:5432/solstein
+  ADMIN_EMAIL: test@example.com
+  ADMIN_PASSWORD_HASH: ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f
+  SECURITY__ADMIN_EMAIL: test@example.com
+  SECURITY__ADMIN_PASSWORD_HASH: ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f
+  GITHUB_TOKEN: test-token
+  SECURITY__SECRET_KEY: test-secret
 
 jobs:
+
   lint-and-format:
     name: Lint & Format
     runs-on: ubuntu-latest
