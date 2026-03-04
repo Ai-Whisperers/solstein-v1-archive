@@ -343,3 +343,4 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md). This is a proprietary platform — int
 [![Contact](https://img.shields.io/badge/Contact-AI%20Whisperers-4b0082?style=for-the-badge&logoColor=ffd700)](mailto:contact@ai-whisperers.com)
 
 </div>
+ 
