@@ -3,23 +3,61 @@
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
-      "description": "File system operations in the project directory"
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/d1/AI WHISPERERS/AGENTIC/solstein"
+      ],
+      "description": "File system operations scoped to this project"
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git", "--repository", "/d1/AI WHISPERERS/AGENTIC/solstein"],
+      "description": "Git operations for this repository"
     },
     "sequential-thinking": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
       "description": "Structured step-by-step reasoning for complex problems"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub repos, PRs, issues, and code search"
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent knowledge graph memory across sessions"
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "description": "HTTP fetch for web pages, APIs, and online resources"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp"],
+      "description": "Browser automation with Playwright for web scraping and testing"
     }
   },
   "permissions": {
     "bash": {
       "uv *": "allow",
+      "uvx *": "allow",
       "pip *": "allow",
+      "pip3 *": "allow",
       "pytest *": "allow",
       "python *": "allow",
+      "python3 *": "allow",
       "git *": "allow",
+      "gh *": "allow",
       "npm *": "allow",
+      "npx *": "allow",
+      "node *": "allow",
       "make *": "allow",
       "black *": "allow",
       "ruff *": "allow",
@@ -28,11 +66,17 @@
       "ls *": "allow",
       "cat *": "allow",
       "mkdir *": "allow",
+      "cp *": "allow",
+      "mv *": "allow",
+      "curl *": "allow",
+      "jq *": "allow",
       "rm *": "deny",
       "*": "ask"
     },
     "read": {
       "**/*.py": "allow",
+      "**/*.js": "allow",
+      "**/*.ts": "allow",
       "**/*.json": "allow",
       "**/*.yaml": "allow",
       "**/*.yml": "allow",
@@ -41,6 +85,8 @@
       "**/*.toml": "allow",
       "**/*.sh": "allow",
       "**/*.env.example": "allow",
+      "**/*.cfg": "allow",
+      "**/*.ini": "allow",
       "**/.env*": "deny",
       "**/credentials*": "deny",
       "**/secrets*": "deny",
@@ -49,11 +95,15 @@
     },
     "write": {
       "**/*.py": "allow",
+      "**/*.js": "allow",
+      "**/*.ts": "allow",
       "**/*.json": "allow",
       "**/*.yaml": "allow",
       "**/*.yml": "allow",
       "**/*.md": "allow",
       "**/*.txt": "allow",
+      "**/*.toml": "allow",
+      "**/*.sh": "allow",
       "tests/**/*.py": "allow",
       "docs/**/*.md": "allow",
       "**/.env*": "deny",
@@ -62,13 +112,14 @@
     }
   },
   "agents": {
-    "enabled": ["build", "plan", "review", "test", "docs"],
+    "enabled": ["build", "plan", "review", "test", "docs", "research"],
     "budgets": {
       "build": 500,
       "plan": 300,
       "review": 200,
       "test": 200,
-      "docs": 150
+      "docs": 150,
+      "research": 400
     }
   },
   "providers": {
