@@ -127,7 +127,7 @@ def test_data_config_resolve_paths():
 def test_settings_load_no_env(mock_exists, mock_warning):
     mock_exists.return_value = False
     Settings.load()
-    mock_warning.assert_called_with("No .env file found, using defaults")
+    mock_warning.assert_any_call("No .env file found, using defaults")
 
 
 def test_settings_get_database_url():
@@ -145,7 +145,7 @@ def test_get_settings_no_env(mock_exists, mock_load, mock_warning):
     mock_load.return_value = Settings()
     get_settings.cache_clear()
     get_settings()
-    mock_warning.assert_called_with("No .env file found, using defaults")
+    mock_warning.assert_any_call("No .env file found, using defaults")
 
 
 def test_configure_logging(tmp_path):

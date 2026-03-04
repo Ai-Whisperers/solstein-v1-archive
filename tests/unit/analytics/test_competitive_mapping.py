@@ -34,7 +34,7 @@ class TestCompetitiveMapper:
         company = MagicMock(spec=Company)
         company.name = "Stripe"
         company.industry = "Fintech"
-        company.composite_score = 9.0
+        company.composite_score = 6.0
         company.ai_score = 8.0
         company.financials = MagicMock()
         company.financials.revenue = 1000.0

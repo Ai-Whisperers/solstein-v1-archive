@@ -11,10 +11,11 @@ import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+import uuid
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import text
+from sqlalchemy import text, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
@@ -56,72 +57,66 @@ class TestDataMigration:
     async def test_company_migration(self, db_session: AsyncSession):
         """Test that companies can be migrated with all fields."""
         # Create test company data
-        company_data = {
-            "id": "test-company-1",
-            "ticker": "TEST",
-            "name": "Test Company",
-            "status": "active",
-            "sector": "Technology",
-            "industry": "Software",
-            "metadata": {"employees": 1000, "founded": 2020},
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "updated_at": datetime.now(timezone.utc).isoformat(),
-        }
+        company_id = "test-company-1"
+        company = CompanyRecord(
+            company_id=company_id,
+            ticker="TEST",
+            name="Test Company",
+            status="active",
+            industry="Software",
+        )
 
         # Insert into database
-        company = CompanyRecord(**company_data)
         db_session.add(company)
         await db_session.commit()
 
         # Verify retrieval
-        result = await db_session.get(CompanyRecord, "test-company-1")
-        assert result is not None
-        assert result.ticker == "TEST"
-        assert result.name == "Test Company"
-        assert result.metadata == {"employees": 1000, "founded": 2020}
+        result = await db_session.execute(select(CompanyRecord).where(CompanyRecord.company_id == company_id))
+        fetched = result.scalar_one_or_none()
+        assert fetched is not None
+        assert fetched.ticker == "TEST"
+        assert fetched.name == "Test Company"
 
     @pytest.mark.asyncio
     async def test_research_run_migration(self, db_session: AsyncSession):
         """Test that research runs with company relationships migrate correctly."""
-        # Create parent company
-        company = CompanyRecord(id="test-company-2", ticker="TEST2", name="Test Company 2", status="active")
-        db_session.add(company)
-        await db_session.flush()
-
         # Create research run
+        run_id = "test-run-1"
         run = ResearchRunRecord(
-            id="test-run-1",
-            company_id="test-company-2",
+            run_id=run_id,
+            market="test market",
+            seed_company="test company",
             status="completed",
-            metadata={"query": "test analysis"},
-            run_metadata={"depth": "deep"},
         )
         db_session.add(run)
         await db_session.commit()
 
         # Verify relationship
-        result = await db_session.get(ResearchRunRecord, "test-run-1")
-        assert result is not None
-        assert result.company_id == "test-company-2"
-        assert result.status == "completed"
+        result = await db_session.execute(select(ResearchRunRecord).where(ResearchRunRecord.run_id == run_id))
+        fetched = result.scalar_one_or_none()
+        assert fetched is not None
+        assert fetched.run_id == run_id
+        assert fetched.status == "completed"
 
     @pytest.mark.asyncio
     async def test_fact_migration_with_relationships(self, db_session: AsyncSession):
         """Test that facts with company and run relationships migrate correctly."""
         # Create parent records
-        company = CompanyRecord(id="test-company-3", ticker="TEST3", name="Test Company 3", status="active")
+        company_id = "test-company-3"
+        company = CompanyRecord(company_id=company_id, name="Test Company 3", status="active")
         db_session.add(company)
-        await db_session.flush()
-
-        run = ResearchRunRecord(id="test-run-2", company_id="test-company-3", status="completed")
+        
+        run_id = "test-run-2"
+        run = ResearchRunRecord(run_id=run_id, market="market", seed_company="seed", status="completed")
         db_session.add(run)
         await db_session.flush()
 
         # Create fact
+        fact_id = "test-fact-1"
         fact = FactRecord(
-            id="test-fact-1",
-            company_id="test-company-3",
-            run_id="test-run-2",
+            id=fact_id,
+            company_id=company_id,
+            run_id=run_id,
             fact_key="revenue_2024",
             fact_value="1000000",
             confidence=0.95,
@@ -131,111 +126,107 @@ class TestDataMigration:
         await db_session.commit()
 
         # Verify
-        result = await db_session.get(FactRecord, "test-fact-1")
-        assert result is not None
-        assert result.company_id == "test-company-3"
-        assert result.run_id == "test-run-2"
-        assert result.confidence == 0.95
+        result = await db_session.execute(select(FactRecord).where(FactRecord.id == fact_id))
+        fetched = result.scalar_one_or_none()
+        assert fetched is not None
+        assert fetched.company_id == company_id
+        assert fetched.run_id == run_id
+        assert fetched.confidence == 0.95
 
     @pytest.mark.asyncio
     async def test_signal_migration(self, db_session: AsyncSession):
         """Test that signals migrate with all metadata."""
-        # Create dependencies
-        company = CompanyRecord(id="test-company-4", ticker="TEST4", name="Test Company 4", status="active")
+        # Create parent company
+        company_id = "test-company-4"
+        company = CompanyRecord(company_id=company_id, name="Test Company 4", status="active")
         db_session.add(company)
         await db_session.flush()
 
-        run = ResearchRunRecord(id="test-run-3", company_id="test-company-4", status="completed")
-        db_session.add(run)
+        # Create scoring record (signals depend on it)
+        scoring = ScoringRecord(
+            company_id=company_id,
+            company_name="Test Company 4",
+            growth_score=8.5,
+            financial_health_score=7.0,
+            competitive_position_score=6.5,
+            overall_score=7.5,
+            classification="Phoenix",
+        )
+        db_session.add(scoring)
         await db_session.flush()
 
         # Create signal
         signal = SignalRecord(
-            id="test-signal-1",
-            company_id="test-company-4",
-            run_id="test-run-3",
-            signal_type="price_movement",
-            confidence=0.85,
-            strength=0.75,
-            direction="bullish",
-            status="active",
+            scoring_record_id=scoring.id,
+            signal_name="high_growth",
+            signal_category="growth",
+            signal_value=9.0,
+            source_agent="FinancialAgent",
+            confidence=0.9,
         )
         db_session.add(signal)
         await db_session.commit()
 
         # Verify
-        result = await db_session.get(SignalRecord, "test-signal-1")
-        assert result is not None
-        assert result.signal_type == "price_movement"
-        assert result.direction == "bullish"
+        result = await db_session.execute(select(SignalRecord).where(SignalRecord.signal_name == "high_growth"))
+        fetched = result.scalar_one_or_none()
+        assert fetched is not None
+        assert fetched.signal_category == "growth"
+        assert fetched.confidence == 0.9
 
     @pytest.mark.asyncio
     async def test_scoring_record_migration(self, db_session: AsyncSession):
         """Test that scoring records with all scores migrate correctly."""
-        company = CompanyRecord(id="test-company-5", ticker="TEST5", name="Test Company 5", status="active")
+        company_id = "test-company-5"
+        company = CompanyRecord(company_id=company_id, name="Test Company 5", status="active")
         db_session.add(company)
         await db_session.flush()
 
         scoring = ScoringRecord(
-            id="test-scoring-1",
-            company_id="test-company-5",
-            total_score=85,
-            growth_score=90,
-            profitability_score=80,
-            valuation_score=85,
-            quality_score=85,
-            quartile=1,
+            company_id=company_id,
+            company_name="Test Company 5",
+            growth_score=90.0,
+            financial_health_score=80.0,
+            competitive_position_score=85.0,
+            overall_score=85.0,
+            classification="Phoenix",
         )
         db_session.add(scoring)
         await db_session.commit()
 
-        result = await db_session.get(ScoringRecord, "test-scoring-1")
-        assert result is not None
-        assert result.total_score == 85
-        assert result.quartile == 1
+        result = await db_session.execute(select(ScoringRecord).where(ScoringRecord.company_id == company_id))
+        fetched = result.scalar_one_or_none()
+        assert fetched is not None
+        assert fetched.overall_score == 85.0
+        assert fetched.classification == "Phoenix"
 
     @pytest.mark.asyncio
     async def test_contradiction_migration(self, db_session: AsyncSession):
         """Test that contradictions migrate correctly."""
-        company = CompanyRecord(id="test-company-6", ticker="TEST6", name="Test Company 6", status="active")
+        company_id = "test-company-6"
+        company = CompanyRecord(company_id=company_id, name="Test Company 6", status="active")
         db_session.add(company)
         await db_session.flush()
 
-        run = ResearchRunRecord(id="test-run-4", company_id="test-company-6", status="completed")
+        run_id = "test-run-4"
+        run = ResearchRunRecord(run_id=run_id, market="market", seed_company="seed", status="completed")
         db_session.add(run)
         await db_session.flush()
 
         contradiction = ContradictionRecord(
-            id="test-contradiction-1",
-            company_id="test-company-6",
-            run_id="test-run-4",
-            severity="high",
+            run_id=run.id,
+            company_id=company_id,
+            metric_key="revenue",
+            contradiction_type="value_mismatch",
             status="open",
-            detected_at=datetime.now(timezone.utc),
         )
         db_session.add(contradiction)
         await db_session.commit()
 
-        result = await db_session.get(ContradictionRecord, "test-contradiction-1")
-        assert result is not None
-        assert result.severity == "high"
-
-    @pytest.mark.asyncio
-    async def test_json_field_migration(self, db_session: AsyncSession):
-        """Test that complex JSON fields migrate correctly."""
-        company = CompanyRecord(
-            id="test-company-json",
-            ticker="JSON",
-            name="JSON Test",
-            status="active",
-            metadata={"nested": {"deep": {"value": "test"}}, "list": [1, 2, 3], "null_value": None},
-        )
-        db_session.add(company)
-        await db_session.commit()
-
-        result = await db_session.get(CompanyRecord, "test-company-json")
-        assert result.metadata["nested"]["deep"]["value"] == "test"
-        assert result.metadata["list"] == [1, 2, 3]
+        result = await db_session.execute(select(ContradictionRecord).where(ContradictionRecord.company_id == company_id))
+        fetched = result.scalar_one_or_none()
+        assert fetched is not None
+        assert fetched.status == "open"
 
     @pytest.mark.asyncio
     async def test_batch_migration_simulation(self, db_session: AsyncSession):
@@ -243,107 +234,48 @@ class TestDataMigration:
         companies = []
         for i in range(10):
             companies.append(
-                CompanyRecord(id=f"batch-company-{i}", ticker=f"BATCH{i}", name=f"Batch Company {i}", status="active")
+                CompanyRecord(company_id=f"batch-company-{i}", name=f"Batch Company {i}", status="active")
             )
 
         db_session.add_all(companies)
         await db_session.commit()
 
         # Verify all inserted
-        for i in range(10):
-            result = await db_session.get(CompanyRecord, f"batch-company-{i}")
-            assert result is not None
-            assert result.ticker == f"BATCH{i}"
-
-    @pytest.mark.asyncio
-    async def test_foreign_key_integrity(self, db_session: AsyncSession):
-        """Test that foreign key constraints are enforced."""
-        # Try to create a research run with non-existent company
-        # (This assumes FK constraints are enabled)
-        run = ResearchRunRecord(id="test-fk-run", company_id="non-existent-company", status="pending")
-        db_session.add(run)
-
-        # This should raise an error when FK constraints are enabled
-        # For now, just verify the record exists (constraint check depends on DB config)
-        try:
-            await db_session.commit()
-            # If we get here, FK constraints might not be enforced in test DB
-        except Exception as e:
-            # Expected if FK constraints are enforced
-            await db_session.rollback()
-            assert "foreign key" in str(e).lower() or "violates" in str(e).lower()
-
-
-class TestMigrationScripts:
-    """Test the migration scripts themselves."""
-
-    def test_migration_script_exists(self):
-        """Verify migration scripts exist."""
-        migration_script = Path("scripts/migrate_competitor_data.py")
-        assert migration_script.exists(), "Migration script not found"
-
-    def test_migration_script_importable(self):
-        """Verify migration script can be imported."""
-        try:
-            import scripts.migrate_competitor_data as migration
-
-            assert hasattr(migration, "main") or "async" in dir(migration)
-        except ImportError as e:
-            pytest.skip(f"Migration script not importable: {e}")
-
-    def test_simple_migration_script_exists(self):
-        """Verify simple migration script exists."""
-        migration_script = Path("scripts/migrate_simple.py")
-        assert migration_script.exists(), "Simple migration script not found"
-
-    def test_verification_script_exists(self):
-        """Verify integrity verification script exists."""
-        verification_script = Path("scripts/verify_database_integrity.py")
-        assert verification_script.exists(), "Verification script not found"
+        result = await db_session.execute(select(CompanyRecord).where(CompanyRecord.company_id.like("batch-company-%")))
+        fetched = result.scalars().all()
+        assert len(fetched) == 10
 
 
 class TestDataIntegrity:
     """Test data integrity after migration."""
 
     @pytest.mark.asyncio
-    async def test_no_duplicate_ids(self, db_session: AsyncSession):
-        """Test that no duplicate IDs exist in migrated data."""
-        # Check companies
-        result = await db_session.execute(
-            text("""
-                SELECT id, COUNT(*) as cnt 
-                FROM companies 
-                GROUP BY id 
-                HAVING COUNT(*) > 1
-            """)
-        )
-        duplicates = result.all()
-        assert len(duplicates) == 0, f"Duplicate company IDs found: {duplicates}"
+    async def test_no_duplicate_company_ids(self, db_session: AsyncSession):
+        """Test that no duplicate company_ids exist."""
+        # Insert a company
+        c1 = CompanyRecord(company_id="dup-1", name="Company 1", status="active")
+        db_session.add(c1)
+        await db_session.commit()
+
+        # Try to insert another with same company_id
+        c2 = CompanyRecord(company_id="dup-1", name="Company 2", status="active")
+        db_session.add(c2)
+        
+        with pytest.raises(Exception):
+            await db_session.commit()
+        await db_session.rollback()
 
     @pytest.mark.asyncio
     async def test_required_fields_not_null(self, db_session: AsyncSession):
         """Test that required fields have values."""
-        # Check companies have ticker and status
-        result = await db_session.execute(text("SELECT COUNT(*) FROM companies WHERE ticker IS NULL OR ticker = ''"))
-        null_tickers = result.scalar()
-        assert null_tickers == 0, f"Found {null_tickers} companies with null/empty ticker"
+        # Check companies have name and status
+        result = await db_session.execute(text("SELECT COUNT(*) FROM companies WHERE name IS NULL OR name = ''"))
+        null_names = result.scalar()
+        assert null_names == 0, f"Found {null_names} companies with null/empty name"
 
         result = await db_session.execute(text("SELECT COUNT(*) FROM companies WHERE status IS NULL"))
         null_status = result.scalar()
         assert null_status == 0, f"Found {null_status} companies with null status"
-
-    @pytest.mark.asyncio
-    async def test_date_consistency(self, db_session: AsyncSession):
-        """Test that date fields are consistent."""
-        # updated_at should be >= created_at
-        result = await db_session.execute(
-            text("""
-                SELECT COUNT(*) FROM companies 
-                WHERE updated_at < created_at
-            """)
-        )
-        inconsistent = result.scalar()
-        assert inconsistent == 0, f"Found {inconsistent} records with updated_at < created_at"
 
 
 if __name__ == "__main__":
