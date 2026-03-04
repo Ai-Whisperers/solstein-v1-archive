@@ -266,3 +266,6 @@ EPIC-002: Configuration Integrity
 3. Assess risk using the [risk matrix](GUIDELINES/RISK-ASSESSMENT.md)
 4. Update this README if adding new epics or changing priorities
 5. Run `python scripts/update-backlog-metrics.py` to refresh dashboard counts
+
+## Automation Test
+- [ ] [AUTO] Test automated issue creation via cron script
