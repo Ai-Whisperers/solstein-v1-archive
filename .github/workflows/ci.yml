@@ -91,7 +91,8 @@ jobs:
         run: pip install uv
       - name: Create .env for tests
         run: |
-          echo "DATABASE__URL=postgresql://postgres:postgres@localhost:5432/solstein" > .env
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/solstein" > .env
+          echo "DATABASE__URL=postgresql://postgres:postgres@localhost:5432/solstein" >> .env
           echo "REDIS__URL=redis://localhost:6379/0" >> .env
           echo "GITHUB_TOKEN=test-token" >> .env
           echo "SECURITY__SECRET_KEY=test-secret" >> .env

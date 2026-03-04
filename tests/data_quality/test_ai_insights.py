@@ -55,7 +55,7 @@ def test_golden_lead_classification(scorer):
     Verified 'Lead' profile.
 
     Scoring:
-        base(5.0) + growth(-10/20=-0.5) + margin_negative_penalty(-1.0) = 3.5
+        base(5.0) + growth(-10/20=-0.5) + margin_negative_penalty(-1.0) + compound_penalty(-1.0) = 2.5
     """
     lead = Company(
         id="lead-verified",
@@ -69,8 +69,8 @@ def test_golden_lead_classification(scorer):
     )
 
     scored = scorer.calculate_scores(lead)
-    assert scored.growth_score == pytest.approx(3.5), (
-        "Verified Lead must score exactly 3.5 (base - 0.5 growth - 1.0 neg margin)"
+    assert scored.growth_score == pytest.approx(2.5), (
+        "Verified Lead must score exactly 2.5 (base - 0.5 growth - 1.0 neg margin - 1.0 compound)"
     )
     assert scored.growth_score <= 4.0, "Lead must be below the classification threshold"
 

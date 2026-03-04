@@ -20,6 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+from solstein.config import Settings
 from solstein.infrastructure.database import DatabaseManager
 from solstein.infrastructure.database_models import (
     CompanyRecord,
@@ -34,7 +35,7 @@ from solstein.infrastructure.database_models import (
 @pytest_asyncio.fixture
 async def db_session() -> AsyncSession:
     """Provide a database session for tests."""
-    db_manager = DatabaseManager()
+    db_manager = DatabaseManager(Settings.load())
     session = await db_manager.get_session().__aenter__()
 
     # Start transaction that will be rolled back

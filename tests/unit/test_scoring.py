@@ -77,11 +77,11 @@ def test_calculate_growth_score_lead(scorer, lead_company):
     Verify exact growth score for a declining company.
 
     Calculation:
-        growth: base(5.0) + growth(-5/20=-0.25) + deep_neg_margin(-2%<-0.1% → -1.5) + compound(-1.0) = 2.25
+        growth: base(5.0) + growth(-5/20=-0.25) + neg_margin(-2% < 0 → -1.0) + compound(-1.0) = 2.75
         financial: base(5.0) + revenue_med(10M>=10M → +1.25) + margin_negative(-2% < 0 → -2.5) = 3.75
     """
     scored = scorer.calculate_scores(lead_company)
-    assert scored.growth_score == pytest.approx(2.25)
+    assert scored.growth_score == pytest.approx(2.75)
     assert scored.financial_health_score == pytest.approx(3.75)
 
 

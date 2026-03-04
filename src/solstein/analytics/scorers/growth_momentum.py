@@ -51,23 +51,23 @@ class GrowthMomentumScorer:
             )
             score += growth_factor
             # Slow growth penalty: stagnant companies penalized
-            if 0 <= financials.growth_rate < 0.05:  # 0-5% growth (decimal format)
+            if 0 <= financials.growth_rate < 5.0:  # 0-5% growth
                 score -= 0.75  # Stagnant growth penalty
                 explanation.components.append(
                     ScoreComponent(
                         name="Stagnant Growth Penalty",
                         value=-0.75,
-                        formula="growth_rate < 5% (decimal: < 0.05) → -0.75",
+                        formula="growth_rate < 5%",
                         reasoning="Growth rate below 5% indicates stagnation.",
                     )
                 )
-            elif 0.05 <= financials.growth_rate < 0.10:  # 5-10% growth (decimal format)
+            elif 5.0 <= financials.growth_rate < 10.0:  # 5-10% growth
                 score -= 0.25  # Below-average growth penalty
                 explanation.components.append(
                     ScoreComponent(
                         name="Below-Average Growth Penalty",
                         value=-0.25,
-                        formula="growth_rate 5-10% (decimal: 0.05-0.10) → -0.25",
+                        formula="growth_rate 5-10%",
                         reasoning="Growth rate below 10% is below sector average.",
                     )
                 )
@@ -125,7 +125,7 @@ class GrowthMomentumScorer:
                 adj = cfg.margin_high_bonus
             elif financials.profit_margin > cfg.margin_med_threshold:
                 adj = cfg.margin_med_bonus
-            elif financials.profit_margin < -0.10:
+            elif financials.profit_margin < -10.0:  # -10% deep negative margin
                 adj = cfg.margin_negative_penalty * 1.5  # Deep negative margin: 1.5x penalty
             elif financials.profit_margin < 0:
                 adj = cfg.margin_negative_penalty

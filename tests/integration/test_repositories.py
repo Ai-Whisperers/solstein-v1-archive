@@ -21,9 +21,10 @@ from solstein.infrastructure.repositories import FactRepository
 @pytest_asyncio.fixture
 async def db_session() -> AsyncSession:
     """Provide database session."""
+    from solstein.config import Settings
     from solstein.infrastructure.database import DatabaseManager
 
-    db_manager = DatabaseManager()
+    db_manager = DatabaseManager(Settings.load())
     session = await db_manager.get_session().__aenter__()
     transaction = await session.begin_nested()
     yield session
