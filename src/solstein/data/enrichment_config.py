@@ -13,6 +13,7 @@ Centralized configuration for the enrichment system with:
 import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from typing import Optional, Any, Dict, List, Union
 
 
 from loguru import logger
