@@ -154,7 +154,7 @@ async def get_async_session():
     engine = db_manager.engine
     if engine is None:
         # Initialise lazily in dev when DB is not yet connected
-        await db_manager.init_async()
+        db_manager.init_async()
         engine = db_manager.engine
     async with AsyncSession(engine, expire_on_commit=False) as session:
         yield session

@@ -272,6 +272,7 @@ class TestEnhancedLLMClient:
     async def test_generate_with_success(self):
         """Test successful generation."""
         mock_checker = MagicMock()
+        mock_checker.check_all_providers = AsyncMock()
         mock_checker.PROVIDER_PRIORITY = ["openai"]
         mock_checker.get_health.return_value = ProviderHealth(
             provider="openai",
@@ -299,6 +300,7 @@ class TestEnhancedLLMClient:
     async def test_generate_falls_back_on_failure(self):
         """Test that generation falls back to next provider on failure."""
         mock_checker = MagicMock()
+        mock_checker.check_all_providers = AsyncMock()
         mock_checker.PROVIDER_PRIORITY = ["openai", "groq"]
         mock_checker.get_health.side_effect = [
             ProviderHealth(provider="openai", status=ProviderStatus.HEALTHY),
@@ -337,6 +339,7 @@ class TestEnhancedLLMClient:
             answer: str
 
         mock_checker = MagicMock()
+        mock_checker.check_all_providers = AsyncMock()
         mock_checker.PROVIDER_PRIORITY = ["openai"]
         mock_checker.get_health.return_value = ProviderHealth(
             provider="openai",
@@ -379,12 +382,29 @@ class TestIntegration:
             settings.openai_api_key = None
             settings.groq_api_key = None
             settings.fireworks_api_key = None
+            # Also ensure other keys are None
+            settings.mistral_api_key = None
+            settings.deepinfra_api_key = None
+            settings.gemini_api_key = None
+            settings.nvidia_nim_api_key = None
+            settings.cerebras_api_key = None
+            settings.kimi_api_key = None
+            settings.anthropic_api_key = None
+            settings.siliconflow_api_key = None
+            settings.alibaba_api_key = None
             mock_settings.return_value = settings
 
-            health = await checker.check_all_providers()
+            # Mock check_provider to avoid real network calls
+            with patch.object(checker, "check_provider", new_callable=AsyncMock) as mock_check:
+                mock_check.return_value = ProviderHealth(
+                    provider="ollama", status=ProviderStatus.UNHEALTHY
+                )
+                
+                health = await checker.check_all_providers()
 
-            # Should have checked but found no providers
-            assert len(health) == 0 or all(h.status != ProviderStatus.HEALTHY for h in health.values())
+                # Should have checked but found no providers healthy
+                assert len(health) >= 1
+                assert all(h.status != ProviderStatus.HEALTHY for h in health.values())
 
     def test_error_classification_comprehensive(self):
         """Test comprehensive error classification patterns."""

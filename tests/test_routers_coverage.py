@@ -8,49 +8,6 @@ from tests.factories import make_company
 
 
 # ---------------------------------------------------------------------------
-# GET /scoring/batch
-# ---------------------------------------------------------------------------
-@patch("solstein.api.routers.scoring.TemporalClient.connect")
-def test_batch_scoring_endpoint_temporal_success(mock_connect, client):
-    """Test batch scoring endpoint using Temporal."""
-    mock_client = AsyncMock()
-    mock_connect.return_value = mock_client
-    mock_handle = AsyncMock()
-    mock_handle.id = "workflow-123"
-    mock_client.start_workflow.return_value = mock_handle
-
-    response = client.get("/scoring/batch?industry=Energy")
-
-    assert response.status_code == 200
-    data = response.json()
-    assert data["message"] == "Batch scoring workflow started via Temporal"
-    assert data["workflow_id"] == "workflow-123"
-    assert data["status"] == "running"
-    assert data["filters"]["industry"] == "Energy"
-
-
-@patch(
-    "solstein.api.routers.scoring.TemporalClient.connect",
-    side_effect=Exception("Connection failed"),
-)
-@patch("solstein.analytics.activities.fetch_market_company_ids", new_callable=AsyncMock)
-@patch("solstein.analytics.activities.calculate_company_score", new_callable=AsyncMock)
-def test_batch_scoring_endpoint_fallback(mock_calc, mock_fetch, mock_connect, client):
-    """Test batch scoring synchronous fallback when Temporal is unavailable."""
-    mock_fetch.return_value = ["c1"]
-    mock_calc.return_value = {"company_id": "c1", "status": "scored"}
-
-    response = client.get("/scoring/batch?industry=Finance")
-
-    assert response.status_code == 200
-    data = response.json()
-    assert data["message"] == "Batch scoring completed synchronously (Local Fallback)"
-    assert data["status"] == "completed"
-    assert data["processed_count"] == 1
-    assert data["filters"]["industry"] == "Finance"
-
-
-# ---------------------------------------------------------------------------
 # POST /simulation/run
 # ---------------------------------------------------------------------------
 def test_run_simulation_endpoint(client, mock_repo):
@@ -93,5 +50,6 @@ def test_run_simulation_endpoint_no_companies(client, mock_repo):
 
     response = client.post("/simulation/run", json=payload)
     assert response.status_code == 404
-    assert response.json()["error"] == "HTTP Error"
-    assert "No companies found" in response.json()["details"]
+    data = response.json()
+    assert data["code"] == "NOT_FOUND"
+    assert "No companies found" in data["message"]

@@ -89,11 +89,11 @@ class CompanyRepository:
 
         return record
 
-    async def create(self, company_data: dict[str, Any]) -> CompanyRecord:
+    async def create(self, **company_data) -> CompanyRecord:
         """Create a new company record.
 
         Args:
-            company_data: Dictionary containing company attributes.
+            **company_data: Company attributes.
                 Must include 'company_id' and 'name' at minimum.
 
         Returns:
