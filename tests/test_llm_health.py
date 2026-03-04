@@ -396,10 +396,8 @@ class TestIntegration:
 
             # Mock check_provider to avoid real network calls
             with patch.object(checker, "check_provider", new_callable=AsyncMock) as mock_check:
-                mock_check.return_value = ProviderHealth(
-                    provider="ollama", status=ProviderStatus.UNHEALTHY
-                )
-                
+                mock_check.return_value = ProviderHealth(provider="ollama", status=ProviderStatus.UNHEALTHY)
+
                 health = await checker.check_all_providers()
 
                 # Should have checked but found no providers healthy

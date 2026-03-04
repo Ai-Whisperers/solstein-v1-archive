@@ -1,10 +1,10 @@
 """Constants for analytics, scoring, and classification thresholds."""
 
 # Classification Score Thresholds
-# Phoenix (High Growth): >= 7.0
-# Salt (Stable): 4.5 - 6.99
+# Phoenix (High Growth): >= 7.01
+# Salt (Stable): 4.5 - 7.0
 # Lead (Legacy/Opportunity): < 4.5
-PHOENIX_SCORE_THRESHOLD = 7.0  # High-growth companies
+PHOENIX_SCORE_THRESHOLD = 7.01  # High-growth companies
 SALT_SCORE_THRESHOLD = 4.5  # Stable companies
 LEAD_SCORE_THRESHOLD = 4.49  # Legacy/opportunity companies
 

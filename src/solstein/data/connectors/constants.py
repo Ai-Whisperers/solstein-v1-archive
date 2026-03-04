@@ -17,7 +17,7 @@ COMPANIES_HOUSE_DEFAULT_CONFIDENCE = 0.93  # UK Companies House is authoritative
 COMPANIES_HOUSE_REQUEST_TIMEOUT_S = 15.0  # HTTP request timeout in seconds
 
 # News Signal Detector
-NEWS_SIGNAL_DAILY_QUERY_LIMIT = 90  # Maximum queries per day
+NEWS_SIGNAL_DAILY_QUERY_LIMIT = 100  # Maximum queries per day
 NEWS_SIGNAL_REQUEST_TIMEOUT_S = 10  # HTTP request timeout in seconds
 
 # HTTP Status Codes (for clarity in error handling)

@@ -89,6 +89,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
                 },
                 "request_id": request_id,
             },
+            headers={"X-Request-ID": request_id},
         )
 
     @app.exception_handler(RequestValidationError)
@@ -157,6 +158,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
                 },
                 "request_id": request_id,
             },
+            headers={"X-Request-ID": request_id},
         )
 
     @app.exception_handler(Exception)
@@ -188,4 +190,5 @@ def setup_exception_handlers(app: FastAPI) -> None:
                 "request_id": request_id,
                 "traceback": tb,  # Exposed for QA/debugging in non-prod
             },
+            headers={"X-Request-ID": request_id},
         )

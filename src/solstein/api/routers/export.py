@@ -18,10 +18,10 @@ growth_scorer = GrowthScorer()
 excel_exporter = ExcelExporter()
 
 
-def _run_excel_export(repo: CompanyRepository, filters: dict[str, Any], filename: str) -> None:  # noqa: E501
+async def _run_excel_export(repo: CompanyRepository, filters: dict[str, Any], filename: str) -> None:  # noqa: E501
     """Background task to generate excel report."""
     company_filter = CompanyFilter(**filters) if filters else None
-    companies = repo.get_all(filters=company_filter)
+    companies = await repo.get_all(filters=company_filter)
 
     # Apply scoring to all companies before export
     if companies:

@@ -32,11 +32,10 @@ from solstein.infrastructure.database_models import CompanyRecord, ResearchRunRe
 async def db_session() -> AsyncSession:
     """Provide database session."""
     db_manager = DatabaseManager(Settings.load())
-    session = await db_manager.get_session().__aenter__()
-    transaction = await session.begin_nested()
-    yield session
-    await transaction.rollback()
-    await session.close()
+    async with db_manager.get_session() as session:
+        transaction = await session.begin_nested()
+        yield session
+        await transaction.rollback()
     await db_manager.engine.dispose()
 
 

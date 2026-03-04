@@ -31,15 +31,24 @@ class TestNewsSignalDetectorInitialization:
 
     def test_init_with_env_variable(self, monkeypatch):
         """Test initialization reading from environment variable."""
+        from solstein.config import get_settings
+        get_settings.cache_clear()
         monkeypatch.setenv("NEWSAPI_KEY", "env-key-456")
         detector = NewsSignalDetector()
         assert detector.api_key == "env-key-456"
 
     def test_init_missing_api_key_raises_error(self, monkeypatch):
         """Test initialization fails without API key."""
+        from solstein.config import get_settings
+        get_settings.cache_clear()
         monkeypatch.delenv("NEWSAPI_KEY", raising=False)
-        with pytest.raises(ValueError, match="NewsAPI key required"):
-            NewsSignalDetector()
+        # Also ensure it's not in settings if already loaded
+        with patch("solstein.config.get_settings") as mock_get:
+            mock_settings = MagicMock()
+            mock_settings.news_api_key = None
+            mock_get.return_value = mock_settings
+            with pytest.raises(ValueError, match="NewsAPI key required"):
+                NewsSignalDetector()
 
 
 class TestFundingSignalDetection:

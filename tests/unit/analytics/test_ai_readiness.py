@@ -31,7 +31,7 @@ class TestAIReadinessScorer:
         company = MagicMock(spec=Company)
         company.name = "TestCorp"
         company.ai_score = 8.0
-        company.ai_maturity = AIMaturity.ADVANCED
+        company.ai_maturity = AIMaturity.STRONG
         company.ai_in_production = True
         company.saas_maturity = 7.0
         company.employees = 500

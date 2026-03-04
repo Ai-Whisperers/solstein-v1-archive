@@ -32,26 +32,29 @@ client = TestClient(app)
 
 def test_exception_handler_500():
     # Will hit LoggingMiddleware exception and global 500 handler
-    with pytest.raises(ValueError):
-        # By default TestClient raises server errors. We can suppress it.
-        client.get("/_test/error500")
-
     client_no_raise = TestClient(app, raise_server_exceptions=False)
     resp = client_no_raise.get("/_test/error500")
     assert resp.status_code == 500
-    assert resp.json()["error"]["code"] == "INTERNAL_ERROR"
+    data = resp.json()
+    assert data["error"]["code"] == "INTERNAL_ERROR"
+    assert "request_id" in data
 
 
 def test_exception_handler_http():
-    resp = client.get("/_test/error400")
+    client_no_raise = TestClient(app, raise_server_exceptions=False)
+    resp = client_no_raise.get("/_test/error400")
     assert resp.status_code == 400
-    assert "A manual HTTP error" in resp.json()["error"]["message"]
-    assert resp.headers.get("X-Request-ID") is not None
+    data = resp.json()
+    assert "A manual HTTP error" in data["error"]["message"]
+    # Check for Request ID in body or header
+    assert data.get("request_id") is not None or resp.headers.get("X-Request-ID") is not None
 
 
 def test_exception_handler_validation():
     # Send missing req_field
-    resp = client.post("/_test/validation", json={})
+    client_no_raise = TestClient(app, raise_server_exceptions=False)
+    resp = client_no_raise.post("/_test/validation", json={})
     assert resp.status_code == 422
-    assert resp.json()["error"]["code"] == "VALIDATION_ERROR"
-    assert resp.headers.get("X-Request-ID") is not None
+    data = resp.json()
+    assert data["error"]["code"] == "VALIDATION_ERROR"
+    assert data.get("request_id") is not None

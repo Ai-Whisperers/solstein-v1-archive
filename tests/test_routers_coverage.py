@@ -2,8 +2,6 @@
 Additional integration tests for Solstein FastAPI routers (scoring batch, simulation).
 """
 
-from unittest.mock import AsyncMock, patch
-
 from tests.factories import make_company
 
 
