@@ -35,8 +35,10 @@ class TestCompetitiveMapper:
         company.name = "Stripe"
         company.industry = "Fintech"
         company.composite_score = 9.0
+        company.ai_score = 8.0
         company.financials = MagicMock()
         company.financials.revenue = 1000.0
+        company.financials.growth_rate = 25.0
         return company
 
     @pytest.fixture
@@ -45,8 +47,10 @@ class TestCompetitiveMapper:
         company.name = "Adyen"
         company.industry = "Fintech"
         company.composite_score = 8.5
+        company.ai_score = 6.0
         company.financials = MagicMock()
         company.financials.revenue = 800.0
+        company.financials.growth_rate = 15.0
         company.tier = MagicMock()
         company.tier.value = "Phoenix"
         return company
@@ -57,8 +61,10 @@ class TestCompetitiveMapper:
         company.name = "Visa"
         company.industry = "Fintech"
         company.composite_score = 9.8
+        company.ai_score = 9.0
         company.financials = MagicMock()
         company.financials.revenue = 20000.0
+        company.financials.growth_rate = 10.0
         company.tier = MagicMock()
         company.tier.value = "Phoenix"
         return company
@@ -69,8 +75,10 @@ class TestCompetitiveMapper:
         company.name = "OilCorp"
         company.industry = "Oil & Gas"
         company.composite_score = 5.0
+        company.ai_score = 3.0
         company.financials = MagicMock()
         company.financials.revenue = 5000.0
+        company.financials.growth_rate = 5.0
         return company
 
     def test_map_returns_landscape(self, mapper: CompetitiveMapper, reference_company: MagicMock) -> None:

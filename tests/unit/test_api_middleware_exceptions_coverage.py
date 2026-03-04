@@ -39,13 +39,13 @@ def test_exception_handler_500():
     client_no_raise = TestClient(app, raise_server_exceptions=False)
     resp = client_no_raise.get("/_test/error500")
     assert resp.status_code == 500
-    assert "Internal Server Error" in resp.json()["error"]
+    assert resp.json()["error"]["code"] == "INTERNAL_ERROR"
 
 
 def test_exception_handler_http():
     resp = client.get("/_test/error400")
     assert resp.status_code == 400
-    assert "A manual HTTP error" in resp.json()["details"]
+    assert "A manual HTTP error" in resp.json()["error"]["message"]
     assert resp.headers.get("X-Request-ID") is not None
 
 
@@ -53,5 +53,5 @@ def test_exception_handler_validation():
     # Send missing req_field
     resp = client.post("/_test/validation", json={})
     assert resp.status_code == 422
-    assert "Unprocessable Entity" in resp.json()["error"]
+    assert resp.json()["error"]["code"] == "VALIDATION_ERROR"
     assert resp.headers.get("X-Request-ID") is not None

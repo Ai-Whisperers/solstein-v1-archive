@@ -87,7 +87,7 @@ async def export_to_json(
     try:
         filters = CompanyFilter(industry=industry)
 
-        filtered_companies = repo.get_all(filters=filters)
+        filtered_companies = await repo.get_all(filters=filters)
 
         # Filter by industry if specified (manual check to be safe)
         if industry:

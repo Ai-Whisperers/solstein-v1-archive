@@ -66,9 +66,9 @@ def calculate_classification_confidence(
     completeness_factor = data_completeness / 100.0
 
     # Score certainty: higher scores are more certain
-    # Scores near boundaries (4.5, 7.5) are less certain
+    # Scores near boundaries (5.49/5.5, 7.0) are less certain
     score_certainty = 1.0
-    if 4.4 <= composite_score <= 4.6 or 7.4 <= composite_score <= 7.6:  # Near Salt/Lead or Phoenix boundary
+    if 5.4 <= composite_score <= 5.6 or 6.9 <= composite_score <= 7.1:  # Near Lead/Salt or Phoenix boundary
         score_certainty = 0.7
 
     # Combine factors: 70% data quality, 30% score certainty

@@ -798,6 +798,35 @@ class TenantRecord(Base):
         Index("ix_tenants_is_active", "is_active"),
     )
 
+
+class FactRecord(Base):
+    """Stores company facts as key-value pairs with confidence scoring."""
+
+    __tablename__ = "fact_records"
+
+    id: Mapped[str] = mapped_column(String(255), primary_key=True, default=lambda: str(uuid.uuid4()))
+    company_id: Mapped[str] = mapped_column(String(255), ForeignKey("companies.company_id"), nullable=False, index=True)
+    fact_key: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    fact_value: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(50), default="active", nullable=False)
+    confidence: Mapped[float] = mapped_column(Float, default=0.5, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    __table_args__ = (
+        Index("ix_fact_records_company_key", "company_id", "fact_key"),
+        Index("ix_fact_records_status", "status"),
+    )
+
     def to_dict(self) -> dict[str, object]:
         return {
             "id": str(self.id),

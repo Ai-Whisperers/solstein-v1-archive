@@ -85,7 +85,7 @@ async def batch_score_companies_endpoint(
     """
     raise APIError(
         code="NOT_IMPLEMENTED",
-        message="Batch scoring endpoint disabled - Temporal integration removed. Use individual /company/{id}/score endpoint instead.",
+        message="Batch scoring endpoint disabled - Temporal integration removed. Use individual /company/COMPANY_ID/score endpoint instead.",
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
     )
 

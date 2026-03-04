@@ -101,7 +101,10 @@ def setup_exception_handlers(app: FastAPI) -> None:
         modified_details = [{"loc": err.get("loc"), "msg": err.get("msg"), "type": err.get("type")} for err in errors]
 
         logger.warning(
-            f"Validation Error [422] | {request.method} {request.url.path} | Details: {modified_details}",
+            "Validation Error [422] | {} {} | {} errors",
+            request.method,
+            request.url.path,
+            len(modified_details),
             extra={"request_id": request_id},
         )
 

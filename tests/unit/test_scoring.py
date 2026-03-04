@@ -64,12 +64,12 @@ def test_calculate_growth_score_phoenix(scorer, phoenix_company):
     Verify exact growth score for a high-growth company.
 
     Calculation:
-        base(5.0) + growth(45/20=2.25) + margin_med_bonus(1.0) = 8.25
-        (margin=15% hits margin_med_threshold=10.0, NOT margin_high_threshold=20.0)
+        growth: base(5.0) + growth(45/20=2.25) + margin_med_bonus(1.0) = 8.25
+        financial: base(5.0) + revenue_large(500M>=100M → +2.5) + margin_med(15%>5% → +1.25) = 8.75
     """
     scored = scorer.calculate_scores(phoenix_company)
     assert scored.growth_score == pytest.approx(8.25)
-    assert scored.financial_health_score == pytest.approx(5.25)
+    assert scored.financial_health_score == pytest.approx(8.75)
 
 
 def test_calculate_growth_score_lead(scorer, lead_company):
@@ -77,12 +77,12 @@ def test_calculate_growth_score_lead(scorer, lead_company):
     Verify exact growth score for a declining company.
 
     Calculation:
-        base(5.0) + growth(-5/20=-0.25) + margin_negative_penalty(-1.0) = 3.75
+        growth: base(5.0) + growth(-5/20=-0.25) + deep_neg_margin(-2%<-0.1% → -1.5) + compound(-1.0) = 2.25
+        financial: base(5.0) + revenue_med(10M>=10M → +1.25) + margin_negative(-2% < 0 → -2.5) = 3.75
     """
     scored = scorer.calculate_scores(lead_company)
-    assert scored.growth_score == pytest.approx(3.75)
-    # financial_health: base(5.0) + revenue_small(10 < 1M → -1.0) + margin_negative(-2.5) = 1.5
-    assert scored.financial_health_score == pytest.approx(1.5)
+    assert scored.growth_score == pytest.approx(2.25)
+    assert scored.financial_health_score == pytest.approx(3.75)
 
 
 def test_calculate_scores_returns_same_company_object(scorer):
@@ -101,16 +101,16 @@ def test_calculate_scores_returns_same_company_object(scorer):
 @pytest.mark.parametrize(
     "growth_rate,expected_min,expected_max",
     [
-        (0.0, 4.9, 5.1),  # Neutral: base=5.0, no growth contribution, no margin
+        (0.0, 4.1, 4.4),  # base(5.0) + growth(0) + stagnant_penalty(-0.75) = 4.25
         (20.0, 5.9, 6.1),  # Exactly one divisor: 5.0 + 20/20=1.0 = 6.0
         (45.0, 7.2, 7.3),  # 5.0 + 2.25 = 7.25 (no margin, no funding on bare company)
         (400.0, 8.9, 9.1),  # 5.0 + cap(4.0) = 9.0 (revenue_growth_cap=4.0, no extras)
-        (-10.0, 4.4, 4.6),  # 5.0 + (-10/20=-0.5) = 4.5 (no negative margin penalty)
+        (-10.0, 3.4, 3.6),  # 5.0 + (-10/20=-0.5) + compound_penalty(-1.0) = 3.5
         (
             -40.0,
-            2.9,
-            3.1,
-        ),  # 5.0 + cap(-2.0) = 3.0 (growth capped at -20/20=-1.0 each div)
+            1.9,
+            2.1,
+        ),  # 5.0 + (-40/20=-2.0) + compound_penalty(-1.0) = 2.0 (clamped to 0)
     ],
 )
 def test_growth_score_ranges(scorer, growth_rate, expected_min, expected_max):

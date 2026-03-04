@@ -63,10 +63,12 @@ class TenantMiddleware(BaseHTTPMiddleware):
             from solstein.config import get_settings
 
             settings = get_settings()
-            if not getattr(settings, "require_api_key", False):
-                return await call_next(request)
+            require_key = getattr(settings, "require_api_key", False)
         except Exception:  # pragma: no cover
-            pass
+            require_key = False
+
+        if not require_key:
+            return await call_next(request)
 
         api_key = request.headers.get("X-API-Key", "").strip()
         if not api_key:

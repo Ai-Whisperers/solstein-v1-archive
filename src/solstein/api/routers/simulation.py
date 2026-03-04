@@ -24,7 +24,7 @@ async def run_simulation(
     try:
         # 1. Get Companies
         filters = CompanyFilter(industry=industry)
-        companies = repo.get_all(filters=filters)
+        companies = await repo.get_all(filters=filters)
 
         if not companies:
             raise APIError(

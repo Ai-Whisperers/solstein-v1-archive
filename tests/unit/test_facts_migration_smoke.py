@@ -4,12 +4,12 @@ from pathlib import Path
 
 import pytest
 import sqlalchemy as sa
-from alembic import command
-from alembic.config import Config
 from sqlalchemy.exc import IntegrityError
 
 
-def _alembic_config(repo_root: Path) -> Config:
+def _alembic_config(repo_root: Path):  # type: ignore[return]
+    from alembic.config import Config  # deferred to avoid shadowing by alembic/ directory
+
     cfg = Config(str(repo_root / "alembic.ini"))
     cfg.set_main_option("script_location", str(repo_root / "alembic"))
     return cfg
@@ -19,6 +19,8 @@ def _alembic_config(repo_root: Path) -> Config:
 def test_facts_migration_smoke(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     db_path = tmp_path / "facts_migration_smoke.sqlite"
     monkeypatch.setenv("DATABASE__URL", f"sqlite:///{db_path}")
+
+    from alembic import command  # deferred import
 
     repo_root = Path(__file__).resolve().parents[2]
     command.upgrade(_alembic_config(repo_root), "head")

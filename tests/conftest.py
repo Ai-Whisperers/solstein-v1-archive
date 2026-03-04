@@ -1,5 +1,5 @@
 import os
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -32,8 +32,11 @@ def mock_repo(mock_company):
         mock_repo.get_by_id.return_value = None
     """
     repo = MagicMock(spec=CompanyRepository)
-    repo.get_all.return_value = [mock_company]
-    repo.get_by_id.return_value = mock_company
+    repo.get_all = AsyncMock(return_value=[mock_company])
+    repo.get_by_id = AsyncMock(return_value=mock_company)
+    repo.save = AsyncMock(return_value=mock_company)
+    repo.delete = AsyncMock(return_value=True)
+    repo.search = AsyncMock(return_value=[mock_company])
     return repo
 
 
@@ -95,7 +98,7 @@ def patch_competitor_data_loader(monkeypatch):
             website="https://eneve.de",
             description="Energy software company",
             ai_maturity=AIMaturity.STRONG,
-            ai_maturity_score=7.5,
+            ai_score=7.5,
             geographic_presence=["Germany", "France", "UK", "Netherlands", "Belgium", "Austria", "Switzerland"],
             revenue_timeline=[
                 {"year": 2020, "eur_millions": 2.0, "yoy_growth_pct": 0},
