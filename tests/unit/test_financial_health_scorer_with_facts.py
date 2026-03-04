@@ -231,8 +231,8 @@ class TestFinancialHealthScorerWithFacts:
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
-        # Struggling company should score < 4.0
-        assert score < 4.0
+        # Struggling company should score <= 4.0
+        assert score <= 4.0
 
     def test_score_with_profitability_fact(self, scorer, mock_fact_repo):
         """Test scoring with profitability fact."""

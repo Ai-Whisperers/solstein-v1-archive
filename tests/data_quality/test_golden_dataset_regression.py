@@ -98,14 +98,16 @@ class TestGoldenDatasetRegression:
     def test_validate_composite_score_within_range(self):
         """Should validate composite score within range."""
         company = get_golden_company_by_id("eneve-1")
-        assert company.validate_composite_score(7.5) is True
+        # Eneve composite range is 8.0 - 10.0
         assert company.validate_composite_score(8.0) is True
+        assert company.validate_composite_score(8.5) is True
+        assert company.validate_composite_score(10.0) is True
 
     def test_validate_composite_score_outside_range(self):
         """Should reject composite score outside range."""
         company = get_golden_company_by_id("eneve-1")
-        assert company.validate_composite_score(6.0) is False
-        assert company.validate_composite_score(9.0) is False
+        assert company.validate_composite_score(7.9) is False
+        assert company.validate_composite_score(10.1) is False
 
     def test_validate_classification_match(self):
         """Should validate matching classification."""

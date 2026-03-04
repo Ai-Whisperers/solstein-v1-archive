@@ -104,6 +104,46 @@ async def create_company(
         ) from e
 
 
+@router.put("/companies/{company_id}", response_model=Company)
+async def update_company(
+    company_id: str,
+    company_in: Company,
+    _: dict[str, Any] = Depends(get_current_user),
+    repo: CompanyRepository = Depends(get_company_repository),
+) -> Company:
+    """Update a company profile."""
+    try:
+        # Check if exists
+        existing = await repo.get_by_id(company_id)
+        if not existing:
+            raise APIError(
+                code="NOT_FOUND",
+                message=f"Company with ID {company_id} not found",
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Recalculate scores with new data
+        scored_company = growth_scorer.calculate_scores(company_in)
+        scored_company.id = company_id
+
+        # Persist to database
+        updated_company = await repo.save(scored_company)
+
+        return updated_company
+    except HTTPException:
+        raise
+    except APIError:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating company {company_id}: {e}")
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error updating company",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=str(e),
+        ) from e
+
+
 @router.delete("/companies/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_company(
     company_id: str,

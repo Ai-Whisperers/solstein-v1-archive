@@ -259,14 +259,15 @@ class TestFactSourceModel:
 
 
 class TestFactRepositoryValidation:
-    """Tests for FactRepository validation logic."""
+    """Tests for FactRepository validation logic (async methods awaited properly)."""
 
-    def test_repository_store_validates_confidence(self):
+    @pytest.mark.asyncio
+    async def test_repository_store_validates_confidence(self):
         """Test repository store() validates confidence range."""
         from unittest.mock import MagicMock
 
-        db_manager = MagicMock(spec=DatabaseManager)
-        repo = FactRepository(db_manager)
+        session = MagicMock(spec=DatabaseManager)
+        repo = FactRepository(session)
 
         batch_id = uuid.uuid4()
         fact = Fact(
@@ -277,14 +278,15 @@ class TestFactRepositoryValidation:
         )
 
         with pytest.raises(ValueError, match="Confidence must be between"):
-            repo.store(fact)
+            await repo.store(fact)
 
-    def test_repository_store_validates_fact_type(self):
+    @pytest.mark.asyncio
+    async def test_repository_store_validates_fact_type(self):
         """Test repository store() validates fact_type is not empty."""
         from unittest.mock import MagicMock
 
-        db_manager = MagicMock(spec=DatabaseManager)
-        repo = FactRepository(db_manager)
+        session = MagicMock(spec=DatabaseManager)
+        repo = FactRepository(session)
 
         batch_id = uuid.uuid4()
         fact = Fact(
@@ -295,97 +297,106 @@ class TestFactRepositoryValidation:
         )
 
         with pytest.raises(ValueError, match="Fact type is required"):
-            repo.store(fact)
+            await repo.store(fact)
 
-    def test_repository_get_company_facts_requires_company_id(self):
+    @pytest.mark.asyncio
+    async def test_repository_get_company_facts_requires_company_id(self):
         """Test get_company_facts() requires company_id."""
         from unittest.mock import MagicMock
 
-        db_manager = MagicMock(spec=DatabaseManager)
-        repo = FactRepository(db_manager)
+        session = MagicMock(spec=DatabaseManager)
+        repo = FactRepository(session)
 
         with pytest.raises(ValueError, match="Company ID is required"):
-            repo.get_company_facts("")
+            await repo.get_company_facts("")
 
-    def test_repository_get_facts_by_type_requires_company_id(self):
+    @pytest.mark.asyncio
+    async def test_repository_get_facts_by_type_requires_company_id(self):
         """Test get_facts_by_type() requires company_id."""
         from unittest.mock import MagicMock
 
-        db_manager = MagicMock(spec=DatabaseManager)
-        repo = FactRepository(db_manager)
+        session = MagicMock(spec=DatabaseManager)
+        repo = FactRepository(session)
 
         with pytest.raises(ValueError, match="Company ID is required"):
-            repo.get_facts_by_type("", "annual_revenue")
+            await repo.get_facts_by_type("", "annual_revenue")
 
-    def test_repository_get_facts_by_type_requires_fact_type(self):
+    @pytest.mark.asyncio
+    async def test_repository_get_facts_by_type_requires_fact_type(self):
         """Test get_facts_by_type() requires fact_type."""
         from unittest.mock import MagicMock
 
-        db_manager = MagicMock(spec=DatabaseManager)
-        repo = FactRepository(db_manager)
+        session = MagicMock(spec=DatabaseManager)
+        repo = FactRepository(session)
 
         with pytest.raises(ValueError, match="Fact type is required"):
-            repo.get_facts_by_type("test-company", "")
+            await repo.get_facts_by_type("test-company", "")
 
-    def test_repository_create_batch_requires_company_id(self):
+    @pytest.mark.asyncio
+    async def test_repository_create_batch_requires_company_id(self):
         """Test create_batch() requires company_id."""
         from unittest.mock import MagicMock
 
-        db_manager = MagicMock(spec=DatabaseManager)
-        repo = FactRepository(db_manager)
+        session = MagicMock(spec=DatabaseManager)
+        repo = FactRepository(session)
 
         with pytest.raises(ValueError, match="Company ID is required"):
-            repo.create_batch("")
+            await repo.create_batch("")
 
-    def test_repository_add_source_requires_fact_id(self):
+    @pytest.mark.asyncio
+    async def test_repository_add_source_requires_fact_id(self):
         """Test add_source() requires fact_id."""
         from unittest.mock import MagicMock
 
-        db_manager = MagicMock(spec=DatabaseManager)
-        repo = FactRepository(db_manager)
+        session = MagicMock(spec=DatabaseManager)
+        repo = FactRepository(session)
 
         with pytest.raises(ValueError, match="Fact ID is required"):
-            repo.add_source("", "sec_edgar")
+            await repo.add_source("", "sec_edgar")
 
-    def test_repository_add_source_requires_source_type(self):
+    @pytest.mark.asyncio
+    async def test_repository_add_source_requires_source_type(self):
         """Test add_source() requires source_type."""
         from unittest.mock import MagicMock
 
-        db_manager = MagicMock(spec=DatabaseManager)
-        repo = FactRepository(db_manager)
+        session = MagicMock(spec=DatabaseManager)
+        repo = FactRepository(session)
 
         with pytest.raises(ValueError, match="Source type is required"):
-            repo.add_source(str(uuid.uuid4()), "")
+            await repo.add_source(str(uuid.uuid4()), "")
 
-    def test_repository_get_batch_requires_batch_id(self):
+    @pytest.mark.asyncio
+    async def test_repository_get_batch_requires_batch_id(self):
         """Test get_batch() requires batch_id."""
         from unittest.mock import MagicMock
 
-        db_manager = MagicMock(spec=DatabaseManager)
-        repo = FactRepository(db_manager)
+        session = MagicMock(spec=DatabaseManager)
+        repo = FactRepository(session)
 
         with pytest.raises(ValueError, match="Batch ID is required"):
-            repo.get_batch("")
+            await repo.get_batch("")
 
-    def test_repository_update_batch_status_requires_batch_id(self):
+    @pytest.mark.asyncio
+    async def test_repository_update_batch_status_requires_batch_id(self):
         """Test update_batch_status() requires batch_id."""
         from unittest.mock import MagicMock
 
-        db_manager = MagicMock(spec=DatabaseManager)
-        repo = FactRepository(db_manager)
+        session = MagicMock(spec=DatabaseManager)
+        repo = FactRepository(session)
 
         with pytest.raises(ValueError, match="Batch ID is required"):
-            repo.update_batch_status("", "completed")
+            await repo.update_batch_status("", "completed")
 
-    def test_repository_update_batch_status_requires_status(self):
+    @pytest.mark.asyncio
+    async def test_repository_update_batch_status_requires_status(self):
         """Test update_batch_status() requires status."""
         from unittest.mock import MagicMock
 
-        db_manager = MagicMock(spec=DatabaseManager)
-        repo = FactRepository(db_manager)
+        session = MagicMock(spec=DatabaseManager)
+        repo = FactRepository(session)
 
         with pytest.raises(ValueError, match="Status is required"):
-            repo.update_batch_status(str(uuid.uuid4()), "")
+            await repo.update_batch_status(str(uuid.uuid4()), "")
 
 
 class TestFactModelSerialization:

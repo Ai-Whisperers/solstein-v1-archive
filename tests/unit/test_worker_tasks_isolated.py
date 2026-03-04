@@ -9,6 +9,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+celery = pytest.importorskip("celery", reason="celery not installed")
+
 from tests.mocks import MaxRetriesExceededError
 
 

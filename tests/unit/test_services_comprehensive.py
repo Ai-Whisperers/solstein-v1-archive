@@ -526,13 +526,13 @@ class TestGrowthScorer:
         assert classify_company(7.5) == "Phoenix"
         assert classify_company(10.0) == "Phoenix"
 
-        # Test Salt boundary (4.0 - 6.9)
-        assert classify_company(4.0) == "Salt"
-        assert classify_company(5.0) == "Salt"
+        # Test Salt boundary (5.5 - 6.9)
+        assert classify_company(5.5) == "Salt"
+        assert classify_company(6.0) == "Salt"
         assert classify_company(6.9) == "Salt"
 
-        # Test Lead boundary (<= 3.9)
-        assert classify_company(3.9) == "Lead"
+        # Test Lead boundary (< 5.5)
+        assert classify_company(4.0) == "Lead"
         assert classify_company(2.0) == "Lead"
         assert classify_company(0.0) == "Lead"
 

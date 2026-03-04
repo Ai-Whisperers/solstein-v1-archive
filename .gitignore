@@ -190,3 +190,4 @@ secrets.json
 .env.dev
 .env.prod
 .env.local
+data/output/exports/

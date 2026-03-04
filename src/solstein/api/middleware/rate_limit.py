@@ -8,6 +8,7 @@ Provides configurable rate limiting with multiple strategies:
 
 from __future__ import annotations
 
+import os
 import time
 from collections import defaultdict
 from collections.abc import Callable
@@ -153,6 +154,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     def _is_excluded(self, request: Request) -> bool:
         """Check if path is excluded from rate limiting."""
+        # Check environment first
+        if os.getenv("SOLSTEIN_DISABLE_RATE_LIMIT") == "true":
+            return True
+
         path = request.url.path
         return path in self.EXCLUDED_PATHS
 
@@ -166,6 +171,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         Returns:
             Tuple of (allowed: bool, headers: dict)
         """
+        # Check environment first
+        if os.getenv("SOLSTEIN_DISABLE_RATE_LIMIT") == "true":
+            return True, {}
+
         entry = self._storage[key]
         now = time.time()
 

@@ -10,8 +10,8 @@ from typing import Any
 from loguru import logger
 from pydantic import BaseModel, Field
 
-from ..config import get_settings
-from ..llm.enhanced_client import EnhancedLLMClient, get_enhanced_llm_client
+from ...config import get_settings
+from ...llm.enhanced_client import EnhancedLLMClient, get_enhanced_llm_client
 
 
 class FilterResponse(BaseModel):

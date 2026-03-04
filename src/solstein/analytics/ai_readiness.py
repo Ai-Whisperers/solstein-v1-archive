@@ -34,6 +34,8 @@ _WEIGHTS = {
 # AI maturity level → base deployment score
 _MATURITY_TO_SCORE: dict[str, float] = {
     "exceptional": 9.5,
+    "very strong": 9.0,
+    "strong": 8.0,
     "advanced": 7.5,
     "emerging": 5.0,
     "none": 1.0,

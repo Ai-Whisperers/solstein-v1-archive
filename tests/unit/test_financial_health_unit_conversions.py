@@ -355,6 +355,11 @@ class TestFinancialHealthConfigValidation:
 class TestFinancialHealthExplanation:
     """Test that scoring explanations are comprehensive and accurate."""
 
+    @pytest.fixture
+    def scorer(self):
+        """Create a FinancialHealthScorer with default config."""
+        return FinancialHealthScorer()
+
     def test_explanation_includes_all_applicable_components(self, scorer):
         """Test that explanation includes all applicable scoring components."""
         financials = FinancialMetric(
@@ -412,8 +417,9 @@ class TestFinancialHealthExplanation:
 
         score, expl = scorer.score(financials)
 
-        # Calculate expected score
-        expected = expl.base_score + sum(c.value for c in expl.components)
+        # Calculate expected score (clamped to [0, 10])
+        raw = expl.base_score + sum(c.value for c in expl.components)
+        expected = max(0.0, min(10.0, raw))
 
         # Should match (within floating point tolerance)
         assert abs(score - expected) < 0.01

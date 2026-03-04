@@ -20,15 +20,6 @@ from solstein.api.main import app
 
 
 @pytest.fixture
-def client():
-    """Provide FastAPI test client with authentication headers."""
-    client = TestClient(app)
-    # Add authorization header for authenticated requests
-    client.headers.update({"Authorization": "Bearer test-token"})
-    return client
-
-
-@pytest.fixture
 def sample_company_data():
     """Provide sample company data for testing."""
     return {
@@ -273,6 +264,7 @@ class TestScoringEndpoints:
 
     def test_score_company_numeric_scores(self, client):
         """Test that scores are numeric values."""
+        # Note: Depending on mock_repo implementation, this might return 404 or 500
         response = client.post("/scoring/company/test-company-001/score")
         if response.status_code == 200:
             data = response.json()
