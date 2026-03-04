@@ -2,7 +2,6 @@
 
 # Testing Rule Violations
 import os
-import sys
 
 # Test function with no docstring
 
@@ -30,14 +29,14 @@ def t():
 
 
 def test_no_assert():
-    x = 5
+    pass
 
 
 # Test with hardcoded values
 
 
 def test_hardcoded():
-    assert os.path.exists("/path/to/file") == True
+    assert os.path.exists("/path/to/file")
 
 
 # Test with no isolation

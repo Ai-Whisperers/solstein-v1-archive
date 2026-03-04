@@ -2,10 +2,9 @@
 """Enforce branch-specific coverage thresholds."""
 
 import json
-import sys
-from pathlib import Path
-from xml.etree import ElementTree as ET
 import os
+import sys
+from xml.etree import ElementTree as ET
 
 
 def get_branch_type():
@@ -60,14 +59,14 @@ def main():
     if actual_coverage is None:
         return 1
 
-    print(f"\nCoverage Enforcement")
+    print("\nCoverage Enforcement")
     print(f"   Branch Type: {branch_type}")
     print(f"   Required:    {required_coverage}%")
     print(f"   Actual:      {actual_coverage:.2f}%")
-    print(f"   Status:      ", end="")
+    print("   Status:      ", end="")
 
     if actual_coverage >= required_coverage:
-        print(f"PASS\n")
+        print("PASS\n")
         return 0
     else:
         shortfall = required_coverage - actual_coverage

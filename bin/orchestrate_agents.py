@@ -13,12 +13,10 @@ Cycle runs every 30 minutes (48 cycles per day)
 """
 
 import subprocess
-import json
+import sys
 import time
 from datetime import datetime
 from pathlib import Path
-import sys
-import os
 
 
 class AgentOrchestrator:
@@ -36,7 +34,7 @@ class AgentOrchestrator:
         """Get current cycle number and increment for next time"""
         try:
             if self.counter_file.exists():
-                with open(self.counter_file, "r") as f:
+                with open(self.counter_file) as f:
                     cycle_num = int(f.read().strip())
             else:
                 cycle_num = 1
@@ -72,7 +70,7 @@ class AgentOrchestrator:
             self.log(f"✅ {agent_name.upper()} completed (exit code: {result.returncode})")
 
             if result.returncode != 0:
-                self.log(f"⚠️  Agent returned non-zero exit code")
+                self.log("⚠️  Agent returned non-zero exit code")
                 if result.stderr:
                     self.log(f"   Error: {result.stderr[:200]}")
 

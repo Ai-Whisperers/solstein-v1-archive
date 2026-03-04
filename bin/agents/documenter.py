@@ -71,9 +71,9 @@ class DocumenterAgent:
         return {
             "what_was_done": [
                 f"Ran full test suite ({self.cycle_num} cycle)",
-                f"Analyzed code quality and found issues",
+                "Analyzed code quality and found issues",
                 f"Implemented fixes to {len(implementer.get('changes_made', []))} files",
-                f"Verified all tests passing after changes",
+                "Verified all tests passing after changes",
             ],
             "why": [
                 "Continuous improvement of Solstein codebase",

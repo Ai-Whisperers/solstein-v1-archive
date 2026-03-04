@@ -132,7 +132,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from loguru import logger
 
@@ -146,7 +146,7 @@ class DataSourceResult:
     data: dict[str, Any]
     confidence: float  # 0.0 to 1.0
     timestamp: datetime
-    raw_response: Optional[dict] = None
+    raw_response: dict | None = None
 
 
 @dataclass
@@ -165,12 +165,12 @@ class AggregatedCompany:
 class BaseDataSource(ABC):
     """Abstract base class for data source adapters."""
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self.api_key = api_key
         self.source_name = self.__class__.__name__
 
     @abstractmethod
-    async def fetch_company(self, company_name: str) -> Optional[DataSourceResult]:
+    async def fetch_company(self, company_name: str) -> DataSourceResult | None:
         """Fetch company data from this source.
 
         Args:
@@ -276,8 +276,8 @@ class RealDataPipeline:
 
     def __init__(
         self,
-        crunchbase_api_key: Optional[str] = None,
-        linkedin_api_key: Optional[str] = None,
+        crunchbase_api_key: str | None = None,
+        linkedin_api_key: str | None = None,
         enable_yahoo_finance: bool = True,
     ):
         self.sources: list[BaseDataSource] = []
@@ -292,7 +292,7 @@ class RealDataPipeline:
 
         logger.info(f"Initialized RealDataPipeline with {len(self.sources)} sources")
 
-    async def fetch_company(self, company_name: str) -> Optional[AggregatedCompany]:
+    async def fetch_company(self, company_name: str) -> AggregatedCompany | None:
         """Fetch and aggregate data for a single company.
 
         Args:
@@ -431,7 +431,7 @@ class RealDataPipeline:
 class CrunchbaseAdapter(BaseDataSource):
     """Adapter for Crunchbase API."""
 
-    async def fetch_company(self, company_name: str) -> Optional[DataSourceResult]:
+    async def fetch_company(self, company_name: str) -> DataSourceResult | None:
         """TODO: Implement in Story 8.2"""
         pass
 
@@ -442,7 +442,7 @@ class CrunchbaseAdapter(BaseDataSource):
 class LinkedInAdapter(BaseDataSource):
     """Adapter for LinkedIn API."""
 
-    async def fetch_company(self, company_name: str) -> Optional[DataSourceResult]:
+    async def fetch_company(self, company_name: str) -> DataSourceResult | None:
         """TODO: Implement in Story 8.3"""
         pass
 
@@ -453,7 +453,7 @@ class LinkedInAdapter(BaseDataSource):
 class YahooFinanceAdapter(BaseDataSource):
     """Adapter for Yahoo Finance API."""
 
-    async def fetch_company(self, company_name: str) -> Optional[DataSourceResult]:
+    async def fetch_company(self, company_name: str) -> DataSourceResult | None:
         """TODO: Implement"""
         pass
 

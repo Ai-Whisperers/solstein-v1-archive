@@ -6,16 +6,12 @@ This module provides validation and compliance checking mechanisms for OpenCode 
 It validates code against the rules defined in the .claude/rules directory.
 """
 
+import ast
 import os
 import re
-import subprocess
+from collections.abc import Callable
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any, Callable
-from dataclasses import dataclass
-import json
-import ast
-import tokenize
-from io import BytesIO
+from typing import Any
 
 
 class ValidationResult:
@@ -25,8 +21,8 @@ class ValidationResult:
         self,
         rule: str,
         file: str,
-        line: Optional[int],
-        column: Optional[int],
+        line: int | None,
+        column: int | None,
         message: str,
         severity: str,
         passed: bool,
@@ -45,7 +41,7 @@ class ComplianceChecker:
 
     def __init__(self):
         self.rules_dir = Path(".claude/rules")
-        self.rules: Dict[str, Dict[str, Any]] = {}
+        self.rules: dict[str, dict[str, Any]] = {}
         self.load_rules()
 
     def load_rules(self):
@@ -56,7 +52,7 @@ class ComplianceChecker:
         for rule_file in self.rules_dir.glob("*.md"):
             rule_name = rule_file.stem
             try:
-                with open(rule_file, "r", encoding="utf-8") as f:
+                with open(rule_file, encoding="utf-8") as f:
                     content = f.read()
                     if rule_name == "testing":
                         self.rules[rule_name] = {
@@ -174,7 +170,7 @@ class ComplianceChecker:
 
         return True
 
-    def _rule_applies(self, rule: Dict[str, Any], file_path: str) -> bool:
+    def _rule_applies(self, rule: dict[str, Any], file_path: str) -> bool:
         """Check if a rule applies to a specific file."""
         # Check file extension patterns
         if "file_patterns" in rule:
@@ -190,7 +186,7 @@ class ComplianceChecker:
 
         return True
 
-    def _extract_patterns(self, content: str) -> List[str]:
+    def _extract_patterns(self, content: str) -> list[str]:
         """Extract validation patterns from rule content."""
         patterns = []
 
@@ -208,7 +204,7 @@ class ComplianceChecker:
 
         return patterns
 
-    def _extract_requirements(self, content: str) -> List[str]:
+    def _extract_requirements(self, content: str) -> list[str]:
         """Extract requirements from rule content."""
         requirements = []
 
@@ -238,7 +234,7 @@ class ComplianceChecker:
                     return severity
         return "info"
 
-    def _extract_custom_validators(self, content: str) -> List[Callable[..., Any]]:
+    def _extract_custom_validators(self, content: str) -> list[Callable[..., Any]]:
         """Extract custom validation functions from rule content."""
         validators = []
 
@@ -259,12 +255,12 @@ class ComplianceChecker:
 
         return validators
 
-    def validate_file(self, file_path: str) -> List[ValidationResult]:
+    def validate_file(self, file_path: str) -> list[ValidationResult]:
         """Validate a single file against all rules."""
         results = []
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
                 lines = content.split("\n")
 
@@ -344,14 +340,14 @@ class ComplianceChecker:
 
         return results
 
-    def _pattern_matches(self, pattern: str, content: str, lines: List[str]) -> bool:
+    def _pattern_matches(self, pattern: str, content: str, lines: list[str]) -> bool:
         if pattern.startswith("r"):
             pattern = pattern[1:]
             return bool(re.search(pattern, content, re.DOTALL))
         return pattern in content
 
     def _requirement_met(
-        self, requirement: str, content: str, lines: List[str]
+        self, requirement: str, content: str, lines: list[str]
     ) -> bool:
         if requirement.startswith("r"):
             requirement = requirement[1:]
@@ -363,7 +359,7 @@ class ComplianceChecker:
 
         return requirement.lower() in content.lower()
 
-    def validate_directory(self, dir_path: str) -> List[ValidationResult]:
+    def validate_directory(self, dir_path: str) -> list[ValidationResult]:
         """Validate all files in a directory."""
         results = []
 
@@ -425,7 +421,7 @@ class ComplianceChecker:
 
         return True
 
-    def generate_report(self, results: List[ValidationResult]) -> str:
+    def generate_report(self, results: list[ValidationResult]) -> str:
         """Generate a compliance report."""
         report = []
 
@@ -469,8 +465,8 @@ class ComplianceChecker:
 
 
 def validate_python_syntax(
-    file_path: str, content: str, lines: List[str]
-) -> Tuple[bool, str]:
+    file_path: str, content: str, lines: list[str]
+) -> tuple[bool, str]:
     """Custom validator for Python syntax checking."""
     try:
         ast.parse(content)
@@ -480,8 +476,8 @@ def validate_python_syntax(
 
 
 def validate_no_debug_statements(
-    file_path: str, content: str, lines: List[str]
-) -> Tuple[bool, str]:
+    file_path: str, content: str, lines: list[str]
+) -> tuple[bool, str]:
     """Custom validator to check for debug statements."""
     debug_statements = ["print(", "console.log(", "debugger;"]
     for i, line in enumerate(lines, 1):
@@ -492,8 +488,8 @@ def validate_no_debug_statements(
 
 
 def validate_file_size(
-    file_path: str, content: str, lines: List[str]
-) -> Tuple[bool, str]:
+    file_path: str, content: str, lines: list[str]
+) -> tuple[bool, str]:
     """Custom validator to check file size."""
     max_size = 5 * 1024 * 1024  # 5MB
     file_size = os.path.getsize(file_path)
@@ -503,8 +499,8 @@ def validate_file_size(
 
 
 def validate_no_todo_todo(
-    file_path: str, content: str, lines: List[str]
-) -> Tuple[bool, str]:
+    file_path: str, content: str, lines: list[str]
+) -> tuple[bool, str]:
     """Custom validator to check for TODO/FIXME comments."""
     todo_patterns = ["TODO:", "FIXME:", "XXX:"]
     for i, line in enumerate(lines, 1):
@@ -515,8 +511,8 @@ def validate_no_todo_todo(
 
 
 def validate_no_hardcoded_secrets(
-    file_path: str, content: str, lines: List[str]
-) -> Tuple[bool, str]:
+    file_path: str, content: str, lines: list[str]
+) -> tuple[bool, str]:
     """Custom validator to check for hardcoded secrets."""
     secret_patterns = [
         r"password\s*=\s*['\"][^'\"]*['\"]",
@@ -531,8 +527,8 @@ def validate_no_hardcoded_secrets(
 
 
 def validate_python_imports(
-    file_path: str, content: str, lines: List[str]
-) -> Tuple[bool, str]:
+    file_path: str, content: str, lines: list[str]
+) -> tuple[bool, str]:
     """Custom validator for Python import style."""
     if not file_path.endswith(".py"):
         return True, "Not a Python file"

@@ -16,10 +16,7 @@ def load_patterns(config_file="config/secret-patterns.json"):
 def should_exclude(path, exclusions):
     """Check if file should be excluded from scanning."""
     path_str = str(path)
-    for exclude_path in exclusions.get("paths", []):
-        if exclude_path in path_str:
-            return True
-    return False
+    return any(exclude_path in path_str for exclude_path in exclusions.get("paths", []))
 
 
 def scan_file(file_path, patterns, exclusions):
@@ -28,7 +25,7 @@ def scan_file(file_path, patterns, exclusions):
         return []
 
     try:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(file_path, encoding="utf-8", errors="ignore") as f:
             content = f.read()
     except Exception:
         return []

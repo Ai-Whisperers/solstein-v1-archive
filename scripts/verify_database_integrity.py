@@ -9,9 +9,10 @@ Checks for:
 """
 
 import asyncio
-from datetime import datetime
+
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
+
 from solstein.database_config import get_test_database_url
 
 
@@ -20,7 +21,7 @@ async def verify_database():
     db_url = get_test_database_url()
     # Convert to async URL
     async_url = db_url.replace("postgresql://", "postgresql+asyncpg://")
-    
+
     # Handle SSL
     connect_args = {}
     if '?sslmode=' in async_url:
@@ -31,7 +32,7 @@ async def verify_database():
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl.CERT_NONE
         connect_args['ssl'] = ssl_context
-    
+
     engine = create_async_engine(async_url, echo=False, connect_args=connect_args)
     print("=" * 80)
     print("DATABASE INTEGRITY VERIFICATION")

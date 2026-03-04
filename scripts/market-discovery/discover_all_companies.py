@@ -7,7 +7,6 @@ Discovers companies until market coverage is complete
 import json
 import sys
 from pathlib import Path
-from typing import Set, List, Dict
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
@@ -21,8 +20,8 @@ class ContinuousMarketDiscovery:
     """
 
     def __init__(self):
-        self.discovered_companies: Dict[str, dict] = {}
-        self.known_names: Set[str] = set()
+        self.discovered_companies: dict[str, dict] = {}
+        self.known_names: set[str] = set()
         self.iteration = 0
         self.max_iterations = 20  # Safety limit
         self.convergence_threshold = 5  # Stop if <5 new companies found in iteration
@@ -30,7 +29,7 @@ class ContinuousMarketDiscovery:
     def load_existing_database(self):
         """Load companies we already have."""
         try:
-            with open("data/input/competitor_data.json", "r") as f:
+            with open("data/input/competitor_data.json") as f:
                 db = json.load(f)
 
             for company in db["competitors"]:
@@ -42,7 +41,7 @@ class ContinuousMarketDiscovery:
         except Exception as e:
             logger.warning(f"Could not load existing database: {e}")
 
-    def discover_from_static_catalogs(self) -> List[dict]:
+    def discover_from_static_catalogs(self) -> list[dict]:
         """Source 1: All static catalogs in discovery.py"""
         from solstein.research.discovery import _catalog_for_market
 
@@ -80,7 +79,7 @@ class ContinuousMarketDiscovery:
 
         return new_companies
 
-    def discover_from_competitor_references(self) -> List[dict]:
+    def discover_from_competitor_references(self) -> list[dict]:
         """Source 2: Find companies mentioned as competitors in existing data."""
         new_companies = []
 
@@ -113,7 +112,7 @@ class ContinuousMarketDiscovery:
 
         return new_companies
 
-    def discover_from_market_segments(self) -> List[dict]:
+    def discover_from_market_segments(self) -> list[dict]:
         """Source 3: Systematic segment coverage."""
 
         # Comprehensive list of energy software segments
@@ -245,7 +244,7 @@ class ContinuousMarketDiscovery:
 
         return new_companies
 
-    def discover_from_geographic_expansion(self) -> List[dict]:
+    def discover_from_geographic_expansion(self) -> list[dict]:
         """Source 4: Geographic markets we haven't covered well."""
 
         # Major European energy markets
@@ -279,7 +278,7 @@ class ContinuousMarketDiscovery:
 
         return new_companies
 
-    def deduplicate_and_filter(self, candidates: List[dict]) -> List[dict]:
+    def deduplicate_and_filter(self, candidates: list[dict]) -> list[dict]:
         """Remove duplicates and filter out invalid entries."""
         seen = set()
         filtered = []
@@ -331,7 +330,7 @@ class ContinuousMarketDiscovery:
 
         return False
 
-    def add_to_database(self, companies: List[dict]):
+    def add_to_database(self, companies: list[dict]):
         """Add newly discovered companies to our tracking."""
         for company in companies:
             name = company.get("company_name", "").lower()
@@ -426,7 +425,7 @@ def main():
             indent=2,
         )
 
-    logger.info(f"\nDiscovery log saved to: data/output/discovery_log.json")
+    logger.info("\nDiscovery log saved to: data/output/discovery_log.json")
 
     return companies
 

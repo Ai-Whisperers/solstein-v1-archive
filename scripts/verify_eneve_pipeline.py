@@ -9,15 +9,15 @@ from loguru import logger
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
-from solstein.analytics.scorers.financial_health import FinancialHealthScorer
 from solstein.analytics.scorers.competitive_position import CompetitivePositionScorer
-from solstein.core.scoring_config import GrowthScoringConfig, FinancialHealthConfig, CompetitivePositionConfig
+from solstein.analytics.scorers.financial_health import FinancialHealthScorer
+from solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
+from solstein.core.scoring_config import CompetitivePositionConfig, FinancialHealthConfig, GrowthScoringConfig
 from solstein.data.eneve_enrichment import EnveEnrichmentService
 from solstein.data.loaders import CompetitorDataLoader
 from solstein.domain.models import Company, FinancialMetric
-from solstein.extractors.markdown_extractor import MarkdownExtractor, BatchExtractor
 from solstein.extractors.llm_financial_extractor import LLMFinancialExtractor
+from solstein.extractors.markdown_extractor import BatchExtractor, MarkdownExtractor
 
 
 def verify_scoring_config():

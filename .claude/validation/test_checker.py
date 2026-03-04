@@ -1,7 +1,7 @@
-import unittest
-from unittest.mock import patch
 import os
-from . import validate_file, validate_directory, generate_report
+import unittest
+
+from . import generate_report, validate_directory, validate_file
 from .checker import ValidationResult
 
 

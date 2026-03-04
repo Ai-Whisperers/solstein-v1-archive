@@ -5,7 +5,6 @@ import re
 import subprocess
 import sys
 
-
 TAG_PATTERNS = {
     "release": r"^release-(\d+\.\d+\.\d+)(?:-rc(\d+))?$",
     "test": r"^test-(\d+\.\d+\.\d+)-rc(\d+)$",

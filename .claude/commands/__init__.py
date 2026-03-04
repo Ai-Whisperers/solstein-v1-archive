@@ -7,22 +7,23 @@ It maps command names to their corresponding implementations and handles
 command execution, argument parsing, and error handling.
 """
 
-import os
-import sys
 import importlib
 import inspect
-from pathlib import Path
-from typing import Dict, Callable, Any, Optional
+import os
+import sys
 from argparse import ArgumentParser, Namespace
+from collections.abc import Callable
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 
 class CommandSystem:
     """Main command system dispatcher and manager."""
 
     def __init__(self):
-        self.commands: Dict[str, Callable] = {}
-        self.command_descriptions: Dict[str, str] = {}
-        self.command_usage: Dict[str, str] = {}
+        self.commands: dict[str, Callable] = {}
+        self.command_descriptions: dict[str, str] = {}
+        self.command_usage: dict[str, str] = {}
 
     def register_command(
         self, name: str, func: Callable, description: str, usage: str = ""
@@ -32,15 +33,15 @@ class CommandSystem:
         self.command_descriptions[name] = description
         self.command_usage[name] = usage
 
-    def get_command(self, name: str) -> Optional[Callable]:
+    def get_command(self, name: str) -> Callable | None:
         """Get a registered command by name."""
         return self.commands.get(name)
 
-    def list_commands(self) -> Dict[str, str]:
+    def list_commands(self) -> dict[str, str]:
         """List all available commands with descriptions."""
         return self.command_descriptions.copy()
 
-    def execute_command(self, name: str, args: Optional[list] = None) -> Any:
+    def execute_command(self, name: str, args: list | None = None) -> Any:
         if args is None:
             args = []
 

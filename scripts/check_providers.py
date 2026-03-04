@@ -6,8 +6,9 @@ import sys
 sys.path.insert(0, "/home/ai-whisperers/solstein/src")
 
 import asyncio
-from solstein.llm import get_health_checker
+
 from solstein.config import get_settings
+from solstein.llm import get_health_checker
 
 # Provider test results from manual API testing
 PROVIDER_STATUS = {
@@ -69,7 +70,7 @@ def print_status():
     print("-" * 70)
     for provider, info in working:
         print(f"\n  🔹 {provider.upper()}")
-        print(f"     Status: ✓ Working")
+        print("     Status: ✓ Working")
         print(f"     Models: {', '.join(info['models'][:3])}")
         print(f"     Best for: {info['best_for']}")
         print(f"     Cost: {info['cost']}")
@@ -92,12 +93,12 @@ def print_status():
      - Cheapest option
      - Good quality
      - Reliable
-     
+
   🥈 SECONDARY: OpenAI (gpt-4o-mini)
      - Best quality
      - Fast
      - More expensive
-     
+
   🥉 FALLBACK: Mistral or DeepInfra
      - Alternative providers
      - Good for redundancy

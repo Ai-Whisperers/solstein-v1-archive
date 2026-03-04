@@ -7,8 +7,6 @@ Create Date: 2026-02-27 20:30:00.000000
 """
 
 from alembic import op
-import sqlalchemy as sa
-
 
 revision = "009"
 down_revision = "008"
@@ -27,7 +25,7 @@ def upgrade() -> None:
         ["company_id"],
         ondelete="CASCADE",
     )
-    
+
     # Add FK constraint to enrichment_cache.company_id -> companies.company_id
     op.create_foreign_key(
         "fk_enrichment_cache_companies_company_id",
@@ -46,7 +44,7 @@ def downgrade() -> None:
         "enrichment_cache",
         type_="foreignkey",
     )
-    
+
     op.drop_constraint(
         "fk_enrichment_audit_trail_companies_company_id",
         "enrichment_audit_trail",

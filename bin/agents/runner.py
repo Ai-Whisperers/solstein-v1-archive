@@ -11,7 +11,6 @@ Agent 1 of 5: Code Execution + Baseline Metrics
 
 import json
 import subprocess
-import os
 from datetime import datetime
 from pathlib import Path
 

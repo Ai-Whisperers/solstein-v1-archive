@@ -5,9 +5,7 @@ OpenCode Command System - Setup and Installation
 This script sets up the command system and makes it executable.
 """
 
-import os
 import sys
-import subprocess
 from pathlib import Path
 
 

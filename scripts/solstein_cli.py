@@ -25,10 +25,11 @@ src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
 try:
-    from solstein.analytics.scoring import GrowthScorer
-    from solstein.config import Settings
     from solstein.data.models import CompanyProfile, ConfidenceLevel, FinancialMetric
     from solstein.exporters.excel_exporter import ExcelExporter
+
+    from solstein.analytics.scoring import GrowthScorer
+    from solstein.config import Settings
 
     HAS_DEPS = True
 except ImportError as e:

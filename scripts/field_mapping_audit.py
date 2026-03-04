@@ -189,10 +189,10 @@ Usage:
         print("All fields mapped correctly!")
 """
 
-from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
+from typing import Any
 
-from solstein.domain.models import Company, FinancialMetric, ConfidenceLevel
+from solstein.domain.models import Company
 
 
 @dataclass
@@ -205,7 +205,7 @@ class FieldMappingIssue:
     message: str
 
 
-def validate_field_mapping(json_data: Dict[str, Any], company: Company) -> List[FieldMappingIssue]:
+def validate_field_mapping(json_data: dict[str, Any], company: Company) -> list[FieldMappingIssue]:
     """Validate that all fields from JSON are correctly mapped to Company model.
 
     Args:
@@ -346,7 +346,7 @@ def validate_field_mapping(json_data: Dict[str, Any], company: Company) -> List[
     return issues
 
 
-def generate_field_mapping_report(json_data: Dict[str, Any], company: Company) -> str:
+def generate_field_mapping_report(json_data: dict[str, Any], company: Company) -> str:
     """Generate a human-readable field mapping report.
 
     Args:
@@ -383,19 +383,19 @@ def generate_field_mapping_report(json_data: Dict[str, Any], company: Company) -
 
     # Summary of mapped fields
     lines.append("MAPPED FIELDS:")
-    lines.append(f"  Basic info: name, industry, description, website, headquarters, founded_year")
-    lines.append(f"  Financials: revenue, growth_rate, employees, funding, valuation")
-    lines.append(f"  Profitability: profit_margin, ebitda_margin, recurring_revenue")
-    lines.append(f"  Metadata: tier, ai_maturity, threat_level, saas_maturity")
-    lines.append(f"  Preserved: revenue_cagr_3yr, revenue_cagr_5yr, enrichment_source_count")
-    lines.append(f"  Generated: signal_confidences (from individual confidence fields)")
+    lines.append("  Basic info: name, industry, description, website, headquarters, founded_year")
+    lines.append("  Financials: revenue, growth_rate, employees, funding, valuation")
+    lines.append("  Profitability: profit_margin, ebitda_margin, recurring_revenue")
+    lines.append("  Metadata: tier, ai_maturity, threat_level, saas_maturity")
+    lines.append("  Preserved: revenue_cagr_3yr, revenue_cagr_5yr, enrichment_source_count")
+    lines.append("  Generated: signal_confidences (from individual confidence fields)")
     lines.append("")
     lines.append("=" * 60)
 
     return "\n".join(lines)
 
 
-def audit_all_companies(json_path: str) -> Dict[str, Any]:
+def audit_all_companies(json_path: str) -> dict[str, Any]:
     """Audit field mapping for all companies in a JSON file.
 
     Args:
@@ -405,7 +405,6 @@ def audit_all_companies(json_path: str) -> Dict[str, Any]:
         Dictionary with audit results
     """
     import json
-    from pathlib import Path
 
     # Import here to avoid circular import
     import sys
@@ -466,7 +465,7 @@ if __name__ == "__main__":
 
     results = audit_all_companies(json_path)
 
-    print(f"Audit Results:")
+    print("Audit Results:")
     print(f"  Total companies: {results['total']}")
     print(f"  Successful: {results['successful']}")
     print(f"  Failed: {results['failed']}")

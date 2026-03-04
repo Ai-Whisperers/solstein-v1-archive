@@ -6,13 +6,8 @@ Create Date: 2026-02-25 21:45:00.000000
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import sqlalchemy as sa
 from alembic import op
-
-if TYPE_CHECKING:
-    pass
 
 # revision identifiers, used by Alembic.
 revision = "004"
@@ -40,14 +35,14 @@ def upgrade() -> None:
         sa.Column("timestamp", sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
-    
+
     # Create indexes for enrichment_audit_trail
     op.create_index("ix_enrichment_audit_trail_company_id", "enrichment_audit_trail", ["company_id"])
     op.create_index("ix_enrichment_audit_trail_operation", "enrichment_audit_trail", ["operation"])
     op.create_index("ix_enrichment_audit_trail_timestamp", "enrichment_audit_trail", ["timestamp"])
     op.create_index("ix_enrichment_audit_company_timestamp", "enrichment_audit_trail", ["company_id", "timestamp"])
     op.create_index("ix_enrichment_audit_operation_timestamp", "enrichment_audit_trail", ["operation", "timestamp"])
-    
+
     # Create enrichment_cache table
     op.create_table(
         "enrichment_cache",
@@ -63,7 +58,7 @@ def upgrade() -> None:
         sa.Column("last_accessed_at", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
-    
+
     # Create indexes for enrichment_cache
     op.create_index("ix_enrichment_cache_company_id", "enrichment_cache", ["company_id"])
     op.create_index("ix_enrichment_cache_expires_at", "enrichment_cache", ["expires_at"])
@@ -74,7 +69,7 @@ def downgrade() -> None:
     op.drop_index("ix_enrichment_cache_expires_at", table_name="enrichment_cache")
     op.drop_index("ix_enrichment_cache_company_id", table_name="enrichment_cache")
     op.drop_table("enrichment_cache")
-    
+
     op.drop_index("ix_enrichment_audit_operation_timestamp", table_name="enrichment_audit_trail")
     op.drop_index("ix_enrichment_audit_company_timestamp", table_name="enrichment_audit_trail")
     op.drop_index("ix_enrichment_audit_trail_timestamp", table_name="enrichment_audit_trail")

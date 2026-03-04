@@ -9,7 +9,7 @@ In production, this would be replaced with real data collection.
 import json
 import random
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any
 
 
 class SyntheticCompanyGenerator:
@@ -77,7 +77,7 @@ class SyntheticCompanyGenerator:
         "Next-generation {industry} technology for {focus_area} and sustainability",
         "Comprehensive {focus_area} suite designed for {target_market} in {industry}",
     ]
-    
+
     FOCUS_AREAS = [
         "renewable energy management", "smart grid optimization", "carbon tracking",
         "energy trading", "demand response", "distributed energy resources",
@@ -85,7 +85,7 @@ class SyntheticCompanyGenerator:
         "industrial energy efficiency", "predictive maintenance", "asset performance management",
         "energy procurement", "sustainability reporting", "ESG compliance",
     ]
-    
+
     TARGET_MARKETS = [
         "utilities", "enterprises", "industrial facilities", "commercial buildings",
         "residential customers", "municipalities", "data centers", "manufacturing",
@@ -106,20 +106,20 @@ class SyntheticCompanyGenerator:
             return f"{prefix}{connector}{suffix}"
 
         return f"{prefix}{suffix}"
-    
+
     def generate_description(self, industry: str) -> str:
         """Generate a detailed, varied company description."""
         template = random.choice(self.DESCRIPTION_TEMPLATES)
         focus_area = random.choice(self.FOCUS_AREAS)
         target_market = random.choice(self.TARGET_MARKETS)
-        
+
         return template.format(
             industry=industry,
             focus_area=focus_area,
             target_market=target_market
         )
 
-    def generate_revenue_timeline(self, base_revenue: float, growth_rate: float) -> List[Dict[str, Any]]:
+    def generate_revenue_timeline(self, base_revenue: float, growth_rate: float) -> list[dict[str, Any]]:
         """Generate 4-year revenue timeline."""
         timeline = []
         current_revenue = base_revenue / ((1 + growth_rate / 100) ** 3)
@@ -139,7 +139,7 @@ class SyntheticCompanyGenerator:
 
         return timeline
 
-    def generate_company(self, tier: str = None) -> Dict[str, Any]:
+    def generate_company(self, tier: str = None) -> dict[str, Any]:
         """Generate a complete synthetic company profile."""
         # Determine company tier based on target distribution
         if tier is None:
@@ -185,7 +185,7 @@ class SyntheticCompanyGenerator:
         # Generate company name first and reuse it
         company_name = self.generate_company_name()
         industry = random.choice(self.INDUSTRIES)  # Extract before dict for use in description
-        
+
         company = {
             "company_name": company_name,
             "folder": f"company_{random.randint(1000, 9999)}",
@@ -232,7 +232,7 @@ class SyntheticCompanyGenerator:
 
         return company
 
-    def generate_companies(self, count: int = 196) -> List[Dict[str, Any]]:
+    def generate_companies(self, count: int = 196) -> list[dict[str, Any]]:
         """Generate specified number of synthetic companies."""
         companies = []
 

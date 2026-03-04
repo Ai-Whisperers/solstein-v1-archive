@@ -4,7 +4,6 @@ Example commands for the OpenCode command system.
 These demonstrate different types of commands and patterns.
 """
 
-import argparse
 from . import register_command
 
 

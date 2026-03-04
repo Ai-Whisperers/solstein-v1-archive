@@ -16,7 +16,7 @@ from loguru import logger
 
 def load_companies():
     """Load all 101 companies from database."""
-    with open("data/input/competitor_data.json", "r") as f:
+    with open("data/input/competitor_data.json") as f:
         db = json.load(f)
     return db["competitors"]
 
@@ -28,7 +28,7 @@ def identify_companies_needing_enrichment(companies):
 
     for c in companies:
         scorecard = c.get("scorecard", {})
-        score = scorecard.get("composite_score", 5.0)
+        scorecard.get("composite_score", 5.0)
 
         # Check if this is a default score (5.0) or has real data
         has_revenue_timeline = bool(c.get("revenue", {}).get("timeline"))
@@ -179,7 +179,7 @@ def run_automated_enrichment():
     logger.info(f"\n✅ Enriched {enriched_count} companies")
 
     # Save updated database
-    with open("data/input/competitor_data.json", "r") as f:
+    with open("data/input/competitor_data.json") as f:
         db = json.load(f)
 
     db["competitors"] = companies
@@ -217,7 +217,7 @@ def generate_enrichment_report(companies):
         print(f"  - {c['company_name']}: {c['scorecard']['composite_score']:.1f}")
 
     print(f"\n🧂 SALT (4.0-6.9): {len(salt)} companies")
-    print(f"  (Including Eneve and most mid-tier players)")
+    print("  (Including Eneve and most mid-tier players)")
 
     print(f"\n⚖️ LEAD (<4.0): {len(lead)} companies")
     for c in lead[:3]:
@@ -228,7 +228,7 @@ def generate_enrichment_report(companies):
         all_scores = [c["scorecard"]["composite_score"] for c in companies]
         rank = sorted(all_scores, reverse=True).index(score) + 1
 
-        print(f"\n" + "=" * 60)
+        print("\n" + "=" * 60)
         print("ENEVE POSITION")
         print("=" * 60)
         print(f"Rank: #{rank} of {len(companies)}")
