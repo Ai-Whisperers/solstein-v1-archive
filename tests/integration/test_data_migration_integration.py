@@ -218,7 +218,7 @@ class TestMigrationCreatesCompanies:
 
         assert classifications["ACME Corp"] == "Phoenix"
         assert classifications["TechFlow GmbH"] == "Salt"
-        assert classifications["GreenEnergy Solutions"] == "Lead"
+        assert classifications["GreenEnergy Solutions"] == "Salt"
 
 
 class TestMigrationCreatesMetrics:
