@@ -50,6 +50,8 @@ class DatabaseManager:
         url = self.settings.get_database_url()
         if url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        elif url.startswith("sqlite://") and "+aiosqlite" not in url:
+            url = url.replace("sqlite://", "sqlite+aiosqlite://", 1)
 
         self.engine = create_async_engine(
             url,

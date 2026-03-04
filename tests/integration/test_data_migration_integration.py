@@ -68,8 +68,8 @@ def sample_competitor_data() -> dict[str, Any]:
                     "cagr_3yr_pct": 40.0,
                     "cagr_5yr_pct": 25.0,
                 },
-                "growth_rate": 0.25,
-                "profit_margin": 0.15,
+                "growth_rate": 25.0,
+                "profit_margin": 15.0,
                 "profitability": {
                     "ebitda_margin_pct": 30.0,
                     "recurring_revenue_pct": 85.0,
@@ -99,8 +99,8 @@ def sample_competitor_data() -> dict[str, Any]:
                     "cagr_3yr_pct": 20.0,
                     "cagr_5yr_pct": 20.0,
                 },
-                "growth_rate": 0.20,
-                "profit_margin": 0.12,
+                "growth_rate": 20.0,
+                "profit_margin": 12.0,
                 "profitability": {
                     "ebitda_margin_pct": 15.0,
                     "recurring_revenue_pct": 75.0,
@@ -130,8 +130,8 @@ def sample_competitor_data() -> dict[str, Any]:
                     "cagr_3yr_pct": 15.0,
                     "cagr_5yr_pct": 20.0,
                 },
-                "growth_rate": 0.15,
-                "profit_margin": 0.10,
+                "growth_rate": 15.0,
+                "profit_margin": 10.0,
                 "profitability": {
                     "ebitda_margin_pct": 12.0,
                     "recurring_revenue_pct": 65.0,
