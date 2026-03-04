@@ -23,6 +23,7 @@ import time
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Query, Request
+from sqlalchemy import text
 
 # Import schemas
 from solstein.api.schemas.enrichment import (
@@ -89,7 +90,7 @@ async def check_database_health() -> tuple[str, bool]:
         if hasattr(db_manager, "initialized") and db_manager.initialized:
             # Try to execute a simple query
             async for session in db_manager.get_session():
-                await session.execute("SELECT 1")
+                await session.execute(text("SELECT 1"))
             return "operational", True
         else:
             return "not_initialized", False

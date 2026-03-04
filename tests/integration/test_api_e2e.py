@@ -14,9 +14,6 @@ Uses mocking and fixtures to avoid database initialization issues.
 from __future__ import annotations
 
 import pytest
-from fastapi.testclient import TestClient
-
-from solstein.api.main import app
 
 
 @pytest.fixture

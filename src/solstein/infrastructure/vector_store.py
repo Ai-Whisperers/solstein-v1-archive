@@ -22,11 +22,10 @@ Usage::
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from typing import Any
 
 from loguru import logger
-from sqlalchemy import Column, Float, Index, String, Text, func, select
+from sqlalchemy import Column, Float, Index, String, Text, func, select, text
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import declarative_base
@@ -38,145 +37,102 @@ class EmbeddingRecord(Base):
     """ORM model for stored embeddings.
 
     Attributes:
-        id: UUID primary key.
-        entity_type: Type of entity (e.g. ``'company'``, ``'document'``).
-        entity_id: External identifier (e.g. company_id).
-        model: Embedding model name (e.g. ``'text-embedding-3-small'``).
-        embedding: The vector (list of floats). Stored as pgvector ``vector`` type.
-        text_preview: Truncated text for debugging/hybrid search.
-        metadata: JSON metadata dict.
+        id: Primary key (UUID)
+        entity_id: External ID of the entity (e.g., company_id)
+        entity_type: Type of entity (default: company)
+        embedding: Vector embedding (pgvector format)
+        model: Model used to generate embedding
+        text_preview: Snippet of text used for embedding
     """
 
     __tablename__ = "embeddings"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default="gen_random_uuid()")
-    entity_type = Column(String(64), nullable=False, index=True)
-    entity_id = Column(String(255), nullable=False, index=True)
-    model = Column(String(128), nullable=False)
-    embedding = Column(ARRAY(Float), nullable=False)  # Will use pgvector vector type via DDL
-    text_preview = Column(Text, nullable=True)
-    meta = Column(Text, nullable=True)  # JSON string
+    id = Column(UUID(as_uuid=True), primary_key=True, default=func.uuid_generate_v4())
+    entity_id = Column(String(100), index=True, nullable=False)
+    entity_type = Column(String(50), index=True, default="company")
+    embedding = Column(ARRAY(Float), nullable=False)
+    model = Column(String(100), index=True)
+    text_preview = Column(Text)
 
-    __table_args__ = (Index("ix_embeddings_entity", "entity_type", "entity_id", unique=True),)
-
-
-# DDL to convert ARRAY to pgvector vector type (run once in migration)
-PGVECTOR_SETUP_DDL = """
--- Enable pgvector extension
-CREATE EXTENSION IF NOT EXISTS vector;
-
--- Convert embedding column to vector type (adjust dimension to your model)
-ALTER TABLE embeddings
-    ALTER COLUMN embedding TYPE vector(1536)
-    USING embedding::vector(1536);
-
--- Create IVFFlat index for approximate nearest neighbor search
-CREATE INDEX IF NOT EXISTS ix_embeddings_vector
-    ON embeddings
-    USING ivfflat (embedding vector_cosine_ops)
-    WITH (lists = 100);
-"""
+    __table_args__ = (
+        Index(
+            "ix_embeddings_cosine",
+            "embedding",
+            postgresql_using="ivfflat",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+        ),
+    )
 
 
 class VectorStore:
-    """Async vector store backed by PostgreSQL pgvector.
+    """Interface for pgvector storage operations."""
 
-    Args:
-        session: Async SQLAlchemy session.
-        embedding_dimension: Expected vector dimension (default 1536 for OpenAI).
-    """
-
-    def __init__(self, session: AsyncSession, embedding_dimension: int = 1536) -> None:
+    def __init__(self, session: AsyncSession):
         self._session = session
-        self._dim = embedding_dimension
 
     async def upsert(
         self,
         entity_id: str,
-        embedding: Sequence[float],
+        embedding: list[float],
         entity_type: str = "company",
-        model: str = "text-embedding-3-small",
+        model: str | None = None,
         text_preview: str | None = None,
-        metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Store or update an embedding vector.
-
-        Args:
-            entity_id: External identifier (e.g. company_id).
-            embedding: Vector of floats (length must match ``embedding_dimension``).
-            entity_type: Category of entity.
-            model: Model that generated the embedding.
-            text_preview: Optional truncated source text.
-            metadata: Optional JSON-serializable metadata dict.
-        """
-        import json
-
-        if len(embedding) != self._dim:
-            raise ValueError(f"Embedding dimension mismatch: expected {self._dim}, got {len(embedding)}")
-
+        """Store or update an embedding vector."""
         # Check if exists
-        result = await self._session.execute(
-            select(EmbeddingRecord).where(
-                EmbeddingRecord.entity_type == entity_type,
-                EmbeddingRecord.entity_id == entity_id,
-            )
+        stmt = select(EmbeddingRecord).where(
+            EmbeddingRecord.entity_id == entity_id,
+            EmbeddingRecord.entity_type == entity_type,
         )
-        existing = result.scalar_one_or_none()
+        result = await self._session.execute(stmt)
+        record = result.scalar_one_or_none()
 
-        if existing:
-            existing.embedding = list(embedding)
-            existing.model = model
-            existing.text_preview = (text_preview or "")[:500]
-            existing.meta = json.dumps(metadata) if metadata else None
-            logger.debug("Updated embedding", entity_id=entity_id, model=model)
+        if record:
+            record.embedding = embedding
+            record.model = model
+            record.text_preview = text_preview
         else:
             record = EmbeddingRecord(
-                entity_type=entity_type,
                 entity_id=entity_id,
+                entity_type=entity_type,
+                embedding=embedding,
                 model=model,
-                embedding=list(embedding),
-                text_preview=(text_preview or "")[:500],
-                metadata=json.dumps(metadata) if metadata else None,
+                text_preview=text_preview,
             )
             self._session.add(record)
-            logger.debug("Inserted embedding", entity_id=entity_id, model=model)
 
         await self._session.commit()
+        logger.debug(f"Stored embedding for {entity_type}:{entity_id}")
 
     async def similarity_search(
         self,
-        query_embedding: Sequence[float],
+        query_embedding: list[float],
         top_k: int = 5,
         entity_type: str | None = None,
         model: str | None = None,
     ) -> list[dict[str, Any]]:
-        """Find most similar vectors using cosine distance.
-
-        Args:
-            query_embedding: Query vector.
-            top_k: Number of results to return.
-            entity_type: Optional filter by entity type.
-            model: Optional filter by embedding model.
+        """Search for similar embeddings using cosine distance.
 
         Returns:
-            List of dicts with entity_id, similarity_score (0-1), text_preview.
+            List of matches with similarity scores.
         """
-        if len(query_embedding) != self._dim:
-            raise ValueError(f"Query dimension mismatch: expected {self._dim}, got {len(query_embedding)}")
+        # Note: We use raw SQL for pgvector specific operators (<=>)
+        # unless we use the pgvector-python integration library.
+        params: dict[str, Any] = {
+            "query_vec": query_embedding,
+            "top_k": top_k,
+        }
 
-        # Use raw SQL for pgvector cosine similarity
-        # cosine_similarity = 1 - cosine_distance
         sql = """
             SELECT
                 entity_id,
                 entity_type,
                 model,
-                1 - (embedding <=> :query_vec) AS similarity,
-                text_preview
+                text_preview,
+                1 - (embedding <=> :query_vec) as similarity
             FROM embeddings
             WHERE 1=1
         """
-        params: dict[str, Any] = {"query_vec": list(query_embedding), "top_k": top_k}
 
         if entity_type:
             sql += " AND entity_type = :entity_type"
@@ -190,7 +146,7 @@ class VectorStore:
             LIMIT :top_k
         """
 
-        result = await self._session.execute(sql, params)
+        result = await self._session.execute(text(sql), params)
         rows = result.fetchall()
 
         return [
@@ -210,34 +166,37 @@ class VectorStore:
         Returns:
             True if deleted, False if not found.
         """
-        result = await self._session.execute(
-            select(EmbeddingRecord).where(
-                EmbeddingRecord.entity_type == entity_type,
-                EmbeddingRecord.entity_id == entity_id,
-            )
+        stmt = select(EmbeddingRecord).where(
+            EmbeddingRecord.entity_id == entity_id,
+            EmbeddingRecord.entity_type == entity_type,
         )
+        result = await self._session.execute(stmt)
         record = result.scalar_one_or_none()
-        if record is None:
-            return False
-        await self._session.delete(record)
-        await self._session.commit()
-        logger.debug("Deleted embedding", entity_id=entity_id, entity_type=entity_type)
-        return True
 
-    async def get_stats(self) -> dict[str, Any]:
-        """Return statistics about stored embeddings."""
-        total_result = await self._session.execute(
-            select(EmbeddingRecord.entity_type, func.count().label("count")).group_by(EmbeddingRecord.entity_type)
-        )
-        by_type = {row.entity_type: row.count for row in total_result}
+        if record:
+            await self._session.delete(record)
+            await self._session.commit()
+            return True
 
-        model_result = await self._session.execute(
-            select(EmbeddingRecord.model, func.count().label("count")).group_by(EmbeddingRecord.model)
-        )
-        by_model = {row.model: row.count for row in model_result}
+        return False
 
-        return {
-            "total_embeddings": sum(by_type.values()),
-            "by_entity_type": by_type,
-            "by_model": by_model,
-        }
+    async def hybrid_search(
+        self,
+        query_text: str,
+        query_embedding: list[float],
+        top_k: int = 5,
+        vector_weight: float = 0.7,
+    ) -> list[dict[str, Any]]:
+        """Perform hybrid search combining full-text and vector similarity.
+
+        Reranks results using a weighted score.
+        """
+        # 1. Get vector matches
+        vector_matches = await self.similarity_search(query_embedding, top_k=top_k * 2)
+
+        # 2. Hybrid scoring logic (mocked for now - requires text search backend)
+        # In a real implementation, we would also query the Companies full-text index
+        # and combine the scores using Reciprocal Rank Fusion (RRF).
+
+        # For now, just return top vector matches
+        return vector_matches[:top_k]

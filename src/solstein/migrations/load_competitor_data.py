@@ -14,8 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from solstein.infrastructure.database_models import CompanyRecord
 
@@ -53,7 +52,7 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
 
     # Create async engine and session
     engine = create_async_engine(db_url, echo=False)
-    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async_session = async_sessionmaker(engine, expire_on_commit=False)
 
     async with async_session() as session:
         companies_to_add = []

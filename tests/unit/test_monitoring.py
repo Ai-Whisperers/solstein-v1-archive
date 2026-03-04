@@ -5,7 +5,7 @@ and metrics are correctly collected and reported.
 """
 
 from datetime import datetime
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -76,9 +76,7 @@ class TestHealthMonitor:
     def test_overall_status_healthy(self, monitor):
         """Verify that overall status is healthy/degraded when required checks pass."""
         for name in ("database", "api", "configuration"):
-            monitor.checks[name] = HealthCheck(
-                name=name, status=HealthStatus.HEALTHY, message="OK"
-            )
+            monitor.checks[name] = HealthCheck(name=name, status=HealthStatus.HEALTHY, message="OK")
         status = monitor.get_overall_status()
 
         assert status in (HealthStatus.HEALTHY, HealthStatus.DEGRADED)
@@ -86,9 +84,7 @@ class TestHealthMonitor:
     def test_is_ready_when_healthy(self, monitor):
         """Verify that application is ready when required checks are healthy."""
         for name in ("database", "api", "configuration"):
-            monitor.checks[name] = HealthCheck(
-                name=name, status=HealthStatus.HEALTHY, message="OK"
-            )
+            monitor.checks[name] = HealthCheck(name=name, status=HealthStatus.HEALTHY, message="OK")
         ready = monitor.is_ready()
 
         assert ready is True
