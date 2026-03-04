@@ -5,13 +5,14 @@ Verify that classification confidence is calculated and available.
 """
 
 import pytest
-from src.solstein.analytics.classification import (
+
+from solstein.analytics.classification import (
     format_classification_with_confidence,
     get_classification_with_confidence,
     is_tentative_classification,
 )
-from src.solstein.analytics.scoring import GrowthScorer
-from src.solstein.data.unified_loader import UnifiedCompanyLoader
+from solstein.analytics.scoring import GrowthScorer
+from solstein.data.unified_loader import UnifiedCompanyLoader
 
 
 class TestClassificationConfidence:

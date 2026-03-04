@@ -20,8 +20,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.solstein.infrastructure.database import DatabaseManager
-from src.solstein.infrastructure.database_models import (
+from solstein.infrastructure.database import DatabaseManager
+from solstein.infrastructure.database_models import (
     CompanyRecord,
     ContradictionRecord,
     FactRecord,

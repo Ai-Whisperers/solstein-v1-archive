@@ -6,7 +6,8 @@ and not reduced to continent-level or generic regions.
 """
 
 import pytest
-from src.solstein.data.unified_loader import UnifiedCompanyLoader
+
+from solstein.data.unified_loader import UnifiedCompanyLoader
 
 
 class TestGeographicSpecificity:

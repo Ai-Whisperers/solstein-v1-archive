@@ -3,10 +3,11 @@
 import json
 
 import pytest
-from src.solstein.data.eneve_enrichment import EnveEnrichmentService
-from src.solstein.data.loaders import CompetitorDataLoader
-from src.solstein.domain.models import Company
-from src.solstein.extractors.markdown_extractor import BatchExtractor, MarkdownExtractor
+
+from solstein.data.eneve_enrichment import EnveEnrichmentService
+from solstein.data.loaders import CompetitorDataLoader
+from solstein.domain.models import Company
+from solstein.extractors.markdown_extractor import BatchExtractor, MarkdownExtractor
 
 
 class TestEnevelPipelineE2E:
@@ -195,13 +196,13 @@ class TestEnevelPipelineScoring:
 
     def test_none_base_score_handling(self):
         """Test that None base_score doesn't break scoring."""
-        from src.solstein.core.scoring_config import GrowthScoringConfig
+        from solstein.core.scoring_config import GrowthScoringConfig
 
         cfg = GrowthScoringConfig()
         assert cfg.base_score is None
 
         # Verify scorer can handle None
-        from src.solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
+        from solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
 
         scorer = GrowthMomentumScorer()
         assert scorer is not None

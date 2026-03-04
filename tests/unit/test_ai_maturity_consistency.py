@@ -6,8 +6,9 @@ Fixes contradictions like 'Strong' maturity with 0/10 score.
 """
 
 import pytest
-from src.solstein.data.unified_loader import UnifiedCompanyLoader
-from src.solstein.domain.models import AIMaturity
+
+from solstein.data.unified_loader import UnifiedCompanyLoader
+from solstein.domain.models import AIMaturity
 
 
 class TestAIMaturityConsistency:

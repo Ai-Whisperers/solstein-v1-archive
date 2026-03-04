@@ -4,7 +4,7 @@ Task 9-11: Classification System Tests
 Tests for balanced classification (Phoenix/Salt/Lead) with confidence scoring.
 """
 
-from src.solstein.analytics.classification import (
+from solstein.analytics.classification import (
     calculate_classification_confidence,
     classify_company_balanced,
     format_classification_with_confidence,
@@ -13,7 +13,7 @@ from src.solstein.analytics.classification import (
     is_tentative_classification,
     validate_classification_distribution,
 )
-from src.solstein.domain.models import Company
+from solstein.domain.models import Company
 
 
 class TestClassifyCompanyBalanced:

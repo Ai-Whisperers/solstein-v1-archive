@@ -5,14 +5,14 @@ Tests for converting ConfidenceLevel enums to numeric weights and populating
 signal_confidences for use in scoring component weighting.
 """
 
-from src.solstein.analytics.confidence_weighting import (
+from solstein.analytics.confidence_weighting import (
     confidence_level_to_weight,
     get_average_confidence,
     get_confidence_summary,
     has_high_confidence_data,
     populate_signal_confidences,
 )
-from src.solstein.domain.models import Company, ConfidenceLevel, FinancialMetric
+from solstein.domain.models import Company, ConfidenceLevel, FinancialMetric
 
 
 class TestConfidenceLevelToWeight:

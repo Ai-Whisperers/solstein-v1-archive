@@ -17,8 +17,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.solstein.infrastructure.database import DatabaseManager
-from src.solstein.infrastructure.database_models import CompanyRecord, FactRecord, ResearchRunRecord
+
+from solstein.infrastructure.database import DatabaseManager
+from solstein.infrastructure.database_models import CompanyRecord, FactRecord, ResearchRunRecord
 
 
 @pytest_asyncio.fixture

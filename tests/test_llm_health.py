@@ -7,10 +7,11 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from src.solstein.llm.enhanced_client import (
+
+from solstein.llm.enhanced_client import (
     EnhancedLLMClient,
 )
-from src.solstein.llm.health_checker import (
+from solstein.llm.health_checker import (
     ProviderError,
     ProviderErrorType,
     ProviderHealth,

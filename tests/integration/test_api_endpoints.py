@@ -22,8 +22,9 @@ except ImportError:
     FASTAPI_AVAILABLE = False
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.solstein.infrastructure.database import DatabaseManager
-from src.solstein.infrastructure.database_models import CompanyRecord, ResearchRunRecord
+
+from solstein.infrastructure.database import DatabaseManager
+from solstein.infrastructure.database_models import CompanyRecord, ResearchRunRecord
 
 
 @pytest_asyncio.fixture
@@ -45,7 +46,7 @@ def test_client():
         pytest.skip("FastAPI TestClient not available")
 
     try:
-        from src.solstein.api.main import app
+        from solstein.api.main import app
 
         return TestClient(app)
     except ImportError:

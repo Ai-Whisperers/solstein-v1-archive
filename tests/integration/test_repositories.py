@@ -13,15 +13,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from src.solstein.infrastructure.company_repository import CompanyRepository
-from src.solstein.infrastructure.database_models import CompanyRecord, FactRecord
-from src.solstein.infrastructure.repositories import FactRepository
+from solstein.infrastructure.company_repository import CompanyRepository
+from solstein.infrastructure.database_models import CompanyRecord, FactRecord
+from solstein.infrastructure.repositories import FactRepository
 
 
 @pytest_asyncio.fixture
 async def db_session() -> AsyncSession:
     """Provide database session."""
-    from src.solstein.infrastructure.database import DatabaseManager
+    from solstein.infrastructure.database import DatabaseManager
 
     db_manager = DatabaseManager()
     session = await db_manager.get_session().__aenter__()
