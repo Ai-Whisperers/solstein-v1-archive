@@ -9,22 +9,19 @@ Separates enrichment logic from loading logic into focused service classes:
 """
 
 import logging
-from typing import Optional, List
 from datetime import datetime, timezone
 
-from ..domain.models import ConfidenceLevel
 from .enrichment_config import UnifiedCompanyLoaderConfig, get_config
-from .enrichment_orchestrator import (
-    EnrichmentOrchestrator,
-    EnrichmentConfig,
-    EnrichmentSource,
-)
+from .enrichment_orchestrator import EnrichmentConfig, EnrichmentOrchestrator, EnrichmentSource
+from .gap_analyzer import analyze_company_gaps
 from .enrichment_validators import (
     validate_revenue,
     validate_growth_rate,
     validate_employee_count,
     validate_profit_margin,
 )
+from .source_policy import SourceTier
+from .enrichment_types import EnrichableCompany
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +61,7 @@ class DataValidationService:
     """Service for data validation (Phase 7 item 128)."""
 
     @staticmethod
-    def validate_enrichment_data(data: dict) -> tuple[bool, Optional[str]]:
+    def validate_enrichment_data(data: dict[str, object]) -> tuple[bool, str | None]:
         """
         Validate enriched data before accepting.
 
@@ -104,7 +101,7 @@ class DataValidationService:
         return True, None
 
     @staticmethod
-    def sanitize_data(data: dict) -> dict:
+    def sanitize_data(data: dict[str, object]) -> dict[str, object]:
         """
         Sanitize enriched data for database storage.
 
@@ -114,7 +111,7 @@ class DataValidationService:
         Returns:
             Sanitized data dictionary
         """
-        sanitized = {}
+        sanitized: dict[str, object] = {}
         for key, value in data.items():
             # Skip None values
             if value is None:
@@ -202,24 +199,24 @@ class EnrichmentService:
     Encapsulates all enrichment logic, separate from loading.
     """
 
-    def __init__(self, config: Optional[UnifiedCompanyLoaderConfig] = None):
+    def __init__(self, config: UnifiedCompanyLoaderConfig | None = None):
         """
         Initialize enrichment service.
 
         Args:
             config: Configuration (uses global if not provided)
         """
-        self.config = config or get_config()
-        self.orchestrator = EnrichmentOrchestrator(
+        self.config: UnifiedCompanyLoaderConfig = config or get_config()
+        self.orchestrator: EnrichmentOrchestrator = EnrichmentOrchestrator(
             EnrichmentConfig(
                 enabled=self.config.enrichment_enabled,
                 dry_run=self.config.dry_run,
             )
         )
-        self.validator = DataValidationService()
-        self.error_handler = ErrorHandlingService()
+        self.validator: DataValidationService = DataValidationService()
+        self.error_handler: ErrorHandlingService = ErrorHandlingService()
 
-    def enrich_company(self, company) -> tuple:
+    def enrich_company(self, company: EnrichableCompany) -> tuple[EnrichableCompany, list[EnrichmentSource], list[str]]:
         """
         Enrich single company using orchestrator.
 
@@ -240,15 +237,16 @@ class EnrichmentService:
         # Create immutable copy
         enriched = self.orchestrator.create_enrichment_copy(company)
 
-        sources = self.orchestrator.get_enrichment_order(enriched)
+        sources_used: list[EnrichmentSource] = []
         fields = self.orchestrator.get_fields_to_enrich(enriched)
+        sources_free = self.orchestrator.get_enrichment_order(enriched, stage=SourceTier.FREE)
 
-        if not sources or not fields:
-            return enriched, sources, []
+        if not sources_free or not fields:
+            return enriched, sources_used, []
 
-        errors = []
+        errors: list[str] = []
 
-        for source in sources:
+        for source in sources_free:
             try:
                 if source == EnrichmentSource.SEC_EDGAR:
                     enriched = self._enrich_from_sec(enriched)
@@ -256,6 +254,10 @@ class EnrichmentService:
                     enriched = self._enrich_from_companies_house(enriched)
                 elif source == EnrichmentSource.NEWS_SIGNALS:
                     enriched = self._enrich_from_news_signals(enriched)
+                sources_used.append(source)
+                fields = self.orchestrator.get_fields_to_enrich(enriched)
+                if not fields:
+                    break
             except Exception as e:
                 error_msg = self.error_handler.handle_enrichment_error(
                     company.name,
@@ -268,19 +270,83 @@ class EnrichmentService:
                     enriched = self.orchestrator.rollback_on_error(company, enriched, str(e))
                     break
 
-        return enriched, sources, errors
+        if fields and self.config.allow_paid_escalation:
+            unresolved_fields = [field.value for field in fields]
+            if hasattr(enriched, "metric_justifications"):
+                for field_name in unresolved_fields:
+                    justification_key = f"paid_escalation:{field_name}"
+                    _ = enriched.metric_justifications.setdefault(
+                        justification_key,
+                        "unresolved after free pass",
+                    )
 
-    def _enrich_from_sec(self, company):
+            paid_sources = self.orchestrator.get_enrichment_order(enriched, stage=SourceTier.PAID)
+            paid_attempts = 0
+            for source in paid_sources:
+                if paid_attempts >= self.config.paid_escalation_max_attempts:
+                    errors.append("Paid escalation attempt budget exceeded")
+                    break
+
+                policy = self.orchestrator.source_policies.get(source.value)
+                if policy and policy.field_coverage:
+                    if not set(unresolved_fields).intersection(policy.field_coverage):
+                        continue
+
+                try:
+                    if source == EnrichmentSource.SEC_EDGAR:
+                        enriched = self._enrich_from_sec(enriched)
+                    elif source == EnrichmentSource.COMPANIES_HOUSE:
+                        enriched = self._enrich_from_companies_house(enriched)
+                    elif source == EnrichmentSource.NEWS_SIGNALS:
+                        enriched = self._enrich_from_news_signals(enriched)
+                    sources_used.append(source)
+                    paid_attempts += 1
+                    if hasattr(enriched, "enrichment_sources"):
+                        enriched.enrichment_sources.append(f"paid-escalation:{source.value}")
+                    if hasattr(enriched, "enrichment_timestamps"):
+                        enriched.enrichment_timestamps[source.value] = datetime.now(timezone.utc)
+                    fields = self.orchestrator.get_fields_to_enrich(enriched)
+                    if not fields:
+                        break
+                except Exception as e:
+                    error_msg = self.error_handler.handle_enrichment_error(
+                        company.name,
+                        str(source),
+                        e,
+                    )
+                    errors.append(error_msg)
+
+                    if self.config.rollback_on_error:
+                        enriched = self.orchestrator.rollback_on_error(company, enriched, str(e))
+                        break
+
+        if fields and not self.config.allow_paid_escalation:
+            logger.info(
+                "Paid escalation disabled; unresolved enrichment fields remain for %s: %s",
+                company.name,
+                [field.value for field in fields],
+            )
+
+        return enriched, sources_used, errors
+
+    def analyze_unresolved_gaps(
+        self,
+        companies: list[EnrichableCompany],
+        min_confidence: float = 0.5,
+    ) -> list[dict[str, object]]:
+        return [analyze_company_gaps(company, min_confidence=min_confidence) for company in companies]
+
+    def _enrich_from_sec(self, company: EnrichableCompany) -> EnrichableCompany:
         """Enrich from SEC EDGAR (placeholder)."""
         # This would call the actual SEC enrichment method
         return company
 
-    def _enrich_from_companies_house(self, company):
+    def _enrich_from_companies_house(self, company: EnrichableCompany) -> EnrichableCompany:
         """Enrich from Companies House (placeholder)."""
         # This would call the actual Companies House enrichment method
         return company
 
-    def _enrich_from_news_signals(self, company):
+    def _enrich_from_news_signals(self, company: EnrichableCompany) -> EnrichableCompany:
         """Enrich from News Signals (placeholder)."""
         # This would call the actual News Signals enrichment method
         return company
@@ -296,10 +362,10 @@ class CacheService:
         Args:
             ttl_hours: Time-to-live in hours
         """
-        self.ttl_hours = ttl_hours
-        self.cache = {}
+        self.ttl_hours: int = ttl_hours
+        self.cache: dict[str, tuple[dict[str, object], datetime]] = {}
 
-    def get(self, key: str) -> Optional[dict]:
+    def get(self, key: str) -> dict[str, object] | None:
         """Get cached value if not expired."""
         if key not in self.cache:
             return None
@@ -313,7 +379,7 @@ class CacheService:
 
         return value
 
-    def set(self, key: str, value: dict) -> None:
+    def set(self, key: str, value: dict[str, object]) -> None:
         """Cache value with current timestamp."""
         self.cache[key] = (value, datetime.now(timezone.utc))
 
@@ -327,10 +393,10 @@ class MetricsService:
 
     def __init__(self):
         """Initialize metrics service."""
-        self.enrichment_count = 0
-        self.success_count = 0
-        self.error_count = 0
-        self.total_duration_ms = 0.0
+        self.enrichment_count: int = 0
+        self.success_count: int = 0
+        self.error_count: int = 0
+        self.total_duration_ms: float = 0.0
 
     def record_enrichment(self, duration_ms: float, success: bool) -> None:
         """Record enrichment operation."""
@@ -341,7 +407,7 @@ class MetricsService:
         else:
             self.error_count += 1
 
-    def get_summary(self) -> dict:
+    def get_summary(self) -> dict[str, float | int]:
         """Get metrics summary."""
         avg_duration = self.total_duration_ms / self.enrichment_count if self.enrichment_count > 0 else 0
 

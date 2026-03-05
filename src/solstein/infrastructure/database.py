@@ -6,6 +6,7 @@ for PostgreSQL persistence of scoring results and market analysis data.
 
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -78,6 +79,7 @@ class DatabaseManager:
 
         self._sync_session_factory = _factory
 
+    @asynccontextmanager
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         """Get an async database session.
 
@@ -155,7 +157,7 @@ async def get_async_session():
     engine = db_manager.engine
     if engine is None:
         # Initialise lazily in dev when DB is not yet connected
-        await db_manager.init_async()
+        db_manager.init_async()
         engine = db_manager.engine
     async with AsyncSession(engine, expire_on_commit=False) as session:
         yield session

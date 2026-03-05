@@ -19,15 +19,14 @@ Handles robust, configurable enrichment with proper decision-making:
 
 import logging
 import copy
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, TYPE_CHECKING
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from datetime import datetime, timezone
 
 from ..domain.models import ConfidenceLevel
-
-if TYPE_CHECKING:
-    from .unified_loader import UnifiedCompany
+from .source_policy import SourceTier, default_source_policy_catalog
+from .enrichment_types import EnrichableCompany
 
 logger = logging.getLogger(__name__)
 
@@ -63,18 +62,18 @@ class EnrichmentCost:
     duration_ms: float = 0.0
     success: bool = False
     error: Optional[str] = None
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = dataclass_field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 @dataclass
 class EnrichmentResult:
     """Result of enrichment operation."""
 
-    company: "UnifiedCompany"
-    sources_used: List[EnrichmentSource] = field(default_factory=list)
-    fields_enriched: List[EnrichmentField] = field(default_factory=list)
-    costs: List[EnrichmentCost] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
+    company: "EnrichableCompany"
+    sources_used: List[EnrichmentSource] = dataclass_field(default_factory=list)
+    fields_enriched: List[EnrichmentField] = dataclass_field(default_factory=list)
+    costs: List[EnrichmentCost] = dataclass_field(default_factory=list)
+    errors: List[str] = dataclass_field(default_factory=list)
     total_api_calls: int = 0
     total_duration_ms: float = 0.0
     idempotent: bool = True  # Same input = same output on retries
@@ -89,14 +88,14 @@ class EnrichmentConfig:
     dry_run: bool = False
 
     # Source configuration
-    source_order: List[EnrichmentSource] = field(
+    source_order: List[EnrichmentSource] = dataclass_field(
         default_factory=lambda: [
             EnrichmentSource.SEC_EDGAR,
             EnrichmentSource.COMPANIES_HOUSE,
             EnrichmentSource.NEWS_SIGNALS,
         ]
     )
-    enabled_sources: Set[EnrichmentSource] = field(
+    enabled_sources: Set[EnrichmentSource] = dataclass_field(
         default_factory=lambda: {
             EnrichmentSource.SEC_EDGAR,
             EnrichmentSource.COMPANIES_HOUSE,
@@ -137,7 +136,14 @@ class EnrichmentOrchestrator:
     def __init__(self, config: Optional[EnrichmentConfig] = None):
         """Initialize orchestrator with configuration."""
         self.config = config or EnrichmentConfig()
+        self.source_policies = default_source_policy_catalog()
         self._progress_callbacks: List[Callable[[str, int, int], None]] = []
+
+    def get_source_policy_tier(self, source: EnrichmentSource) -> SourceTier:
+        policy = self.source_policies.get(source.value)
+        if not policy:
+            return SourceTier.FREE
+        return policy.tier
 
     def register_progress_callback(self, callback: Callable[[str, int, int], None]) -> None:
         """Register callback for progress tracking.
@@ -155,7 +161,7 @@ class EnrichmentOrchestrator:
             except Exception as e:
                 logger.warning(f"Progress callback failed: {e}")
 
-    def should_skip_enrichment(self, company: "UnifiedCompany") -> bool:
+    def should_skip_enrichment(self, company: "EnrichableCompany") -> bool:
         """Determine if enrichment should be skipped.
 
         Skip if:
@@ -173,7 +179,6 @@ class EnrichmentOrchestrator:
             logger.debug(f"Enrichment disabled for {company.name}")
             return True
 
-
         # Check if we have any valid identifiers
         has_ticker = company.ticker and company.ticker.strip()
         has_company_number = company.company_number and company.company_number.strip()
@@ -184,7 +189,7 @@ class EnrichmentOrchestrator:
 
         return False
 
-    def _is_data_complete(self, company: "UnifiedCompany") -> bool:
+    def _is_data_complete(self, company: "EnrichableCompany") -> bool:
         """Check if company data is already complete.
 
         Complete means: has revenue, growth_rate, employees, profit_margin
@@ -200,7 +205,9 @@ class EnrichmentOrchestrator:
 
         return has_revenue and has_growth and has_employees and has_margin
 
-    def get_enrichment_order(self, company: "UnifiedCompany") -> List[EnrichmentSource]:
+    def get_enrichment_order(
+        self, company: "EnrichableCompany", stage: SourceTier = SourceTier.FREE
+    ) -> List[EnrichmentSource]:
         """Get prioritized enrichment order for company.
 
         Prioritization:
@@ -220,6 +227,9 @@ class EnrichmentOrchestrator:
             if not self.config.is_source_enabled(source):
                 continue
 
+            if self.get_source_policy_tier(source) != stage:
+                continue
+
             # Check if we have required identifier for this source
             if source == EnrichmentSource.SEC_EDGAR:
                 if not (company.ticker and company.ticker.strip()):
@@ -233,7 +243,10 @@ class EnrichmentOrchestrator:
 
         return order
 
-    def get_fields_to_enrich(self, company: "UnifiedCompany") -> List[EnrichmentField]:
+    def get_paid_escalation_order(self, company: "EnrichableCompany") -> List[EnrichmentSource]:
+        return self.get_enrichment_order(company, stage=SourceTier.PAID)
+
+    def get_fields_to_enrich(self, company: "EnrichableCompany") -> List[EnrichmentField]:
         """Get list of fields that need enrichment.
 
         Args:
@@ -323,7 +336,7 @@ class EnrichmentOrchestrator:
 
         return False
 
-    def create_enrichment_copy(self, company: "UnifiedCompany") -> "UnifiedCompany":
+    def create_enrichment_copy(self, company: "EnrichableCompany") -> "EnrichableCompany":
         """Create a deep copy of company for enrichment.
 
         Ensures immutability - enrichment returns new object, doesn't mutate input.
@@ -338,10 +351,10 @@ class EnrichmentOrchestrator:
 
     def rollback_on_error(
         self,
-        original: "UnifiedCompany",
-        modified: "UnifiedCompany",
+        original: "EnrichableCompany",
+        modified: "EnrichableCompany",
         error: str,
-    ) -> "UnifiedCompany":
+    ) -> "EnrichableCompany":
         """Rollback enrichment on error.
 
         Returns original company and logs error.
@@ -359,8 +372,8 @@ class EnrichmentOrchestrator:
 
     def enrich_batch(
         self,
-        companies: List["UnifiedCompany"],
-        enrichment_fn: Callable[["UnifiedCompany", EnrichmentSource, List[EnrichmentField]], "UnifiedCompany"],
+        companies: List["EnrichableCompany"],
+        enrichment_fn: Callable[["EnrichableCompany", EnrichmentSource, List[EnrichmentField]], "EnrichableCompany"],
     ) -> List[EnrichmentResult]:
         """Enrich multiple companies efficiently.
 
@@ -391,8 +404,8 @@ class EnrichmentOrchestrator:
 
     def enrich_single(
         self,
-        company: "UnifiedCompany",
-        enrichment_fn: Callable[["UnifiedCompany", EnrichmentSource, List[EnrichmentField]], "UnifiedCompany"],
+        company: "EnrichableCompany",
+        enrichment_fn: Callable[["EnrichableCompany", EnrichmentSource, List[EnrichmentField]], "EnrichableCompany"],
     ) -> EnrichmentResult:
         """Enrich single company with orchestration logic.
 

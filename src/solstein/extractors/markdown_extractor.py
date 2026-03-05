@@ -27,6 +27,7 @@ from ..domain.models import (
     FinancialMetric,
     ThreatLevel,
 )
+from ..domain.source_contract import canonical_source_uri, is_valid_source_uri, normalize_source_key
 from ..research.sources import canonicalize_url, is_probably_url
 
 REQUIRED_PROVENANCE_METRICS = [
@@ -239,9 +240,19 @@ class MarkdownExtractor:
             sources = metric_sources.get(metric, [])
             if value is not None and isinstance(sources, list):
                 for source in sources:
+                    source_key = normalize_source_key(
+                        source_type="markdown",
+                        source_name=source,
+                    )
                     metric_observations[metric].append(
                         {
                             "source": source,
+                            "source_key": source_key,
+                            "source_uri": canonical_source_uri(
+                                source_uri=source,
+                                fallback_url=source,
+                                source_key=source_key,
+                            ),
                             "value": value,
                         }
                     )
@@ -354,7 +365,7 @@ class MarkdownExtractor:
 
     def _determine_tier_from_revenue(self, revenue: float | None) -> CompanyTier:
         """Determine company tier based on revenue (in euros).
-        
+
         Tier boundaries:
         - Tier 1: > €1B (1,000,000,000)
         - Tier 2: €100M - €1B (100,000,000 - 1,000,000,000)
@@ -363,7 +374,7 @@ class MarkdownExtractor:
         """
         if revenue is None:
             return CompanyTier.TIER_3
-        
+
         if revenue >= 1_000_000_000:  # >= €1B
             return CompanyTier.TIER_1
         elif revenue >= 100_000_000:  # >= €100M
@@ -574,6 +585,14 @@ class BatchExtractor:
                             violations.append(
                                 f"Metric '{metric}' observation source not present in metric_sources: {src}"
                             )
+
+                    source_key = obs.get("source_key")
+                    if not isinstance(source_key, str) or not source_key.strip() or ":" not in source_key:
+                        violations.append(f"Metric '{metric}' observation has invalid source_key")
+
+                    source_uri = obs.get("source_uri")
+                    if not isinstance(source_uri, str) or not is_valid_source_uri(source_uri):
+                        violations.append(f"Metric '{metric}' observation has invalid source_uri")
 
         return violations
 
