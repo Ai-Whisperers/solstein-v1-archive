@@ -18,4 +18,16 @@ from .excel_improved import (
     ImprovedExcelExporter as ExcelExporter,
 )
 
-__all__ = ["ExcelExporter", "LayoutConstants", "ColorPalette", "ExcelStyles"]
+
+class TemplateExporter:
+    def create_dashboard(self, profiles, output_path):
+        raise NotImplementedError
+
+
+__all__ = [
+    "ExcelExporter",
+    "LayoutConstants",
+    "ColorPalette",
+    "ExcelStyles",
+    "TemplateExporter",
+]

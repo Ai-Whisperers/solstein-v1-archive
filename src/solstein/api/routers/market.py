@@ -13,8 +13,7 @@ from loguru import logger
 
 from ...analytics.scoring import CompetitiveOverlapCalculator, MarketAnalyzer
 from ...domain.models import CompetitiveOverlap, MarketAnalysis
-from ...infrastructure.company_repository import CompanyRepository
-from ..dependencies import get_company_repository, get_current_user
+from ..dependencies import get_company_repository, get_current_tenant
 from ..exceptions import APIError
 
 router = APIRouter(tags=["Market Analysis"])
@@ -27,8 +26,8 @@ async def analyze_market(
     industry: str | None = Query(None, description="Industry to analyze"),
     region: str | None = Query(None, description="Region to analyze"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum companies to analyze"),
-    _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_company_repository),
+    _: dict[str, Any] = Depends(get_current_tenant),
+    repo: Any = Depends(get_company_repository),
 ) -> MarketAnalysis:
     """Perform market analysis for a specific industry/region."""
     try:
@@ -64,8 +63,8 @@ async def analyze_market(
 async def get_competitive_overlap(
     company_id: str,
     limit: int = Query(50, ge=1, le=100, description="Maximum number of competitors to return"),
-    _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_company_repository),
+    _: dict[str, Any] = Depends(get_current_tenant),
+    repo: Any = Depends(get_company_repository),
 ) -> list[CompetitiveOverlap]:
     """Calculate competitive overlap using the specialized calculator."""
     try:
@@ -85,7 +84,7 @@ async def get_competitive_overlap(
         overlaps = []
         peer_count = 0
         for peer in peers:
-            if peer.id == target.id:
+            if peer.company_id == target.company_id:
                 continue
 
             if peer_count >= limit:
@@ -96,8 +95,8 @@ async def get_competitive_overlap(
 
             overlaps.append(
                 CompetitiveOverlap(
-                    company_a_id=target.id,
-                    company_b_id=peer.id,
+                    company_a_id=target.company_id,
+                    company_b_id=peer.company_id,
                     overlap_score=score,
                     overlap_areas=[target.industry]
                     if target.industry and peer.industry and target.industry.lower() == peer.industry.lower()
@@ -130,8 +129,8 @@ async def search_companies(
     field: str = Query("name", description="Field to search (name, industry, description)"),
     skip: int = Query(0, ge=0, description="Number of results to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum results to return"),
-    _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_company_repository),
+    _: dict[str, Any] = Depends(get_current_tenant),
+    repo: Any = Depends(get_company_repository),
 ) -> dict[str, Any]:
     """Search companies by various fields."""
     try:

@@ -458,7 +458,7 @@ if __name__ == "__main__":
 
     sys.path.insert(0, "/home/ai-whisperers/solstein/src")
 
-    json_path = "/home/ai-whisperers/solstein/data/input/competitor_data_199.json"
+    json_path = "/home/ai-whisperers/solstein/tests/fixtures/synthetic/competitor_data_199.json"
 
     print("Running field mapping audit...")
     print()

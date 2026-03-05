@@ -9,7 +9,7 @@ In production, this would be replaced with real data collection.
 import json
 import random
 from pathlib import Path
-from typing import Any
+from typing import Dict, List, Any, Optional
 
 
 class SyntheticCompanyGenerator:
@@ -17,19 +17,68 @@ class SyntheticCompanyGenerator:
 
     # Realistic company name components (EPIC-006: Removed duplicate "Grid")
     PREFIXES = [
-        "Green", "Eco", "Smart", "Clean", "Power", "Energy", "Grid",
-        "Solar", "Wind", "Hydro", "Bio", "Net", "Flux", "Volt",
-        "Amp", "Watt", "Core", "Nexus", "Pulse", "Spark", "Flow",
-        "Sync", "Link", "Data", "Digital", "Intelli", "Auto", "Cyber",
+        "Green",
+        "Eco",
+        "Smart",
+        "Clean",
+        "Power",
+        "Energy",
+        "Grid",
+        "Solar",
+        "Wind",
+        "Hydro",
+        "Bio",
+        "Net",
+        "Flux",
+        "Volt",
+        "Amp",
+        "Watt",
+        "Core",
+        "Nexus",
+        "Pulse",
+        "Spark",
+        "Flow",
+        "Sync",
+        "Link",
+        "Data",
+        "Digital",
+        "Intelli",
+        "Auto",
+        "Cyber",
     ]
 
     # EPIC-006: Added more diverse suffixes
     SUFFIXES = [
-        "Tech", "Systems", "Solutions", "Energy", "Power", "Grid",
-        "Soft", "Ware", "Dynamics", "Labs", "Hub", "Cloud", "AI",
-        "IO", "ify", "Flow", "Stream", "Base", "Core", "Nexus",
-        "Platform", "Analytics", "Network", "Exchange", "Market",
-        "Optimizer", "Controller", "Manager", "Tracker", "Monitor",
+        "Tech",
+        "Systems",
+        "Solutions",
+        "Energy",
+        "Power",
+        "Grid",
+        "Soft",
+        "Ware",
+        "Dynamics",
+        "Labs",
+        "Hub",
+        "Cloud",
+        "AI",
+        "IO",
+        "ify",
+        "Flow",
+        "Stream",
+        "Base",
+        "Core",
+        "Nexus",
+        "Platform",
+        "Analytics",
+        "Network",
+        "Exchange",
+        "Market",
+        "Optimizer",
+        "Controller",
+        "Manager",
+        "Tracker",
+        "Monitor",
     ]
 
     COUNTRIES = [
@@ -79,18 +128,38 @@ class SyntheticCompanyGenerator:
     ]
 
     FOCUS_AREAS = [
-        "renewable energy management", "smart grid optimization", "carbon tracking",
-        "energy trading", "demand response", "distributed energy resources",
-        "energy storage management", "electric vehicle charging", "building energy management",
-        "industrial energy efficiency", "predictive maintenance", "asset performance management",
-        "energy procurement", "sustainability reporting", "ESG compliance",
+        "renewable energy management",
+        "smart grid optimization",
+        "carbon tracking",
+        "energy trading",
+        "demand response",
+        "distributed energy resources",
+        "energy storage management",
+        "electric vehicle charging",
+        "building energy management",
+        "industrial energy efficiency",
+        "predictive maintenance",
+        "asset performance management",
+        "energy procurement",
+        "sustainability reporting",
+        "ESG compliance",
     ]
 
     TARGET_MARKETS = [
-        "utilities", "enterprises", "industrial facilities", "commercial buildings",
-        "residential customers", "municipalities", "data centers", "manufacturing",
-        "healthcare facilities", "educational institutions", "retail chains",
-        "transportation networks", "agricultural operations", "smart cities",
+        "utilities",
+        "enterprises",
+        "industrial facilities",
+        "commercial buildings",
+        "residential customers",
+        "municipalities",
+        "data centers",
+        "manufacturing",
+        "healthcare facilities",
+        "educational institutions",
+        "retail chains",
+        "transportation networks",
+        "agricultural operations",
+        "smart cities",
     ]
 
     def generate_company_name(self) -> str:
@@ -113,13 +182,9 @@ class SyntheticCompanyGenerator:
         focus_area = random.choice(self.FOCUS_AREAS)
         target_market = random.choice(self.TARGET_MARKETS)
 
-        return template.format(
-            industry=industry,
-            focus_area=focus_area,
-            target_market=target_market
-        )
+        return template.format(industry=industry, focus_area=focus_area, target_market=target_market)
 
-    def generate_revenue_timeline(self, base_revenue: float, growth_rate: float) -> list[dict[str, Any]]:
+    def generate_revenue_timeline(self, base_revenue: float, growth_rate: float) -> List[Dict[str, Any]]:
         """Generate 4-year revenue timeline."""
         timeline = []
         current_revenue = base_revenue / ((1 + growth_rate / 100) ** 3)
@@ -139,7 +204,7 @@ class SyntheticCompanyGenerator:
 
         return timeline
 
-    def generate_company(self, tier: str = None) -> dict[str, Any]:
+    def generate_company(self, tier: Optional[str] = None) -> Dict[str, Any]:
         """Generate a complete synthetic company profile."""
         # Determine company tier based on target distribution
         if tier is None:
@@ -195,7 +260,14 @@ class SyntheticCompanyGenerator:
                 "cagr_5yr_pct": round(growth_rate * random.uniform(0.8, 1.2), 1),
             },
             "profitability": {
-                "ebitda_margin_pct": round(random.uniform(-20, 3) if archetype == "struggling" else random.uniform(2, 12) if archetype == "declining_legacy" else random.uniform(5, 35), 1),
+                "ebitda_margin_pct": round(
+                    random.uniform(-20, 3)
+                    if archetype == "struggling"
+                    else random.uniform(2, 12)
+                    if archetype == "declining_legacy"
+                    else random.uniform(5, 35),
+                    1,
+                ),
                 "recurring_revenue_pct": round(random.uniform(40, 95), 1),
                 "revenue_per_employee_eur_k": round(base_revenue * 1000 / max(employees, 1), 1),
                 "confidence": "medium",
@@ -211,12 +283,30 @@ class SyntheticCompanyGenerator:
             "ai_maturity": random.choice(["Strong", "Moderate", "Emerging", "Low"]),
             "ai_score": round(random.uniform(3, 9), 1),
             "growth_rate": round(growth_rate / 100, 2),
-            "profit_margin": round(random.uniform(-0.15, 0.01) if archetype == "struggling" else random.uniform(0.01, 0.08) if archetype == "declining_legacy" else random.uniform(0.05, 0.25), 2),
-            "funding_raised": round(0.0 if archetype == "struggling" else random.uniform(0, 500000) if archetype == "declining_legacy" else base_revenue * random.uniform(0.2, 2) * 1000000, 0),
+            "profit_margin": round(
+                random.uniform(-0.15, 0.01)
+                if archetype == "struggling"
+                else random.uniform(0.01, 0.08)
+                if archetype == "declining_legacy"
+                else random.uniform(0.05, 0.25),
+                2,
+            ),
+            "funding_raised": round(
+                0.0
+                if archetype == "struggling"
+                else random.uniform(0, 500000)
+                if archetype == "declining_legacy"
+                else base_revenue * random.uniform(0.2, 2) * 1000000,
+                0,
+            ),
             "valuation": round(base_revenue * random.uniform(3, 15) * 1000000, 0),
             "geographic_presence": random.sample(self.COUNTRIES, random.randint(1, 5)),
             # FIXED: growth_rate is stored as decimal (0.25 = 25%), so compare against 0.30 not 30
-            "classification": "Lead" if archetype == "struggling" else "Salt" if archetype == "declining_legacy" else ("Phoenix" if (growth_rate / 100) > 0.30 else "Salt" if (growth_rate / 100) > 0.10 else "Lead"),
+            "classification": "Lead"
+            if archetype == "struggling"
+            else "Salt"
+            if archetype == "declining_legacy"
+            else ("Phoenix" if (growth_rate / 100) > 0.30 else "Salt" if (growth_rate / 100) > 0.10 else "Lead"),
             "classification_confidence": round(random.uniform(0.7, 0.95), 2),
             "data_quality_score": round(random.uniform(0.6, 0.9), 2),
             "enrichment_source_count": 0,  # Synthetic data, no real enrichment sources
@@ -232,7 +322,7 @@ class SyntheticCompanyGenerator:
 
         return company
 
-    def generate_companies(self, count: int = 196) -> list[dict[str, Any]]:
+    def generate_companies(self, count: int = 196) -> List[Dict[str, Any]]:
         """Generate specified number of synthetic companies."""
         companies = []
 
@@ -274,7 +364,7 @@ def main():
 
     # Save
     output_data = {"competitors": all_companies}
-    output_path = Path("data/input/competitor_data_199.json")
+    output_path = Path("tests/fixtures/synthetic/competitor_data_199.json")
 
     with open(output_path, "w") as f:
         json.dump(output_data, f, indent=2)

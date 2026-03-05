@@ -77,8 +77,25 @@
       "funding_source": "Crunchbase",
       "valuation_confidence": "medium",
       "valuation_source": "Industry multiple",
-      "data_quality_score": 0.75,
-      "enrichment_source_count": 3
+      "data_quality_score": 0.95,
+      "enrichment_source_count": 3,
+      "source_links": [
+        {
+          "source": "LinkedIn",
+          "type": "linkedin",
+          "confidence": "medium"
+        },
+        {
+          "source": "Website",
+          "type": "website",
+          "confidence": "medium"
+        },
+        {
+          "source": "Crunchbase",
+          "type": "crunchbase",
+          "confidence": "medium"
+        }
+      ]
     },
     {
       "company_name": "Test Company 2",
@@ -152,8 +169,25 @@
       "funding_source": "Crunchbase",
       "valuation_confidence": "medium",
       "valuation_source": "Industry multiple",
-      "data_quality_score": 0.75,
-      "enrichment_source_count": 3
+      "data_quality_score": 0.95,
+      "enrichment_source_count": 3,
+      "source_links": [
+        {
+          "source": "LinkedIn",
+          "type": "linkedin",
+          "confidence": "medium"
+        },
+        {
+          "source": "Website",
+          "type": "website",
+          "confidence": "medium"
+        },
+        {
+          "source": "Crunchbase",
+          "type": "crunchbase",
+          "confidence": "medium"
+        }
+      ]
     },
     {
       "company_name": "Test Company 3",
@@ -227,8 +261,25 @@
       "funding_source": "Crunchbase",
       "valuation_confidence": "medium",
       "valuation_source": "Industry multiple",
-      "data_quality_score": 0.75,
-      "enrichment_source_count": 3
+      "data_quality_score": 0.95,
+      "enrichment_source_count": 3,
+      "source_links": [
+        {
+          "source": "LinkedIn",
+          "type": "linkedin",
+          "confidence": "medium"
+        },
+        {
+          "source": "Website",
+          "type": "website",
+          "confidence": "medium"
+        },
+        {
+          "source": "Crunchbase",
+          "type": "crunchbase",
+          "confidence": "medium"
+        }
+      ]
     }
   ]
 }

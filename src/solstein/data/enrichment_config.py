@@ -12,7 +12,9 @@ Centralized configuration for the enrichment system with:
 
 import os
 from dataclasses import dataclass, field
+from typing import Dict, List, Optional
 from datetime import datetime, timezone
+
 
 from loguru import logger
 
@@ -26,14 +28,14 @@ class ConfigError(Exception):
 class EnvValidator:
     """Validates .env file and environment variables on startup."""
 
-    REQUIRED_KEYS: dict[str, str] = {
+    REQUIRED_KEYS = {
         "SEC_EDGAR_API_KEY": "Optional: SEC EDGAR API key for enhanced rate limits",
         "COMPANIES_HOUSE_API_KEY": "Required: Companies House API key",
         "NEWS_API_KEY": "Optional: NewsAPI key for signal detection",
         "ENRICHMENT_ENABLED": "Optional: Enable/disable enrichment (default: true)",
     }
 
-    OPTIONAL_KEYS: dict[str, str] = {
+    OPTIONAL_KEYS = {
         "SEC_EDGAR_TIMEOUT": "API timeout in seconds (default: 30)",
         "COMPANIES_HOUSE_TIMEOUT": "API timeout in seconds (default: 30)",
         "NEWS_API_TIMEOUT": "API timeout in seconds (default: 30)",
@@ -42,7 +44,7 @@ class EnvValidator:
     }
 
     @staticmethod
-    def validate_startup() -> dict[str, str | int | None]:
+    def validate_startup() -> Dict[str, object]:
         """
         Validate .env file on startup.
 
@@ -52,7 +54,7 @@ class EnvValidator:
         Raises:
             ConfigError: If required keys missing or invalid
         """
-        env_vars: dict[str, str | int | None] = {}
+        env_vars: Dict[str, object] = {}
 
         # Check required keys
         for key, description in EnvValidator.REQUIRED_KEYS.items():
@@ -159,7 +161,7 @@ class ConnectorConfig:
     enabled: bool = True
     timeout_seconds: int = 30
     max_retries: int = 3
-    api_key: str | None = None
+    api_key: Optional[str] = None
     batch_size: int = 10
     cache_ttl_hours: int = 24
 
@@ -213,8 +215,6 @@ class UnifiedCompanyLoaderConfig:
     skip_enrichment_if_complete: bool = True
     immutable_enrichment: bool = True
     rollback_on_error: bool = True
-    allow_paid_escalation: bool = False
-    paid_escalation_max_attempts: int = 2
 
     # Logging and monitoring
     log_enrichment_metrics: bool = True
@@ -252,47 +252,48 @@ class UnifiedCompanyLoaderConfig:
         """
         env_vars = EnvValidator.validate_startup()
 
-        def _get_int(key: str, default: int) -> int:
-            value = env_vars.get(key)
-            if isinstance(value, int):
-                return value
-            if isinstance(value, str) and value.strip():
-                return int(value)
+        def as_int(key: str, default: int) -> int:
+            raw = env_vars.get(key, default)
+            if isinstance(raw, int):
+                return raw
+            if isinstance(raw, str):
+                try:
+                    return int(raw)
+                except ValueError:
+                    return default
             return default
 
-        def _get_str(key: str) -> str | None:
-            value = env_vars.get(key)
-            if isinstance(value, str) and value.strip():
-                return value
+        def as_optional_str(key: str) -> Optional[str]:
+            raw = env_vars.get(key)
+            if isinstance(raw, str):
+                return raw
             return None
 
         # Create connector configs from environment
         sec_edgar_config = ConnectorConfig(
             enabled=True,
-            timeout_seconds=_get_int("SEC_EDGAR_TIMEOUT", 30),
-            max_retries=_get_int("MAX_RETRIES", 3),
-            api_key=_get_str("SEC_EDGAR_API_KEY"),
+            timeout_seconds=as_int("SEC_EDGAR_TIMEOUT", 30),
+            max_retries=as_int("MAX_RETRIES", 3),
+            api_key=as_optional_str("SEC_EDGAR_API_KEY"),
         )
 
         companies_house_config = ConnectorConfig(
             enabled=True,
-            timeout_seconds=_get_int("COMPANIES_HOUSE_TIMEOUT", 30),
-            max_retries=_get_int("MAX_RETRIES", 3),
-            api_key=(_get_str("COMPANIES_HOUSE_API_KEY")),
+            timeout_seconds=as_int("COMPANIES_HOUSE_TIMEOUT", 30),
+            max_retries=as_int("MAX_RETRIES", 3),
+            api_key=as_optional_str("COMPANIES_HOUSE_API_KEY"),
         )
 
         news_signals_config = ConnectorConfig(
-            enabled=bool(env_vars.get("NEWS_API_KEY")),
-            timeout_seconds=_get_int("NEWS_API_TIMEOUT", 30),
-            max_retries=_get_int("MAX_RETRIES", 3),
-            api_key=_get_str("NEWS_API_KEY"),
+            enabled=bool(as_optional_str("NEWS_API_KEY")),
+            timeout_seconds=as_int("NEWS_API_TIMEOUT", 30),
+            max_retries=as_int("MAX_RETRIES", 3),
+            api_key=as_optional_str("NEWS_API_KEY"),
         )
 
         # Create config instance
         config = cls(
             enrichment_enabled=os.getenv("ENRICHMENT_ENABLED", "true").lower() == "true",
-            allow_paid_escalation=os.getenv("PAID_ESCALATION_ENABLED", "false").lower() == "true",
-            paid_escalation_max_attempts=_get_int("PAID_ESCALATION_MAX_ATTEMPTS", 2),
             sec_edgar_config=sec_edgar_config,
             companies_house_config=companies_house_config,
             news_signals_config=news_signals_config,
@@ -336,14 +337,12 @@ class UnifiedCompanyLoaderConfig:
             f"  Max Retries: {self.sec_edgar_config.max_retries}\n"
             f"  Dry Run: {self.dry_run}\n"
             f"  Immutable Enrichment: {self.immutable_enrichment}\n"
-            f"  Rollback on Error: {self.rollback_on_error}\n"
-            f"  Paid Escalation Enabled: {self.allow_paid_escalation}\n"
-            f"  Paid Escalation Max Attempts: {self.paid_escalation_max_attempts}"
+            f"  Rollback on Error: {self.rollback_on_error}"
         )
 
 
 # Global configuration instance
-_global_config: UnifiedCompanyLoaderConfig | None = None
+_global_config: Optional[UnifiedCompanyLoaderConfig] = None
 
 
 def get_config() -> UnifiedCompanyLoaderConfig:

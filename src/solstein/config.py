@@ -89,6 +89,10 @@ class APIConfig(BaseModel):
     cors_methods: list[str] = Field(default=["GET", "POST", "PUT", "DELETE"], description="Allowed HTTP methods")
     cors_headers: list[str] = Field(default=["Authorization", "Content-Type"], description="Allowed request headers")
     api_prefix: str = Field(default="/api/v1")
+    require_api_key: bool = Field(
+        default=True,
+        description="Require X-API-Key tenant authentication for non-public endpoints",
+    )
 
     @property
     def base_url(self) -> str:

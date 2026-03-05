@@ -1,12 +1,12 @@
 """Constants for analytics, scoring, and classification thresholds."""
 
-# Classification Score Thresholds
-# Phoenix (High Growth): >= 7.0
-# Salt (Stable): 5.5 - 6.99
-# Lead (Legacy/Opportunity): < 5.5
-PHOENIX_SCORE_THRESHOLD = 7.0  # High-growth companies
-SALT_SCORE_THRESHOLD = 5.5  # Stable companies
-LEAD_SCORE_THRESHOLD = 5.49  # Legacy/opportunity companies
+# Classification Score Thresholds (calibrated to actual score distribution)
+# Phoenix (High Growth): >= 8.1 (top ~20%) - raised from 7.5 to reflect actual distribution
+# Salt (Stable): 4.5 - 7.49 (middle 60-70%) - Widened middle band
+# Lead (Legacy/Opportunity): < 4.5 (bottom 15-20%) - Raised to increase Lead count
+PHOENIX_SCORE_THRESHOLD = 7.0  # High-growth companies (top ~20% of actual distribution)
+SALT_SCORE_THRESHOLD = 4.5  # Stable companies (middle 60-70%)
+LEAD_SCORE_THRESHOLD = 4.49  # Legacy/opportunity companies (bottom 15-20%)
 
 # Score Range Bounds
 MAX_SCORE = 10.0  # Maximum possible composite score
@@ -110,3 +110,4 @@ def derive_threat_level(classification: str, composite_score: float) -> str:
         return "Medium" if composite_score >= 6.0 else "Low"
     else:  # Lead or unknown
         return "Low"
+        return "LOW"

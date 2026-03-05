@@ -80,7 +80,7 @@ The data conversion pipeline loses **30+ fields** during transformation from inp
 Create comprehensive field mapping documentation and identify all lost fields.
 
 **Acceptance Criteria:**
-- [ ] List all 41 input fields from competitor_data_199.json
+- [ ] List all 41 input fields from tests/fixtures/synthetic/competitor_data_199.json
 - [ ] List all 78 output fields from scored output
 - [ ] Identify 30 lost fields with specific paths
 - [ ] Create field mapping matrix (input → output → status)
@@ -126,7 +126,7 @@ confidence_map = {
 
 # Extract confidence from revenue timeline
 revenue_confidence = confidence_map.get(
-    latest_revenue.get("confidence", ""), 
+    latest_revenue.get("confidence", ""),
     ConfidenceLevel.UNKNOWN
 )
 
@@ -246,7 +246,7 @@ financials = FinancialMetric(
     recurring_revenue_pct=profitability.get("recurring_revenue_pct"),
     revenue_per_employee=profitability.get("revenue_per_employee_eur_k"),
     profit_margin_confidence=confidence_map.get(
-        profitability.get("confidence"), 
+        profitability.get("confidence"),
         ConfidenceLevel.UNKNOWN
     ),
     ...

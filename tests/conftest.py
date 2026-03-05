@@ -1,3 +1,4 @@
+import asyncio
 import os
 from unittest.mock import AsyncMock, MagicMock
 
@@ -7,14 +8,15 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 os.environ.setdefault("GITHUB_TOKEN", "test-github-token-12345")
-os.environ.setdefault("SOLSTEIN_DISABLE_RATE_LIMIT", "true")
 
-from solstein.api.dependencies import get_company_repository, get_current_user
-from solstein.api.main import app
-from solstein.core.repositories import CompanyRepository
-from solstein.database_config import convert_to_async_url, get_test_database_url
-from solstein.domain.models import AIMaturity
 from tests.factories import make_company
+
+
+from solstein.api.dependencies import get_company_repository, get_current_tenant, get_current_user
+from solstein.api.main import app
+from solstein.config import get_settings
+from solstein.domain.models import AIMaturity
+from solstein.database_config import get_test_database_url, convert_to_async_url
 
 
 @pytest.fixture
@@ -32,33 +34,13 @@ def mock_repo(mock_company):
     Override in individual tests for 'not found' scenarios:
         mock_repo.get_by_id.return_value = None
     """
-    repo = MagicMock(spec=CompanyRepository)
+    repo = MagicMock()
     repo.get_all = AsyncMock(return_value=[mock_company])
-
-    # Improved get_by_id to handle 'nonexistent' IDs commonly used in tests
-    async def get_by_id_side_effect(company_id):
-        if company_id in ["nonexistent-company-xyz", "nonexistent-id", "nonexistent-company"]:
-            return None
-        # Return a copy with the requested ID
-        company = make_company(id=company_id)
-        return company
-
-    repo.get_by_id = AsyncMock(side_effect=get_by_id_side_effect)
-
-    # Improved save to return the company being saved
-    async def save_side_effect(company):
-        return company
-
-    repo.save = AsyncMock(side_effect=save_side_effect)
-
-    # Improved delete to return False for nonexistent IDs
-    async def delete_side_effect(company_id):
-        if company_id in ["nonexistent-id", "nonexistent-company"]:
-            return False
-        return True
-
-    repo.delete = AsyncMock(side_effect=delete_side_effect)
-
+    repo.get_all_filtered = AsyncMock(return_value=[mock_company])
+    repo.get_by_id = AsyncMock(return_value=mock_company)
+    repo.save = AsyncMock(return_value=mock_company)
+    repo.delete = AsyncMock(return_value=True)
+    repo.filter_by = AsyncMock(return_value=[mock_company])
     repo.search = AsyncMock(return_value=[mock_company])
     return repo
 
@@ -66,20 +48,27 @@ def mock_repo(mock_company):
 @pytest.fixture
 def client(mock_repo):
     """Provides an authenticated TestClient with dependency overrides."""
+    settings = get_settings()
+    previous_require_api_key = settings.api.require_api_key
+    settings.api.require_api_key = False
+
     app.dependency_overrides[get_current_user] = lambda: {
         "username": "testuser",
         "role": "admin",
     }
+    app.dependency_overrides[get_current_tenant] = lambda: {
+        "tenant_id": "test-tenant",
+        "name": "Test Tenant",
+    }
     app.dependency_overrides[get_company_repository] = lambda: mock_repo
 
     with TestClient(app) as test_client:
-        # Add authorization header for authenticated requests
-        # This is needed to bypass AuthenticationMiddleware
-        test_client.headers.update({"Authorization": "Bearer test-token-long-enough-to-pass"})
+        test_client.headers.update({"Authorization": "Bearer " + "a" * 40})
         yield test_client
 
     # Clear overrides after test
     app.dependency_overrides = {}
+    settings.api.require_api_key = previous_require_api_key
 
 
 @pytest.fixture
@@ -103,8 +92,8 @@ def patch_competitor_data_loader(monkeypatch):
     This ensures ALL tests that use UnifiedCompanyLoader will get mock data
     instead of trying to load from the missing data/input/competitor_data.json file.
     """
-    from solstein.data.loaders import CompetitorDataLoader
     from solstein.domain.models import Company
+    from solstein.data.loaders import CompetitorDataLoader
 
     # Create comprehensive test companies with all required financial fields
     test_companies = [
@@ -116,7 +105,7 @@ def patch_competitor_data_loader(monkeypatch):
             founded_year=2015,
             employees=150,
             revenue=5000000.0,
-            growth_rate=25.0,
+            growth_rate=0.25,
             profit_margin=0.15,
             funding_raised=2000000.0,
             valuation=50000000.0,
@@ -124,7 +113,7 @@ def patch_competitor_data_loader(monkeypatch):
             website="https://eneve.de",
             description="Energy software company",
             ai_maturity=AIMaturity.STRONG,
-            ai_score=7.5,
+            ai_maturity_score=7.5,
             geographic_presence=["Germany", "France", "UK", "Netherlands", "Belgium", "Austria", "Switzerland"],
             revenue_timeline=[
                 {"year": 2020, "eur_millions": 2.0, "yoy_growth_pct": 0},
@@ -147,8 +136,8 @@ def patch_competitor_data_loader(monkeypatch):
             founded_year=2016,
             employees=100,
             revenue=3000000.0,
-            growth_rate=20.0,
-            profit_margin=12.0,
+            growth_rate=0.20,
+            profit_margin=0.12,
             funding_raised=1500000.0,
             valuation=30000000.0,
             github_url="https://github.com/test2",
@@ -178,8 +167,8 @@ def patch_competitor_data_loader(monkeypatch):
             founded_year=2017,
             employees=80,
             revenue=2000000.0,
-            growth_rate=15.0,
-            profit_margin=10.0,
+            growth_rate=0.15,
+            profit_margin=0.10,
             funding_raised=1000000.0,
             valuation=20000000.0,
             github_url="https://github.com/test3",
@@ -214,6 +203,11 @@ def patch_competitor_data_loader(monkeypatch):
 # DATABASE FIXTURES FOR REAL SUPABASE TESTING (Wave 2, Task 6)
 # ============================================================================
 
+import asyncio
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+from src.solstein.database_config import get_test_database_url, convert_to_async_url
+
 
 # Note: pytest-asyncio handles event_loop automatically with mode=auto
 # Removed custom event_loop fixture - pytest-asyncio mode=auto manages this
@@ -233,10 +227,7 @@ async def db_engine():
     - pool_recycle=3600: Recycle connections after 1 hour
     - pool_pre_ping=True: Test connections before using them
     """
-    try:
-        db_url = get_test_database_url()
-    except Exception:
-        pytest.skip("DATABASE_URL not configured - skipping database tests")
+    db_url = get_test_database_url()
     async_url = convert_to_async_url(db_url)
 
     engine = create_async_engine(

@@ -65,7 +65,7 @@ if random.random() < 0.5:
 
 ### Affected Files
 - `scripts/generate_synthetic_companies.py` (main issue)
-- `data/input/competitor_data_199.json` (output)
+- `tests/fixtures/synthetic/competitor_data_199.json` (output)
 
 ---
 
@@ -157,7 +157,7 @@ def generate_company_name(self) -> str:
         if name not in self.generated_names:
             self.generated_names.add(name)
             return name
-    
+
     # Fallback: add numeric suffix
     base_name = self._generate_name_attempt()
     counter = 2

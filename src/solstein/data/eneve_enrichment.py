@@ -1,5 +1,8 @@
 """Enrichment utilities for eneve competitive intelligence pipeline."""
 
+from typing import Optional
+from loguru import logger
+
 from ..domain.models import Company
 
 
@@ -74,6 +77,8 @@ class EnveEnrichmentService:
         # Overall data completeness score
         company.signal_confidences["data_completeness"] = metrics_present / total_metrics
 
+        company.confidence_scores = dict(company.signal_confidences)
+
         return company
 
     @staticmethod
@@ -101,7 +106,7 @@ class EnveEnrichmentService:
         return len(sources)
 
     @staticmethod
-    def validate_enriched_data(company: Company) -> tuple[bool, str | None]:
+    def validate_enriched_data(company: Company) -> tuple[bool, Optional[str]]:
         """Validate enriched company data.
 
         Args:
@@ -187,6 +192,20 @@ class EnveEnrichmentService:
 
             if primary.financials.valuation is None and secondary.financials.valuation is not None:
                 primary.financials.valuation = secondary.financials.valuation
+
+        if primary.financials:
+            if primary.revenue is None and primary.financials.revenue is not None:
+                primary.revenue = primary.financials.revenue
+            if primary.employees is None and primary.financials.employees is not None:
+                primary.employees = primary.financials.employees
+            if primary.growth_rate is None and primary.financials.growth_rate is not None:
+                primary.growth_rate = primary.financials.growth_rate
+            if primary.profit_margin is None and primary.financials.profit_margin is not None:
+                primary.profit_margin = primary.financials.profit_margin
+            if primary.funding is None and primary.financials.funding_raised is not None:
+                primary.funding = primary.financials.funding_raised
+            if primary.valuation is None and primary.financials.valuation is not None:
+                primary.valuation = primary.financials.valuation
 
         # Merge source links
         if secondary.source_links:

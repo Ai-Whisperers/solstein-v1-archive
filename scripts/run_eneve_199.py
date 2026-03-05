@@ -6,19 +6,20 @@ Converts JSON data to Company models and generates outputs.
 
 import json
 import re
+from pathlib import Path
+from datetime import datetime, timezone
+import time
 
 # Setup paths
 import sys
-import time
-from datetime import datetime, timezone
-from pathlib import Path
 
-sys.path.insert(0, '/home/ai-whisperers/solstein/src')
+sys.path.insert(0, "/home/ai-whisperers/solstein/src")
 
-from solstein.analytics.constants import PHOENIX_SCORE_THRESHOLD, SALT_SCORE_THRESHOLD
+from solstein.domain.models import Company, FinancialMetric, CompanyTier, AIMaturity, ThreatLevel, ConfidenceLevel
 from solstein.analytics.scoring import GrowthScorer
-from solstein.domain.models import AIMaturity, Company, CompanyTier, ConfidenceLevel, FinancialMetric, ThreatLevel
+from solstein.data.metric_contract import normalize_financial_payload
 from solstein.exporters.excel import ExcelExporter
+from solstein.analytics.constants import PHOENIX_SCORE_THRESHOLD, SALT_SCORE_THRESHOLD, LEAD_SCORE_THRESHOLD
 
 
 class CompanyIDGenerator:
@@ -38,8 +39,8 @@ class CompanyIDGenerator:
         """
         # Create base ID from company name
         base_id = company_name.lower().strip()
-        base_id = re.sub(r'[^\w\s-]', '', base_id)  # Remove special chars
-        base_id = re.sub(r'\s+', '-', base_id)  # Replace spaces with hyphens
+        base_id = re.sub(r"[^\w\s-]", "", base_id)  # Remove special chars
+        base_id = re.sub(r"\s+", "-", base_id)  # Replace spaces with hyphens
         base_id = base_id[:50]  # Limit length
 
         if not base_id:
@@ -66,24 +67,40 @@ _id_generator = CompanyIDGenerator()
 def convert_json_to_company(data: dict) -> Company:
     """Convert competitor_data.json format to Company model."""
     # Extract revenue data from timeline
-    revenue_data = data.get("revenue", {})
-    revenue_timeline = revenue_data.get("timeline", [])
-    latest_revenue = revenue_timeline[0] if revenue_timeline else {}
-
-    revenue = latest_revenue.get("eur_millions")
-    growth_rate = latest_revenue.get("yoy_growth_pct")
-
-    # Extract CAGR data (3-year and 5-year)
-    revenue_cagr_3yr = revenue_data.get("cagr_3yr_pct")
-    revenue_cagr_5yr = revenue_data.get("cagr_5yr_pct")
+    revenue_data = data.get("revenue") or {}
+    if isinstance(revenue_data, dict):
+        revenue_timeline = revenue_data.get("timeline", [])
+        latest_revenue = revenue_timeline[0] if revenue_timeline else {}
+        revenue = latest_revenue.get("eur_millions")
+        growth_rate = latest_revenue.get("yoy_growth_pct")
+        revenue_cagr_3yr = revenue_data.get("cagr_3yr_pct")
+        revenue_cagr_5yr = revenue_data.get("cagr_5yr_pct")
+    else:
+        revenue_timeline = []
+        latest_revenue = {}
+        revenue = float(revenue_data) if isinstance(revenue_data, (int, float)) else None
+        growth_rate = None
+        revenue_cagr_3yr = None
+        revenue_cagr_5yr = None
 
     # Get confidence from timeline entry
     confidence_map = {
         "high": ConfidenceLevel.CONFIRMED,
         "medium": ConfidenceLevel.ESTIMATED,
-        "low": ConfidenceLevel.UNKNOWN
+        "low": ConfidenceLevel.UNKNOWN,
     }
-    revenue_confidence = confidence_map.get(latest_revenue.get("confidence", ""), ConfidenceLevel.UNKNOWN)
+    confidence_score = data.get("confidence")
+    if isinstance(confidence_score, (int, float)):
+        if confidence_score >= 0.7:
+            inferred_confidence = ConfidenceLevel.CONFIRMED
+        elif confidence_score >= 0.4:
+            inferred_confidence = ConfidenceLevel.ESTIMATED
+        else:
+            inferred_confidence = ConfidenceLevel.UNKNOWN
+    else:
+        inferred_confidence = ConfidenceLevel.UNKNOWN
+
+    revenue_confidence = confidence_map.get(latest_revenue.get("confidence", ""), inferred_confidence)
 
     # Extract employees (direct field, not nested)
     employees = data.get("employees")
@@ -101,12 +118,24 @@ def convert_json_to_company(data: dict) -> Company:
         "Strong": AIMaturity.STRONG,
         "Moderate": AIMaturity.MODERATE,
         "Low": AIMaturity.LOW,
-        "None": AIMaturity.NONE
+        "None": AIMaturity.NONE,
     }
     ai_maturity = ai_maturity_map.get(ai_maturity_str, AIMaturity.NONE)
+    ai_maturity_score = data.get("ai_maturity_score")
+    if isinstance(ai_maturity_score, (int, float)):
+        if ai_maturity_score >= 9:
+            ai_maturity = AIMaturity.VERY_STRONG
+        elif ai_maturity_score >= 7:
+            ai_maturity = AIMaturity.STRONG
+        elif ai_maturity_score >= 5:
+            ai_maturity = AIMaturity.MODERATE
+        elif ai_maturity_score >= 3:
+            ai_maturity = AIMaturity.LOW
+        else:
+            ai_maturity = AIMaturity.NONE
 
     # Extract profitability data
-    profitability = data.get("profitability", {})
+    profitability = data.get("profitability") or {}
     profit_margin = profitability.get("ebitda_margin_pct")
     ebitda_margin = profitability.get("ebitda_margin_pct")  # Same field for now
     recurring_revenue_pct = profitability.get("recurring_revenue_pct")
@@ -115,18 +144,33 @@ def convert_json_to_company(data: dict) -> Company:
     # Extract enrichment source count
     enrichment_source_count = data.get("enrichment_source_count", 0)
 
+    normalized_financials = normalize_financial_payload(
+        {
+            "revenue": revenue,
+            "growth_rate": growth_rate,
+            "profit_margin": profit_margin,
+            "funding_raised": funding_raised,
+            "valuation": valuation,
+        }
+    )
+    revenue = normalized_financials["revenue"]
+    growth_rate = normalized_financials["growth_rate"]
+    profit_margin = normalized_financials["profit_margin"]
+    funding_raised = normalized_financials["funding_raised"]
+    valuation = normalized_financials["valuation"]
+
     # Extract tier (use classification to infer)
     # FIXED: Phoenix -> Tier 1 (best), Salt -> Tier 2, Lead -> Tier 4 (worst)
     classification = data.get("classification", "Salt")
     tier_map = {
         "Phoenix": CompanyTier.TIER_1,  # Best companies get best tier
-        "Salt": CompanyTier.TIER_2,     # Moderate companies
-        "Lead": CompanyTier.TIER_4      # Struggling companies
+        "Salt": CompanyTier.TIER_2,  # Moderate companies
+        "Lead": CompanyTier.TIER_4,  # Struggling companies
     }
     tier = tier_map.get(classification, CompanyTier.TIER_3)
 
     # Generate unique company ID
-    company_id = _id_generator.generate_id(data.get("company_name", "unknown"))
+    company_id = _id_generator.generate_id(data.get("company_name") or data.get("name") or "unknown")
 
     # Extract confidence from all input fields
     # Map confidence levels to numeric weights (0.0-1.0)
@@ -137,16 +181,16 @@ def convert_json_to_company(data: dict) -> Company:
     }
 
     # Extract employee confidence
-    employees_confidence = confidence_map.get(data.get("employees_confidence", ""), ConfidenceLevel.UNKNOWN)
+    employees_confidence = confidence_map.get(data.get("employees_confidence", ""), inferred_confidence)
 
     # Extract funding confidence
-    funding_confidence = confidence_map.get(data.get("funding_confidence", ""), ConfidenceLevel.UNKNOWN)
+    funding_confidence = confidence_map.get(data.get("funding_confidence", ""), inferred_confidence)
 
     # Extract valuation confidence
-    valuation_confidence = confidence_map.get(data.get("valuation_confidence", ""), ConfidenceLevel.UNKNOWN)
+    valuation_confidence = confidence_map.get(data.get("valuation_confidence", ""), inferred_confidence)
 
     # Extract AI confidence
-    ai_confidence = confidence_map.get(data.get("ai_confidence", ""), ConfidenceLevel.UNKNOWN)
+    ai_confidence = confidence_map.get(data.get("ai_confidence", ""), inferred_confidence)
 
     # Build signal_confidences dictionary for scoring weighting
     signal_confidences = {
@@ -161,7 +205,7 @@ def convert_json_to_company(data: dict) -> Company:
     # Build Company object
     return Company(
         id=company_id,
-        name=data.get("company_name", "Unknown"),
+        name=data.get("company_name") or data.get("name") or "Unknown",
         industry=data.get("industry", "Energy Software"),
         description=data.get("description"),
         website=data.get("website"),
@@ -189,7 +233,6 @@ def convert_json_to_company(data: dict) -> Company:
             profit_margin=profit_margin,
             ebitda_margin=ebitda_margin,
             recurring_revenue_pct=recurring_revenue_pct,
-            revenue_per_employee=revenue_per_employee
         ),
         geographic_presence=data.get("geographic_presence", []),
         key_customers=[],
@@ -197,7 +240,10 @@ def convert_json_to_company(data: dict) -> Company:
         enrichment_quality_metrics=data.get("enrichment_quality_metrics", {}),  # NEW: Preserve quality metrics
         data_source="Solstein Competitive Intelligence",
         last_updated=datetime.now(timezone.utc),
-        data_source_type=data.get("data_source_type", "unknown"),  # EPIC-003/010: track data source
+        data_source_type=data.get(
+            "data_source_type",
+            "synthetic" if data.get("is_synthetic", False) else "real",
+        ),
     )
 
 
@@ -206,12 +252,17 @@ def main():
     print("ENEVE 199-Company Workflow")
     print("=" * 60)
     pipeline_start = time.time()
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"[STAGE 1/4 - LOAD] {datetime.now().strftime('%H:%M:%S')} Loading and converting company data...")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
-    # Load 199 companies
-    input_path = Path("data/input/competitor_data_199.json")
+    enriched_path = Path("data/input/competitor_data_real_enriched.json")
+    input_path = enriched_path if enriched_path.exists() else Path("data/input/competitor_data_real.json")
+    if not input_path.exists():
+        raise FileNotFoundError(
+            "Real data file not found. Run 'solstein research-companies' or "
+            "'solstein replace-synthetic' to generate data/input/competitor_data_real.json"
+        )
     with open(input_path) as f:
         data = json.load(f)
 
@@ -227,7 +278,9 @@ def main():
             company = convert_json_to_company(raw)
             companies.append(company)
             if i < 3:
-                print(f"  ✓ {company.name}: revenue={company.financials.revenue}M, growth={company.financials.growth_rate}%")
+                print(
+                    f"  ✓ {company.name}: revenue={company.financials.revenue}M, growth={company.financials.growth_rate}%"
+                )
         except Exception as e:
             errors.append((raw.get("company_name", "Unknown"), str(e)))
             if len(errors) <= 5:
@@ -239,9 +292,9 @@ def main():
     print(f"\n✅ Successfully converted {len(companies)} companies")
 
     # Score companies
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"[STAGE 2/4 - SCORE] {datetime.now().strftime('%H:%M:%S')} Scoring {len(companies)} companies...")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print("\n🎯 Scoring companies...")
     scorer = GrowthScorer()
     scored = []
@@ -264,9 +317,9 @@ def main():
         print(f"  {company.name}: composite={company.composite_score:.2f}, classification={company.classification}")
 
     # Save scored output
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"[STAGE 3/4 - EXPORT] {datetime.now().strftime('%H:%M:%S')} Saving outputs and creating Excel dashboard...")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     output_dir = Path("data/output/exports")
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -279,16 +332,19 @@ def main():
     print("\n📊 Creating Excel dashboard...")
     try:
         ExcelExporter().create_dashboard(scored, output_dir / "eneve_full_199_dashboard.xlsx")
-        print("✅ Created Excel dashboard")
+        print(f"✅ Created Excel dashboard")
     except Exception as e:
         print(f"✗ Error creating Excel dashboard: {e}")
         import traceback
+
         traceback.print_exc()
 
     # Summary statistics
-    print(f"\n{'='*60}")
-    print(f"[STAGE 4/4 - SUMMARY] {datetime.now().strftime('%H:%M:%S')} Pipeline completed in {time.time()-pipeline_start:.1f}s")
-    print(f"{'='*60}")
+    print(f"\n{'=' * 60}")
+    print(
+        f"[STAGE 4/4 - SUMMARY] {datetime.now().strftime('%H:%M:%S')} Pipeline completed in {time.time() - pipeline_start:.1f}s"
+    )
+    print(f"{'=' * 60}")
     print("\n" + "=" * 60)
     print("SUMMARY")
     print("=" * 60)

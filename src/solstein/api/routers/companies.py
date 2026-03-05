@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from loguru import logger
 
 from ...analytics.scoring import GrowthScorer
-from ...core.repositories import CompanyFilter, CompanyRepository
+from ...core.repositories import CompanyFilter
 from ...domain.models import Company, CompanyTier
-from ..dependencies import get_company_repository, get_current_user
+from ..dependencies import get_company_repository, get_current_tenant
 from ..exceptions import APIError
 
 router = APIRouter(tags=["Companies"])
@@ -20,8 +20,8 @@ async def get_companies(
     tier: CompanyTier | None = Query(None, description="Filter by company tier"),
     industry: str | None = Query(None, description="Filter by industry"),
     min_revenue: float | None = Query(None, ge=0, description="Minimum revenue in EUR millions"),
-    _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_company_repository),
+    _: dict[str, Any] = Depends(get_current_tenant),
+    repo: Any = Depends(get_company_repository),
 ) -> list[Company]:
     """Get list of companies with optional filtering."""
     try:
@@ -44,8 +44,8 @@ async def get_companies(
 @router.get("/companies/{company_id}", response_model=Company)
 async def get_company(
     company_id: str,
-    _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_company_repository),
+    _: dict[str, Any] = Depends(get_current_tenant),
+    repo: Any = Depends(get_company_repository),
 ) -> Any:
     """Get company by ID."""
     try:
@@ -80,8 +80,8 @@ async def get_company(
 )
 async def create_company(
     company_in: Company,
-    _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_company_repository),
+    _: dict[str, Any] = Depends(get_current_tenant),
+    repo: Any = Depends(get_company_repository),
 ) -> Company:
     """Create a new company profile."""
     try:
@@ -104,51 +104,11 @@ async def create_company(
         ) from e
 
 
-@router.put("/companies/{company_id}", response_model=Company)
-async def update_company(
-    company_id: str,
-    company_in: Company,
-    _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_company_repository),
-) -> Company:
-    """Update a company profile."""
-    try:
-        # Check if exists
-        existing = await repo.get_by_id(company_id)
-        if not existing:
-            raise APIError(
-                code="NOT_FOUND",
-                message=f"Company with ID {company_id} not found",
-                status_code=status.HTTP_404_NOT_FOUND,
-            )
-
-        # Recalculate scores with new data
-        scored_company = growth_scorer.calculate_scores(company_in)
-        scored_company.id = company_id
-
-        # Persist to database
-        updated_company = await repo.save(scored_company)
-
-        return updated_company
-    except HTTPException:
-        raise
-    except APIError:
-        raise
-    except Exception as e:
-        logger.error(f"Error updating company {company_id}: {e}")
-        raise APIError(
-            code="INTERNAL_ERROR",
-            message="Error updating company",
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            details=str(e),
-        ) from e
-
-
 @router.delete("/companies/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_company(
     company_id: str,
-    _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_company_repository),
+    _: dict[str, Any] = Depends(get_current_tenant),
+    repo: Any = Depends(get_company_repository),
 ) -> None:
     """Delete a company profile."""
     try:

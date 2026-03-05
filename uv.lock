@@ -3305,6 +3305,7 @@ dependencies = [
 [package.optional-dependencies]
 dev = [
     { name = "black" },
+    { name = "factory-boy" },
     { name = "mypy" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -3330,6 +3331,7 @@ requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0" },
     { name = "click", specifier = ">=8.1" },
     { name = "edgartools" },
+    { name = "factory-boy", marker = "extra == 'dev'", specifier = ">=3.3" },
     { name = "fastapi", specifier = ">=0.104,<1.0" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "langgraph", specifier = ">=0.0.20,<1.0" },

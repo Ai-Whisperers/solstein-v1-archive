@@ -4,8 +4,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from solstein.api.dependencies import get_company_repository, get_current_user
+from solstein.api.dependencies import get_company_repository, get_current_tenant, get_current_user
 from solstein.api.main import app
+from solstein.config import get_settings
 from solstein.domain.models import (
     AIMaturity,
     Company,
@@ -16,29 +17,24 @@ from solstein.domain.models import (
 
 # Override authentication
 app.dependency_overrides[get_current_user] = lambda: {"username": "test_user"}
+app.dependency_overrides[get_current_tenant] = lambda: {"tenant_id": "test-tenant", "name": "Test Tenant"}
 
-
-@pytest.fixture(autouse=True)
-def bypass_rate_limit(monkeypatch):
-    """Bypass rate limiting to prevent 429 errors across multiple tests."""
-    monkeypatch.setattr(
-        "solstein.api.middleware.rate_limit.RateLimitMiddleware._check_rate_limit",
-        lambda self, key, rpm: (True, {}),
-    )
+_settings = get_settings()
+_settings.api.require_api_key = False
 
 
 # Shared fixtures
 @pytest.fixture
 def mock_repo():
     repo = MagicMock()
-    # Use AsyncMock for methods that are awaited by routers
     repo.get_all = AsyncMock(return_value=[])
+    repo.get_all_filtered = AsyncMock(return_value=[])
     repo.get_by_id = AsyncMock(return_value=None)
     repo.save = AsyncMock(return_value=None)
     repo.delete = AsyncMock(return_value=False)
-    repo.search = AsyncMock(return_value=[])
-    repo.get_all_filtered = AsyncMock(return_value=[])
     repo.filter_by = AsyncMock(return_value=[])
+    repo.search = AsyncMock(return_value=[])
+    repo.get_all_llm_filtered = AsyncMock(return_value=([], {}))
     app.dependency_overrides[get_company_repository] = lambda: repo
     yield repo
     app.dependency_overrides.pop(get_company_repository, None)
@@ -46,7 +42,9 @@ def mock_repo():
 
 @pytest.fixture
 def client():
-    return TestClient(app, raise_server_exceptions=False)
+    with TestClient(app, raise_server_exceptions=False) as c:
+        c.headers.update({"Authorization": "Bearer " + "a" * 40})
+        yield c
 
 
 def make_company(cid="c1", name="Test", ind="Tech"):
@@ -165,29 +163,31 @@ def test_competitive_overlap(client, mock_repo):
 
 
 def test_search_companies(client, mock_repo):
-    apple = make_company("c1", "Apple", "Tech")
-    tesla = make_company("c2", "Tesla", "Auto")
-    desc_co = make_company("c3", "Desc Test", "Tech")
+    dataset = [
+        make_company("c1", "Apple", "Tech"),
+        make_company("c2", "Tesla", "Auto"),
+    ]
 
-    # name search
-    mock_repo.search.return_value = [apple]
+    async def search_side_effect(query, field="name"):
+        return [c for c in dataset if query.lower() in str(getattr(c, field, "")).lower()]
+
+    mock_repo.search.side_effect = search_side_effect
+
     resp = client.get("/market/search?query=appl&field=name")
     assert resp.status_code == 200
     assert len(resp.json()["results"]) == 1
 
-    # industry search
-    mock_repo.search.return_value = [tesla]
     resp = client.get("/market/search?query=auto&field=industry")
     assert resp.status_code == 200
     assert len(resp.json()["results"]) == 1
 
-    # description search
-    mock_repo.search.return_value = [desc_co]
+    dataset = [make_company("c3", "Desc Test", "Tech")]
+    dataset[0].description = "some awesome product"
+    mock_repo.search.side_effect = search_side_effect
     resp = client.get("/market/search?query=awesome&field=description")
     assert resp.status_code == 200
     assert len(resp.json()["results"]) == 1
 
-    # error
     mock_repo.search.side_effect = Exception("Err")
     resp = client.get("/market/search?query=appl&field=name")
     assert resp.status_code == 500
@@ -208,13 +208,34 @@ def test_score_company(client, mock_repo):
     assert resp.status_code == 500
 
 
-def test_batch_score_disabled(client):
-    """Batch scoring is disabled (Temporal integration removed) - returns 501."""
+@patch("solstein.api.routers.scoring.TemporalClient.connect")
+def test_batch_score_temporal_success(mock_connect, client):
+    mock_temp = AsyncMock()
+    mock_temp.start_workflow.return_value.id = "wf_123"
+    mock_connect.return_value = mock_temp
+
     resp = client.get("/scoring/batch?industry=Tech")
-    assert resp.status_code == 501
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "running"
+
+
+@patch(
+    "solstein.api.routers.scoring.TemporalClient.connect",
+    side_effect=Exception("No Temporal"),
+)
+@patch("solstein.analytics.activities.fetch_market_company_ids", new_callable=AsyncMock)
+@patch("solstein.analytics.activities.calculate_company_score", new_callable=AsyncMock)
+def test_batch_score_temporal_fallback(mock_calc, mock_fetch, mock_connect, client, mock_repo):
+    mock_fetch.return_value = ["c1"]
+    mock_calc.return_value = {"company_id": "c1"}
 
     resp = client.get("/scoring/batch")
-    assert resp.status_code == 501
+    assert resp.status_code == 200
+    assert resp.json()["processed_count"] == 1
+
+    mock_fetch.side_effect = Exception("Fatal Error")
+    resp = client.get("/scoring/batch")
+    assert resp.status_code == 500
 
 
 def test_scoring_stats(client, mock_repo):
@@ -237,36 +258,83 @@ def test_export_excel(client, mock_repo):
     resp_no_ind = client.get("/export/excel")
     assert resp_no_ind.status_code == 200
 
-    with patch("solstein.api.routers.export.datetime") as mock_dt:
-        mock_dt.now.side_effect = Exception("Export Err")
-        resp = client.get("/export/excel")
-        assert resp.status_code == 500
+    with patch("solstein.api.routers.export.BackgroundTasks") as mock_bg:
+        mock_bg.return_value.add_task.side_effect = Exception("Export Err")
+        # Wait, BackgroundTasks is an injected dependency, not easy to patch this way.
+        # Patching datetime is easier
+        with patch("solstein.api.routers.export.datetime") as mock_dt:
+            mock_dt.now.side_effect = Exception("Export Err")
+            resp = client.get("/export/excel")
+            assert resp.status_code == 500
 
 
 def test_export_json_success(client, mock_repo):
-    mock_repo.get_all.return_value = [make_company("c1", "A", "Tech")]
+    mock_repo.get_all_filtered.return_value = [make_company("c1", "A", "Tech")]
     resp = client.get("/export/json?industry=Tech")
     assert resp.status_code == 200
     assert resp.json()["total_companies"] == 1
 
 
 def test_export_json_not_found(client, mock_repo):
-    mock_repo.get_all.return_value = [make_company("c1", "A", "Auto")]
+    mock_repo.get_all_filtered.return_value = [make_company("c1", "A", "Auto")]
     resp = client.get("/export/json?industry=Tech")
     assert resp.status_code == 404
 
 
 def test_export_json_error(client, mock_repo):
-    mock_repo.get_all.side_effect = Exception("JSON err")
+    mock_repo.get_all_filtered.side_effect = Exception("JSON err")
     resp = client.get("/export/json")
     assert resp.status_code == 500
 
 
 # --- Jobs Router ---
-def test_get_job_status_disabled(client):
-    """Job status is disabled (Temporal integration removed) - returns 501."""
+@patch("solstein.api.routers.jobs.TemporalClient.connect", new_callable=AsyncMock)
+def test_get_job_status_success(mock_connect, client):
+    import datetime
+
+    mock_handle = MagicMock()
+    mock_handle.describe = AsyncMock()
+    mock_handle.describe.return_value.status = "COMPLETED"
+    mock_handle.describe.return_value.start_time = None
+    mock_handle.describe.return_value.close_time = datetime.datetime(2023, 1, 1)
+
+    # We must patch result as an AsyncMock that returns some dict
+    mock_handle.result = AsyncMock(return_value={"total_processed": 5})
+
+    mock_temp = MagicMock()
+    mock_temp.get_workflow_handle.return_value = mock_handle
+    mock_connect.return_value = mock_temp
+
     resp = client.get("/jobs/wf_123")
-    assert resp.status_code == 501
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "COMPLETED"
+
+
+@patch("solstein.api.routers.jobs.TemporalClient.connect", new_callable=AsyncMock)
+def test_get_job_status_result_error(mock_connect, client):
+    import datetime
+
+    mock_handle = MagicMock()
+    mock_handle.describe = AsyncMock()
+    mock_handle.describe.return_value.status = "COMPLETED"
+    mock_handle.describe.return_value.start_time = None
+    mock_handle.describe.return_value.close_time = datetime.datetime(2023, 1, 1)
+
+    mock_handle.result = AsyncMock(side_effect=Exception("Failed Result"))
+
+    mock_temp = MagicMock()
+    mock_temp.get_workflow_handle.return_value = mock_handle
+    mock_connect.return_value = mock_temp
+
+    resp = client.get("/jobs/wf_123")
+    assert resp.status_code == 200
+    assert "Workflow failed" in resp.json()["error"]
+
+
+@patch("solstein.api.routers.jobs.TemporalClient.connect", side_effect=Exception("Job Err"))
+def test_get_job_status_error(mock_connect, client):
+    resp = client.get("/jobs/wf_123")
+    assert resp.status_code == 500
 
 
 # --- Simulation Router ---
@@ -291,7 +359,7 @@ def test_run_simulation_success(client, mock_repo):
         {"type": "InvalidType", "name": "inv", "impact_factor": 1.0, "description": ""}
     )
 
-    mock_repo.get_all.return_value = [make_company()]
+    mock_repo.get_all_filtered.return_value = [make_company()]
 
     # Since we use strict Pydantic Domains, passing bad Enums instantly 422s.
     resp_invalid = client.post("/simulation/run", json=invalid_payload)
@@ -305,13 +373,13 @@ def test_run_simulation_success(client, mock_repo):
 
 def test_run_simulation_empty(client, mock_repo):
     payload = {"id": "s1", "name": "Scen1", "description": "desc", "conditions": []}
-    mock_repo.get_all.return_value = []
+    mock_repo.get_all_filtered.return_value = []
     resp = client.post("/simulation/run", json=payload)
     assert resp.status_code == 404
 
 
 def test_run_simulation_error(client, mock_repo):
     payload = {"id": "s1", "name": "Scen1", "description": "desc", "conditions": []}
-    mock_repo.get_all.side_effect = Exception("Sim Err")
+    mock_repo.get_all_filtered.side_effect = Exception("Sim Err")
     resp = client.post("/simulation/run", json=payload)
     assert resp.status_code == 500

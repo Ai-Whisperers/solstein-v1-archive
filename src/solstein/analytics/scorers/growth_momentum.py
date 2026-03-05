@@ -5,7 +5,8 @@ facts repository (SEC EDGAR, Companies House, news signals) to calculate a
 comprehensive growth momentum score.
 """
 
-from typing import TYPE_CHECKING
+import asyncio
+from typing import TYPE_CHECKING, Any
 
 from ...core.scoring_config import ScoringSettings
 from ...domain.models import ConfidenceLevel, FinancialMetric, ScoreComponent, ScoringExplanation
@@ -45,29 +46,31 @@ class GrowthMomentumScorer:
             financials = self._merge_facts_into_financials(financials, fact_repo, company_id)
 
         if financials.growth_rate is not None:
+            growth_rate = financials.growth_rate
+            if growth_rate <= 1:
+                growth_rate = growth_rate * 100
             growth_factor = min(
-                financials.growth_rate / cfg.revenue_growth_divisor,
+                growth_rate / cfg.revenue_growth_divisor,
                 cfg.revenue_growth_cap,
             )
             score += growth_factor
-            # Slow growth penalty: stagnant companies penalized
-            if 0 <= financials.growth_rate < 5.0:  # 0-5% growth
+            if 0 <= growth_rate < 5:
                 score -= 0.75  # Stagnant growth penalty
                 explanation.components.append(
                     ScoreComponent(
                         name="Stagnant Growth Penalty",
                         value=-0.75,
-                        formula="growth_rate < 5%",
+                        formula="growth_rate < 5% → -0.75",
                         reasoning="Growth rate below 5% indicates stagnation.",
                     )
                 )
-            elif 5.0 <= financials.growth_rate < 10.0:  # 5-10% growth
+            elif 5 <= growth_rate < 10:
                 score -= 0.25  # Below-average growth penalty
                 explanation.components.append(
                     ScoreComponent(
                         name="Below-Average Growth Penalty",
                         value=-0.25,
-                        formula="growth_rate 5-10%",
+                        formula="growth_rate 5-10% → -0.25",
                         reasoning="Growth rate below 10% is below sector average.",
                     )
                 )
@@ -75,15 +78,26 @@ class GrowthMomentumScorer:
                 ScoreComponent(
                     name="Revenue Growth",
                     value=growth_factor,
-                    formula=f"min({financials.growth_rate}% / {cfg.revenue_growth_divisor}, {cfg.revenue_growth_cap})",
-                    reasoning=f"High growth rate of {financials.growth_rate}% identified."
-                    if financials.growth_rate > 15
+                    formula=f"min({growth_rate}% / {cfg.revenue_growth_divisor}, {cfg.revenue_growth_cap})",
+                    reasoning=f"High growth rate of {growth_rate}% identified."
+                    if growth_rate > 15
                     else "Moderate growth rate identified.",
                 )
             )
+            if growth_rate >= 50:
+                score += 2.5
+                explanation.components.append(
+                    ScoreComponent(
+                        name="Hyper-Growth Bonus",
+                        value=2.5,
+                        formula="growth_rate >= 50% → +2.5",
+                        reasoning="Exceptional growth rate indicates hyper-growth momentum.",
+                    )
+                )
 
         if financials.employees and financials.revenue:
-            rev_per_emp = financials.revenue / financials.employees
+            revenue_eur = financials.revenue * 1_000_000
+            rev_per_emp = revenue_eur / financials.employees
             bonus = 0.0
             if rev_per_emp > cfg.efficiency_high_threshold:
                 bonus = cfg.efficiency_high_bonus
@@ -125,7 +139,7 @@ class GrowthMomentumScorer:
                 adj = cfg.margin_high_bonus
             elif financials.profit_margin > cfg.margin_med_threshold:
                 adj = cfg.margin_med_bonus
-            elif financials.profit_margin < -10.0:  # -10% deep negative margin
+            elif financials.profit_margin < -10:
                 adj = cfg.margin_negative_penalty * 1.5  # Deep negative margin: 1.5x penalty
             elif financials.profit_margin < 0:
                 adj = cfg.margin_negative_penalty
@@ -178,10 +192,14 @@ class GrowthMomentumScorer:
             Updated FinancialMetric with facts merged in
         """
         try:
-            facts = fact_repo.get_company_facts(company_id)
+            facts_result = fact_repo.get_company_facts(company_id)
         except Exception:
-            # If fact retrieval fails, return original financials
             return financials
+
+        if asyncio.iscoroutine(facts_result):
+            return financials
+
+        facts: list[Any] = list(facts_result)
 
         # Map fact types to financial metric fields
         fact_map = {

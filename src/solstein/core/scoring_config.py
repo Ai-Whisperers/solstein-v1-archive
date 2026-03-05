@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 class GrowthScoringConfig(BaseModel):
     """Configuration for growth score calculation."""
 
-    base_score: float | None = 5.0
+    base_score: float | None = None
 
     # Weights & Factors
     revenue_growth_divisor: float = 20.0
@@ -46,7 +46,7 @@ class GrowthScoringConfig(BaseModel):
 class FinancialHealthConfig(BaseModel):
     """Configuration for financial health score calculation."""
 
-    base_score: float | None = 5.0
+    base_score: float | None = 2.5
 
     # Revenue Scale (in Millions EUR - matches data format)
     # Data stores revenue as 5.0 for €5M, so thresholds must be in millions

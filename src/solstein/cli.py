@@ -3,15 +3,12 @@ Command-line interface for SolStein.
 """
 
 import json
-from datetime import datetime
-import json
 from pathlib import Path
 
 import click
 from loguru import logger
 
 from .analytics.scoring import GrowthScorer
-from .data.report_release_gate import ReportReleaseGate
 from .domain.models import Company, MarketAnalysis
 from .exporters.excel import ExcelExporter
 from .exporters.markdown.generator import ClientReportGenerator
@@ -28,31 +25,6 @@ def cli(verbose: bool) -> None:
     else:
         logger.remove()
         logger.add(lambda msg: click.echo(msg, err=True), level="INFO")
-
-
-def _ensure_release_gate(companies: list[Company]) -> None:
-    gate = ReportReleaseGate()
-    result = gate.evaluate(companies)
-    audit_path = Path("data/output/release_gate_audit.jsonl")
-    audit_path.parent.mkdir(parents=True, exist_ok=True)
-    audit_entry = {
-        "timestamp": datetime.now().isoformat(),
-        "passed": result.passed,
-        "companies": [company.name for company in companies],
-        "reasons": [{"code": reason.code, "message": reason.message} for reason in result.reasons],
-    }
-    try:
-        with audit_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(audit_entry) + "\n")
-    except Exception as exc:
-        logger.error("Failed to write release gate audit", error=str(exc))
-
-    if result.passed:
-        return
-    click.echo("❌ Report release gate failed", err=True)
-    for reason in result.reasons[:10]:
-        click.echo(f"  • {reason.code}: {reason.message}", err=True)
-    raise click.Abort()
 
 
 @cli.command()
@@ -278,6 +250,7 @@ def compare(profile1: str, profile2: str, input_file: Path) -> None:
 def generate_report(company_name: str, input: Path | None, output: Path | None) -> None:
     """Generate intelligence report for a company."""
     from .data.loaders import CompetitorDataLoader
+    from .data.report_readiness import assert_client_report_ready
 
     click.echo(f"📊 Generating reports for: {company_name}")
 
@@ -305,8 +278,7 @@ def generate_report(company_name: str, input: Path | None, output: Path | None) 
 
         # Get competitors (all other companies)
         competitors = [c for c in scored_companies if c.id != target.id]
-
-        _ensure_release_gate([target, *competitors])
+        assert_client_report_ready(target, competitors)
 
         # Generate reports
         output_dir = output or Path(f"data/output/reports/{target.id}")
@@ -338,6 +310,7 @@ def generate_report(company_name: str, input: Path | None, output: Path | None) 
 def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) -> None:
     """Generate LLM-enhanced intelligence report for a company."""
     from .data.loaders import CompetitorDataLoader
+    from .data.report_readiness import assert_client_report_ready
 
     click.echo(f"🤖 Generating LLM-enhanced reports for: {company_name}")
 
@@ -363,12 +336,13 @@ def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) ->
             return
 
         competitors = [c for c in scored_companies if c.id != target.id]
-
-        _ensure_release_gate([target, *competitors])
+        assert_client_report_ready(target, competitors)
 
         output_dir = output or Path(f"data/output/reports/llm/{target.id}")
 
         if no_llm:
+            from .exporters.markdown.generator import ClientReportGenerator
+
             generator = ClientReportGenerator(output_dir=output_dir, use_llm=False)
             reports = generator.generate_client_report(target, competitors)
         else:
@@ -398,6 +372,7 @@ def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) ->
 def generate_all_reports(output: Path | None) -> None:
     """Generate reports for all companies."""
     from .data.loaders import CompetitorDataLoader
+    from .data.report_readiness import assert_report_ready
 
     click.echo("📊 Generating reports for all companies...")
 
@@ -411,10 +386,10 @@ def generate_all_reports(output: Path | None) -> None:
             scored = scorer.calculate_scores(company)
             scored_companies.append(scored)
 
+        assert_report_ready(scored_companies)
+
         output_dir = output or Path("data/output/reports/all_companies")
         generator = ClientReportGenerator(output_dir=output_dir)
-
-        _ensure_release_gate(scored_companies)
 
         generated = generator.generate_all_reports(scored_companies)
 
@@ -443,7 +418,7 @@ try:
 except ImportError as e:
     import warnings
 
-    warnings.warn(f"Research commands not available: {e}", stacklevel=2)
+    warnings.warn(f"Research commands not available: {e}")
 
 # Register AI research commands
 try:
@@ -453,7 +428,7 @@ try:
 except ImportError as e:
     import warnings
 
-    warnings.warn(f"AI research commands not available: {e}", stacklevel=2)
+    warnings.warn(f"AI research commands not available: {e}")
 
 
 def main() -> None:

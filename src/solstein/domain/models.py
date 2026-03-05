@@ -11,8 +11,6 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from .source_contract import canonical_source_uri, normalize_source_key
-
 if sys.version_info >= (3, 11):  # noqa: UP036
     from enum import StrEnum
 else:
@@ -93,9 +91,19 @@ class FinancialMetric(BaseModel):
     ebitda_margin: float | None = None
     recurring_revenue_pct: float | None = None
     funding_raised: float | None = None
+    margin_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
+    funding_raised: float | None = None
     funding_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
     valuation: float | None = None
     valuation_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
+
+    @property
+    def funding(self) -> float | None:
+        return self.funding_raised
+
+    @funding.setter
+    def funding(self, value: float | None) -> None:
+        self.funding_raised = value
 
     @field_validator("employees")
     @classmethod
@@ -112,6 +120,7 @@ class Company(BaseModel):
 
     id: str
     name: str
+    company_name: str | None = None
     industry: str = "Energy Software"
     description: str | None = None
     website: str | None = None
@@ -129,6 +138,12 @@ class Company(BaseModel):
 
     # Financials
     financials: FinancialMetric = Field(default_factory=FinancialMetric)
+    revenue: float | None = None
+    employees: int | None = None
+    growth_rate: float | None = None
+    profit_margin: float | None = None
+    funding: float | None = None
+    valuation: float | None = None
 
     # Market
     geographic_presence: list[str] = Field(default_factory=list)
@@ -148,6 +163,7 @@ class Company(BaseModel):
     metric_justifications: dict[str, str] = Field(default_factory=dict)
     metric_observations: dict[str, list[dict[str, Any]]] = Field(default_factory=dict)
     signal_confidences: dict[str, float] = Field(default_factory=dict)
+    confidence_scores: dict[str, float] = Field(default_factory=dict)
     enrichment_source_count: int = 0
     data_quality_tier: str = "unknown"
     data_source_type: str = "unknown"  # 'synthetic', 'real', 'mixed', 'unknown'
@@ -189,6 +205,42 @@ class Company(BaseModel):
     revenue_timeline: list[dict[str, Any]] = Field(default_factory=list)
     revenue_cagr_3yr: float | None = None
     revenue_cagr_5yr: float | None = None
+
+    @model_validator(mode="after")
+    def sync_financial_fields(self) -> "Company":
+        if self.company_name is None:
+            self.company_name = self.name
+
+        if self.financials is None:
+            self.financials = FinancialMetric()
+
+        def sync_field(field_name: str, financial_name: str) -> None:
+            value = getattr(self, field_name)
+            financial_value = getattr(self.financials, financial_name)
+            if value is None and financial_value is not None:
+                setattr(self, field_name, financial_value)
+            elif value is not None and financial_value is None:
+                setattr(self.financials, financial_name, value)
+
+        sync_field("revenue", "revenue")
+        sync_field("employees", "employees")
+        sync_field("growth_rate", "growth_rate")
+        sync_field("profit_margin", "profit_margin")
+        sync_field("valuation", "valuation")
+
+        funding_value = self.funding
+        financial_funding = self.financials.funding_raised
+        if funding_value is None and financial_funding is not None:
+            self.funding = financial_funding
+        elif funding_value is not None and financial_funding is None:
+            self.financials.funding_raised = funding_value
+
+        if not self.confidence_scores and self.signal_confidences:
+            self.confidence_scores = dict(self.signal_confidences)
+        elif self.confidence_scores and not self.signal_confidences:
+            self.signal_confidences = dict(self.confidence_scores)
+
+        return self
 
     # EPIC-010: Standardized field access methods
     def get_field(self, field_name: str, default: Any = None) -> Any:
@@ -308,7 +360,7 @@ class Company(BaseModel):
 
     @field_validator("ai_score")
     @classmethod
-    def validate_ai_score(cls, v: float | None) -> float | None:
+    def validate_ai_score_value(cls, v: float | None) -> float | None:
         if v is not None and (v < 0 or v > 10):
             raise ValueError("AI score must be between 0 and 10")
         return v
@@ -426,7 +478,6 @@ class MarketAnalysis(BaseModel):
     model_config = ConfigDict(validate_assignment=True)
 
     market_name: str
-    market_segment: str | None = None  # NEW
     analysis_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     companies: list[Company] = Field(default_factory=list)
 
@@ -532,13 +583,6 @@ class RawDataSource(BaseModel):
     source_name: str  # e.g., "TechCrunch", "Companies House", "GitHub"
     raw_content: str | dict[str, Any]  # Original content (article text, JSON, etc.)
     url: str | None = None  # Where we got this from
-    source_key: str | None = None
-    source_namespace: str | None = None
-    source_uri: str | None = None
-    producer: str | None = None
-    job_run_id: str | None = None
-    logic_version: str | None = None
-    correlation_id: str | None = None
     retrieval_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     publication_date: datetime | None = None  # When source was published
     confidence: float = Field(default=0.5, ge=0, le=1)  # Initial confidence in source
@@ -546,23 +590,6 @@ class RawDataSource(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)  # Extra info (author, category, etc.)
     extraction_method: str | None = None  # How we got this (API, scrape, manual, etc.)
     notes: str | None = None
-
-    @model_validator(mode="after")
-    def _normalize_provenance(self) -> "RawDataSource":
-        if not self.source_namespace:
-            self.source_namespace = "solstein"
-        if not self.source_key:
-            self.source_key = normalize_source_key(
-                source_type=self.source_type.value,
-                source_name=self.source_name,
-                source_namespace=self.source_namespace,
-            )
-        self.source_uri = canonical_source_uri(
-            source_uri=self.source_uri,
-            fallback_url=self.url,
-            source_key=self.source_key,
-        )
-        return self
 
 
 class RawDataRecord(BaseModel):

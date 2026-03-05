@@ -1,4 +1,5 @@
 import uuid
+from typing import Optional, cast
 from datetime import datetime, timezone
 
 from sqlalchemy import (
@@ -33,6 +34,7 @@ class CompanyRecord(Base):
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(String(255), unique=True, index=True, nullable=False)
     name = Column(String(500), nullable=False)
+    tenant_id = Column(String(255), nullable=True, index=True)
 
     # Basic info
     industry = Column(String(100), default="Energy Software")
@@ -101,6 +103,7 @@ class CompanyRecord(Base):
 
     __table_args__ = (
         Index("ix_company_name", "name"),
+        Index("ix_company_tenant", "tenant_id"),
         Index("ix_company_industry", "industry"),  # NEW: For industry filtering
         Index("ix_company_headquarters", "headquarters"),  # NEW: For region filtering
         Index("ix_company_tier", "tier"),
@@ -112,6 +115,7 @@ class CompanyRecord(Base):
         Index("ix_company_last_updated", "last_updated"),  # NEW: For recency queries
         # Composite index for common filter combinations
         Index("ix_company_industry_headquarters", "industry", "headquarters"),  # NEW: Combined filter
+        Index("ix_company_tenant_industry", "tenant_id", "industry"),
     )
 
     def to_dict(self) -> dict[str, object]:
@@ -119,6 +123,7 @@ class CompanyRecord(Base):
             "id": self.id,
             "company_id": self.company_id,
             "name": self.name,
+            "tenant_id": self.tenant_id,
             "industry": self.industry,
             "description": self.description,
             "website": self.website,
@@ -640,24 +645,6 @@ class EnrichmentAuditRecord(Base):
         Index("ix_enrichment_audit_operation", "operation", "timestamp"),
     )
 
-
-class ReleaseGateAuditRecord(Base):
-    __tablename__ = "release_gate_audit"
-
-    id = Column(Integer, primary_key=True, index=True)
-    operation = Column(String(50), nullable=False)
-    status = Column(String(20), nullable=False)
-    company_ids = Column(JSON, nullable=False)
-    company_names = Column(JSON, nullable=False)
-    reason_codes = Column(JSON, nullable=True)
-    reason_details = Column(JSON, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
-
-    __table_args__ = (
-        Index("ix_release_gate_operation", "operation", "created_at"),
-        Index("ix_release_gate_status", "status", "created_at"),
-    )
-
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary representation."""
         return {
@@ -705,10 +692,11 @@ class EnrichmentCacheRecord(Base):
 
     def is_expired(self) -> bool:
         """Check if cache entry has expired."""
-        expires_at_value = self.__dict__.get("expires_at")
-        if not isinstance(expires_at_value, datetime):
+        expires_at = cast(Optional[datetime], cast(object, self.expires_at))
+        if expires_at is None:
             return False
-        return datetime.now(timezone.utc) > expires_at_value
+        comparison = datetime.now(timezone.utc) > expires_at
+        return cast(bool, comparison)
 
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary representation."""
@@ -820,15 +808,13 @@ class TenantRecord(Base):
     )
 
     def to_dict(self) -> dict[str, object]:
+        created_at = cast(Optional[datetime], cast(object, self.created_at))
+        created_at_value = created_at.isoformat() if created_at is not None else None
         return {
             "id": str(self.id),
             "name": self.name,
             "plan": self.plan,
             "is_active": self.is_active,
             "rate_limit_per_min": self.rate_limit_per_min,
-            "created_at": (
-                created_at_value.isoformat()
-                if isinstance((created_at_value := self.__dict__.get("created_at")), datetime)
-                else None
-            ),
+            "created_at": created_at_value,
         }

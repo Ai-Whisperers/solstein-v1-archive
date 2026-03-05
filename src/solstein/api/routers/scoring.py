@@ -1,14 +1,15 @@
 import asyncio
+import uuid
 from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query, status
 from loguru import logger
 
-from ...analytics.company_loader import unified_score_loader
+
 from ...analytics.scoring import GrowthScorer
-from ...core.repositories import CompanyRepository
-from ..dependencies import get_company_repository, get_current_user
+from ...analytics.company_loader import unified_score_loader
+from ..dependencies import get_company_repository, get_current_tenant
 from ..exceptions import APIError
 
 router = APIRouter(tags=["Scoring"])
@@ -18,8 +19,8 @@ growth_scorer = GrowthScorer()
 @router.post("/company/{company_id}/score")
 async def score_company(
     company_id: str,
-    _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_company_repository),
+    _: dict[str, Any] = Depends(get_current_tenant),
+    repo: Any = Depends(get_company_repository),
 ) -> dict[str, Any]:
     """Calculate growth and competitive scores for a company."""
     try:
@@ -77,7 +78,7 @@ async def score_company(
 async def batch_score_companies_endpoint(
     industry: str | None = Query(None, description="Industry to score"),
     min_revenue: float | None = Query(None, ge=0, description="Minimum revenue"),
-    _: dict[str, Any] = Depends(get_current_user),
+    _: dict[str, Any] = Depends(get_current_tenant),
 ) -> dict[str, Any]:
     """Batch score multiple companies.
 
@@ -85,15 +86,15 @@ async def batch_score_companies_endpoint(
     """
     raise APIError(
         code="NOT_IMPLEMENTED",
-        message="Batch scoring endpoint disabled - Temporal integration removed. Use individual /company/COMPANY_ID/score endpoint instead.",
+        message="Batch scoring endpoint disabled - Temporal integration removed. Use individual /company/{id}/score endpoint instead.",
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
     )
 
 
 @router.get("/stats", tags=["Statistics"])
 async def get_statistics(
-    _: dict[str, Any] = Depends(get_current_user),
-    repo: CompanyRepository = Depends(get_company_repository),
+    _: dict[str, Any] = Depends(get_current_tenant),
+    repo: Any = Depends(get_company_repository),
 ) -> dict[str, Any]:
     """Get platform statistics. Uses stored values for maximum performance."""
     try:

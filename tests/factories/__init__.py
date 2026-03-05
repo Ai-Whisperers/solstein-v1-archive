@@ -1,57 +1,83 @@
-"""Factory Boy factories and manual factory functions for creating test data.
+"""Factory Boy factories for creating test data.
 
-This module provides centralized factories for creating test data.
-It includes both Factory Boy classes and manual 'make_x' functions for legacy support.
+This module provides centralized factories for creating test data
+without manual mock setup.
 
 Usage:
-    from tests.factories import CompanyFactory, make_company
+    from tests.factories import CompanyFactory
 
-    # Using Factory Boy
+    # Create a company with default values
     company = CompanyFactory()
 
-    # Using manual function
-    company = make_company()
+    # Create a company with specific values
+    company = CompanyFactory(name="Test Corp", tier=CompanyTier.TIER_1)
+
+    # Create multiple companies
+    companies = CompanyFactory.create_batch(10)
 """
 
+from typing import Any, TYPE_CHECKING, Optional, cast
 from uuid import uuid4
 
-import factory
-from factory import Faker, Sequence
-from sqlalchemy.ext.asyncio import AsyncSession
+from factory.base import Factory
 
-from solstein.domain.facts import Fact, FactSource, GatheringBatch
+if TYPE_CHECKING:
+
+    class _BaseFactoryMeta(Factory.Meta):
+        pass
+else:
+
+    class _BaseFactoryMeta:
+        pass
+
+
+from factory.helpers import post_generation
+from factory.declarations import Iterator, List, Sequence, SubFactory
+from factory.faker import Faker
+from sqlalchemy.ext.asyncio import AsyncSession
 from solstein.domain.models import (
-    AIMaturity,
     Company,
     CompanyTier,
-    ConfidenceLevel,
-    FinancialMetric,
+    AIMaturity,
     ThreatLevel,
+    FinancialMetric,
+    ConfidenceLevel,
 )
+from solstein.domain.facts import Fact, FactSource, GatheringBatch
 
 
-class FinancialMetricFactory(factory.Factory):
+class FinancialMetricFactory(Factory[FinancialMetric]):
     """Factory for creating FinancialMetric instances."""
 
-    class Meta:
+    class Meta(_BaseFactoryMeta):
         model = FinancialMetric
 
-    revenue = factory.Faker("pydecimal", left_digits=6, right_digits=2, positive=True)
+    revenue = Faker("pydecimal", left_digits=6, right_digits=2, positive=True)
     revenue_confidence = ConfidenceLevel.CONFIRMED
-    growth_rate = factory.Faker("pydecimal", left_digits=2, right_digits=2, positive=True)
+    growth_rate = Faker("pydecimal", left_digits=2, right_digits=2, positive=True)
     growth_confidence = ConfidenceLevel.ESTIMATED
-    employees = factory.Faker("random_int", min=10, max=10000)
+    employees = Faker("random_int", min=10, max=10000)
     employees_confidence = ConfidenceLevel.CONFIRMED
 
 
-class CompanyFactory(factory.Factory):
+class CompanyFactory(Factory[Company]):
     """Factory for creating Company instances.
 
     Creates realistic company data with sensible defaults.
     All fields can be overridden.
+
+    Examples:
+        >>> # Default company
+        >>> company = CompanyFactory()
+
+        >>> # Company with specific tier
+        >>> company = CompanyFactory(tier=CompanyTier.TIER_1)
+
+        >>> # Create 10 companies
+        >>> companies = CompanyFactory.create_batch(10)
     """
 
-    class Meta:
+    class Meta(_BaseFactoryMeta):
         model = Company
 
     id = Sequence(lambda n: f"comp_{n:03d}")
@@ -62,27 +88,24 @@ class CompanyFactory(factory.Factory):
     headquarters = Faker("city")
     founded_year = Faker("year")
 
-    tier = factory.Iterator(CompanyTier)
-    ai_maturity = factory.Iterator(AIMaturity)
-    threat_level = factory.Iterator(ThreatLevel)
+    tier = Iterator(CompanyTier)
+    ai_maturity = Iterator(AIMaturity)
+    threat_level = Iterator(ThreatLevel)
 
-    financials = factory.SubFactory(FinancialMetricFactory)
+    financials = SubFactory(FinancialMetricFactory)
+    composite_score: float | None = None
 
-    geographic_presence = factory.List(
-        [
-            factory.Faker("country"),
-            factory.Faker("country"),
-            factory.Faker("country"),
-        ]
-    )
+    geographic_presence = List([Faker("country") for _ in range(3)])
 
-    @factory.post_generation
-    def set_composite_score(self, create, extracted, **kwargs):
+    @post_generation
+    def set_composite_score(obj, create, extracted, **kwargs):
         """Calculate composite score after creation."""
-        if self.growth_score and self.financial_health_score:
-            self.composite_score = (
-                self.growth_score * 0.4 + self.financial_health_score * 0.3 + self.competitive_position_score * 0.3
-            )
+        growth_score = cast(Optional[float], getattr(obj, "growth_score", None))
+        financial_health_score = cast(Optional[float], getattr(obj, "financial_health_score", None))
+        competitive_position_score = cast(Optional[float], getattr(obj, "competitive_position_score", None))
+        if growth_score is not None and financial_health_score is not None and competitive_position_score is not None:
+            composite_score = growth_score * 0.4 + financial_health_score * 0.3 + competitive_position_score * 0.3
+            setattr(obj, "composite_score", composite_score)
 
 
 class CompanyFactoryHighGrowth(CompanyFactory):
@@ -103,43 +126,23 @@ class CompanyFactoryDistressed(CompanyFactory):
     threat_level = ThreatLevel.HIGH
 
 
-# --- Manual Factory Functions (Legacy Support) ---
+def make_company(**kwargs: object) -> Company:
+    return CompanyFactory(**kwargs)
 
 
-def make_financial_metric(**overrides) -> FinancialMetric:
-    """Build a FinancialMetric with sensible defaults."""
-    defaults = dict(
-        revenue=100.0,  # EUR millions
-        growth_rate=15.0,  # %
-        profit_margin=10.0,  # %
-        funding_raised=50.0,  # EUR millions
+def make_financial_metric(**overrides: Any) -> FinancialMetric:
+    defaults: dict[str, Any] = dict(
+        revenue=100.0,
+        growth_rate=15.0,
+        profit_margin=10.0,
+        funding_raised=50.0,
     )
     defaults.update(overrides)
     return FinancialMetric(**defaults)
 
 
-def make_company(**overrides) -> Company:
-    """Build a Company with sensible defaults."""
-    defaults = dict(
-        id="test-company",
-        name="Test Corp",
-        industry="Technology",
-        headquarters="New York, USA",
-        tier=CompanyTier.TIER_1,
-        threat_level=ThreatLevel.MEDIUM,
-        ai_maturity=AIMaturity.STRONG,
-        saas_maturity=4,
-        tech_stack=["React", "Python", "AWS"],
-        geographic_presence=["US", "UK"],
-        financials=make_financial_metric(),
-    )
-    defaults.update(overrides)
-    return Company(**defaults)
-
-
-def make_phoenix_company(**overrides) -> Company:
-    """Build a high-growth 'Phoenix' company for scoring tests."""
-    defaults = dict(
+def make_phoenix_company(**overrides: Any) -> Company:
+    defaults: dict[str, Any] = dict(
         id="phoenix-001",
         name="Phoenix Inc",
         ai_maturity=AIMaturity.STRONG,
@@ -153,9 +156,8 @@ def make_phoenix_company(**overrides) -> Company:
     return make_company(**defaults)
 
 
-def make_lead_company(**overrides) -> Company:
-    """Build a declining 'Lead' company for scoring tests."""
-    defaults = dict(
+def make_lead_company(**overrides: Any) -> Company:
+    defaults: dict[str, Any] = dict(
         id="lead-001",
         name="Lead Corp",
         ai_maturity=AIMaturity.NONE,
@@ -169,18 +171,17 @@ def make_lead_company(**overrides) -> Company:
     return make_company(**defaults)
 
 
-# --- Database Factories ---
-
-
-async def create_test_company(session: AsyncSession, **overrides) -> str:
-    """Create and persist a test company in the database."""
+async def create_test_company(session: AsyncSession, **overrides: Any) -> str:
     company_id = overrides.get("company_id", f"test-company-{uuid4()}")
-    return company_id
+    return str(company_id)
 
 
-async def create_test_batch(session: AsyncSession, company_id: str, **overrides) -> GatheringBatch:
-    """Create and persist a gathering batch in the database."""
-    batch_data = {
+async def create_test_batch(
+    session: AsyncSession,
+    company_id: str,
+    **overrides: Any,
+) -> GatheringBatch:
+    batch_data: dict[str, Any] = {
         "company_id": company_id,
         "status": "completed",
     }
@@ -192,9 +193,13 @@ async def create_test_batch(session: AsyncSession, company_id: str, **overrides)
     return batch
 
 
-async def create_test_fact(session: AsyncSession, batch_id: str, company_id: str, **overrides) -> Fact:
-    """Create and persist a fact in the database."""
-    fact_data = {
+async def create_test_fact(
+    session: AsyncSession,
+    batch_id: str,
+    company_id: str,
+    **overrides: Any,
+) -> Fact:
+    fact_data: dict[str, Any] = {
         "batch_id": batch_id,
         "company_id": company_id,
         "fact_type": "test_fact",
@@ -209,9 +214,12 @@ async def create_test_fact(session: AsyncSession, batch_id: str, company_id: str
     return fact
 
 
-async def create_test_fact_source(session: AsyncSession, fact_id: str, **overrides) -> FactSource:
-    """Create and persist a fact source in the database."""
-    source_data = {
+async def create_test_fact_source(
+    session: AsyncSession,
+    fact_id: str,
+    **overrides: Any,
+) -> FactSource:
+    source_data: dict[str, Any] = {
         "fact_id": fact_id,
         "source_type": "test",
         "url": "https://example.com/test",

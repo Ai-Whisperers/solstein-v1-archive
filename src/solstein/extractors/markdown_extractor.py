@@ -12,6 +12,13 @@ from typing import Any
 
 from loguru import logger
 
+from .llm_financial_extractor import LLMFinancialExtractor
+import re
+from pathlib import Path
+from typing import Any
+
+from loguru import logger
+
 from ..domain.models import (
     AIMaturity,
     Company,
@@ -20,9 +27,7 @@ from ..domain.models import (
     FinancialMetric,
     ThreatLevel,
 )
-from ..domain.source_contract import canonical_source_uri, is_valid_source_uri, normalize_source_key
 from ..research.sources import canonicalize_url, is_probably_url
-from .llm_financial_extractor import LLMFinancialExtractor
 
 REQUIRED_PROVENANCE_METRICS = [
     "revenue",
@@ -234,19 +239,9 @@ class MarkdownExtractor:
             sources = metric_sources.get(metric, [])
             if value is not None and isinstance(sources, list):
                 for source in sources:
-                    source_key = normalize_source_key(
-                        source_type="markdown",
-                        source_name=source,
-                    )
                     metric_observations[metric].append(
                         {
                             "source": source,
-                            "source_key": source_key,
-                            "source_uri": canonical_source_uri(
-                                source_uri=source,
-                                fallback_url=source,
-                                source_key=source_key,
-                            ),
                             "value": value,
                         }
                     )
@@ -271,7 +266,6 @@ class MarkdownExtractor:
         return profile
 
     def _parse_numeric(self, value: str | None) -> float | None:
-        """Parse numeric values with suffixes (K, M, B, T)."""
         if not value:
             return None
 
@@ -281,13 +275,13 @@ class MarkdownExtractor:
 
             # Handle suffixes
             if value.endswith("T"):
-                return float(value[:-1]) * 1_000_000_000_000
-            elif value.endswith("B"):
-                return float(value[:-1]) * 1_000_000_000
-            elif value.endswith("M"):
                 return float(value[:-1]) * 1_000_000
-            elif value.endswith("K"):
+            elif value.endswith("B"):
                 return float(value[:-1]) * 1_000
+            elif value.endswith("M"):
+                return float(value[:-1])
+            elif value.endswith("K"):
+                return float(value[:-1]) / 1_000
             else:
                 return float(value)
         except (ValueError, AttributeError):
@@ -358,22 +352,14 @@ class MarkdownExtractor:
         return CompanyTier.TIER_3
 
     def _determine_tier_from_revenue(self, revenue: float | None) -> CompanyTier:
-        """Determine company tier based on revenue (in euros).
-
-        Tier boundaries:
-        - Tier 1: > €1B (1,000,000,000)
-        - Tier 2: €100M - €1B (100,000,000 - 1,000,000,000)
-        - Tier 3: €10M - €100M (10,000,000 - 100,000,000)
-        - Tier 4: < €10M (< 10,000,000)
-        """
         if revenue is None:
             return CompanyTier.TIER_3
 
-        if revenue >= 1_000_000_000:  # >= €1B
+        if revenue >= 1_000:  # >= €1B
             return CompanyTier.TIER_1
-        elif revenue >= 100_000_000:  # >= €100M
+        elif revenue >= 100:  # >= €100M
             return CompanyTier.TIER_2
-        elif revenue >= 10_000_000:  # >= €10M
+        elif revenue >= 10:  # >= €10M
             return CompanyTier.TIER_3
         else:
             return CompanyTier.TIER_4
@@ -579,14 +565,6 @@ class BatchExtractor:
                             violations.append(
                                 f"Metric '{metric}' observation source not present in metric_sources: {src}"
                             )
-
-                    source_key = obs.get("source_key")
-                    if not isinstance(source_key, str) or not source_key.strip() or ":" not in source_key:
-                        violations.append(f"Metric '{metric}' observation has invalid source_key")
-
-                    source_uri = obs.get("source_uri")
-                    if not isinstance(source_uri, str) or not is_valid_source_uri(source_uri):
-                        violations.append(f"Metric '{metric}' observation has invalid source_uri")
 
         return violations
 

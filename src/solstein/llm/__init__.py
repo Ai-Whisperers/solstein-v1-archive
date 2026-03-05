@@ -28,6 +28,7 @@ from .health_checker import (
     get_health_checker,
     reset_health_checker,
 )
+from .usage_tracker import UsageTracker, get_usage_tracker
 
 __all__ = [
     # Enhanced client
@@ -42,4 +43,6 @@ __all__ = [
     "ProviderErrorType",
     "get_health_checker",
     "reset_health_checker",
+    "UsageTracker",
+    "get_usage_tracker",
 ]

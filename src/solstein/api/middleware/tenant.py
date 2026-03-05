@@ -17,7 +17,7 @@ Usage::
 from __future__ import annotations
 
 import hashlib
-from collections.abc import Awaitable, Callable
+from typing import Any, Awaitable, Callable
 
 from fastapi import status
 from fastapi.responses import JSONResponse
@@ -63,12 +63,15 @@ class TenantMiddleware(BaseHTTPMiddleware):
             from solstein.config import get_settings
 
             settings = get_settings()
-            require_key = getattr(settings, "require_api_key", False)
+            require_api_key = getattr(
+                settings.api,
+                "require_api_key",
+                getattr(settings, "require_api_key", True),
+            )
+            if not require_api_key:
+                return await call_next(request)
         except Exception:  # pragma: no cover
-            require_key = False
-
-        if not require_key:
-            return await call_next(request)
+            pass
 
         api_key = request.headers.get("X-API-Key", "").strip()
         if not api_key:
@@ -99,7 +102,7 @@ class TenantMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-async def _lookup_tenant(key_hash: str, request: Request) -> dict | None:
+async def _lookup_tenant(key_hash: str, request: Request) -> dict[str, Any] | None:
     """Fetch tenant from DB by API key hash.
 
     Returns a plain dict with tenant info or ``None`` if not found / inactive.

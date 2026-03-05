@@ -16,6 +16,7 @@ from ..domain.models import (
     FinancialMetric,
     ThreatLevel,
 )
+from .metric_contract import normalize_financial_payload
 
 logger = logging.getLogger(__name__)
 
@@ -96,12 +97,19 @@ class CompetitorDataLoader:
 
     def _convert_to_domain_company(self, raw_data: dict[str, Any], index: int) -> Company:
         """Convert raw JSON data to Company domain entity."""
-        company_name = raw_data.get("company_name", f"Company {index}")
+        company_name = raw_data.get("company_name") or raw_data.get("name") or f"Company {index}"
         folder = raw_data.get("folder", f"company-{index}")
 
         # Extract revenue timeline
         revenue_data = raw_data.get("revenue", {})
-        timeline = revenue_data.get("timeline", [])
+        if isinstance(revenue_data, dict):
+            timeline = revenue_data.get("timeline", [])
+            cagr_3yr = revenue_data.get("cagr_3yr_pct")
+            cagr_5yr = revenue_data.get("cagr_5yr_pct")
+        else:
+            timeline = []
+            cagr_3yr = raw_data.get("revenue_cagr_3yr")
+            cagr_5yr = raw_data.get("revenue_cagr_5yr")
 
         latest_revenue = None
         latest_growth = None
@@ -112,11 +120,14 @@ class CompetitorDataLoader:
             latest_revenue = latest.get("eur_millions")
             latest_growth = latest.get("yoy_growth_pct")
             revenue_confidence = self._convert_confidence(latest.get("confidence"))
+        elif isinstance(revenue_data, (int, float)):
+            latest_revenue = float(revenue_data)
+            growth_rate = raw_data.get("growth_rate")
+            if isinstance(growth_rate, (int, float)):
+                latest_growth = float(growth_rate)
+            revenue_confidence = ConfidenceLevel.CONFIRMED
 
         # Get CAGR from data
-        cagr_3yr = revenue_data.get("cagr_3yr_pct")
-        cagr_5yr = revenue_data.get("cagr_5yr_pct")
-
         # Calculate CAGR from timeline if not provided
         calculated_cagr_3yr = cagr_3yr
         if not calculated_cagr_3yr and timeline and len(timeline) >= 2:
@@ -328,22 +339,38 @@ class CompetitorDataLoader:
         else:
             threat_level = ThreatLevel.LOW
 
-        # Create financial metric
+        normalized_financials = normalize_financial_payload(
+            {
+                "revenue": latest_revenue,
+                "growth_rate": latest_growth,
+                "profit_margin": profit_margin,
+                "funding_raised": total_funding_eur,
+                "valuation": latest_valuation_eur,
+            }
+        )
+        latest_revenue = normalized_financials["revenue"]
+        latest_growth = normalized_financials["growth_rate"]
+        profit_margin = normalized_financials["profit_margin"]
+        total_funding_eur = normalized_financials["funding_raised"]
+        latest_valuation_eur = normalized_financials["valuation"]
+
         financial = FinancialMetric(
             revenue=latest_revenue,
             revenue_confidence=revenue_confidence,
             growth_rate=latest_growth,
-            growth_confidence=ConfidenceLevel.ESTIMATED if latest_growth else ConfidenceLevel.UNKNOWN,
+            growth_confidence=ConfidenceLevel.ESTIMATED if latest_growth is not None else ConfidenceLevel.UNKNOWN,
             employees=employee_count,
-            employees_confidence=ConfidenceLevel.CONFIRMED if employee_count else ConfidenceLevel.UNKNOWN,
+            employees_confidence=ConfidenceLevel.CONFIRMED if employee_count is not None else ConfidenceLevel.UNKNOWN,
             profit_margin=profit_margin,
-            margin_confidence=ConfidenceLevel.CONFIRMED if profit_margin else ConfidenceLevel.UNKNOWN,
+            margin_confidence=ConfidenceLevel.CONFIRMED if profit_margin is not None else ConfidenceLevel.UNKNOWN,
             ebitda_margin=ebitda_margin,
             recurring_revenue_pct=recurring_rev_pct,
             funding_raised=total_funding_eur,
-            funding_confidence=ConfidenceLevel.ESTIMATED if total_funding_eur else ConfidenceLevel.UNKNOWN,
+            funding_confidence=ConfidenceLevel.ESTIMATED if total_funding_eur is not None else ConfidenceLevel.UNKNOWN,
             valuation=latest_valuation_eur,
-            valuation_confidence=ConfidenceLevel.ESTIMATED if latest_valuation_eur else ConfidenceLevel.UNKNOWN,
+            valuation_confidence=ConfidenceLevel.ESTIMATED
+            if latest_valuation_eur is not None
+            else ConfidenceLevel.UNKNOWN,
         )
 
         # Determine tier based on revenue
@@ -754,7 +781,7 @@ class BondYieldLoader:
 class SP500MembershipData:
     """Container for S&P 500 membership data."""
 
-    def __init__(self, memberships: dict[str, dict] | None = None):
+    def __init__(self, memberships: dict[str, dict[str, Any]] | None = None):
         self.memberships = memberships or {}
 
     def is_member(self, ticker: str, as_of: date) -> bool:
