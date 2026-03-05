@@ -46,21 +46,11 @@ class DatabaseManager:
         self._sync_engine: Engine | None = None
         self._sync_session_factory: Callable[[], Session] | None = None
 
-    @property
-    def initialized(self) -> bool:
-        """Check if async engine is initialized."""
-        return self.engine is not None
-
     def init_async(self):
         """Initialize async engine and session factory."""
-        if self.engine:
-            return
-
         url = self.settings.get_database_url()
         if url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-        elif url.startswith("sqlite://") and "+aiosqlite" not in url:
-            url = url.replace("sqlite://", "sqlite+aiosqlite://", 1)
 
         self.engine = create_async_engine(
             url,
@@ -73,9 +63,6 @@ class DatabaseManager:
 
     def init_sync(self):
         """Initialize sync engine and session factory for Alembic migrations."""
-        if self._sync_engine:
-            return
-
         self._sync_engine = create_engine(
             self.settings.get_database_url(),
             pool_size=self.settings.database.pool_size,
@@ -97,12 +84,12 @@ class DatabaseManager:
 
         Yields:
             AsyncSession: Database session for queries
+
+        Raises:
+            RuntimeError: If async engine not initialized
         """
         if self.engine is None or self.session_factory is None:
-            self.init_async()
-
-        if self.session_factory is None:
-            raise RuntimeError("Failed to initialize session factory")
+            raise RuntimeError("Database not initialized. Call init_async() first.")
 
         async with self.session_factory() as session:
             yield session
@@ -117,57 +104,64 @@ class DatabaseManager:
             RuntimeError: If sync engine not initialized
         """
         if not self._sync_session_factory:
-            self.init_sync()
-
-        if not self._sync_session_factory:
-            raise RuntimeError("Failed to initialize sync session factory")
+            raise RuntimeError("Sync database not initialized. Call init_sync() first.")
 
         return self._sync_session_factory()
 
     async def create_tables(self):
         """Create all tables from Base metadata."""
         if not self.engine:
-            self.init_async()
+            raise RuntimeError("Database not initialized. Call init_async() first.")
 
-        if self.engine:
-            async with self.engine.begin() as conn:
-                await conn.run_sync(Base.metadata.create_all)
+        async with self.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
 
     async def drop_tables(self):
         """Drop all tables from Base metadata."""
         if not self.engine:
-            self.init_async()
+            raise RuntimeError("Database not initialized. Call init_async() first.")
 
-        if self.engine:
-            async with self.engine.begin() as conn:
-                await conn.run_sync(Base.metadata.drop_all)
+        async with self.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
 
     async def close(self):
         """Close database connection pool."""
         if self.engine:
             await self.engine.dispose()
-            self.engine = None
-            self.session_factory = None
 
     def close_sync(self):
         """Close synchronous database connection pool."""
         if self._sync_engine:
             self._sync_engine.dispose()
-            self._sync_engine = None
-            self._sync_session_factory = None
 
 
 db_manager = DatabaseManager(Settings.load())
 
 
 async def get_async_session():
-    """FastAPI dependency that yields an async SQLAlchemy session."""
-    async with db_manager.get_session() as session:
+    """FastAPI dependency that yields an async SQLAlchemy session.
+
+    Usage::
+
+        from fastapi import Depends
+        from solstein.infrastructure.database import get_async_session
+        from sqlalchemy.ext.asyncio import AsyncSession
+
+        @router.get("/")
+        async def my_route(session: AsyncSession = Depends(get_async_session)):
+            ...
+    """
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    engine = db_manager.engine
+    if engine is None:
+        # Initialise lazily in dev when DB is not yet connected
+        db_manager.init_async()
+        engine = db_manager.engine
+    async with AsyncSession(engine, expire_on_commit=False) as session:
         yield session
 
 
 def get_async_engine():
     """Return the shared async engine (initialised lazily)."""
-    if not db_manager.engine:
-        db_manager.init_async()
     return db_manager.engine

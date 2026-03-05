@@ -3,12 +3,15 @@ Command-line interface for SolStein.
 """
 
 import json
+from datetime import datetime
+import json
 from pathlib import Path
 
 import click
 from loguru import logger
 
 from .analytics.scoring import GrowthScorer
+from .data.report_release_gate import ReportReleaseGate
 from .domain.models import Company, MarketAnalysis
 from .exporters.excel import ExcelExporter
 from .exporters.markdown.generator import ClientReportGenerator
@@ -25,6 +28,31 @@ def cli(verbose: bool) -> None:
     else:
         logger.remove()
         logger.add(lambda msg: click.echo(msg, err=True), level="INFO")
+
+
+def _ensure_release_gate(companies: list[Company]) -> None:
+    gate = ReportReleaseGate()
+    result = gate.evaluate(companies)
+    audit_path = Path("data/output/release_gate_audit.jsonl")
+    audit_path.parent.mkdir(parents=True, exist_ok=True)
+    audit_entry = {
+        "timestamp": datetime.now().isoformat(),
+        "passed": result.passed,
+        "companies": [company.name for company in companies],
+        "reasons": [{"code": reason.code, "message": reason.message} for reason in result.reasons],
+    }
+    try:
+        with audit_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(audit_entry) + "\n")
+    except Exception as exc:
+        logger.error("Failed to write release gate audit", error=str(exc))
+
+    if result.passed:
+        return
+    click.echo("❌ Report release gate failed", err=True)
+    for reason in result.reasons[:10]:
+        click.echo(f"  • {reason.code}: {reason.message}", err=True)
+    raise click.Abort()
 
 
 @cli.command()
@@ -278,6 +306,8 @@ def generate_report(company_name: str, input: Path | None, output: Path | None) 
         # Get competitors (all other companies)
         competitors = [c for c in scored_companies if c.id != target.id]
 
+        _ensure_release_gate([target, *competitors])
+
         # Generate reports
         output_dir = output or Path(f"data/output/reports/{target.id}")
         generator = ClientReportGenerator(output_dir=output_dir)
@@ -334,17 +364,17 @@ def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) ->
 
         competitors = [c for c in scored_companies if c.id != target.id]
 
+        _ensure_release_gate([target, *competitors])
+
         output_dir = output or Path(f"data/output/reports/llm/{target.id}")
 
         if no_llm:
-            from .exporters.report_generator import ClientReportGenerator
-
             generator = ClientReportGenerator(output_dir=output_dir, use_llm=False)
             reports = generator.generate_client_report(target, competitors)
         else:
             import asyncio
 
-            from .exporters.report_generator import LLMEnhancedReportGenerator
+            from .exporters.markdown.generator import LLMEnhancedReportGenerator
 
             generator = LLMEnhancedReportGenerator(output_dir=output_dir, use_llm=True)
             reports = asyncio.run(generator.generate_llm_enhanced_report(target, competitors))
@@ -383,6 +413,8 @@ def generate_all_reports(output: Path | None) -> None:
 
         output_dir = output or Path("data/output/reports/all_companies")
         generator = ClientReportGenerator(output_dir=output_dir)
+
+        _ensure_release_gate(scored_companies)
 
         generated = generator.generate_all_reports(scored_companies)
 

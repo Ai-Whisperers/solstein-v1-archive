@@ -1,8 +1,13 @@
 """FastAPI routes for manual data refresh and webhook triggers."""
 
+import importlib
+from typing import Protocol, cast
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from solstein.infrastructure.database import db_manager
+from solstein.infrastructure.refresh import get_refresh_statuses
 from solstein.worker_tasks import (
     refresh_all_sources,
     refresh_companies_house,
@@ -11,13 +16,31 @@ from solstein.worker_tasks import (
     refresh_sec_edgar,
 )
 
+
+class AsyncResult(Protocol):
+    id: str
+
+
+class CeleryTask(Protocol):
+    def apply_async(self) -> AsyncResult: ...
+
+
+def _queue_task(task: CeleryTask) -> str:
+    result = task.apply_async()
+    return result.id
+
+
+def _as_task(task: object) -> CeleryTask:
+    return cast(CeleryTask, task)
+
+
 router = APIRouter(prefix="/api/refresh", tags=["refresh"])
 
-SUPPORTED_SOURCES = {
-    "sec_edgar": refresh_sec_edgar,
-    "companies_house": refresh_companies_house,
-    "news_signals": refresh_news_signals,
-    "github": refresh_github,
+SUPPORTED_SOURCES: dict[str, CeleryTask | None] = {
+    "sec_edgar": _as_task(refresh_sec_edgar),
+    "companies_house": _as_task(refresh_companies_house),
+    "news_signals": _as_task(refresh_news_signals),
+    "github": _as_task(refresh_github),
     "all": None,
 }
 
@@ -31,6 +54,17 @@ class RefreshResponse(BaseModel):
     job_id: str
     source: str
     status: str
+
+
+class RefreshStatusResponse(BaseModel):
+    source_name: str
+    source_type: str
+    last_refresh_time: str | None
+    next_scheduled_time: str | None
+    refresh_interval_seconds: int
+    stale: bool
+    stale_reason: str | None
+    freshness_window_hours: float
 
 
 class WebhookPayload(BaseModel):
@@ -57,13 +91,15 @@ async def trigger_refresh(source_name: str, request: RefreshRequest | None = Non
         )
 
     if source_name == "all":
-        result = refresh_all_sources.apply_async()
-        return RefreshResponse(job_id=result.id, source="all", status="queued")
+        if request is not None:
+            _ = request.company_ids
+            _ = request.incremental
+        return RefreshResponse(job_id=_queue_task(_as_task(refresh_all_sources)), source="all", status="queued")
 
     task = SUPPORTED_SOURCES[source_name]
-    result = task.apply_async()
-
-    return RefreshResponse(job_id=result.id, source=source_name, status="queued")
+    if task is None:
+        raise HTTPException(status_code=500, detail="Refresh task not configured")
+    return RefreshResponse(job_id=_queue_task(task), source=source_name, status="queued")
 
 
 @router.get("/status/{job_id}")
@@ -76,13 +112,37 @@ async def get_refresh_status(job_id: str):
     Returns:
         Job status information
     """
-    from celery.result import AsyncResult
+    try:
+        module = importlib.import_module("celery.result")
+    except ImportError as exc:
+        raise HTTPException(status_code=500, detail="Celery is not installed") from exc
 
+    AsyncResult = getattr(module, "AsyncResult")
     result = AsyncResult(job_id)
     return {
         "job_id": job_id,
         "status": result.state,
         "result": result.result if result.ready() else None,
+    }
+
+
+@router.get("/status")
+async def list_refresh_statuses(source_name: str | None = None):
+    statuses = await get_refresh_statuses(db_manager=db_manager, source_name=source_name)
+    return {
+        "statuses": [
+            RefreshStatusResponse(
+                source_name=status.source_name,
+                source_type=status.source_type,
+                last_refresh_time=status.last_refresh_time.isoformat() if status.last_refresh_time else None,
+                next_scheduled_time=status.next_scheduled_time.isoformat() if status.next_scheduled_time else None,
+                refresh_interval_seconds=status.refresh_interval_seconds,
+                stale=status.stale,
+                stale_reason=status.stale_reason,
+                freshness_window_hours=status.freshness_window_hours,
+            )
+            for status in statuses
+        ]
     }
 
 
@@ -109,13 +169,15 @@ async def webhook_trigger(payload: WebhookPayload):
         )
 
     if payload.source == "all":
-        result = refresh_all_sources.apply_async()
+        job_id = _queue_task(_as_task(refresh_all_sources))
     else:
         task = SUPPORTED_SOURCES[payload.source]
-        result = task.apply_async()
+        if task is None:
+            raise HTTPException(status_code=500, detail="Refresh task not configured")
+        job_id = _queue_task(task)
 
     return {
-        "job_id": result.id,
+        "job_id": job_id,
         "source": payload.source,
         "status": "queued",
         "message": "Refresh triggered via webhook",

@@ -9,7 +9,9 @@ import sys
 from datetime import datetime, timezone
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from .source_contract import canonical_source_uri, normalize_source_key
 
 if sys.version_info >= (3, 11):  # noqa: UP036
     from enum import StrEnum
@@ -530,6 +532,13 @@ class RawDataSource(BaseModel):
     source_name: str  # e.g., "TechCrunch", "Companies House", "GitHub"
     raw_content: str | dict[str, Any]  # Original content (article text, JSON, etc.)
     url: str | None = None  # Where we got this from
+    source_key: str | None = None
+    source_namespace: str | None = None
+    source_uri: str | None = None
+    producer: str | None = None
+    job_run_id: str | None = None
+    logic_version: str | None = None
+    correlation_id: str | None = None
     retrieval_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     publication_date: datetime | None = None  # When source was published
     confidence: float = Field(default=0.5, ge=0, le=1)  # Initial confidence in source
@@ -537,6 +546,23 @@ class RawDataSource(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)  # Extra info (author, category, etc.)
     extraction_method: str | None = None  # How we got this (API, scrape, manual, etc.)
     notes: str | None = None
+
+    @model_validator(mode="after")
+    def _normalize_provenance(self) -> "RawDataSource":
+        if not self.source_namespace:
+            self.source_namespace = "solstein"
+        if not self.source_key:
+            self.source_key = normalize_source_key(
+                source_type=self.source_type.value,
+                source_name=self.source_name,
+                source_namespace=self.source_namespace,
+            )
+        self.source_uri = canonical_source_uri(
+            source_uri=self.source_uri,
+            fallback_url=self.url,
+            source_key=self.source_key,
+        )
+        return self
 
 
 class RawDataRecord(BaseModel):

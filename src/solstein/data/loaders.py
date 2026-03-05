@@ -287,6 +287,14 @@ class CompetitorDataLoader:
 
         # Determine AI maturity from string field first, then scorecard
         ai_maturity_str = raw_data.get("ai_maturity", "").strip().lower()
+        has_ai_derivation_signal = any(
+            [
+                bool(ai_maturity_str),
+                ai_signal_level is not None,
+                bool(ai_capabilities),
+                ai_in_production is not None,
+            ]
+        )
         if ai_maturity_str:
             # Map string values to enum
             if ai_maturity_str in ("strong", "advanced", "mature"):
@@ -340,6 +348,15 @@ class CompetitorDataLoader:
 
         # Determine tier based on revenue
         tier = self._determine_tier(latest_revenue)
+
+        if ai_score is None and has_ai_derivation_signal:
+            ai_score_by_maturity = {
+                AIMaturity.STRONG: 8.0,
+                AIMaturity.MODERATE: 6.0,
+                AIMaturity.LOW: 3.0,
+                AIMaturity.NONE: 1.0,
+            }
+            ai_score = ai_score_by_maturity.get(ai_maturity, 1.0)
 
         # Create company profile
         company = Company(
@@ -414,18 +431,19 @@ class CompetitorDataLoader:
         ):
             return 0.0
 
-        # Currency to EUR multipliers
-        currency_mult = {
-            "$": 1.0,  # USD
-            "EUR": 1.0,
-            "€": 1.0,
-            "GBP": 1.18,  # GBP to EUR
-            "£": 1.18,
-            "NOK": 0.085,  # NOK to EUR
-            "DKK": 0.134,  # DKK to EUR
-            "A$": 0.60,  # AUD to EUR
-            "AUD": 0.60,
-        }
+        currency_mult = self._detect_currency_multiplier(text)
+        if currency_mult is None:
+            return None
+
+        explicit_match = re.search(r"(EUR|USD|GBP|A\$|AUD|£|\$)\s*([\d.,]+)\s*(B|BN|BILLION|M|MLN|MILLION)", text)
+        if explicit_match:
+            amount = self._parse_numeric_value(explicit_match.group(2))
+            if amount is not None:
+                mag = explicit_match.group(3)
+                magnitude = 1_000_000_000 if mag.startswith("B") else 1_000_000
+                rate = self._detect_currency_multiplier(explicit_match.group(1))
+                if rate is not None:
+                    return amount * magnitude * rate
 
         # Patterns: (regex, multiplier_key)
         patterns = [
@@ -451,14 +469,10 @@ class CompetitorDataLoader:
             match = re.search(pattern, text)
             if match:
                 try:
-                    amount = float(match.group(1))
-                    # Try to detect currency
-                    mult = 1.0
-                    for curr, rate in currency_mult.items():
-                        if curr in text:
-                            mult = rate
-                            break
-                    return amount * magnitude[mag_key] * mult
+                    amount = self._parse_numeric_value(match.group(1))
+                    if amount is None:
+                        continue
+                    return amount * magnitude[mag_key] * currency_mult
                 except (ValueError, KeyError):
                     continue
         return None
@@ -469,6 +483,20 @@ class CompetitorDataLoader:
             return None
 
         text = text.upper()
+
+        currency_mult = self._detect_currency_multiplier(text)
+        if currency_mult is None:
+            return None
+
+        explicit_match = re.search(r"(EUR|USD|GBP|A\$|AUD|£|\$)\s*([\d.,]+)\s*(B|BN|BILLION|M|MLN|MILLION)", text)
+        if explicit_match:
+            amount = self._parse_numeric_value(explicit_match.group(2))
+            if amount is not None:
+                mag = explicit_match.group(3)
+                magnitude = 1_000_000_000 if mag.startswith("B") else 1_000_000
+                rate = self._detect_currency_multiplier(explicit_match.group(1))
+                if rate is not None:
+                    return amount * magnitude * rate
 
         # Check for no valuation
         if any(
@@ -488,12 +516,14 @@ class CompetitorDataLoader:
         if range_match:
             try:
                 curr = range_match.group(1)
-                low = float(range_match.group(2))
-                high = float(range_match.group(3))
+                low = self._parse_numeric_value(range_match.group(2))
+                high = self._parse_numeric_value(range_match.group(3))
+                if low is None or high is None:
+                    return None
                 mag = range_match.group(4)
                 midpoint = (low + high) / 2
                 mult = 1_000_000 if mag == "M" else 1_000_000_000
-                rate = 1.0 if curr in ["EUR", "$", "USD"] else 1.18
+                rate = self._detect_currency_multiplier(curr) or currency_mult
                 return midpoint * mult * rate
             except (ValueError, AttributeError) as e:
                 logger.debug(f"Could not parse valuation range: {e}")
@@ -509,25 +539,16 @@ class CompetitorDataLoader:
                 if match:
                     try:
                         curr = match.group(1)
-                        amount = float(match.group(2))
+                        amount = self._parse_numeric_value(match.group(2))
+                        if amount is None:
+                            continue
                         mag = match.group(3)
                         mult = 1_000_000 if mag.startswith("M") else 1_000_000_000
-                        rate = 1.0 if curr in ["EUR", "$", "USD"] else 1.18 if curr in ["GBP", "£"] else 0.60
+                        rate = self._detect_currency_multiplier(curr) or currency_mult
                         return amount * mult * rate
                     except (ValueError, TypeError, AttributeError) as e:
                         logger.debug(f"Could not parse market cap: {e}")
                         continue
-
-        currency_mult = {
-            "$": 1.0,
-            "USD": 1.0,
-            "EUR": 1.0,
-            "€": 1.0,
-            "GBP": 1.18,
-            "£": 1.18,
-            "NOK": 0.085,
-            "DKK": 0.134,
-        }
 
         patterns = [
             (r"~\$?\s*([\d.]+)\s*BILLION", "BILLION"),
@@ -549,16 +570,40 @@ class CompetitorDataLoader:
             match = re.search(pattern, text)
             if match:
                 try:
-                    amount = float(match.group(1))
-                    mult = 1.0
-                    for curr, rate in currency_mult.items():
-                        if curr in text:
-                            mult = rate
-                            break
-                    return amount * magnitude[mag_key] * mult
+                    amount = self._parse_numeric_value(match.group(1))
+                    if amount is None:
+                        continue
+                    return amount * magnitude[mag_key] * currency_mult
                 except (ValueError, KeyError):
                     continue
         return None
+
+    def _detect_currency_multiplier(self, text: str) -> float | None:
+        currency_mult = [
+            ("A$", 0.60),
+            ("AUD", 0.60),
+            ("USD", 1.0),
+            ("$", 1.0),
+            ("EUR", 1.0),
+            ("€", 1.0),
+            ("GBP", 1.18),
+            ("£", 1.18),
+            ("NOK", 0.085),
+            ("DKK", 0.134),
+        ]
+        for token, rate in currency_mult:
+            if token in text:
+                return rate
+        return None
+
+    def _parse_numeric_value(self, raw: str) -> float | None:
+        cleaned = raw.replace(",", "").strip()
+        if not cleaned:
+            return None
+        try:
+            return float(cleaned)
+        except ValueError:
+            return None
 
     def _convert_confidence(self, confidence_str: str | None) -> ConfidenceLevel:
         """Convert string confidence to ConfidenceLevel enum."""

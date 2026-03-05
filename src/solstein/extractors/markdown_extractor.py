@@ -20,6 +20,7 @@ from ..domain.models import (
     FinancialMetric,
     ThreatLevel,
 )
+from ..domain.source_contract import canonical_source_uri, is_valid_source_uri, normalize_source_key
 from ..research.sources import canonicalize_url, is_probably_url
 from .llm_financial_extractor import LLMFinancialExtractor
 
@@ -233,9 +234,19 @@ class MarkdownExtractor:
             sources = metric_sources.get(metric, [])
             if value is not None and isinstance(sources, list):
                 for source in sources:
+                    source_key = normalize_source_key(
+                        source_type="markdown",
+                        source_name=source,
+                    )
                     metric_observations[metric].append(
                         {
                             "source": source,
+                            "source_key": source_key,
+                            "source_uri": canonical_source_uri(
+                                source_uri=source,
+                                fallback_url=source,
+                                source_key=source_key,
+                            ),
                             "value": value,
                         }
                     )
@@ -568,6 +579,14 @@ class BatchExtractor:
                             violations.append(
                                 f"Metric '{metric}' observation source not present in metric_sources: {src}"
                             )
+
+                    source_key = obs.get("source_key")
+                    if not isinstance(source_key, str) or not source_key.strip() or ":" not in source_key:
+                        violations.append(f"Metric '{metric}' observation has invalid source_key")
+
+                    source_uri = obs.get("source_uri")
+                    if not isinstance(source_uri, str) or not is_valid_source_uri(source_uri):
+                        violations.append(f"Metric '{metric}' observation has invalid source_uri")
 
         return violations
 

@@ -2,14 +2,28 @@
 
 import hashlib
 import uuid
+from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from loguru import logger
+from sqlalchemy import text
 
 from solstein.domain.facts import Fact, GatheringBatch
 from solstein.infrastructure.database import DatabaseManager
+
+
+@dataclass(frozen=True)
+class RefreshStatus:
+    source_name: str
+    source_type: str
+    last_refresh_time: datetime | None
+    next_scheduled_time: datetime | None
+    refresh_interval_seconds: int
+    stale: bool
+    stale_reason: str | None
+    freshness_window_hours: float
 
 
 class BaseRefreshConnector(ABC):
@@ -83,11 +97,13 @@ class BaseRefreshConnector(ABC):
         """Get last successful refresh time from metadata."""
         async with self.db_manager.get_session() as session:
             result = await session.execute(
-                """
-                SELECT last_refresh_time 
-                FROM refresh_metadata 
-                WHERE source_name = :name
-                """,
+                text(
+                    """
+                    SELECT last_refresh_time
+                    FROM refresh_metadata
+                    WHERE source_name = :name
+                    """
+                ),
                 {"name": self.source_name},
             )
             row = result.fetchone()
@@ -126,15 +142,17 @@ class BaseRefreshConnector(ABC):
         """Check if a fact has changed compared to stored version."""
         async with self.db_manager.get_session() as session:
             result = await session.execute(
-                """
-                SELECT value_hash 
-                FROM facts 
-                WHERE company_id = :cid 
-                AND fact_type = :ft 
-                AND source = :src
-                ORDER BY extracted_at DESC 
-                LIMIT 1
-                """,
+                text(
+                    """
+                    SELECT value_hash
+                    FROM facts
+                    WHERE company_id = :cid
+                    AND fact_type = :ft
+                    AND source = :src
+                    ORDER BY extracted_at DESC
+                    LIMIT 1
+                    """
+                ),
                 {"cid": company_id, "ft": fact_type, "src": self.source_name},
             )
             row = result.fetchone()
@@ -211,15 +229,17 @@ class BaseRefreshConnector(ABC):
     async def _update_refresh_metadata(self, refresh_time: datetime) -> None:
         async with self.db_manager.get_session() as session:
             await session.execute(
-                """
-                INSERT INTO refresh_metadata (source_name, source_type, last_refresh_time, last_refresh_status, last_refresh_job_id, next_scheduled_time)
-                VALUES (:name, :type, :time, :status, :job, :next)
-                ON CONFLICT (source_name) DO UPDATE SET
-                    last_refresh_time = :time,
-                    last_refresh_status = :status,
-                    last_refresh_job_id = :job,
-                    next_scheduled_time = :next
-                """,
+                text(
+                    """
+                    INSERT INTO refresh_metadata (source_name, source_type, last_refresh_time, last_refresh_status, last_refresh_job_id, next_scheduled_time)
+                    VALUES (:name, :type, :time, :status, :job, :next)
+                    ON CONFLICT (source_name) DO UPDATE SET
+                        last_refresh_time = :time,
+                        last_refresh_status = :status,
+                        last_refresh_job_id = :job,
+                        next_scheduled_time = :next
+                    """
+                ),
                 {
                     "name": self.source_name,
                     "type": self.source_type,
@@ -230,6 +250,88 @@ class BaseRefreshConnector(ABC):
                 },
             )
             await session.commit()
+
+
+def _compute_stale(
+    last_refresh_time: datetime | None,
+    refresh_interval_seconds: int,
+    now: datetime,
+) -> tuple[bool, str | None]:
+    if last_refresh_time is None:
+        return True, "no refresh recorded"
+    if now - last_refresh_time > timedelta(seconds=refresh_interval_seconds):
+        return True, "last refresh exceeded freshness window"
+    return False, None
+
+
+def build_refresh_snapshot(statuses: list[RefreshStatus], generated_at: datetime) -> dict[str, object]:
+    stale_count = sum(1 for status in statuses if status.stale)
+    fresh_count = len(statuses) - stale_count
+    overall_stale = stale_count > 0 or not statuses
+    return {
+        "generated_at": generated_at.isoformat(),
+        "overall_stale": overall_stale,
+        "stale_count": stale_count,
+        "fresh_count": fresh_count,
+        "statuses": [
+            {
+                "source_name": status.source_name,
+                "source_type": status.source_type,
+                "last_refresh_time": status.last_refresh_time.isoformat() if status.last_refresh_time else None,
+                "next_scheduled_time": status.next_scheduled_time.isoformat() if status.next_scheduled_time else None,
+                "refresh_interval_seconds": status.refresh_interval_seconds,
+                "freshness_window_hours": status.freshness_window_hours,
+                "stale": status.stale,
+                "stale_reason": status.stale_reason,
+            }
+            for status in statuses
+        ],
+    }
+
+
+def raise_if_stale(statuses: list[RefreshStatus]) -> None:
+    stale_reasons = [f"{status.source_name}:{status.stale_reason or 'stale'}" for status in statuses if status.stale]
+    if stale_reasons:
+        raise ValueError("Stale refresh metadata detected: " + "; ".join(stale_reasons))
+
+
+async def get_refresh_statuses(
+    db_manager: DatabaseManager,
+    source_name: str | None = None,
+    now: datetime | None = None,
+) -> list[RefreshStatus]:
+    current_time = now or datetime.now(timezone.utc)
+    query = (
+        "SELECT source_name, source_type, last_refresh_time, next_scheduled_time, refresh_interval_seconds "
+        "FROM refresh_metadata"
+    )
+    params = {}
+    if source_name:
+        query += " WHERE source_name = :name"
+        params["name"] = source_name
+
+    async with db_manager.get_session() as session:
+        result = await session.execute(text(query), params)
+        rows = result.fetchall()
+
+    statuses: list[RefreshStatus] = []
+    for row in rows:
+        last_refresh_time = row[2]
+        refresh_interval_seconds = row[4] or 0
+        stale, reason = _compute_stale(last_refresh_time, refresh_interval_seconds, current_time)
+        statuses.append(
+            RefreshStatus(
+                source_name=row[0],
+                source_type=row[1],
+                last_refresh_time=last_refresh_time,
+                next_scheduled_time=row[3],
+                refresh_interval_seconds=refresh_interval_seconds,
+                stale=stale,
+                stale_reason=reason,
+                freshness_window_hours=refresh_interval_seconds / 3600 if refresh_interval_seconds else 0.0,
+            )
+        )
+    return statuses
 
 
 def compute_fact_hash(company_id: str, fact_type: str, value: Any) -> str:
