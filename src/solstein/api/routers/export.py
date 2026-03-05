@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any
+from typing import Protocol, cast
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 from fastapi.responses import JSONResponse
@@ -8,7 +8,9 @@ from loguru import logger
 from ...analytics.scoring import GrowthScorer
 from ...config import get_settings
 from ...core.repositories import CompanyFilter, CompanyRepository
+from ...domain.models import Company
 from ...exporters.excel import ExcelExporter
+from ...data.report_release_gate import ReportReleaseGate
 from ..dependencies import get_current_user, get_company_repository
 from ..exceptions import APIError
 
@@ -16,11 +18,33 @@ router = APIRouter(tags=["Export"])
 settings = get_settings()
 growth_scorer = GrowthScorer()
 excel_exporter = ExcelExporter()
+report_gate = ReportReleaseGate()
 
 
-def _run_excel_export(repo: CompanyRepository, filters: dict[str, Any], filename: str) -> None:  # noqa: E501
+class LLMCompanyRepository(Protocol):
+    async def get_all_llm_filtered(
+        self,
+        criteria: str,
+        limit: int | None = None,
+    ) -> tuple[list[Company], dict[str, object]]: ...
+
+
+def _gate_or_raise(companies: list[Company]) -> None:
+    result = report_gate.evaluate(companies)
+    if result.passed:
+        return
+    raise APIError(
+        code="REPORT_NOT_READY",
+        message="Report release gate failed",
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        details=[{"code": reason.code, "message": reason.message} for reason in result.reasons],
+    )
+
+
+def _run_excel_export(repo: CompanyRepository, filters: dict[str, str], filename: str) -> None:  # noqa: E501
     """Background task to generate excel report."""
-    company_filter = CompanyFilter(**filters) if filters else None
+    industry = filters.get("industry") if filters else None
+    company_filter = CompanyFilter(industry=industry) if industry else None
     companies = repo.get_all(filters=company_filter)
 
     # Apply scoring to all companies before export
@@ -35,6 +59,12 @@ def _run_excel_export(repo: CompanyRepository, filters: dict[str, Any], filename
                 scored_companies.append(company)
         companies = scored_companies
 
+        try:
+            _gate_or_raise(companies)
+        except APIError as exc:
+            logger.error(f"Excel export blocked by gate: {exc.details}")
+            return
+
         output_path = settings.data.export_dir / filename
         excel_exporter.create_dashboard(companies, output_path)
         logger.info(f"Excel report generated at {output_path}")
@@ -45,14 +75,13 @@ async def export_to_excel(
     background_tasks: BackgroundTasks,
     industry: str | None = Query(None, description="Industry to export"),
     include_charts: bool = Query(True, description="Include charts in Excel"),
-    _: dict[str, Any] = Depends(get_current_user),
+    _: dict[str, object] = Depends(get_current_user),
     repo: CompanyRepository = Depends(get_company_repository),
-) -> dict[str, Any]:
+) -> dict[str, object]:
     """Trigger background Excel export."""
     try:
-        filters: dict[str, Any] = {}
-        if industry:
-            filters["industry"] = industry
+        _include_charts = include_charts
+        filters = {"industry": industry} if industry else {}
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         if industry:
@@ -80,7 +109,7 @@ async def export_to_excel(
 @router.get("/json")
 async def export_to_json(
     industry: str | None = Query(None, description="Industry to export"),
-    _: dict[str, Any] = Depends(get_current_user),
+    _: dict[str, object] = Depends(get_current_user),
     repo: CompanyRepository = Depends(get_company_repository),
 ) -> JSONResponse:
     """Export company data to JSON."""
@@ -104,11 +133,15 @@ async def export_to_json(
 
         # Convert to dict with JSON serializable values
         companies_data = []
+        scored_companies = []
         for company in filtered_companies:
             # Score and map Domain Entity directly to Dict
             scored = growth_scorer.calculate_scores(company)
+            scored_companies.append(scored)
             company_dict = scored.model_dump(mode="json")
             companies_data.append(company_dict)
+
+        _gate_or_raise(scored_companies)
 
         # Create output
         export_data = {
@@ -138,7 +171,7 @@ async def search_with_llm(
     ),
     limit: int | None = Query(None, description="Maximum number of results"),
     include_reasoning: bool = Query(True, description="Include LLM reasoning in response"),
-    _: dict[str, Any] = Depends(get_current_user),
+    _: dict[str, object] = Depends(get_current_user),
     repo: CompanyRepository = Depends(get_company_repository),
 ) -> JSONResponse:
     """Search and filter companies using natural language criteria via LLM.
@@ -146,12 +179,14 @@ async def search_with_llm(
     This endpoint uses AI to understand natural language criteria and match
     companies based on their full profile, not just keyword matching.
     """
-    companies, filter_metadata = await repo.get_all_llm_filtered(
+    _include_reasoning = include_reasoning
+    llm_repo = cast(LLMCompanyRepository, cast(object, repo))
+    companies, filter_metadata = await llm_repo.get_all_llm_filtered(
         criteria=criteria,
         limit=limit,
     )
+    _ = filter_metadata
     if not companies:
-
         return JSONResponse(
             content={
                 "criteria": criteria,
