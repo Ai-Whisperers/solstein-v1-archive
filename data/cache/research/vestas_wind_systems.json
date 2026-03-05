@@ -1,0 +1,26 @@
+{
+  "company_name": "Vestas Wind Systems",
+  "website": null,
+  "description": "\u4f8b\u3048\u3070\u3001\u7c73\u56fdGE\u30ea\u30cb\u30e5\u30fc\u30ef\u30d6\u30eb\u30a8\u30ca\u30b8\u30fc\uff08\u65e5\u672c\u3067\u306f\u6771\u829d\u3068\u88fd\u9020\u3067\u5354\u696d\uff09\u306f\u300114 MW\u4ed5\u69d8\u306e Haliade-X\uff08\u30cf\u30ea\u30a2\u30c7-X\u30012021\u5e7410\u6708\u30d7\u30ed \u2026",
+  "industry": null,
+  "founded_year": null,
+  "employees": null,
+  "headquarters": null,
+  "revenue": null,
+  "funding_raised": null,
+  "valuation": null,
+  "github_url": null,
+  "linkedin_url": null,
+  "twitter_url": null,
+  "ai_score": null,
+  "data_sources": [
+    "web_search"
+  ],
+  "confidence": 0.2,
+  "last_updated": "2026-03-04 11:26:44.263309",
+  "raw_data": {
+    "search_results": 5,
+    "data_collection_method": "web_research",
+    "is_synthetic": false
+  }
+}

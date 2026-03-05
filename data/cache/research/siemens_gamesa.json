@@ -1,0 +1,27 @@
+{
+  "company_name": "Siemens Gamesa",
+  "website": null,
+  "description": "24 de nov. de 2019 \u00b7 Hejsan, Vi har haft lite problem med att v\u00e5r frys med automatisk avfrostning frostar igen. Det b\u00f6rjade f\u00f6r \u2026",
+  "industry": null,
+  "founded_year": null,
+  "employees": null,
+  "headquarters": null,
+  "revenue": null,
+  "funding_raised": null,
+  "valuation": null,
+  "github_url": null,
+  "linkedin_url": "https://br.linkedin.com/company/siemensgamesa/jobs",
+  "twitter_url": null,
+  "ai_score": null,
+  "data_sources": [
+    "web_search",
+    "linkedin"
+  ],
+  "confidence": 0.2,
+  "last_updated": "2026-03-04 11:26:50.177244",
+  "raw_data": {
+    "search_results": 5,
+    "data_collection_method": "web_research",
+    "is_synthetic": false
+  }
+}

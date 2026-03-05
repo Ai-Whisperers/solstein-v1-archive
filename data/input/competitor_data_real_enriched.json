@@ -1,0 +1,495 @@
+{
+  "competitors": [
+    {
+      "company_name": "ABB",
+      "website": "https://www.avanza.se/aktier/om-aktien.html/5447/abb",
+      "description": "Avanza erbjuder ett enklare sparande i fonder och aktier. Kom ig\u00e5ng med ett sparande p\u00e5 3 minuter. V\u00e4lkommen till Avanza \u2013 en bank som den borde vara.",
+      "industry": "Energy Software",
+      "country": "Unknown",
+      "founded_year": null,
+      "employees": 111900,
+      "funding_raised": null,
+      "valuation": 159615.05792,
+      "github_url": null,
+      "revenue": 33219.999744,
+      "ai_maturity_score": 1.5,
+      "data_sources": [
+        "web_search",
+        "company_website",
+        "funding_data"
+      ],
+      "confidence": 0.4,
+      "last_updated": "2026-03-04T11:27:04.287757",
+      "is_synthetic": false,
+      "data_quality": {
+        "confidence_score": 0.4,
+        "validation_issues": [],
+        "data_sources": [
+          "web_search",
+          "company_website",
+          "funding_data"
+        ],
+        "collection_method": "web_research",
+        "is_synthetic": false,
+        "last_validated": "2026-03-04T11:36:07.068862"
+      },
+      "ticker": "ABBNY",
+      "company_number": "03780764",
+      "isin": "CH0012221716",
+      "headquarters": "Unknown",
+      "growth_rate": 5.4,
+      "profit_margin": 14.249999999999998,
+      "enrichment_sources": [
+        "SEC_EDGAR",
+        "COMPANIES_HOUSE",
+        "NEWS_SIGNALS"
+      ],
+      "free_research_sources": [
+        "web_search:funding",
+        "web_search:general",
+        "web_search:product",
+        "web_search:technology",
+        "yahoo_finance"
+      ],
+      "enrichment_errors": [],
+      "identifier_confidence": 0.7166666666666667,
+      "metric_lineage": {
+        "revenue": {
+          "value": 33219.999744,
+          "source": "yahoo_finance",
+          "confidence": 0.78,
+          "unit": "millions"
+        },
+        "employees": {
+          "value": 111900,
+          "source": "yahoo_finance",
+          "confidence": 0.7,
+          "unit": "count"
+        },
+        "growth_rate": {
+          "value": 5.4,
+          "source": "yahoo_finance",
+          "confidence": 0.72,
+          "unit": "percent"
+        },
+        "profit_margin": {
+          "value": 14.249999999999998,
+          "source": "yahoo_finance",
+          "confidence": 0.74,
+          "unit": "percent"
+        },
+        "funding_raised": {
+          "value": null,
+          "source": "SEC_EDGAR",
+          "confidence": null,
+          "unit": "millions"
+        },
+        "valuation": {
+          "value": 159615.05792,
+          "source": "yahoo_finance",
+          "confidence": 0.76,
+          "unit": "millions"
+        }
+      },
+      "source_priority": [
+        "sec_edgar",
+        "companies_house",
+        "yahoo_finance",
+        "web_search",
+        "news_signals"
+      ]
+    },
+    {
+      "company_name": "Enphase Energy",
+      "website": "https://tracxn.com/d/companies/enphaseenergy/__C8EjVOCBLViU1R5Vuc1QvurDukWDFe1l29shYNIOrxE",
+      "description": "Explore Enphase Energy's in-depth company profile, including funding details, key investors, leadership, competitors, and acquisitions.",
+      "industry": "Energy Software",
+      "country": "Unknown",
+      "founded_year": null,
+      "employees": 2872,
+      "funding_raised": 6.5,
+      "valuation": 5590.709248,
+      "github_url": null,
+      "revenue": 1472.98496,
+      "ai_maturity_score": 1.5,
+      "data_sources": [
+        "web_search",
+        "company_website"
+      ],
+      "confidence": 0.4,
+      "last_updated": "2026-03-04T11:26:34.744870",
+      "is_synthetic": false,
+      "data_quality": {
+        "confidence_score": 0.4,
+        "validation_issues": [],
+        "data_sources": [
+          "web_search",
+          "company_website"
+        ],
+        "collection_method": "web_research",
+        "is_synthetic": false,
+        "last_validated": "2026-03-04T11:36:07.068983"
+      },
+      "ticker": "ENPH",
+      "company_number": "07944070",
+      "isin": "US29355A1079",
+      "headquarters": "Unknown",
+      "growth_rate": -10.299999999999999,
+      "profit_margin": 11.686,
+      "enrichment_sources": [
+        "SEC_EDGAR",
+        "COMPANIES_HOUSE",
+        "NEWS_SIGNALS"
+      ],
+      "free_research_sources": [
+        "web_search:funding",
+        "web_search:general",
+        "web_search:product",
+        "web_search:technology",
+        "yahoo_finance"
+      ],
+      "enrichment_errors": [],
+      "identifier_confidence": 0.65,
+      "metric_lineage": {
+        "revenue": {
+          "value": 1472.98496,
+          "source": "yahoo_finance",
+          "confidence": 0.78,
+          "unit": "millions"
+        },
+        "employees": {
+          "value": 2872,
+          "source": "yahoo_finance",
+          "confidence": 0.7,
+          "unit": "count"
+        },
+        "growth_rate": {
+          "value": -10.299999999999999,
+          "source": "yahoo_finance",
+          "confidence": 0.72,
+          "unit": "percent"
+        },
+        "profit_margin": {
+          "value": 11.686,
+          "source": "yahoo_finance",
+          "confidence": 0.74,
+          "unit": "percent"
+        },
+        "funding_raised": {
+          "value": 6.5,
+          "source": "SEC_EDGAR",
+          "confidence": 0.52,
+          "unit": "millions"
+        },
+        "valuation": {
+          "value": 5590.709248,
+          "source": "yahoo_finance",
+          "confidence": 0.76,
+          "unit": "millions"
+        }
+      },
+      "source_priority": [
+        "sec_edgar",
+        "companies_house",
+        "yahoo_finance",
+        "web_search",
+        "news_signals"
+      ]
+    },
+    {
+      "company_name": "Moixa",
+      "website": "https://www.dnb.com/business-directory/company-profiles.moixa_energy_holdings_limited.467ba941f392b1b8dfb5551e4c2d0a77.html",
+      "description": "Use our commercial database of more than 120 million business records & industry directory for company research & industry analysis. Start sales research here.",
+      "industry": "Energy Software",
+      "country": "Unknown",
+      "founded_year": null,
+      "employees": null,
+      "funding_raised": 4.6,
+      "valuation": null,
+      "github_url": null,
+      "revenue": 1.5,
+      "ai_maturity_score": 1.5,
+      "data_sources": [
+        "web_search",
+        "company_website"
+      ],
+      "confidence": 0.4,
+      "last_updated": "2026-03-04T11:27:34.137397",
+      "is_synthetic": false,
+      "data_quality": {
+        "confidence_score": 0.4,
+        "validation_issues": [],
+        "data_sources": [
+          "web_search",
+          "company_website"
+        ],
+        "collection_method": "web_research",
+        "is_synthetic": false,
+        "last_validated": "2026-03-04T11:36:07.069045"
+      },
+      "ticker": null,
+      "company_number": "05631091",
+      "isin": "RU000A0JP5V6",
+      "headquarters": "Unknown",
+      "growth_rate": null,
+      "profit_margin": null,
+      "enrichment_sources": [
+        "COMPANIES_HOUSE",
+        "NEWS_SIGNALS"
+      ],
+      "free_research_sources": [
+        "web_search:funding",
+        "web_search:general",
+        "web_search:product",
+        "web_search:technology"
+      ],
+      "enrichment_errors": [],
+      "identifier_confidence": 0.65,
+      "metric_lineage": {
+        "revenue": {
+          "value": 1.5,
+          "source": "web_search",
+          "confidence": 0.58,
+          "unit": "millions"
+        },
+        "employees": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "count"
+        },
+        "growth_rate": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "percent"
+        },
+        "profit_margin": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "percent"
+        },
+        "funding_raised": {
+          "value": 4.6,
+          "source": "COMPANIES_HOUSE",
+          "confidence": 0.52,
+          "unit": "millions"
+        },
+        "valuation": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "millions"
+        }
+      },
+      "source_priority": [
+        "sec_edgar",
+        "companies_house",
+        "yahoo_finance",
+        "web_search",
+        "news_signals"
+      ]
+    },
+    {
+      "company_name": "OVO Energy",
+      "website": "https://forum.ovoenergy.com/my-account-140",
+      "description": "All about your OVO account. You\u2019ll find questions and answers about your energy use, charges, payments, refunds \u2013 the usual energy supplier stuff, in on...",
+      "industry": "Energy Software",
+      "country": "Unknown",
+      "founded_year": null,
+      "employees": null,
+      "funding_raised": 516.0,
+      "valuation": null,
+      "github_url": null,
+      "revenue": null,
+      "ai_maturity_score": 1.5,
+      "data_sources": [
+        "web_search",
+        "company_website"
+      ],
+      "confidence": 0.4,
+      "last_updated": "2026-03-04T11:26:12.573208",
+      "is_synthetic": false,
+      "data_quality": {
+        "confidence_score": 0.4,
+        "validation_issues": [],
+        "data_sources": [
+          "web_search",
+          "company_website"
+        ],
+        "collection_method": "web_research",
+        "is_synthetic": false,
+        "last_validated": "2026-03-04T11:36:07.069096"
+      },
+      "ticker": null,
+      "company_number": "06890795",
+      "isin": null,
+      "headquarters": "Unknown",
+      "growth_rate": null,
+      "profit_margin": null,
+      "enrichment_sources": [
+        "COMPANIES_HOUSE",
+        "NEWS_SIGNALS"
+      ],
+      "free_research_sources": [
+        "web_search:funding",
+        "web_search:general",
+        "web_search:product",
+        "web_search:technology"
+      ],
+      "enrichment_errors": [],
+      "identifier_confidence": 0.55,
+      "metric_lineage": {
+        "revenue": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "millions"
+        },
+        "employees": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "count"
+        },
+        "growth_rate": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "percent"
+        },
+        "profit_margin": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "percent"
+        },
+        "funding_raised": {
+          "value": 516.0,
+          "source": "COMPANIES_HOUSE",
+          "confidence": 0.52,
+          "unit": "millions"
+        },
+        "valuation": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "millions"
+        }
+      },
+      "source_priority": [
+        "sec_edgar",
+        "companies_house",
+        "yahoo_finance",
+        "web_search",
+        "news_signals"
+      ]
+    },
+    {
+      "company_name": "Sunrun",
+      "website": "https://guangfu.bjx.com.cn/topics/sunrun/",
+      "description": "\u5317\u6781\u661f\u592a\u9633\u80fd\u5149\u4f0f\u7f51\u4e3a\u60a8\u63d0\u4f9bSunrun\u76f8\u5173\u65b0\u95fb\uff0c\u4e86\u89e3Sunrun\u6700\u65b0\u76f8\u5173\u7684\u62a5\u9053\u653f\u7b56\u62db\u6295\u6807\u7b49\u76f8\u5173\u4fe1\u606f\uff0c\u5c31\u6765\u5317\u6781\u661f\u592a\u9633\u80fd\u5149\u4f0f\u7f51\u3002",
+      "industry": "Energy Software",
+      "country": "Unknown",
+      "founded_year": null,
+      "employees": 9059,
+      "funding_raised": 297.0,
+      "valuation": 2858.755328,
+      "github_url": null,
+      "revenue": 2956.99712,
+      "ai_maturity_score": 1.5,
+      "data_sources": [
+        "web_search",
+        "company_website"
+      ],
+      "confidence": 0.4,
+      "last_updated": "2026-03-04T11:26:34.302829",
+      "is_synthetic": false,
+      "data_quality": {
+        "confidence_score": 0.4,
+        "validation_issues": [],
+        "data_sources": [
+          "web_search",
+          "company_website"
+        ],
+        "collection_method": "web_research",
+        "is_synthetic": false,
+        "last_validated": "2026-03-04T11:36:07.069144"
+      },
+      "ticker": "RUN",
+      "company_number": null,
+      "isin": "US86771W1053",
+      "headquarters": "Unknown",
+      "growth_rate": 1.235,
+      "profit_margin": 15.215999,
+      "enrichment_sources": [
+        "SEC_EDGAR",
+        "NEWS_SIGNALS"
+      ],
+      "free_research_sources": [
+        "web_search:funding",
+        "web_search:general",
+        "web_search:product",
+        "web_search:technology",
+        "yahoo_finance"
+      ],
+      "enrichment_errors": [],
+      "identifier_confidence": 0.8,
+      "metric_lineage": {
+        "revenue": {
+          "value": 2956.99712,
+          "source": "yahoo_finance",
+          "confidence": 0.78,
+          "unit": "millions"
+        },
+        "employees": {
+          "value": 9059,
+          "source": "yahoo_finance",
+          "confidence": 0.7,
+          "unit": "count"
+        },
+        "growth_rate": {
+          "value": 1.235,
+          "source": "yahoo_finance",
+          "confidence": 0.72,
+          "unit": "percent"
+        },
+        "profit_margin": {
+          "value": 15.215999,
+          "source": "yahoo_finance",
+          "confidence": 0.74,
+          "unit": "percent"
+        },
+        "funding_raised": {
+          "value": 297.0,
+          "source": "SEC_EDGAR",
+          "confidence": 0.52,
+          "unit": "millions"
+        },
+        "valuation": {
+          "value": 2858.755328,
+          "source": "yahoo_finance",
+          "confidence": 0.76,
+          "unit": "millions"
+        }
+      },
+      "source_priority": [
+        "sec_edgar",
+        "companies_house",
+        "yahoo_finance",
+        "web_search",
+        "news_signals"
+      ]
+    }
+  ],
+  "metadata": {
+    "data_source": "web_research",
+    "collection_date": "2026-03-04T14:36:07.070077",
+    "is_synthetic": false,
+    "real_data_percentage": "100%",
+    "companies_requested": 5,
+    "companies_found": 5,
+    "queue_source": "data/output/research_queue.json"
+  }
+}

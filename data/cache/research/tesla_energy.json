@@ -1,0 +1,27 @@
+{
+  "company_name": "Tesla Energy",
+  "website": null,
+  "description": "24 de feb. de 2026 \u00b7 Das Tesla Forum f\u00fcr technische Probleme, Erfahrungen, Tests und Bilder mit mehr als 121 Beitr\u00e4gen in der Auto \u2026",
+  "industry": null,
+  "founded_year": null,
+  "employees": null,
+  "headquarters": null,
+  "revenue": null,
+  "funding_raised": null,
+  "valuation": null,
+  "github_url": null,
+  "linkedin_url": "https://www.linkedin.com/company/tesla-energy-namibia",
+  "twitter_url": null,
+  "ai_score": null,
+  "data_sources": [
+    "web_search",
+    "linkedin"
+  ],
+  "confidence": 0.2,
+  "last_updated": "2026-03-04 11:26:14.280563",
+  "raw_data": {
+    "search_results": 5,
+    "data_collection_method": "web_research",
+    "is_synthetic": false
+  }
+}

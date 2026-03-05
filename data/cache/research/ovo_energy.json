@@ -1,0 +1,27 @@
+{
+  "company_name": "OVO Energy",
+  "website": "https://forum.ovoenergy.com/my-account-140",
+  "description": "All about your OVO account. You\u2019ll find questions and answers about your energy use, charges, payments, refunds \u2013 the usual energy supplier stuff, in on...",
+  "industry": null,
+  "founded_year": null,
+  "employees": null,
+  "headquarters": null,
+  "revenue": null,
+  "funding_raised": null,
+  "valuation": null,
+  "github_url": null,
+  "linkedin_url": null,
+  "twitter_url": null,
+  "ai_score": null,
+  "data_sources": [
+    "web_search",
+    "company_website"
+  ],
+  "confidence": 0.4,
+  "last_updated": "2026-03-04 11:26:12.573208",
+  "raw_data": {
+    "search_results": 10,
+    "data_collection_method": "web_research",
+    "is_synthetic": false
+  }
+}

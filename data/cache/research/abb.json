@@ -1,0 +1,28 @@
+{
+  "company_name": "ABB",
+  "website": "https://www.avanza.se/aktier/om-aktien.html/5447/abb",
+  "description": "Avanza erbjuder ett enklare sparande i fonder och aktier. Kom ig\u00e5ng med ett sparande p\u00e5 3 minuter. V\u00e4lkommen till Avanza \u2013 en bank som den borde vara.",
+  "industry": null,
+  "founded_year": null,
+  "employees": null,
+  "headquarters": null,
+  "revenue": null,
+  "funding_raised": null,
+  "valuation": 586.6,
+  "github_url": null,
+  "linkedin_url": null,
+  "twitter_url": null,
+  "ai_score": null,
+  "data_sources": [
+    "web_search",
+    "company_website",
+    "funding_data"
+  ],
+  "confidence": 0.4,
+  "last_updated": "2026-03-04 11:27:04.287757",
+  "raw_data": {
+    "search_results": 10,
+    "data_collection_method": "web_research",
+    "is_synthetic": false
+  }
+}

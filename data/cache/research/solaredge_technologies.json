@@ -1,0 +1,26 @@
+{
+  "company_name": "SolarEdge Technologies",
+  "website": null,
+  "description": "5 de sept. de 2025 \u00b7 Es w\u00e4ren also nur die Kosten f\u00fcr den RWS zus\u00e4tzlich. Und die Frage w\u00e4re, ist das technisch problemlos m\u00f6glich? Der Nexis \u2026",
+  "industry": null,
+  "founded_year": null,
+  "employees": null,
+  "headquarters": null,
+  "revenue": null,
+  "funding_raised": null,
+  "valuation": null,
+  "github_url": null,
+  "linkedin_url": null,
+  "twitter_url": null,
+  "ai_score": null,
+  "data_sources": [
+    "web_search"
+  ],
+  "confidence": 0.2,
+  "last_updated": "2026-03-04 11:26:36.314573",
+  "raw_data": {
+    "search_results": 5,
+    "data_collection_method": "web_research",
+    "is_synthetic": false
+  }
+}

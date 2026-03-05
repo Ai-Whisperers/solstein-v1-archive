@@ -1,0 +1,175 @@
+{
+  "competitors": [
+    {
+      "company_name": "ABB",
+      "website": "https://www.avanza.se/aktier/om-aktien.html/5447/abb",
+      "description": "Avanza erbjuder ett enklare sparande i fonder och aktier. Kom ig\u00e5ng med ett sparande p\u00e5 3 minuter. V\u00e4lkommen till Avanza \u2013 en bank som den borde vara.",
+      "industry": "Energy Software",
+      "country": "Unknown",
+      "founded_year": null,
+      "employees": null,
+      "funding_raised": null,
+      "valuation": 586600000.0,
+      "github_url": null,
+      "revenue": null,
+      "ai_maturity_score": null,
+      "data_sources": [
+        "web_search",
+        "company_website",
+        "funding_data"
+      ],
+      "confidence": 0.4,
+      "last_updated": "2026-03-04T11:27:04.287757",
+      "is_synthetic": false,
+      "data_quality": {
+        "confidence_score": 0.4,
+        "validation_issues": [],
+        "data_sources": [
+          "web_search",
+          "company_website",
+          "funding_data"
+        ],
+        "collection_method": "web_research",
+        "is_synthetic": false,
+        "last_validated": "2026-03-04T11:36:07.068862"
+      }
+    },
+    {
+      "company_name": "Enphase Energy",
+      "website": "https://tracxn.com/d/companies/enphaseenergy/__C8EjVOCBLViU1R5Vuc1QvurDukWDFe1l29shYNIOrxE",
+      "description": "Explore Enphase Energy's in-depth company profile, including funding details, key investors, leadership, competitors, and acquisitions.",
+      "industry": "Energy Software",
+      "country": "Unknown",
+      "founded_year": null,
+      "employees": null,
+      "funding_raised": null,
+      "valuation": null,
+      "github_url": null,
+      "revenue": null,
+      "ai_maturity_score": null,
+      "data_sources": [
+        "web_search",
+        "company_website"
+      ],
+      "confidence": 0.4,
+      "last_updated": "2026-03-04T11:26:34.744870",
+      "is_synthetic": false,
+      "data_quality": {
+        "confidence_score": 0.4,
+        "validation_issues": [],
+        "data_sources": [
+          "web_search",
+          "company_website"
+        ],
+        "collection_method": "web_research",
+        "is_synthetic": false,
+        "last_validated": "2026-03-04T11:36:07.068983"
+      }
+    },
+    {
+      "company_name": "Moixa",
+      "website": "https://www.dnb.com/business-directory/company-profiles.moixa_energy_holdings_limited.467ba941f392b1b8dfb5551e4c2d0a77.html",
+      "description": "Use our commercial database of more than 120 million business records & industry directory for company research & industry analysis. Start sales research here.",
+      "industry": "Energy Software",
+      "country": "Unknown",
+      "founded_year": null,
+      "employees": null,
+      "funding_raised": null,
+      "valuation": null,
+      "github_url": null,
+      "revenue": null,
+      "ai_maturity_score": null,
+      "data_sources": [
+        "web_search",
+        "company_website"
+      ],
+      "confidence": 0.4,
+      "last_updated": "2026-03-04T11:27:34.137397",
+      "is_synthetic": false,
+      "data_quality": {
+        "confidence_score": 0.4,
+        "validation_issues": [],
+        "data_sources": [
+          "web_search",
+          "company_website"
+        ],
+        "collection_method": "web_research",
+        "is_synthetic": false,
+        "last_validated": "2026-03-04T11:36:07.069045"
+      }
+    },
+    {
+      "company_name": "OVO Energy",
+      "website": "https://forum.ovoenergy.com/my-account-140",
+      "description": "All about your OVO account. You\u2019ll find questions and answers about your energy use, charges, payments, refunds \u2013 the usual energy supplier stuff, in on...",
+      "industry": "Energy Software",
+      "country": "Unknown",
+      "founded_year": null,
+      "employees": null,
+      "funding_raised": null,
+      "valuation": null,
+      "github_url": null,
+      "revenue": null,
+      "ai_maturity_score": null,
+      "data_sources": [
+        "web_search",
+        "company_website"
+      ],
+      "confidence": 0.4,
+      "last_updated": "2026-03-04T11:26:12.573208",
+      "is_synthetic": false,
+      "data_quality": {
+        "confidence_score": 0.4,
+        "validation_issues": [],
+        "data_sources": [
+          "web_search",
+          "company_website"
+        ],
+        "collection_method": "web_research",
+        "is_synthetic": false,
+        "last_validated": "2026-03-04T11:36:07.069096"
+      }
+    },
+    {
+      "company_name": "Sunrun",
+      "website": "https://guangfu.bjx.com.cn/topics/sunrun/",
+      "description": "\u5317\u6781\u661f\u592a\u9633\u80fd\u5149\u4f0f\u7f51\u4e3a\u60a8\u63d0\u4f9bSunrun\u76f8\u5173\u65b0\u95fb\uff0c\u4e86\u89e3Sunrun\u6700\u65b0\u76f8\u5173\u7684\u62a5\u9053\u653f\u7b56\u62db\u6295\u6807\u7b49\u76f8\u5173\u4fe1\u606f\uff0c\u5c31\u6765\u5317\u6781\u661f\u592a\u9633\u80fd\u5149\u4f0f\u7f51\u3002",
+      "industry": "Energy Software",
+      "country": "Unknown",
+      "founded_year": null,
+      "employees": null,
+      "funding_raised": null,
+      "valuation": null,
+      "github_url": null,
+      "revenue": null,
+      "ai_maturity_score": null,
+      "data_sources": [
+        "web_search",
+        "company_website"
+      ],
+      "confidence": 0.4,
+      "last_updated": "2026-03-04T11:26:34.302829",
+      "is_synthetic": false,
+      "data_quality": {
+        "confidence_score": 0.4,
+        "validation_issues": [],
+        "data_sources": [
+          "web_search",
+          "company_website"
+        ],
+        "collection_method": "web_research",
+        "is_synthetic": false,
+        "last_validated": "2026-03-04T11:36:07.069144"
+      }
+    }
+  ],
+  "metadata": {
+    "data_source": "web_research",
+    "collection_date": "2026-03-04T14:36:07.070077",
+    "is_synthetic": false,
+    "real_data_percentage": "100%",
+    "companies_requested": 5,
+    "companies_found": 5,
+    "queue_source": "data/output/research_queue.json"
+  }
+}

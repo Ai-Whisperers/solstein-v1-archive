@@ -1,0 +1,26 @@
+{
+  "company_name": "Bulb Energy",
+  "website": null,
+  "description": "Hace 3 d\u00edas \u00b7 This mission reflects the NSAA\u2019s commitment to empowering students and all who serve them by providing structured opportunities to inspire lifelong memories for kids, coaches, and \u2026",
+  "industry": null,
+  "founded_year": null,
+  "employees": null,
+  "headquarters": null,
+  "revenue": null,
+  "funding_raised": null,
+  "valuation": null,
+  "github_url": null,
+  "linkedin_url": null,
+  "twitter_url": null,
+  "ai_score": null,
+  "data_sources": [
+    "web_search"
+  ],
+  "confidence": 0.2,
+  "last_updated": "2026-03-04 11:26:13.008577",
+  "raw_data": {
+    "search_results": 10,
+    "data_collection_method": "web_research",
+    "is_synthetic": false
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "company_name": "Schneider Electric",
+  "website": null,
+  "description": "\u65bd\u8010\u5fb7\u5149\u5b66\uff08Schneider Kreuznach\uff09\u662f\u5fb7\u56fd\u516c\u53f8 \u65bd\u8010\u5fb7\u7535\u6c14\uff08Schneider Electric\uff09\u662f\u6cd5\u56fd\u516c\u53f8 \u8fd9\u4e24\u4e2a\u516c\u53f8\u4e4b\u95f4\u6ca1\u6709\u5173\u7cfb\uff0c\u521b\u59cb\u4eba\u662f\u4e0d\u662f\u8fdc\u623f\u4eb2\u621a\u5c31\u4e0d\u597d\u8bf4\u4e86 \u65bd\u8010\u5fb7\u7535\u6c14\u516c\u53f8\u539f\u540d\u65bd\u8010\u5fb7\u514b\u52d2\u4f50\uff0c\u662f\u6b27\u4e5f\u59aeEug\u00e8ne \u2026",
+  "industry": null,
+  "founded_year": null,
+  "employees": null,
+  "headquarters": null,
+  "revenue": null,
+  "funding_raised": null,
+  "valuation": null,
+  "github_url": null,
+  "linkedin_url": null,
+  "twitter_url": null,
+  "ai_score": null,
+  "data_sources": [
+    "web_search"
+  ],
+  "confidence": 0.2,
+  "last_updated": "2026-03-04 11:27:02.661129",
+  "raw_data": {
+    "search_results": 10,
+    "data_collection_method": "web_research",
+    "is_synthetic": false
+  }
+}

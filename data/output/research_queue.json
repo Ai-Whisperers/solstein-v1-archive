@@ -1,0 +1,79 @@
+{
+  "total_companies": 5,
+  "queued_companies": 3,
+  "missing_counts": {
+    "company_name": 0,
+    "industry": 0,
+    "headquarters": 0,
+    "website": 0,
+    "revenue": 1,
+    "employees": 2,
+    "growth_rate": 2,
+    "profit_margin": 2,
+    "funding_raised": 1,
+    "valuation": 2,
+    "ai_maturity_score": 0
+  },
+  "queue": [
+    {
+      "company": "OVO Energy",
+      "missing_fields": [
+        "revenue",
+        "employees",
+        "growth_rate",
+        "profit_margin",
+        "valuation"
+      ],
+      "confidence": 0.4,
+      "sources": [
+        "web_search",
+        "company_website"
+      ],
+      "priority_score": 13,
+      "research_actions": [
+        "Use SEC filings or premium private-company connector",
+        "Use annual reports/official filings",
+        "Derive from multi-period revenue after revenue is sourced",
+        "Use financial statements",
+        "Use PitchBook/CapIQ/transactions"
+      ]
+    },
+    {
+      "company": "Moixa",
+      "missing_fields": [
+        "employees",
+        "growth_rate",
+        "profit_margin",
+        "valuation"
+      ],
+      "confidence": 0.4,
+      "sources": [
+        "web_search",
+        "company_website"
+      ],
+      "priority_score": 10,
+      "research_actions": [
+        "Use annual reports/official filings",
+        "Derive from multi-period revenue after revenue is sourced",
+        "Use financial statements",
+        "Use PitchBook/CapIQ/transactions"
+      ]
+    },
+    {
+      "company": "ABB",
+      "missing_fields": [
+        "funding_raised"
+      ],
+      "confidence": 0.4,
+      "sources": [
+        "web_search",
+        "company_website",
+        "funding_data"
+      ],
+      "priority_score": 1,
+      "research_actions": [
+        "Use Crunchbase/PitchBook/Orbis"
+      ]
+    }
+  ]
+}
