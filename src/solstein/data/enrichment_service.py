@@ -8,8 +8,10 @@ Separates enrichment logic from loading logic into focused service classes:
 - ConnectorFactory: Creates connector instances
 """
 
+import json
 import logging
 from datetime import datetime, timezone
+from pathlib import Path
 
 from .enrichment_config import UnifiedCompanyLoaderConfig, get_config
 from .enrichment_orchestrator import EnrichmentConfig, EnrichmentOrchestrator, EnrichmentSource
@@ -24,6 +26,16 @@ from .source_policy import SourceTier
 from .enrichment_types import EnrichableCompany
 
 logger = logging.getLogger(__name__)
+
+
+def _append_enrichment_audit(entry: dict[str, object]) -> None:
+    audit_path = Path("data/output/enrichment_audit.jsonl")
+    audit_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with audit_path.open("a", encoding="utf-8") as handle:
+            _ = handle.write(json.dumps(entry) + "\n")
+    except Exception as exc:
+        logger.error("Failed to write enrichment audit: %s", exc)
 
 
 class ConnectorFactory:
@@ -285,6 +297,17 @@ class EnrichmentService:
             for source in paid_sources:
                 if paid_attempts >= self.config.paid_escalation_max_attempts:
                     errors.append("Paid escalation attempt budget exceeded")
+                    _append_enrichment_audit(
+                        {
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "company": company.name,
+                            "operation": "paid_escalation",
+                            "status": "blocked",
+                            "reason": "budget_exceeded",
+                            "unresolved_fields": unresolved_fields,
+                            "max_attempts": self.config.paid_escalation_max_attempts,
+                        }
+                    )
                     break
 
                 policy = self.orchestrator.source_policies.get(source.value)
@@ -301,6 +324,17 @@ class EnrichmentService:
                         enriched = self._enrich_from_news_signals(enriched)
                     sources_used.append(source)
                     paid_attempts += 1
+                    _append_enrichment_audit(
+                        {
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "company": company.name,
+                            "operation": "paid_escalation",
+                            "status": "attempted",
+                            "source": source.value,
+                            "unresolved_fields": unresolved_fields,
+                            "attempt": paid_attempts,
+                        }
+                    )
                     if hasattr(enriched, "enrichment_sources"):
                         enriched.enrichment_sources.append(f"paid-escalation:{source.value}")
                     if hasattr(enriched, "enrichment_timestamps"):
@@ -315,6 +349,16 @@ class EnrichmentService:
                         e,
                     )
                     errors.append(error_msg)
+                    _append_enrichment_audit(
+                        {
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "company": company.name,
+                            "operation": "paid_escalation",
+                            "status": "failed",
+                            "source": source.value,
+                            "error": str(e),
+                        }
+                    )
 
                     if self.config.rollback_on_error:
                         enriched = self.orchestrator.rollback_on_error(company, enriched, str(e))
@@ -325,6 +369,16 @@ class EnrichmentService:
                 "Paid escalation disabled; unresolved enrichment fields remain for %s: %s",
                 company.name,
                 [field.value for field in fields],
+            )
+            _append_enrichment_audit(
+                {
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "company": company.name,
+                    "operation": "paid_escalation",
+                    "status": "skipped",
+                    "reason": "disabled",
+                    "unresolved_fields": [field.value for field in fields],
+                }
             )
 
         return enriched, sources_used, errors

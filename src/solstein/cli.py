@@ -3,6 +3,8 @@ Command-line interface for SolStein.
 """
 
 import json
+from datetime import datetime
+import json
 from pathlib import Path
 
 import click
@@ -31,6 +33,20 @@ def cli(verbose: bool) -> None:
 def _ensure_release_gate(companies: list[Company]) -> None:
     gate = ReportReleaseGate()
     result = gate.evaluate(companies)
+    audit_path = Path("data/output/release_gate_audit.jsonl")
+    audit_path.parent.mkdir(parents=True, exist_ok=True)
+    audit_entry = {
+        "timestamp": datetime.now().isoformat(),
+        "passed": result.passed,
+        "companies": [company.name for company in companies],
+        "reasons": [{"code": reason.code, "message": reason.message} for reason in result.reasons],
+    }
+    try:
+        with audit_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(audit_entry) + "\n")
+    except Exception as exc:
+        logger.error("Failed to write release gate audit", error=str(exc))
+
     if result.passed:
         return
     click.echo("❌ Report release gate failed", err=True)

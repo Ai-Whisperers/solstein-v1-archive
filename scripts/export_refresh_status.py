@@ -8,12 +8,18 @@ from pathlib import Path
 from loguru import logger
 
 from solstein.infrastructure.database import db_manager
+from sqlalchemy.exc import OperationalError
+
 from solstein.infrastructure.refresh import build_refresh_snapshot, get_refresh_statuses
 
 
 async def main(output_path: Path) -> None:
     db_manager.init_async()
-    statuses = await get_refresh_statuses(db_manager=db_manager)
+    try:
+        statuses = await get_refresh_statuses(db_manager=db_manager)
+    except OperationalError as exc:
+        logger.warning("Refresh metadata unavailable", error=str(exc))
+        statuses = []
     snapshot = build_refresh_snapshot(statuses, generated_at=datetime.now(timezone.utc))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(snapshot, indent=2))

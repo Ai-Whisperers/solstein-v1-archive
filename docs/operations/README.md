@@ -7,3 +7,4 @@ Deployment, migration, rollback, and production-readiness operational documents.
 - `MIGRATION_GUIDE.md`
 - `ROLLBACK_PLAN.md`
 - `PRODUCTION_READINESS_REPORT.md`
+- `RELEASE_READINESS_CHECKLIST.md`

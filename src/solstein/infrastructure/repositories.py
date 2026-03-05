@@ -9,6 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from solstein.domain.facts import Fact, FactSource, GatheringBatch
+from solstein.infrastructure.database_models import ReleaseGateAuditRecord
 
 
 class FactRepository:
@@ -180,6 +181,32 @@ class FactRepository:
         result = await self.session.execute(stmt)
         fact = result.scalar_one_or_none()
         return fact
+
+
+class ReleaseGateAuditRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def log_decision(
+        self,
+        operation: str,
+        status: str,
+        company_ids: list[str],
+        company_names: list[str],
+        reason_codes: list[str],
+        reason_details: list[dict[str, object]] | None = None,
+    ) -> ReleaseGateAuditRecord:
+        record = ReleaseGateAuditRecord(
+            operation=operation,
+            status=status,
+            company_ids=company_ids,
+            company_names=company_names,
+            reason_codes=reason_codes,
+            reason_details=reason_details,
+        )
+        self.session.add(record)
+        await self.session.flush()
+        return record
 
     async def add_source(
         self,

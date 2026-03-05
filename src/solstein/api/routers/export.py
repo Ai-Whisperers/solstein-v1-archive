@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from typing import Protocol, cast
 
@@ -10,6 +11,8 @@ from ...config import get_settings
 from ...core.repositories import CompanyFilter, CompanyRepository
 from ...domain.models import Company
 from ...exporters.excel import ExcelExporter
+from ...infrastructure.database import db_manager
+from ...infrastructure.repositories import ReleaseGateAuditRepository
 from ...data.report_release_gate import ReportReleaseGate
 from ..dependencies import get_current_user, get_company_repository
 from ..exceptions import APIError
@@ -29,15 +32,59 @@ class LLMCompanyRepository(Protocol):
     ) -> tuple[list[Company], dict[str, object]]: ...
 
 
-def _gate_or_raise(companies: list[Company]) -> None:
+def _reason_details(result) -> list[dict[str, object]]:
+    return [{"code": reason.code, "message": reason.message} for reason in result.reasons]
+
+
+async def _log_gate_decision(
+    operation: str,
+    status_value: str,
+    companies: list[Company],
+    reasons: list[dict[str, object]] | None = None,
+) -> None:
+    company_ids = [company.id for company in companies]
+    company_names = [company.name for company in companies]
+    reason_codes = [str(reason.get("code", "unknown")) for reason in (reasons or [])]
+    async with db_manager.get_session() as session:
+        repo = ReleaseGateAuditRepository(session)
+        await repo.log_decision(
+            operation=operation,
+            status=status_value,
+            company_ids=company_ids,
+            company_names=company_names,
+            reason_codes=reason_codes,
+            reason_details=reasons,
+        )
+        await session.commit()
+
+
+def _gate_or_raise_sync(companies: list[Company], operation: str) -> None:
     result = report_gate.evaluate(companies)
+    details = _reason_details(result)
+    status_value = "passed" if result.passed else "blocked"
+    asyncio.run(_log_gate_decision(operation, status_value, companies, details))
     if result.passed:
         return
     raise APIError(
         code="REPORT_NOT_READY",
         message="Report release gate failed",
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        details=[{"code": reason.code, "message": reason.message} for reason in result.reasons],
+        details=details,
+    )
+
+
+async def _gate_or_raise_async(companies: list[Company], operation: str) -> None:
+    result = report_gate.evaluate(companies)
+    details = _reason_details(result)
+    status_value = "passed" if result.passed else "blocked"
+    await _log_gate_decision(operation, status_value, companies, details)
+    if result.passed:
+        return
+    raise APIError(
+        code="REPORT_NOT_READY",
+        message="Report release gate failed",
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        details=details,
     )
 
 
@@ -60,7 +107,7 @@ def _run_excel_export(repo: CompanyRepository, filters: dict[str, str], filename
         companies = scored_companies
 
         try:
-            _gate_or_raise(companies)
+            _gate_or_raise_sync(companies, operation="excel")
         except APIError as exc:
             logger.error(f"Excel export blocked by gate: {exc.details}")
             return
@@ -141,7 +188,7 @@ async def export_to_json(
             company_dict = scored.model_dump(mode="json")
             companies_data.append(company_dict)
 
-        _gate_or_raise(scored_companies)
+        await _gate_or_raise_async(scored_companies, operation="json")
 
         # Create output
         export_data = {

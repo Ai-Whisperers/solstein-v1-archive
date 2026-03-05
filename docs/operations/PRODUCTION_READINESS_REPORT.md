@@ -237,6 +237,39 @@ EXPOSE 8000
 CMD ["uvicorn", "solstein.api.main:app", "--host", "0.0.0.0"]
 ```
 
+---
+
+## Release Readiness Automation (2026-03-05)
+
+The release gate is now enforced across CLI and API exports. Use the checklist below to confirm readiness before client delivery.
+
+### Automated Checks
+
+```bash
+# 1) Refresh status snapshot (staleness signal)
+PYTHONPATH=src python scripts/export_refresh_status.py
+
+# 2) Enrichment audit trail (JSONL)
+ls -la data/output/enrichment_audit.jsonl
+
+# 3) Release gate audit trail (JSONL)
+ls -la data/output/release_gate_audit.jsonl
+
+# 4) CLI report generation (gate enforced)
+PYTHONPATH=src solstein generate_report --input data/input/competitor_data_real.json --company "Target Company"
+```
+
+### Expected Artifacts
+
+- `data/output/refresh/refresh_status.json`
+- `data/output/enrichment_audit.jsonl`
+- `data/output/release_gate_audit.jsonl`
+
+### Failure Modes
+
+- **Gate fails**: `REPORT_NOT_READY` with reason codes (synthetic_data, gap_analysis, completeness, stale_refresh)
+- **Stale refresh**: refresh_status.json shows `overall_stale: true`
+
 ### Kubernetes Deployment
 ```yaml
 apiVersion: apps/v1

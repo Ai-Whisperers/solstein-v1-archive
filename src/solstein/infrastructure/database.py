@@ -57,7 +57,6 @@ class DatabaseManager:
             pool_size=self.settings.database.pool_size,
             max_overflow=10,
             echo=self.settings.database.echo,
-            poolclass=QueuePool,
         )
 
         self.session_factory = async_sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
