@@ -1,0 +1,21 @@
+name: 'Install Project Dependencies'
+description: 'Install project dependencies using uv'
+inputs:
+  extras:
+    description: 'Extra dependencies to install (e.g., dev, test)'
+    required: false
+    default: 'dev'
+  additional-packages:
+    description: 'Additional packages to install'
+    required: false
+    default: ''
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      run: |
+        uv pip install --system -e ".[${{ inputs.extras }}]"
+        if [ -n "${{ inputs.additional-packages }}" ]; then
+          uv pip install --system ${{ inputs.additional-packages }}
+        fi
+      shell: bash

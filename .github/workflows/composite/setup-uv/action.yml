@@ -1,0 +1,8 @@
+name: 'Install UV'
+description: 'Install UV package manager'
+runs:
+  using: "composite"
+  steps:
+    - name: Install uv
+      run: pip install uv
+      shell: bash
