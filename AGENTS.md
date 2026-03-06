@@ -547,7 +547,99 @@ PYTHONPATH=src celery -A solstein.celery_config worker --loglevel=debug
 ### Optional
 - Ollama (for local LLM inference)
 
+## Code Quality Guidelines for Agents
+
+**CRITICAL: All code must pass automated quality gates.**
+
+### Function Size Limits
+- **Maximum:** 100 lines per function
+- **Target:** <50 lines per function
+- **Action:** If your function exceeds 50 lines, break it down immediately
+
+### Class Size Limits
+- **Maximum:** 300 lines per class
+- **Maximum:** 15 methods per class
+- **Target:** <200 lines per class
+- **Action:** Extract classes if exceeding limits
+
+### File Size Limits
+- **Maximum:** 500 lines per file
+- **Target:** <400 lines per file
+- **Action:** Split into modules if exceeding limits
+
+### Parameter Limits
+- **Maximum:** 5 parameters per function
+- **Action:** Use parameter objects or builders if exceeding
+
+### Nesting Limits
+- **Maximum:** 4 levels of indentation
+- **Action:** Extract early returns, use guard clauses
+
+### Error Handling
+- **NEVER use bare except clauses**
+- **ALWAYS catch specific exceptions**
+- **NEVER silently catch errors**
+
+```python
+# ❌ FORBIDDEN:
+try:
+    process_data()
+except:
+    pass
+
+# ✅ REQUIRED:
+try:
+    process_data()
+except ValueError as e:
+    logger.error(f"Invalid data: {e}")
+    raise BusinessError("Processing failed") from e
+```
+
+### Import Rules
+- **NO lazy imports** (imports inside functions)
+- **Place all imports at top of file**
+- **Use absolute imports** (not relative)
+
+```python
+# ❌ FORBIDDEN:
+def some_function():
+    from . import utils  # Lazy import!
+    utils.do_something()
+
+# ✅ REQUIRED:
+from solstein import utils  # At top of file
+
+def some_function():
+    utils.do_something()
+```
+
+### Automated Enforcement
+CI/CD will **REJECT** your PR if:
+- Any function >100 lines
+- Any class >300 lines
+- Any file >500 lines
+- Any bare except clauses
+- Lazy imports detected
+
+### Quality Check Commands
+
+```bash
+# Check your code before committing
+python scripts/ci/code_smell_detector.py src/your/file.py
+python scripts/ci/check_function_sizes.py src/your/file.py
+python scripts/ci/check_class_sizes.py src/your/file.py
+python scripts/ci/check_file_sizes.py
+```
+
+### Code Smell References
+- See [EPIC-019](../docs/epics/EPIC-019-AUTOMATED-CODE-QUALITY-GUARDRAILS.md) for full guidelines
+- See [COMPLETE_CODE_SMELLS_FULL_ANALYSIS.md](../COMPLETE_CODE_SMELLS_FULL_ANALYSIS.md) for current issues
+- All new code must not increase smell count
+
 ---
+
+## Version History
+
 
 ## Version History
 
