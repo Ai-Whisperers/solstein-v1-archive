@@ -47,8 +47,6 @@ class GrowthMomentumScorer:
 
         if financials.growth_rate is not None:
             growth_rate = financials.growth_rate
-            if growth_rate <= 1:
-                growth_rate = growth_rate * 100
             growth_factor = min(
                 growth_rate / cfg.revenue_growth_divisor,
                 cfg.revenue_growth_cap,

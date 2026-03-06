@@ -9,7 +9,7 @@
       "founded_year": null,
       "employees": 111900,
       "funding_raised": null,
-      "valuation": 159615.05792,
+      "valuation": 155363.278848,
       "github_url": null,
       "revenue": 33219.999744,
       "ai_maturity_score": 1.5,
@@ -39,16 +39,8 @@
       "headquarters": "Unknown",
       "growth_rate": 5.4,
       "profit_margin": 14.249999999999998,
-      "enrichment_sources": [
-        "SEC_EDGAR",
-        "COMPANIES_HOUSE",
-        "NEWS_SIGNALS"
-      ],
+      "enrichment_sources": [],
       "free_research_sources": [
-        "web_search:funding",
-        "web_search:general",
-        "web_search:product",
-        "web_search:technology",
         "yahoo_finance"
       ],
       "enrichment_errors": [],
@@ -80,12 +72,12 @@
         },
         "funding_raised": {
           "value": null,
-          "source": "SEC_EDGAR",
+          "source": "yahoo_finance",
           "confidence": null,
           "unit": "millions"
         },
         "valuation": {
-          "value": 159615.05792,
+          "value": 155363.278848,
           "source": "yahoo_finance",
           "confidence": 0.76,
           "unit": "millions"
@@ -107,8 +99,8 @@
       "country": "Unknown",
       "founded_year": null,
       "employees": 2872,
-      "funding_raised": 6.5,
-      "valuation": 5590.709248,
+      "funding_raised": null,
+      "valuation": 5394.716672,
       "github_url": null,
       "revenue": 1472.98496,
       "ai_maturity_score": 1.5,
@@ -136,16 +128,8 @@
       "headquarters": "Unknown",
       "growth_rate": -10.299999999999999,
       "profit_margin": 11.686,
-      "enrichment_sources": [
-        "SEC_EDGAR",
-        "COMPANIES_HOUSE",
-        "NEWS_SIGNALS"
-      ],
+      "enrichment_sources": [],
       "free_research_sources": [
-        "web_search:funding",
-        "web_search:general",
-        "web_search:product",
-        "web_search:technology",
         "yahoo_finance"
       ],
       "enrichment_errors": [],
@@ -176,13 +160,13 @@
           "unit": "percent"
         },
         "funding_raised": {
-          "value": 6.5,
-          "source": "SEC_EDGAR",
-          "confidence": 0.52,
+          "value": null,
+          "source": "yahoo_finance",
+          "confidence": null,
           "unit": "millions"
         },
         "valuation": {
-          "value": 5590.709248,
+          "value": 5394.716672,
           "source": "yahoo_finance",
           "confidence": 0.76,
           "unit": "millions"
@@ -204,10 +188,10 @@
       "country": "Unknown",
       "founded_year": null,
       "employees": null,
-      "funding_raised": 4.6,
+      "funding_raised": null,
       "valuation": null,
       "github_url": null,
-      "revenue": 1.5,
+      "revenue": null,
       "ai_maturity_score": 1.5,
       "data_sources": [
         "web_search",
@@ -237,19 +221,14 @@
         "COMPANIES_HOUSE",
         "NEWS_SIGNALS"
       ],
-      "free_research_sources": [
-        "web_search:funding",
-        "web_search:general",
-        "web_search:product",
-        "web_search:technology"
-      ],
+      "free_research_sources": [],
       "enrichment_errors": [],
       "identifier_confidence": 0.65,
       "metric_lineage": {
         "revenue": {
-          "value": 1.5,
-          "source": "web_search",
-          "confidence": 0.58,
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
           "unit": "millions"
         },
         "employees": {
@@ -271,9 +250,9 @@
           "unit": "percent"
         },
         "funding_raised": {
-          "value": 4.6,
+          "value": null,
           "source": "COMPANIES_HOUSE",
-          "confidence": 0.52,
+          "confidence": null,
           "unit": "millions"
         },
         "valuation": {
@@ -299,7 +278,7 @@
       "country": "Unknown",
       "founded_year": null,
       "employees": null,
-      "funding_raised": 516.0,
+      "funding_raised": null,
       "valuation": null,
       "github_url": null,
       "revenue": null,
@@ -332,12 +311,7 @@
         "COMPANIES_HOUSE",
         "NEWS_SIGNALS"
       ],
-      "free_research_sources": [
-        "web_search:funding",
-        "web_search:general",
-        "web_search:product",
-        "web_search:technology"
-      ],
+      "free_research_sources": [],
       "enrichment_errors": [],
       "identifier_confidence": 0.55,
       "metric_lineage": {
@@ -366,9 +340,9 @@
           "unit": "percent"
         },
         "funding_raised": {
-          "value": 516.0,
+          "value": null,
           "source": "COMPANIES_HOUSE",
-          "confidence": 0.52,
+          "confidence": null,
           "unit": "millions"
         },
         "valuation": {
@@ -394,8 +368,8 @@
       "country": "Unknown",
       "founded_year": null,
       "employees": 9059,
-      "funding_raised": 297.0,
-      "valuation": 2858.755328,
+      "funding_raised": null,
+      "valuation": 2735.773184,
       "github_url": null,
       "revenue": 2956.99712,
       "ai_maturity_score": 1.5,
@@ -423,15 +397,8 @@
       "headquarters": "Unknown",
       "growth_rate": 1.235,
       "profit_margin": 15.215999,
-      "enrichment_sources": [
-        "SEC_EDGAR",
-        "NEWS_SIGNALS"
-      ],
+      "enrichment_sources": [],
       "free_research_sources": [
-        "web_search:funding",
-        "web_search:general",
-        "web_search:product",
-        "web_search:technology",
         "yahoo_finance"
       ],
       "enrichment_errors": [],
@@ -462,13 +429,13 @@
           "unit": "percent"
         },
         "funding_raised": {
-          "value": 297.0,
-          "source": "SEC_EDGAR",
-          "confidence": 0.52,
+          "value": null,
+          "source": "yahoo_finance",
+          "confidence": null,
           "unit": "millions"
         },
         "valuation": {
-          "value": 2858.755328,
+          "value": 2735.773184,
           "source": "yahoo_finance",
           "confidence": 0.76,
           "unit": "millions"

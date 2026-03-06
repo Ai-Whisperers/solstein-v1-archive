@@ -10,7 +10,7 @@
     "ticker": "ABBNY",
     "ticker_confidence": 0.85,
     "ticker_source": "duckduckgo_search",
-    "updated_at": "2026-03-04T18:03:25.757253+00:00"
+    "updated_at": "2026-03-05T23:11:11.883429+00:00"
   },
   "enphase energy": {
     "company_number": "07944070",
@@ -23,7 +23,7 @@
     "ticker": "ENPH",
     "ticker_confidence": 0.65,
     "ticker_source": "duckduckgo_search",
-    "updated_at": "2026-03-04T18:03:43.363379+00:00"
+    "updated_at": "2026-03-05T23:11:15.436980+00:00"
   },
   "moixa": {
     "company_number": "05631091",
@@ -33,14 +33,14 @@
     "isin": "RU000A0JP5V6",
     "isin_confidence": 0.75,
     "isin_source": "duckduckgo_search",
-    "updated_at": "2026-03-04T18:04:03.658198+00:00"
+    "updated_at": "2026-03-05T23:11:17.567906+00:00"
   },
   "ovo energy": {
     "company_number": "06890795",
     "company_number_confidence": 0.55,
     "company_number_source": "duckduckgo_search",
     "identifier_confidence": 0.55,
-    "updated_at": "2026-03-04T18:04:26.532979+00:00"
+    "updated_at": "2026-03-05T23:11:17.568956+00:00"
   },
   "sunrun": {
     "identifier_confidence": 0.8,
@@ -50,6 +50,6 @@
     "ticker": "RUN",
     "ticker_confidence": 0.85,
     "ticker_source": "duckduckgo_search",
-    "updated_at": "2026-03-04T18:04:52.444921+00:00"
+    "updated_at": "2026-03-05T23:11:17.569816+00:00"
   }
 }

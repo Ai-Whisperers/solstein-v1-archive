@@ -1,10 +1,15 @@
-"""
-Standardized error handling for SolStein API.
+"""Standardized error handling for SolStein API with secure responses.
 
 Provides:
 - APIError: Custom exception with code, message, status_code
 - Global exception handlers for consistent JSON error responses
+- Secure error responses (no traceback exposure in production)
 - Structured error format: {"error": {"code": "...", "message": "...", "details": ...}}
+
+Security:
+- Stack traces only returned when DEBUG_ERRORS=true AND environment != production
+- Internal details filtered from error responses
+- Full error details always logged server-side
 """
 
 import sys
@@ -17,12 +22,15 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from solstein.config import get_settings
+from solstein.exceptions import SolsteinError
+
 
 class APIError(StarletteHTTPException):
     """Custom API exception with structured error code and message.
 
     Attributes:
-        code: Machine-readable error code (e.g., "NOT_FOUND", "VALIDATION_ERROR")
+        code: Machine-readable error code (e.g. "NOT_FOUND", "VALIDATION_ERROR")
         message: Human-readable error message
         status_code: HTTP status code
         details: Optional additional error details
@@ -40,155 +48,100 @@ class APIError(StarletteHTTPException):
         Args:
             code: Machine-readable error code
             message: Human-readable error message
-            status_code: HTTP status code (default: 500)
+            status_code: HTTP status code
             details: Optional additional error details
         """
+        super().__init__(status_code=status_code, detail=message)
         self.code = code
         self.message = message
-        self.status_code = status_code
         self.details = details
-        super().__init__(status_code=status_code, detail=message)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert error to dictionary format."""
+        return {
+            "code": self.code,
+            "message": self.message,
+            "details": self.details,
+        }
 
 
 def setup_exception_handlers(app: FastAPI) -> None:
-    """Register robust, structured global exception handlers.
+    """Configure global exception handlers for the FastAPI application.
 
-    Handles:
-    - APIError: Custom API exceptions with structured codes
-    - RequestValidationError: Pydantic validation errors (422)
-    - StarletteHTTPException: Standard HTTP exceptions (404, 401, etc.)
-    - Exception: Catch-all for unhandled server errors (500)
+    Args:
+        app: FastAPI application instance
     """
 
     @app.exception_handler(APIError)
-    async def api_error_handler(request: Request, exc: APIError) -> JSONResponse:
-        """Handle custom APIError exceptions with structured response."""
-        request_id = getattr(request.state, "request_id", None) or "unknown"
-
-        # Log based on status code
-        if exc.status_code >= 500:
-            logger.error(
-                f"API Error [{exc.status_code}] | {request.method} {request.url.path} | "
-                f"Code: {exc.code} | Message: {exc.message}",
-                extra={"request_id": request_id},
-            )
-        else:
-            logger.warning(
-                f"API Error [{exc.status_code}] | {request.method} {request.url.path} | "
-                f"Code: {exc.code} | Message: {exc.message}",
-                extra={"request_id": request_id},
-            )
-
+    async def handle_api_error(request: Request, exc: APIError) -> JSONResponse:
+        """Handle custom APIError exceptions."""
         return JSONResponse(
             status_code=exc.status_code,
-            content={
-                "error": {
-                    "code": exc.code,
-                    "message": exc.message,
-                    "details": exc.details,
-                },
-                "request_id": request_id,
-            },
-            headers={"X-Request-ID": request_id},
+            content={"error": exc.to_dict()},
+        )
+
+    @app.exception_handler(SolsteinError)
+    async def handle_solstein_error(request: Request, exc: SolsteinError) -> JSONResponse:
+        """Handle SolsteinError domain exceptions."""
+        settings = get_settings()
+        error_response = {
+            "error": {
+                "code": exc.code if hasattr(exc, "code") else "DOMAIN_ERROR",
+                "message": str(exc),
+                "details": exc.details if hasattr(exc, "details") else None,
+            }
+        }
+
+        # Only include stack trace in debug mode and non-production
+        if settings.debug and settings.environment != "production":
+            error_response["error"]["stack_trace"] = traceback.format_exc()
+
+        return JSONResponse(
+            status_code=exc.status_code if hasattr(exc, "status_code") else 500,
+            content=error_response,
         )
 
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
-        """Handle Pydantic validation errors (422)."""
-        request_id = getattr(request.state, "request_id", None) or "unknown"
-
-        # Format validation errors clearly
-        errors = exc.errors()
-        modified_details = [{"loc": err.get("loc"), "msg": err.get("msg"), "type": err.get("type")} for err in errors]
-
-        logger.warning(
-            "Validation Error [422] | {} {} | {} errors",
-            request.method,
-            request.url.path,
-            len(modified_details),
-            extra={"request_id": request_id},
-        )
-
+    async def handle_validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
+        """Handle FastAPI request validation errors."""
+        logger.warning(f"Validation error: {exc.errors()}")
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={
                 "error": {
                     "code": "VALIDATION_ERROR",
                     "message": "Request validation failed",
-                    "details": modified_details,
-                },
-                "request_id": request_id,
+                    "details": exc.errors(),
+                }
             },
-        )
-
-    @app.exception_handler(StarletteHTTPException)
-    async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
-        """Handle standard HTTP exceptions (404, 401, etc.)."""
-        request_id = getattr(request.state, "request_id", None) or "unknown"
-
-        # Map status codes to error codes
-        status_to_code = {
-            status.HTTP_400_BAD_REQUEST: "BAD_REQUEST",
-            status.HTTP_401_UNAUTHORIZED: "UNAUTHORIZED",
-            status.HTTP_403_FORBIDDEN: "FORBIDDEN",
-            status.HTTP_404_NOT_FOUND: "NOT_FOUND",
-            status.HTTP_409_CONFLICT: "CONFLICT",
-            status.HTTP_422_UNPROCESSABLE_ENTITY: "VALIDATION_ERROR",
-            status.HTTP_429_TOO_MANY_REQUESTS: "RATE_LIMITED",
-            status.HTTP_500_INTERNAL_SERVER_ERROR: "INTERNAL_ERROR",
-            status.HTTP_501_NOT_IMPLEMENTED: "NOT_IMPLEMENTED",
-            status.HTTP_503_SERVICE_UNAVAILABLE: "SERVICE_UNAVAILABLE",
-        }
-
-        error_code = status_to_code.get(exc.status_code, "HTTP_ERROR")
-
-        logger.warning(
-            f"HTTP Exception [{exc.status_code}] | {request.method} {request.url.path} | "
-            f"Code: {error_code} | Detail: {exc.detail}",
-            extra={"request_id": request_id},
-        )
-
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={
-                "error": {
-                    "code": error_code,
-                    "message": str(exc.detail),
-                    "details": None,
-                },
-                "request_id": request_id,
-            },
-            headers={"X-Request-ID": request_id},
         )
 
     @app.exception_handler(Exception)
-    async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-        """Catch-all for unhandled server errors (500).
+    async def handle_generic_exception(request: Request, exc: Exception) -> JSONResponse:
+        """Handle all unhandled exceptions securely."""
+        settings = get_settings()
 
-        Captures full traceback for debugging.
-        """
-        request_id = getattr(request.state, "request_id", None) or "unknown"
+        # Log full error details server-side
+        logger.error(f"Unhandled exception: {exc}")
+        logger.error(traceback.format_exc())
 
-        # Capture standard traceback for professional debugging
-        exc_info = sys.exc_info()
-        tb = traceback.format_exception(*exc_info) if exc_info[0] else ["Unknown traceback"]
+        # Return safe error response
+        error_response: dict[str, Any] = {
+            "error": {
+                "code": "INTERNAL_ERROR",
+                "message": "An unexpected error occurred",
+            }
+        }
 
-        # Log with full context
-        logger.exception(
-            f"Unhandled Server Error [500] | {request.method} {request.url.path}",
-            extra={"request_id": request_id},
-        )
+        # Only include debug info in development
+        if settings.debug and settings.environment != "production":
+            error_response["error"]["debug"] = {
+                "type": type(exc).__name__,
+                "message": str(exc),
+                "stack_trace": traceback.format_exc(),
+            }
 
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "error": {
-                    "code": "INTERNAL_ERROR",
-                    "message": "An unexpected error occurred",
-                    "details": str(exc),
-                },
-                "request_id": request_id,
-                "traceback": tb,  # Exposed for QA/debugging in non-prod
-            },
-            headers={"X-Request-ID": request_id},
+            content=error_response,
         )

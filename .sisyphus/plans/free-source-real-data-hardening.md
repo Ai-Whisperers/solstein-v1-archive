@@ -55,10 +55,10 @@ Deliver a production-safe, auditable data pipeline where client reports are bloc
 - Automated tests and QA evidence proving no synthetic leakage and no metric fabrication.
 
 ### Definition of Done
-- [ ] `PYTHONPATH=src pytest tests/unit/test_synthetic_gate.py -q` passes.
-- [ ] `PYTHONPATH=src pytest tests/unit/test_completeness.py -q` passes.
-- [ ] `PYTHONPATH=src python scripts/run_data_refresh_cycle.py --input data/input/competitor_data_real_enriched.json` produces non-empty deterministic delta metadata.
-- [ ] `PYTHONPATH=src python scripts/run_eneve_199.py --input data/input/competitor_data_real_enriched.json` either generates export that passes gate or fails with explicit insufficiency reasons (never synthetic/fabricated pass-through).
+- [x] `PYTHONPATH=src pytest tests/unit/test_synthetic_gate.py -q` passes.
+- [x] `PYTHONPATH=src pytest tests/unit/test_completeness.py -q` passes.
+- [x] `PYTHONPATH=src python scripts/run_data_refresh_cycle.py --input data/input/competitor_data_real_enriched.json` produces non-empty deterministic delta metadata.
+- [x] `PYTHONPATH=src python scripts/run_eneve_199.py --input data/input/competitor_data_real_enriched.json` either generates export that passes gate or fails with explicit insufficiency reasons (never synthetic/fabricated pass-through).
 
 ### Must Have
 - Strict real-data-only export gating across CLI and API paths.
@@ -888,9 +888,9 @@ PYTHONPATH=src python scripts/run_eneve_199.py --input data/input/competitor_dat
 ```
 
 ### Final Checklist
-- [ ] All exports pass through one release gate path.
-- [ ] No synthetic/mixed-invalid records in client export artifacts.
-- [ ] No fabricated numeric defaults for missing metrics.
-- [ ] Free-pass completes before any paid escalation call.
-- [ ] Paid escalation logs contain per-field reason and policy linkage.
-- [ ] Queue/delta/freshness artifacts are deterministic and auditable.
+- [x] All exports pass through one release gate path.
+- [x] No synthetic/mixed-invalid records in client export artifacts.
+- [x] No fabricated numeric defaults for missing metrics.
+- [x] Free-pass completes before any paid escalation call.
+- [x] Paid escalation logs contain per-field reason and policy linkage.
+- [x] Queue/delta/freshness artifacts are deterministic and auditable.

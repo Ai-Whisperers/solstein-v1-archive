@@ -18,6 +18,7 @@ sys.path.insert(0, "/home/ai-whisperers/solstein/src")
 from solstein.domain.models import Company, FinancialMetric, CompanyTier, AIMaturity, ThreatLevel, ConfidenceLevel
 from solstein.analytics.scoring import GrowthScorer
 from solstein.data.metric_contract import normalize_financial_payload
+from solstein.data.report_readiness import assert_report_ready
 from solstein.exporters.excel import ExcelExporter
 from solstein.analytics.constants import PHOENIX_SCORE_THRESHOLD, SALT_SCORE_THRESHOLD, LEAD_SCORE_THRESHOLD
 
@@ -315,6 +316,14 @@ def main():
     print("\n📈 Sample Results:")
     for company in scored[:5]:
         print(f"  {company.name}: composite={company.composite_score:.2f}, classification={company.classification}")
+
+    print("\n🛡️  Running release gate checks...")
+    try:
+        assert_report_ready(scored)
+        print("✅ Release gate passed")
+    except ValueError as exc:
+        print(f"❌ Release gate blocked export: {exc}")
+        raise SystemExit(1) from exc
 
     # Save scored output
     print(f"\n{'=' * 60}")

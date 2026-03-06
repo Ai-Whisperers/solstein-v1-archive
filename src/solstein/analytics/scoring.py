@@ -5,7 +5,7 @@ Calculates growth scores, financial health scores, and competitive positioning.
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 from loguru import logger
 
@@ -14,6 +14,7 @@ from ..domain.models import (
     Company,
     MarketAnalysis,
     ScoringExplanation,
+    ThreatLevel,
 )
 from .constants import (
     LEAD_SCORE_THRESHOLD,
@@ -125,9 +126,15 @@ class GrowthScorer:
         profile.financial_health_score = financial_health_score
         profile.competitive_position_score = competitive_position_score
 
+        composite = self.config.composite
+        if not composite.validate_weights():
+            composite.normalize_weights()
+
         if all(s is not None for s in [growth_score, financial_health_score, competitive_position_score]):
             profile.composite_score = round(
-                (growth_score * 0.4) + (financial_health_score * 0.3) + (competitive_position_score * 0.3),
+                (growth_score * composite.growth_weight)
+                + (financial_health_score * composite.financial_weight)
+                + (competitive_position_score * composite.competitive_weight),
                 2,
             )
         else:
@@ -137,8 +144,9 @@ class GrowthScorer:
         profile.classification = classify_company(profile.composite_score)
 
         # Derive threat level from classification and score
-        profile.threat_level = derive_threat_level(profile.classification, profile.composite_score)
-        profile.classification = classify_company(profile.composite_score)
+        profile.threat_level = cast(
+            ThreatLevel, ThreatLevel(derive_threat_level(profile.classification, profile.composite_score))
+        )
 
         profile.scoring_breakdown["growth"] = growth_expl
         profile.scoring_breakdown["financial"] = fin_expl

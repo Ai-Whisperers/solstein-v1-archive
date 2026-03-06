@@ -16,11 +16,25 @@ class GateReason:
     message: str
     details: dict[str, object]
 
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "code": self.code,
+            "message": self.message,
+            "details": self.details,
+        }
+
 
 @dataclass(frozen=True)
 class ReportGateResult:
     passed: bool
     reasons: list[GateReason]
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "passed": self.passed,
+            "reason_count": len(self.reasons),
+            "reasons": [reason.to_dict() for reason in self.reasons],
+        }
 
 
 class ReportReleaseGate:

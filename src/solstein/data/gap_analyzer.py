@@ -19,6 +19,11 @@ REQUIRED_FINANCIAL_FIELDS = (
     "profit_margin",
 )
 
+ZERO_ALLOWED_FIELDS = {
+    "growth_rate",
+    "profit_margin",
+}
+
 
 @dataclass(frozen=True)
 class FieldGap:
@@ -72,6 +77,14 @@ def _extract_confidence(company: Any, field_name: str) -> float | None:
         return None
 
 
+def _is_missing_value(field_name: str, value: float | int | None) -> bool:
+    if value is None:
+        return True
+    if value == 0 and field_name not in ZERO_ALLOWED_FIELDS:
+        return True
+    return False
+
+
 def analyze_company_gaps(company: Any, min_confidence: float = 0.5) -> dict[str, Any]:
     field_states: list[dict[str, Any]] = []
 
@@ -80,13 +93,13 @@ def analyze_company_gaps(company: Any, min_confidence: float = 0.5) -> dict[str,
         value = getattr(financials, field_name, None) if financials else None
         confidence = _extract_confidence(company, field_name)
 
-        if value is None or value == 0:
+        if _is_missing_value(field_name, value):
             field_states.append(
                 FieldGap(
                     field=field_name,
                     status=GapStatus.MISSING,
                     confidence=confidence,
-                    reason="field is null or zero",
+                    reason="field is null or zero (zero allowed only for growth_rate/profit_margin)",
                 ).__dict__
             )
             continue

@@ -26,7 +26,7 @@
       "recurring_revenue_pct": null,
       "funding_raised": null,
       "funding_confidence": "Estimated",
-      "valuation": 159615.05792,
+      "valuation": 155363.278848,
       "valuation_confidence": "Estimated"
     },
     "revenue": 33219.999744,
@@ -34,13 +34,13 @@
     "growth_rate": null,
     "profit_margin": null,
     "funding": null,
-    "valuation": 159615.05792,
+    "valuation": 155363.278848,
     "geographic_presence": [],
     "key_customers": [],
     "parent_company": null,
     "subsidiaries": [],
     "acquisitions": [],
-    "last_updated": "2026-03-05T18:55:40.261860Z",
+    "last_updated": "2026-03-05T23:08:20.953049Z",
     "data_source": "Solstein Competitive Intelligence",
     "notes": null,
     "source_links": [],
@@ -184,23 +184,23 @@
       "margin_confidence": "Unknown",
       "ebitda_margin": null,
       "recurring_revenue_pct": null,
-      "funding_raised": 6.5,
+      "funding_raised": null,
       "funding_confidence": "Estimated",
-      "valuation": 5590.709248,
+      "valuation": 5394.716672,
       "valuation_confidence": "Estimated"
     },
     "revenue": 1472.98496,
     "employees": 2872,
     "growth_rate": null,
     "profit_margin": null,
-    "funding": 6.5,
-    "valuation": 5590.709248,
+    "funding": null,
+    "valuation": 5394.716672,
     "geographic_presence": [],
     "key_customers": [],
     "parent_company": null,
     "subsidiaries": [],
     "acquisitions": [],
-    "last_updated": "2026-03-05T18:55:40.262023Z",
+    "last_updated": "2026-03-05T23:08:20.953211Z",
     "data_source": "Solstein Competitive Intelligence",
     "notes": null,
     "source_links": [],
@@ -239,9 +239,9 @@
     "enrichment_error_count": 0,
     "enrichment_error_categories": {},
     "growth_score": 2.0,
-    "financial_health_score": 5.55,
+    "financial_health_score": 6.25,
     "competitive_position_score": 6.238899999999999,
-    "composite_score": 4.34,
+    "composite_score": 4.55,
     "scoring_breakdown": {
       "growth": {
         "base_score": 0.0,
@@ -272,16 +272,9 @@
             "formula": "rev_per_emp(\u20ac512,878) -> adjustment",
             "reasoning": "Revenue per employee indicates operational efficiency. \u20ac1473.0M revenue / 2872 employees = \u20ac512,878 per employee.",
             "confidence_weight": 1.0
-          },
-          {
-            "name": "Funding Cushion",
-            "value": -0.7,
-            "formula": "funding_ratio(0.00) -> adjustment",
-            "reasoning": "Capital reserves relative to revenue scale. \u20ac6.5M funding / \u20ac1473.0M revenue = 0.00x ratio.",
-            "confidence_weight": 0.7
           }
         ],
-        "final_score": 5.55
+        "final_score": 6.25
       },
       "competitive": {
         "base_score": 5.0,
@@ -311,7 +304,7 @@
         "final_score": 6.238899999999999
       }
     },
-    "classification": "Lead",
+    "classification": "Salt",
     "revenue_timeline": [],
     "revenue_cagr_3yr": null,
     "revenue_cagr_5yr": null,
@@ -348,7 +341,7 @@
     "saas_maturity": 5,
     "tech_stack": [],
     "financials": {
-      "revenue": 1.5,
+      "revenue": null,
       "revenue_confidence": "Estimated",
       "growth_rate": null,
       "growth_confidence": "Estimated",
@@ -358,23 +351,23 @@
       "margin_confidence": "Unknown",
       "ebitda_margin": null,
       "recurring_revenue_pct": null,
-      "funding_raised": 4.6,
+      "funding_raised": null,
       "funding_confidence": "Estimated",
       "valuation": null,
       "valuation_confidence": "Estimated"
     },
-    "revenue": 1.5,
+    "revenue": null,
     "employees": null,
     "growth_rate": null,
     "profit_margin": null,
-    "funding": 4.6,
+    "funding": null,
     "valuation": null,
     "geographic_presence": [],
     "key_customers": [],
     "parent_company": null,
     "subsidiaries": [],
     "acquisitions": [],
-    "last_updated": "2026-03-05T18:55:40.262099Z",
+    "last_updated": "2026-03-05T23:08:20.953282Z",
     "data_source": "Solstein Competitive Intelligence",
     "notes": null,
     "source_links": [],
@@ -413,9 +406,9 @@
     "enrichment_error_count": 0,
     "enrichment_error_categories": {},
     "growth_score": 0.0,
-    "financial_health_score": 3.375,
+    "financial_health_score": 2.5,
     "competitive_position_score": 6.238899999999999,
-    "composite_score": 2.88,
+    "composite_score": 2.62,
     "scoring_breakdown": {
       "growth": {
         "base_score": 0.0,
@@ -424,16 +417,8 @@
       },
       "financial": {
         "base_score": 2.5,
-        "components": [
-          {
-            "name": "Funding Cushion",
-            "value": 0.875,
-            "formula": "funding_ratio(3.07) -> adjustment",
-            "reasoning": "Capital reserves relative to revenue scale. \u20ac4.6M funding / \u20ac1.5M revenue = 3.07x ratio.",
-            "confidence_weight": 0.7
-          }
-        ],
-        "final_score": 3.375
+        "components": [],
+        "final_score": 2.5
       },
       "competitive": {
         "base_score": 5.0,
@@ -510,7 +495,7 @@
       "margin_confidence": "Unknown",
       "ebitda_margin": null,
       "recurring_revenue_pct": null,
-      "funding_raised": 516.0,
+      "funding_raised": null,
       "funding_confidence": "Estimated",
       "valuation": null,
       "valuation_confidence": "Estimated"
@@ -519,14 +504,14 @@
     "employees": null,
     "growth_rate": null,
     "profit_margin": null,
-    "funding": 516.0,
+    "funding": null,
     "valuation": null,
     "geographic_presence": [],
     "key_customers": [],
     "parent_company": null,
     "subsidiaries": [],
     "acquisitions": [],
-    "last_updated": "2026-03-05T18:55:40.262157Z",
+    "last_updated": "2026-03-05T23:08:20.953335Z",
     "data_source": "Solstein Competitive Intelligence",
     "notes": null,
     "source_links": [],
@@ -564,23 +549,15 @@
     "enrichment_error_timestamps": {},
     "enrichment_error_count": 0,
     "enrichment_error_categories": {},
-    "growth_score": 1.4,
+    "growth_score": 0.0,
     "financial_health_score": 2.5,
     "competitive_position_score": 6.238899999999999,
-    "composite_score": 3.18,
+    "composite_score": 2.62,
     "scoring_breakdown": {
       "growth": {
         "base_score": 0.0,
-        "components": [
-          {
-            "name": "Funding Momentum",
-            "value": 1.4,
-            "formula": "funding(516 EUR) > threshold",
-            "reasoning": "Significant capital injection signals strong market confidence.",
-            "confidence_weight": 0.7
-          }
-        ],
-        "final_score": 1.4
+        "components": [],
+        "final_score": 0.0
       },
       "financial": {
         "base_score": 2.5,
@@ -662,23 +639,23 @@
       "margin_confidence": "Unknown",
       "ebitda_margin": null,
       "recurring_revenue_pct": null,
-      "funding_raised": 297.0,
+      "funding_raised": null,
       "funding_confidence": "Estimated",
-      "valuation": 2858.755328,
+      "valuation": 2735.773184,
       "valuation_confidence": "Estimated"
     },
     "revenue": 2956.99712,
     "employees": 9059,
     "growth_rate": null,
     "profit_margin": null,
-    "funding": 297.0,
-    "valuation": 2858.755328,
+    "funding": null,
+    "valuation": 2735.773184,
     "geographic_presence": [],
     "key_customers": [],
     "parent_company": null,
     "subsidiaries": [],
     "acquisitions": [],
-    "last_updated": "2026-03-05T18:55:40.262202Z",
+    "last_updated": "2026-03-05T23:08:20.953382Z",
     "data_source": "Solstein Competitive Intelligence",
     "notes": null,
     "source_links": [],
@@ -716,10 +693,10 @@
     "enrichment_error_timestamps": {},
     "enrichment_error_count": 0,
     "enrichment_error_categories": {},
-    "growth_score": 2.4,
-    "financial_health_score": 4.3,
+    "growth_score": 1.0,
+    "financial_health_score": 5.0,
     "competitive_position_score": 6.238899999999999,
-    "composite_score": 4.12,
+    "composite_score": 3.77,
     "scoring_breakdown": {
       "growth": {
         "base_score": 0.0,
@@ -730,16 +707,9 @@
             "formula": "rev_per_emp(326,415 EUR) > threshold",
             "reasoning": "Revenue per employee is above efficiency benchmarks.",
             "confidence_weight": 1.0
-          },
-          {
-            "name": "Funding Momentum",
-            "value": 1.4,
-            "formula": "funding(297 EUR) > threshold",
-            "reasoning": "Significant capital injection signals strong market confidence.",
-            "confidence_weight": 0.7
           }
         ],
-        "final_score": 2.4
+        "final_score": 1.0
       },
       "financial": {
         "base_score": 2.5,
@@ -750,16 +720,9 @@
             "formula": "revenue(\u20ac2957.0M) -> adjustment",
             "reasoning": "Revenue scale impacts financial stability. Thresholds: <\u20ac1.0M small, >\u20ac10.0M medium, >\u20ac100.0M large.",
             "confidence_weight": 1.0
-          },
-          {
-            "name": "Funding Cushion",
-            "value": -0.7,
-            "formula": "funding_ratio(0.10) -> adjustment",
-            "reasoning": "Capital reserves relative to revenue scale. \u20ac297.0M funding / \u20ac2957.0M revenue = 0.10x ratio.",
-            "confidence_weight": 0.7
           }
         ],
-        "final_score": 4.3
+        "final_score": 5.0
       },
       "competitive": {
         "base_score": 5.0,

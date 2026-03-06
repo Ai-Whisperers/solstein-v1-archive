@@ -1,0 +1,5 @@
+{"timestamp": "2026-03-05T23:08:09.684986+00:00", "company": "Moixa", "operation": "paid_escalation", "status": "skipped", "reason": "disabled", "unresolved_fields": ["revenue", "growth_rate", "employees", "profit_margin"]}
+{"timestamp": "2026-03-05T23:08:09.686012+00:00", "company": "OVO Energy", "operation": "paid_escalation", "status": "skipped", "reason": "disabled", "unresolved_fields": ["revenue", "growth_rate", "employees", "profit_margin"]}
+{"timestamp": "2026-03-05T23:11:17.568827+00:00", "company": "Moixa", "operation": "paid_escalation", "status": "skipped", "reason": "disabled", "unresolved_fields": ["revenue", "growth_rate", "employees", "profit_margin"]}
+{"timestamp": "2026-03-05T23:11:17.569712+00:00", "company": "OVO Energy", "operation": "paid_escalation", "status": "skipped", "reason": "disabled", "unresolved_fields": ["revenue", "growth_rate", "employees", "profit_margin"]}
+{"timestamp": "2026-03-06T00:06:10.042004+00:00", "company": "ACME", "operation": "paid_escalation", "status": "blocked", "reason": "budget_exceeded", "unresolved_fields": ["revenue", "growth_rate", "employees", "profit_margin"], "max_attempts": 0}

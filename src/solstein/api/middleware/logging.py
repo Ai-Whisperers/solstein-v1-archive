@@ -1,23 +1,23 @@
-"""
-Request/Response Logging Middleware (Phase 10)
+"""Request/Response Logging Middleware with unified Loguru logging.
 
 Logs all API requests and responses with:
 - Request method, path, status
 - Request duration
 - User information (if available)
 - Error details (if failed)
+- Automatic context propagation via contextvars
 """
 
 import json
-import logging
 import time
 import uuid
 from collections.abc import Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+from ...utils.context import set_context, reset_context, generate_request_id, generate_correlation_id
 
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
@@ -34,12 +34,60 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         return response
 
 
+class ContextMiddleware(BaseHTTPMiddleware):
+    """Set request-scoped context for logging using contextvars.
+
+    This middleware ensures request_id, correlation_id, tenant_id, and user_id
+    are propagated to all logs throughout the request lifecycle.
+    """
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        # Extract or generate IDs
+        request_id = request.headers.get("X-Request-ID") or generate_request_id()
+        correlation_id = request.headers.get("X-Correlation-ID") or generate_correlation_id()
+
+        # Extract tenant/user from request state (set by auth middleware)
+        tenant_id = getattr(request.state, "tenant_id", None)
+        user_id = getattr(request.state, "user_id", None)
+
+        # Set context for this request
+        tokens = set_context(
+            request_id=request_id,
+            correlation_id=correlation_id,
+            tenant_id=tenant_id,
+            user_id=user_id,
+            operation=f"{request.method}_{request.url.path}",
+        )
+
+        # Store in request for handlers
+        request.state.request_id = request_id
+        request.state.correlation_id = correlation_id
+
+        try:
+            logger.debug("Request started", method=request.method, path=request.url.path)
+            response = await call_next(request)
+
+            # Add headers to response
+            response.headers["X-Request-ID"] = request_id
+            response.headers["X-Correlation-ID"] = correlation_id
+
+            logger.debug("Request completed", status_code=response.status_code)
+            return response
+
+        except Exception:
+            logger.exception("Request failed")
+            raise
+        finally:
+            # ALWAYS reset context to prevent leaks
+            reset_context(tokens)
+
+
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
-    """Log all requests and responses."""
+    """Log all requests and responses with context."""
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Log request/response details."""
-        request_id = request.scope.get("request_id", "unknown")
+        request_id = getattr(request.state, "request_id", "unknown")
         start_time = time.time()
 
         # Get client IP
@@ -51,32 +99,25 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         # Log request
         logger.info(
             f"📨 REQUEST: {request.method} {request.url.path}",
-            extra={
-                "request_id": request_id,
-                "method": request.method,
-                "path": request.url.path,
-                "client_ip": client_ip,
-                "user_id": user_id,
-                "query_params": dict(request.query_params) or None,
-            },
+            method=request.method,
+            path=request.url.path,
+            client_ip=client_ip,
+            user_id=user_id,
+            query_params=dict(request.query_params) or None,
         )
 
         try:
             response = await call_next(request)
         except Exception as e:
             duration = time.time() - start_time
-            logger.error(
+            logger.exception(
                 f"❌ REQUEST FAILED: {request.method} {request.url.path}",
-                extra={
-                    "request_id": request_id,
-                    "method": request.method,
-                    "path": request.url.path,
-                    "duration_ms": duration * 1000,
-                    "error": str(e),
-                    "client_ip": client_ip,
-                    "user_id": user_id,
-                },
-                exc_info=True,
+                method=request.method,
+                path=request.url.path,
+                duration_ms=round(duration * 1000, 2),
+                error=str(e),
+                client_ip=client_ip,
+                user_id=user_id,
             )
             raise
 
@@ -84,20 +125,27 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
         # Log response
         log_level = "info" if response.status_code < 400 else "warning"
-        log_func = getattr(logger, log_level)
 
-        log_func(
-            f"📤 RESPONSE: {request.method} {request.url.path} → {response.status_code}",
-            extra={
-                "request_id": request_id,
-                "method": request.method,
-                "path": request.url.path,
-                "status_code": response.status_code,
-                "duration_ms": duration * 1000,
-                "client_ip": client_ip,
-                "user_id": user_id,
-            },
-        )
+        if response.status_code < 400:
+            logger.info(
+                f"📤 RESPONSE: {request.method} {request.url.path} → {response.status_code}",
+                method=request.method,
+                path=request.url.path,
+                status_code=response.status_code,
+                duration_ms=round(duration * 1000, 2),
+                client_ip=client_ip,
+                user_id=user_id,
+            )
+        else:
+            logger.warning(
+                f"📤 RESPONSE: {request.method} {request.url.path} → {response.status_code}",
+                method=request.method,
+                path=request.url.path,
+                status_code=response.status_code,
+                duration_ms=round(duration * 1000, 2),
+                client_ip=client_ip,
+                user_id=user_id,
+            )
 
         # Add timing headers
         response.headers["X-Response-Time"] = f"{duration * 1000:.2f}ms"
@@ -115,43 +163,83 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
 
 class ErrorLoggingMiddleware(BaseHTTPMiddleware):
-    """Log errors with details for debugging."""
+    """Log errors with details for debugging. Never silently swallow exceptions."""
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        """Log error responses."""
+        """Log error responses with full context."""
         response = await call_next(request)
 
         # Log errors
         if response.status_code >= 400:
-            try:
-                body = await response.body()
-                if body:
-                    try:
-                        error_data = json.loads(body)
-                        logger.warning(
-                            f"⚠️  ERROR RESPONSE: {response.status_code}",
-                            extra={
-                                "path": request.url.path,
-                                "status_code": response.status_code,
-                                "error": error_data.get("error"),
-                                "message": error_data.get("message"),
-                            },
-                        )
-                    except json.JSONDecodeError:
-                        logger.warning(
-                            f"⚠️  ERROR RESPONSE: {response.status_code}",
-                            extra={"path": request.url.path, "status_code": response.status_code},
-                        )
-            except Exception:
-                pass
+            await self._log_error_response(request, response)
 
         return response
 
+    async def _log_error_response(self, request: Request, response: Response) -> None:
+        """Log error response details. All failures are logged, never silent."""
+        request_id = getattr(request.state, "request_id", "unknown")
+
+        try:
+            # Attempt to read error details from response
+            body = b""
+            async for chunk in response.body_iterator:
+                body += chunk
+
+            error_data = None
+            error_message = "Unknown error"
+
+            try:
+                error_data = json.loads(body)
+                error_message = error_data.get("error", error_data.get("message", "Unknown error"))
+            except json.JSONDecodeError as e:
+                # Log JSON parsing failure but don't fail the whole handler
+                logger.warning(
+                    "Error response body is not valid JSON",
+                    request_id=request_id,
+                    status_code=response.status_code,
+                    body_preview=body[:200].decode("utf-8", errors="replace"),
+                    json_error=str(e),
+                )
+                error_message = body.decode("utf-8", errors="replace")[:200]
+
+            # Log the actual error
+            log_level = "error" if response.status_code >= 500 else "warning"
+            logger.log(
+                log_level,
+                f"⚠️  ERROR RESPONSE: {response.status_code}",
+                request_id=request_id,
+                path=request.url.path,
+                method=request.method,
+                status_code=response.status_code,
+                error=error_message,
+                error_details=error_data,
+            )
+
+        except Exception as e:
+            # CRITICAL: Never silent. Log everything we know.
+            logger.exception(
+                "Failed to log error response details",
+                request_id=request_id,
+                path=request.url.path,
+                method=request.method,
+                status_code=response.status_code,
+                error_type=type(e).__name__,
+                error=str(e),
+            )
+
 
 def setup_logging_middleware(app) -> None:
-    """Setup all logging middleware."""
-    app.add_middleware(ErrorLoggingMiddleware)
+    """Setup all logging middleware in correct order.
+
+    Order matters:
+    1. ContextMiddleware (sets up context first)
+    2. RequestIDMiddleware (for backward compat)
+    3. ErrorLoggingMiddleware (catches errors)
+    4. RequestLoggingMiddleware (logs all requests)
+    """
     app.add_middleware(RequestLoggingMiddleware)
+    app.add_middleware(ErrorLoggingMiddleware)
     app.add_middleware(RequestIDMiddleware)
+    app.add_middleware(ContextMiddleware)
 
     logger.info("✅ Logging middleware configured")

@@ -1,6 +1,7 @@
 from typing import Any
 
 from solstein.domain.models import Company
+from solstein.data.report_release_gate import ReportReleaseGate
 
 
 REQUIRED_FINANCIAL_FIELDS = ("revenue", "employees", "growth_rate", "profit_margin")
@@ -71,14 +72,14 @@ def get_report_readiness_issues(companies: list[Company]) -> list[dict[str, Any]
 
 
 def assert_report_ready(companies: list[Company]) -> None:
-    issues = get_report_readiness_issues(companies)
-    if not issues:
-        return
-    issue_lines = []
-    for issue in issues:
-        issue_lines.append(f"{issue['company_name']}: missing {', '.join(issue['missing_fields'])}")
-    details = "; ".join(issue_lines)
-    raise ValueError(f"Report generation blocked: incomplete real data. {details}")
+    gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
+    gate.ensure_release_ready(companies)
+
+
+def build_report_gate_snapshot(companies: list[Company], min_confidence: float = 0.6) -> dict[str, object]:
+    gate = ReportReleaseGate(min_confidence=min_confidence, allow_synthetic=False)
+    result = gate.evaluate(companies)
+    return result.to_dict()
 
 
 def assert_client_report_ready(
@@ -87,31 +88,25 @@ def assert_client_report_ready(
     min_ready_peers: int = 3,
     min_confidence: float = 0.6,
 ) -> None:
-    target_missing = get_missing_pe_fields(target)
-    target_low_conf = get_low_confidence_fields(target, min_confidence=min_confidence)
-    if target_missing or target_low_conf:
-        raise ValueError(
-            "Client report blocked: target company is not PE-ready. "
-            f"Missing fields: {', '.join(target_missing) if target_missing else 'none'}; "
-            f"Low-confidence fields: {', '.join(target_low_conf) if target_low_conf else 'none'}"
-        )
+    gate = ReportReleaseGate(min_confidence=min_confidence, allow_synthetic=False)
+
+    target_result = gate.evaluate([target])
+    if not target_result.passed:
+        reason_codes = ", ".join(reason.code for reason in target_result.reasons)
+        raise ValueError(f"Client report blocked: target company is not PE-ready ({reason_codes})")
 
     ready_peers = 0
-    peer_gaps: list[str] = []
+    blocked_peers: list[str] = []
     for peer in competitors:
-        missing = get_missing_pe_fields(peer)
-        low_conf = get_low_confidence_fields(peer, min_confidence=min_confidence)
-        if not missing and not low_conf:
+        peer_result = gate.evaluate([peer])
+        if peer_result.passed:
             ready_peers += 1
         else:
-            peer_gaps.append(
-                f"{peer.name} (missing: {', '.join(missing) if missing else 'none'}; "
-                f"low_conf: {', '.join(low_conf) if low_conf else 'none'})"
-            )
+            blocked_peers.append(f"{peer.name} ({', '.join(reason.code for reason in peer_result.reasons)})")
 
     if ready_peers < min_ready_peers:
         raise ValueError(
             "Client report blocked: insufficient PE-ready peer coverage. "
             f"Ready peers={ready_peers}/{min_ready_peers}. "
-            f"Peer gaps: {'; '.join(peer_gaps[:8])}"
+            f"Peer gaps: {'; '.join(blocked_peers[:8])}"
         )

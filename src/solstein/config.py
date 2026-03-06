@@ -180,6 +180,12 @@ class Settings(BaseSettings):
     # Environment
     environment: str = Field(default="development")
     debug: bool = Field(default=False)
+    debug_errors: bool = Field(
+        default=False,
+        description="Include debug info (tracebacks) in error responses. NEVER enable in production."
+    )
+    environment: str = Field(default="development")
+    debug: bool = Field(default=False)
 
     # Components
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
@@ -204,6 +210,10 @@ class Settings(BaseSettings):
     crunchbase_api_key: str | None = Field(default=None)
     news_api_key: str | None = Field(default=None)
     patentsview_api_key: str | None = Field(default=None)
+
+    feature_new_classifier: bool = Field(default=False)
+    feature_new_readiness_gate: bool = Field(default=False)
+    feature_new_unified_loader: bool = Field(default=False)
 
     # LLM APIs
     groq_api_key: str | None = Field(default=None)
@@ -375,6 +385,11 @@ DATA__EXPORT_DIR=exports
 # GROQ_API_KEY=gsk_...
 # FIREWORKS_API_KEY=fw_...
 # PERPLEXITY_API_KEY=pplx-...  # (currently unused)
+
+# Feature flags (safe cutover controls)
+# FEATURE_NEW_CLASSIFIER=false
+# FEATURE_NEW_READINESS_GATE=false
+# FEATURE_NEW_UNIFIED_LOADER=false
 
 # LLM Runtime (optional)
 # LLM_PROVIDER=auto  # auto|ollama|fireworks|openai|groq|none

@@ -775,6 +775,21 @@ class EnrichmentJobRecord(Base):
         }
 
 
+class ReleaseGateAuditRecord(Base):
+    __tablename__ = "release_gate_audit"
+
+    id = Column(Integer, primary_key=True, index=True)
+    operation = Column(String(100), nullable=False, index=True)
+    status = Column(String(50), nullable=False, index=True)
+    company_ids = Column(JSON, nullable=False)
+    company_names = Column(JSON, nullable=False)
+    reason_codes = Column(JSON, nullable=False)
+    reason_details = Column(JSON, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), index=True)
+
+    __table_args__ = (Index("ix_release_gate_operation_status", "operation", "status"),)
+
+
 class TenantRecord(Base):
     """ORM model for API tenants.
 

@@ -6,14 +6,24 @@ from typing import Any
 from fastapi import APIRouter, Depends, Query, status
 from loguru import logger
 
-
-from ...analytics.scoring import GrowthScorer
-from ...analytics.company_loader import unified_score_loader
-from ..dependencies import get_company_repository, get_current_tenant
-from ..exceptions import APIError
+from solstein.analytics.classification_service import ClassificationService
+from solstein.analytics.scoring import GrowthScorer
+from solstein.analytics.company_loader import unified_score_loader
+from solstein.config import get_settings
+from solstein.api.dependencies import get_company_repository, get_current_tenant
+from solstein.api.exceptions import APIError
 
 router = APIRouter(tags=["Scoring"])
 growth_scorer = GrowthScorer()
+classification_service = ClassificationService()
+
+
+def _legacy_classification_from_growth(growth_score: float) -> str:
+    if growth_score >= 7.0:
+        return "Phoenix"
+    if growth_score <= 3.9:
+        return "Lead"
+    return "Salt"
 
 
 @router.post("/company/{company_id}/score")
@@ -42,12 +52,24 @@ async def score_company(
         scored_company = growth_scorer.calculate_scores(target_company)
 
         growth_score = scored_company.growth_score or 0.0
-        if growth_score >= 7.0:
-            classification = "Phoenix"
-        elif growth_score <= 3.9:
-            classification = "Lead"
-        else:
-            classification = "Salt"
+        legacy_classification = _legacy_classification_from_growth(growth_score)
+        canonical_classification = scored_company.classification or classification_service.classify(
+            scored_company.composite_score
+        )
+
+        settings = get_settings()
+        use_new_classifier = settings.feature_new_classifier
+        classification = canonical_classification if use_new_classifier else legacy_classification
+
+        if legacy_classification != canonical_classification:
+            logger.info(
+                "Classification shadow mismatch",
+                company_id=company_id,
+                legacy=legacy_classification,
+                canonical=canonical_classification,
+                selected=classification,
+                feature_new_classifier=use_new_classifier,
+            )
 
         # Save the scores back to the DB to keep it 'magically' up to date
         await repo.save(scored_company)
@@ -59,6 +81,13 @@ async def score_company(
             "competitive_position_score": scored_company.competitive_position_score,
             "composite_score": scored_company.composite_score,
             "classification": classification,
+            "classification_shadow": {
+                "legacy": legacy_classification,
+                "canonical": canonical_classification,
+                "selected": classification,
+                "mismatch": legacy_classification != canonical_classification,
+                "feature_new_classifier": use_new_classifier,
+            },
             "scoring_breakdown": scored_company.scoring_breakdown,
             "calculated_at": datetime.now().isoformat(),
         }

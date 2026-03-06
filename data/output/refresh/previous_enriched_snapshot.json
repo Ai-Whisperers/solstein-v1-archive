@@ -7,12 +7,12 @@
       "industry": "Energy Software",
       "country": "Unknown",
       "founded_year": null,
-      "employees": null,
+      "employees": 111900,
       "funding_raised": null,
-      "valuation": 586600000.0,
+      "valuation": 155363.278848,
       "github_url": null,
-      "revenue": null,
-      "ai_maturity_score": null,
+      "revenue": 33219.999744,
+      "ai_maturity_score": 1.5,
       "data_sources": [
         "web_search",
         "company_website",
@@ -33,15 +33,63 @@
         "is_synthetic": false,
         "last_validated": "2026-03-04T11:36:07.068862"
       },
-      "ticker": null,
-      "company_number": null,
-      "isin": null,
+      "ticker": "ABBNY",
+      "company_number": "03780764",
+      "isin": "CH0012221716",
       "headquarters": "Unknown",
-      "growth_rate": null,
-      "profit_margin": null,
+      "growth_rate": 5.4,
+      "profit_margin": 14.249999999999998,
       "enrichment_sources": [],
+      "free_research_sources": [
+        "yahoo_finance"
+      ],
       "enrichment_errors": [],
-      "identifier_confidence": 0.0
+      "identifier_confidence": 0.7166666666666667,
+      "metric_lineage": {
+        "revenue": {
+          "value": 33219.999744,
+          "source": "yahoo_finance",
+          "confidence": 0.78,
+          "unit": "millions"
+        },
+        "employees": {
+          "value": 111900,
+          "source": "yahoo_finance",
+          "confidence": 0.7,
+          "unit": "count"
+        },
+        "growth_rate": {
+          "value": 5.4,
+          "source": "yahoo_finance",
+          "confidence": 0.72,
+          "unit": "percent"
+        },
+        "profit_margin": {
+          "value": 14.249999999999998,
+          "source": "yahoo_finance",
+          "confidence": 0.74,
+          "unit": "percent"
+        },
+        "funding_raised": {
+          "value": null,
+          "source": "yahoo_finance",
+          "confidence": null,
+          "unit": "millions"
+        },
+        "valuation": {
+          "value": 155363.278848,
+          "source": "yahoo_finance",
+          "confidence": 0.76,
+          "unit": "millions"
+        }
+      },
+      "source_priority": [
+        "sec_edgar",
+        "companies_house",
+        "yahoo_finance",
+        "web_search",
+        "news_signals"
+      ]
     },
     {
       "company_name": "Enphase Energy",
@@ -50,12 +98,12 @@
       "industry": "Energy Software",
       "country": "Unknown",
       "founded_year": null,
-      "employees": null,
+      "employees": 2872,
       "funding_raised": null,
-      "valuation": null,
+      "valuation": 5394.716672,
       "github_url": null,
-      "revenue": null,
-      "ai_maturity_score": null,
+      "revenue": 1472.98496,
+      "ai_maturity_score": 1.5,
       "data_sources": [
         "web_search",
         "company_website"
@@ -74,15 +122,63 @@
         "is_synthetic": false,
         "last_validated": "2026-03-04T11:36:07.068983"
       },
-      "ticker": null,
-      "company_number": null,
-      "isin": null,
+      "ticker": "ENPH",
+      "company_number": "07944070",
+      "isin": "US29355A1079",
       "headquarters": "Unknown",
-      "growth_rate": null,
-      "profit_margin": null,
+      "growth_rate": -10.299999999999999,
+      "profit_margin": 11.686,
       "enrichment_sources": [],
+      "free_research_sources": [
+        "yahoo_finance"
+      ],
       "enrichment_errors": [],
-      "identifier_confidence": 0.0
+      "identifier_confidence": 0.65,
+      "metric_lineage": {
+        "revenue": {
+          "value": 1472.98496,
+          "source": "yahoo_finance",
+          "confidence": 0.78,
+          "unit": "millions"
+        },
+        "employees": {
+          "value": 2872,
+          "source": "yahoo_finance",
+          "confidence": 0.7,
+          "unit": "count"
+        },
+        "growth_rate": {
+          "value": -10.299999999999999,
+          "source": "yahoo_finance",
+          "confidence": 0.72,
+          "unit": "percent"
+        },
+        "profit_margin": {
+          "value": 11.686,
+          "source": "yahoo_finance",
+          "confidence": 0.74,
+          "unit": "percent"
+        },
+        "funding_raised": {
+          "value": null,
+          "source": "yahoo_finance",
+          "confidence": null,
+          "unit": "millions"
+        },
+        "valuation": {
+          "value": 5394.716672,
+          "source": "yahoo_finance",
+          "confidence": 0.76,
+          "unit": "millions"
+        }
+      },
+      "source_priority": [
+        "sec_edgar",
+        "companies_house",
+        "yahoo_finance",
+        "web_search",
+        "news_signals"
+      ]
     },
     {
       "company_name": "Moixa",
@@ -96,7 +192,7 @@
       "valuation": null,
       "github_url": null,
       "revenue": null,
-      "ai_maturity_score": null,
+      "ai_maturity_score": 1.5,
       "data_sources": [
         "web_search",
         "company_website"
@@ -116,14 +212,63 @@
         "last_validated": "2026-03-04T11:36:07.069045"
       },
       "ticker": null,
-      "company_number": null,
-      "isin": null,
+      "company_number": "05631091",
+      "isin": "RU000A0JP5V6",
       "headquarters": "Unknown",
       "growth_rate": null,
       "profit_margin": null,
-      "enrichment_sources": [],
+      "enrichment_sources": [
+        "COMPANIES_HOUSE",
+        "NEWS_SIGNALS"
+      ],
+      "free_research_sources": [],
       "enrichment_errors": [],
-      "identifier_confidence": 0.0
+      "identifier_confidence": 0.65,
+      "metric_lineage": {
+        "revenue": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "millions"
+        },
+        "employees": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "count"
+        },
+        "growth_rate": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "percent"
+        },
+        "profit_margin": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "percent"
+        },
+        "funding_raised": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "millions"
+        },
+        "valuation": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "millions"
+        }
+      },
+      "source_priority": [
+        "sec_edgar",
+        "companies_house",
+        "yahoo_finance",
+        "web_search",
+        "news_signals"
+      ]
     },
     {
       "company_name": "OVO Energy",
@@ -137,7 +282,7 @@
       "valuation": null,
       "github_url": null,
       "revenue": null,
-      "ai_maturity_score": null,
+      "ai_maturity_score": 1.5,
       "data_sources": [
         "web_search",
         "company_website"
@@ -157,14 +302,63 @@
         "last_validated": "2026-03-04T11:36:07.069096"
       },
       "ticker": null,
-      "company_number": null,
+      "company_number": "06890795",
       "isin": null,
       "headquarters": "Unknown",
       "growth_rate": null,
       "profit_margin": null,
-      "enrichment_sources": [],
+      "enrichment_sources": [
+        "COMPANIES_HOUSE",
+        "NEWS_SIGNALS"
+      ],
+      "free_research_sources": [],
       "enrichment_errors": [],
-      "identifier_confidence": 0.0
+      "identifier_confidence": 0.55,
+      "metric_lineage": {
+        "revenue": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "millions"
+        },
+        "employees": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "count"
+        },
+        "growth_rate": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "percent"
+        },
+        "profit_margin": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "percent"
+        },
+        "funding_raised": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "millions"
+        },
+        "valuation": {
+          "value": null,
+          "source": "COMPANIES_HOUSE",
+          "confidence": null,
+          "unit": "millions"
+        }
+      },
+      "source_priority": [
+        "sec_edgar",
+        "companies_house",
+        "yahoo_finance",
+        "web_search",
+        "news_signals"
+      ]
     },
     {
       "company_name": "Sunrun",
@@ -173,12 +367,12 @@
       "industry": "Energy Software",
       "country": "Unknown",
       "founded_year": null,
-      "employees": null,
+      "employees": 9059,
       "funding_raised": null,
-      "valuation": null,
+      "valuation": 2735.773184,
       "github_url": null,
-      "revenue": null,
-      "ai_maturity_score": null,
+      "revenue": 2956.99712,
+      "ai_maturity_score": 1.5,
       "data_sources": [
         "web_search",
         "company_website"
@@ -197,15 +391,63 @@
         "is_synthetic": false,
         "last_validated": "2026-03-04T11:36:07.069144"
       },
-      "ticker": null,
+      "ticker": "RUN",
       "company_number": null,
-      "isin": null,
+      "isin": "US86771W1053",
       "headquarters": "Unknown",
-      "growth_rate": null,
-      "profit_margin": null,
+      "growth_rate": 1.235,
+      "profit_margin": 15.215999,
       "enrichment_sources": [],
+      "free_research_sources": [
+        "yahoo_finance"
+      ],
       "enrichment_errors": [],
-      "identifier_confidence": 0.0
+      "identifier_confidence": 0.8,
+      "metric_lineage": {
+        "revenue": {
+          "value": 2956.99712,
+          "source": "yahoo_finance",
+          "confidence": 0.78,
+          "unit": "millions"
+        },
+        "employees": {
+          "value": 9059,
+          "source": "yahoo_finance",
+          "confidence": 0.7,
+          "unit": "count"
+        },
+        "growth_rate": {
+          "value": 1.235,
+          "source": "yahoo_finance",
+          "confidence": 0.72,
+          "unit": "percent"
+        },
+        "profit_margin": {
+          "value": 15.215999,
+          "source": "yahoo_finance",
+          "confidence": 0.74,
+          "unit": "percent"
+        },
+        "funding_raised": {
+          "value": null,
+          "source": "yahoo_finance",
+          "confidence": null,
+          "unit": "millions"
+        },
+        "valuation": {
+          "value": 2735.773184,
+          "source": "yahoo_finance",
+          "confidence": 0.76,
+          "unit": "millions"
+        }
+      },
+      "source_priority": [
+        "sec_edgar",
+        "companies_house",
+        "yahoo_finance",
+        "web_search",
+        "news_signals"
+      ]
     }
   ],
   "metadata": {

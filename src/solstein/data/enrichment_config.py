@@ -215,6 +215,8 @@ class UnifiedCompanyLoaderConfig:
     skip_enrichment_if_complete: bool = True
     immutable_enrichment: bool = True
     rollback_on_error: bool = True
+    allow_paid_escalation: bool = False
+    paid_escalation_max_attempts: int = 3
 
     # Logging and monitoring
     log_enrichment_metrics: bool = True

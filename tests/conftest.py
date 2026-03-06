@@ -9,7 +9,15 @@ from sqlalchemy.orm import sessionmaker
 
 os.environ.setdefault("GITHUB_TOKEN", "test-github-token-12345")
 
-from tests.factories import make_company
+try:
+    from tests.factories import make_company
+except ModuleNotFoundError as exc:
+    if exc.name == "factory":
+        raise ModuleNotFoundError(
+            "Missing test dependency 'factory-boy'. Install dev dependencies with `uv sync --dev` "
+            "or `pip install -e .[dev]` before running tests."
+        ) from exc
+    raise
 
 
 from solstein.api.dependencies import get_company_repository, get_current_tenant, get_current_user

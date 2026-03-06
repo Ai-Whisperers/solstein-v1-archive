@@ -4789,11 +4789,11 @@ From AGENTS.md (LOCAL workspace context):
 - Hostinger deployment info (via SSH)
 
 **Created This Session**:
-- /home/ai-whisperers/LOCAL_OPENCLAW_AUDIT.md
-- /home/ai-whisperers/CRITICAL_FIXES_COMPLETED.md
-- /home/ai-whisperers/HOSTINGER_OPENCLAW_AUDIT.md
-- /home/ai-whisperers/DUAL_INSTANCE_STATUS.md
-- /home/ai-whisperers/COMPREHENSIVE_INFRASTRUCTURE_ANALYSIS.md
+- /home/ai-whisperers/docs/openclaw/LOCAL_OPENCLAW_AUDIT.md
+- /home/ai-whisperers/docs/operations/CRITICAL_FIXES_COMPLETED.md
+- /home/ai-whisperers/docs/openclaw/HOSTINGER_OPENCLAW_AUDIT.md
+- /home/ai-whisperers/docs/operations/DUAL_INSTANCE_STATUS.md
+- /home/ai-whisperers/docs/infra/COMPREHENSIVE_INFRASTRUCTURE_ANALYSIS.md
 
 **Will Need Next**:
 - Docker Compose configs (both instances)
@@ -10048,8 +10048,8 @@ PRIMARY (TO MODIFY):
   - /home/ai-whisperers/backups/openclaw-config-backup-20260213/scripts/intelligent-router.js
 
 REFERENCE (READ-ONLY):
-  - /home/ai-whisperers/solstein_final_report.md
-  - /home/ai-whisperers/LOCAL_OPENCLAW_AUDIT.md
+  - /home/ai-whisperers/docs/solstein/solstein_final_report.md
+  - /home/ai-whisperers/docs/openclaw/LOCAL_OPENCLAW_AUDIT.md
 ```
 
 ### Key Code in Progress

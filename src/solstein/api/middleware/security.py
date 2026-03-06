@@ -1,21 +1,20 @@
-"""
-Security Middleware for Enrichment API (Phase 10)
+"""Security Middleware for Enrichment API with unified logging.
 
 Implements:
 - CORS (Cross-Origin Resource Sharing)
 - Security headers (XSS, Clickjacking, MIME sniffing)
 - Bearer token authentication
 - Input validation
+
+Uses Loguru for consistent logging with context propagation.
 """
 
-import logging
 from collections.abc import Callable
 
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):

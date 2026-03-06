@@ -9,6 +9,7 @@ from ...analytics.scoring import GrowthScorer
 from ...config import get_settings
 from ...core.repositories import CompanyFilter
 from ...exporters.excel import ExcelExporter
+from ...data.report_release_gate import ReportReleaseGate
 from ..dependencies import get_company_repository, get_current_tenant
 from ..exceptions import APIError
 
@@ -34,6 +35,13 @@ def _run_excel_export(repo: Any, filters: dict[str, Any], filename: str) -> None
                 logger.warning(f"Failed to score company {company.name}: {e}")
                 scored_companies.append(company)
         companies = scored_companies
+
+        gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
+        gate_result = gate.evaluate(companies)
+        if not gate_result.passed:
+            reason_codes = ", ".join(reason.code for reason in gate_result.reasons)
+            logger.error(f"Release gate blocked Excel export: {reason_codes}")
+            return
 
         output_path = settings.data.export_dir / filename
         excel_exporter.create_dashboard(companies, output_path)
@@ -110,11 +118,22 @@ async def export_to_json(
             company_dict = scored.model_dump(mode="json")
             companies_data.append(company_dict)
 
+        gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
+        gate_result = gate.evaluate(filtered_companies)
+        if not gate_result.passed:
+            reason_codes = ", ".join(reason.code for reason in gate_result.reasons)
+            raise APIError(
+                code="RELEASE_GATE_BLOCKED",
+                message=f"Release gate blocked JSON export: {reason_codes}",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
         # Create output
         export_data = {
             "exported_at": datetime.now().isoformat(),
             "total_companies": len(companies_data),
             "companies": companies_data,
+            "release_gate": gate_result.to_dict(),
         }
 
         return JSONResponse(content=export_data)
