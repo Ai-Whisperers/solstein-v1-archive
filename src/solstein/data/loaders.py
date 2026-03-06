@@ -385,6 +385,51 @@ class CompetitorDataLoader:
             }
             ai_score = ai_score_by_maturity.get(ai_maturity, 1.0)
 
+        # Build confidence scores dictionary from raw confidence fields
+        confidence_scores = {}
+        if raw_data.get("classification_confidence"):
+            confidence_scores["classification"] = raw_data["classification_confidence"]
+        if raw_data.get("ai_confidence"):
+            confidence_scores["ai_score"] = raw_data["ai_confidence"]
+        if raw_data.get("employees_confidence"):
+            confidence_scores["employees"] = raw_data["employees_confidence"]
+        if raw_data.get("funding_confidence"):
+            confidence_scores["funding"] = raw_data["funding_confidence"]
+        if raw_data.get("valuation_confidence"):
+            confidence_scores["valuation"] = raw_data["valuation_confidence"]
+
+        # Build metric sources dictionary from raw source fields
+        metric_sources = {}
+        if raw_data.get("employees_source"):
+            metric_sources["employees"] = [raw_data["employees_source"]]
+        if raw_data.get("ai_source"):
+            metric_sources["ai_score"] = [raw_data["ai_source"]]
+        if raw_data.get("funding_source"):
+            metric_sources["funding"] = [raw_data["funding_source"]]
+        if raw_data.get("valuation_source"):
+            metric_sources["valuation"] = [raw_data["valuation_source"]]
+        # Add profitability source if available
+        profitability_data = raw_data.get("profitability", {})
+        if isinstance(profitability_data, dict):
+            if profitability_data.get("source"):
+                metric_sources["profitability"] = [profitability_data["source"]]
+
+        # Build enrichment quality metrics
+        enrichment_quality_metrics = {}
+        if raw_data.get("data_quality_score") is not None:
+            enrichment_quality_metrics["data_quality_score"] = raw_data["data_quality_score"]
+        if raw_data.get("enrichment_source_count") is not None:
+            enrichment_quality_metrics["source_count"] = raw_data["enrichment_source_count"]
+
+        # Convert source_links from objects to strings
+        source_links = []
+        raw_source_links = raw_data.get("source_links", [])
+        for link in raw_source_links:
+            if isinstance(link, dict) and link.get("source"):
+                source_links.append(link["source"])
+            elif isinstance(link, str):
+                source_links.append(link)
+
         # Create company profile
         company = Company(
             id=folder.lower().replace(" ", "-").replace("/", "-"),
@@ -407,6 +452,7 @@ class CompetitorDataLoader:
             # Scores
             composite_score=composite_score,
             classification=classification,
+            confidence_scores=confidence_scores,
             # Comprehensive data
             revenue_timeline=timeline,
             revenue_cagr_3yr=calculated_cagr_3yr if calculated_cagr_3yr else cagr_3yr,
@@ -429,6 +475,12 @@ class CompetitorDataLoader:
             ai_key_capabilities=ai_capabilities,
             ai_in_production=ai_in_production,
             data_availability=raw_data.get("data_availability"),
+            # EPIC-004: Preserve quality and source metadata
+            metric_sources=metric_sources,
+            enrichment_quality_metrics=enrichment_quality_metrics,
+            source_links=source_links,
+            enrichment_source_count=raw_data.get("enrichment_source_count", 0),
+            data_quality_tier="high" if raw_data.get("data_quality_score", 0) >= 0.7 else "medium" if raw_data.get("data_quality_score", 0) >= 0.4 else "low",
         )
 
         return company

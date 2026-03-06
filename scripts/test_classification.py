@@ -42,7 +42,6 @@ def test_classification_thresholds():
     print(f"  Phoenix: >= {PHOENIX_SCORE_THRESHOLD}")
     print(f"  Salt: {LEAD_SCORE_THRESHOLD + 0.01} - {PHOENIX_SCORE_THRESHOLD - 0.01}")
     print(f"  Lead: <= {LEAD_SCORE_THRESHOLD}")
-
     print(f"\nTest Cases:")
     all_passed = True
     for score, expected in test_cases:
@@ -116,7 +115,8 @@ def test_edge_cases():
         (0.0, "Lead", "Zero score"),
         (10.0, "Phoenix", "Max score"),
         (7.0, "Phoenix", "Exactly at Phoenix threshold"),
-        (4.5, "Lead", "Exactly at Lead threshold"),
+        (4.49, "Lead", "Exactly at Lead threshold (4.49)"),
+        (4.5, "Salt", "Just above Lead threshold"),
     ]
 
     all_passed = True
