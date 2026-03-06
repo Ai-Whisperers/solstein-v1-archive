@@ -40,7 +40,7 @@ class IdentifierLookupService:
         except Exception as exc:
             logger.warning("requests unavailable for OpenFIGI", error=str(exc))
 
-    def _search_opencorporates(self, company_name: str) -> dict[str, Any]:
+    async def _search_opencorporates(self, company_name: str) -> dict[str, Any]:
         if not self._opencorporates_api_key:
             return {}
 
@@ -101,7 +101,7 @@ class IdentifierLookupService:
         if record:
             self._set_cached_record(key, record)
 
-    def _search_openfigi(self, company_name: str) -> dict[str, Any]:
+    async def _search_openfigi(self, company_name: str) -> dict[str, Any]:
         if not self._openfigi_available:
             return {}
 

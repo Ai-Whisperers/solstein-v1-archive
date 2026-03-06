@@ -11,7 +11,7 @@ import re
 from collections.abc import Mapping
 from datetime import datetime, timedelta, timezone
 
-import requests
+import httpx
 
 from ..domain.models import DataSourceType
 from .base_agent import AgentTaskResult, BaseDataGatheringAgent
@@ -48,7 +48,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             headers.pop("Authorization", None)
         return headers
 
-    def _get(
+    async def _get(
         self,
         url: str,
         *,
@@ -282,7 +282,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             "signal": signal,
         }
 
-    def _fetch_repo_text_file(self, org_name: str, repo_name: str, path: str) -> str | None:
+    async def _fetch_repo_text_file(self, org_name: str, repo_name: str, path: str) -> str | None:
         url = f"{self.api_base}/repos/{org_name}/{repo_name}/contents/{path}"
         try:
             resp = self._get(url, timeout=10)
@@ -390,7 +390,7 @@ class GitHubAgent(BaseDataGatheringAgent):
 
         return outdated, vulns
 
-    def _get_latest_version(self, ecosystem: str, name: str, cache: dict[tuple[str, str], str | None]) -> str | None:
+    async def _get_latest_version(self, ecosystem: str, name: str, cache: dict[tuple[str, str], str | None]) -> str | None:
         key = (ecosystem, name)
         if key in cache:
             return cache[key]
@@ -417,7 +417,7 @@ class GitHubAgent(BaseDataGatheringAgent):
         cache[key] = latest
         return latest
 
-    def _get_osv_vulns(
+    async def _get_osv_vulns(
         self,
         ecosystem: str,
         name: str,
@@ -543,7 +543,7 @@ class GitHubAgent(BaseDataGatheringAgent):
 
         return None
 
-    def _api_search_org(self, query: str) -> str | None:
+    async def _api_search_org(self, query: str) -> str | None:
         """API call to search for GitHub org."""
         try:
             url = f"{self.api_base}/search/users"
@@ -561,7 +561,7 @@ class GitHubAgent(BaseDataGatheringAgent):
                 self.log_warning("GitHub API rate limited")
             elif resp.status_code == 401:
                 self.log_warning("GitHub API unauthorized")
-        except requests.Timeout:
+        except httpx.TimeoutException:
             self.log_warning(f"Timeout searching for org: {query}")
         except Exception as e:
             self.log_warning(f"Error searching org: {e}")
@@ -587,7 +587,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             self.log_error(f"Error fetching repos: {e}")
             return []
 
-    def _api_fetch_repos(self, org_name: str) -> list[dict[str, object]]:
+    async def _api_fetch_repos(self, org_name: str) -> list[dict[str, object]]:
         """API call to fetch org repos."""
         try:
             url = f"{self.api_base}/orgs/{org_name}/repos"
@@ -629,7 +629,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             self.log_error(f"Error counting commits: {e}")
             return None
 
-    def _api_count_commits(self, org_name: str, repos: list[dict[str, object]]) -> int | None:
+    async def _api_count_commits(self, org_name: str, repos: list[dict[str, object]]) -> int | None:
         """API call to count commits."""
         total_commits = 0
         thirty_days_ago = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
@@ -670,7 +670,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             self.log_error(f"Error computing commit velocity trend: {e}")
             return None
 
-    def _api_commit_velocity_trend(self, org_name: str, repos: list[dict[str, object]]) -> dict[str, object] | None:
+    async def _api_commit_velocity_trend(self, org_name: str, repos: list[dict[str, object]]) -> dict[str, object] | None:
         now = datetime.now(timezone.utc)
         recent_since = (now - timedelta(days=14)).isoformat()
         prev_since = (now - timedelta(days=28)).isoformat()
@@ -741,7 +741,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             self.log_error(f"Error counting contributors: {e}")
             return None
 
-    def _api_count_contributors(self, org_name: str, repos: list[dict[str, object]]) -> int | None:
+    async def _api_count_contributors(self, org_name: str, repos: list[dict[str, object]]) -> int | None:
         """API call to count contributors."""
         total_contributors = set()
 

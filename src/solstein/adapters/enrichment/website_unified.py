@@ -9,7 +9,7 @@ Extracts product info, tech stack, and company details from websites.
 from datetime import datetime
 from typing import Any
 
-import requests
+import httpx
 from loguru import logger
 
 from solstein.domain.models import RawDataSource
@@ -36,7 +36,7 @@ class WebsiteUnifiedAdapter(BaseRefreshConnector):
             confidence=0.70,
         )
 
-    def _scrape_website(self, website: str) -> dict[str, Any]:
+    async def _scrape_website(self, website: str) -> dict[str, Any]:
         """Scrape company website for product/tech info."""
         try:
             if not website.startswith(("http://", "https://")):

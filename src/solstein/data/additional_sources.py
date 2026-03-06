@@ -21,7 +21,7 @@ import json
 from datetime import date, datetime, timedelta
 from typing import Any
 
-import requests
+import httpx
 from loguru import logger
 from pydantic import BaseModel
 
@@ -130,7 +130,7 @@ class AdditionalDataSources:
 
         return self._get_news_from_web_search(company_name, days_back)
 
-    def _get_news_from_api(self, company_name: str, days_back: int) -> PressCoverage:
+    async def _get_news_from_api(self, company_name: str, days_back: int) -> PressCoverage:
         """Get news using NewsAPI.org."""
         if not self.news_api_key:
             return PressCoverage(
@@ -210,7 +210,7 @@ class AdditionalDataSources:
                 sentiment_score=None,
             )
 
-    def _get_news_from_web_search(self, company_name: str, days_back: int) -> PressCoverage:
+    async def _get_news_from_web_search(self, company_name: str, days_back: int) -> PressCoverage:
         """
         Get news using web search as fallback.
 
@@ -358,7 +358,7 @@ class AdditionalDataSources:
     # WEB SCRAPING
     # ====================
 
-    def scrape_company_website(self, company_name: str, website: str) -> ProductInfo:
+    async def scrape_company_website(self, company_name: str, website: str) -> ProductInfo:
         """
         Scrape company website for product information.
 
@@ -451,7 +451,7 @@ class AdditionalDataSources:
     # CRUNCHBASE ALTERNATIVE (Using Public Data)
     # ====================
 
-    def get_funding_data(self, company_name: str) -> FundingData:
+    async def get_funding_data(self, company_name: str) -> FundingData:
         """
         Get funding data.
 
@@ -525,7 +525,7 @@ class AdditionalDataSources:
     # PATENT DATA (PatentsView API)
     # ====================
 
-    def get_patent_data(self, company_name: str) -> PatentData:
+    async def get_patent_data(self, company_name: str) -> PatentData:
         """
         Get patent data for a company using PatentsView API.
 

@@ -30,7 +30,7 @@ import re
 from datetime import datetime, timedelta
 from typing import Any
 
-import requests
+import httpx
 from loguru import logger
 
 from solstein.data.connectors.constants import (
@@ -125,7 +125,7 @@ class NewsSignalDetector:
         if self.queries_today >= NEWS_SIGNAL_DAILY_QUERY_LIMIT - 10:
             logger.warning(f"Approaching daily limit: {self.queries_today}/{self.daily_query_limit}")
 
-    def _search_news(self, query: str) -> list[dict[str, Any]]:
+    async def _search_news(self, query: str) -> list[dict[str, Any]]:
         """
         Search news articles using NewsAPI.
 
@@ -173,7 +173,7 @@ class NewsSignalDetector:
             logger.info(f"Found {len(articles)} articles for query: {query}")
             return articles
 
-        except requests.RequestException as e:
+        except httpx.RequestError as e:
             logger.error(f"Request error searching news: {e}")
             raise RuntimeError(f"Failed to search news: {e}") from e
 

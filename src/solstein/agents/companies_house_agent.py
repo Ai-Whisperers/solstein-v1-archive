@@ -7,7 +7,7 @@ for UK-registered companies and their subsidiaries.
 import asyncio
 from datetime import datetime, timezone
 
-import requests
+import httpx
 
 from ..domain.models import DataSourceType
 from .base_agent import AgentTaskResult, BaseDataGatheringAgent
@@ -126,7 +126,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             self.log_error(f"Error searching company: {e}")
             return None
 
-    def _api_search_company(self, company_name: str) -> str | None:
+    async def _api_search_company(self, company_name: str) -> str | None:
         """API call to search for company."""
         try:
             url = f"{self.api_base}/search/companies"
@@ -174,7 +174,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             self.log_error(f"Error fetching company details: {e}")
             return None
 
-    def _api_get_company(self, company_num: str) -> dict | None:
+    async def _api_get_company(self, company_num: str) -> dict | None:
         """API call to get company details."""
         try:
             url = f"{self.api_base}/company/{company_num}"
@@ -212,7 +212,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             self.log_error(f"Error fetching financials: {e}")
             return None
 
-    def _api_get_financials(self, company_num: str) -> dict | None:
+    async def _api_get_financials(self, company_num: str) -> dict | None:
         """API call to get financial filing."""
         try:
             url = f"{self.api_base}/company/{company_num}/filing-history"

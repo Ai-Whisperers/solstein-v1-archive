@@ -54,7 +54,7 @@ def search_company_patents(company_name: str) -> PatentResult:
     return PatentResult(source="none")
 
 
-def _search_uspto_peds(company_name: str) -> PatentResult:
+async def _search_uspto_peds(company_name: str) -> PatentResult:
     """
     Search USPTO Patent Examination Data System (PEDS).
 
@@ -132,7 +132,7 @@ def _search_uspto_peds(company_name: str) -> PatentResult:
         return PatentResult()
 
 
-def _search_google_patents(company_name: str) -> PatentResult:
+async def _search_google_patents(company_name: str) -> PatentResult:
     """
     Search Google Patents via scraping.
     """
@@ -185,7 +185,7 @@ def _search_google_patents(company_name: str) -> PatentResult:
     return PatentResult()
 
 
-def _search_duckduckgo(company_name: str) -> PatentResult:
+async def _search_duckduckgo(company_name: str) -> PatentResult:
     """
     Fallback: Use DuckDuckGo for patent-related information.
     """

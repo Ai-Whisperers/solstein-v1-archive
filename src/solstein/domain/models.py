@@ -118,7 +118,58 @@ class Company(BaseModel):
 
     model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
 
-    id: str
+    id: str = Field(..., description="Unique company identifier")
+    name: str
+    company_name: str | None = None
+    industry: str = "Energy Software"
+    description: str | None = None
+    website: str | None = None
+    headquarters: str | None = None
+    founded_year: int | None = None
+
+    # Metadata
+    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    data_source: str | None = None
+    notes: str | None = None
+    source_links: list[str] = Field(default_factory=list)
+    metric_sources: dict[str, list[str]] = Field(default_factory=dict)
+    metric_justifications: dict[str, str] = Field(default_factory=dict)
+    metric_observations: dict[str, list[dict[str, Any]]] = Field(default_factory=dict)
+    signal_confidences: dict[str, float] = Field(default_factory=dict)
+
+    @field_validator("id")
+    @classmethod
+    def validate_id(cls, v: str) -> str:
+        """Validate company ID format."""
+        if not v:
+            raise ValueError("Company ID cannot be empty")
+        if len(v) < 3:
+            raise ValueError("Company ID must be at least 3 characters")
+        if " " in v:
+            raise ValueError("Company ID cannot contain spaces")
+        return v.strip()
+
+    @classmethod
+    def generate_id(cls, name: str, prefix: str = "COMP") -> str:
+        """Generate a unique company ID from name.
+
+        Args:
+            name: Company name
+            prefix: ID prefix (default: COMP)
+
+        Returns:
+            Unique company ID
+        """
+        import re
+        import uuid
+
+        # Clean name: remove special chars, uppercase
+        clean = re.sub(r'[^a-zA-Z0-9]', '', name.upper())[:10]
+
+        # Add random suffix for uniqueness
+        suffix = str(uuid.uuid4())[:8]
+
+        return f"{prefix}-{clean}-{suffix}"
     name: str
     company_name: str | None = None
     industry: str = "Energy Software"

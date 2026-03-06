@@ -9,7 +9,7 @@ Uses Crunchbase API when available, falls back to public sources.
 from datetime import datetime
 from typing import Any
 
-import requests
+import httpx
 from loguru import logger
 
 from solstein.domain.models import RawDataSource
@@ -37,7 +37,7 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
         )
         self.crunchbase_api_key = crunchbase_api_key
 
-    def _get_crunchbase_data(self, company_name: str) -> dict[str, Any] | None:
+    async def _get_crunchbase_data(self, company_name: str) -> dict[str, Any] | None:
         """Get funding data from Crunchbase API."""
         if not self.crunchbase_api_key:
             return None

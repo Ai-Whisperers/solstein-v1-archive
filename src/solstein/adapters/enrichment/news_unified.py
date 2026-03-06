@@ -9,7 +9,7 @@ Uses NewsAPI.org as primary with web search fallback.
 from datetime import datetime, timedelta
 from typing import Any
 
-import requests
+import httpx
 from loguru import logger
 
 from solstein.domain.models import RawDataSource
@@ -86,7 +86,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
             return "negative"
         return "neutral"
 
-    def _get_news_from_api(self, company_name: str, days_back: int = 30) -> list[dict[str, Any]]:
+    async def _get_news_from_api(self, company_name: str, days_back: int = 30) -> list[dict[str, Any]]:
         """Get news using NewsAPI.org."""
         if not self.news_api_key:
             return []

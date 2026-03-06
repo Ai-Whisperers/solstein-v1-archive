@@ -8,7 +8,7 @@ Provides a simple interface to GitHub data retrieval for refresh connectors.
 
 from typing import Any
 
-import requests
+import httpx
 from loguru import logger
 
 from solstein.data.connectors.constants import (
@@ -47,7 +47,7 @@ class GitHubConnector:
         if self.github_token:
             self.headers["Authorization"] = f"token {self.github_token}"
 
-    def get_user_repositories(self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE) -> list[dict[str, Any]]:
+    async def get_user_repositories(self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE) -> list[dict[str, Any]]:
         """Fetch repositories for a GitHub user or organization.
 
         Args:
@@ -77,14 +77,14 @@ class GitHubConnector:
                 logger.warning(f"GitHub API error ({response.status_code}) fetching repos for {username}")
                 return []
 
-        except requests.RequestException as e:
+        except httpx.RequestError as e:
             logger.warning(f"Failed to fetch repositories for {username}: {e}")
             return []
         except Exception as e:
             logger.error(f"Unexpected error fetching repositories for {username}: {e}")
             return []
 
-    def get_recent_commits(self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE) -> list[dict[str, Any]]:
+    async def get_recent_commits(self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE) -> list[dict[str, Any]]:
         """Fetch recent commits for a GitHub user.
 
         Note: GitHub API doesn't provide a direct "commits by user" endpoint.
@@ -123,14 +123,14 @@ class GitHubConnector:
                 logger.warning(f"GitHub API error ({response.status_code}) fetching commits for {username}")
                 return []
 
-        except requests.RequestException as e:
+        except httpx.RequestError as e:
             logger.warning(f"Failed to fetch commits for {username}: {e}")
             return []
         except Exception as e:
             logger.error(f"Unexpected error fetching commits for {username}: {e}")
             return []
 
-    def get_repository_activity(self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE) -> list[dict[str, Any]]:
+    async def get_repository_activity(self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE) -> list[dict[str, Any]]:
         """Fetch recent activity for a GitHub user.
 
         Returns the user's public events (activity stream).
@@ -162,7 +162,7 @@ class GitHubConnector:
                 logger.warning(f"GitHub API error ({response.status_code}) fetching activity for {username}")
                 return []
 
-        except requests.RequestException as e:
+        except httpx.RequestError as e:
             logger.warning(f"Failed to fetch activity for {username}: {e}")
             return []
         except Exception as e:
