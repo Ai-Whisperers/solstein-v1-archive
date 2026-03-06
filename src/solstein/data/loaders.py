@@ -386,17 +386,37 @@ class CompetitorDataLoader:
             ai_score = ai_score_by_maturity.get(ai_maturity, 1.0)
 
         # Build confidence scores dictionary from raw confidence fields
+        # Convert string confidence levels to numeric scores
+        confidence_level_map = {
+            'confirmed': 1.0,
+            'high': 0.9,
+            'strong': 0.85,
+            'medium': 0.6,
+            'moderate': 0.5,
+            'low': 0.3,
+            'weak': 0.2,
+            'estimated': 0.5,
+            'unknown': 0.0,
+        }
+
+        def convert_confidence(value):
+            if isinstance(value, (int, float)):
+                return float(value)
+            if isinstance(value, str):
+                return confidence_level_map.get(value.lower(), 0.5)
+            return 0.0
+
         confidence_scores = {}
         if raw_data.get("classification_confidence"):
-            confidence_scores["classification"] = raw_data["classification_confidence"]
+            confidence_scores["classification"] = convert_confidence(raw_data["classification_confidence"])
         if raw_data.get("ai_confidence"):
-            confidence_scores["ai_score"] = raw_data["ai_confidence"]
+            confidence_scores["ai_score"] = convert_confidence(raw_data["ai_confidence"])
         if raw_data.get("employees_confidence"):
-            confidence_scores["employees"] = raw_data["employees_confidence"]
+            confidence_scores["employees"] = convert_confidence(raw_data["employees_confidence"])
         if raw_data.get("funding_confidence"):
-            confidence_scores["funding"] = raw_data["funding_confidence"]
+            confidence_scores["funding"] = convert_confidence(raw_data["funding_confidence"])
         if raw_data.get("valuation_confidence"):
-            confidence_scores["valuation"] = raw_data["valuation_confidence"]
+            confidence_scores["valuation"] = convert_confidence(raw_data["valuation_confidence"])
 
         # Build metric sources dictionary from raw source fields
         metric_sources = {}
