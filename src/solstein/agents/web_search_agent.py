@@ -7,7 +7,7 @@ to extract facts about company growth, funding, and announcements.
 import asyncio
 from datetime import datetime, timezone
 
-import requests
+import httpx
 
 from ..domain.models import DataSourceType
 from .base_agent import AgentTaskResult, BaseDataGatheringAgent
@@ -57,7 +57,6 @@ class WebSearchAgent(BaseDataGatheringAgent):
             for query_name, query_text in search_queries:
                 try:
                     articles = await call_with_retry(
-                        asyncio.to_thread,
                         self._api_search_news,
                         query_text,
                         retry_config=WEB_SEARCH_RETRY_CONFIG,
@@ -119,8 +118,31 @@ class WebSearchAgent(BaseDataGatheringAgent):
             ("Press Releases", f"{company_name} press release news"),
         ]
 
-    def _api_search_news(self, query: str) -> list[dict]:
+    async def _api_search_news(self, query: str) -> list[dict]:
         """API call to Google Custom Search."""
+        if not self.google_api_key or not self.search_engine_id:
+            return []
+
+        try:
+            params = {
+                "q": query,
+                "key": self.google_api_key,
+                "cx": self.search_engine_id,
+                "num": 10,
+                "sort": "date",
+            }
+
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(self.search_base, params=params, timeout=15.0)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    return data.get("items", [])
+                else:
+                    self.log_warning(f"Search API error {resp.status_code}")
+        except Exception as e:
+            self.log_error(f"Error calling search API: {e}")
+
+        return []
         if not self.google_api_key or not self.search_engine_id:
             return []
 

@@ -115,3 +115,24 @@ async def get_current_tenant(request: Request) -> dict[str, Any]:
         )
 
     return tenant
+
+
+
+async def require_admin(user: UserPayload = Depends(get_current_user)) -> UserPayload:
+    """Require admin role for access.
+
+    Args:
+        user: Current authenticated user
+
+    Returns:
+        UserPayload if user is admin
+
+    Raises:
+        HTTPException: 403 if user is not admin
+    """
+    if user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return user

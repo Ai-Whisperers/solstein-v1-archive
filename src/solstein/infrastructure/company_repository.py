@@ -162,7 +162,34 @@ class CompanyRepository:
         await self.session.flush()
         return True
 
-    async def search(self, query: str, field: str = "name") -> list[CompanyRecord]:
+    async def search(self, query: str, field: str = "name", skip: int = 0, limit: int = 100) -> list[CompanyRecord]:
+        """Search companies by a specific field using case-insensitive matching.
+
+        Args:
+            query: Search query string.
+            field: Field to search in (default: "name").
+                Supported fields: name, industry, headquarters, description.
+            skip: Number of records to skip (default: 0).
+            limit: Maximum number of records to return (default: 100).
+
+        Returns:
+            List of matching CompanyRecord objects.
+
+        Raises:
+            ValueError: If field is not supported.
+        """
+        supported_fields = {"name", "industry", "headquarters", "description"}
+        if field not in supported_fields:
+            raise ValueError(f"Field '{field}' not supported. Choose from: {supported_fields}")
+
+        search_field = getattr(CompanyRecord, field)
+        result = await self.session.execute(
+            select(CompanyRecord)
+            .where(search_field.ilike(f"%{query}%"))
+            .offset(skip)
+            .limit(limit)
+        )
+        return list(result.scalars().all())
         """Search companies by a specific field using case-insensitive matching.
 
         Args:
@@ -184,7 +211,37 @@ class CompanyRepository:
         result = await self.session.execute(select(CompanyRecord).where(search_field.ilike(f"%{query}%")))
         return list(result.scalars().all())
 
-    async def filter_by(self, **filters) -> list[CompanyRecord]:
+    async def filter_by(self, skip: int = 0, limit: int = 100, **filters) -> list[CompanyRecord]:
+        """Filter companies by multiple criteria.
+
+        Args:
+            skip: Number of records to skip (default: 0).
+            limit: Maximum number of records to return (default: 100).
+            **filters: Arbitrary keyword arguments for filtering.
+                Supported filters: tier, classification, ai_maturity, industry, etc.
+
+        Returns:
+            List of CompanyRecord objects matching all filter criteria.
+
+        Raises:
+            ValueError: If no valid filters are provided.
+        """
+        if not filters:
+            raise ValueError("At least one filter criterion must be provided")
+
+        conditions = []
+        for key, value in filters.items():
+            if not hasattr(CompanyRecord, key):
+                raise ValueError(f"CompanyRecord has no attribute '{key}'")
+            conditions.append(getattr(CompanyRecord, key) == value)
+
+        result = await self.session.execute(
+            select(CompanyRecord)
+            .where(and_(*conditions))
+            .offset(skip)
+            .limit(limit)
+        )
+        return list(result.scalars().all())
         """Filter companies by multiple criteria.
 
         Args:

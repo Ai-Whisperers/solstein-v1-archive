@@ -5,6 +5,9 @@ Phase 1, Item 1.2: JWT Authentication Endpoints
 
 import hashlib
 
+import bcrypt
+from fastapi import APIRouter, Depends, HTTPException, status
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
@@ -77,7 +80,14 @@ async def login(request: LoginRequest) -> TokenResponse:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Validate password (compare SHA-256 hash)
+    # Validate password (compare bcrypt hash)
+    if not bcrypt.checkpw(request.password.encode(), admin_password_hash.encode()):
+        logger.warning(f"Login failed — wrong password for: {request.email}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     provided_hash = hashlib.sha256(request.password.encode()).hexdigest()
     if provided_hash != admin_password_hash:
         logger.warning(f"Login failed — wrong password for: {request.email}")
@@ -158,3 +168,29 @@ async def get_me(current_user: UserPayload = Depends(get_current_user)) -> UserP
     """
     logger.info(f"User info requested for: {current_user.email}")
     return current_user
+
+
+
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt.
+
+    Args:
+        password: Plain text password
+
+    Returns:
+        str: bcrypt hashed password
+    """
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against a bcrypt hash.
+
+    Args:
+        plain_password: Plain text password
+        hashed_password: bcrypt hashed password
+
+    Returns:
+        bool: True if password matches, False otherwise
+    """
+    return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
