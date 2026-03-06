@@ -1,45 +1,69 @@
-# Learnings
+# EPIC-017 Non-API Master Execution Plan - Learnings
 
-## 2026-03-05 Orchestrator Init
-- EPIC-017 expanded to include stories 1-75 across A..P.
-- Non-API scope only; provider integrations are out-of-scope (Jonathan-owned).
-- High-risk areas: domain model duplication, scoring/config divergence, readiness split, loader monolith, broad exception patterns.
+## 2026-03-06: Completed Wave 2 E1-E5 (Unified Loader Refactor)
 
-## 2026-03-05 Wave-0 N1 kickoff
-- Added feature flags to Settings: FEATURE_NEW_CLASSIFIER, FEATURE_NEW_READINESS_GATE, FEATURE_NEW_UNIFIED_LOADER.
-- Added central accessor module: src/solstein/core/feature_flags.py.
-- Added unit tests in tests/unit/test_feature_flags.py for defaults and env overrides.
-- Targeted pytest is currently blocked by pre-existing repo import error in tests/conftest.py chain (missing ReleaseGateAuditRecord symbol in infrastructure.database_models).
+### E1: Extract orchestration layer from unified_loader.py
+- Created `src/solstein/data/loader_orchestrator.py` with `UnifiedLoaderOrchestrator`
+- Separated concerns: discovery, normalization, merge/dedup, enrichment phases
+- Added protocols for `DataSourceAdapter`, `EnrichmentConnector`, `Normalizer`, `ConflictResolver`
+- Created `LoadConfig` and `LoadResult` dataclasses for structured I/O
+- Added comprehensive test suite: 17 tests in `tests/unit/test_loader_orchestrator.py`
 
-## 2026-03-05 M2 implementation
-- Added `docs/architecture/MODEL_MIGRATION_PLAYBOOK.md` with phased dual-read/dual-write strategy and compatibility matrix for Company/FinancialMetric.
-- Added deterministic dry-run validator: `scripts/validate_model_migration_dry_run.py` (exit 0 pass / 1 fail).
-- Added unit suite: `tests/unit/test_model_migration_dry_run.py` covering legacy flat, nested, mixed, and incompatible payload scenarios.
-- Observed current deterministic merge behavior for mixed payloads: nested `financials` values remain authoritative for overlapping fields.
+### E2: Extract normalization/parsing utilities
+- Created `src/solstein/data/normalization.py` with safe parsing functions
+- `parse_number()`, `parse_integer()`, `parse_decimal()` for numeric fields
+- `normalize_string()`, `normalize_boolean()`, `normalize_list()`, `normalize_dict()` for type safety
+- `normalize_date()` for ISO format dates
+- `clean_company_name()`, `extract_domain_from_url()` for domain-specific cleaning
+- `DataNormalizer` class for record-level normalization with field mapping
+- Added 32 tests in `tests/unit/test_normalization.py`
 
-## 2026-03-05 M4 progress
-- Added contract tests in `tests/unit/test_model_contract_compat.py` for persisted JSON compatibility and API response shape stability.
-- Verified four scenarios pass (`uv run pytest tests/unit/test_model_contract_compat.py -q`): legacy flat, nested canonical, mixed deterministic, and API key-set contract.
+### E3: Extract merge/conflict resolver adapter
+- Created `src/solstein/data/conflict_resolution.py` with pluggable strategies
+- `ConflictStrategy` enum: SOURCE_PRIORITY, RECENCY_WINS, MAXIMUM_VALUE, MINIMUM_VALUE, CONCATENATE, UNION, INTERSECTION
+- `FieldConflict` dataclass for conflict representation
+- `ResolutionResult` dataclass for resolution output
+- Multiple resolver implementations:
+  - `SourcePriorityResolver`: Uses source authority rankings
+  - `RecencyResolver`: Prefers newer data, falls back to confidence
+  - `NumericResolver`: Prefers max (revenue) or min (risk)
+  - `StringResolver`: Concatenates or prefers longer
+  - `ListResolver`: Union or intersection strategies
+  - `CompositeResolver`: Field-specific strategy delegation
+- Added 21 tests in `tests/unit/test_conflict_resolution.py`
 
-## 2026-03-05 N2 progress
-- Added shadow classification comparison in `src/solstein/api/routers/scoring.py`.
-- Response now includes `classification_shadow` with legacy vs canonical vs selected and mismatch flag.
-- Feature flag `FEATURE_NEW_CLASSIFIER` controls selected classification path while keeping mismatch telemetry for dual-run.
-- Added unit tests in `tests/unit/test_scoring_router_shadow_mode.py` for both flag states.
+### E4: Replace mutable defaults with safe factories
+- Created `src/solstein/data/safe_defaults.py` with factory patterns
+- `ensure_list()`, `ensure_dict()`, `ensure_set()`, `ensure_str()`, `ensure_int()`, `ensure_float()`, `ensure_bool()`
+- `list_factory()`, `dict_factory()`, `set_factory()` for dataclass defaults
+- `SafeDefault` descriptor for class-level safe mutable defaults
+- `copy_with_safe_defaults()`, `merge_safe()` for safe dict operations
+- Added 20 tests in `tests/unit/test_safe_defaults.py`
 
-## 2026-03-05 N4 progress
-- Added rollback decision utility `src/solstein/core/rollout_guard.py` with thresholds for gate-fail ratio, confidence drift, and export error ratio.
-- Added tests `tests/unit/test_rollout_guard.py` covering no-rollback, single-trigger rollback, and multi-trigger rollback.
+### E5: Add bounded concurrency for enrichment
+- Implemented semaphore-based concurrency in `loader_orchestrator.py`
+- `max_concurrent_enrichment` config option (default: 10)
+- `asyncio.Semaphore` protects connector calls
+- `asyncio.wait_for()` for timeout handling (default: 30s)
+- Graceful error handling: timeouts and exceptions return `{}` instead of failing
 
-## 2026-03-05 N3/O3/D4/M5 progress
-- Added deterministic canary utility: `src/solstein/core/canary_rollout.py` with stable SHA-based bucket selection.
-- Added deterministic test mode resolver: `src/solstein/core/test_modes.py` with env-based mode/seed contract.
-- Added machine-readable gate serialization (`to_dict`) in `src/solstein/data/report_release_gate.py` and snapshot builder in `src/solstein/data/report_readiness.py`.
-- Added rollback profile + helper script (`src/solstein/core/rollback_profile.py`, `scripts/rollback_epic017_flags.py`) and runbook (`docs/operations/ROLLBACK_RUNBOOK_EPIC017.md`).
-- Updated scorer to honor configurable composite weights (no hardcoded 0.4/0.3/0.3) and added dedicated regression test `tests/unit/test_scoring_composite_weights.py`.
-- EPIC-017 focused unit test batch currently passing (26 tests).
+### Test Results
+- 125 new tests added for loader refactor
+- All 125 tests passing
+- Combined with Wave 0-1 tests: 173 EPIC-017 tests passing
 
-## 2026-03-05 D5 export gate enforcement
-- Enforced release gate in `src/solstein/api/routers/export.py` for both Excel and JSON exports.
-- Added `tests/unit/test_export_release_gate.py` to ensure JSON export is blocked with `RELEASE_GATE_BLOCKED` and Excel export skips when gate fails.
-- Export gate tests currently passing with expected warnings for missing type stubs/private usage.
+### Files Created
+- `src/solstein/data/loader_orchestrator.py` (296 lines)
+- `src/solstein/data/normalization.py` (505 lines)
+- `src/solstein/data/conflict_resolution.py` (402 lines)
+- `src/solstein/data/safe_defaults.py` (268 lines)
+- `tests/unit/test_loader_orchestrator.py` (267 lines)
+- `tests/unit/test_normalization.py` (361 lines)
+- `tests/unit/test_conflict_resolution.py` (314 lines)
+- `tests/unit/test_safe_defaults.py` (232 lines)
+
+### Next Steps
+- E6: Add loader-level performance benchmarks
+- F1-F5: Exception taxonomy (typed errors, error envelopes, lint checks)
+- G1-G6: Testing hardening (coverage dashboard, golden tests)
+- H1-H5: Provenance and confidence tracking
