@@ -8,21 +8,22 @@ from solstein.domain.models import AIMaturity, CompanyTier, ConfidenceLevel, Thr
 
 @pytest.fixture
 def temp_data_dir(tmp_path):
-    # Setup dummy data
-    data_dir = tmp_path / "data"
-    data_dir.mkdir()
+    """Create temporary data directory with proper structure."""
+    # Setup dummy data with proper structure
+    data_dir = tmp_path / "data" / "input"
+    data_dir.mkdir(parents=True)
     return data_dir
 
 
-@pytest.mark.skip(reason="Data path issue")
 def test_loader_missing_file(temp_data_dir):
+    """Test that missing file raises FileNotFoundError."""
     loader = CompetitorDataLoader(temp_data_dir)
     with pytest.raises(FileNotFoundError):
         loader.load_companies()
 
 
-@pytest.mark.skip(reason="Data path issue")
 def test_loader_success_and_cache(temp_data_dir):
+    """Test successful loading with caching."""
     json_path = temp_data_dir / "competitor_data.json"
     comp_data = {
         "competitors": [
@@ -119,8 +120,8 @@ def test_loader_success_and_cache(temp_data_dir):
     assert len(lim_comps_2) == 2
 
 
-@pytest.mark.skip(reason="Data path issue")
 def test_loader_bad_json(temp_data_dir):
+    """Test handling of invalid JSON."""
     json_path = temp_data_dir / "competitor_data.json"
     json_path.write_text("invalid json")
 
@@ -129,8 +130,8 @@ def test_loader_bad_json(temp_data_dir):
     assert len(comps) == 0
 
 
-@pytest.mark.skip(reason="Data path issue")
 def test_loader_bad_competitor(temp_data_dir, caplog):
+    """Test handling of malformed competitor data."""
     json_path = temp_data_dir / "competitor_data.json"
     json_path.write_text(json.dumps({"competitors": ["not a dict"]}))
 

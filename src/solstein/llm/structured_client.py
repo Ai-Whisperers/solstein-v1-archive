@@ -21,7 +21,7 @@ Usage::
         prompt="Describe Stripe as a JSON object.",
         schema=CompanyProfile,
     )
-    print(profile.name)  # "Stripe"
+    logger.info(f"Profile: {profile.name}")
 """
 
 from __future__ import annotations

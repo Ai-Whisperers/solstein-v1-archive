@@ -11,7 +11,7 @@ Usage::
 
     exporter = CSVExporter()
     path = exporter.export(companies, output_path=Path("/tmp/companies.csv"))
-    print(f"Exported {len(companies)} companies to {path}")
+    logger.info(f"Exported {len(companies)} companies to {path}")
 """
 
 from __future__ import annotations

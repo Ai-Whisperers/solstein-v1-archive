@@ -453,8 +453,8 @@ async def main():
 
         for result in results:
             print(f"\n{'=' * 60}")
-            print(f"Company: {result.company_name}")
-            print(f"Website: {result.website}")
+            logger.info(f"Company: {result.company_name}")
+            logger.info(f"Website: {result.website}")
             print(f"Employees: {result.employees}")
             print(f"Funding: ${result.funding_raised}M" if result.funding_raised else "Funding: Unknown")
             print(f"Confidence: {result.confidence:.2f}")

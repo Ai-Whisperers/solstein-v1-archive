@@ -407,7 +407,25 @@ class CompetitorDataLoader:
                 return confidence_level_map.get(value.lower(), 0.5)
             return 0.0
 
+        def extract_revenue_confidences(revenue_data):
+            """Extract confidence levels from revenue timeline entries."""
+            confidences = {}
+            if not isinstance(revenue_data, dict):
+                return confidences
+            timeline = revenue_data.get("timeline", [])
+            for entry in timeline:
+                if isinstance(entry, dict):
+                    year = entry.get("year")
+                    confidence = entry.get("confidence")
+                    if year and confidence:
+                        confidences[f"revenue_{year}"] = convert_confidence(confidence)
+            return confidences
+
         confidence_scores = {}
+        # Add revenue timeline confidences
+        revenue_confidences = extract_revenue_confidences(raw_data.get("revenue", {}))
+        confidence_scores.update(revenue_confidences)
+
         if raw_data.get("classification_confidence"):
             confidence_scores["classification"] = convert_confidence(raw_data["classification_confidence"])
         if raw_data.get("ai_confidence"):

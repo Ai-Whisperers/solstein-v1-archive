@@ -15,7 +15,7 @@ Usage::
     pipeline = EnrichmentPipeline(registry)
 
     record = await pipeline.enrich("stripe-inc", "Stripe")
-    print(record.confidence_score)
+    logger.info(f"Confidence score: {record.confidence_score}")
 """
 
 from __future__ import annotations

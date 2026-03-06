@@ -419,22 +419,22 @@ async def enrich_eneve_data(input_path: Path, output_path: Path) -> None:
         else 0
     )
 
-    print("\n📊 Enrichment Summary:")
-    print(f"  Companies enriched: {len(enriched)}")
-    print(f"  Total sources: {total_sources}")
-    print(f"  Average data quality: {avg_quality:.0%}")
-    print("\n📈 Quality Metrics:")
-    print(f"  Average completeness: {avg_completeness:.0%}")
-    print(f"  Average diversity score: {avg_diversity_score:.2f}")
-    print(f"  Total unique source types: {total_diversity}")
+    logger.info("Enrichment Summary:")
+    logger.info(f"Companies enriched: {len(enriched)}")
+    logger.info(f"Total sources: {total_sources}")
+    logger.info(f"Average data quality: {avg_quality:.0%}")
+    logger.info("Quality Metrics:")
+    logger.info(f"Average completeness: {avg_completeness:.0%}")
+    logger.info(f"Average diversity score: {avg_diversity_score:.2f}")
+    logger.info(f"Total unique source types: {total_diversity}")
 
     # Print cache stats if caching is enabled
     if enricher.cache:
         cache_stats = enricher.cache.get_stats()
-        print("\n💾 Cache Statistics:")
-        print(f"  Cache entries: {cache_stats['total_entries']}")
-        print(f"  Expired entries: {cache_stats['expired_entries']}")
-        print(f"  Cache size: {cache_stats['total_size_bytes'] / 1024:.1f} KB")
+        logger.info("Cache Statistics:")
+        logger.info(f"Cache entries: {cache_stats['total_entries']}")
+        logger.info(f"Expired entries: {cache_stats['expired_entries']}")
+        logger.info(f"Cache size: {cache_stats['total_size_bytes'] / 1024:.1f} KB")
 
 
 # CLI entry point

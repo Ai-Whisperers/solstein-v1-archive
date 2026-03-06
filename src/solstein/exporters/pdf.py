@@ -13,7 +13,7 @@ Usage::
 
     exporter = PDFExporter()
     path = exporter.export(companies, title="Q1 2026 Market Intelligence Report")
-    print(f"Report written to {path}")
+    logger.info(f"Report written to {path}")
 """
 
 from __future__ import annotations
