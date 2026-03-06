@@ -336,6 +336,9 @@ class GitHubAgent(BaseDataGatheringAgent):
     def _parse_package_json_deps(self, text: str) -> dict[str, str]:
         try:
             data = json.loads(text)
+        except (json.JSONDecodeError, TypeError):
+            return {}
+            data = json.loads(text)
         except Exception:
             return {}
         if not isinstance(data, dict):
