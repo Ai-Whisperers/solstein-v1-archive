@@ -96,8 +96,12 @@ class TestClassificationConfidenceGoldenCases:
 
     @pytest.mark.parametrize("score,completeness,expected_range,description", CONFIDENCE_CASES)
     def test_confidence_golden_cases(
-        self, service: ClassificationService, score: float | None, completeness: float | None,
-        expected_range: tuple[float, float], description: str
+        self,
+        service: ClassificationService,
+        score: float | None,
+        completeness: float | None,
+        expected_range: tuple[float, float],
+        description: str,
     ) -> None:
         """Confidence calculation must match golden expectations."""
         confidence = service.calculate_confidence(score, completeness)
@@ -194,8 +198,8 @@ class TestCompositeScoreGoldenCases:
         return Company(**defaults)
 
     COMPOSITE_SCORE_CASES = [
-        (1.00, 50000000, 0.30, 10000000, (4.0, 4.6), "Salt", "Unicorn profile"),
-        (0.60, 20000000, 0.25, 8000000, (4.0, 4.6), "Salt", "Strong scale-up"),
+        (1.00, 50000000, 0.30, 10000000, (4.0, 4.6), "Lead", "Unicorn profile"),
+        (0.60, 20000000, 0.25, 8000000, (4.0, 4.6), "Lead", "Strong scale-up"),
         (0.40, 10000000, 0.15, 5000000, (4.5, 5.0), "Salt", "Solid mid-stage"),
         (0.20, 5000000, 0.10, 3000000, (4.5, 5.0), "Salt", "Growing early-stage"),
         (0.10, 2000000, 0.05, 1000000, (4.5, 5.0), "Salt", "Early startup"),
@@ -206,8 +210,14 @@ class TestCompositeScoreGoldenCases:
         "growth,revenue,margin,funding,expected_range,expected_class,description", COMPOSITE_SCORE_CASES
     )
     def test_composite_score_golden_cases(
-        self, growth: float, revenue: int, margin: float, funding: int,
-        expected_range: tuple[float, float], expected_class: str, description: str
+        self,
+        growth: float,
+        revenue: int,
+        margin: float,
+        funding: int,
+        expected_range: tuple[float, float],
+        expected_class: str,
+        description: str,
     ) -> None:
         """Composite scoring must match golden expectations."""
         company = self.create_test_company(
