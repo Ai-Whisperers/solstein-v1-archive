@@ -427,7 +427,8 @@ class ImprovedExcelExporter:
                 fund_conf_str,
                 self._format_number(self._safe_get_financial(profile, "valuation"), 1),
                 val_conf_str,
-                self._format_percentage(self._safe_get_financial(profile, "profit_margin")),
+                self._format_percentage(self._safe_get(profile, "profit_margin")),
+                self._format_percentage(self._safe_get(profile, "ebitda_margin")),
                 self._format_percentage(self._safe_get_financial(profile, "ebitda_margin")),
             ]
 

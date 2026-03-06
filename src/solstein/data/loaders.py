@@ -16,6 +16,7 @@ from ..domain.models import (
     FinancialMetric,
     ThreatLevel,
 )
+from ..analytics.confidence_weighting import populate_signal_confidences
 from .metric_contract import normalize_financial_payload
 
 logger = logging.getLogger(__name__)
@@ -502,6 +503,9 @@ class CompetitorDataLoader:
             enrichment_source_count=raw_data.get("enrichment_source_count", 0),
             data_quality_tier="high" if raw_data.get("data_quality_score", 0) >= 0.7 else "medium" if raw_data.get("data_quality_score", 0) >= 0.4 else "low",
         )
+
+        # EPIC-007: Populate signal_confidences from financial metric confidence levels
+        company = populate_signal_confidences(company)
 
         return company
 

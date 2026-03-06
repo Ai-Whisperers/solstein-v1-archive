@@ -235,7 +235,7 @@ class EneveEnricher:
                 company_id=company_name.lower().replace(" ", "-"),
                 company_name=company_name,
                 website=params["website"],
-                industry=params["industry"],
+
             )
 
             if result and result.sources:
@@ -287,7 +287,7 @@ class EneveEnricher:
             sources.append(
                 RawDataSource(
                     source_name="Input Data",
-                    source_type="input",
+                    source_type="competitor_json",
                     entity_id=company_name,
                     entity_name=company_name,
                     raw_content=company_data,
