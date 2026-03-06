@@ -6,238 +6,95 @@ on:
       - 'src/**/*.py'
       - 'tests/**/*.py'
       - 'scripts/**/*.py'
+      - '.github/workflows/code-quality-guardrails.yml'
   push:
     branches: [main, master]
     paths:
       - 'src/**/*.py'
+      - 'tests/**/*.py'
+      - 'scripts/**/*.py'
+      - '.github/workflows/code-quality-guardrails.yml'
+
+env:
+  PYTHON_VERSION: "3.12"
 
 jobs:
-  code-smell-detection:
-    name: Code Smell Detection
+  code-quality:
+    name: Code Quality Checks
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-      
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      
-      - name: Run Code Smell Detector
-        id: detector
-        run: |
-          python scripts/ci/code_smell_detector.py
+
+      - uses: ./.github/workflows/composite/setup-python
+      - uses: ./.github/workflows/composite/setup-uv
+
+      - name: Install radon
+        run: uv pip install --system radon
+
+      - name: Check code smells
+        id: code-smells
+        run: python scripts/ci/code_smell_detector.py
         continue-on-error: true
-      
-      - name: Comment PR
-        if: github.event_name == 'pull_request' && steps.detector.outcome == 'failure'
+
+      - name: Check function sizes
+        id: function-sizes
+        run: python scripts/ci/check_function_sizes.py --max-lines 100 --fail-on-violation
+
+      - name: Check class sizes
+        id: class-sizes
+        run: python scripts/ci/check_class_sizes.py --max-lines 300 --fail-on-violation
+
+      - name: Check file sizes
+        id: file-sizes
+        run: python scripts/ci/check_file_sizes.py --max-lines 500
+
+      - name: Check for bare excepts
+        id: bare-excepts
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '\.py$' || true)
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep '\.py$' || true)
+          fi
+
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "Checking changed files: $CHANGED_FILES"
+            python scripts/ci/code_smell_detector.py $CHANGED_FILES
+          else
+            echo "No Python files changed"
+          fi
+
+      - name: Generate complexity metrics
+        run: |
+          echo "## Complexity Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Cyclomatic Complexity" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          radon cc src --average >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Maintainability Index" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          radon mi src >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Post PR comment on code smell failures
+        if: steps.code-smells.outcome == 'failure' && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
-            const output = `## 🔴 Code Quality Check Failed
-            
-            Critical code smells detected in this PR:
-            
-            - God functions (\u003e100 lines)
-            - God classes (\u003e300 lines)
-            - Functions with \u003e8 parameters
-            - Deep nesting (\u003e6 levels)
-            
-            **Please refactor before merging.**
-            
-            Run locally to see details:
-            \`\`\`bash
-            python scripts/ci/code_smell_detector.py
-            \`\`\`
-            
-            See [EPIC-019](../docs/epics/EPIC-019-AUTOMATED-CODE-QUALITY-GUARDRAILS.md) for guidelines.
-            `;
-            
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: output
-            });
-      
-      - name: Fail on critical smells
-        if: steps.detector.outcome == 'failure'
+              body: '⚠️ **Code Smell Detection Failed**\n\nPlease review the code smell report and address any critical issues.'
+            })
+
+      - name: Fail if any check failed
+        if: steps.function-sizes.outcome == 'failure' || steps.class-sizes.outcome == 'failure' || steps.file-sizes.outcome == 'failure'
         run: |
-          echo "❌ Critical code smells detected!"
+          echo "❌ One or more code quality checks failed"
           exit 1
-
-  function-size-check:
-    name: Function Size Check
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-      
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      
-      - name: Check function sizes
-        run: |
-          python scripts/ci/check_function_sizes.py --max-lines 100 --fail-on-violation
-
-  class-size-check:
-    name: Class Size Check
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-      
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      
-      - name: Check class sizes
-        run: |
-          python scripts/ci/check_class_sizes.py --max-lines 300 --fail-on-violation
-
-  bare-except-check:
-    name: Bare Except Check
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Check for bare excepts
-        run: |
-          # Count bare excepts
-          BARE_EXCEPTS=$(grep -rn "^\s*except:\s*$\|^\s*except Exception:" src --include="*.py" | wc -l)
-          echo "Bare except clauses found: $BARE_EXCEPTS"
-          
-          # Check if new ones were added
-          NEW_EXCEPTS=$(git diff HEAD~1 HEAD --name-only | xargs -I {} sh -c 'grep -rn "^\s*except:\s*$\|^\s*except Exception:" {} 2>/dev/null || true' | wc -l)
-          echo "New bare excepts in this PR: $NEW_EXCEPTS"
-          
-          if [ "$NEW_EXCEPTS" -gt 0 ]; then
-            echo "❌ New bare except clauses detected!"
-            echo "Please use specific exceptions: except ValueError as e:"
-            exit 1
-          fi
-          
-          echo "✅ No new bare except clauses."
-
-  file-size-check:
-    name: File Size Check
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-      
-      - name: Check file sizes
-        run: |
-          python scripts/ci/check_file_sizes.py --max-lines 500 --warn-lines 400
-
-  complexity-metrics:
-    name: Complexity Metrics
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-      
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      
-      - name: Install dependencies
-        run: |
-          pip install radon
-      
-      - name: Calculate complexity
-        run: |
-          echo "### Cyclomatic Complexity" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          radon cc src --average --show-closures >> $GITHUB_STEP_SUMMARY || true
-          
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Maintainability Index" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          radon mi src >> $GITHUB_STEP_SUMMARY || true
-      
-      - name: Check for high complexity
-        run: |
-          # Fail if any function has complexity >15
-          HIGH_COMPLEXITY=$(radon cc src -nc --min=C | grep -c "C\|D\|E\|F" || true)
-          if [ "$HIGH_COMPLEXITY" -gt 0 ]; then
-            echo "⚠️ Functions with high cyclomatic complexity detected: $HIGH_COMPLEXITY"
-            echo "Consider refactoring these functions."
-          fi
-
-  code-quality-score:
-    name: Code Quality Score
-    runs-on: ubuntu-latest
-    needs: [code-smell-detection, function-size-check, class-size-check, bare-except-check]
-    if: always()
-    
-    steps:
-      - name: Calculate quality score
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const jobs = context.payload.workflow_run?.jobs || [];
-            
-            let passed = 0;
-            let failed = 0;
-            
-            jobs.forEach(job => {
-              if (job.name.includes('Check') || job.name.includes('Detection')) {
-                if (job.conclusion === 'success') passed++;
-                if (job.conclusion === 'failure') failed++;
-              }
-            });
-            
-            const total = passed + failed;
-            const score = total > 0 ? Math.round((passed / total) * 100) : 100;
-            
-            let grade = 'F';
-            if (score >= 90) grade = 'A';
-            else if (score >= 80) grade = 'B';
-            else if (score >= 70) grade = 'C';
-            else if (score >= 60) grade = 'D';
-            
-            const output = `## 📊 Code Quality Score: ${grade} (${score}%)
-            
-            - ✅ Passed checks: ${passed}
-            - ❌ Failed checks: ${failed}
-            
-            ${grade === 'A' ? '🎉 Excellent code quality!' : 
-              grade === 'B' ? '👍 Good code quality with minor issues.' :
-              grade === 'C' ? '⚠️ Code quality needs improvement.' :
-              grade === 'D' ? '🔴 Code quality requires attention.' :
-              '🚨 Critical code quality issues detected!'}
-            
-            See [Code Quality Guidelines](../docs/epics/EPIC-019-AUTOMATED-CODE-QUALITY-GUARDRAILS.md)
-            `;
-            
-            if (context.issue.number) {
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: output
-              });
-            }
