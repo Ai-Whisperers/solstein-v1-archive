@@ -133,7 +133,21 @@ app.add_middleware(
     max_age=600,  # ✅ Cache preflight for 10 min
 )
 
+# Setup Global Exception Handlers (must be first to catch middleware errors)
+setup_exception_handlers(app)
+
 # Custom Logging Middleware (Request IDs and Timing)
+setup_logging_middleware(app)
+
+# Rate Limiting Middleware
+setup_rate_limiting(app)
+setup_logging_middleware(app)
+
+# Rate Limiting Middleware
+setup_rate_limiting(app)
+
+# Setup Global Exception Handlers
+setup_exception_handlers(app)
 setup_logging_middleware(app)
 
 # Rate Limiting Middleware

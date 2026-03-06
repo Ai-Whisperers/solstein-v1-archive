@@ -162,7 +162,8 @@ def normalize_string(value: Any, default: str = "") -> str:
     # Convert other types to string
     try:
         return str(value).strip() or default
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Failed to convert value to string: {e}", value=value)
         return default
 
 

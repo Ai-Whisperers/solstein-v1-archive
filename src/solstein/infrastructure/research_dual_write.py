@@ -2,7 +2,7 @@ from __future__ import annotations
 
 # pyright: reportMissingTypeStubs=false
 import json
-import logging
+from loguru import logger
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, cast
 from urllib.parse import urlparse
@@ -31,7 +31,6 @@ if TYPE_CHECKING:
 
     from sqlalchemy.orm import Session
 
-logger = logging.getLogger(__name__)
 
 JsonValue = dict[str, "JsonValue"] | list["JsonValue"] | str | int | float | bool | None
 

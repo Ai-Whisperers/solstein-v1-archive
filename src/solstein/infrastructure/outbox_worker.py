@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-import logging
+from loguru import logger
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
@@ -25,7 +25,6 @@ from solstein.infrastructure.research_dual_write import (
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-logger = logging.getLogger(__name__)
 
 
 def _load_required_payload(payload: object) -> dict[str, JsonValue]:

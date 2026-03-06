@@ -202,8 +202,8 @@ class WebResearcher:
                             addr = json_data["address"]
                             if isinstance(addr, dict):
                                 data["headquarters"] = addr.get("addressLocality", addr.get("addressCountry"))
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug(f"Failed to parse JSON-LD: {e}")
 
             # Look for About page
             about_links = soup.find_all("a", href=re.compile(r"about|company", re.I))
@@ -244,8 +244,8 @@ class WebResearcher:
                             funding_data["valuation"] = amount
                         else:
                             funding_data["funding_raised"] = amount
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug(f"Failed to parse funding amount: {e}")
 
         return funding_data
 
@@ -432,8 +432,8 @@ class SyntheticDataDetector:
                 updated = datetime.fromisoformat(last_updated.replace("Z", "+00:00"))
                 if datetime.now() - updated > timedelta(days=90):
                     issues.append("Data is >90 days old")
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Failed to parse last_updated date: {e}")
 
         return issues
 

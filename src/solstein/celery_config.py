@@ -133,3 +133,7 @@ if settings.refresh_schedule:
             "task": f"solstein.worker_tasks.refresh_{source}",
             "schedule": schedule,
         }
+
+
+# Import celery_context to register signal handlers for context propagation
+from . import celery_context  # noqa: F401

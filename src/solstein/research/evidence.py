@@ -19,7 +19,8 @@ def _domains(links: list[str]) -> list[str]:
     for link in links:
         try:
             host = urlparse(link).netloc.lower().strip()
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Failed to parse URL: {e}", link=link)
             host = ""
         if host and host not in out:
             out.append(host)

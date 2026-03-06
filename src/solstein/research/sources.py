@@ -23,7 +23,8 @@ def canonicalize_url(url: str) -> str:
 
     try:
         parsed = urlparse(raw)
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Failed to parse URL: {e}", url=raw)
         return raw
 
     scheme = (parsed.scheme or "").lower()
