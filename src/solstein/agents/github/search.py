@@ -1,0 +1,65 @@
+"""GitHub organization search."""
+
+from __future__ import annotations
+
+from .client import GitHubClient
+
+
+class GitHubOrgSearcher:
+    """Search for company GitHub organizations."""
+
+    def __init__(self, client: GitHubClient):
+        self.client = client
+
+    def search(self, company_name: str) -> str | None:
+        """Search for company's GitHub organization."""
+        search_queries = [
+            company_name,
+            company_name.split()[0] if " " in company_name else None,
+            company_name.lower().replace(" ", "-"),
+        ]
+
+        for query in [q for q in search_queries if q]:
+            result = self._search_org(query)
+            if result:
+                return result
+
+        return None
+
+    def _search_org(self, query: str) -> str | None:
+        """API call to search for GitHub org."""
+        url = f"{self.client.api_base}/search/users"
+        params = {"q": f"{query} type:org", "per_page": 5}
+
+        try:
+            resp = self.client.get(url, params=params, timeout=10)
+            if resp.status_code == 200:
+                data = resp.json()
+                items = data.get("items", [])
+                if items:
+                    return items[0].get("login")
+            elif resp.status_code == 403:
+                # Rate limited
+                pass
+        except Exception:
+            pass
+
+        return None
+
+    def fetch_repos(self, org_name: str, max_repos: int = 100) -> list[dict]:
+        """Fetch repos from GitHub org."""
+        url = f"{self.client.api_base}/orgs/{org_name}/repos"
+        params = {
+            "per_page": min(max_repos, 100),
+            "sort": "stars",
+            "direction": "desc",
+        }
+
+        try:
+            resp = self.client.get(url, params=params, timeout=15)
+            if resp.status_code == 200:
+                return resp.json()
+        except Exception:
+            pass
+
+        return []
