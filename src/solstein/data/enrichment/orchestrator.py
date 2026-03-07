@@ -1,4 +1,11 @@
-"""Enrichment orchestrator for Solstein."""
+"""Enrichment orchestrator for Solstein.
+
+EPIC-022: Refactored to use modular policies for decision-making.
+
+Uses policy classes for:
+- Enrichment decisions (should skip, is complete, overwrite)
+- Source ordering (enrichment order, paid escalation)
+"""
 
 from __future__ import annotations
 
@@ -15,24 +22,31 @@ from .models import (
     EnrichmentResult,
     EnrichmentSource,
 )
+from .policies import EnrichmentPolicy, SourceOrderingPolicy
 
 logger = logging.getLogger(__name__)
 
 
 class EnrichmentOrchestrator:
-    """Orchestrates enrichment operations with proper decision-making."""
+    """Orchestrates enrichment operations using Policy Pattern.
+
+    EPIC-022: Refactored to delegate decision-making to policy classes.
+    Policies handle enrichment decisions and source ordering.
+    """
 
     def __init__(self, config: Optional[EnrichmentConfig] = None):
-        """Initialize orchestrator with configuration."""
+        """Initialize orchestrator with configuration and policies.
+
+        Args:
+            config: Enrichment configuration
+        """
         self.config = config or EnrichmentConfig()
         self.source_policies = default_source_policy_catalog()
         self._progress_callbacks: List[Callable[[str, int, int], None]] = []
 
-    def get_source_policy_tier(self, source: EnrichmentSource) -> SourceTier:
-        policy = self.source_policies.get(source.value)
-        if not policy:
-            return SourceTier.FREE
-        return policy.tier
+        # Initialize policies
+        self._decision_policy = EnrichmentPolicy(self.config)
+        self._ordering_policy = SourceOrderingPolicy(self.config, self.source_policies)
 
     def register_progress_callback(self, callback: Callable[[str, int, int], None]) -> None:
         """Register callback for progress tracking."""
@@ -46,94 +60,18 @@ class EnrichmentOrchestrator:
             except Exception as e:
                 logger.warning(f"Progress callback failed: {e}")
 
+    # Delegate to decision policy
     def should_skip_enrichment(self, company: "EnrichableCompany") -> bool:
         """Determine if enrichment should be skipped."""
-        if not self.config.enabled:
-            logger.debug(f"Enrichment disabled for {company.name}")
-            return True
-
-        # Check if we have any valid identifiers
-        has_ticker = company.ticker and company.ticker.strip()
-        has_company_number = company.company_number and company.company_number.strip()
-
-        if not has_ticker and not has_company_number:
-            logger.debug(f"No valid identifiers for {company.name}, skipping enrichment")
-            return True
-
-        return False
+        return self._decision_policy.should_skip_enrichment(company)
 
     def _is_data_complete(self, company: "EnrichableCompany") -> bool:
         """Check if company data is already complete."""
-        financials = company.financials
-        if not financials:
-            return False
-
-        has_revenue = financials.revenue is not None and financials.revenue > 0
-        has_growth = financials.growth_rate is not None
-        has_employees = financials.employees is not None and financials.employees > 0
-        has_margin = financials.profit_margin is not None
-
-        return has_revenue and has_growth and has_employees and has_margin
-
-    def get_enrichment_order(
-        self, company: "EnrichableCompany", stage: SourceTier = SourceTier.FREE
-    ) -> List[EnrichmentSource]:
-        """Get prioritized enrichment order for company."""
-        order = []
-
-        for source in self.config.source_order:
-            if not self.config.is_source_enabled(source):
-                continue
-
-            if self.get_source_policy_tier(source) != stage:
-                continue
-
-            # Check if we have required identifier for this source
-            if source == EnrichmentSource.SEC_EDGAR:
-                if not (company.ticker and company.ticker.strip()):
-                    continue
-            elif source == EnrichmentSource.COMPANIES_HOUSE:
-                if not (company.company_number and company.company_number.strip()):
-                    continue
-
-            order.append(source)
-
-        return order
-
-    def get_paid_escalation_order(self, company: "EnrichableCompany") -> List[EnrichmentSource]:
-        return self.get_enrichment_order(company, stage=SourceTier.PAID)
+        return self._decision_policy.is_data_complete(company)
 
     def get_fields_to_enrich(self, company: "EnrichableCompany") -> List[EnrichmentField]:
         """Get list of fields that need enrichment."""
-        fields = []
-        financials = company.financials
-
-        if not financials:
-            return [
-                EnrichmentField.REVENUE,
-                EnrichmentField.GROWTH_RATE,
-                EnrichmentField.EMPLOYEES,
-                EnrichmentField.PROFIT_MARGIN,
-            ]
-
-        # Check each field
-        if (financials.revenue is None or financials.revenue == 0) and self.config.should_enrich_field(
-            EnrichmentField.REVENUE
-        ):
-            fields.append(EnrichmentField.REVENUE)
-
-        if financials.growth_rate is None and self.config.should_enrich_field(EnrichmentField.GROWTH_RATE):
-            fields.append(EnrichmentField.GROWTH_RATE)
-
-        if (financials.employees is None or financials.employees == 0) and self.config.should_enrich_field(
-            EnrichmentField.EMPLOYEES
-        ):
-            fields.append(EnrichmentField.EMPLOYEES)
-
-        if financials.profit_margin is None and self.config.should_enrich_field(EnrichmentField.PROFIT_MARGIN):
-            fields.append(EnrichmentField.PROFIT_MARGIN)
-
-        return fields
+        return self._decision_policy.get_fields_to_enrich(company)
 
     def should_overwrite_field(
         self,
@@ -144,31 +82,28 @@ class EnrichmentOrchestrator:
         new_confidence: ConfidenceLevel,
     ) -> bool:
         """Determine if existing field should be overwritten."""
-        if existing_value is None:
-            return True
+        return self._decision_policy.should_overwrite_field(
+            field,
+            existing_value,
+            new_value,
+            existing_confidence,
+            new_confidence,
+        )
 
-        # Don't overwrite high-confidence data
-        if existing_confidence == ConfidenceLevel.CONFIRMED:
-            logger.debug(f"Not overwriting {field} - already CONFIRMED")
-            return False
+    # Delegate to ordering policy
+    def get_enrichment_order(
+        self,
+        company: "EnrichableCompany",
+        stage: SourceTier = SourceTier.FREE,
+    ) -> List[EnrichmentSource]:
+        """Get prioritized enrichment order for company."""
+        return self._ordering_policy.get_enrichment_order(company, stage)
 
-        # Check for magnitude mismatch (>10x difference)
-        if isinstance(existing_value, (int, float)) and isinstance(new_value, (int, float)):
-            if existing_value > 0 and new_value > 0:
-                ratio = max(existing_value, new_value) / min(existing_value, new_value)
-                if ratio > 10:
-                    logger.warning(
-                        f"Not overwriting {field} - magnitude mismatch: "
-                        f"{existing_value} vs {new_value} (ratio: {ratio:.1f}x)"
-                    )
-                    return False
+    def get_paid_escalation_order(self, company: "EnrichableCompany") -> List[EnrichmentSource]:
+        """Get order for paid escalation."""
+        return self._ordering_policy.get_paid_escalation_order(company)
 
-        # Overwrite if new confidence is higher
-        if new_confidence == ConfidenceLevel.CONFIRMED and existing_confidence != ConfidenceLevel.CONFIRMED:
-            return True
-
-        return False
-
+    # Utility methods
     def create_enrichment_copy(self, company: "EnrichableCompany") -> "EnrichableCompany":
         """Create a deep copy of company for enrichment."""
         return copy.deepcopy(company)
@@ -183,6 +118,7 @@ class EnrichmentOrchestrator:
         logger.error(f"Enrichment error for {original.name}: {error}. Rolling back.")
         return original
 
+    # Execution methods
     def enrich_batch(
         self,
         companies: List["EnrichableCompany"],
@@ -260,6 +196,7 @@ class EnrichmentOrchestrator:
         result.company = enriched
         return result
 
+    # Control methods
     def request_cancellation(self) -> None:
         """Request cancellation of ongoing enrichment."""
         logger.info("Enrichment cancellation requested")
@@ -269,6 +206,7 @@ class EnrichmentOrchestrator:
         """Reset cancellation flag."""
         self.config.cancel_requested = False
 
+    # Tracking methods
     def track_cost(
         self,
         source: EnrichmentSource,
