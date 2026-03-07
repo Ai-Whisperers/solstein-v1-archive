@@ -145,6 +145,12 @@ setup_security_middleware(app)
 # EPIC-023: Performance monitoring middleware
 setup_performance_middleware(app, enable_timing=True)
 
+# EPIC-023: Profiling dashboard
+from solstein.monitoring.profiling.dashboard import router as profiling_router
+
+app.include_router(profiling_router, prefix="/admin")
+setup_performance_middleware(app, enable_timing=True)
+
 # Multi-tenancy
 app.add_middleware(TenantMiddleware)
 

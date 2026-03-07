@@ -8,11 +8,7 @@ solstein.domain.models.company_refactored which uses mixins
 and reduces code duplication. Migration path documented in
 EPIC-022-HANDOFF.md.
 """
-Domain entities for SolStein.
 
-Pure Python objects representing the core business concepts,
-now powered directly by Pydantic for end-to-end validation.
-"""
 
 import sys
 from datetime import datetime, timezone

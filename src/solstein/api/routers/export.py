@@ -8,7 +8,7 @@ from loguru import logger
 from ...analytics.scoring import GrowthScorer
 from ...config import get_settings
 from ...core.repositories import CompanyFilter
-from ...exporters.excel import ExcelExporter
+from ...exporters import ExcelExporter
 from ...data.report_release_gate import ReportReleaseGate
 from ..dependencies import get_company_repository, get_current_tenant
 from ..exceptions import APIError
