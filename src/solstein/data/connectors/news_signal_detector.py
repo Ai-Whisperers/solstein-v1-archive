@@ -1,30 +1,21 @@
-"""
+"""News Signal Detector for Solstein.
 
-News Signal Detector for Solstein.
-
-
+EPIC-042: News Signal Detection
+EPIC-022: Refactored to use Strategy Pattern
 
 Detects funding rounds, partnerships, and key hires from NewsAPI.
-
-Provides pattern-based signal extraction with confidence scoring.
-
-
+Uses modular signal detectors for each signal type.
 
 Features:
-
 - Funding signal detection (Series A/B/C, raised, investment)
-
 - Partnership detection (collaboration, integration, partnership)
-
 - Key hire detection (appoints, joins, new CEO, executive)
-
 - Deduplication by (company_id, signal_type, date)
-
 - Rate limit tracking (100 queries/day limit)
-
 - Confidence scoring (0.70-0.75 for news signals)
-
 """
+
+from __future__ import annotations
 
 import re
 from datetime import datetime, timedelta
@@ -33,16 +24,25 @@ from typing import Any
 import httpx
 from loguru import logger
 
-from solstein.data.connectors.constants import (
+from .constants import (
     HTTP_STATUS_RATE_LIMITED,
     NEWS_SIGNAL_DAILY_QUERY_LIMIT,
     NEWS_SIGNAL_REQUEST_TIMEOUT_S,
 )
+from .signal_detectors import (
+    FundingSignalDetector,
+    KeyHireSignalDetector,
+    PartnershipSignalDetector,
+    Signal,
+)
 
 
 class NewsSignalDetector:
-    """
-    Detect market signals from news articles using NewsAPI.
+    """Detect market signals from news articles using Strategy Pattern.
+
+    EPIC-022: Refactored to delegate to specialized signal detectors.
+    Each signal type (funding, partnership, key hire) has its own
+    detector with specific patterns and confidence scoring.
 
     Confidence Scoring:
     - Funding signals: 0.75 (news can be speculative)
@@ -50,40 +50,8 @@ class NewsSignalDetector:
     - Key hire signals: 0.70 (often announced but may not materialize)
     """
 
-    # Pattern definitions for signal detection
-    FUNDING_PATTERNS = [
-        r"Series\s+[A-Z]",  # Series A, Series B, etc.
-        r"raised\s+\$[\d,]+\s*(?:million|billion|M|B)",
-        r"\$[\d,]+\s*(?:million|billion|M|B)\s+(?:funding|investment|round)",
-        r"funding\s+round",
-        r"investment\s+round",
-        r"announced\s+funding",
-        r"secured\s+\$[\d,]+",
-    ]
-
-    PARTNERSHIP_PATTERNS = [
-        r"partnership",
-        r"collaboration",
-        r"integrates\s+with",
-        r"announces\s+partnership",
-        r"partners\s+with",
-        r"strategic\s+alliance",
-        r"joint\s+venture",
-        r"announces\s+collaboration",
-    ]
-
-    KEY_HIRE_PATTERNS = [
-        r"appoints\s+(?:new\s+)?(?:CEO|CTO|CFO|COO|Chief)",
-        r"joins\s+as\s+(?:CEO|CTO|CFO|COO|Chief)",
-        r"new\s+(?:CEO|CTO|CFO|COO|Chief)",
-        r"hires\s+(?:new\s+)?(?:CEO|CTO|CFO|COO|Chief)",
-        r"executive\s+(?:appointment|hire|joins)",
-        r"appoints\s+new\s+executive",
-    ]
-
     def __init__(self, api_key: str | None = None):
-        """
-        Initialize NewsSignalDetector.
+        """Initialize NewsSignalDetector with signal detectors.
 
         Args:
             api_key: NewsAPI key. If None, reads from NEWSAPI_KEY env var.
@@ -98,279 +66,166 @@ class NewsSignalDetector:
         if not self.api_key:
             raise ValueError("NewsAPI key required. Set NEWSAPI_KEY env var or pass api_key parameter.")
 
-        self.base_url = "https://newsapi.org/v2"
-        self.daily_query_limit = NEWS_SIGNAL_DAILY_QUERY_LIMIT
-        self.queries_today = 0
-        self.last_reset = datetime.now().date()
-        self.seen_signals = set()  # For deduplication
+        # Initialize signal detectors (Strategy Pattern)
+        self._detectors = [
+            FundingSignalDetector(),
+            PartnershipSignalDetector(),
+            KeyHireSignalDetector(),
+        ]
 
-        logger.info("NewsSignalDetector initialized")
+        # Rate limit tracking
+        self._daily_query_count = 0
+        self._last_reset = datetime.now()
+        self._seen_signals: set[str] = set()
 
     def _reset_daily_counter(self) -> None:
-        """Reset daily query counter if date changed."""
-        today = datetime.now().date()
-        if today != self.last_reset:
-            self.queries_today = 0
-            self.last_reset = today
-            logger.info(f"Daily query counter reset for {today}")
+        """Reset daily query counter if day has changed."""
+        now = datetime.now()
+        if now.date() != self._last_reset.date():
+            self._daily_query_count = 0
+            self._last_reset = now
+            logger.info("Daily query counter reset")
 
     def _check_rate_limit(self) -> None:
-        """Check if approaching daily rate limit."""
+        """Check if we've hit the rate limit."""
         self._reset_daily_counter()
-
-        if self.queries_today >= self.daily_query_limit:
-            logger.error(f"Daily query limit reached: {self.queries_today}/{self.daily_query_limit}")
-            raise RuntimeError("NewsAPI daily query limit exceeded (100/day)")
-
-        if self.queries_today >= NEWS_SIGNAL_DAILY_QUERY_LIMIT - 10:
-            logger.warning(f"Approaching daily limit: {self.queries_today}/{self.daily_query_limit}")
+        if self._daily_query_count >= NEWS_SIGNAL_DAILY_QUERY_LIMIT:
+            raise RuntimeError(f"Daily query limit reached ({NEWS_SIGNAL_DAILY_QUERY_LIMIT})")
 
     async def _search_news(self, query: str) -> list[dict[str, Any]]:
-        """
-        Search news articles using NewsAPI.
+        """Search news articles via NewsAPI.
 
         Args:
-            query: Search query string
+            query: Search query
 
         Returns:
-            List of article dictionaries from NewsAPI
-
-        Raises:
-            RuntimeError: If API call fails or rate limit exceeded
+            List of article dictionaries
         """
         self._check_rate_limit()
 
-        try:
-            params = {
-                "q": query,
-                "apiKey": self.api_key,
-                "sortBy": "publishedAt",
-                "language": "en",
-                "pageSize": 100,
-            }
+        url = "https://newsapi.org/v2/everything"
+        params = {
+            "q": query,
+            "apiKey": self.api_key,
+            "language": "en",
+            "sortBy": "publishedAt",
+            "pageSize": 20,
+        }
 
-            response = requests.get(
-                f"{self.base_url}/everything",
-                params=params,
-                timeout=NEWS_SIGNAL_REQUEST_TIMEOUT_S,
-            )
-            self.queries_today += 1
-
-            if response.status_code == HTTP_STATUS_RATE_LIMITED:
-                logger.error("NewsAPI rate limit hit (429)")
-                raise RuntimeError("NewsAPI rate limit exceeded")
-
-            if response.status_code != 200:
-                logger.error(f"NewsAPI error {response.status_code}: {response.text}")
-                raise RuntimeError(f"NewsAPI error: {response.status_code}")
-
-            data = response.json()
-            if data.get("status") != "ok":
-                logger.error(f"NewsAPI error: {data.get('message')}")
-                raise RuntimeError(f"NewsAPI error: {data.get('message')}")
-
-            articles = data.get("articles", [])
-            logger.info(f"Found {len(articles)} articles for query: {query}")
-            return articles
-
-        except httpx.RequestError as e:
-            logger.error(f"Request error searching news: {e}")
-            raise RuntimeError(f"Failed to search news: {e}") from e
-
-    def _match_patterns(self, text: str, patterns: list[str]) -> bool:
-        """
-        Check if text matches any pattern (case-insensitive).
-
-        Args:
-            text: Text to search
-            patterns: List of regex patterns
-
-        Returns:
-            True if any pattern matches
-        """
-        text_lower = text.lower()
-        return any(re.search(pattern, text_lower, re.IGNORECASE) for pattern in patterns)
-
-    def _extract_signals(
-        self,
-        articles: list[dict[str, Any]],
-        company_name: str,
-        signal_type: str,
-        patterns: list[str],
-        confidence: float,
-    ) -> list[dict[str, Any]]:
-        """
-        Extract signals from articles matching patterns.
-
-        Args:
-            articles: List of articles from NewsAPI
-            company_name: Company name for deduplication
-            signal_type: Type of signal (funding, partnership, key_hire)
-            patterns: List of regex patterns to match
-            confidence: Confidence score for this signal type
-
-        Returns:
-            List of signal dictionaries
-        """
-        signals = []
-
-        for article in articles:
-            title = article.get("title", "")
-            description = article.get("description", "")
-            content = article.get("content", "")
-            published_at = article.get("publishedAt", "")
-            url = article.get("url", "")
-            source = article.get("source", {}).get("name", "Unknown")
-
-            # Combine text for pattern matching
-            full_text = f"{title} {description} {content}".lower()
-
-            # Check if patterns match
-            if not self._match_patterns(full_text, patterns):
-                continue
-
-            # Parse date
+        async with httpx.AsyncClient(timeout=NEWS_SIGNAL_REQUEST_TIMEOUT_S) as client:
             try:
-                signal_date = datetime.fromisoformat(published_at.replace("Z", "+00:00")).date()
-            except (ValueError, AttributeError):
-                signal_date = datetime.now().date()
+                response = await client.get(url, params=params)
 
-            # Create deduplication key
-            dedup_key = (company_name.lower(), signal_type, str(signal_date))
-            if dedup_key in self.seen_signals:
-                logger.debug(f"Skipping duplicate signal: {company_name} {signal_type} {signal_date}")
-                continue
+                if response.status_code == HTTP_STATUS_RATE_LIMITED:
+                    raise RuntimeError("NewsAPI rate limit exceeded")
 
-            self.seen_signals.add(dedup_key)
+                response.raise_for_status()
+                data = response.json()
 
-            signal = {
-                "company_name": company_name,
-                "signal_type": signal_type,
-                "title": title,
-                "description": description,
-                "source": source,
-                "url": url,
-                "published_at": published_at,
-                "signal_date": signal_date.isoformat(),
-                "confidence": confidence,
-                "detected_at": datetime.now().isoformat(),
-            }
+                self._daily_query_count += 1
 
-            signals.append(signal)
-            logger.info(f"Detected {signal_type} signal for {company_name}: {title[:60]}...")
+                if data.get("status") != "ok":
+                    logger.warning("NewsAPI error", error=data.get("message"))
+                    return []
 
-        return signals
+                return data.get("articles", [])
 
-    def detect_funding_signal(self, company_name: str) -> list[dict[str, Any]]:
+            except httpx.HTTPStatusError as e:
+                logger.error("NewsAPI HTTP error", status=e.response.status_code, error=str(e))
+                raise
+            except Exception as e:
+                logger.error("NewsAPI request failed", error=str(e))
+                raise
+
+    def _is_duplicate(self, signal: Signal) -> bool:
+        """Check if signal is a duplicate.
+
+        Args:
+            signal: Signal to check
+
+        Returns:
+            True if duplicate, False otherwise
         """
-        Detect funding round announcements for a company.
+        # Create unique key
+        key = f"{signal.company_name}:{signal.signal_type}:{signal.detected_at.date()}"
+
+        if key in self._seen_signals:
+            return True
+
+        self._seen_signals.add(key)
+        return False
+
+    async def detect_signals(
+        self,
+        company_name: str,
+        signal_types: list[str] | None = None,
+    ) -> list[Signal]:
+        """Detect all signal types for a company.
 
         Args:
             company_name: Company name to search
+            signal_types: Optional list of signal types to detect
 
         Returns:
-            List of funding signals with confidence 0.75
-
-        Raises:
-            RuntimeError: If API call fails
+            List of detected signals
         """
-        logger.info(f"Detecting funding signals for: {company_name}")
+        # Filter detectors by signal type
+        detectors = self._detectors
+        if signal_types:
+            detectors = [d for d in self._detectors if d.signal_type in signal_types]
 
-        try:
-            articles = self._search_news(company_name)
-            signals = self._extract_signals(
-                articles,
-                company_name,
-                "funding_round",
-                self.FUNDING_PATTERNS,
-                0.75,
-            )
-            return signals
+        all_signals: list[Signal] = []
 
-        except RuntimeError as e:
-            logger.error(f"Failed to detect funding signals: {e}")
-            raise
+        # Search for news about company
+        query = f'"{company_name}" AND (funding OR investment OR partnership OR appoints OR hires)'
+        articles = await self._search_news(query)
 
-    def detect_partnership_signal(self, company_name: str) -> list[dict[str, Any]]:
-        """
-        Detect partnership announcements for a company.
+        logger.info(f"Found {len(articles)} articles for {company_name}")
 
-        Args:
-            company_name: Company name to search
+        # Run each detector on each article
+        for article in articles:
+            for detector in detectors:
+                signals = detector.detect(article, company_name)
 
-        Returns:
-            List of partnership signals with confidence 0.72
+                for signal in signals:
+                    if not self._is_duplicate(signal):
+                        all_signals.append(signal)
+                        logger.info(
+                            f"Detected {signal.signal_type} signal for {company_name}",
+                            confidence=signal.confidence,
+                            source=signal.source,
+                        )
 
-        Raises:
-            RuntimeError: If API call fails
-        """
-        logger.info(f"Detecting partnership signals for: {company_name}")
+        return all_signals
 
-        try:
-            articles = self._search_news(company_name)
-            signals = self._extract_signals(
-                articles,
-                company_name,
-                "partnership",
-                self.PARTNERSHIP_PATTERNS,
-                0.72,
-            )
-            return signals
+    # Convenience methods for specific signal types
+    async def detect_funding_signal(self, company_name: str) -> list[Signal]:
+        """Detect funding signals for a company."""
+        return await self.detect_signals(company_name, ["funding"])
 
-        except RuntimeError as e:
-            logger.error(f"Failed to detect partnership signals: {e}")
-            raise
+    async def detect_partnership_signal(self, company_name: str) -> list[Signal]:
+        """Detect partnership signals for a company."""
+        return await self.detect_signals(company_name, ["partnership"])
 
-    def detect_key_hire_signal(self, company_name: str) -> list[dict[str, Any]]:
-        """
-        Detect key hire announcements for a company.
-
-        Args:
-            company_name: Company name to search
-
-        Returns:
-            List of key hire signals with confidence 0.70
-
-        Raises:
-            RuntimeError: If API call fails
-        """
-        logger.info(f"Detecting key hire signals for: {company_name}")
-
-        try:
-            articles = self._search_news(company_name)
-            signals = self._extract_signals(
-                articles,
-                company_name,
-                "key_hire",
-                self.KEY_HIRE_PATTERNS,
-                0.70,
-            )
-            return signals
-
-        except RuntimeError as e:
-            logger.error(f"Failed to detect key hire signals: {e}")
-            raise
+    async def detect_key_hire_signal(self, company_name: str) -> list[Signal]:
+        """Detect key hire signals for a company."""
+        return await self.detect_signals(company_name, ["key_hire"])
 
     def get_rate_limit_status(self) -> dict[str, Any]:
-        """
-        Get current rate limit status.
+        """Get current rate limit status.
 
         Returns:
-            Dictionary with queries_used, queries_remaining, reset_time
+            Dictionary with rate limit info
         """
         self._reset_daily_counter()
-
-        remaining = max(0, self.daily_query_limit - self.queries_today)
-        reset_time = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-
         return {
-            "queries_used": self.queries_today,
-            "queries_remaining": remaining,
-            "daily_limit": self.daily_query_limit,
-            "reset_time": reset_time.isoformat(),
+            "daily_limit": NEWS_SIGNAL_DAILY_QUERY_LIMIT,
+            "queries_used": self._daily_query_count,
+            "queries_remaining": NEWS_SIGNAL_DAILY_QUERY_LIMIT - self._daily_query_count,
+            "last_reset": self._last_reset.isoformat(),
         }
 
     def clear_seen_signals(self) -> None:
-        """Clear the deduplication cache."""
-        self.seen_signals.clear()
-        logger.info("Cleared deduplication cache")
+        """Clear the seen signals cache."""
+        self._seen_signals.clear()
+        logger.info("Seen signals cache cleared")
