@@ -1,65 +1,79 @@
-# 📜 Solstein — The Sunstone for Capital Navigation
+# 📚 Solstein Documentation
 
-> *"The Viking sunstone revealed the sun through clouds.*
-> *Solstein reveals the competitive landscape through market fog."*
+Welcome to the Solstein documentation hub.
+
+## 🚀 Quick Start
+
+- **[Status Dashboard](active/EPIC_STATUS_DASHBOARD.md)** - Single source of truth for all EPICs
+- **[Roadmap](active/ROADMAP.md)** - Current 24-week development roadmap
+- **[Setup Guide](reference/SETUP_GUIDE.md)** - Get started with development
+
+## 📁 Documentation Structure
+
+```
+docs/
+├── active/           # Current work (check here for latest)
+│   ├── EPIC_STATUS_DASHBOARD.md
+│   ├── ROADMAP.md
+│   ├── epics/        # Active EPIC documentation
+│   └── backlog/      # Future work backlog
+├── archive/          # Historical documents
+│   ├── analysis/     # Past analysis reports
+│   └── audits/       # Audit reports
+├── reference/        # Ongoing reference docs
+│   ├── AGENTS.md
+│   ├── SETUP_GUIDE.md
+│   ├── TESTING.md
+│   └── ...
+└── ORGANIZATION_SUMMARY.md  # How docs are organized
+```
+
+## 📊 Current Status
+
+**System Status:** 🔴 NOT PRODUCTION READY  
+**Completion:** ~15% (2 epics partial, 47 pending)  
+**Next Milestone:** MVP (Week 10)
+
+See [Status Dashboard](active/EPIC_STATUS_DASHBOARD.md) for detailed breakdown.
+
+## 🗺️ Roadmap
+
+**Phase 1 (Weeks 1-2):** Foundation - Observability, Data Integrity, Testing  
+**Phase 2 (Weeks 3-5):** Core Scoring - Financial scoring, Classification  
+**Phase 3 (Weeks 6-8):** Real Data - Enrichment, Validation  
+**Phase 4 (Weeks 9-10):** Quality - Export, Performance, Security
+
+See [full roadmap](active/ROADMAP.md) for details.
+
+## 🔍 Finding Things
+
+### EPICs
+- **Active EPICs:** `docs/active/epics/`
+- **Backlog:** `docs/active/backlog/`
+- **Status:** See [STATUS_DASHBOARD.md](active/EPIC_STATUS_DASHBOARD.md)
+
+### Analysis & Reports
+- **Historical analysis:** `docs/archive/analysis/`
+- **Audit reports:** `docs/archive/audits/`
+
+### Development
+- **Architecture:** [AGENTS.md](reference/AGENTS.md)
+- **Setup:** [SETUP_GUIDE.md](reference/SETUP_GUIDE.md)
+- **Testing:** [TESTING.md](reference/TESTING.md)
+- **Contributing:** [CONTRIBUTING.md](reference/CONTRIBUTING.md)
+
+## ⚠️ Important Notes
+
+1. **Previous claims of "all epics complete" were incorrect.** See status dashboard for accurate state.
+2. **EPIC-018 naming collision resolved** - backlog version renamed to EPIC-050
+3. **Documentation reorganized March 2026** - see [ORGANIZATION_SUMMARY.md](ORGANIZATION_SUMMARY.md)
+
+## 🆘 Need Help?
+
+- **Status questions:** Check [EPIC_STATUS_DASHBOARD.md](active/EPIC_STATUS_DASHBOARD.md)
+- **Setup issues:** See [TROUBLESHOOTING.md](reference/TROUBLESHOOTING.md)
+- **Architecture:** Read [AGENTS.md](reference/AGENTS.md)
 
 ---
 
-## The Grimoire of Capital Intelligence
-
-Welcome to the library of the Guild.
-
-These scrolls contain everything: the origin of the spell, the commercial architecture, the proof of casting, the technical foundations, and the analogies that make it all legible to the nerds and the wizards alike.
-
-Navigate using the tabs above.
-
----
-
-## At a Glance
-
-| Scroll | For Whom | What It Contains |
-|--------|----------|-----------------|
-| 📄 [Getting Started](guides/getting-started.md) | New Developers | Clear reading order and onboarding path |
-| 📄 [The Origin](LORE/origin.md) | Everyone | The Gravity of Legacy, the Scary Forest, and how the Sunstone was forged |
-| 📄 [The Three-Entity Flywheel](LORE/the-play.md) | Investors, Partners | The alchemy play — equity in transmutation, not invoices for time |
-| 📄 [The Grimoire](LORE/grimoire.md) | Nerds, worldbuilders | Every analogy: alchemy, wizardry, D&D, sci-fi, Tolkien, Cyberpunk |
-| ⚡️ [Executive Brief](PITCH/executive-brief.md) | PE Partners | One page — the old ritual is dead, the spell is here |
-| ⚡️ [Full Proposal](PITCH/full-proposal.md) | Deal teams | The five incantations, the proof, the commercial structure |
-| ⚡️ [Case Study](PITCH/case-study.md) | Skeptics | 29 companies, 3 days, full classification — live cast |
-| ⚙️ [Operator Guide](guides/operator.md) | DevOps | Deployment, monitoring, and operations |
-| ⚙️ [API Reference](api/reference.md) | Integrators | All REST endpoints, schemas, and error codes (41/42 documented) |
-| 🏗️ [Decision Records](architecture/decisions.md) | Architects | Why FastAPI, Celery, JSON files, and the 6-layer testing strategy |
-| 🏗️ [Health Routing](architecture/health-endpoint-routing.md) | Architects | Health endpoint routing clarification and conflict resolution |
-| 📊 [Analysis & Reports](analysis/README.md) | Analysts | Market intelligence, company analysis, session reports |
-| 🧭 [Session Dossier 2026-03-02](sessions/SESSION_IMPLEMENTATION_DOSSIER_2026-03-02.md) | Engineers | Verified findings, repairs, and implementation-ready backlog continuity |
-| 🧭 [Next Session Runbook](continuation/NEXT_SESSION_RUNBOOK.md) | Engineers | Fast restart checklist and first actions for continuation |
-| 🧭 [Implementation Backlog](continuation/IMPLEMENTATION_BACKLOG.md) | Engineers | Execution-ready prioritized backlog with done criteria |
-| 🧭 [Architecture Guardrails](continuation/ARCHITECTURE_GUARDRAILS.md) | Engineers | Non-negotiable reliability/provenance constraints |
-| 🧭 [Verification Cookbook](continuation/VERIFICATION_COOKBOOK.md) | Engineers | Command matrix and evidence logging format |
----
-
-## Canonical Buckets
-- `research/` - AI research architecture, plans, and real-data transition docs
-- `operations/` - deployment, migration, rollback, readiness
-- `sessions/` - implementation dossiers and continuity backups
-- `reference/` - glossary, schema, quick-reference, structure docs
-- `documentation/` - documentation governance and maintenance docs
-- `archive/` - historical and superseded docs
-
-## Compatibility Notes
-- Several root files are redirect stubs to preserve existing links.
-- Canonical content is maintained in the bucket folders above.
-
-## The Classification System
-
-Every company in every market is one of three things. Solstein reads which.
-
-| Classification | Score | What It Means |
-|---------------|-------|---------------|
-| 🔥 **Phoenix** | ≥ 7.0 | High-growth, AI-native or rapidly becoming so |
-| 🧂 **Salt** | 4.0–7.0 | Stable. Signal-rich. The most misread companies in any portfolio. |
-| ⚖️ **Lead** | ≤ 4.0 | Carrying coal. Not a write-off — a transformation opportunity. |
-
----
-
-*Solstein is a product of* ***AI Whisperers*** *— the wizards who find the diamonds nobody knew were there.*
+*Last updated: 2026-03-07*
