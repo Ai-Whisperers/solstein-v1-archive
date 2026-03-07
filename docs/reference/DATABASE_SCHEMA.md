@@ -1,8 +1,8 @@
 # Solstein Database Schema Reference
 
-> **Version**: 2026-03-01
-> **Source of truth**: `src/solstein/infrastructure/database_models.py`
-> **Engine**: PostgreSQL 14+ via SQLAlchemy 2.0 (async) + asyncpg
+> **Version**: 2026-03-01  
+> **Source of truth**: `src/solstein/infrastructure/database_models.py`  
+> **Engine**: PostgreSQL 14+ via SQLAlchemy 2.0 (async) + asyncpg  
 > **Tables**: 18 total across 3 functional groups
 
 ---
@@ -294,8 +294,8 @@ CREATE INDEX ix_enrichment_audit_company_ts  ON enrichment_audit_trail (company_
 CREATE INDEX ix_enrichment_audit_operation_ts ON enrichment_audit_trail (operation, timestamp);
 ```
 
-**Valid `operation` values:** `enrich_start`, `enrich_success`, `enrich_failure`, `cache_hit`, `cache_miss`
-**Valid `status` values:** `SUCCESS`, `FAILURE`, `SKIPPED`
+**Valid `operation` values:** `enrich_start`, `enrich_success`, `enrich_failure`, `cache_hit`, `cache_miss`  
+**Valid `status` values:** `SUCCESS`, `FAILURE`, `SKIPPED`  
 **Valid `source` values** (from `DataSourceType`): `GITHUB`, `COMPANY_FILINGS`, `NEWS`, `CRUNCHBASE`, `LINKEDIN`, `PATENTS`, `WEBSITE`, `PRESS_RELEASE`, `YAHOO_FINANCE`, `EXA_SEARCH`, `GOOGLE_SEARCH`, `USPTO`, `GOOGLE_PATENTS`, `NEWSAPI`, `COMPETITOR_JSON`, `STATIC_CATALOG`
 
 ---
@@ -683,5 +683,5 @@ async def example():
 
 ---
 
-*Schema source: `src/solstein/infrastructure/database_models.py`*
+*Schema source: `src/solstein/infrastructure/database_models.py`*  
 *Last verified: 2026-03-01*
