@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "solstein.fullname" . }}
+  labels:
+    {{- include "solstein.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "solstein.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+      labels:
+        {{- include "solstein.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "solstein.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.config.environment | quote }}
+            - name: DEBUG
+              value: {{ .Values.config.debug | quote }}
+            - name: API__HOST
+              value: {{ .Values.config.api.host | quote }}
+            - name: API__PORT
+              value: {{ .Values.config.api.port | quote }}
+            - name: API__API_PREFIX
+              value: {{ .Values.config.api.prefix | quote }}
+            - name: LOGGING__LEVEL
+              value: {{ .Values.config.logging.level | quote }}
+            - name: LOGGING__FORMAT
+              value: {{ .Values.config.logging.format | quote }}
+            - name: LLM_PROVIDER
+              value: {{ .Values.config.llm.provider | quote }}
+            - name: OLLAMA_URL
+              value: {{ .Values.config.llm.ollama.url | quote }}
+            - name: OLLAMA_MODEL
+              value: {{ .Values.config.llm.ollama.model | quote }}
+            - name: DATABASE__URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "solstein.fullname" . }}-secrets
+                  key: database-url
+            - name: REDIS__URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "solstein.fullname" . }}-secrets
+                  key: redis-url
+            - name: SECURITY__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "solstein.fullname" . }}-secrets
+                  key: secret-key
+          {{- range $key, $value := .Values.secrets }}
+            {{- if $value }}
+            - name: {{ $key | upper | replace "ApiKey" "_API_KEY" | replace "Url" "_URL" }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "solstein.fullname" $ }}-secrets
+                  key: {{ $key | lower | replace "ApiKey" "api-key" | replace "Url" "url" }}
+            {{- end }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

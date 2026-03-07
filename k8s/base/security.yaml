@@ -1,0 +1,105 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: solstein-network-policy
+  namespace: solstein
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: solstein
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8000
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: solstein-role
+  namespace: solstein
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+    resourceNames: ["solstein-secrets"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: solstein-rolebinding
+  namespace: solstein
+subjects:
+  - kind: ServiceAccount
+    name: solstein
+    namespace: solstein
+roleRef:
+  kind: Role
+  name: solstein-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: solstein-limits
+  namespace: solstein
+spec:
+  limits:
+    - default:
+        memory: "1Gi"
+        cpu: "500m"
+      defaultRequest:
+        memory: "256Mi"
+        cpu: "100m"
+      type: Container
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: solstein-quota
+  namespace: solstein
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+    pods: "20"
+    persistentvolumeclaims: "10"

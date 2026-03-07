@@ -1,0 +1,307 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: solstein
+  labels:
+    app.kubernetes.io/name: solstein
+    app.kubernetes.io/component: namespace
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: solstein-config
+  namespace: solstein
+data:
+  ENVIRONMENT: "production"
+  DEBUG: "false"
+  API__HOST: "0.0.0.0"
+  API__PORT: "8000"
+  API__API_PREFIX: "/api/v1"
+  LOGGING__LEVEL: "INFO"
+  LOGGING__FORMAT: "json"
+  LLM_PROVIDER: "auto"
+  OLLAMA_URL: "http://ollama:11434"
+  OLLAMA_MODEL: "llama3.2:latest"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: solstein-secrets
+  namespace: solstein
+type: Opaque
+stringData:
+  # These should be populated from external secrets management
+  DATABASE__URL: "postgresql://postgres:password@postgres:5432/solstein"
+  REDIS__URL: "redis://redis:6379/0"
+  SECURITY__SECRET_KEY: "change-me-in-production"
+  GITHUB_TOKEN: ""
+  # LLM API Keys (populate as needed)
+  OPENAI_API_KEY: ""
+  GROQ_API_KEY: ""
+  FIREWORKS_API_KEY: ""
+  MISTRAL_API_KEY: ""
+  DEEPINFRA_API_KEY: ""
+  GEMINI_API_KEY: ""
+  NVIDIA_NIM_API_KEY: ""
+  CEREBRAS_API_KEY: ""
+  KIMI_API_KEY: ""
+  ANTHROPIC_API_KEY: ""
+  SILICONFLOW_API_KEY: ""
+  ALIBABA_API_KEY: ""
+  # Data Source API Keys
+  EXA_API_KEY: ""
+  CRUNCHBASE_API_KEY: ""
+  NEWS_API_KEY: ""
+  PATENTSVIEW_API_KEY: ""
+  COMPANIES_HOUSE_API_KEY: ""
+  OPENFIGI_API_KEY: ""
+  OPENCORPORATES_API_KEY: ""
+  PITCHBOOK_API_KEY: ""
+  ORBIS_API_KEY: ""
+  CAPIQ_API_KEY: ""
+  GOOGLE_API_KEY: ""
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: solstein-api
+  namespace: solstein
+  labels:
+    app.kubernetes.io/name: solstein
+    app.kubernetes.io/component: api
+    app.kubernetes.io/version: "latest"
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: solstein
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: solstein
+        app.kubernetes.io/component: api
+        app.kubernetes.io/version: "latest"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: solstein
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+        - name: api
+          image: ghcr.io/your-org/solstein:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: solstein-config
+            - secretRef:
+                name: solstein-secrets
+          env:
+            - name: DATABASE__URL
+              valueFrom:
+                secretKeyRef:
+                  name: solstein-secrets
+                  key: DATABASE__URL
+            - name: REDIS__URL
+              valueFrom:
+                secretKeyRef:
+                  name: solstein-secrets
+                  key: REDIS__URL
+            - name: SECURITY__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: solstein-secrets
+                  key: SECURITY__SECRET_KEY
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: data
+              mountPath: /app/data
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: data
+          persistentVolumeClaim:
+            claimName: solstein-data
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                        - solstein
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: solstein-api
+  namespace: solstein
+  labels:
+    app.kubernetes.io/name: solstein
+    app.kubernetes.io/component: api
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: solstein
+    app.kubernetes.io/component: api
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: solstein
+  namespace: solstein
+  annotations:
+    # For AWS IRSA: eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT:role/solstein
+    # For GCP Workload Identity: iam.gke.io/gcp-service-account: solstein@PROJECT.iam.gserviceaccount.com
+automountServiceAccountToken: true
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: solstein-api
+  namespace: solstein
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+    - hosts:
+        - api.solstein.app
+      secretName: solstein-tls
+  rules:
+    - host: api.solstein.app
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: solstein-api
+                port:
+                  number: 80
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: solstein-api
+  namespace: solstein
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: solstein-api
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 4
+          periodSeconds: 15
+      selectPolicy: Max
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: solstein-api
+  namespace: solstein
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: solstein
+      app.kubernetes.io/component: api
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: solstein-data
+  namespace: solstein
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard

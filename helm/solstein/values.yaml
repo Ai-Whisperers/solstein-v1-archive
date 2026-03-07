@@ -1,0 +1,198 @@
+# Default values for solstein.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 3
+
+image:
+  repository: ghcr.io/your-org/solstein
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8000"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  fsGroup: 1001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: api.solstein.app
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: solstein-tls
+      hosts:
+        - api.solstein.app
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+pdb:
+  enabled: true
+  minAvailable: 2
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - solstein
+          topologyKey: kubernetes.io/hostname
+
+# Application configuration
+config:
+  environment: production
+  debug: "false"
+  api:
+    host: "0.0.0.0"
+    port: "8000"
+    prefix: "/api/v1"
+  logging:
+    level: INFO
+    format: json
+  llm:
+    provider: auto
+    ollama:
+      url: http://ollama:11434
+      model: llama3.2:latest
+
+# Secrets (should be populated from external secrets management)
+secrets:
+  databaseUrl: ""
+  redisUrl: ""
+  secretKey: ""
+  githubToken: ""
+  # LLM API Keys
+  openaiApiKey: ""
+  groqApiKey: ""
+  fireworksApiKey: ""
+  mistralApiKey: ""
+  deepinfraApiKey: ""
+  geminiApiKey: ""
+  nvidiaNimApiKey: ""
+  cerebrasApiKey: ""
+  kimiApiKey: ""
+  anthropicApiKey: ""
+  siliconflowApiKey: ""
+  alibabaApiKey: ""
+  # Data Source API Keys
+  exaApiKey: ""
+  crunchbaseApiKey: ""
+  newsApiKey: ""
+  patentsviewApiKey: ""
+  companiesHouseApiKey: ""
+  openfigiApiKey: ""
+  opencorporatesApiKey: ""
+  pitchbookApiKey: ""
+  orbisApiKey: ""
+  capiqApiKey: ""
+  googleApiKey: ""
+
+# PostgreSQL subchart configuration
+postgresql:
+  enabled: true
+  auth:
+    username: postgres
+    password: ""
+    database: solstein
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+# Redis subchart configuration
+redis:
+  enabled: true
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 5Gi
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
+
+# Ingress NGINX subchart configuration
+ingress-nginx:
+  enabled: false  # Set to true if you want to deploy ingress controller
+
+# Monitoring
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+
+# Backup
+backup:
+  enabled: true
+  schedule: "0 2 * * *"
+  retentionDays: 7

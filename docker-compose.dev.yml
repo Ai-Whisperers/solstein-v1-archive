@@ -1,0 +1,191 @@
+# Solstein Development Docker Compose
+# One-command local development setup with hot reload
+
+version: '3.9'
+
+services:
+  # ---------------------------------------------------------------------------
+  # API Service with Hot Reload
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: solstein-api-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE__URL=postgresql://postgres:postgres@db:5432/solstein
+      - REDIS__URL=redis://redis:6379/0
+      - API__HOST=0.0.0.0
+      - API__PORT=8000
+      - PYTHONPATH=/app/src
+    volumes:
+      - .:/app
+      - /app/.venv  # Don't overwrite venv
+      - /app/__pycache__  # Don't persist pycache
+    command: uvicorn solstein.api.main:app --reload --host 0.0.0.0 --port 8000
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - solstein-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+
+  # ---------------------------------------------------------------------------
+  # Celery Worker with Hot Reload
+  # ---------------------------------------------------------------------------
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: solstein-celery-dev
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE__URL=postgresql://postgres:postgres@db:5432/solstein
+      - REDIS__URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - PYTHONPATH=/app/src
+    volumes:
+      - .:/app
+      - /app/.venv
+    command: watchfiles --filter python "celery -A solstein.celery_config worker --loglevel=info" /app/src
+    depends_on:
+      - db
+      - redis
+    networks:
+      - solstein-dev
+
+  # ---------------------------------------------------------------------------
+  # Celery Beat (Scheduler)
+  # ---------------------------------------------------------------------------
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: solstein-celery-beat-dev
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE__URL=postgresql://postgres:postgres@db:5432/solstein
+      - REDIS__URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - PYTHONPATH=/app/src
+    volumes:
+      - .:/app
+      - /app/.venv
+    command: celery -A solstein.celery_config beat --loglevel=info
+    depends_on:
+      - db
+      - redis
+    networks:
+      - solstein-dev
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL 15
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: solstein-db-dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: solstein
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - solstein-dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d solstein"]
+      interval: 10s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Redis 7
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: solstein-redis-dev
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-dev-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - solstein-dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # PGAdmin (Database Admin) - Optional
+  # ---------------------------------------------------------------------------
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: solstein-pgadmin-dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@solstein.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin-dev-data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - solstein-dev
+    profiles:
+      - tools  # Only start with: docker-compose --profile tools up
+
+  # ---------------------------------------------------------------------------
+  # Redis Commander (Redis Admin) - Optional
+  # ---------------------------------------------------------------------------
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: solstein-redis-commander-dev
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - solstein-dev
+    profiles:
+      - tools
+
+# ---------------------------------------------------------------------------
+# Volumes
+# ---------------------------------------------------------------------------
+volumes:
+  postgres-dev-data:
+    driver: local
+  redis-dev-data:
+    driver: local
+  pgadmin-dev-data:
+    driver: local
+
+# ---------------------------------------------------------------------------
+# Networks
+# ---------------------------------------------------------------------------
+networks:
+  solstein-dev:
+    driver: bridge

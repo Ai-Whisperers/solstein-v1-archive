@@ -1,0 +1,53 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "solstein.fullname" . }}-backup
+  labels:
+    {{- include "solstein.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: backup
+              image: postgres:15-alpine
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  pg_dump -h {{ .Release.Name }}-postgresql -U postgres solstein | gzip > /backup/solstein-$(date +%Y%m%d-%H%M%S).sql.gz
+                  find /backup -name "solstein-*.sql.gz" -mtime +{{ .Values.backup.retentionDays }} -delete
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Release.Name }}-postgresql
+                      key: postgres-password
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: {{ include "solstein.fullname" . }}-backup
+          restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "solstein.fullname" . }}-backup
+  labels:
+    {{- include "solstein.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+{{- end }}
