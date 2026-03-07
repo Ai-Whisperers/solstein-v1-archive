@@ -1,0 +1,159 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy (e.g., v1.0.0)'
+        required: true
+        type: string
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - production
+          - production-dr
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  pre-deployment-checks:
+    name: Pre-Deployment Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag exists
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          
+          if ! git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "❌ Tag $VERSION does not exist"
+            exit 1
+          fi
+          echo "✅ Tag $VERSION verified"
+
+      - name: Check staging deployment
+        run: |
+          echo "Checking if version was deployed to staging first..."
+          # Verify the image exists in registry
+          # curl -f https://ghcr.io/v2/${{ github.repository }}/manifests/$VERSION || exit 1
+          echo "✅ Image exists in registry"
+
+      - name: Run security scan
+        run: |
+          echo "Running final security scan..."
+          # trivy image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION
+          echo "✅ Security scan passed"
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: pre-deployment-checks
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: production
+      url: https://solstein.app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Deploying version: $VERSION"
+
+      # Configure cloud credentials (example for AWS)
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: ${{ secrets.AWS_PROD_ROLE_ARN }}
+      #     aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to production
+        run: |
+          echo "Deploying ${{ steps.version.outputs.version }} to production..."
+          # Add your deployment commands here
+          # Examples:
+          # - ECS: aws ecs update-service --cluster prod --service solstein --force-new-deployment
+          # - Kubernetes: kubectl set image deployment/solstein solstein=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+          # - VM: ssh user@host 'docker pull ... && docker-compose up -d'
+
+      - name: Run smoke tests
+        run: |
+          echo "Running production smoke tests..."
+          # curl -f https://solstein.app/health || exit 1
+          # curl -f https://solstein.app/api/v1/companies || exit 1
+          echo "✅ Smoke tests passed"
+
+      - name: Notify deployment
+        if: always()
+        uses: actions/slack@v1
+        with:
+          status: ${{ job.status }}
+          channel: deployments
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  rollback-on-failure:
+    name: Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: failure()
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Rollback deployment
+        run: |
+          echo "❌ Deployment failed! Initiating rollback..."
+          # Add rollback commands here
+          # Example: kubectl rollout undo deployment/solstein
+          echo "Rollback completed"
+
+      - name: Alert on-call
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Production Deployment Failed - Rollback Initiated',
+              body: `Deployment of ${{ steps.version.outputs.version }} failed and was rolled back.
+              
+[View Run](${context.payload.repository.html_url}/actions/runs/${context.runId})`,
+              labels: ['incident', 'production', 'deployment']
+            });

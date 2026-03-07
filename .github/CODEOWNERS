@@ -1,0 +1,28 @@
+# Code Owners
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global fallback - require review from core team
+* @core-team
+
+# CI/CD workflows require platform team review
+.github/workflows/ @platform-team @core-team
+.github/workflows/composite/ @platform-team
+
+# Infrastructure and deployment
+Dockerfile @platform-team @core-team
+docker/ @platform-team
+scripts/ci/ @platform-team
+
+# Security-sensitive files
+.github/dependabot.yml @platform-team @security-team
+.github/CODEOWNERS @platform-team
+
+# Database migrations require DBA review
+src/solstein/migrations/ @dba-team @core-team
+
+# API changes require architecture review
+src/solstein/api/ @architect-team @core-team
+
+# Documentation
+docs/ @docs-team @core-team
+*.md @docs-team @core-team
