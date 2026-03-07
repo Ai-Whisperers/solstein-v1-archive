@@ -3,7 +3,7 @@ SolStein Exporter Modules
 """
 
 from .audit_report import PipelineAuditReportGenerator
-from .excel import ExcelExporter
+from .excel_compat import ExcelExporter
 from .excel_improved import ImprovedExcelExporter
 from .llm import LLMReportEnhancer
 from .markdown.generator import (

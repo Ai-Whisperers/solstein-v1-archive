@@ -3,7 +3,7 @@
 Signals related to company growth metrics.
 """
 
-from ..models import Signal, SignalCategory
+from ..base import Signal, SignalCategory
 
 GROWTH_SIGNALS = [
     Signal(

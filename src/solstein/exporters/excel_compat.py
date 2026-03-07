@@ -1,15 +1,13 @@
-"""
-Excel exporter for SolStein dashboards.
+"""Excel exporter for SolStein dashboards.
 
 EPIC-005: Excel Export Improvements
-- Replaces the monolithic generate_excel_report.py script
-- Now delegates to ImprovedExcelExporter for better maintainability
+EPIC-022: Refactored to use modular components
 
 This module provides backwards compatibility while using the improved implementation.
 """
 
-# Re-export from improved implementation for backwards compatibility
-from .excel_improved import (
+# Re-export from modular components for backwards compatibility
+from .excel import (
     ColorPalette,
     ExcelStyles,
     LayoutConstants,

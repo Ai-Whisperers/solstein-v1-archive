@@ -1,5 +1,8 @@
 """Monitoring, health checks, and metrics collection.
 
+EPIC-022: Refactored to use Strategy Pattern for health checks.
+Health checks are now modular strategies in the health_checks/ package.
+
 Provides:
 - Health status checks (database connectivity, API responsiveness)
 - Readiness probes (dependencies initialized)
@@ -8,40 +11,21 @@ Provides:
 - Data quality monitoring
 """
 
-import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from enum import Enum
 from typing import Any
 
 from loguru import logger
 
-
-class HealthStatus(str, Enum):
-    """Health status indicator."""
-
-    HEALTHY = "healthy"
-    DEGRADED = "degraded"
-    UNHEALTHY = "unhealthy"
-
-
-class ReadinessStatus(str, Enum):
-    """Readiness status for Kubernetes."""
-
-    READY = "ready"
-    NOT_READY = "not_ready"
-
-
-@dataclass
-class HealthCheck:
-    """Result of a health check."""
-
-    name: str
-    status: HealthStatus
-    message: str
-    last_checked: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    duration_ms: float = 0.0
-    details: dict[str, Any] = field(default_factory=dict)
+from .health_checks import (
+    ApiHealthCheck,
+    ConfigurationHealthCheck,
+    DatabaseHealthCheck,
+    HealthCheck,
+    HealthStatus,
+    LLMHealthCheck,
+    RedisHealthCheck,
+)
 
 
 @dataclass
@@ -74,10 +58,14 @@ class DataQualityMetrics:
 
 
 class HealthMonitor:
-    """Monitors application health and readiness."""
+    """Monitors application health and readiness using strategy pattern.
+
+    EPIC-022: Health checks are now implemented as separate strategy classes
+    in the health_checks/ package for modularity and testability.
+    """
 
     def __init__(self):
-        """Initialize health monitor."""
+        """Initialize health monitor with health check strategies."""
         self.checks: dict[str, HealthCheck] = {}
         self.metrics = MetricsSnapshot(timestamp=datetime.now(timezone.utc))
         self.data_quality = DataQualityMetrics()
@@ -85,247 +73,14 @@ class HealthMonitor:
         self.request_history: list[dict[str, Any]] = []
         self.error_history: list[dict[str, Any]] = []
 
-    async def check_database(self) -> HealthCheck:
-        """Check database connectivity with real probe.
-
-        Returns:
-            HealthCheck result
-        """
-        start = datetime.now(timezone.utc)
-        try:
-            from sqlalchemy import text
-
-            from ..config import Settings
-            from ..infrastructure.database import DatabaseManager
-
-            settings = Settings.load()
-            db_manager = DatabaseManager(settings)
-            db_manager.init_async()
-
-            if db_manager.engine is None:
-                raise RuntimeError("Database engine not initialized")
-
-            async with db_manager.engine.connect() as conn:
-                await conn.execute(text("SELECT 1"))
-
-            check = HealthCheck(
-                name="database",
-                status=HealthStatus.HEALTHY,
-                message="Database connection successful",
-                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                details={"connection": "postgresql", "pool_size": settings.database.pool_size},
-            )
-            self.checks["database"] = check
-            return check
-        except Exception as e:
-            check = HealthCheck(
-                name="database",
-                status=HealthStatus.UNHEALTHY,
-                message=f"Database connection failed: {str(e)}",
-                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                details={"error": str(e)},
-            )
-            self.checks["database"] = check
-            logger.error("Database health check failed", error=str(e))
-            return check
-
-    async def check_api_responsiveness(self) -> HealthCheck:
-        """Check API responsiveness (always healthy if process running).
-
-        Returns:
-            HealthCheck result
-        """
-        start = datetime.now(timezone.utc)
-        try:
-            # API responsiveness is implicit - if this code runs, API is responsive
-            check = HealthCheck(
-                name="api",
-                status=HealthStatus.HEALTHY,
-                message="API is responsive",
-                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                details={"endpoints_available": 14},
-            )
-            self.checks["api"] = check
-            return check
-        except Exception as e:
-            check = HealthCheck(
-                name="api",
-                status=HealthStatus.UNHEALTHY,
-                message=f"API health check failed: {str(e)}",
-                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                details={"error": str(e)},
-            )
-            self.checks["api"] = check
-            return check
-
-    async def check_redis(self) -> HealthCheck:
-        """Check Redis connectivity with real probe.
-
-        Returns:
-            HealthCheck result
-        """
-        start = datetime.now(timezone.utc)
-        try:
-            import redis.asyncio as redis
-
-            from ..config import Settings
-
-            settings = Settings.load()
-            redis_client = redis.from_url(settings.redis.url, decode_responses=True)
-
-            # Attempt PING to verify connectivity
-            pong = await redis_client.ping()
-            await redis_client.close()
-
-            if pong:
-                check = HealthCheck(
-                    name="redis",
-                    status=HealthStatus.HEALTHY,
-                    message="Redis connection successful",
-                    duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                    details={"connection": "redis", "response": str(pong)},
-                )
-            else:
-                check = HealthCheck(
-                    name="redis",
-                    status=HealthStatus.DEGRADED,
-                    message="Redis PING returned unexpected response",
-                    duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                    details={"response": str(pong)},
-                )
-            self.checks["redis"] = check
-            return check
-        except Exception as e:
-            check = HealthCheck(
-                name="redis",
-                status=HealthStatus.DEGRADED,
-                message=f"Redis connection failed (optional service): {str(e)}",
-                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                details={"error": str(e), "optional": True},
-            )
-            self.checks["redis"] = check
-            logger.warning("Redis health check failed (optional service)", error=str(e))
-            return check
-
-    async def check_configuration(self) -> HealthCheck:
-        """Check that configuration is valid.
-
-        Returns:
-            HealthCheck result
-        """
-        start = datetime.now(timezone.utc)
-        try:
-            from ..config import Settings
-
-            settings = Settings.load()
-
-            check = HealthCheck(
-                name="configuration",
-                status=HealthStatus.HEALTHY,
-                message="Configuration is valid",
-                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                details={
-                    "environment": settings.environment,
-                    "debug": settings.debug,
-                },
-            )
-            self.checks["configuration"] = check
-            return check
-        except Exception as e:
-            check = HealthCheck(
-                name="configuration",
-                status=HealthStatus.UNHEALTHY,
-                message=f"Configuration check failed: {str(e)}",
-                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                details={"error": str(e)},
-            )
-            self.checks["configuration"] = check
-            return check
-
-    async def check_llm_services(self) -> HealthCheck:
-        """Check LLM service availability with detailed health status.
-
-        Uses the enhanced health checker to provide detailed information about
-        provider status, credits, and rate limits.
-
-        Returns:
-            HealthCheck result
-        """
-        start = datetime.now(timezone.utc)
-        try:
-            from ..llm.health_checker import ProviderStatus, get_health_checker
-
-            health_checker = get_health_checker()
-            health = await health_checker.check_all_providers()
-
-            available_providers = health_checker.get_available_providers()
-
-            if available_providers:
-                # Collect detailed status for each provider
-                provider_details = {}
-                for name, h in health.items():
-                    provider_details[name] = {
-                        "status": h.status.value,
-                        "is_available": h.is_available,
-                        "last_error": h.last_error.value if h.last_error else None,
-                        "consecutive_failures": h.consecutive_failures,
-                        "total_successes": h.total_successes,
-                    }
-
-                check = HealthCheck(
-                    name="llm_services",
-                    status=HealthStatus.HEALTHY,
-                    message=f"LLM services available: {', '.join(available_providers)}",
-                    duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                    details={
-                        "available_providers": available_providers,
-                        "all_providers": provider_details,
-                        "best_provider": health_checker.get_best_provider(),
-                    },
-                )
-            else:
-                # Check if any providers are exhausted or rate limited
-                exhausted = [name for name, h in health.items() if h.status == ProviderStatus.EXHAUSTED]
-                rate_limited = [name for name, h in health.items() if h.status == ProviderStatus.RATE_LIMITED]
-
-                if exhausted or rate_limited:
-                    status = HealthStatus.DEGRADED
-                    message_parts = []
-                    if exhausted:
-                        message_parts.append(f"quota exhausted: {', '.join(exhausted)}")
-                    if rate_limited:
-                        message_parts.append(f"rate limited: {', '.join(rate_limited)}")
-                    message = "LLM " + "; ".join(message_parts)
-                else:
-                    status = HealthStatus.DEGRADED
-                    message = "No LLM backends configured or available"
-
-                check = HealthCheck(
-                    name="llm_services",
-                    status=status,
-                    message=message,
-                    duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                    details={
-                        "fallback": "keyword_and_template_based",
-                        "exhausted_providers": exhausted,
-                        "rate_limited_providers": rate_limited,
-                        "all_statuses": {name: h.status.value for name, h in health.items()},
-                    },
-                )
-
-            self.checks["llm_services"] = check
-            return check
-        except Exception as e:
-            check = HealthCheck(
-                name="llm_services",
-                status=HealthStatus.DEGRADED,
-                message=f"LLM health check failed: {str(e)}",
-                duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                details={"error": str(e), "fallback": "active"},
-            )
-            self.checks["llm_services"] = check
-            logger.error(f"LLM health check failed: {str(e)}")
-            return check
+        # Health check strategies
+        self._health_strategies = [
+            DatabaseHealthCheck(),
+            ApiHealthCheck(),
+            RedisHealthCheck(),
+            ConfigurationHealthCheck(),
+            LLMHealthCheck(),
+        ]
 
     async def run_all_checks(self) -> dict[str, HealthCheck]:
         """Run all health checks in parallel.
@@ -333,16 +88,18 @@ class HealthMonitor:
         Returns:
             Dictionary of check results
         """
-        await asyncio.gather(
-            self.check_database(),
-            self.check_api_responsiveness(),
-            self.check_redis(),
-            self.check_configuration(),
-            self.check_llm_services(),
-        )
+        import asyncio
+
+        # Run all health check strategies
+        results = await asyncio.gather(*[strategy.check() for strategy in self._health_strategies])
+
+        # Store results
+        for check in results:
+            self.checks[check.name] = check
+
         return self.checks
 
-    def get_overall_status(self) -> HealthStatus:
+    def get_overall_status(self) -> str:
         """Get overall health status based on checks.
 
         Returns:
@@ -393,14 +150,7 @@ class HealthMonitor:
         status_code: int,
         duration_ms: float,
     ) -> None:
-        """Record an API request.
-
-        Args:
-            method: HTTP method
-            path: Request path
-            status_code: Response status code
-            duration_ms: Request duration in milliseconds
-        """
+        """Record an API request."""
         self.metrics.total_requests += 1
         if 200 <= status_code < 300:
             self.metrics.successful_requests += 1
@@ -425,13 +175,7 @@ class HealthMonitor:
         message: str,
         details: dict[str, Any] | None = None,
     ) -> None:
-        """Record an error.
-
-        Args:
-            error_type: Type of error
-            message: Error message
-            details: Additional error details
-        """
+        """Record an error."""
         error = {
             "timestamp": datetime.now(timezone.utc),
             "error_type": error_type,
@@ -456,36 +200,24 @@ class HealthMonitor:
                 self.metrics.avg_response_time_ms = avg_duration
 
     def get_metrics(self) -> MetricsSnapshot:
-        """Get current metrics snapshot.
-
-        Returns:
-            MetricsSnapshot
-        """
+        """Get current metrics snapshot."""
         self.update_metrics()
         return self.metrics
 
     def get_data_quality_metrics(self) -> DataQualityMetrics:
-        """Get data quality metrics.
-
-        Returns:
-            DataQualityMetrics
-        """
+        """Get data quality metrics."""
         return self.data_quality
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert monitor state to dictionary.
-
-        Returns:
-            Dictionary representation
-        """
+        """Convert monitor state to dictionary."""
         self.update_metrics()
         return {
-            "status": self.get_overall_status().value,
+            "status": self.get_overall_status(),
             "ready": self.is_ready(),
             "alive": self.is_alive(),
             "checks": {
                 name: {
-                    "status": check.status.value,
+                    "status": check.status,
                     "message": check.message,
                     "duration_ms": check.duration_ms,
                     "details": check.details,
