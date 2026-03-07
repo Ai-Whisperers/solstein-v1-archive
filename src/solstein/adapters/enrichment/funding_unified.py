@@ -15,6 +15,11 @@ from loguru import logger
 from solstein.domain.models import RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
+from solstein.infrastructure.conflict_resolution import SourceAuthority
+from solstein.infrastructure.refresh import BaseRefreshConnector
+from solstein.research.discovery import DiscoveryCandidate
+from solstein.infrastructure.conflict_resolution import SourceAuthority
+from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
 
 
@@ -95,6 +100,10 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
         max_results: int = 50,
         extra_keywords: list[str] | None = None,
     ) -> list[DiscoveryCandidate]:
+        """Discover recently funded companies in market."""
+        from solstein.research.discovery import DiscoveryCandidate
+
+        logger.info(f"Discovering funded companies in {market}")
         """Discover recently funded companies in market."""
         logger.info(f"Discovering funded companies in {market}")
 

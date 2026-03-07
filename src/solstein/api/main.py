@@ -1,14 +1,17 @@
 """
 SolStein FastAPI Backend - Competitive Intelligence Platform
 
-Production-ready REST API following Vete's architecture patterns:
+Production-ready REST API following clean architecture patterns:
 - Clean architecture with clear separation of concerns
 - Type-safe Pydantic models for request/response validation
 - OpenAPI/Swagger auto-documentation
 - JWT authentication (optional)
 - PostgreSQL with async support
 - Comprehensive error handling
+- Performance monitoring (EPIC-023)
 """
+
+from __future__ import annotations
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -21,16 +24,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from loguru import logger
 
-from ..config import ConfigurationError, Settings
-from ..core.production_hardening import (
+from solstein.config import ConfigurationError, Settings
+from solstein.core.production_hardening import (
     FeatureFlagManager,
     GracefulDegradation,
     GracefulShutdown,
     ResponseCache,
 )
-from ..infrastructure.cache_warming import warm_cache
+from solstein.infrastructure.cache_warming import warm_cache
+
 from .exceptions import setup_exception_handlers
-from .middleware import setup_logging_middleware, setup_rate_limiting, setup_security_middleware
+from .middleware import (
+    setup_logging_middleware,
+    setup_rate_limiting,
+    setup_security_middleware,
+)
+from .middleware.performance import setup_performance_middleware
 from .middleware.tenant import TenantMiddleware
 from .routers import (
     async_jobs,
@@ -56,17 +65,7 @@ graceful_shutdown: GracefulShutdown | None = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Lifecycle manager for startup and shutdown events.
-
-    On startup:
-    1. Validates required configuration
-    2. Creates necessary directories
-    3. Initializes production hardening components
-    4. Logs environment information
-
-    On shutdown:
-    - Executes graceful shutdown sequence
-    """
+    """Lifecycle manager for startup and shutdown events."""
     global feature_flags, response_cache, graceful_degradation, graceful_shutdown
 
     logger.info("Starting SolStein API server")
@@ -90,18 +89,22 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     graceful_shutdown = GracefulShutdown()
 
     logger.info("Production hardening components initialized")
-    logger.info(f"Feature flags available: {len(feature_flags.flags)}")
-    logger.info("Response cache initialized with TTL support")
 
-    # EPIC-018: Warm cache in background (non-blocking)
+    # EPIC-023: Enable performance profiling if configured
+    if settings.environment == "development":
+        from solstein.monitoring.profiler import enable_profiling
+
+        enable_profiling()
+        logger.info("Performance profiling enabled")
+
+    # EPIC-018: Warm cache in background
     try:
         import asyncio as _asyncio
-
-        from ..infrastructure.cache import CacheManager as _CacheManager
+        from solstein.infrastructure.cache import CacheManager as _CacheManager
 
         _cache = _CacheManager()
         _asyncio.create_task(warm_cache(_cache))
-        logger.info("Cache warming task scheduled on startup")
+        logger.info("Cache warming task scheduled")
     except Exception as _exc:
         logger.warning("Cache warming could not start", error=str(_exc))
 
@@ -123,46 +126,27 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware - SECURE configuration
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.api.cors_origins,  # ✅ Specific origins only
-    allow_credentials=True,  # ✅ Only with specific origins
-    allow_methods=settings.api.cors_methods,  # ✅ Explicit methods
-    allow_headers=settings.api.cors_headers,  # ✅ Explicit headers
-    max_age=600,  # ✅ Cache preflight for 10 min
+    allow_origins=settings.api.cors_origins,
+    allow_credentials=True,
+    allow_methods=settings.api.cors_methods,
+    allow_headers=settings.api.cors_headers,
+    max_age=600,
 )
 
-# Setup Global Exception Handlers (must be first to catch middleware errors)
-setup_exception_handlers(app)
-
-# Custom Logging Middleware (Request IDs and Timing)
-setup_logging_middleware(app)
-
-# Rate Limiting Middleware
-setup_rate_limiting(app)
-setup_logging_middleware(app)
-
-# Rate Limiting Middleware
-setup_rate_limiting(app)
-
-# Setup Global Exception Handlers
+# Setup middleware (order matters)
 setup_exception_handlers(app)
 setup_logging_middleware(app)
-
-# Rate Limiting Middleware
 setup_rate_limiting(app)
-
-# Setup Global Exception Handlers
-setup_exception_handlers(app)
-
-# Setup Security Middleware
 setup_security_middleware(app)
 
-# Multi-tenancy: X-API-Key validation (only when require_api_key=True)
-app.add_middleware(TenantMiddleware)
+# EPIC-023: Performance monitoring middleware
+setup_performance_middleware(app, enable_timing=True)
 
-# Global dependencies configured in lifespan
+# Multi-tenancy
+app.add_middleware(TenantMiddleware)
 
 # Include Routers
 app.include_router(auth.router)
@@ -178,13 +162,12 @@ app.include_router(drill_down.router)
 app.include_router(simulation.router, prefix="/simulation")
 app.include_router(async_jobs.router)
 
-# Dashboard API (EPIC-031)
+# Dashboard API
 from .routers.dashboard import router as dashboard_router
 
 app.include_router(dashboard_router)
 
 
-# Custom docs endpoint
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html() -> Any:
     """Custom Swagger UI with SolStein branding."""
@@ -195,14 +178,12 @@ async def custom_swagger_ui_html() -> Any:
     )
 
 
-# Health check endpoint alias for backward compatibility
 @app.get("/healthz", tags=["Health"], include_in_schema=False)
 async def health_check_alias() -> dict[str, Any]:
-    """Health check alias for K8s - routes to /health."""
+    """Health check alias for K8s."""
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 
-# Main entry point
 if __name__ == "__main__":
     uvicorn.run(
         "solstein.api.main:app",

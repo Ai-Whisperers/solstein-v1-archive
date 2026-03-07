@@ -47,6 +47,30 @@ class DatabaseManager:
         self._sync_session_factory: Callable[[], Session] | None = None
 
     def init_async(self):
+        """Initialize async engine and session factory with optimized pooling.
+
+        EPIC-025: Optimized connection pooling configuration:
+        - pool_size: 20 (base connections for typical load)
+        - max_overflow: 30 (burst capacity for traffic spikes)
+        - pool_timeout: 10 (fail fast, don't hang clients)
+        - pool_recycle: 1800 (recycle connections every 30min)
+        - pool_pre_ping: True (verify connections before use)
+        """
+        url = self.settings.get_database_url()
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+        self.engine = create_async_engine(
+            url,
+            pool_size=self.settings.database.pool_size,
+            max_overflow=30,
+            pool_timeout=10,
+            pool_recycle=1800,
+            pool_pre_ping=True,
+            echo=self.settings.database.echo,
+        )
+
+        self.session_factory = async_sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
         """Initialize async engine and session factory."""
         url = self.settings.get_database_url()
         if url.startswith("postgresql://"):
@@ -62,6 +86,20 @@ class DatabaseManager:
         self.session_factory = async_sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
 
     def init_sync(self):
+        """Initialize sync engine and session factory for Alembic migrations.
+
+        Uses same optimized pooling settings as async engine.
+        """
+        self._sync_engine = create_engine(
+            self.settings.get_database_url(),
+            pool_size=self.settings.database.pool_size,
+            max_overflow=30,
+            pool_timeout=10,
+            pool_recycle=1800,
+            pool_pre_ping=True,
+            echo=self.settings.database.echo,
+            poolclass=QueuePool,
+        )
         """Initialize sync engine and session factory for Alembic migrations."""
         self._sync_engine = create_engine(
             self.settings.get_database_url(),

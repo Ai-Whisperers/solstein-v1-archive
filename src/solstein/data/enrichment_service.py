@@ -230,14 +230,16 @@ class EnrichmentService:
 
     def enrich_company(self, company: EnrichableCompany) -> tuple[EnrichableCompany, list[EnrichmentSource], list[str]]:
         """
-        Enrich single company using orchestrator.
+        Enrich single company using orchestrator with executor classes.
 
-        Args:
-            company: UnifiedCompany to enrich
-
-        Returns:
-            Tuple of (enriched_company, sources_used, errors)
+        EPIC-020: Refactored from 153-line method to use executor classes.
         """
+        from .enrichment_executors import (
+            FreeEnrichmentExecutor,
+            PaidEscalationExecutor,
+            PaidEscalationSkipHandler,
+        )
+
         if not self.config.enrichment_enabled:
             logger.debug(f"Enrichment disabled, skipping {company.name}")
             return company, [], []
@@ -258,130 +260,26 @@ class EnrichmentService:
 
         errors: list[str] = []
 
-        for source in sources_free:
-            try:
-                if source == EnrichmentSource.SEC_EDGAR:
-                    enriched = self._enrich_from_sec(enriched)
-                elif source == EnrichmentSource.COMPANIES_HOUSE:
-                    enriched = self._enrich_from_companies_house(enriched)
-                elif source == EnrichmentSource.NEWS_SIGNALS:
-                    enriched = self._enrich_from_news_signals(enriched)
-                sources_used.append(source)
-                fields = self.orchestrator.get_fields_to_enrich(enriched)
-                if not fields:
-                    break
-            except Exception as e:
-                error_msg = self.error_handler.handle_enrichment_error(
-                    company.name,
-                    str(source),
-                    e,
-                )
-                errors.append(error_msg)
+        # Execute free source enrichment
+        free_executor = FreeEnrichmentExecutor(self, self.orchestrator)
+        enriched, sources_used, errors, fields = free_executor.execute(
+            company, enriched, fields, sources_free
+        )
 
-                if self.config.rollback_on_error:
-                    enriched = self.orchestrator.rollback_on_error(company, enriched, str(e))
-                    break
-
+        # Execute paid escalation if needed
         if fields and self.config.allow_paid_escalation:
-            unresolved_fields = [field.value for field in fields]
-            if hasattr(enriched, "metric_justifications"):
-                for field_name in unresolved_fields:
-                    justification_key = f"paid_escalation:{field_name}"
-                    _ = enriched.metric_justifications.setdefault(
-                        justification_key,
-                        "unresolved after free pass",
-                    )
+            paid_executor = PaidEscalationExecutor(self, self.orchestrator)
+            enriched, sources_used, errors, fields = paid_executor.execute(
+                company, enriched, fields, sources_used, errors
+            )
 
-            paid_sources = self.orchestrator.get_enrichment_order(enriched, stage=SourceTier.PAID)
-            paid_attempts = 0
-            for source in paid_sources:
-                if paid_attempts >= self.config.paid_escalation_max_attempts:
-                    errors.append("Paid escalation attempt budget exceeded")
-                    _append_enrichment_audit(
-                        {
-                            "timestamp": datetime.now(timezone.utc).isoformat(),
-                            "company": company.name,
-                            "operation": "paid_escalation",
-                            "status": "blocked",
-                            "reason": "budget_exceeded",
-                            "unresolved_fields": unresolved_fields,
-                            "max_attempts": self.config.paid_escalation_max_attempts,
-                        }
-                    )
-                    break
-
-                policy = self.orchestrator.source_policies.get(source.value)
-                if policy and policy.field_coverage:
-                    if not set(unresolved_fields).intersection(policy.field_coverage):
-                        continue
-
-                try:
-                    if source == EnrichmentSource.SEC_EDGAR:
-                        enriched = self._enrich_from_sec(enriched)
-                    elif source == EnrichmentSource.COMPANIES_HOUSE:
-                        enriched = self._enrich_from_companies_house(enriched)
-                    elif source == EnrichmentSource.NEWS_SIGNALS:
-                        enriched = self._enrich_from_news_signals(enriched)
-                    sources_used.append(source)
-                    paid_attempts += 1
-                    _append_enrichment_audit(
-                        {
-                            "timestamp": datetime.now(timezone.utc).isoformat(),
-                            "company": company.name,
-                            "operation": "paid_escalation",
-                            "status": "attempted",
-                            "source": source.value,
-                            "unresolved_fields": unresolved_fields,
-                            "attempt": paid_attempts,
-                        }
-                    )
-                    if hasattr(enriched, "enrichment_sources"):
-                        enriched.enrichment_sources.append(f"paid-escalation:{source.value}")
-                    if hasattr(enriched, "enrichment_timestamps"):
-                        enriched.enrichment_timestamps[source.value] = datetime.now(timezone.utc)
-                    fields = self.orchestrator.get_fields_to_enrich(enriched)
-                    if not fields:
-                        break
-                except Exception as e:
-                    error_msg = self.error_handler.handle_enrichment_error(
-                        company.name,
-                        str(source),
-                        e,
-                    )
-                    errors.append(error_msg)
-                    _append_enrichment_audit(
-                        {
-                            "timestamp": datetime.now(timezone.utc).isoformat(),
-                            "company": company.name,
-                            "operation": "paid_escalation",
-                            "status": "failed",
-                            "source": source.value,
-                            "error": str(e),
-                        }
-                    )
-
-                    if self.config.rollback_on_error:
-                        enriched = self.orchestrator.rollback_on_error(company, enriched, str(e))
-                        break
-
+        # Handle disabled paid escalation with remaining fields
         if fields and not self.config.allow_paid_escalation:
-            logger.info(
-                "Paid escalation disabled; unresolved enrichment fields remain for %s: %s",
-                company.name,
-                [field.value for field in fields],
-            )
-            _append_enrichment_audit(
-                {
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "company": company.name,
-                    "operation": "paid_escalation",
-                    "status": "skipped",
-                    "reason": "disabled",
-                    "unresolved_fields": [field.value for field in fields],
-                }
-            )
+            skip_handler = PaidEscalationSkipHandler(self)
+            skip_handler.handle(company, fields)
 
         return enriched, sources_used, errors
+
 
     def analyze_unresolved_gaps(
         self,

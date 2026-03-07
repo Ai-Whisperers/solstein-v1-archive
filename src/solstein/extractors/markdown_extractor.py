@@ -13,11 +13,6 @@ from typing import Any
 from loguru import logger
 
 from .llm_financial_extractor import LLMFinancialExtractor
-import re
-from pathlib import Path
-from typing import Any
-
-from loguru import logger
 
 from ..domain.models import (
     AIMaturity,

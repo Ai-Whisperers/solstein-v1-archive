@@ -2,7 +2,7 @@ import asyncio
 
 from loguru import logger
 
-from solstein.analytics.scoring import GrowthScorer
+from solstein.core.scoring_utils import GrowthScorer
 from solstein.data.loaders import CompetitorDataLoader
 from solstein.data.repositories import SupabaseRepository
 

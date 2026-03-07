@@ -11,12 +11,12 @@ __email__ = "team@ai-whisperers.com"
 
 import logging
 import sys
-from typing import Any
+from importlib import import_module
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 
 from .constants import ScoringWeights, Thresholds
-from .data.loaders import CompetitorDataLoader
 from .domain.models import AIMaturity, Company, CompanyTier, ThreatLevel
 from .exceptions import (
     DataLoadError,
@@ -24,7 +24,10 @@ from .exceptions import (
     SolsteinError,
     ValidationError,
 )
-from .exporters.excel import ExcelExporter
+
+if TYPE_CHECKING:
+    from .data.unified import UnifiedCompanyLoader
+    from .exporters.excel import ExcelExporter
 
 # Configure logging
 logger.remove()
@@ -70,7 +73,7 @@ __all__ = [
     "ThreatLevel",
     "AIMaturity",
     # Data & I/O
-    "CompetitorDataLoader",
+    "UnifiedCompanyLoader",
     "ExcelExporter",
     # Exceptions
     "SolsteinError",
@@ -82,4 +85,13 @@ __all__ = [
     "Thresholds",
     # Legacy exports for backward compatibility
     "logger",
+    "InterceptHandler",
 ]
+
+
+def __getattr__(name: str) -> Any:
+    if name == "UnifiedCompanyLoader":
+        return import_module("solstein.data.unified").UnifiedCompanyLoader
+    if name == "ExcelExporter":
+        return import_module("solstein.exporters.excel").ExcelExporter
+    raise AttributeError(f"module 'solstein' has no attribute {name!r}")

@@ -16,7 +16,6 @@ from loguru import logger
 
 from solstein.domain.models import DataSourceType, RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
-from solstein.research.discovery import DiscoveryCandidate, _slugify
 
 
 class CompetitorJsonSource:
@@ -37,6 +36,8 @@ class CompetitorJsonSource:
         max_results: int = 50,
         extra_keywords: list[str] | None = None,
     ) -> list[DiscoveryCandidate]:
+        from solstein.research.discovery import DiscoveryCandidate, _slugify
+        
         try:
             from solstein.data.loaders import CompetitorDataLoader
 

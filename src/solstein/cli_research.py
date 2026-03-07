@@ -10,6 +10,8 @@ Usage:
     solstein replace-synthetic --input data/input/competitor_data.json --output data/input/competitor_data_real.json
 """
 
+from __future__ import annotations
+
 import asyncio
 import json
 from datetime import datetime
@@ -162,6 +164,36 @@ def validate_data(input: Path, detailed: bool):
     asyncio.run(_validate())
 
 
+# Default companies to research when none specified
+DEFAULT_ENERGY_COMPANIES = [
+    "Octopus Energy",
+    "OVO Energy",
+    "Bulb Energy",
+    "Tesla Energy",
+    "Sonnen",
+    "Sunrun",
+    "Enphase Energy",
+    "SolarEdge Technologies",
+    "Vestas Wind Systems",
+    "Siemens Gamesa",
+    "GE Renewable Energy",
+    "Schneider Electric",
+    "ABB",
+    "SMA Solar Technology",
+    "BYD Energy",
+    "Fluence Energy",
+    "Powin",
+    "Northvolt",
+    "QuantumScape",
+    "Form Energy",
+    "Stem Inc",
+    "AutoGrid Systems",
+    "Opus One",
+    "GridBeyond",
+    "Moixa",
+]
+
+
 @click.command(name="replace-synthetic")
 @click.option(
     "--input",
@@ -203,12 +235,7 @@ def replace_synthetic(input: Path, output: Path, companies: tuple[str, ...]):
         # Validate first
         validation = await loader.validate_existing_data(input)
 
-        click.echo(f"\n{'=' * 60}")
-        click.echo("SYNTHETIC DATA REPLACEMENT")
-        click.echo(f"{'=' * 60}")
-        click.echo(f"Input: {input}")
-        click.echo(f"Output: {output}")
-        click.echo(f"Synthetic companies found: {click.style(str(validation['synthetic_count']), fg='red')}")
+        _display_replacement_header(input, output, validation)
 
         if validation["synthetic_count"] == 0:
             click.echo("✅ No synthetic data found. Nothing to replace.")
@@ -219,38 +246,8 @@ def replace_synthetic(input: Path, output: Path, companies: tuple[str, ...]):
             click.echo("Cancelled.")
             return
 
-        # Use provided companies or default list
-        if companies:
-            companies_to_research = list(companies)
-        else:
-            # Default: research top energy software companies
-            companies_to_research = [
-                "Octopus Energy",
-                "OVO Energy",
-                "Bulb Energy",
-                "Tesla Energy",
-                "Sonnen",
-                "Sunrun",
-                "Enphase Energy",
-                "SolarEdge Technologies",
-                "Vestas Wind Systems",
-                "Siemens Gamesa",
-                "GE Renewable Energy",
-                "Schneider Electric",
-                "ABB",
-                "SMA Solar Technology",
-                "BYD Energy",
-                "Fluence Energy",
-                "Powin",
-                "Northvolt",
-                "QuantumScape",
-                "Form Energy",
-                "Stem Inc",
-                "AutoGrid Systems",
-                "Opus One",
-                "GridBeyond",
-                "Moixa",
-            ]
+        # Get companies to research
+        companies_to_research = _get_companies_to_research(companies)
 
         click.echo(f"\n🔍 Researching {len(companies_to_research)} real companies...")
 
@@ -261,46 +258,79 @@ def replace_synthetic(input: Path, output: Path, companies: tuple[str, ...]):
             click.echo("❌ Failed to research any companies")
             return
 
-        # Create output
-        output_data = {
-            "competitors": real_companies,
-            "metadata": {
-                "data_source": "web_research",
-                "collection_date": None,  # Will be set below
-                "is_synthetic": False,
-                "real_data_percentage": "100%",
-                "validation_passed": True,
-                "original_file": str(input),
-                "synthetic_companies_replaced": validation["synthetic_count"],
-            },
-        }
+        # Save output
+        _save_replacement_output(output, input, validation, real_companies)
 
-        # Save
-        output.parent.mkdir(parents=True, exist_ok=True)
-        with open(output, "w") as f:
-            json.dump(output_data, f, indent=2)
-
-        click.echo("\n✅ Successfully replaced synthetic data!")
-        click.echo(f"   Real companies saved: {len(real_companies)}")
-        click.echo(f"   Output: {output}")
-        click.echo("\n📊 Quality Report:")
-
-        for c in real_companies:
-            dq = c.get("data_quality", {})
-            confidence = dq.get("confidence_score", 0)
-            sources = len(dq.get("data_sources", []))
-
-            conf_color = "green" if confidence > 0.7 else "yellow" if confidence > 0.4 else "red"
-            click.echo(
-                f"  • {c['company_name']}: {click.style(f'{confidence:.0%}', fg=conf_color)} confidence, {sources} sources"
-            )
-
-        click.echo("\n💡 Next steps:")
-        click.echo(f"   1. Review the output file: {output}")
-        click.echo(f"   2. Update your config to use: {output}")
-        click.echo("   3. Regenerate reports with: solstein generate-report [COMPANY]")
+        # Display results
+        _display_replacement_results(output, real_companies)
 
     asyncio.run(_replace())
+
+
+def _display_replacement_header(input: Path, output: Path, validation: dict) -> None:
+    """Display the replacement operation header."""
+    click.echo(f"\n{'=' * 60}")
+    click.echo("SYNTHETIC DATA REPLACEMENT")
+    click.echo(f"{'=' * 60}")
+    click.echo(f"Input: {input}")
+    click.echo(f"Output: {output}")
+    click.echo(f"Synthetic companies found: {click.style(str(validation['synthetic_count']), fg='red')}")
+
+
+def _get_companies_to_research(companies: tuple[str, ...]) -> list[str]:
+    """Get list of companies to research."""
+    if companies:
+        return list(companies)
+    return DEFAULT_ENERGY_COMPANIES
+
+
+def _save_replacement_output(
+    output: Path,
+    input: Path,
+    validation: dict,
+    real_companies: list[dict],
+) -> None:
+    """Save the replacement output data."""
+    output_data = {
+        "competitors": real_companies,
+        "metadata": {
+            "data_source": "web_research",
+            "collection_date": None,  # Will be set below
+            "is_synthetic": False,
+            "real_data_percentage": "100%",
+            "validation_passed": True,
+            "original_file": str(input),
+            "synthetic_companies_replaced": validation["synthetic_count"],
+        },
+    }
+
+    # Save
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with open(output, "w") as f:
+        json.dump(output_data, f, indent=2)
+
+
+def _display_replacement_results(output: Path, real_companies: list[dict]) -> None:
+    """Display the replacement results."""
+    click.echo("\n✅ Successfully replaced synthetic data!")
+    click.echo(f"   Real companies saved: {len(real_companies)}")
+    click.echo(f"   Output: {output}")
+    click.echo("\n📊 Quality Report:")
+
+    for c in real_companies:
+        dq = c.get("data_quality", {})
+        confidence = dq.get("confidence_score", 0)
+        sources = len(dq.get("data_sources", []))
+
+        conf_color = "green" if confidence > 0.7 else "yellow" if confidence > 0.4 else "red"
+        click.echo(
+            f"  • {c['company_name']}: {click.style(f'{confidence:.0%}', fg=conf_color)} confidence, {sources} sources"
+        )
+
+    click.echo("\n💡 Next steps:")
+    click.echo(f"   1. Review the output file: {output}")
+    click.echo(f"   2. Update your config to use: {output}")
+    click.echo("   3. Regenerate reports with: solstein generate-report [COMPANY]")
 
 
 # Add commands to CLI group

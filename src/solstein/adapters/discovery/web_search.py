@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from loguru import logger
 
-from solstein.research.discovery import DiscoveryCandidate, _slugify
 
 
 class WebSearchDiscoverySource:
@@ -29,6 +28,8 @@ class WebSearchDiscoverySource:
         max_results: int = 50,
         extra_keywords: list[str] | None = None,
     ) -> list[DiscoveryCandidate]:
+        from solstein.research.discovery import DiscoveryCandidate, _slugify
+        
         try:
             from solstein.data.web_search_client import search_company_info
 

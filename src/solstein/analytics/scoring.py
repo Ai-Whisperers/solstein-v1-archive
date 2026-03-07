@@ -4,14 +4,16 @@ Scoring algorithms for SolStein competitive intelligence.
 Calculates growth scores, financial health scores, and competitive positioning.
 """
 
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, cast
+from typing import Any
 
 from loguru import logger
 
 from ..core.scoring_config import ScoringSettings
 from ..domain.models import (
     Company,
+    CompanyClassification,
     MarketAnalysis,
     ScoringExplanation,
     ThreatLevel,
@@ -46,6 +48,13 @@ _COMPONENT_SIGNAL_MAP: dict[str, list[str]] = {
     "Geographic Footprint": [],
     "Stack Diversity": [],
 }
+
+
+@dataclass(frozen=True)
+class CompositeScoreResult:
+    composite_score: float
+    classification: CompanyClassification
+    breakdown: dict[str, float | str]
 
 
 def _confidence_weight(
@@ -86,15 +95,47 @@ def _apply_confidence_weights(
     return final, explanation
 
 
-def classify_company(score: float | None) -> str:
+def classify_company(score: float | None) -> CompanyClassification:
     """Central logic to classify a company based on its composite or growth score."""
     if score is None:
-        return "Salt"
+        return CompanyClassification.SALT
     if score >= PHOENIX_SCORE_THRESHOLD:
-        return "Phoenix"
-    elif score <= LEAD_SCORE_THRESHOLD:
-        return "Lead"
-    return "Salt"
+        return CompanyClassification.PHOENIX
+    if score <= LEAD_SCORE_THRESHOLD:
+        return CompanyClassification.LEAD
+    return CompanyClassification.SALT
+
+
+def calculate_composite_score(
+    growth_score: float,
+    financial_health_score: float,
+    competitive_position_score: float,
+    config: ScoringSettings | None = None,
+) -> CompositeScoreResult:
+    settings = config or ScoringSettings()
+    composite = settings.composite
+    if not composite.validate_weights():
+        composite.normalize_weights()
+
+    composite_score = round(
+        (growth_score * composite.growth_weight)
+        + (financial_health_score * composite.financial_weight)
+        + (competitive_position_score * composite.competitive_weight),
+        2,
+    )
+    classification = classify_company(composite_score)
+    breakdown: dict[str, float | str] = {
+        "growth_score": growth_score,
+        "financial_health_score": financial_health_score,
+        "competitive_position_score": competitive_position_score,
+        "composite_score": composite_score,
+        "classification": classification.value,
+    }
+    return CompositeScoreResult(
+        composite_score=composite_score,
+        classification=classification,
+        breakdown=breakdown,
+    )
 
 
 class GrowthScorer:
@@ -130,27 +171,24 @@ class GrowthScorer:
         if not composite.validate_weights():
             composite.normalize_weights()
 
-        if all(s is not None for s in [growth_score, financial_health_score, competitive_position_score]):
-            profile.composite_score = round(
-                (growth_score * composite.growth_weight)
-                + (financial_health_score * composite.financial_weight)
-                + (competitive_position_score * composite.competitive_weight),
-                2,
-            )
-        else:
-            profile.composite_score = growth_score
+        profile.composite_score = round(
+            (growth_score * composite.growth_weight)
+            + (financial_health_score * composite.financial_weight)
+            + (competitive_position_score * composite.competitive_weight),
+            2,
+        )
 
         # Always calculate classification
         profile.classification = classify_company(profile.composite_score)
 
         # Derive threat level from classification and score
-        profile.threat_level = cast(
-            ThreatLevel, ThreatLevel(derive_threat_level(profile.classification, profile.composite_score))
-        )
+        profile.threat_level = ThreatLevel(derive_threat_level(profile.classification, profile.composite_score))
 
-        profile.scoring_breakdown["growth"] = growth_expl
-        profile.scoring_breakdown["financial"] = fin_expl
-        profile.scoring_breakdown["competitive"] = comp_expl
+        profile.scoring_breakdown = {
+            "growth": growth_expl,
+            "financial": fin_expl,
+            "competitive": comp_expl,
+        }
 
         return profile
 
@@ -224,7 +262,7 @@ class MarketAnalyzer:
 
     def _generate_recommendations(self, profiles: list[Company], avg_growth: float, cr4: float) -> list[str]:  # noqa: E501
         """Generate strategic recommendations based on market metrics."""
-        recommendations = []
+        recommendations: list[str] = []
         if avg_growth > 15:
             recommendations.append("Aggressive expansion into high-growth verticals")
         if cr4 > 70:
@@ -289,7 +327,7 @@ class MarketAnalyzer:
             ai_counts[profile.ai_maturity] = ai_counts.get(profile.ai_maturity, 0) + 1
 
         # Count unique technologies
-        all_tech = set()
+        all_tech: set[str] = set()
         for profile in profiles:
             all_tech.update(profile.tech_stack)
 
@@ -361,7 +399,7 @@ class CompetitiveOverlapCalculator:
 
     def calculate_overlap(self, profile1: Company, profile2: Company) -> float:
         """Calculate overlap score between two companies (0-1)."""
-        scores = []
+        scores: list[float] = []
 
         # Industry overlap
         if profile1.industry == profile2.industry:

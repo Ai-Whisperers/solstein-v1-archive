@@ -107,116 +107,157 @@ class FinancialSanityValidator:
         if data_source_type == "synthetic":
             return report
 
-        # Revenue per employee check
-        if revenue_eur_millions is not None and employee_count is not None and employee_count > 0:
-            rev_per_emp = (revenue_eur_millions * 1_000_000) / employee_count
-            if rev_per_emp < self.REV_PER_EMP_MIN_EUR:
-                report.violations.append(
-                    SanityViolation(
-                        field="revenue_per_employee",
-                        value=rev_per_emp,
-                        expected_range=f">{self.REV_PER_EMP_WARN_LOW:,.0f} EUR",
-                        severity="critical",
-                        message=(
-                            f"€{rev_per_emp:,.0f}/employee is implausibly low "
-                            f"(expected >€{self.REV_PER_EMP_WARN_LOW:,.0f})"
-                        ),
-                    )
-                )
-            elif rev_per_emp < self.REV_PER_EMP_WARN_LOW:
-                report.violations.append(
-                    SanityViolation(
-                        field="revenue_per_employee",
-                        value=rev_per_emp,
-                        expected_range=f">{self.REV_PER_EMP_WARN_LOW:,.0f} EUR",
-                        severity="warning",
-                        message=(
-                            f"€{rev_per_emp:,.0f}/employee is below industry minimum €{self.REV_PER_EMP_WARN_LOW:,.0f}"
-                        ),
-                    )
-                )
-            elif rev_per_emp > self.REV_PER_EMP_WARN_HIGH:
-                report.violations.append(
-                    SanityViolation(
-                        field="revenue_per_employee",
-                        value=rev_per_emp,
-                        expected_range=f"<{self.REV_PER_EMP_WARN_HIGH:,.0f} EUR",
-                        severity="warning",
-                        message=f"€{rev_per_emp:,.0f}/employee seems implausibly high",
-                    )
-                )
-
-        # Profit margin check
-        if profit_margin is not None:
-            if profit_margin > self.MARGIN_IMPOSSIBLE_HIGH:
-                report.violations.append(
-                    SanityViolation(
-                        field="profit_margin",
-                        value=profit_margin,
-                        expected_range=f"<{self.MARGIN_IMPOSSIBLE_HIGH:.0%}",
-                        severity="critical",
-                        message=f"{profit_margin:.1%} profit margin is implausibly high for software",
-                    )
-                )
-            elif profit_margin < self.MARGIN_DEEP_NEGATIVE:
-                report.violations.append(
-                    SanityViolation(
-                        field="profit_margin",
-                        value=profit_margin,
-                        expected_range=f">{self.MARGIN_DEEP_NEGATIVE:.0%}",
-                        severity="warning",
-                        message=f"{profit_margin:.1%} margin indicates severe distress",
-                    )
-                )
-
-        # Growth rate check
-        if growth_rate is not None:
-            if growth_rate > self.GROWTH_IMPOSSIBLE_HIGH:
-                report.violations.append(
-                    SanityViolation(
-                        field="growth_rate",
-                        value=growth_rate,
-                        expected_range=f"<{self.GROWTH_IMPOSSIBLE_HIGH}%",
-                        severity="critical",
-                        message=f"{growth_rate:.1f}% YoY growth is implausible for an established company",
-                    )
-                )
-            elif growth_rate < self.GROWTH_IMPOSSIBLE_LOW:
-                report.violations.append(
-                    SanityViolation(
-                        field="growth_rate",
-                        value=growth_rate,
-                        expected_range=f">{self.GROWTH_IMPOSSIBLE_LOW}%",
-                        severity="warning",
-                        message=f"{growth_rate:.1f}% YoY decline suggests critical situation",
-                    )
-                )
-
-        # Funding/revenue ratio check
-        if total_funding_eur is not None and revenue_eur_millions is not None and revenue_eur_millions > 0:
-            funding_revenue_ratio = total_funding_eur / (revenue_eur_millions * 1_000_000)
-            if funding_revenue_ratio > self.FUNDING_RATIO_INSANE:
-                report.violations.append(
-                    SanityViolation(
-                        field="funding_revenue_ratio",
-                        value=funding_revenue_ratio,
-                        expected_range=f"<{self.FUNDING_RATIO_INSANE}x",
-                        severity="warning",
-                        message=f"Funding is {funding_revenue_ratio:.0f}x revenue — check data accuracy",
-                    )
-                )
+        # Run all validation checks
+        self._check_revenue_per_employee(report, revenue_eur_millions, employee_count)
+        self._check_profit_margin(report, profit_margin)
+        self._check_growth_rate(report, growth_rate)
+        self._check_funding_ratio(report, total_funding_eur, revenue_eur_millions)
 
         # Log violations
-        if not report.is_clean:
-            logger.warning(
-                f"Sanity violations for {company_name} "
-                f"({report.violation_count} total, {report.critical_count} critical)"
-            )
-            for v in report.violations:
-                log_fn = logger.error if v.severity == "critical" else logger.warning
-                log_fn(f"  {company_name}.{v.field}: {v.message}")
+        self._log_violations(company_name, report)
 
         return report
+
+    def _check_revenue_per_employee(
+        self,
+        report: SanityReport,
+        revenue_eur_millions: float | None,
+        employee_count: int | None,
+    ) -> None:
+        """Check revenue per employee is within reasonable bounds."""
+        if revenue_eur_millions is None or employee_count is None or employee_count <= 0:
+            return
+
+        rev_per_emp = (revenue_eur_millions * 1_000_000) / employee_count
+
+        if rev_per_emp < self.REV_PER_EMP_MIN_EUR:
+            report.violations.append(
+                SanityViolation(
+                    field="revenue_per_employee",
+                    value=rev_per_emp,
+                    expected_range=f">{self.REV_PER_EMP_WARN_LOW:,.0f} EUR",
+                    severity="critical",
+                    message=(
+                        f"€{rev_per_emp:,.0f}/employee is implausibly low (expected >€{self.REV_PER_EMP_WARN_LOW:,.0f})"
+                    ),
+                )
+            )
+        elif rev_per_emp < self.REV_PER_EMP_WARN_LOW:
+            report.violations.append(
+                SanityViolation(
+                    field="revenue_per_employee",
+                    value=rev_per_emp,
+                    expected_range=f">{self.REV_PER_EMP_WARN_LOW:,.0f} EUR",
+                    severity="warning",
+                    message=(
+                        f"€{rev_per_emp:,.0f}/employee is below industry minimum €{self.REV_PER_EMP_WARN_LOW:,.0f}"
+                    ),
+                )
+            )
+        elif rev_per_emp > self.REV_PER_EMP_WARN_HIGH:
+            report.violations.append(
+                SanityViolation(
+                    field="revenue_per_employee",
+                    value=rev_per_emp,
+                    expected_range=f"<{self.REV_PER_EMP_WARN_HIGH:,.0f} EUR",
+                    severity="warning",
+                    message=f"€{rev_per_emp:,.0f}/employee seems implausibly high",
+                )
+            )
+
+    def _check_profit_margin(
+        self,
+        report: SanityReport,
+        profit_margin: float | None,
+    ) -> None:
+        """Check profit margin is within reasonable bounds."""
+        if profit_margin is None:
+            return
+
+        if profit_margin > self.MARGIN_IMPOSSIBLE_HIGH:
+            report.violations.append(
+                SanityViolation(
+                    field="profit_margin",
+                    value=profit_margin,
+                    expected_range=f"<{self.MARGIN_IMPOSSIBLE_HIGH:.0%}",
+                    severity="critical",
+                    message=f"{profit_margin:.1%} profit margin is implausibly high for software",
+                )
+            )
+        elif profit_margin < self.MARGIN_DEEP_NEGATIVE:
+            report.violations.append(
+                SanityViolation(
+                    field="profit_margin",
+                    value=profit_margin,
+                    expected_range=f">{self.MARGIN_DEEP_NEGATIVE:.0%}",
+                    severity="warning",
+                    message=f"{profit_margin:.1%} margin indicates severe distress",
+                )
+            )
+
+    def _check_growth_rate(
+        self,
+        report: SanityReport,
+        growth_rate: float | None,
+    ) -> None:
+        """Check growth rate is within reasonable bounds."""
+        if growth_rate is None:
+            return
+
+        if growth_rate > self.GROWTH_IMPOSSIBLE_HIGH:
+            report.violations.append(
+                SanityViolation(
+                    field="growth_rate",
+                    value=growth_rate,
+                    expected_range=f"<{self.GROWTH_IMPOSSIBLE_HIGH}%",
+                    severity="critical",
+                    message=f"{growth_rate:.1f}% YoY growth is implausible for an established company",
+                )
+            )
+        elif growth_rate < self.GROWTH_IMPOSSIBLE_LOW:
+            report.violations.append(
+                SanityViolation(
+                    field="growth_rate",
+                    value=growth_rate,
+                    expected_range=f">{self.GROWTH_IMPOSSIBLE_LOW}%",
+                    severity="warning",
+                    message=f"{growth_rate:.1f}% YoY decline suggests critical situation",
+                )
+            )
+
+    def _check_funding_ratio(
+        self,
+        report: SanityReport,
+        total_funding_eur: float | None,
+        revenue_eur_millions: float | None,
+    ) -> None:
+        """Check funding to revenue ratio is reasonable."""
+        if total_funding_eur is None or revenue_eur_millions is None or revenue_eur_millions <= 0:
+            return
+
+        funding_revenue_ratio = total_funding_eur / (revenue_eur_millions * 1_000_000)
+        if funding_revenue_ratio > self.FUNDING_RATIO_INSANE:
+            report.violations.append(
+                SanityViolation(
+                    field="funding_revenue_ratio",
+                    value=funding_revenue_ratio,
+                    expected_range=f"<{self.FUNDING_RATIO_INSANE}x",
+                    severity="warning",
+                    message=f"Funding is {funding_revenue_ratio:.0f}x revenue — check data accuracy",
+                )
+            )
+
+    def _log_violations(self, company_name: str, report: SanityReport) -> None:
+        """Log all violations for a company."""
+        if report.is_clean:
+            return
+
+        logger.warning(
+            f"Sanity violations for {company_name} ({report.violation_count} total, {report.critical_count} critical)"
+        )
+        for v in report.violations:
+            log_fn = logger.error if v.severity == "critical" else logger.warning
+            log_fn(f"  {company_name}.{v.field}: {v.message}")
 
 
 def validate_batch(

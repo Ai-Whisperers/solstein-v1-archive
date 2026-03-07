@@ -5,6 +5,8 @@ facts repository (SEC EDGAR, Companies House, news signals) to calculate a
 comprehensive growth momentum score.
 """
 
+from __future__ import annotations
+
 import asyncio
 from typing import TYPE_CHECKING, Any
 
@@ -45,119 +47,189 @@ class GrowthMomentumScorer:
         if fact_repo and company_id:
             financials = self._merge_facts_into_financials(financials, fact_repo, company_id)
 
-        if financials.growth_rate is not None:
-            growth_rate = financials.growth_rate
-            growth_factor = min(
-                growth_rate / cfg.revenue_growth_divisor,
-                cfg.revenue_growth_cap,
-            )
-            score += growth_factor
-            if 0 <= growth_rate < 5:
-                score -= 0.75  # Stagnant growth penalty
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Stagnant Growth Penalty",
-                        value=-0.75,
-                        formula="growth_rate < 5% → -0.75",
-                        reasoning="Growth rate below 5% indicates stagnation.",
-                    )
-                )
-            elif 5 <= growth_rate < 10:
-                score -= 0.25  # Below-average growth penalty
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Below-Average Growth Penalty",
-                        value=-0.25,
-                        formula="growth_rate 5-10% → -0.25",
-                        reasoning="Growth rate below 10% is below sector average.",
-                    )
-                )
+        # Apply all scoring components
+        score = self._score_growth_rate(financials, score, explanation, cfg)
+        score = self._score_employee_efficiency(financials, score, explanation, cfg)
+        score = self._score_funding_momentum(financials, score, explanation, cfg)
+        score = self._score_profitability(financials, score, explanation, cfg)
+        score = self._apply_compound_penalties(financials, score, explanation)
+
+        final_score = max(0.0, min(score, 10.0))
+        explanation.final_score = final_score
+        return final_score, explanation
+
+    def _score_growth_rate(
+        self,
+        financials: FinancialMetric,
+        score: float,
+        explanation: ScoringExplanation,
+        cfg: Any,
+    ) -> float:
+        """Score revenue growth rate component."""
+        if financials.growth_rate is None:
+            return score
+
+        growth_rate = financials.growth_rate
+        growth_factor = min(
+            growth_rate / cfg.revenue_growth_divisor,
+            cfg.revenue_growth_cap,
+        )
+        score += growth_factor
+
+        # Apply growth penalties
+        if 0 <= growth_rate < 5:
+            score -= 0.75
             explanation.components.append(
                 ScoreComponent(
-                    name="Revenue Growth",
-                    value=growth_factor,
-                    formula=f"min({growth_rate}% / {cfg.revenue_growth_divisor}, {cfg.revenue_growth_cap})",
-                    reasoning=f"High growth rate of {growth_rate}% identified."
-                    if growth_rate > 15
-                    else "Moderate growth rate identified.",
+                    name="Stagnant Growth Penalty",
+                    value=-0.75,
+                    formula="growth_rate < 5% → -0.75",
+                    reasoning="Growth rate below 5% indicates stagnation.",
                 )
             )
-            if growth_rate >= 50:
-                score += 2.5
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Hyper-Growth Bonus",
-                        value=2.5,
-                        formula="growth_rate >= 50% → +2.5",
-                        reasoning="Exceptional growth rate indicates hyper-growth momentum.",
-                    )
+        elif 5 <= growth_rate < 10:
+            score -= 0.25
+            explanation.components.append(
+                ScoreComponent(
+                    name="Below-Average Growth Penalty",
+                    value=-0.25,
+                    formula="growth_rate 5-10% → -0.25",
+                    reasoning="Growth rate below 10% is below sector average.",
                 )
+            )
 
-        if financials.employees and financials.revenue:
-            revenue_eur = financials.revenue * 1_000_000
-            rev_per_emp = revenue_eur / financials.employees
-            bonus = 0.0
-            if rev_per_emp > cfg.efficiency_high_threshold:
-                bonus = cfg.efficiency_high_bonus
-            elif rev_per_emp > cfg.efficiency_med_threshold:
-                bonus = cfg.efficiency_med_bonus
+        explanation.components.append(
+            ScoreComponent(
+                name="Revenue Growth",
+                value=growth_factor,
+                formula=f"min({growth_rate}% / {cfg.revenue_growth_divisor}, {cfg.revenue_growth_cap})",
+                reasoning=f"High growth rate of {growth_rate}% identified."
+                if growth_rate > 15
+                else "Moderate growth rate identified.",
+            )
+        )
 
-            if bonus > 0:
-                score += bonus
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Employee Efficiency",
-                        value=bonus,
-                        formula=f"rev_per_emp({rev_per_emp:,.0f} EUR) > threshold",
-                        reasoning="Revenue per employee is above efficiency benchmarks.",
-                    )
+        if growth_rate >= 50:
+            score += 2.5
+            explanation.components.append(
+                ScoreComponent(
+                    name="Hyper-Growth Bonus",
+                    value=2.5,
+                    formula="growth_rate >= 50% → +2.5",
+                    reasoning="Exceptional growth rate indicates hyper-growth momentum.",
                 )
+            )
 
-        if financials.funding_raised:
-            bonus = 0.0
-            if financials.funding_raised > cfg.funding_high_threshold:
-                bonus = cfg.funding_high_bonus
-            elif financials.funding_raised > cfg.funding_med_threshold:
-                bonus = cfg.funding_med_bonus
+        return score
 
-            if bonus > 0:
-                score += bonus
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Funding Momentum",
-                        value=bonus,
-                        formula=f"funding({financials.funding_raised:,.0f} EUR) > threshold",
-                        reasoning="Significant capital injection signals strong market confidence.",
-                    )
+    def _score_employee_efficiency(
+        self,
+        financials: FinancialMetric,
+        score: float,
+        explanation: ScoringExplanation,
+        cfg: Any,
+    ) -> float:
+        """Score employee efficiency component."""
+        if not financials.employees or not financials.revenue:
+            return score
+
+        revenue_eur = financials.revenue * 1_000_000
+        rev_per_emp = revenue_eur / financials.employees
+        bonus = 0.0
+
+        if rev_per_emp > cfg.efficiency_high_threshold:
+            bonus = cfg.efficiency_high_bonus
+        elif rev_per_emp > cfg.efficiency_med_threshold:
+            bonus = cfg.efficiency_med_bonus
+
+        if bonus > 0:
+            score += bonus
+            explanation.components.append(
+                ScoreComponent(
+                    name="Employee Efficiency",
+                    value=bonus,
+                    formula=f"rev_per_emp({rev_per_emp:,.0f} EUR) > threshold",
+                    reasoning="Revenue per employee is above efficiency benchmarks.",
                 )
+            )
 
-        if financials.profit_margin is not None:
-            adj = 0.0
-            if financials.profit_margin > cfg.margin_high_threshold:
-                adj = cfg.margin_high_bonus
-            elif financials.profit_margin > cfg.margin_med_threshold:
-                adj = cfg.margin_med_bonus
-            elif financials.profit_margin < -10:
-                adj = cfg.margin_negative_penalty * 1.5  # Deep negative margin: 1.5x penalty
-            elif financials.profit_margin < 0:
-                adj = cfg.margin_negative_penalty
+        return score
 
-            if adj != 0:
-                score += adj
-                explanation.components.append(
-                    ScoreComponent(
-                        name="Profitability Profile",
-                        value=adj,
-                        formula=f"margin({financials.profit_margin}%) -> adjustment",
-                        reasoning="Healthy margins contribute to growth score."
-                        if adj > 0
-                        else "Negative margins penalize growth score.",
-                    )
+    def _score_funding_momentum(
+        self,
+        financials: FinancialMetric,
+        score: float,
+        explanation: ScoringExplanation,
+        cfg: Any,
+    ) -> float:
+        """Score funding momentum component."""
+        if not financials.funding_raised:
+            return score
+
+        bonus = 0.0
+        if financials.funding_raised > cfg.funding_high_threshold:
+            bonus = cfg.funding_high_bonus
+        elif financials.funding_raised > cfg.funding_med_threshold:
+            bonus = cfg.funding_med_bonus
+
+        if bonus > 0:
+            score += bonus
+            explanation.components.append(
+                ScoreComponent(
+                    name="Funding Momentum",
+                    value=bonus,
+                    formula=f"funding({financials.funding_raised:,.0f} EUR) > threshold",
+                    reasoning="Significant capital injection signals strong market confidence.",
                 )
+            )
 
-        # Compound penalty: negative growth + no funding = high-risk signal
+        return score
+
+    def _score_profitability(
+        self,
+        financials: FinancialMetric,
+        score: float,
+        explanation: ScoringExplanation,
+        cfg: Any,
+    ) -> float:
+        """Score profitability profile component."""
+        if financials.profit_margin is None:
+            return score
+
+        adj = 0.0
+        if financials.profit_margin > cfg.margin_high_threshold:
+            adj = cfg.margin_high_bonus
+        elif financials.profit_margin > cfg.margin_med_threshold:
+            adj = cfg.margin_med_bonus
+        elif financials.profit_margin < -10:
+            adj = cfg.margin_negative_penalty * 1.5
+        elif financials.profit_margin < 0:
+            adj = cfg.margin_negative_penalty
+
+        if adj != 0:
+            score += adj
+            explanation.components.append(
+                ScoreComponent(
+                    name="Profitability Profile",
+                    value=adj,
+                    formula=f"margin({financials.profit_margin}%) -> adjustment",
+                    reasoning="Healthy margins contribute to growth score."
+                    if adj > 0
+                    else "Negative margins penalize growth score.",
+                )
+            )
+
+        return score
+
+    def _apply_compound_penalties(
+        self,
+        financials: FinancialMetric,
+        score: float,
+        explanation: ScoringExplanation,
+    ) -> float:
+        """Apply compound penalties for high-risk combinations."""
         if financials.growth_rate is not None and financials.growth_rate < 0 and not financials.funding_raised:
-            score -= 1.0  # Compound penalty: burning cash with no investor support
+            score -= 1.0
             explanation.components.append(
                 ScoreComponent(
                     name="Compound Risk Penalty",
@@ -167,9 +239,7 @@ class GrowthMomentumScorer:
                 )
             )
 
-        final_score = max(0.0, min(score, 10.0))
-        explanation.final_score = final_score
-        return final_score, explanation
+        return score
 
     def _merge_facts_into_financials(
         self,

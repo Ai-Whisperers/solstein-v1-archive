@@ -87,49 +87,33 @@ def reconcile_research_run(
     run_id: str | None = None,
     output_dir: Path | None = None,
 ) -> dict[str, object]:
-    if run_id is None and output_dir is None:
-        raise ReconciliationError("Either run_id or output_dir must be provided")
+    """Reconcile JSON research artifacts against persisted research records.
 
-    resolved_run_id = run_id
-    resolved_output_dir = output_dir
-    outbox_record: OutboxRecord | None = None
+    EPIC-020: Refactored from 170-line function to use helper functions.
+    """
+    from .reconciliation_helpers import (
+        resolve_run_and_output_dir,
+        extract_artifact_hashes,
+        compare_artifacts,
+        build_reconciliation_report,
+    )
 
-    if resolved_run_id is not None and resolved_output_dir is None:
-        outbox_record = _find_outbox_for_run_id(session, resolved_run_id)
-        if outbox_record is None:
-            raise ReconciliationError(f"Could not resolve output_dir from outbox payload for run_id {resolved_run_id}")
-        payload = _as_payload_dict(outbox_record.payload)
-        if payload is None:
-            raise ReconciliationError(f"Outbox payload for run_id {resolved_run_id} is not a JSON object")
-        output_dir_value = payload.get("output_dir")
-        if not isinstance(output_dir_value, str) or not output_dir_value:
-            raise ReconciliationError(f"Outbox payload for run_id {resolved_run_id} is missing output_dir")
-        resolved_output_dir = Path(output_dir_value)
+    # Resolve run_id and output_dir
+    resolved_run_id, resolved_output_dir, outbox_record = resolve_run_and_output_dir(
+        session, run_id, output_dir,
+        _find_outbox_for_run_id, _find_outbox_for_output_dir, _as_payload_dict
+    )
 
-    if resolved_output_dir is not None and resolved_run_id is None:
-        outbox_record = _find_outbox_for_output_dir(session, resolved_output_dir)
-        if outbox_record is None:
-            raise ReconciliationError(
-                f"Could not resolve run_id from outbox payload for output_dir {resolved_output_dir}"
-            )
-        payload = _as_payload_dict(outbox_record.payload)
-        if payload is None:
-            raise ReconciliationError(f"Outbox payload for output_dir {resolved_output_dir} is not a JSON object")
-        run_id_value = payload.get("run_id")
-        if not isinstance(run_id_value, str) or not run_id_value:
-            raise ReconciliationError(f"Outbox payload for output_dir {resolved_output_dir} is missing run_id")
-        resolved_run_id = run_id_value
-
-    if resolved_run_id is None or resolved_output_dir is None:
-        raise ReconciliationError("Unable to resolve both run_id and output_dir")
-
+    # Load artifacts
     stage_report, artifacts = load_research_artifacts(resolved_output_dir)
 
+    # Query database records
     run_record = session.execute(
         select(ResearchRunRecord).where(ResearchRunRecord.run_id == resolved_run_id)
     ).scalar_one_or_none()
     run_db_present = run_record is not None
 
+    # Get outbox matches
     outbox_records = _outbox_candidates_for_research_runs(session)
     outbox_matches_for_run: list[OutboxRecord] = []
     for record in outbox_records:
@@ -140,6 +124,7 @@ def reconcile_research_run(
         if isinstance(payload_run_id, str) and payload_run_id == resolved_run_id:
             outbox_matches_for_run.append(record)
 
+    # Get DB artifact records
     db_artifact_records: list[ResearchArtifactRecord] = []
     if run_record is not None:
         db_artifact_records = list(
@@ -148,111 +133,31 @@ def reconcile_research_run(
             .all()
         )
 
+    # Build artifact name mappings
     db_artifacts_by_name = {
         row.artifact_name: row for row in sorted(db_artifact_records, key=lambda row: row.artifact_name)
     }
 
-    stage_hashes_obj = stage_report.get("artifact_hashes")
-    stage_hashes: dict[str, str] = {}
-    if isinstance(stage_hashes_obj, dict):
-        stage_hashes = {
-            str(name): str(value)
-            for name, value in sorted(stage_hashes_obj.items(), key=lambda item: str(item[0]))
-            if isinstance(value, str)
-        }
+    # Extract artifact hashes
+    stage_hashes = extract_artifact_hashes(stage_report)
 
+    # Compare artifacts
     json_artifact_names = sorted(str(name) for name in artifacts.keys())
     db_artifact_names = sorted(db_artifacts_by_name.keys())
 
-    matched: list[dict[str, JsonValue]] = []
-    missing_in_db: list[dict[str, JsonValue]] = []
-    missing_in_json: list[dict[str, JsonValue]] = []
-    mismatched_hash: list[dict[str, JsonValue]] = []
+    matched, missing_in_db, missing_in_json, mismatched_hash = compare_artifacts(
+        artifacts, db_artifacts_by_name, stage_hashes
+    )
 
-    for artifact_name in json_artifact_names:
-        json_hash = stage_hashes.get(artifact_name)
-        db_record = db_artifacts_by_name.get(artifact_name)
-        if db_record is None:
-            missing_in_db.append(
-                {
-                    "artifact_name": artifact_name,
-                    "json_artifact_hash": json_hash,
-                }
-            )
-            continue
-
-        db_hash = _extract_db_artifact_hash(db_record.payload)
-        if json_hash == db_hash:
-            matched.append(
-                {
-                    "artifact_name": artifact_name,
-                    "json_artifact_hash": json_hash,
-                    "db_artifact_hash": db_hash,
-                }
-            )
-            continue
-
-        if json_hash is None and db_hash is None:
-            matched.append(
-                {
-                    "artifact_name": artifact_name,
-                    "json_artifact_hash": None,
-                    "db_artifact_hash": None,
-                }
-            )
-            continue
-
-        mismatched_hash.append(
-            {
-                "artifact_name": artifact_name,
-                "json_artifact_hash": json_hash,
-                "db_artifact_hash": db_hash,
-            }
-        )
-
-    for artifact_name in db_artifact_names:
-        if artifact_name in artifacts:
-            continue
-        db_hash = _extract_db_artifact_hash(db_artifacts_by_name[artifact_name].payload)
-        missing_in_json.append(
-            {
-                "artifact_name": artifact_name,
-                "db_artifact_hash": db_hash,
-            }
-        )
-
-    matched.sort(key=lambda item: cast("str", item["artifact_name"]))
-    missing_in_db.sort(key=lambda item: cast("str", item["artifact_name"]))
-    missing_in_json.sort(key=lambda item: cast("str", item["artifact_name"]))
-    mismatched_hash.sort(key=lambda item: cast("str", item["artifact_name"]))
-
-    report: dict[str, object] = {
-        "run_id": resolved_run_id,
-        "output_dir": str(resolved_output_dir),
-        "presence": {
-            "json_run_present": True,
-            "db_run_present": run_db_present,
-        },
-        "counts": {
-            "matched": len(matched),
-            "missing_in_db": len(missing_in_db),
-            "missing_in_json": len(missing_in_json),
-            "mismatched_hash": len(mismatched_hash),
-            "json_artifacts": len(json_artifact_names),
-            "db_artifacts": len(db_artifact_names),
-            "outbox_records": len(outbox_matches_for_run),
-        },
-        "artifacts": {
-            "matched": matched,
-            "missing_in_db": missing_in_db,
-            "missing_in_json": missing_in_json,
-            "mismatched_hash": mismatched_hash,
-        },
-    }
+    # Build and write report
+    report = build_reconciliation_report(
+        resolved_run_id, resolved_output_dir, run_db_present,
+        matched, missing_in_db, missing_in_json, mismatched_hash,
+        json_artifact_names, db_artifact_names, len(outbox_matches_for_run)
+    )
 
     _ = _write_reconciliation_report(output_dir=resolved_output_dir, report=report)
     return report
-
 
 def reconcile_research_run_with_configured_db(
     *,

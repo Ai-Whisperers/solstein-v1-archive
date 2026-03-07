@@ -77,210 +77,74 @@ class ClientReportGenerator(CompanyReportGenerator):
 
         ai_market_avg = self._avg([c.ai_score for c in competitors if c.ai_score is not None]) if competitors else None
 
-        growth_market_avg = (
-            self._avg([c.growth_score for c in competitors if c.growth_score is not None]) if competitors else None
-        )
-        growth_top = max([c.growth_score or 0 for c in competitors], default=None) if competitors else None
+    def _generate_competitive_analysis(
+        self,
+        client: Company,
+        competitors: list[Company],
+        output_dir: Path,
+    ) -> Path:
+        """Generate competitive analysis report using section generators.
 
-        health_market_avg = (
-            self._avg([c.financial_health_score for c in competitors if c.financial_health_score is not None])
-            if competitors
-            else None
-        )
-        health_top = max([c.financial_health_score or 0 for c in competitors], default=None) if competitors else None
+        EPIC-020: Refactored from 222-line monolithic function to use
+        ReportSectionGenerator for better maintainability.
+        """
+        from .report_sections import ReportSectionGenerator
 
-        position_market_avg = (
-            self._avg([c.competitive_position_score for c in competitors if c.competitive_position_score is not None])
-            if competitors
-            else None
-        )
-        position_top = (
-            max([c.competitive_position_score or 0 for c in competitors], default=None) if competitors else None
-        )
+        # Identify competitive threats
+        threats = [c for c in competitors if (c.composite_score or 0) > (client.composite_score or 0)]
+        direct = [c for c in competitors if c.tier == client.tier]
 
-        composite_market_avg = (
-            self._avg([c.composite_score for c in competitors if c.composite_score is not None])
-            if competitors
-            else None
-        )
-        composite_top = max([c.composite_score or 0 for c in competitors], default=None) if competitors else None
+        # Calculate market averages
+        ai_market_avg = self._avg([c.ai_score for c in competitors if c.ai_score is not None])
+        growth_market_avg = self._avg([c.growth_score for c in competitors if c.growth_score is not None])
+        growth_top = max([c.growth_score or 0 for c in competitors], default=None)
+        health_market_avg = self._avg([c.financial_health_score for c in competitors if c.financial_health_score is not None])
+        health_top = max([c.financial_health_score or 0 for c in competitors], default=None)
+        position_market_avg = self._avg([c.competitive_position_score for c in competitors if c.competitive_position_score is not None])
+        position_top = max([c.competitive_position_score or 0 for c in competitors], default=None)
+        composite_market_avg = self._avg([c.composite_score for c in competitors if c.composite_score is not None])
+        composite_top = max([c.composite_score or 0 for c in competitors], default=None)
 
-        # Check data authenticity and add warning if synthetic data detected
+        # Check data authenticity
         is_authentic, warning = self._check_data_authenticity([client] + competitors)
 
-        report = f"""# Competitive Analysis - {client.name}
+        # Sort competitors by score
+        sorted_comp = sorted(
+            [c for c in competitors if c.composite_score is not None],
+            key=lambda c: c.composite_score or 0,
+            reverse=True,
+        )
 
-{warning if warning else ""}
-**Report Date**: {datetime.now().strftime("%B %Y")}
+        # Generate report sections
+        section_gen = ReportSectionGenerator(self.formatter)
 
-**Report Date**: {datetime.now().strftime("%B %Y")}
-**Client**: {client.name}
-**Analysis Scope**: {len(competitors)} competitors
+        report_parts = [
+            section_gen.generate_executive_summary(client, competitors, threats, ai_market_avg, warning),
+            section_gen.generate_client_profile(
+                client, competitors,
+                self._rank_revenue, self._rank_growth, self._rank_score, self._rank_ai, self._rank_saas
+            ),
+            section_gen.generate_competitive_positioning(
+                client, competitors, growth_market_avg, growth_top,
+                health_market_avg, health_top, position_market_avg, position_top,
+                composite_market_avg, composite_top
+            ),
+            section_gen.generate_direct_competitors(client, direct),
+            section_gen.generate_competitor_details(client, direct),
+            section_gen.generate_competitive_threats(client, threats),
+            section_gen.generate_competitive_landscape(client, sorted_comp),
+            section_gen.generate_strategic_recommendations(
+                client, competitors, threats, self._generate_client_strengths, self._generate_client_weaknesses
+            ),
+            section_gen.generate_appendix(sorted_comp, derive_threat_level),
+        ]
 
----
+        report = "\n".join(report_parts)
 
-## Executive Summary
-
-This report analyzes {client.name}'s competitive position against {len(competitors)}
-companies in the {client.industry or "energy software"} market.
-
-### Key Findings
-
-- **Current Position**: {client.classification or "N/A"} ({client.composite_score or "N/A"}/10)
-- **Revenue**: €{client.financials.revenue or 0:.1f}M (CAGR: {client.revenue_cagr_3yr or "N/A"}%)
-- **Competitive Threats**: {len(threats)} companies with higher composite scores
-- **AI Gap**: {client.ai_score or 0}/10 (Market avg: {_fmt_float(ai_market_avg)})
-
----
-
-## Client Profile
-
-| Metric | Value | Market Rank |
-|---|---|---|
-| Revenue | €{client.financials.revenue or 0:.1f}M | {self._rank_revenue(client, competitors)} |
-| Growth (CAGR) | {client.revenue_cagr_3yr or "N/A"}% | {self._rank_growth(client, competitors)} |
-| Composite Score | {client.composite_score or "N/A"} | {self._rank_score(client, competitors)} |
-| AI Score | {client.ai_score or "N/A"}/10 | {self._rank_ai(client, competitors)} |
-| SaaS Maturity | {client.saas_maturity or "N/A"}/10 | {self._rank_saas(client, competitors)} |
-
----
-
-## Competitive Positioning
-
-### Score Comparison
-
-| Dimension | {client.name} | Market Avg | Top Performer |
-|---|---|---|---|
-| Growth Score | {client.growth_score or "N/A"} | {_fmt_float(growth_market_avg)} | {_fmt_float(growth_top)} |
-| Financial Health | {client.financial_health_score or "N/A"} | {_fmt_float(health_market_avg)} | {_fmt_float(health_top)} |
-| Competitive Position | {self.formatter.format_score(client.competitive_position_score)} | {_fmt_float(position_market_avg)} | {_fmt_float(position_top)} |
-| Composite | {client.composite_score or "N/A"} | {_fmt_float(composite_market_avg)} | {_fmt_float(composite_top)} |
-| Revenue CAGR | {client.revenue_cagr_3yr or "N/A"}% | {self._avg([c.revenue_cagr_3yr for c in sorted_comp if c.revenue_cagr_3yr]):.1f}% | {max([c.revenue_cagr_3yr for c in sorted_comp if c.revenue_cagr_3yr], default=0):.1f}% |
-
----
-
-## Direct Competitors
-
-These companies operate in the same tier with similar market positioning:
-
-| Company | Revenue | CAGR | Score | AI | SaaS | Classification |
-|---|---|---|---|---|---|---|
-"""
-        for c in direct:
-            report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {c.ai_score or 'N/A'}/10 | {c.saas_maturity or 'N/A'}/10 | {c.classification or 'N/A'} |\n"
-
-        # Add detailed competitor analysis
-        if direct:
-            report += """
-
-### Competitor Details
-
-"""
-            for c in direct:
-                report += f"""**{c.name}** ({c.classification or "Unknown"})
-- Revenue: €{c.financials.revenue or 0:.1f}M | CAGR: {c.revenue_cagr_3yr or "N/A"}% | Score: {c.composite_score or "N/A"}/10
-- AI Maturity: {c.ai_score or "N/A"}/10 | SaaS Maturity: {c.saas_maturity or "N/A"}/10
-"""
-                # Add relative positioning
-                if c.composite_score and client.composite_score:
-                    diff = c.composite_score - client.composite_score
-                    if diff > 0:
-                        report += f"- **{diff:.2f} points higher** composite score\n"
-                    elif diff < 0:
-                        report += f"- **{abs(diff):.2f} points lower** composite score\n"
-
-                # Add key differentiator
-                if c.ai_score and client.ai_score and c.ai_score > client.ai_score:
-                    report += f"- **AI Advantage**: {c.ai_score}/10 vs your {client.ai_score}/10\n"
-                if c.saas_maturity and client.saas_maturity and c.saas_maturity > client.saas_maturity:
-                    report += f"- **SaaS Advantage**: {c.saas_maturity}/10 vs your {client.saas_maturity}/10\n"
-                if c.revenue_cagr_3yr and client.revenue_cagr_3yr and c.revenue_cagr_3yr > client.revenue_cagr_3yr:
-                    report += f"- **Growth Advantage**: {c.revenue_cagr_3yr}% CAGR vs your {client.revenue_cagr_3yr}%\n"
-
-                report += "\n"
-
-        report += """
-
-## Competitive Threats
-
-Companies with superior composite scores that could disrupt market position:
-
-| Company | Revenue | CAGR | Score | Threat Level |
-|---|---|---|---|---|
-"""
-        if threats:
-            for c in threats:
-                score_diff = (c.composite_score or 0) - (client.composite_score or 0)
-                threat = "High" if score_diff > 2 else "Medium" if score_diff > 1 else "Low"
-                report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {threat} |\n"
-        else:
-            report += "| *No companies with higher scores* | - | - | - | *N/A* |\n"
-
-        # Add all competitors section
-        report += """
-
-## Competitive Landscape
-
-All competitors ranked by composite score:
-
-| Company | Revenue | CAGR | Score | vs Client |
-|---|---|---|---|---|
-"""
-        all_comp = [c for c in sorted_comp if c.id != client.id][:5]
-        for c in all_comp:
-            score_diff = (c.composite_score or 0) - (client.composite_score or 0)
-            if score_diff > 0:
-                diff_str = f"+{score_diff:.2f} (higher)"
-            elif score_diff < 0:
-                diff_str = f"{score_diff:.2f} (lower)"
-            else:
-                diff_str = "0.00 (equal)"
-            report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {diff_str} |\n"
-
-        report += f"""
-
-## Strategic Recommendations
-
-### Strengths to Leverage
-
-{self._generate_client_strengths(client, competitors)}
-
-### Weaknesses to Address
-
-{self._generate_client_weaknesses(client, competitors)}
-
-### Opportunities
-
-1. Target competitors with lower AI scores for market share gains
-2. Expand geographically to markets served by weaker competitors
-3. Acquire AI capabilities from smaller players
-
-### Threats to Monitor
-
-- {threats[0].name if threats else "N/A"} - Highest scoring competitor
-- {"; ".join([c.name for c in threats[:3]]) if threats else "None identified"}
-
----
-
-## Appendix: All Competitors
-
-| Company | Revenue | CAGR | AI | SaaS | Classification | Threat Level |
-|---|---|---|---|---|---|---|
-"""
-        for c in sorted_comp:
-            threat = derive_threat_level(c.classification, c.composite_score or 0)
-            report += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.ai_score or 'N/A'}/10 | {c.saas_maturity or 'N/A'}/10 | {c.classification or 'N/A'} | {threat} |\n"
-
-        report += f"""
-
----
-
-*Report generated by SolStein Competitive Intelligence Platform*
-*Data as of {datetime.now().strftime("%B %Y")}*
-"""
         output_path = output_dir / "competitive-analysis.md"
         output_path.write_text(report)
         return output_path
+
 
     def _rank_revenue(self, client: Company, competitors: list[Company]) -> str:
         """Get revenue rank."""
