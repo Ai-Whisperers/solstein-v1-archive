@@ -120,3 +120,66 @@ mutation-test:
 generate-sbom:
 	pip install cyclonedx-bom
 	cyclonedx-py -i . -o bom.xml --format xml
+
+.PHONY: dev dev-setup dev-shell dev-logs dev-stop dev-clean dev-tools test-fast
+
+# =============================================================================
+# Development Commands (EPIC-028)
+# =============================================================================
+
+# Start development environment with hot reload
+dev:
+	@echo "🚀 Starting Solstein development environment..."
+	docker-compose -f docker-compose.dev.yml up --build
+
+# Initial setup for development
+dev-setup:
+	@echo "🔧 Setting up Solstein development environment..."
+	cp -n .env.example .env 2>/dev/null || echo ".env already exists"
+	docker-compose -f docker-compose.dev.yml build
+	@echo "✅ Setup complete! Run 'make dev' to start."
+
+# Open shell in dev container
+dev-shell:
+	docker-compose -f docker-compose.dev.yml exec api bash
+
+# View logs from all services
+dev-logs:
+	docker-compose -f docker-compose.dev.yml logs -f
+
+# Stop development environment
+dev-stop:
+	docker-compose -f docker-compose.dev.yml down
+
+# Clean development environment (removes volumes)
+dev-clean:
+	docker-compose -f docker-compose.dev.yml down -v
+	docker-compose -f docker-compose.dev.yml rm -f
+	@echo "✅ Development environment cleaned"
+
+# Start with optional tools (pgadmin, redis-commander)
+dev-tools:
+	@echo "🚀 Starting with development tools..."
+	docker-compose -f docker-compose.dev.yml --profile tools up --build
+
+# Run tests in development container
+dev-test:
+	docker-compose -f docker-compose.dev.yml exec api pytest -xvs
+
+# Run fast tests only (no slow tests)
+test-fast:
+	$(BIN)/pytest -m "not slow" -x
+
+# Reset development database
+dev-reset-db:
+	docker-compose -f docker-compose.dev.yml exec api python -c "
+		import asyncio;
+		from solstein.infrastructure.database import init_db, close_db;
+		asyncio.run(init_db())"
+
+# Seed development database
+dev-seed:
+	docker-compose -f docker-compose.dev.yml exec api python -c "
+		import asyncio;
+		from scripts.seed_db import seed_companies;
+		asyncio.run(seed_companies(count=100))"

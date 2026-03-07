@@ -1,4 +1,4 @@
-name: Code Quality Guardrails
+name: Code Quality Guardrails v2
 
 on:
   pull_request:
@@ -18,10 +18,23 @@ on:
 env:
   PYTHON_VERSION: "3.12"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write  # Required for PR comments
+
 jobs:
   code-quality:
     name: Code Quality Checks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      checks: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -34,39 +47,11 @@ jobs:
       - name: Install radon
         run: uv pip install --system radon
 
-      - name: Check code smells
-        id: code-smells
-        run: python scripts/ci/code_smell_detector.py
-        continue-on-error: true
+      # Run all quality checks
+      - name: Run quality checks
+        run: python scripts/ci/quality_check.py
 
-      - name: Check function sizes
-        id: function-sizes
-        run: python scripts/ci/check_function_sizes.py --max-lines 100 --fail-on-violation
-
-      - name: Check class sizes
-        id: class-sizes
-        run: python scripts/ci/check_class_sizes.py --max-lines 300 --fail-on-violation
-
-      - name: Check file sizes
-        id: file-sizes
-        run: python scripts/ci/check_file_sizes.py --max-lines 500
-
-      - name: Check for bare excepts
-        id: bare-excepts
-        run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '\.py$' || true)
-          else
-            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep '\.py$' || true)
-          fi
-
-          if [ -n "$CHANGED_FILES" ]; then
-            echo "Checking changed files: $CHANGED_FILES"
-            python scripts/ci/code_smell_detector.py $CHANGED_FILES
-          else
-            echo "No Python files changed"
-          fi
-
+      # Generate complexity metrics
       - name: Generate complexity metrics
         run: |
           echo "## Complexity Metrics" >> $GITHUB_STEP_SUMMARY
@@ -81,20 +66,262 @@ jobs:
           radon mi src >> $GITHUB_STEP_SUMMARY || true
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-      - name: Post PR comment on code smell failures
-        if: steps.code-smells.outcome == 'failure' && github.event_name == 'pull_request'
+      # Import cycle detection (new in v2)
+      - name: Detect Import Cycles
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Import Cycle Detection" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          python scripts/ci/detect_import_cycles.py src/solstein >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      # Dead code detection (new in v2)
+      - name: Detect Dead Code
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Dead Code Detection" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          python scripts/ci/detect_dead_code.py src/solstein >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      # EPIC-020 pattern validation (new in v2)
+      - name: Validate EPIC-020 Patterns
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## EPIC-020 Pattern Validation" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          python scripts/ci/validate_epic020_patterns.py src/solstein >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      # Generate Quality Score Dashboard
+      - name: Generate Quality Score Dashboard
+        if: github.event_name == 'pull_request'
+        run: |
+          python scripts/ci/quality_score_dashboard.py src/solstein --pr-comment --output=quality_report.md
+          cat quality_report.md >> $GITHUB_STEP_SUMMARY
+
+      # Post Quality Report as PR Comment
+      - name: Post Quality Report as PR Comment
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            const fs = require('fs');
+            const report = fs.readFileSync('quality_report.md', 'utf8');
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '⚠️ **Code Smell Detection Failed**\n\nPlease review the code smell report and address any critical issues.'
-            })
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Code Quality Report')
+            );
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: report,
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: report,
+              });
+            }
 
-      - name: Fail if any check failed
-        if: steps.function-sizes.outcome == 'failure' || steps.class-sizes.outcome == 'failure' || steps.file-sizes.outcome == 'failure'
+  # New job: Architecture Compliance (v2)
+  architecture-compliance:
+    name: Architecture Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: ./.github/workflows/composite/setup-python
+      - uses: ./.github/workflows/composite/setup-uv
+
+      - name: Check Module Boundaries
         run: |
-          echo "❌ One or more code quality checks failed"
-          exit 1
+          echo "## Module Boundary Enforcement" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          python scripts/ci/enforce_module_boundaries.py src/solstein >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true  # Informational during transition
+
+      - name: Check Architecture Compliance
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Architecture Compliance" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          python scripts/ci/architecture_compliance.py src/solstein >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true  # Informational during transition
+
+  # New job: Code Duplication Detection (v2)
+  duplication-detection:
+    name: Code Duplication Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: ./.github/workflows/composite/setup-python
+      - uses: ./.github/workflows/composite/setup-uv
+
+      - name: Detect Code Duplication
+        run: |
+          echo "## Code Duplication Detection" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          python scripts/ci/duplication_detector.py src/solstein --min-lines 15 >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true  # Informational only
+
+  # New job: Refactoring Suggestions (v2)
+  refactoring-suggestions:
+    name: Refactoring Suggestions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: ./.github/workflows/composite/setup-python
+      - uses: ./.github/workflows/composite/setup-uv
+
+      - name: Generate Refactoring Suggestions
+        run: |
+          python scripts/ci/refactoring_bot.py src/solstein --output=refactoring_suggestions.md
+          echo "## 🤖 Refactoring Suggestions" >> $GITHUB_STEP_SUMMARY
+          cat refactoring_suggestions.md >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true  # Informational only
+
+      - name: Post Refactoring Suggestions as PR Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const suggestions = fs.readFileSync('refactoring_suggestions.md', 'utf8');
+              
+              // Only post if there are suggestions
+              if (suggestions.includes('No refactoring suggestions')) {
+                console.log('No refactoring suggestions to post');
+                return;
+              }
+              
+              // Find existing comment
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+              
+              const botComment = comments.find(comment => 
+                comment.user.type === 'Bot' && 
+                comment.body.includes('Refactoring Suggestions')
+              );
+              
+              if (botComment) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: botComment.id,
+                  body: suggestions,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: suggestions,
+                });
+              }
+            } catch (error) {
+              console.log('Could not post refactoring suggestions:', error.message);
+            }
+
+
+  # EPIC-019 Story 2: PR Size and Complexity Check
+  pr-size-check:
+    name: PR Size and Complexity Limits
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for diff
+
+      - name: Fetch base branch
+        run: git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
+
+      - uses: ./.github/workflows/composite/setup-python
+      - uses: ./.github/workflows/composite/setup-uv
+
+      - name: Check PR Size and Complexity
+        run: |
+          python scripts/ci/check_pr_size.py \
+            --base ${{ github.base_ref }} \
+            --max-lines 500 \
+            --max-functions 20 \
+            --max-params 5 \
+            --output=pr_size_report.md \
+            --fail-on-violations
+          cat pr_size_report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Post PR Size Report
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const report = fs.readFileSync('pr_size_report.md', 'utf8');
+              
+              // Find existing comment
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+              
+              const botComment = comments.find(comment => 
+                comment.user.type === 'Bot' && 
+                comment.body.includes('PR Size Check')
+              );
+              
+              if (botComment) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: botComment.id,
+                  body: report,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: report,
+                });
+              }
+            } catch (error) {
+              console.log('Could not post PR size report:', error.message);
+            }

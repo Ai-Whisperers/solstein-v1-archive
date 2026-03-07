@@ -12,3 +12,21 @@ repos:
       - id: check-toml
       - id: check-merge-conflict
       - id: detect-private-key
+
+  # EPIC-019: Agent Code Quality Pre-commit Hook
+  - repo: local
+    hooks:
+      - id: agent-code-quality
+        name: Agent Code Quality Checks
+        entry: python3 scripts/ci/agent_precommit_hook.py
+        language: system
+        files: \.(py)$
+        pass_filenames: true
+        stages: [pre-commit]
+      - id: code-smell-detector
+        name: Code Smell Detection
+        entry: python3 scripts/ci/code_smell_detector.py
+        language: system
+        files: \.(py)$
+        pass_filenames: true
+        stages: [pre-commit]

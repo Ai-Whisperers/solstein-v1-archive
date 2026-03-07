@@ -49,6 +49,7 @@ dev = [
     "ruff>=0.1",
     "mypy>=1.6",
     "pre-commit>=3.5",
+    "pytest-xdist>=3.3.0",
 ]
 
 [project.scripts]
@@ -212,20 +213,29 @@ markers = [
     "e2e: end-to-end tests",
 ]
 
+# EPIC-028 Story 5: Parallel execution and optimization
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+timeout = 300  # 5 minutes per test
+xfail_strict = true
+asyncio_mode = "auto"
+
 [dependency-groups]
 dev = [
     "factory-boy>=3.3.3",
+    "pytest-asyncio>=0.21.0",
     "pytest-randomly>=4.0.1",
+    "pytest-xdist>=3.3.0",
     "syrupy>=5.1.0",
     "testcontainers>=4.14.1",
 ]
-
 
 [tool.mutmut]
 paths_to_mutate = ["src/solstein"]
 runner = "pytest"
 tests_dir = "tests"
-
 
 # Cache configuration for query results
 [tool.solstein.cache]

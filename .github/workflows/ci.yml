@@ -29,17 +29,23 @@ env:
   DATABASE__URL: postgresql://postgres:postgres@localhost:5432/solstein_test
   REDIS_URL: redis://localhost:6379/0
   REDIS__URL: redis://localhost:6379/0
-  ADMIN_EMAIL: test@example.com
-  SECURITY__ADMIN_EMAIL: test@example.com
-  ADMIN_PASSWORD_HASH: ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f
-  SECURITY__ADMIN_PASSWORD_HASH: ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f
-  GITHUB_TOKEN: test-token
-  SECURITY__SECRET_KEY: test-secret
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  security-events: write
 
 jobs:
   lint-and-format:
     name: Lint & Format
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/composite/setup-python
@@ -54,6 +60,9 @@ jobs:
   type-check:
     name: Type Check
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/composite/setup-python
@@ -65,6 +74,10 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -91,6 +104,9 @@ jobs:
   test:
     name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
     services:
       postgres:
         image: postgres:14-alpine
@@ -129,12 +145,12 @@ jobs:
           echo "DATABASE__URL=${{ env.DATABASE__URL }}" >> .env
           echo "REDIS_URL=${{ env.REDIS_URL }}" >> .env
           echo "REDIS__URL=${{ env.REDIS__URL }}" >> .env
-          echo "GITHUB_TOKEN=${{ env.GITHUB_TOKEN }}" >> .env
-          echo "SECURITY__SECRET_KEY=${{ env.SECURITY__SECRET_KEY }}" >> .env
-          echo "ADMIN_EMAIL=${{ env.ADMIN_EMAIL }}" >> .env
-          echo "SECURITY__ADMIN_EMAIL=${{ env.SECURITY__ADMIN_EMAIL }}" >> .env
-          echo "ADMIN_PASSWORD_HASH=${{ env.ADMIN_PASSWORD_HASH }}" >> .env
-          echo "SECURITY__ADMIN_PASSWORD_HASH=${{ env.SECURITY__ADMIN_PASSWORD_HASH }}" >> .env
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> .env
+          echo "SECURITY__SECRET_KEY=${{ secrets.TEST_SECRET_KEY }}" >> .env
+          echo "ADMIN_EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}" >> .env
+          echo "SECURITY__ADMIN_EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}" >> .env
+          echo "ADMIN_PASSWORD_HASH=${{ secrets.TEST_ADMIN_PASSWORD_HASH }}" >> .env
+          echo "SECURITY__ADMIN_PASSWORD_HASH=${{ secrets.TEST_ADMIN_PASSWORD_HASH }}" >> .env
       - uses: ./.github/workflows/composite/install-deps
         with:
           extras: dev
@@ -153,8 +169,13 @@ jobs:
   docker-build:
     name: Build Docker
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [test, type-check]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU
@@ -188,7 +209,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.23.0
         with:
           image-ref: ghcr.io/${{ github.repository }}:${{ github.sha }}
           format: 'sarif'

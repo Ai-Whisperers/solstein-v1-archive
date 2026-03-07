@@ -1,21 +1,26 @@
-import asyncio
 import os
+import sys
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-os.environ.setdefault("GITHUB_TOKEN", "test-github-token-12345")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC_ROOT = PROJECT_ROOT / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
+
+_ = os.environ.setdefault("GITHUB_TOKEN", "test-github-token-12345")
 
 try:
     from tests.factories import make_company
 except ModuleNotFoundError as exc:
     if exc.name == "factory":
         raise ModuleNotFoundError(
-            "Missing test dependency 'factory-boy'. Install dev dependencies with `uv sync --dev` "
-            "or `pip install -e .[dev]` before running tests."
+            "Missing test dependency 'factory-boy'. Install dev dependencies with `uv sync --dev` or "
+            "`pip install -e .[dev]` before running tests."
         ) from exc
     raise
 
@@ -207,16 +212,6 @@ def patch_competitor_data_loader(monkeypatch):
     monkeypatch.setattr(CompetitorDataLoader, "load_companies", mock_load_companies)
 
 
-# ============================================================================
-# DATABASE FIXTURES FOR REAL SUPABASE TESTING (Wave 2, Task 6)
-# ============================================================================
-
-import asyncio
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from src.solstein.database_config import get_test_database_url, convert_to_async_url
-
-
 # Note: pytest-asyncio handles event_loop automatically with mode=auto
 # Removed custom event_loop fixture - pytest-asyncio mode=auto manages this
 
@@ -266,7 +261,7 @@ async def db_session(db_engine):
             # db_session is an AsyncSession
             result = await db_session.execute(...)
     """
-    async_session = sessionmaker(
+    async_session = async_sessionmaker(
         db_engine,
         class_=AsyncSession,
         expire_on_commit=False,

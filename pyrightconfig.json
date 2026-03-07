@@ -10,5 +10,26 @@
     "build",
     ".claude/commands",
     ".claude/validation/test_*.py"
+  ],
+  "pythonVersion": "3.11",
+  "pythonPlatform": "Linux",
+  "venvPath": ".",
+  "venv": ".venv",
+  "typeCheckingMode": "basic",
+  "strict": ["src/solstein"],
+  "reportMissingImports": "warning",
+  "reportMissingTypeStubs": "information",
+  "reportOptionalCall": "warning",
+  "reportOptionalIterable": "warning",
+  "reportOptionalMemberAccess": "warning",
+  "reportOptionalOperand": "warning",
+  "reportOptionalSubscript": "warning",
+  "useLibraryCodeForTypes": true,
+  "autoImportCompletions": true,
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": ["src"]
+    }
   ]
 }

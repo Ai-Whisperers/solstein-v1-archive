@@ -176,6 +176,8 @@ Desktop.ini
 .gemini/
 .cursor/run.json
 .cursor/state.json
+.sisyphus/
+logs/
 
 # OpenCode/Claude MCP local overrides
 .mcp.local.json

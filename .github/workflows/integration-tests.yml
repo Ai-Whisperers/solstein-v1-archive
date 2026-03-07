@@ -17,10 +17,20 @@ env:
   PYTHON_VERSION: "3.12"
   PYTHONPATH: src
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
     services:
       postgres:
         image: postgres:14-alpine
@@ -43,6 +53,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+    
     steps:
       - uses: actions/checkout@v4
 
@@ -53,19 +64,6 @@ jobs:
           extras: dev
           additional-packages: factory-boy testcontainers
 
-      - name: Wait for services
-        run: |
-          echo "Waiting for PostgreSQL..."
-          until pg_isready -h localhost -p 5432 -U postgres; do
-            sleep 1
-          done
-          echo "PostgreSQL is ready"
-          echo "Waiting for Redis..."
-          until redis-cli -h localhost -p 6379 ping | grep -q PONG; do
-            sleep 1
-          done
-          echo "Redis is ready"
-
       - name: Run integration tests
         run: pytest tests/integration/ -v --tb=short
         env:
@@ -74,7 +72,7 @@ jobs:
           REDIS_URL: redis://localhost:6379/0
           REDIS__URL: redis://localhost:6379/0
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SECURITY__SECRET_KEY: integration-test-secret-key
+          SECURITY__SECRET_KEY: ${{ secrets.TEST_SECRET_KEY }}
 
       - name: Notify on failure
         if: failure() && github.event_name == 'schedule'
@@ -82,7 +80,9 @@ jobs:
         with:
           script: |
             const issueTitle = '🔴 Integration Tests Failed';
-            const issueBody = `Integration tests failed on ${new Date().toISOString()}.\n\n[View Run](${context.payload.repository.html_url}/actions/runs/${context.runId})`;
+            const issueBody = `Integration tests failed on ${new Date().toISOString()}.
+
+[View Run](${context.payload.repository.html_url}/actions/runs/${context.runId})`;
 
             // Check if an open issue already exists
             const issues = await github.rest.issues.listForRepo({
