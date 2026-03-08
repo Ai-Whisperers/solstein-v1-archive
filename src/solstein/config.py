@@ -4,6 +4,7 @@ Configuration management for SolStein.
 Handles environment variables, configuration files, and settings.
 """
 
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -22,7 +23,7 @@ class ConfigurationError(Exception):
 class DatabaseConfig(BaseModel):
     """Database configuration."""
 
-    url: str = Field(...)
+    url: str = Field(default="sqlite:///./solstein.db")
     pool_size: int = Field(default=20, ge=1, le=100)
     echo: bool = Field(default=False)
 
@@ -100,10 +101,13 @@ class APIConfig(BaseModel):
         return f"http://{self.host}:{self.port}{self.api_prefix}"
 
 
+DEFAULT_INSECURE_SECRET = "change-me-in-production"
+
+
 class SecurityConfig(BaseModel):
     """Security configuration."""
 
-    secret_key: str = Field(default="change-me-in-production")
+    secret_key: str = Field(default=DEFAULT_INSECURE_SECRET)
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30, ge=1)
     admin_email: str | None = Field(default=None, description="Admin login email (set ADMIN_EMAIL env var)")
@@ -111,20 +115,11 @@ class SecurityConfig(BaseModel):
         default=None, description="SHA-256 hex hash of admin password (set ADMIN_PASSWORD_HASH env var)"
     )
 
-    def __init__(self, **data: Any) -> None:
-        """Initialize and validate security config."""
-        super().__init__(**data)
-        # Fail startup in production if using default secret key
-        if data.get("environment") == "production" and self.secret_key == "change-me-in-production":
-            raise ValueError(
-                "FATAL: secret_key must be set to a strong value in production. Set SECRET_KEY environment variable."
-            )
-
     @field_validator("secret_key")
     @classmethod
     def validate_secret_key(cls, v: str) -> str:
         """Validate secret key."""
-        if v == "change-me-in-production":
+        if v == DEFAULT_INSECURE_SECRET:
             logger.warning("Using default secret key - change in production!")
         return v
 
@@ -181,12 +176,8 @@ class Settings(BaseSettings):
     environment: str = Field(default="development")
     debug: bool = Field(default=False)
     debug_errors: bool = Field(
-        default=False,
-        description="Include debug info (tracebacks) in error responses. NEVER enable in production."
+        default=False, description="Include debug info (tracebacks) in error responses. NEVER enable in production."
     )
-    environment: str = Field(default="development")
-    debug: bool = Field(default=False)
-
     # Components
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     api: APIConfig = Field(default_factory=APIConfig)
@@ -227,7 +218,7 @@ class Settings(BaseSettings):
 
     celery_broker_url: str | None = Field(default=None)
     celery_result_backend: str | None = Field(default=None)
-    refresh_schedule: dict | None = Field(default=None)
+    refresh_schedule: dict[str, Any] | None = Field(default=None)
 
     llm_provider: str = Field(
         default="auto",
@@ -270,6 +261,7 @@ class Settings(BaseSettings):
             logger.warning("No .env file found, using defaults")
 
         settings = cls()
+        settings._validate_runtime_safety()
         settings.data.ensure_dirs()
 
         # Log configuration summary
@@ -298,7 +290,10 @@ class Settings(BaseSettings):
             COMPANIES_HOUSE_API_KEY - For Companies House data extraction
             GOOGLE_API_KEY - For web search data extraction
         """
-        if self.github_token is None or self.github_token == "":
+        self._validate_runtime_safety()
+
+        github_token = os.getenv("GITHUB_TOKEN")
+        if github_token is None or github_token.strip() == "":
             raise ConfigurationError(
                 "GITHUB_TOKEN environment variable is required. "
                 "Get a token from: https://github.com/settings/tokens and set it before starting."
@@ -311,6 +306,37 @@ class Settings(BaseSettings):
             logger.warning("GOOGLE_API_KEY not configured. Web search data gathering will be disabled.")
 
         logger.info("Configuration validation passed")
+
+    @field_validator("environment", mode="before")
+    @classmethod
+    def normalize_environment(cls, v: Any) -> str:
+        if isinstance(v, str):
+            value = v.strip().lower()
+            return value or "development"
+        return "development"
+
+    def _validate_runtime_safety(self) -> None:
+        if self.environment != "production":
+            return
+
+        if self.security.secret_key.strip() == "" or self.security.secret_key == DEFAULT_INSECURE_SECRET:
+            raise ConfigurationError("SECURITY__SECRET_KEY must be set to a strong non-default value in production.")
+
+        if len(self.security.secret_key) < 32:
+            raise ConfigurationError("SECURITY__SECRET_KEY must be at least 32 characters in production.")
+
+        if self.debug:
+            raise ConfigurationError("DEBUG must be false in production.")
+
+        if self.debug_errors:
+            raise ConfigurationError("DEBUG_ERRORS must be false in production.")
+
+        if not self.api.require_api_key:
+            raise ConfigurationError("API__REQUIRE_API_KEY must be true in production.")
+
+        lowered_db_url = self.database.url.lower()
+        if "postgres:postgres@" in self.database.url or "password" in lowered_db_url:
+            raise ConfigurationError("DATABASE__URL appears to use insecure default credentials in production.")
 
 
 @lru_cache
@@ -341,7 +367,7 @@ ENVIRONMENT=development
 DEBUG=true
 
 # Database (legacy, kept for SQLAlchemy compatibility)
-DATABASE__URL=postgresql://postgres:postgres@localhost:5432/solstein
+DATABASE__URL=postgresql://<user>:<password>@localhost:5432/solstein
 DATABASE__POOL_SIZE=20
 DATABASE__ECHO=false
 
@@ -364,7 +390,7 @@ API__CORS_ORIGINS=["http://localhost:3000"]
 API__API_PREFIX=/api/v1
 
 # Security
-SECURITY__SECRET_KEY=change-me-in-production
+SECURITY__SECRET_KEY=replace-with-a-strong-32-char-min-secret
 SECURITY__ALGORITHM=HS256
 SECURITY__ACCESS_TOKEN_EXPIRE_MINUTES=30
 

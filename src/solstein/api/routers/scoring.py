@@ -1,5 +1,4 @@
 import asyncio
-import uuid
 from datetime import datetime
 from typing import Any
 
@@ -7,11 +6,12 @@ from fastapi import APIRouter, Depends, Query, status
 from loguru import logger
 
 from solstein.analytics.classification_service import ClassificationService
-from solstein.analytics.scoring import GrowthScorer
 from solstein.analytics.company_loader import unified_score_loader
-from solstein.config import get_settings
+from solstein.analytics.constants import PHOENIX_SCORE_THRESHOLD, SALT_SCORE_THRESHOLD
+from solstein.analytics.scoring import GrowthScorer
 from solstein.api.dependencies import get_company_repository, get_current_tenant
 from solstein.api.exceptions import APIError
+from solstein.config import get_settings
 
 router = APIRouter(tags=["Scoring"])
 growth_scorer = GrowthScorer()
@@ -19,9 +19,9 @@ classification_service = ClassificationService()
 
 
 def _legacy_classification_from_growth(growth_score: float) -> str:
-    if growth_score >= 7.0:
+    if growth_score >= PHOENIX_SCORE_THRESHOLD:
         return "Phoenix"
-    if growth_score <= 3.9:
+    if growth_score < SALT_SCORE_THRESHOLD:
         return "Lead"
     return "Salt"
 
@@ -32,101 +32,15 @@ async def score_company(
     _: dict[str, Any] = Depends(get_current_tenant),
     repo: Any = Depends(get_company_repository),
 ) -> dict[str, Any]:
-    """Calculate growth and competitive scores for a company."""
     try:
-        # Load company with unified loader and fallback
         target_company = await _load_company_for_scoring(company_id, repo)
-
-        # Calculate scores with explanations
-        scored_company = growth_scorer.calculate_scores(target_company)
-
-        # Determine classification (legacy vs canonical)
-        growth_score = scored_company.growth_score or 0.0
-        classification, legacy_cls, canonical_cls = _determine_classification(
-            growth_score, scored_company
-        )
-
-        # Save the scores back to the DB
-        await repo.save(scored_company)
-
-        # Build and return response
-        return _build_score_response(
-            company_id, scored_company, classification, legacy_cls, canonical_cls
-        )
-    except APIError:
-        raise
-    except Exception as e:
-        logger.error(f"Error scoring company {company_id}: {e}")
-        raise APIError(
-            code="INTERNAL_ERROR",
-            message="Error scoring company",
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            details=str(e),
-        ) from e
-async def score_company(
-    company_id: str,
-    _: dict[str, Any] = Depends(get_current_tenant),
-    repo: Any = Depends(get_company_repository),
-) -> dict[str, Any]:
-    """Calculate growth and competitive scores for a company."""
-    try:
-        # One high-performance lookup
-        # Load company with unified JSON + Markdown data for accurate scoring
-        target_company = await asyncio.to_thread(unified_score_loader.load_company_for_scoring, company_id)
-        if not target_company:
-            # Fallback to repository if unified loader fails
-            target_company = await repo.get_by_id(company_id)
-
-        if not target_company:
-            raise APIError(
-                code="NOT_FOUND",
-                message=f"Company with ID {company_id} not found",
-                status_code=status.HTTP_404_NOT_FOUND,
-            )
-
-        # Calculate scores with explanations
         scored_company = growth_scorer.calculate_scores(target_company)
 
         growth_score = scored_company.growth_score or 0.0
-        legacy_classification = _legacy_classification_from_growth(growth_score)
-        canonical_classification = scored_company.classification or classification_service.classify(
-            scored_company.composite_score
-        )
+        classification, legacy_cls, canonical_cls = _determine_classification(growth_score, scored_company)
 
-        settings = get_settings()
-        use_new_classifier = settings.feature_new_classifier
-        classification = canonical_classification if use_new_classifier else legacy_classification
-
-        if legacy_classification != canonical_classification:
-            logger.info(
-                "Classification shadow mismatch",
-                company_id=company_id,
-                legacy=legacy_classification,
-                canonical=canonical_classification,
-                selected=classification,
-                feature_new_classifier=use_new_classifier,
-            )
-
-        # Save the scores back to the DB to keep it 'magically' up to date
         await repo.save(scored_company)
-
-        return {
-            "company_id": company_id,
-            "growth_score": scored_company.growth_score,
-            "financial_health_score": scored_company.financial_health_score,
-            "competitive_position_score": scored_company.competitive_position_score,
-            "composite_score": scored_company.composite_score,
-            "classification": classification,
-            "classification_shadow": {
-                "legacy": legacy_classification,
-                "canonical": canonical_classification,
-                "selected": classification,
-                "mismatch": legacy_classification != canonical_classification,
-                "feature_new_classifier": use_new_classifier,
-            },
-            "scoring_breakdown": scored_company.scoring_breakdown,
-            "calculated_at": datetime.now().isoformat(),
-        }
+        return _build_score_response(company_id, scored_company, classification, legacy_cls, canonical_cls)
     except APIError:
         raise
     except Exception as e:
@@ -145,13 +59,12 @@ async def batch_score_companies_endpoint(
     min_revenue: float | None = Query(None, ge=0, description="Minimum revenue"),
     _: dict[str, Any] = Depends(get_current_tenant),
 ) -> dict[str, Any]:
-    """Batch score multiple companies.
-
-    NOTE: Temporal integration has been removed. This endpoint is disabled.
-    """
     raise APIError(
         code="NOT_IMPLEMENTED",
-        message="Batch scoring endpoint disabled - Temporal integration removed. Use individual /company/{id}/score endpoint instead.",
+        message=(
+            "Batch scoring endpoint disabled - Temporal integration removed. "
+            "Use individual /company/{id}/score endpoint instead."
+        ),
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
     )
 
@@ -161,12 +74,9 @@ async def get_statistics(
     _: dict[str, Any] = Depends(get_current_tenant),
     repo: Any = Depends(get_company_repository),
 ) -> dict[str, Any]:
-    """Get platform statistics. Uses stored values for maximum performance."""
     try:
         companies = await repo.get_all()
         total_companies = len(companies)
-
-        # Calculate all statistics using helper functions
         revenue_stats = _calculate_revenue_stats(companies)
         growth_stats = _calculate_growth_stats(companies)
         tier_counts, class_counts = _calculate_distributions(companies)
@@ -187,68 +97,13 @@ async def get_statistics(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             details=str(e),
         ) from e
-async def get_statistics(
-    _: dict[str, Any] = Depends(get_current_tenant),
-    repo: Any = Depends(get_company_repository),
-) -> dict[str, Any]:
-    """Get platform statistics. Uses stored values for maximum performance."""
-    try:
-        # In a real high-perf scenario, we'd use a SQL AGGREGATE call
-        # For now, fetching domain entities is still faster than re-scoring
-        companies = await repo.get_all()
 
-        total_companies = len(companies)
-
-        # Revenue statistics
-        revenues = [c.financials.revenue for c in companies if c.financials.revenue]
-        total_revenue = sum(revenues) if revenues else 0
-        avg_revenue = total_revenue / len(revenues) if revenues else 0
-
-        # Growth statistics
-        growth_rates = [c.financials.growth_rate for c in companies if c.financials.growth_rate]
-        avg_growth = sum(growth_rates) / len(growth_rates) if growth_rates else 0
-
-        # Tier & Classification distribution (using STORED values)
-        tier_counts: dict[str, int] = {}
-        class_counts = {"Phoenix": 0, "Lead": 0, "Salt": 0}
-
-        for company in companies:
-            tier = company.tier.value
-            tier_counts[tier] = tier_counts.get(tier, 0) + 1
-
-            cls_val = company.classification or "Salt"
-            class_counts[cls_val] = class_counts.get(cls_val, 0) + 1
-
-        return {
-            "total_companies": total_companies,
-            "revenue_statistics": {
-                "total_revenue_eur_m": total_revenue,
-                "average_revenue_eur_m": avg_revenue,
-                "companies_with_revenue_data": len(revenues),
-            },
-            "growth_statistics": {
-                "average_growth_rate_pct": avg_growth,
-                "companies_with_growth_data": len(growth_rates),
-            },
-            "tier_distribution": tier_counts,
-            "growth_classification": class_counts,
-            "calculated_at": datetime.now().isoformat(),
-        }
-    except Exception as e:
-        logger.error(f"Error calculating statistics: {e}")
-        raise APIError(
-            code="INTERNAL_ERROR",
-            message="Error calculating statistics",
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            details=str(e),
-        ) from e
 
 async def _load_company_for_scoring(company_id: str, repo: Any) -> Any:
-    """Load company using unified loader with fallback to repository."""
     target_company = await asyncio.to_thread(unified_score_loader.load_company_for_scoring, company_id)
     if not target_company:
         target_company = await repo.get_by_id(company_id)
-    
+
     if not target_company:
         raise APIError(
             code="NOT_FOUND",
@@ -262,7 +117,6 @@ def _determine_classification(
     growth_score: float,
     scored_company: Any,
 ) -> tuple[str, str, str]:
-    """Determine classification using legacy and canonical methods."""
     legacy_classification = _legacy_classification_from_growth(growth_score)
     canonical_classification = scored_company.classification or classification_service.classify(
         scored_company.composite_score
@@ -275,7 +129,7 @@ def _determine_classification(
     if legacy_classification != canonical_classification:
         logger.info(
             "Classification shadow mismatch",
-            company_id=scored_company.id,
+            company_id=getattr(scored_company, "id", "unknown"),
             legacy=legacy_classification,
             canonical=canonical_classification,
             selected=classification,
@@ -292,7 +146,6 @@ def _build_score_response(
     legacy_classification: str,
     canonical_classification: str,
 ) -> dict[str, Any]:
-    """Build the score response dictionary."""
     settings = get_settings()
     use_new_classifier = settings.feature_new_classifier
 
@@ -316,7 +169,6 @@ def _build_score_response(
 
 
 def _calculate_revenue_stats(companies: list[Any]) -> dict[str, Any]:
-    """Calculate revenue statistics from companies."""
     revenues = [c.financials.revenue for c in companies if c.financials.revenue]
     total_revenue = sum(revenues) if revenues else 0
     avg_revenue = total_revenue / len(revenues) if revenues else 0
@@ -329,7 +181,6 @@ def _calculate_revenue_stats(companies: list[Any]) -> dict[str, Any]:
 
 
 def _calculate_growth_stats(companies: list[Any]) -> dict[str, Any]:
-    """Calculate growth statistics from companies."""
     growth_rates = [c.financials.growth_rate for c in companies if c.financials.growth_rate]
     avg_growth = sum(growth_rates) / len(growth_rates) if growth_rates else 0
 
@@ -340,7 +191,6 @@ def _calculate_growth_stats(companies: list[Any]) -> dict[str, Any]:
 
 
 def _calculate_distributions(companies: list[Any]) -> tuple[dict[str, int], dict[str, int]]:
-    """Calculate tier and classification distributions."""
     tier_counts: dict[str, int] = {}
     class_counts: dict[str, int] = {}
 

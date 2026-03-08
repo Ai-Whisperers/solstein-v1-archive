@@ -11,7 +11,7 @@ from unittest.mock import patch
 import pytest
 from loguru import logger
 
-from solstein.config import ConfigurationError, Settings
+from solstein.config import APIConfig, ConfigurationError, DEFAULT_INSECURE_SECRET, SecurityConfig, Settings
 
 
 class TestConfigurationValidation:
@@ -131,29 +131,16 @@ class TestConfigurationValidation:
             assert "GITHUB_TOKEN environment variable is required" in str(exc_info.value)
 
     def test_check_configuration_github_token_whitespace_only(self):
-        """Verify that whitespace-only GITHUB_TOKEN is treated as valid.
-
-        Note: os.getenv returns the raw value including whitespace.
-        This is acceptable because the actual API call will fail with a whitespace token.
-        """
         with patch.dict(
             os.environ,
             {"GITHUB_TOKEN": "   "},
             clear=True,
         ):
-            captured_logs = []
-
-            def log_sink(message):
-                captured_logs.append(message.record["message"])
-
-            handler_id = logger.add(log_sink, level="INFO")
-            try:
-                settings = Settings()
+            settings = Settings()
+            with pytest.raises(ConfigurationError) as exc_info:
                 settings.check_configuration()
 
-                assert any("Configuration validation passed" in log for log in captured_logs)
-            finally:
-                logger.remove(handler_id)
+            assert "GITHUB_TOKEN environment variable is required" in str(exc_info.value)
 
     def test_check_configuration_idempotent(self):
         """Verify that check_configuration can be called multiple times safely."""
@@ -266,3 +253,38 @@ class TestConfigurationValidation:
             # Settings should be unchanged
             assert settings.environment == original_environment
             assert settings.debug == original_debug
+
+    def test_check_configuration_fails_with_default_secret_in_production(self):
+        with patch.dict(
+            os.environ,
+            {
+                "GITHUB_TOKEN": "ghp_valid_token",
+            },
+            clear=True,
+        ):
+            settings = Settings(
+                environment="production",
+                security=SecurityConfig(secret_key=DEFAULT_INSECURE_SECRET),
+            )
+            with pytest.raises(ConfigurationError) as exc_info:
+                settings.check_configuration()
+
+            assert "SECURITY__SECRET_KEY" in str(exc_info.value)
+
+    def test_check_configuration_fails_when_api_key_requirement_disabled_in_production(self):
+        with patch.dict(
+            os.environ,
+            {
+                "GITHUB_TOKEN": "ghp_valid_token",
+            },
+            clear=True,
+        ):
+            settings = Settings(
+                environment="production",
+                security=SecurityConfig(secret_key="x" * 32),
+                api=APIConfig(require_api_key=False),
+            )
+            with pytest.raises(ConfigurationError) as exc_info:
+                settings.check_configuration()
+
+            assert "API__REQUIRE_API_KEY" in str(exc_info.value)

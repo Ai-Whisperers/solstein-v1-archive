@@ -13,6 +13,7 @@ from typing import cast
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.schema import Table
 
 from solstein.domain.models import Company
 from solstein.infrastructure.database import Base as BaseImported  # type: ignore
@@ -265,7 +266,7 @@ def test_per_company_source_gate_filters_low_source_companies(tmp_path: Path, mo
 
     # 5 discovered, but only even-numbered calls (2nd, 4th) have >=3 sources
     assert summary["discovered"] == 5
-    assert summary["profiles"] < 5  # some were filtered
+    assert cast(int, summary["profiles"]) < 5  # some were filtered
 
 
 def test_per_company_source_gate_removes_all_raises(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -448,7 +449,11 @@ def test_outbox_worker_replays_pending_records(tmp_path: Path, monkeypatch: pyte
     }
 
     engine = create_engine(f"sqlite:///{db_path}")
-    BaseImported.metadata.create_all(bind=engine)  # type: ignore
+    tables = [
+        cast(Table, OutboxRecord.__table__),
+        cast(Table, ResearchRunRecord.__table__),
+    ]
+    BaseImported.metadata.create_all(bind=engine, tables=tables)  # type: ignore
     with Session(engine) as session:
         session.add(
             OutboxRecord(

@@ -1,2 +1,0 @@
-src/solstein/domain/models.py: error: Source file found twice under different module names: "solstein.domain.models" and "src.solstein.domain.models"
-Found 1 error in 1 file (errors prevented further checking)

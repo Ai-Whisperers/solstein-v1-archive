@@ -7,30 +7,51 @@ from __future__ import annotations
 from loguru import logger
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql.schema import Table
 
 from solstein.config import Settings
 from solstein.infrastructure.database import Base as BaseImported  # type: ignore
 from solstein.infrastructure.database import db_manager
-from solstein.infrastructure.database_models import OutboxRecord
+from solstein.infrastructure.database_models import (
+    ContradictionRecord,
+    ContradictionTransitionRecord,
+    EvidenceReadinessRecord,
+    MetricObservationRecord,
+    OutboxRecord,
+    ResearchArtifactRecord,
+    ResearchRunRecord,
+    ResearchStageRecord,
+    SourceDocumentRecord,
+)
 from solstein.infrastructure.research_dual_write import (
-    JsonValue,
     load_research_artifacts,
     persist_research_run_records,
     record_outbox_failure,
 )
 
+JsonValue = Any
+
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
-
 
 
 def _load_required_payload(payload: object) -> dict[str, JsonValue]:
     if not isinstance(payload, dict):
         raise ValueError("Outbox payload must be a JSON object")
-    return {str(key): value for key, value in payload.items()}
+    source = cast("dict[object, object]", payload)
+    normalized: dict[str, JsonValue] = {}
+    for key, value in source.items():
+        if isinstance(value, (str, int, float, bool, list, dict)) or value is None:
+            normalized[str(key)] = cast("JsonValue", value)
+    return normalized
+
+
+def _empty_payload() -> dict[str, JsonValue]:
+    return {}
 
 
 def _process_outbox_record(*, session: Session, record: OutboxRecord) -> None:
@@ -71,35 +92,62 @@ def _process_outbox_record(*, session: Session, record: OutboxRecord) -> None:
             "output_dir": str(output_dir),
         }
 
-    _ = persist_research_run_records(
-        session=session,
-        run_id=run_id,
-        market=market,
-        seed_company=seed_company,
-        strict_provenance=strict_provenance,
-        min_readiness_score=(float(min_readiness_score) if isinstance(min_readiness_score, (int, float)) else None),
-        max_contradictions=(int(max_contradictions) if isinstance(max_contradictions, (int, float)) else None),
-        min_total_sources=(int(min_total_sources) if isinstance(min_total_sources, (int, float)) else None),
-        stage_report=stage_report,
-        artifacts=artifacts,
-    )
+    try:
+        _ = persist_research_run_records(
+            session=session,
+            run_id=run_id,
+            market=market,
+            seed_company=seed_company,
+            strict_provenance=strict_provenance,
+            min_readiness_score=(float(min_readiness_score) if isinstance(min_readiness_score, (int, float)) else None),
+            max_contradictions=(int(max_contradictions) if isinstance(max_contradictions, (int, float)) else None),
+            min_total_sources=(int(min_total_sources) if isinstance(min_total_sources, (int, float)) else None),
+            stage_report=stage_report,
+            artifacts=artifacts,
+        )
 
-    success_time = datetime.now(timezone.utc)
-    record.status = "succeeded"
-    record.updated_at = success_time
-    record.available_at = success_time
-    record.last_error = None
-    session.commit()
+        success_time = datetime.now(timezone.utc)
+        record.status = "succeeded"
+        record.updated_at = success_time
+        record.available_at = success_time
+        record.last_error = None
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        logger.info(
+            "Outbox replay detected existing persisted records; marking as succeeded",
+            extra={"event_key": record.event_key, "run_id": run_id},
+        )
+        success_time = datetime.now(timezone.utc)
+        record.status = "succeeded"
+        record.updated_at = success_time
+        record.available_at = success_time
+        record.last_error = None
+        session.commit()
 
 
 def process_outbox_records(*, limit: int = 25) -> int:
-    settings = Settings.load()
-    db_manager.settings = settings
-    db_manager.init_sync()
-    session = db_manager.get_sync_session()
+    try:
+        session = db_manager.get_sync_session()
+    except RuntimeError:
+        settings = Settings.load()
+        db_manager.settings = settings
+        db_manager.init_sync()
+        session = db_manager.get_sync_session()
     try:
         engine = session.get_bind()
-        BaseImported.metadata.create_all(bind=engine)  # type: ignore
+        tables = [
+            cast(Table, OutboxRecord.__table__),
+            cast(Table, ResearchRunRecord.__table__),
+            cast(Table, ResearchStageRecord.__table__),
+            cast(Table, ResearchArtifactRecord.__table__),
+            cast(Table, EvidenceReadinessRecord.__table__),
+            cast(Table, ContradictionRecord.__table__),
+            cast(Table, ContradictionTransitionRecord.__table__),
+            cast(Table, SourceDocumentRecord.__table__),
+            cast(Table, MetricObservationRecord.__table__),
+        ]
+        BaseImported.metadata.create_all(bind=engine, tables=tables)  # type: ignore
         return process_outbox_records_with_session(session=session, limit=limit)
     finally:
         session.close()
@@ -134,16 +182,11 @@ def process_outbox_records_with_session(*, session: Session, limit: int = 25) ->
                 "Failed processing outbox record",
                 extra={"event_key": record.event_key, "event_type": record.event_type},
             )
-            if isinstance(record.payload, dict):
-                payload_source = cast("dict[str, JsonValue]", record.payload)
-                payload = {str(key): value for key, value in payload_source.items()}
-            else:
-                payload = {}
             record_outbox_failure(
                 session=session,
                 event_key=record.event_key,
                 event_type=record.event_type,
-                payload=payload,
+                payload=_empty_payload(),
                 exc=exc,
             )
     return processed

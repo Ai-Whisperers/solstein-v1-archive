@@ -3,6 +3,12 @@
 EPIC-022: Modularized Excel export functionality.
 """
 
+from pathlib import Path
+from typing import Any
+from typing import cast
+
+from ...domain.models import Company
+
 from .sheets import (
     add_executive_summary,
     add_financial_intelligence,
@@ -18,6 +24,20 @@ from .utils import (
     safe_get,
     safe_get_financial,
 )
+from ..excel_improved import ImprovedExcelExporter
+
+
+class ExcelExporter(ImprovedExcelExporter):
+    def export_market_analysis(self, analysis: Any, output_path: Path) -> None:
+        profiles_obj: object = (
+            getattr(analysis, "profiles", None)
+            or getattr(analysis, "companies", None)
+            or getattr(analysis, "scored_companies", None)
+            or []
+        )
+        profiles = cast("list[Company]", profiles_obj if isinstance(profiles_obj, list) else [])
+        self.create_dashboard(profiles, output_path)
+
 
 __all__ = [
     # Styles
@@ -36,4 +56,5 @@ __all__ = [
     "add_executive_summary",
     "add_market_rankings",
     "add_financial_intelligence",
+    "ExcelExporter",
 ]

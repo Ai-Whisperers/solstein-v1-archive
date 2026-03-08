@@ -8,7 +8,7 @@ from typing import Any
 
 from loguru import logger
 
-from ...domain.models import Company
+from ...domain.models import Company, FinancialMetric
 
 
 class ProfileMerger:
@@ -76,7 +76,7 @@ class ProfileMerger:
                     merged_metrics[metric_name] = metric
 
         # Merge data sources
-        all_sources = set()
+        all_sources: set[str] = set()
         for profile in profiles:
             all_sources.update(profile.data_sources)
 
@@ -307,3 +307,28 @@ class BatchExtractor:
             Dictionary of validation issues
         """
         return self._validator.validate_batch(profiles)
+
+    def validate_profiles_provenance(self, profiles: list[Company]) -> dict[str, list[str]]:
+        required_numeric_fields = ["revenue", "growth_rate", "employees", "profit_margin", "funding", "valuation"]
+        violations: dict[str, list[str]] = {}
+
+        for profile in profiles:
+            issues: list[str] = []
+
+            if not profile.source_links and not profile.metric_sources:
+                issues.append("missing_source_links")
+
+            for field_name in required_numeric_fields:
+                field_value = getattr(profile, field_name, None)
+                if field_value is None:
+                    continue
+
+                sources = profile.metric_sources.get(field_name, [])
+                justification = profile.metric_justifications.get(field_name)
+                if not sources and not justification:
+                    issues.append(f"missing_provenance:{field_name}")
+
+            if issues:
+                violations[profile.id] = issues
+
+        return violations
