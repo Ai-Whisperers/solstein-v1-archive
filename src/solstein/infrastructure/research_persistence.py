@@ -25,9 +25,10 @@ from .database_models import (
 
 if TYPE_CHECKING:
     from typing import Any
-    from urllib.parse import ParseResult
 
     from sqlalchemy.orm import Session
+
+    from .research_dual_write import PersistRunPayload
 
 
 JsonValue = dict[str, "JsonValue"] | list["JsonValue"] | str | int | float | bool | None
@@ -68,26 +69,19 @@ def delete_existing_run(session: Session, run_id: str) -> None:
 
 def create_research_run(
     session: Session,
-    run_id: str,
-    market: str,
-    seed_company: str,
-    strict_provenance: bool,
-    min_readiness_score: float | None,
-    max_contradictions: int | None,
-    min_total_sources: int | None,
-    summary: JsonValue,
+    payload: PersistRunPayload,
 ) -> ResearchRunRecord:
     """Create and persist ResearchRunRecord."""
     run = ResearchRunRecord(
-        run_id=run_id,
-        market=market,
-        seed_company=seed_company,
+        run_id=payload.run_id,
+        market=payload.market,
+        seed_company=payload.seed_company,
         status="completed",
-        strict_provenance=strict_provenance,
-        min_readiness_score=min_readiness_score,
-        max_contradictions=max_contradictions,
-        min_total_sources=min_total_sources,
-        summary=summary,
+        strict_provenance=payload.strict_provenance,
+        min_readiness_score=payload.min_readiness_score,
+        max_contradictions=payload.max_contradictions,
+        min_total_sources=payload.min_total_sources,
+        summary=payload.artifacts.get("run_summary"),
         created_at=datetime.now(timezone.utc),
     )
     session.add(run)
@@ -193,6 +187,8 @@ def persist_metric_observations(
     extracted: list[JsonValue],
 ) -> None:
     """Persist MetricObservationRecords for each company."""
+    seen_keys: set[tuple[str, str, str | None, float | None]] = set()
+
     for company in extracted:
         if not isinstance(company, dict):
             continue
@@ -216,6 +212,13 @@ def persist_metric_observations(
                     else:
                         metric_value = None
 
+                    source_obj = row.get("source")
+                    source_url = str(source_obj) if source_obj is not None else None
+                    dedup_key = (company_id, str(metric_key), source_url, metric_value)
+                    if dedup_key in seen_keys:
+                        continue
+                    seen_keys.add(dedup_key)
+
                     session.add(
                         MetricObservationRecord(
                             run_id=run.id,
@@ -223,7 +226,7 @@ def persist_metric_observations(
                             metric_key=str(metric_key),
                             metric_value=metric_value,
                             metric_value_raw=raw_value,
-                            source_url=(str(row.get("source")) if row.get("source") is not None else None),
+                            source_url=source_url,
                             created_at=datetime.now(timezone.utc),
                         )
                     )

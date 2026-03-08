@@ -28,8 +28,12 @@ from solstein.infrastructure.database_models import (
     SourceDocumentRecord,
 )
 from solstein.infrastructure.research_dual_write import (
-    load_research_artifacts,
+    PersistRunPayload,
     persist_research_run_records,
+)
+from solstein.infrastructure.research_outbox_helpers import (
+    OutboxEvent,
+    load_research_artifacts,
     record_outbox_failure,
 )
 
@@ -92,19 +96,20 @@ def _process_outbox_record(*, session: Session, record: OutboxRecord) -> None:
             "output_dir": str(output_dir),
         }
 
+    payload = PersistRunPayload(
+        run_id=run_id,
+        market=market,
+        seed_company=seed_company,
+        strict_provenance=strict_provenance,
+        min_readiness_score=(float(min_readiness_score) if isinstance(min_readiness_score, (int, float)) else None),
+        max_contradictions=(int(max_contradictions) if isinstance(max_contradictions, (int, float)) else None),
+        min_total_sources=(int(min_total_sources) if isinstance(min_total_sources, (int, float)) else None),
+        stage_report=stage_report,
+        artifacts=artifacts,
+    )
+
     try:
-        _ = persist_research_run_records(
-            session=session,
-            run_id=run_id,
-            market=market,
-            seed_company=seed_company,
-            strict_provenance=strict_provenance,
-            min_readiness_score=(float(min_readiness_score) if isinstance(min_readiness_score, (int, float)) else None),
-            max_contradictions=(int(max_contradictions) if isinstance(max_contradictions, (int, float)) else None),
-            min_total_sources=(int(min_total_sources) if isinstance(min_total_sources, (int, float)) else None),
-            stage_report=stage_report,
-            artifacts=artifacts,
-        )
+        _ = persist_research_run_records(session=session, payload=payload)
 
         success_time = datetime.now(timezone.utc)
         record.status = "succeeded"
@@ -127,13 +132,10 @@ def _process_outbox_record(*, session: Session, record: OutboxRecord) -> None:
 
 
 def process_outbox_records(*, limit: int = 25) -> int:
-    try:
-        session = db_manager.get_sync_session()
-    except RuntimeError:
-        settings = Settings.load()
-        db_manager.settings = settings
-        db_manager.init_sync()
-        session = db_manager.get_sync_session()
+    settings = Settings.load()
+    db_manager.settings = settings
+    db_manager.init_sync()
+    session = db_manager.get_sync_session()
     try:
         engine = session.get_bind()
         tables = [
@@ -184,9 +186,7 @@ def process_outbox_records_with_session(*, session: Session, limit: int = 25) ->
             )
             record_outbox_failure(
                 session=session,
-                event_key=record.event_key,
-                event_type=record.event_type,
-                payload=_empty_payload(),
+                event=OutboxEvent(event_key=record.event_key, event_type=record.event_type, payload=_empty_payload()),
                 exc=exc,
             )
     return processed

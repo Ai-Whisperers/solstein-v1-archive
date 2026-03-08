@@ -22,7 +22,7 @@ from solstein.infrastructure.outbox_worker import process_outbox_records
 from solstein.research import pipeline as research_pipeline
 from solstein.research.discovery import discover_companies
 from solstein.research.evidence import evaluate_company_evidence
-from solstein.research.gather import build_company_profile
+from solstein.research.gather import _data_quality_tier, build_company_profile
 from solstein.research.pipeline import run_market_intelligence
 from solstein.research.reconcile import detect_company_contradictions
 
@@ -211,8 +211,6 @@ def test_detect_company_contradictions_flags_divergence() -> None:
 
 def test_data_quality_tier_classification() -> None:
     """Verify _data_quality_tier thresholds: >=3 well-sourced, 1-2 partial, 0 stub."""
-    from solstein.research.gather import _data_quality_tier
-
     assert _data_quality_tier(0) == "stub"
     assert _data_quality_tier(1) == "partial"
     assert _data_quality_tier(2) == "partial"
@@ -308,7 +306,6 @@ def test_per_company_source_gate_removes_all_raises(tmp_path: Path, monkeypatch:
 
 def test_gather_stage_reports_source_quality_breakdown(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Gather stage includes per-company source counts and quality tiers."""
-    import json
 
     def _fake_enrich(candidate, registry, batch_id) -> Company:
         return Company(
@@ -354,6 +351,7 @@ def test_gather_stage_reports_source_quality_breakdown(tmp_path: Path, monkeypat
 def test_run_market_intelligence_dual_write_sqlite(tmp_path: Path, monkeypatch) -> None:
     db_path = tmp_path / "research_test.db"
     monkeypatch.setenv("SUPABASE__DB_URL", f"sqlite:///{db_path}")
+    monkeypatch.setenv("DATABASE__URL", f"sqlite:///{db_path}")
 
     def _fake_enrich(candidate, registry, batch_id) -> Company:
         return Company(
@@ -400,6 +398,7 @@ def test_run_market_intelligence_dual_write_sqlite(tmp_path: Path, monkeypatch) 
 def test_outbox_worker_replays_pending_records(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     db_path = tmp_path / "research_outbox.db"
     monkeypatch.setenv("SUPABASE__DB_URL", f"sqlite:///{db_path}")
+    monkeypatch.setenv("DATABASE__URL", f"sqlite:///{db_path}")
 
     def _fake_enrich(candidate, registry, batch_id) -> Company:
         return Company(

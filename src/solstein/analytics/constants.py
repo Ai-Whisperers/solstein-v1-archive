@@ -110,4 +110,3 @@ def derive_threat_level(classification: str, composite_score: float) -> str:
         return "Medium" if composite_score >= 6.0 else "Low"
     else:  # Lead or unknown
         return "Low"
-        return "LOW"

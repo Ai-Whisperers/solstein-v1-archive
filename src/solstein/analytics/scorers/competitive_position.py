@@ -38,14 +38,15 @@ class CompetitivePositionScorer:
             )
         )
 
-        saas_adj = (profile.saas_maturity - 1) / 9 * 2.0
+        saas_maturity = profile.saas_maturity if profile.saas_maturity is not None else 5.0
+        saas_adj = (saas_maturity - 1) / 9 * 2.0
         score += saas_adj
         explanation.components.append(
             ScoreComponent(
                 name="SaaS Maturity",
                 value=saas_adj,
-                formula=f"({profile.saas_maturity}-1)/9 * 2.0",
-                reasoning=f"SaaS transformation index: {profile.saas_maturity}/10.",
+                formula=f"({saas_maturity}-1)/9 * 2.0",
+                reasoning=f"SaaS transformation index: {saas_maturity}/10.",
             )
         )
 

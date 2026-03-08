@@ -106,3 +106,42 @@ def test_cli_verbose(tmp_path):
     result = runner.invoke(cli, ["-v", "analyze-market", str(input_file)])
     assert result.exit_code != 0
     assert "Failed to analyze market" in result.output
+
+
+def test_cli_score_accepts_wrapped_competitors_payload(tmp_path):
+    input_file = tmp_path / "wrapped.json"
+    output_file = tmp_path / "scored.json"
+    wrapped_data = {
+        "competitors": [
+            {
+                "id": "cmp-001",
+                "name": "Alpha",
+                "industry": "Tech",
+                "financials": {"revenue": 100.0, "valuation": 1000.0},
+            },
+            {
+                "id": "cmp-002",
+                "name": "Beta",
+                "industry": "Tech",
+                "financials": {"revenue": 80.0, "valuation": 700.0},
+            },
+        ]
+    }
+    input_file.write_text(json.dumps(wrapped_data))
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["score", str(input_file), "-o", str(output_file)])
+
+    assert result.exit_code == 0
+    assert output_file.exists()
+
+
+def test_cli_compare_rejects_unknown_object_payload(tmp_path):
+    input_file = tmp_path / "invalid_payload.json"
+    input_file.write_text(json.dumps({"unexpected": []}))
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["compare", "c1", "c2", str(input_file)])
+
+    assert result.exit_code != 0
+    assert "Unsupported input format" in result.output

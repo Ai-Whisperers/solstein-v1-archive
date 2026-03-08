@@ -2,16 +2,22 @@
 Command-line interface for SolStein.
 """
 
+import asyncio
 import json
 from pathlib import Path
+from typing import Any, cast
 
 import click
 from loguru import logger
+from pydantic import ValidationError
 
+from . import __version__
 from .analytics.scoring import GrowthScorer
+from .data.loaders import CompetitorDataLoader
+from .data.report_readiness import assert_client_report_ready, assert_report_ready
 from .domain.models import Company, MarketAnalysis
 from .exporters.excel import ExcelExporter
-from .exporters.markdown.generator import ClientReportGenerator
+from .exporters.markdown.generator import ClientReportGenerator, LLMEnhancedReportGenerator
 from .extractors.markdown_extractor import BatchExtractor
 
 
@@ -25,6 +31,40 @@ def cli(verbose: bool) -> None:
     else:
         logger.remove()
         logger.add(lambda msg: click.echo(msg, err=True), level="INFO")
+
+
+def _coerce_companies_payload(payload: Any, source: Path) -> list[Company]:
+    if isinstance(payload, list):
+        payload_list = cast("list[object]", payload)
+        parsed_companies: list[Company] = []
+        for item in payload_list:
+            if not isinstance(item, dict):
+                raise click.UsageError(f"Unsupported list entry in {source}. Expected object entries.")
+            parsed_companies.append(Company(**item))
+        return parsed_companies
+
+    if isinstance(payload, dict):
+        payload_dict = cast("dict[str, object]", payload)
+        for key in ("competitors", "companies", "data"):
+            value = payload_dict.get(key)
+            if isinstance(value, list):
+                value_list = cast("list[object]", value)
+                wrapped_companies: list[Company] = []
+                for item in value_list:
+                    if not isinstance(item, dict):
+                        raise click.UsageError(f"Unsupported item under '{key}' in {source}. Expected object entries.")
+                    wrapped_companies.append(Company(**item))
+                return wrapped_companies
+
+    raise click.UsageError(
+        f"Unsupported input format in {source}. Expected a JSON list of companies or an object containing 'competitors', "
+        "'companies', or 'data'."
+    )
+
+
+def _load_companies_from_json(input_file: Path) -> list[Company]:
+    payload = json.loads(input_file.read_text())
+    return _coerce_companies_payload(payload, input_file)
 
 
 @cli.command()
@@ -100,16 +140,14 @@ def export_excel(input_file: Path, output_file: Path, template: Path | None) -> 
     click.echo(f"📊 Exporting to Excel: {output_file}")
 
     try:
-        # Load profiles from JSON
-        data = json.loads(input_file.read_text())
-        domain_companies = [Company(**item) for item in data]
+        domain_companies = _load_companies_from_json(input_file)
 
         # Create exporter and generate dashboard
         exporter = ExcelExporter(template_path=template)
         exporter.create_dashboard(domain_companies, output_file)
 
         click.echo(f"✅ Dashboard created: {output_file}")
-    except Exception as e:
+    except (json.JSONDecodeError, ValidationError, ValueError, TypeError, RuntimeError, OSError) as e:
         click.echo(f"❌ Failed to create dashboard: {e}", err=True)
         raise click.Abort() from e
 
@@ -122,13 +160,11 @@ def score(input_file: Path, output: Path | None) -> None:
     click.echo("📈 Calculating scores...")
 
     try:
-        # Load profiles
-        data = json.loads(input_file.read_text())
-        domain_companies = [Company(**item) for item in data]
+        domain_companies = _load_companies_from_json(input_file)
 
         # Calculate scores
         scorer = GrowthScorer()
-        scored_companies = []
+        scored_companies: list[Company] = []
 
         for company in domain_companies:
             scored_company = scorer.calculate_scores(company)
@@ -147,11 +183,11 @@ def score(input_file: Path, output: Path | None) -> None:
 
         if output:
             # Save scored profiles
-            output_data = [c.model_dump(mode="json") for c in scored_companies]
+            output_data: list[dict[str, Any]] = [c.model_dump(mode="json") for c in scored_companies]
             output.write_text(json.dumps(output_data, indent=2, default=str))
             click.echo(f"💾 Saved scored profiles to {output}")
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValidationError, ValueError, TypeError, RuntimeError, OSError) as e:
         click.echo(f"❌ Failed to calculate scores: {e}", err=True)
         raise click.Abort() from e
 
@@ -164,9 +200,7 @@ def analyze_market(input_file: Path, market_name: str) -> None:
     click.echo(f"🌍 Analyzing market: {market_name}")
 
     try:
-        # Load profiles
-        data = json.loads(input_file.read_text())
-        domain_companies = [Company(**item) for item in data]
+        domain_companies = _load_companies_from_json(input_file)
 
         # Re-using domain_companies for MarketAnalysis model
         analysis = MarketAnalysis(market_name=market_name, companies=domain_companies)
@@ -182,7 +216,7 @@ def analyze_market(input_file: Path, market_name: str) -> None:
         for leader in analysis.market_leaders:
             click.echo(f"    • {leader.name} (Tier {leader.tier})")
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValidationError, ValueError, TypeError, RuntimeError, OSError) as e:
         click.echo(f"❌ Failed to analyze market: {e}", err=True)
         raise click.Abort() from e
 
@@ -196,9 +230,8 @@ def compare(profile1: str, profile2: str, input_file: Path) -> None:
     click.echo(f"⚖️ Comparing {profile1} vs {profile2}")
 
     try:
-        # Load profiles
-        data = json.loads(input_file.read_text())
-        profiles = {p["id"]: Company(**p) for p in data}
+        domain_companies = _load_companies_from_json(input_file)
+        profiles = {profile.id: profile for profile in domain_companies}
 
         if profile1 not in profiles:
             click.echo(f"❌ Profile not found: {profile1}", err=True)
@@ -228,7 +261,7 @@ def compare(profile1: str, profile2: str, input_file: Path) -> None:
             v2_str = f"{v2}{unit}" if v2 is not None else "N/A"
             click.echo(f"{name:<20} {v1_str:<20} {v2_str:<20}")
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValidationError, ValueError, TypeError, RuntimeError, OSError) as e:
         click.echo(f"❌ Failed to compare profiles: {e}", err=True)
         raise click.Abort() from e
 
@@ -249,9 +282,6 @@ def compare(profile1: str, profile2: str, input_file: Path) -> None:
 )
 def generate_report(company_name: str, input: Path | None, output: Path | None) -> None:
     """Generate intelligence report for a company."""
-    from .data.loaders import CompetitorDataLoader
-    from .data.report_readiness import assert_client_report_ready
-
     click.echo(f"📊 Generating reports for: {company_name}")
 
     try:
@@ -259,13 +289,13 @@ def generate_report(company_name: str, input: Path | None, output: Path | None) 
         companies = loader.load_from_json(input) if input else loader.load_companies()
 
         scorer = GrowthScorer()
-        scored_companies = []
+        scored_companies: list[Company] = []
         for company in companies:
             scored = scorer.calculate_scores(company)
             scored_companies.append(scored)
 
         # Find target company
-        target = None
+        target: Company | None = None
         for c in scored_companies:
             if company_name.lower() in c.name.lower():
                 target = c
@@ -277,7 +307,7 @@ def generate_report(company_name: str, input: Path | None, output: Path | None) 
             return
 
         # Get competitors (all other companies)
-        competitors = [c for c in scored_companies if c.id != target.id]
+        competitors: list[Company] = [c for c in scored_companies if c.id != target.id]
         assert_client_report_ready(target, competitors)
 
         # Generate reports
@@ -293,7 +323,7 @@ def generate_report(company_name: str, input: Path | None, output: Path | None) 
         click.echo("   - competitive-analysis.md")
         click.echo("   - market-overview.md")
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValidationError, ValueError, TypeError, RuntimeError, OSError) as e:
         click.echo(f"❌ Failed to generate report: {e}", err=True)
         raise click.Abort() from e
 
@@ -309,9 +339,6 @@ def generate_report(company_name: str, input: Path | None, output: Path | None) 
 @click.option("--no-llm", is_flag=True, help="Disable LLM enhancements")
 def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) -> None:
     """Generate LLM-enhanced intelligence report for a company."""
-    from .data.loaders import CompetitorDataLoader
-    from .data.report_readiness import assert_client_report_ready
-
     click.echo(f"🤖 Generating LLM-enhanced reports for: {company_name}")
 
     try:
@@ -319,12 +346,12 @@ def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) ->
         companies = loader.load_companies()
 
         scorer = GrowthScorer()
-        scored_companies = []
+        scored_companies: list[Company] = []
         for company in companies:
             scored = scorer.calculate_scores(company)
             scored_companies.append(scored)
 
-        target = None
+        target: Company | None = None
         for c in scored_companies:
             if company_name.lower() in c.name.lower():
                 target = c
@@ -335,29 +362,23 @@ def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) ->
             click.echo(f"Available: {', '.join([c.name for c in scored_companies[:10]])}...")
             return
 
-        competitors = [c for c in scored_companies if c.id != target.id]
+        competitors: list[Company] = [c for c in scored_companies if c.id != target.id]
         assert_client_report_ready(target, competitors)
 
         output_dir = output or Path(f"data/output/reports/llm/{target.id}")
 
         if no_llm:
-            from .exporters.markdown.generator import ClientReportGenerator
-
-            generator = ClientReportGenerator(output_dir=output_dir, use_llm=False)
+            generator = ClientReportGenerator(output_dir=output_dir)
             reports = generator.generate_client_report(target, competitors)
         else:
-            import asyncio
-
-            from .exporters.markdown.generator import LLMEnhancedReportGenerator
-
-            generator = LLMEnhancedReportGenerator(output_dir=output_dir, use_llm=True)
+            generator = LLMEnhancedReportGenerator(output_dir=output_dir)
             reports = asyncio.run(generator.generate_llm_enhanced_report(target, competitors))
 
         click.echo(f"✅ LLM-enhanced reports generated in: {output_dir}")
         for name in reports:
             click.echo(f"   - {name}")
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValidationError, ValueError, TypeError, RuntimeError, OSError) as e:
         click.echo(f"❌ Failed to generate LLM report: {e}", err=True)
         raise click.Abort() from e
 
@@ -371,9 +392,6 @@ def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) ->
 )
 def generate_all_reports(output: Path | None) -> None:
     """Generate reports for all companies."""
-    from .data.loaders import CompetitorDataLoader
-    from .data.report_readiness import assert_report_ready
-
     click.echo("📊 Generating reports for all companies...")
 
     try:
@@ -381,7 +399,7 @@ def generate_all_reports(output: Path | None) -> None:
         companies = loader.load_companies()
 
         scorer = GrowthScorer()
-        scored_companies = []
+        scored_companies: list[Company] = []
         for company in companies:
             scored = scorer.calculate_scores(company)
             scored_companies.append(scored)
@@ -396,7 +414,7 @@ def generate_all_reports(output: Path | None) -> None:
         click.echo(f"✅ Generated reports for {len(generated)} companies")
         click.echo(f"   Output directory: {output_dir}")
 
-    except Exception as e:
+    except (json.JSONDecodeError, ValidationError, ValueError, TypeError, RuntimeError, OSError) as e:
         click.echo(f"❌ Failed to generate reports: {e}", err=True)
         raise click.Abort() from e
 
@@ -404,16 +422,17 @@ def generate_all_reports(output: Path | None) -> None:
 @cli.command()
 def version() -> None:
     """Show version information."""
-    from . import __version__
-
     click.echo(f"SolStein v{__version__}")
     click.echo("AI-Powered Competitive Intelligence Platform")
 
 
 # Import and register research commands
 try:
-    from .cli_research import register_commands
+    import importlib
+    import warnings
 
+    research_module = importlib.import_module("solstein.cli_research")
+    register_commands = getattr(research_module, "register_commands")
     register_commands(cli)
 except ImportError as e:
     import warnings
@@ -422,8 +441,11 @@ except ImportError as e:
 
 # Register AI research commands
 try:
-    from .cli_ai_research import register_ai_research_commands
+    import importlib
+    import warnings
 
+    ai_research_module = importlib.import_module("solstein.cli_ai_research")
+    register_ai_research_commands = getattr(ai_research_module, "register_ai_research_commands")
     register_ai_research_commands(cli)
 except ImportError as e:
     import warnings
