@@ -1,0 +1,254 @@
+# OpenCode v2.0 Configuration for Solstein with Token Optimization
+# Integrated with 5-Phase Token Optimization Ecosystem
+
+version: "2.0"
+project:
+  name: solstein
+  language: python
+  framework: fastapi
+  ai_ready: true
+
+# Phase 4: Smart Model Routing Configuration
+model_routing:
+  default: sonnet
+  rules:
+    haiku:  # 80% cheaper, 3-5x faster
+      triggers:
+        - "format"
+        - "lint"
+        - "fix typo"
+        - "rename"
+        - "simple edit"
+        - "check"
+        - "syntax"
+      token_budget: 10000
+      cost_reduction: "80%"
+    sonnet:  # 40% cheaper, 1.5-2x faster
+      triggers:
+        - "refactor"
+        - "implement"
+        - "test"
+        - "review"
+        - "debug"
+        - "feature"
+      token_budget: 50000
+      cost_reduction: "40%"
+    opus:  # Full power for hard problems
+      triggers:
+        - "architecture"
+        - "complex logic"
+        - "multi-system design"
+        - "hard debugging"
+        - "security review"
+      token_budget: 150000
+      cost_reduction: "0%"
+
+# Phase 1: Session Continuity Settings
+session_config:
+  enable_continuity: true
+  reuse_context: true
+  context_preservation_ratio: 0.7
+  store_sessions: "/home/ai-whisperers/.claude/sessions/"
+
+# Phase 2: Tiered Context Loading
+context_loading:
+  tier_strategy: "hierarchical"
+  l0_token_budget: 100
+  l1_token_budget: 2000
+  l2_unlimited: true
+  index_path: "./context-index.json"
+
+# Phase 5: Parallel Execution Settings
+parallelization:
+  enable_background_tasks: true
+  max_parallel_tasks: 5
+  auto_parallelize_independent: true
+  session_aware: true
+
+# MCP Server Configuration
+mcp:
+  servers:
+    filesystem:
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-filesystem", "."]
+      description: File system operations
+    
+    sequential-thinking:
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+      description: Structured reasoning
+    
+    memory:
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-memory"]
+      description: Persistent memory across sessions
+      optional: true
+    
+    # Phase 3: Tool Sandboxing MCP
+    context-mode:
+      command: "npx"
+      args: ["-y", "@context-mode/mcp-server"]
+      env:
+        CONFIG_FILE: "/home/ai-whisperers/.claude/sandboxing-rules.json"
+        STORAGE_PATH: "/home/ai-whisperers/.claude/tool-cache/"
+        SANDBOX_MODE: "aggressive"
+        MAX_CONTEXT_KB: "100"
+      description: Tool output sandboxing for context efficiency
+      optional: false
+
+# Granular Permissions
+permissions:
+  bash:
+    allow:
+      - "uv *"
+      - "pip *"
+      - "pytest *"
+      - "python *"
+      - "python3 *"
+      - "git *"
+      - "npm *"
+      - "make *"
+      - "black *"
+      - "ruff *"
+      - "mypy *"
+      - "cd *"
+      - "ls *"
+      - "cat *"
+      - "mkdir *"
+      - "find *"
+      - "head *"
+      - "tail *"
+      - "grep *"
+      - "./scripts/*"
+    deny:
+      - "rm -rf /"
+      - "rm -rf ~"
+      - "sudo *"
+      - "*password*"
+      - "*secret*"
+    default: ask
+  
+  read:
+    allow:
+      - "**/*.py"
+      - "**/*.json"
+      - "**/*.yaml"
+      - "**/*.yml"
+      - "**/*.md"
+      - "**/*.txt"
+      - "**/*.toml"
+      - "**/*.sh"
+      - "**/*.env.example"
+      - "**/*.example"
+    deny:
+      - "**/.env"
+      - "**/.env.*"
+      - "**/.env.local"
+      - "**/credentials*"
+      - "**/secrets*"
+      - "**/*.key"
+      - "**/*.pem"
+      - "**/kaggle.json"
+      - "**/.aws/credentials"
+    default: allow
+  
+  write:
+    allow:
+      - "**/*.py"
+      - "**/*.json"
+      - "**/*.yaml"
+      - "**/*.yml"
+      - "**/*.md"
+      - "**/*.txt"
+      - "tests/**/*.py"
+      - "docs/**/*.md"
+      - "scripts/**/*.sh"
+      - "src/**/*.py"
+    deny:
+      - "**/.env"
+      - "**/.env.*"
+      - "**/.env.local"
+      - "**/credentials*"
+      - "**/secrets*"
+      - "**/*.key"
+      - "**/*.pem"
+    default: ask
+
+# Subagent Configuration with Token-Optimized Budgets
+agents:
+  build:
+    name: "Build Agent"
+    purpose: Implementation and code changes
+    budget: 500  # Increased for complex features
+    tools: ["write", "edit", "test", "bash"]
+    description: "Write code, implement features, fix bugs"
+  
+  plan:
+    name: "Plan Agent"
+    purpose: Architecture and research
+    budget: 300
+    tools: ["read", "analyze", "grep"]
+    read_only: true
+    description: "Analyze codebase, propose changes, design architecture"
+  
+  review:
+    name: "Review Agent"
+    purpose: Code quality checks
+    budget: 200
+    tools: ["read", "analyze"]
+    read_only: true
+    description: "Review code against standards, check quality"
+  
+  test:
+    name: "Test Agent"
+    purpose: Test generation and execution
+    budget: 200
+    tools: ["write", "test", "bash"]
+    description: "Generate tests, run test suites"
+  
+  docs:
+    name: "Docs Agent"
+    purpose: Documentation
+    budget: 150
+    tools: ["write", "read"]
+    description: "Write documentation, update READMEs"
+  
+  research:
+    name: "Research Agent"
+    purpose: Investigation and analysis
+    budget: 400
+    tools: ["read", "grep", "analyze"]
+    read_only: true
+    description: "Research patterns, investigate modules"
+
+# LLM Provider Configuration
+providers:
+  primary: auto
+  fallback:
+    - openai
+    - groq
+    - fireworks
+  local: ollama
+  endpoints:
+    openai: "https://api.openai.com/v1"
+    groq: "https://api.groq.com"
+
+# Environment Variables
+environment:
+  PYTHONPATH: "src"
+  OPENCODE_PROJECT: "solstein"
+  SESSION_STORAGE: "/home/ai-whisperers/.claude/sessions/"
+  CONTEXT_INDEX: "./context-index.json"
+  METRICS_FILE: "/home/ai-whisperers/.claude/tool-cache/metrics.json"
+
+# Token Optimization Features (All 5 Phases)
+optimization:
+  phase_1_session_continuity: true
+  phase_2_tiered_context: true
+  phase_3_tool_sandboxing: true
+  phase_4_model_routing: true
+  phase_5_parallel_agents: true
+  target_token_reduction: "95%"
+  target_speedup: "66%"
+  metrics_tracking: true
+  weekly_reports: true

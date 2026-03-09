@@ -102,7 +102,6 @@ def compare_artifacts(
     missing_in_json: list[dict[str, JsonValue]] = []
     mismatched_hash: list[dict[str, JsonValue]] = []
 
-    print(f"\nDEBUG: stage_hashes={stage_hashes}\nDEBUG: db_artifacts={[db_artifacts_by_name[k].payload for k in db_artifacts_by_name]}\n")
     json_artifact_names = sorted(str(name) for name in json_artifacts.keys())
     db_artifact_names = sorted(db_artifacts_by_name.keys())
 

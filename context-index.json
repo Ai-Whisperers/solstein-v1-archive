@@ -1,0 +1,194 @@
+{
+  "project": "solstein",
+  "description": "AI-Powered Competitive Intelligence Platform",
+  "version": "0.1.0",
+  "total_files": 532,
+  "created": "2026-03-09",
+  "modules": {
+    "api": {
+      "purpose": "FastAPI REST API - HTTP endpoints, request routing, response serialization",
+      "l0": "Provides REST API for competitive intelligence queries and data export",
+      "l1_files": ["src/solstein/api/__init__.py", "src/solstein/api/main.py"],
+      "key_exports": ["create_app", "get_db", "get_current_user"],
+      "submodules": {
+        "routes": "Request handlers for specific endpoints (companies, analysis, exports)",
+        "schemas": "Pydantic models for request/response validation",
+        "services": "Business logic for API operations",
+        "middleware": "Request/response interceptors (auth, logging, error handling)",
+        "websocket": "WebSocket handlers for real-time updates"
+      },
+      "patterns": "FastAPI router pattern, dependency injection via get_db"
+    },
+    "domain": {
+      "purpose": "Domain Models - Core business entities and validation",
+      "l0": "Defines Company, Competitor, Threat, and related value objects",
+      "l1_files": ["src/solstein/domain/models/company.py", "src/solstein/domain/validators"],
+      "key_exports": ["Company", "CompanyTier", "ThreatLevel", "AIMaturity"],
+      "models": {
+        "Company": "Main entity - stores company info, competitors, threats, scores",
+        "CompanyTier": "Enum - Enterprise/Mid-Market/SMB/Startup classification",
+        "ThreatLevel": "Enum - Critical/High/Medium/Low threat assessment",
+        "AIMaturity": "Company AI capability level for competitive threat assessment"
+      }
+    },
+    "connectors": {
+      "purpose": "Data Source Connectors - Interface to external APIs and data sources",
+      "l0": "Abstract connector pattern + implementations for 6 data categories",
+      "l1_files": ["src/solstein/connectors/base.py", "src/solstein/connectors/registry.py"],
+      "categories": {
+        "financial": "Yahoo Finance, SEC Edgar, Crunchbase, OpenCorporates",
+        "government": "USAspending, PatentsView, WHOIS, DNS, Wayback Machine",
+        "news": "NewsAPI, Hacker News, RSS feeds",
+        "academic": "arXiv for research papers",
+        "product": "Product hunt and similar",
+        "social": "Social media monitoring"
+      },
+      "base_class": "BaseConnector with async fetch(), parse(), validate() methods",
+      "l2_investigation": "Individual connector implementations (each 50-100 lines)"
+    },
+    "data": {
+      "purpose": "Data Processing Pipeline - ETL, normalization, enrichment",
+      "l0": "Multi-stage data pipeline: connectors → converters → enrichment → unified",
+      "l1_files": ["src/solstein/data/__init__.py"],
+      "pipeline_stages": {
+        "connectors": "Raw data extraction from sources",
+        "converters": "Normalize different data formats to common schema",
+        "enrichment": "Add derived data, relationships, enrichments",
+        "parsers": "Extract structured info from unstructured data",
+        "normalization": "Clean, deduplicate, standardize values",
+        "unified": "Single source of truth for all company data"
+      },
+      "key_classes": ["UnifiedCompanyLoader", "EnrichmentStrategy", "DataConverter"]
+    },
+    "analytics": {
+      "purpose": "Analytics Engine - Scoring, signals, simulation, valuation",
+      "l0": "Compute competitive threat scores, AI adoption signals, market valuation",
+      "l1_files": ["src/solstein/analytics/__init__.py"],
+      "components": {
+        "scorers": "Threat, competitive, financial scoring algorithms",
+        "signals": "Define and detect competitive signals (market moves, tech adoption)",
+        "filters": "Query filters for company analysis",
+        "valuation": "Market valuation estimates",
+        "simulation": "Scenario modeling for competitive landscape"
+      },
+      "key_classes": ["ThreatScorer", "AIAdoptionSignal", "CompetitiveSimulator"]
+    },
+    "llm": {
+      "purpose": "LLM Integration - Claude/GPT for analysis and query answering",
+      "l0": "Query LLMs for competitive analysis, health checks for availability",
+      "l1_files": ["src/solstein/llm/__init__.py"],
+      "submodules": {
+        "query": "Send structured queries to LLMs, get analysis results",
+        "health": "Monitor LLM service availability and performance"
+      },
+      "usage": "Analyze competitive data, generate insights, answer natural language questions"
+    },
+    "exporters": {
+      "purpose": "Export Engine - Generate Excel, Markdown, PDF reports",
+      "l0": "Export company analysis in multiple formats for sharing/presentation",
+      "l1_files": ["src/solstein/exporters/__init__.py"],
+      "formats": {
+        "excel": "Interactive workbooks with charts, filters",
+        "markdown": "Markdown reports for documentation/sharing",
+        "report_generators": "Template-based report generation"
+      },
+      "strategy_pattern": "ExportStrategy interface for pluggable formatters"
+    },
+    "exceptions": {
+      "purpose": "Standardized Error Taxonomy - Maps to HTTP status codes",
+      "l0": "Custom exceptions hierarchy: SolsteinError → specific errors",
+      "l1_files": ["src/solstein/exceptions.py"],
+      "key_exceptions": [
+        "ValidationError (400 Bad Request)",
+        "NotFoundError (404 Not Found)",
+        "AuthenticationError (401 Unauthorized)",
+        "DataLoadError (503 Service Unavailable)",
+        "LLMAvailabilityError (503 Service Unavailable)"
+      ],
+      "pattern": "Each exception maps cleanly to HTTP status code"
+    },
+    "infrastructure": {
+      "purpose": "Infrastructure Models - Database, service connectors, deployments",
+      "l0": "ORM models, connection pooling, deployment configuration",
+      "l1_files": ["src/solstein/infrastructure/models"],
+      "components": ["Database models", "Redis cache connectors", "Service configs"]
+    },
+    "agents": {
+      "purpose": "LangGraph Agents - Workflow orchestration and autonomous processes",
+      "l0": "Multi-step workflows for data collection, analysis, decision-making",
+      "l1_files": ["src/solstein/agents/__init__.py"],
+      "agents": {
+        "github": "Monitor GitHub org repos, commits, issues for competitive signals",
+        "workflow_nodes": "Individual steps in larger workflows"
+      }
+    },
+    "security": {
+      "purpose": "Security & Authorization - Authentication, RBAC, audit logging",
+      "l0": "User authentication, role-based access control, audit trail",
+      "l1_files": ["src/solstein/security/__init__.py"]
+    },
+    "monitoring": {
+      "purpose": "Observability - Logging, profiling, metrics collection",
+      "l0": "System health, performance profiling, operational metrics",
+      "l1_files": ["src/solstein/monitoring/__init__.py"],
+      "submodules": ["profiling - Performance analysis tools"]
+    },
+    "utils": {
+      "purpose": "Shared Utilities - Helpers, constants, common functions",
+      "l0": "Reusable code shared across modules",
+      "l1_files": ["src/solstein/utils/__init__.py"]
+    }
+  },
+  "patterns": {
+    "architecture": "Layered (API → Application → Domain → Data) with DDD principles",
+    "async": "Async/await throughout with aiohttp for external API calls",
+    "dependency_injection": "FastAPI dependency injection for database, config, current_user",
+    "error_handling": "Custom exception hierarchy mapping to HTTP status codes",
+    "testing_strategy": "6-layer pyramid: unit, integration, e2e, performance, regression, compliance",
+    "data_flow": "Connectors → Converters → Enrichment → Unified → Analytics → API",
+    "configuration": "Environment-based config in src/solstein/config/"
+  },
+  "key_files_by_frequency": [
+    {
+      "path": "src/solstein/api/main.py",
+      "why": "FastAPI app initialization, middleware, route registration",
+      "edits_expected": "Medium - when adding endpoints"
+    },
+    {
+      "path": "src/solstein/domain/models/company.py",
+      "why": "Core Company entity used by all modules",
+      "edits_expected": "High - changes affect entire system"
+    },
+    {
+      "path": "src/solstein/data/unified.py",
+      "why": "UnifiedCompanyLoader orchestrates entire data pipeline",
+      "edits_expected": "High - when adding data sources or processing"
+    },
+    {
+      "path": "src/solstein/connectors/registry.py",
+      "why": "Central registry for all data connectors",
+      "edits_expected": "High - when adding new connectors"
+    },
+    {
+      "path": "src/solstein/analytics/scorers/__init__.py",
+      "why": "Threat and competitive scoring logic",
+      "edits_expected": "High - when refining scoring algorithms"
+    }
+  ],
+  "tier_strategy": {
+    "L0_abstract": "~100 tokens - Just purpose, main exports, data flow",
+    "L1_overview": "~2000 tokens - Module structure, key classes, interfaces, patterns",
+    "L2_full": "On-demand - Complete source code with implementation details",
+    "examples": {
+      "L0_query": "What does the data module do?",
+      "L1_query": "Show me the data pipeline stages and key classes",
+      "L2_query": "Show me complete UnifiedCompanyLoader implementation"
+    }
+  },
+  "asking_instructions": {
+    "start_with_l0": "Always ask for L0 (purpose + flow) first",
+    "then_request_l1": "If L0 makes sense, ask for L1 (structure + patterns)",
+    "finally_request_l2": "Only fetch L2 (full code) when you need implementation details",
+    "save_tokens": "This progression saves 91% tokens vs reading full files immediately"
+  }
+}

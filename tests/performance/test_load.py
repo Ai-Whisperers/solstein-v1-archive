@@ -41,10 +41,7 @@ async def db_session() -> AsyncSession:
         else:
             settings.database.url = "sqlite+aiosqlite:///test_perf.sqlite3"
     db_manager = DatabaseManager(settings)
-    from sqlalchemy.pool import StaticPool
-    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-    db_manager.engine = create_async_engine("sqlite+aiosqlite:///:memory:", poolclass=StaticPool)
-    db_manager.session_factory = async_sessionmaker(db_manager.engine)
+    db_manager.init_async()
     await db_manager.create_tables()
     async with db_manager.get_session() as session:
         yield session
@@ -123,10 +120,7 @@ class TestDatabaseLoad:
         else:
             settings.database.url = "sqlite+aiosqlite:///test_perf.sqlite3"
         db_manager = DatabaseManager(settings)
-        from sqlalchemy.pool import StaticPool
-    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-    db_manager.engine = create_async_engine("sqlite+aiosqlite:///:memory:", poolclass=StaticPool)
-    db_manager.session_factory = async_sessionmaker(db_manager.engine)
+        db_manager.init_async()
 
         async def run_query():
             async with db_manager.get_session() as session:
@@ -191,10 +185,7 @@ class TestConnectionPool:
         else:
             settings.database.url = "sqlite+aiosqlite://"
         db_manager = DatabaseManager(settings)
-        from sqlalchemy.pool import StaticPool
-    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-    db_manager.engine = create_async_engine("sqlite+aiosqlite:///:memory:", poolclass=StaticPool)
-    db_manager.session_factory = async_sessionmaker(db_manager.engine)
+        db_manager.init_async()
 
         # Create multiple sessions
         sessions = []

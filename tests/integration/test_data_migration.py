@@ -48,10 +48,7 @@ async def db_session() -> AsyncSession:
             settings.database.url = "sqlite+aiosqlite:///test_integration.db"
         
     db_manager = DatabaseManager(settings)
-    from sqlalchemy.pool import StaticPool
-    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-    db_manager.engine = create_async_engine("sqlite+aiosqlite:///:memory:", poolclass=StaticPool)
-    db_manager.session_factory = async_sessionmaker(db_manager.engine)
+    db_manager.init_async()
     await db_manager.create_tables()
 
     session = await db_manager.get_session().__aenter__()
