@@ -1,0 +1,69 @@
+name: API Source Suggestion
+description: Suggest a new data source for Solstein
+title: "[API Suggestion] "
+labels: ["api-suggestion", "triage"]
+body:
+  - type: input
+    id: api_name
+    attributes:
+      label: API Name
+      placeholder: e.g., Crunchbase API
+    validations:
+      required: true
+
+  - type: input
+    id: provider
+    attributes:
+      label: Provider or Company
+      placeholder: e.g., Crunchbase Inc.
+    validations:
+      required: true
+
+  - type: input
+    id: documentation_url
+    attributes:
+      label: API Documentation URL
+      placeholder: https://...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Financial Data
+        - Regulatory or Government
+        - News and Media
+        - Jobs and Hiring
+        - Social Media
+        - Web Scraping
+        - Patents and IP
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use Case for Solstein
+      placeholder: How would this API improve competitive intelligence?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pricing
+    attributes:
+      label: Pricing
+      options:
+        - Free
+        - Freemium
+        - Paid
+        - Enterprise
+        - Unknown
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: Additional Information
+      placeholder: Rate limits, coverage, data quality notes, auth type, etc.
