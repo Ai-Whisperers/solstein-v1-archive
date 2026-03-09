@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | Priority | **P0 — Ship Blocker** |
-| Status | 🔴 Open |
+| Status | 🔶 Partial — STORY-009 Complete |
 | Stories | 3 |
 | Created | 2026-02-28 |
 | Depends On | [EPIC-001: Security Restoration](../EPIC-001-security-restoration/README.md) |
@@ -28,7 +28,13 @@ The scoring and classification system is the platform's core deliverable. PE/VC 
 
 ## Definition of Done
 
-- [ ] A single module is the designated source of truth for all classification threshold values — no other module defines threshold literals
+## Definition of Done
+
+- [x] A single module is the designated source of truth for all classification threshold values — no other module defines threshold literals
+- [ ] Each scoring function is implemented exactly once — `analytics/scoring.py` delegates, it does not re-implement
+- [ ] Every numeric literal in scoring logic is replaced with a named constant that has a documented business rationale
+- [x] The same input produces the same tier output regardless of which code path executes
+- [ ] Component weights are asserted to sum to 1.0 in a test
 - [ ] Each scoring function is implemented exactly once — `analytics/scoring.py` delegates, it does not re-implement
 - [ ] Every numeric literal in scoring logic is replaced with a named constant that has a documented business rationale
 - [ ] The same input produces the same tier output regardless of which code path executes

@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | Priority | **P0 — Ship Blocker** |
-| Status | 🔴 Open |
+| Status | 🔶 Partial — STORY-012 Complete |
 | Stories | 3 |
 | Created | 2026-02-28 |
 | Depends On | [EPIC-001: Security Restoration](../EPIC-001-security-restoration/README.md) |
@@ -30,7 +30,14 @@ Additionally, `data/unified_loader.py` line 929 hardcodes `GBP_EUR_RATE = 1.17`.
 
 ## Definition of Done
 
-- [ ] All writes in a research pipeline execution either all succeed atomically or all roll back with no partial state
+## Definition of Done
+
+- [x] All writes in a research pipeline execution either all succeed atomically or all roll back with no partial state
+- [x] The outbox never contains a record that references a primary record that does not exist
+- [ ] Conflict resolution considers data recency and source reliability when merging records
+- [ ] The `MANUAL_REVIEW` strategy creates a persisted, queryable review record
+- [ ] No date string or market name appears as a hardcoded literal in data loading code
+- [ ] No static exchange rate appears as a numeric literal in the codebase
 - [ ] The outbox never contains a record that references a primary record that does not exist
 - [ ] Conflict resolution considers data recency and source reliability when merging records
 - [ ] The `MANUAL_REVIEW` strategy creates a persisted, queryable review record

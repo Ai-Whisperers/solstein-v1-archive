@@ -28,6 +28,8 @@ class FinancialHealthScorer:
     def __init__(self, config: ScoringSettings | None = None):
         self.config = config or ScoringSettings()
 
+    # Missing data penalty
+    _UNKNOWN_DATA_PENALTY: float = -2.0  # Penalty when financial data is unknown
     def score(
         self,
         financials: FinancialMetric,
@@ -69,8 +71,16 @@ class FinancialHealthScorer:
         explanation: ScoringExplanation,
         cfg: Any,
     ) -> float:
-        """Score revenue scale component."""
         if financials.revenue is None:
+            score += self._UNKNOWN_DATA_PENALTY
+            explanation.components.append(
+                ScoreComponent(
+                    name="Missing Revenue Data",
+                    value=self._UNKNOWN_DATA_PENALTY,
+                    formula="revenue = None",
+                    reasoning="No revenue data — unknown financials = higher risk.",
+                )
+            )
             return score
 
         adj = 0.0
@@ -101,8 +111,16 @@ class FinancialHealthScorer:
         explanation: ScoringExplanation,
         cfg: Any,
     ) -> float:
-        """Score profitability component."""
         if financials.profit_margin is None:
+            score += self._UNKNOWN_DATA_PENALTY
+            explanation.components.append(
+                ScoreComponent(
+                    name="Missing Profitability Data",
+                    value=self._UNKNOWN_DATA_PENALTY,
+                    formula="profit_margin = None",
+                    reasoning="No profitability data — unknown financials = higher risk.",
+                )
+            )
             return score
 
         adj = 0.0

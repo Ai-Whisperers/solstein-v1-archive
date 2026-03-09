@@ -3,12 +3,12 @@
 Phase 1, Item 1.2: JWT Authentication Endpoints
 """
 
-import hashlib
+
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from fastapi import APIRouter, Depends, HTTPException, status
+
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
 from pydantic import BaseModel
@@ -45,7 +45,7 @@ async def login(request: LoginRequest) -> TokenResponse:
     """Authenticate user and return access token.
 
     Validates credentials against ADMIN_EMAIL and ADMIN_PASSWORD_HASH
-    environment variables. Password must be SHA-256 hex digest.
+    environment variables. Password must be a bcrypt-hashed string (use hash_password() to generate).
 
     Args:
         request: Login credentials (email and password)
@@ -82,14 +82,6 @@ async def login(request: LoginRequest) -> TokenResponse:
 
     # Validate password (compare bcrypt hash)
     if not bcrypt.checkpw(request.password.encode(), admin_password_hash.encode()):
-        logger.warning(f"Login failed — wrong password for: {request.email}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    provided_hash = hashlib.sha256(request.password.encode()).hexdigest()
-    if provided_hash != admin_password_hash:
         logger.warning(f"Login failed — wrong password for: {request.email}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

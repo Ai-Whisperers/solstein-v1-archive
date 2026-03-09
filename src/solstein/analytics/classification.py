@@ -5,7 +5,7 @@ Implements balanced classification (Phoenix/Salt/Lead) with confidence scoring
 based on data quality and score distribution.
 
 Classification Boundaries (based on percentile analysis):
-- Phoenix (High Growth): >= 7.5 (top 15-20%)
+- Phoenix (High Growth): >= 7.0 (top 15-20%)
 - Salt (Stable): 4.5 - 7.49 (middle 60-70%)
 - Lead (Legacy/Opportunity): < 4.5 (bottom 15-20%)
 

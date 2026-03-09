@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | Priority | **P0 — Ship Blocker** |
-| Status | 🔴 Open |
+| Status | ✅ Complete |
 | Stories | 3 |
 | Created | 2026-02-28 |
 | Depends On | None — this is the root of the critical path |
@@ -30,7 +30,13 @@ This epic is the root of the critical path. EPIC-001 (Security Restoration) cann
 
 ## Definition of Done
 
-- [ ] No duplicate class field definitions exist anywhere in `config.py`
+## Definition of Done
+
+- [x] No duplicate class field definitions exist anywhere in `config.py`
+- [x] No insecure credential defaults exist — every security-sensitive configuration field is required with no fallback
+- [x] All required API keys are validated at startup before the application begins accepting requests
+- [x] Missing required keys produce startup errors that name the specific missing variable
+- [x] Missing optional keys produce WARNING-level logs and allow startup to continue
 - [ ] No insecure credential defaults exist — every security-sensitive configuration field is required with no fallback
 - [ ] All required API keys are validated at startup before the application begins accepting requests
 - [ ] Missing required keys produce startup errors that name the specific missing variable

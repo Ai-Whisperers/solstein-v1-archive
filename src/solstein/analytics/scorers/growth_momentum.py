@@ -18,6 +18,8 @@ _STAGNANT_GROWTH_PENALTY: float = -0.75
 _BELOW_AVERAGE_GROWTH_PENALTY: float = -0.25
 _HYPER_GROWTH_BONUS: float = 2.5
 _COMPOUND_RISK_PENALTY: float = -1.0
+_UNKNOWN_DATA_PENALTY: float = -2.0  # Penalty when data is unknown (higher risk)
+_DECLINING_GROWTH_PENALTY: float = -1.5
 
 class GrowthMomentumScorer:
     """Score company growth momentum (revenue growth, employee efficiency, funding)."""
@@ -69,6 +71,15 @@ class GrowthMomentumScorer:
     ) -> float:
         """Score revenue growth rate component."""
         if financials.growth_rate is None:
+            score += _UNKNOWN_DATA_PENALTY
+            explanation.components.append(
+                ScoreComponent(
+                    name="Missing Growth Data",
+                    value=_UNKNOWN_DATA_PENALTY,
+                    formula="growth_rate = None",
+                    reasoning="No growth rate data available — assuming neutral-to-negative.",
+                )
+            )
             return score
 
         growth_rate = financials.growth_rate
@@ -79,7 +90,17 @@ class GrowthMomentumScorer:
         score += growth_factor
 
         # Apply growth penalties
-        if 0 <= growth_rate < _STAGNANT_GROWTH_UPPER:
+        if growth_rate < 0:
+            score += _DECLINING_GROWTH_PENALTY
+            explanation.components.append(
+                ScoreComponent(
+                    name="Declining Revenue Penalty",
+                    value=_DECLINING_GROWTH_PENALTY,
+                    formula="growth_rate < 0% → -1.5",
+                    reasoning="Negative growth indicates revenue contraction — serious viability concern.",
+                )
+            )
+        elif 0 <= growth_rate < _STAGNANT_GROWTH_UPPER:
             score += _STAGNANT_GROWTH_PENALTY
             explanation.components.append(
                 ScoreComponent(

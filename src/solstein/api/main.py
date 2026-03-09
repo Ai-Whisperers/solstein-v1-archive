@@ -149,7 +149,6 @@ setup_performance_middleware(app, enable_timing=True)
 from solstein.monitoring.profiling.dashboard import router as profiling_router
 
 app.include_router(profiling_router, prefix="/admin")
-setup_performance_middleware(app, enable_timing=True)
 
 # Multi-tenancy
 app.add_middleware(TenantMiddleware)
