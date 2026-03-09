@@ -30,7 +30,7 @@ def test_cli_score(tmp_path):
     output_file = tmp_path / "output.json"
     data = [
         {
-            "id": "c1",
+            "id": "c01",
             "name": "TestCorp",
             "industry": "Tech",
             "financials": {"revenue": 100.0, "valuation": 1000.0},
@@ -49,7 +49,7 @@ def test_cli_analyze_market(tmp_path):
     input_file = tmp_path / "input.json"
     data = [
         {
-            "id": "c1",
+            "id": "c01",
             "name": "TestCorp",
             "industry": "Tech",
             "financials": {"revenue": 100.0, "valuation": 1000.0},
@@ -68,13 +68,13 @@ def test_cli_compare(tmp_path):
     input_file = tmp_path / "input.json"
     data = [
         {
-            "id": "c1",
+            "id": "c01",
             "name": "Alpha",
             "industry": "Tech",
             "financials": {"revenue": 100.0, "valuation": 1000.0},
         },
         {
-            "id": "c2",
+            "id": "c02",
             "name": "Beta",
             "industry": "Tech",
             "financials": {"revenue": 50.0, "valuation": 500.0},
@@ -83,9 +83,9 @@ def test_cli_compare(tmp_path):
     input_file.write_text(json.dumps(data))
 
     runner = CliRunner()
-    result = runner.invoke(cli, ["compare", "c1", "c2", str(input_file)])
+    result = runner.invoke(cli, ["compare", "c01", "c02", str(input_file)])
     assert result.exit_code == 0
-    assert "Comparing c1 vs c2" in result.output
+    assert "Comparing c01 vs c02" in result.output
     assert "Alpha vs Beta" in result.output
 
 

@@ -19,7 +19,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from solstein.infrastructure.database import Base
+from solstein.infrastructure.database_models import Base
 
 
 class GatheringBatch(Base):

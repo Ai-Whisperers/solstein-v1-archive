@@ -18,7 +18,7 @@ def runner() -> CliRunner:
 def mock_profiles(tmp_path: Path) -> Path:
     profiles = [
         {
-            "id": "c1",
+            "id": "c01",
             "name": "Test1",
             "description": "d1",
             "financials": {"revenue": 1000.0, "growth_rate": 10.0},
@@ -29,7 +29,7 @@ def mock_profiles(tmp_path: Path) -> Path:
             "tech_stack": ["Python"],
         },
         {
-            "id": "c2",
+            "id": "c02",
             "name": "Test2",
             "description": "d2",
             "financials": {"revenue": 500.0, "employees": 50},
@@ -111,7 +111,7 @@ def test_score_command(mock_scorer_cls: MagicMock, runner: CliRunner, mock_profi
 
     # Mock return
     scored = Company(
-        id="x",
+        id="xxx",
         name="X",
         financials=FinancialMetric(),
         growth_score=5.0,
@@ -148,17 +148,17 @@ def test_analyze_market_command(runner: CliRunner, mock_profiles: Path, tmp_path
 
 
 def test_compare_command(runner: CliRunner, mock_profiles: Path, tmp_path: Path) -> None:
-    res = runner.invoke(cli, ["compare", "c1", "c2", str(mock_profiles)])
+    res = runner.invoke(cli, ["compare", "c01", "c02", str(mock_profiles)])
     assert res.exit_code == 0
-    assert "Comparing c1 vs c2" in res.output
+    assert "Comparing c01 vs c02" in res.output
     assert "Revenue" in res.output
 
     # Not found cases
-    res = runner.invoke(cli, ["compare", "invalid", "c2", str(mock_profiles)])
+    res = runner.invoke(cli, ["compare", "invalid", "c02", str(mock_profiles)])
     assert res.exit_code == 0
     assert "Profile not found" in res.output
 
-    res = runner.invoke(cli, ["compare", "c1", "invalid", str(mock_profiles)])
+    res = runner.invoke(cli, ["compare", "c01", "invalid", str(mock_profiles)])
     assert res.exit_code == 0
     assert "Profile not found" in res.output
 

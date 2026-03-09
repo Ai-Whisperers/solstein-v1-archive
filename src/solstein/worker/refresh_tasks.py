@@ -100,8 +100,6 @@ def create_refresh_task(
                 )
                 raise
 
-    # Set the function name for better debugging
-    refresh_task.__name__ = task_name.split(".")[-1]
     return refresh_task
 
 

@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, Any
 
 from ...core.scoring_config import ScoringSettings
 from ...domain.models import (
-    ConfidenceLevel,
     FinancialMetric,
     ScoreComponent,
     ScoringExplanation,
@@ -19,6 +18,8 @@ from ...domain.models import (
 
 if TYPE_CHECKING:
     from ...infrastructure.repositories import FactRepository
+
+from ._shared import merge_facts_into_financials
 
 
 class FinancialHealthScorer:
@@ -49,7 +50,7 @@ class FinancialHealthScorer:
 
         # Merge facts from repository if available
         if fact_repo and company_id:
-            financials = self._merge_facts_into_financials(financials, fact_repo, company_id)
+            financials = merge_facts_into_financials(financials, fact_repo, company_id)
 
         # Apply all scoring components
         score = self._score_revenue_scale(financials, score, explanation, cfg)
@@ -196,70 +197,3 @@ class FinancialHealthScorer:
 
         return score
 
-    def _merge_facts_into_financials(
-        self,
-        financials: FinancialMetric,
-        fact_repo: "FactRepository",
-        company_id: str,
-    ) -> FinancialMetric:
-        """Merge facts from repository into financial metrics.
-
-        Facts override existing metrics only if they have higher confidence.
-
-        Args:
-            financials: Existing financial metrics
-            fact_repo: Repository to fetch facts from
-            company_id: Company ID to fetch facts for
-
-        Returns:
-            Updated FinancialMetric with facts merged in
-        """
-        try:
-            facts = fact_repo.get_company_facts(company_id)
-        except Exception:
-            # If fact retrieval fails, return original financials
-            return financials
-
-        # Map fact types to financial metric fields
-        fact_map = {
-            "annual_revenue": ("revenue", "revenue_confidence"),
-            "revenue_growth_yoy": ("growth_rate", "growth_confidence"),
-            "employee_count": ("employees", "employees_confidence"),
-            "gross_margin": ("profit_margin", "margin_confidence"),
-            "total_funding_raised": ("funding_raised", "funding_confidence"),
-            "company_valuation": ("valuation", "valuation_confidence"),
-        }
-
-        for fact in facts:
-            if fact.fact_type not in fact_map:
-                continue
-
-            metric_field, confidence_field = fact_map[fact.fact_type]
-
-            # Only update if fact has a value
-            if fact.value is not None:
-                # Convert confidence (0.0-1.0) to ConfidenceLevel enum
-                confidence_level = self._confidence_to_level(fact.confidence)
-
-                # Update the metric
-                setattr(financials, metric_field, fact.value)
-                setattr(financials, confidence_field, confidence_level)
-
-        return financials
-
-    @staticmethod
-    def _confidence_to_level(confidence: float) -> ConfidenceLevel:
-        """Convert numeric confidence (0.0-1.0) to ConfidenceLevel enum.
-
-        Args:
-            confidence: Numeric confidence between 0.0 and 1.0
-
-        Returns:
-            ConfidenceLevel enum value (CONFIRMED, ESTIMATED, or UNKNOWN)
-        """
-        if confidence >= 0.9:
-            return ConfidenceLevel.CONFIRMED
-        elif confidence >= 0.7:
-            return ConfidenceLevel.ESTIMATED
-        else:
-            return ConfidenceLevel.UNKNOWN

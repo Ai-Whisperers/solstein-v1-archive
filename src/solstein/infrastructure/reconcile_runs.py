@@ -12,7 +12,8 @@ from solstein.infrastructure.database import db_manager
 from solstein.research.hashing import canonical_json_dumps
 
 from .database_models import OutboxRecord, ResearchArtifactRecord, ResearchRunRecord
-from .research_dual_write import JsonValue, load_research_artifacts
+from .research_dual_write import JsonValue
+from .research_outbox_helpers import load_research_artifacts
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -23,6 +24,12 @@ class ReconciliationError(RuntimeError):
 
 
 def _as_payload_dict(payload: object) -> dict[str, JsonValue] | None:
+    import json
+    if isinstance(payload, str):
+        try:
+            payload = json.loads(payload)
+        except json.JSONDecodeError:
+            pass
     if not isinstance(payload, dict):
         return None
     return {str(key): value for key, value in payload.items()}

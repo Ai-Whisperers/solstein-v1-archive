@@ -10,6 +10,7 @@ from typing import Any
 
 from loguru import logger
 
+_TIER_PROXIMITY_NORMALIZER: float = 3.0
 from ..core.scoring_config import ScoringSettings
 from ..domain.models import (
     Company,
@@ -480,4 +481,4 @@ class CompetitiveOverlapCalculator:
         tier2 = tier_order.get(p2.tier, 2)
 
         distance = abs(tier1 - tier2)
-        return 1.0 - (distance / 3.0)  # Normalize to 0-1
+        return 1.0 - (distance / _TIER_PROXIMITY_NORMALIZER)

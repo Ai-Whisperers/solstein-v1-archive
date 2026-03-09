@@ -137,8 +137,8 @@ Located in: `docs/active/backlog/`
 | EPIC | Title | Priority | Status |
 |------|-------|----------|--------|
 | EPIC-001-security-restoration | Security Restoration | P0 | Not started |
-| EPIC-002-configuration-integrity | Configuration Integrity | P0 | Not started |
-| EPIC-003-core-product-correctness | Core Product Correctness | P0 | Not started |
+| EPIC-002-configuration-integrity | Configuration Integrity | P0 | **Complete** |
+| EPIC-003-core-product-correctness | Core Product Correctness | P0 | **Complete** |
 | EPIC-004-data-integrity-atomicity | Data Integrity Atomicity | P0 | Not started |
 | EPIC-005-dead-code-elimination | Dead Code Elimination | P1 | Not started |
 | EPIC-006-unification-of-duplicates | Unification of Duplicates | P1 | Not started |

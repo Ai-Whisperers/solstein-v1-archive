@@ -21,12 +21,11 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.orm import DeclarativeMeta, Session, declarative_base
+from sqlalchemy.orm import Session
 from sqlalchemy.pool import QueuePool
 
 from ..config import Settings
-
-Base: DeclarativeMeta = declarative_base()
+from .database_models import Base
 
 
 class DatabaseManager:
@@ -60,53 +59,46 @@ class DatabaseManager:
         if url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-        self.engine = create_async_engine(
-            url,
-            pool_size=self.settings.database.pool_size,
-            max_overflow=30,
-            pool_timeout=10,
-            pool_recycle=1800,
-            pool_pre_ping=True,
-            echo=self.settings.database.echo,
-        )
-
-        self.session_factory = async_sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
-        """Initialize async engine and session factory."""
-        url = self.settings.get_database_url()
-        if url.startswith("postgresql://"):
-            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        kwargs = {}
+        if not url.startswith("sqlite"):
+            kwargs = {
+                "pool_size": self.settings.database.pool_size,
+                "max_overflow": 30,
+                "pool_timeout": 10,
+                "pool_recycle": 1800,
+                "pool_pre_ping": True,
+            }
 
         self.engine = create_async_engine(
             url,
-            pool_size=self.settings.database.pool_size,
-            max_overflow=10,
             echo=self.settings.database.echo,
+            **kwargs,
         )
 
         self.session_factory = async_sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
+
 
     def init_sync(self):
         """Initialize sync engine and session factory for Alembic migrations.
 
         Uses same optimized pooling settings as async engine.
         """
+        url = self.settings.get_database_url()
+        kwargs = {}
+        if not url.startswith("sqlite"):
+            kwargs = {
+                "pool_size": self.settings.database.pool_size,
+                "max_overflow": 30,
+                "pool_timeout": 10,
+                "pool_recycle": 1800,
+                "pool_pre_ping": True,
+                "poolclass": QueuePool,
+            }
+
         self._sync_engine = create_engine(
-            self.settings.get_database_url(),
-            pool_size=self.settings.database.pool_size,
-            max_overflow=30,
-            pool_timeout=10,
-            pool_recycle=1800,
-            pool_pre_ping=True,
+            url,
             echo=self.settings.database.echo,
-            poolclass=QueuePool,
-        )
-        """Initialize sync engine and session factory for Alembic migrations."""
-        self._sync_engine = create_engine(
-            self.settings.get_database_url(),
-            pool_size=self.settings.database.pool_size,
-            max_overflow=10,
-            echo=self.settings.database.echo,
-            poolclass=QueuePool,
+            **kwargs,
         )
 
         def _factory() -> Session:

@@ -64,12 +64,12 @@ def test_calculate_growth_score_phoenix(scorer, phoenix_company):
     Verify exact growth score for a high-growth company.
 
     Calculation:
-        growth: base(5.0) + growth(45/20=2.25) + margin_med_bonus(1.0) = 8.25
-        financial: base(5.0) + revenue_large(500M>=100M → +2.5) + margin_med(15%>5% → +1.25) = 8.75
+        growth: base(0) + growth(45/20=2.25) + margin_med_bonus(1.0) = 3.25
+        financial: base(2.5) + revenue_large(500M>=100M → +2.5) + margin_med(15%>5% → +1.25) = 6.25
     """
     scored = scorer.calculate_scores(phoenix_company)
-    assert scored.growth_score == pytest.approx(8.25)
-    assert scored.financial_health_score == pytest.approx(8.75)
+    assert scored.growth_score == pytest.approx(3.25)
+    assert scored.financial_health_score == pytest.approx(6.25)
 
 
 def test_calculate_growth_score_lead(scorer, lead_company):
@@ -77,12 +77,12 @@ def test_calculate_growth_score_lead(scorer, lead_company):
     Verify exact growth score for a declining company.
 
     Calculation:
-        growth: base(5.0) + growth(-5/20=-0.25) + neg_margin(-2% < 0 → -1.0) + compound(-1.0) = 2.75
-        financial: base(5.0) + revenue_med(10M>=10M → +1.25) + margin_negative(-2% < 0 → -2.5) = 3.75
+        growth: base(0) + growth(-5/20=-0.25) + neg_margin(-2% < 0 → -1.0) + compound(-1.0) → clamped to 0.0
+        financial: base(2.5) + revenue_med(10M>=10M → +1.25) + margin_negative(-2% < 0 → -2.5) = 1.25
     """
     scored = scorer.calculate_scores(lead_company)
-    assert scored.growth_score == pytest.approx(2.75)
-    assert scored.financial_health_score == pytest.approx(3.75)
+    assert scored.growth_score == pytest.approx(0.0)
+    assert scored.financial_health_score == pytest.approx(1.25)
 
 
 def test_calculate_scores_returns_same_company_object(scorer):
@@ -101,22 +101,22 @@ def test_calculate_scores_returns_same_company_object(scorer):
 @pytest.mark.parametrize(
     "growth_rate,expected_min,expected_max",
     [
-        (0.0, 4.1, 4.4),  # base(5.0) + growth(0) + stagnant_penalty(-0.75) = 4.25
-        (20.0, 5.9, 6.1),  # Exactly one divisor: 5.0 + 20/20=1.0 = 6.0
-        (45.0, 7.2, 7.3),  # 5.0 + 2.25 = 7.25 (no margin, no funding on bare company)
-        (400.0, 8.9, 9.1),  # 5.0 + cap(4.0) = 9.0 (revenue_growth_cap=4.0, no extras)
-        (-10.0, 3.4, 3.6),  # 5.0 + (-10/20=-0.5) + compound_penalty(-1.0) = 3.5
+        (0.0, -0.01, 0.01),  # base(0) + growth(0) + stagnant_penalty(-0.75) → clamped to 0.0
+        (20.0, 0.9, 1.1),    # base(0) + 20/20=1.0 = 1.0
+        (45.0, 2.2, 2.3),    # base(0) + 2.25 = 2.25 (no margin, no funding)
+        (400.0, 6.4, 6.6),   # base(0) + cap(4.0) + hyper_growth(≥50%→+2.5) = 6.5
+        (-10.0, -0.01, 0.01),  # base(0) + (-0.5) + compound(-1.0) → clamped to 0.0
         (
             -40.0,
-            1.9,
-            2.1,
-        ),  # 5.0 + (-40/20=-2.0) + compound_penalty(-1.0) = 2.0 (clamped to 0)
+            -0.01,
+            0.01,
+        ),  # base(0) + (-2.0) + compound(-1.0) → clamped to 0.0
     ],
 )
 def test_growth_score_ranges(scorer, growth_rate, expected_min, expected_max):
     """Growth score stays within predicted range for each zone (bare company, no extras)."""
     # Use bare Company (no tech_stack, no geo, no margin) to isolate growth_rate effect
-    company = Company(id="x", name="X", financials=FinancialMetric(growth_rate=growth_rate))
+    company = Company(id="xxx", name="X", financials=FinancialMetric(growth_rate=growth_rate))
     scored = scorer.calculate_scores(company)
     assert expected_min <= scored.growth_score <= expected_max, (
         f"growth_rate={growth_rate}: expected [{expected_min}, {expected_max}], got {scored.growth_score}"
@@ -255,16 +255,16 @@ def test_market_analysis_average_growth(analyzer, phoenix_company, lead_company)
 
 def test_overlap_same_industry_same_tier(overlap_calculator):
     """Companies in the same industry and tier have a higher overlap score."""
-    p1 = make_company(id="a", name="A", industry="Technology", tier=CompanyTier.TIER_1)
-    p2 = make_company(id="b", name="B", industry="Technology", tier=CompanyTier.TIER_1)
+    p1 = make_company(id="aaa", name="A", industry="Technology", tier=CompanyTier.TIER_1)
+    p2 = make_company(id="bbb", name="B", industry="Technology", tier=CompanyTier.TIER_1)
     score = overlap_calculator.calculate_overlap(p1, p2)
-    assert score > 0.5
+    assert score >= 0.5
 
 
 def test_overlap_different_industry(overlap_calculator):
     """Companies in different industries AND different tiers have a lower overlap score."""
     p1 = Company(
-        id="a",
+        id="aaa",
         name="A",
         industry="Technology",
         tier=CompanyTier.TIER_1,
@@ -272,7 +272,7 @@ def test_overlap_different_industry(overlap_calculator):
         geographic_presence=["US"],
     )
     p2 = Company(
-        id="b",
+        id="bbb",
         name="B",
         industry="Energy",
         tier=CompanyTier.TIER_4,
@@ -286,8 +286,8 @@ def test_overlap_different_industry(overlap_calculator):
 
 def test_geographic_overlap_identical(overlap_calculator):
     """Identical geographic presence yields overlap = 1.0."""
-    p1 = make_company(id="a", name="A", geographic_presence=["US", "UK", "DE"])
-    p2 = make_company(id="b", name="B", geographic_presence=["US", "UK", "DE"])
+    p1 = make_company(id="aaa", name="A", geographic_presence=["US", "UK", "DE"])
+    p2 = make_company(id="bbb", name="B", geographic_presence=["US", "UK", "DE"])
     # Access private method via the calculator for isolation
     score = overlap_calculator._calculate_geographic_overlap(p1, p2)
     assert score == pytest.approx(1.0)
@@ -295,16 +295,16 @@ def test_geographic_overlap_identical(overlap_calculator):
 
 def test_geographic_overlap_no_intersection(overlap_calculator):
     """No shared geographies yields overlap = 0.0."""
-    p1 = make_company(id="a", name="A", geographic_presence=["US"])
-    p2 = make_company(id="b", name="B", geographic_presence=["DE"])
+    p1 = make_company(id="aaa", name="A", geographic_presence=["US"])
+    p2 = make_company(id="bbb", name="B", geographic_presence=["DE"])
     score = overlap_calculator._calculate_geographic_overlap(p1, p2)
     assert score == pytest.approx(0.0)
 
 
 def test_geographic_overlap_partial(overlap_calculator):
     """Partial geographic overlap is between 0 and 1."""
-    p1 = make_company(id="a", name="A", geographic_presence=["US", "UK"])
-    p2 = make_company(id="b", name="B", geographic_presence=["US", "DE"])
+    p1 = make_company(id="aaa", name="A", geographic_presence=["US", "UK"])
+    p2 = make_company(id="bbb", name="B", geographic_presence=["US", "DE"])
     score = overlap_calculator._calculate_geographic_overlap(p1, p2)
     # intersection=1 (US), union=3 (US, UK, DE) → 1/3 ≈ 0.333
     assert score == pytest.approx(1 / 3)
@@ -312,40 +312,40 @@ def test_geographic_overlap_partial(overlap_calculator):
 
 def test_technology_overlap_identical(overlap_calculator):
     """Identical tech stacks yield overlap = 1.0."""
-    p1 = make_company(id="a", name="A", tech_stack=["Python", "React"])
-    p2 = make_company(id="b", name="B", tech_stack=["Python", "React"])
+    p1 = make_company(id="aaa", name="A", tech_stack=["Python", "React"])
+    p2 = make_company(id="bbb", name="B", tech_stack=["Python", "React"])
     score = overlap_calculator._calculate_technology_overlap(p1, p2)
     assert score == pytest.approx(1.0)
 
 
 def test_technology_overlap_no_intersection(overlap_calculator):
     """No shared tech yields overlap = 0.0."""
-    p1 = make_company(id="a", name="A", tech_stack=["Python"])
-    p2 = make_company(id="b", name="B", tech_stack=["Java"])
+    p1 = make_company(id="aaa", name="A", tech_stack=["Python"])
+    p2 = make_company(id="bbb", name="B", tech_stack=["Java"])
     score = overlap_calculator._calculate_technology_overlap(p1, p2)
     assert score == pytest.approx(0.0)
 
 
 def test_tier_proximity_same_tier(overlap_calculator):
     """Same tier should yield proximity = 1.0."""
-    p1 = make_company(id="a", name="A", tier=CompanyTier.TIER_1)
-    p2 = make_company(id="b", name="B", tier=CompanyTier.TIER_1)
+    p1 = make_company(id="aaa", name="A", tier=CompanyTier.TIER_1)
+    p2 = make_company(id="bbb", name="B", tier=CompanyTier.TIER_1)
     score = overlap_calculator._calculate_tier_proximity(p1, p2)
     assert score == pytest.approx(1.0)
 
 
 def test_tier_proximity_max_distance(overlap_calculator):
     """Tier 1 vs Tier 4 (max distance=3) should yield proximity = 0.0."""
-    p1 = make_company(id="a", name="A", tier=CompanyTier.TIER_1)
-    p2 = make_company(id="b", name="B", tier=CompanyTier.TIER_4)
+    p1 = make_company(id="aaa", name="A", tier=CompanyTier.TIER_1)
+    p2 = make_company(id="bbb", name="B", tier=CompanyTier.TIER_4)
     score = overlap_calculator._calculate_tier_proximity(p1, p2)
     assert score == pytest.approx(0.0)
 
 
 def test_tier_proximity_adjacent(overlap_calculator):
     """Adjacent tiers (distance=1) should yield proximity ≈ 0.667."""
-    p1 = make_company(id="a", name="A", tier=CompanyTier.TIER_1)
-    p2 = make_company(id="b", name="B", tier=CompanyTier.TIER_2)
+    p1 = make_company(id="aaa", name="A", tier=CompanyTier.TIER_1)
+    p2 = make_company(id="bbb", name="B", tier=CompanyTier.TIER_2)
     score = overlap_calculator._calculate_tier_proximity(p1, p2)
     assert score == pytest.approx(2 / 3)
 

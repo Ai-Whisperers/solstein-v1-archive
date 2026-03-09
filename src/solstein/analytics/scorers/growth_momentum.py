@@ -1,21 +1,23 @@
-"""Growth momentum scorer: revenue growth, employee efficiency, funding momentum.
-
-This scorer integrates both traditional financial metrics and facts from the
-facts repository (SEC EDGAR, Companies House, news signals) to calculate a
-comprehensive growth momentum score.
-"""
 
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING, Any
 
 from ...core.scoring_config import ScoringSettings
-from ...domain.models import ConfidenceLevel, FinancialMetric, ScoreComponent, ScoringExplanation
+from ...domain.models import FinancialMetric, ScoreComponent, ScoringExplanation
 
 if TYPE_CHECKING:
     from ...infrastructure.repositories import FactRepository
+from ._shared import merge_facts_into_financials
 
+
+_STAGNANT_GROWTH_UPPER: float = 5.0
+_BELOW_AVERAGE_GROWTH_UPPER: float = 10.0
+_HYPER_GROWTH_THRESHOLD: float = 50.0
+_STAGNANT_GROWTH_PENALTY: float = -0.75
+_BELOW_AVERAGE_GROWTH_PENALTY: float = -0.25
+_HYPER_GROWTH_BONUS: float = 2.5
+_COMPOUND_RISK_PENALTY: float = -1.0
 
 class GrowthMomentumScorer:
     """Score company growth momentum (revenue growth, employee efficiency, funding)."""
@@ -45,7 +47,7 @@ class GrowthMomentumScorer:
 
         # Merge facts from repository if available
         if fact_repo and company_id:
-            financials = self._merge_facts_into_financials(financials, fact_repo, company_id)
+            financials = merge_facts_into_financials(financials, fact_repo, company_id)
 
         # Apply all scoring components
         score = self._score_growth_rate(financials, score, explanation, cfg)
@@ -77,22 +79,22 @@ class GrowthMomentumScorer:
         score += growth_factor
 
         # Apply growth penalties
-        if 0 <= growth_rate < 5:
-            score -= 0.75
+        if 0 <= growth_rate < _STAGNANT_GROWTH_UPPER:
+            score += _STAGNANT_GROWTH_PENALTY
             explanation.components.append(
                 ScoreComponent(
                     name="Stagnant Growth Penalty",
-                    value=-0.75,
+                    value=_STAGNANT_GROWTH_PENALTY,
                     formula="growth_rate < 5% → -0.75",
                     reasoning="Growth rate below 5% indicates stagnation.",
                 )
             )
-        elif 5 <= growth_rate < 10:
-            score -= 0.25
+        elif _STAGNANT_GROWTH_UPPER <= growth_rate < _BELOW_AVERAGE_GROWTH_UPPER:
+            score += _BELOW_AVERAGE_GROWTH_PENALTY
             explanation.components.append(
                 ScoreComponent(
                     name="Below-Average Growth Penalty",
-                    value=-0.25,
+                    value=_BELOW_AVERAGE_GROWTH_PENALTY,
                     formula="growth_rate 5-10% → -0.25",
                     reasoning="Growth rate below 10% is below sector average.",
                 )
@@ -109,12 +111,12 @@ class GrowthMomentumScorer:
             )
         )
 
-        if growth_rate >= 50:
-            score += 2.5
+        if growth_rate >= _HYPER_GROWTH_THRESHOLD:
+            score += _HYPER_GROWTH_BONUS
             explanation.components.append(
                 ScoreComponent(
                     name="Hyper-Growth Bonus",
-                    value=2.5,
+                    value=_HYPER_GROWTH_BONUS,
                     formula="growth_rate >= 50% → +2.5",
                     reasoning="Exceptional growth rate indicates hyper-growth momentum.",
                 )
@@ -229,11 +231,11 @@ class GrowthMomentumScorer:
     ) -> float:
         """Apply compound penalties for high-risk combinations."""
         if financials.growth_rate is not None and financials.growth_rate < 0 and not financials.funding_raised:
-            score -= 1.0
+            score += _COMPOUND_RISK_PENALTY
             explanation.components.append(
                 ScoreComponent(
                     name="Compound Risk Penalty",
-                    value=-1.0,
+                    value=_COMPOUND_RISK_PENALTY,
                     formula="growth_rate < 0 AND no_funding → -1.0",
                     reasoning="Negative growth with no funding raises serious viability concerns.",
                 )
@@ -241,74 +243,3 @@ class GrowthMomentumScorer:
 
         return score
 
-    def _merge_facts_into_financials(
-        self,
-        financials: FinancialMetric,
-        fact_repo: "FactRepository",
-        company_id: str,
-    ) -> FinancialMetric:
-        """Merge facts from repository into financial metrics.
-
-        Facts override existing metrics only if they have higher confidence.
-
-        Args:
-            financials: Existing financial metrics
-            fact_repo: Repository to fetch facts from
-            company_id: Company ID to fetch facts for
-
-        Returns:
-            Updated FinancialMetric with facts merged in
-        """
-        try:
-            facts_result = fact_repo.get_company_facts(company_id)
-        except Exception:
-            return financials
-
-        if asyncio.iscoroutine(facts_result):
-            return financials
-
-        facts: list[Any] = list(facts_result)
-
-        # Map fact types to financial metric fields
-        fact_map = {
-            "annual_revenue": ("revenue", "revenue_confidence"),
-            "revenue_growth_yoy": ("growth_rate", "growth_confidence"),
-            "employee_count": ("employees", "employees_confidence"),
-            "gross_margin": ("profit_margin", "margin_confidence"),
-            "total_funding_raised": ("funding_raised", "funding_confidence"),
-            "company_valuation": ("valuation", "valuation_confidence"),
-        }
-
-        for fact in facts:
-            if fact.fact_type not in fact_map:
-                continue
-
-            metric_field, confidence_field = fact_map[fact.fact_type]
-
-            # Only update if fact has a value
-            if fact.value is not None:
-                # Convert confidence (0.0-1.0) to ConfidenceLevel enum
-                confidence_level = self._confidence_to_level(fact.confidence)
-
-                # Update the metric
-                setattr(financials, metric_field, fact.value)
-                setattr(financials, confidence_field, confidence_level)
-
-        return financials
-
-    @staticmethod
-    def _confidence_to_level(confidence: float) -> ConfidenceLevel:
-        """Convert numeric confidence (0.0-1.0) to ConfidenceLevel enum.
-
-        Args:
-            confidence: Numeric confidence between 0.0 and 1.0
-
-        Returns:
-            ConfidenceLevel enum value (CONFIRMED, ESTIMATED, or UNKNOWN)
-        """
-        if confidence >= 0.9:
-            return ConfidenceLevel.CONFIRMED
-        elif confidence >= 0.7:
-            return ConfidenceLevel.ESTIMATED
-        else:
-            return ConfidenceLevel.UNKNOWN

@@ -11,7 +11,7 @@ from unittest.mock import patch
 import pytest
 from loguru import logger
 
-from solstein.config import APIConfig, ConfigurationError, DEFAULT_INSECURE_SECRET, SecurityConfig, Settings
+from solstein.config import APIConfig, ConfigurationError, SecurityConfig, Settings
 
 
 class TestConfigurationValidation:
@@ -42,14 +42,12 @@ class TestConfigurationValidation:
                 logger.remove(handler_id)
 
     def test_check_configuration_requires_github_token(self):
-        """Verify that GITHUB_TOKEN is required and raises ConfigurationError."""
-        with patch.dict(os.environ, {}, clear=True):
-            settings = Settings()
-            with pytest.raises(ConfigurationError) as exc_info:
-                settings.check_configuration()
+        settings = Settings().model_copy(update={"github_token": None})
+        with pytest.raises(ConfigurationError) as exc_info:
+            settings.check_configuration()
 
-            assert "GITHUB_TOKEN environment variable is required" in str(exc_info.value)
-            assert "https://github.com/settings/tokens" in str(exc_info.value)
+        assert "GITHUB_TOKEN environment variable is required" in str(exc_info.value)
+        assert "https://github.com/settings/tokens" in str(exc_info.value)
 
     def test_check_configuration_warns_missing_companies_house_key(self):
         """Verify that missing COMPANIES_HOUSE_API_KEY triggers a warning, not error."""
@@ -131,16 +129,11 @@ class TestConfigurationValidation:
             assert "GITHUB_TOKEN environment variable is required" in str(exc_info.value)
 
     def test_check_configuration_github_token_whitespace_only(self):
-        with patch.dict(
-            os.environ,
-            {"GITHUB_TOKEN": "   "},
-            clear=True,
-        ):
-            settings = Settings()
-            with pytest.raises(ConfigurationError) as exc_info:
-                settings.check_configuration()
+        settings = Settings().model_copy(update={"github_token": "   "})
+        with pytest.raises(ConfigurationError) as exc_info:
+            settings.check_configuration()
 
-            assert "GITHUB_TOKEN environment variable is required" in str(exc_info.value)
+        assert "GITHUB_TOKEN environment variable is required" in str(exc_info.value)
 
     def test_check_configuration_idempotent(self):
         """Verify that check_configuration can be called multiple times safely."""
@@ -197,21 +190,14 @@ class TestConfigurationValidation:
                 logger.remove(handler_id)
 
     def test_check_configuration_error_message_is_actionable(self):
-        """Verify that ConfigurationError message provides actionable guidance."""
-        with patch.dict(os.environ, {}, clear=True):
-            settings = Settings()
-            with pytest.raises(ConfigurationError) as exc_info:
-                settings.check_configuration()
+        settings = Settings().model_copy(update={"github_token": None})
+        with pytest.raises(ConfigurationError) as exc_info:
+            settings.check_configuration()
 
-            error_message = str(exc_info.value)
-            # Error must include:
-            # 1. What's wrong
-            assert "GITHUB_TOKEN" in error_message
-            # 2. Why it matters (implicit in the error)
-            # 3. Where to get help
-            assert "https://github.com/settings/tokens" in error_message
-            # 4. What to do (implicit in "Please set it")
-            assert "set it before starting" in error_message.lower()
+        error_message = str(exc_info.value)
+        assert "GITHUB_TOKEN" in error_message
+        assert "https://github.com/settings/tokens" in error_message
+        assert "set it before starting" in error_message.lower()
 
     def test_check_configuration_logs_at_info_level_on_success(self):
         """Verify that successful validation is logged at INFO level."""
@@ -264,7 +250,7 @@ class TestConfigurationValidation:
         ):
             settings = Settings(
                 environment="production",
-                security=SecurityConfig(secret_key=DEFAULT_INSECURE_SECRET),
+                security=SecurityConfig(secret_key=""),
             )
             with pytest.raises(ConfigurationError) as exc_info:
                 settings.check_configuration()

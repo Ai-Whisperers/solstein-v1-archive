@@ -147,8 +147,8 @@ def export_excel(input_file: Path, output_file: Path, template: Path | None) -> 
         exporter.create_dashboard(domain_companies, output_file)
 
         click.echo(f"✅ Dashboard created: {output_file}")
-    except (json.JSONDecodeError, ValidationError, ValueError, TypeError, RuntimeError, OSError) as e:
-        click.echo(f"❌ Failed to create dashboard: {e}", err=True)
+    except Exception as e:
+        click.echo(f"❌ Failed to create dashboard: {e}")
         raise click.Abort() from e
 
 
@@ -187,8 +187,8 @@ def score(input_file: Path, output: Path | None) -> None:
             output.write_text(json.dumps(output_data, indent=2, default=str))
             click.echo(f"💾 Saved scored profiles to {output}")
 
-    except (json.JSONDecodeError, ValidationError, ValueError, TypeError, RuntimeError, OSError) as e:
-        click.echo(f"❌ Failed to calculate scores: {e}", err=True)
+    except Exception as e:
+        click.echo(f"❌ Failed to calculate scores: {e}")
         raise click.Abort() from e
 
 

@@ -13,7 +13,8 @@ from datetime import datetime
 
 from solstein.domain.models import Company, FinancialMetric
 from solstein.exporters.csv import CSVExporter
-from solstein.exporters.excel_improved import ImprovedExcelExporter, LayoutConstants, ColorPalette
+from solstein.exporters.excel_improved import ImprovedExcelExporter
+from solstein.exporters.excel.styles import LayoutConstants, ColorPalette
 
 
 class TestCSVExporterSnapshots:

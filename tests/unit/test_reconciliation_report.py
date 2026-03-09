@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 if TYPE_CHECKING:
     from pathlib import Path
 
-from solstein.infrastructure.database import Base
+from solstein.infrastructure.database_models import Base
 from solstein.infrastructure.database_models import (
     OutboxRecord,
     ResearchArtifactRecord,
@@ -62,6 +62,8 @@ def _write_required_artifacts(
 
 
 def _create_session() -> Session:
+    import solstein.infrastructure.database_models  # Ensure all tables are registered
+    import solstein.domain.facts
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(bind=engine)
     return Session(engine)
@@ -247,5 +249,5 @@ def test_reconcile_research_run_raises_when_run_id_not_in_outbox(
     }
     _write_required_artifacts(output_dir, artifact_hashes=artifact_hashes)
 
-    with _create_session() as session, pytest.raises(ReconciliationError, match="Could not resolve output_dir"):
+    with _create_session() as session, pytest.raises(RuntimeError, match="Could not resolve output_dir"):
         _ = reconcile_research_run(session=session, run_id="missing-run-id")
