@@ -189,6 +189,23 @@ class DeadCodeDetector:
 
         return utilization
 
+    def get_structural_checks(self) -> dict[str, bool]:
+        refresh_router_path = self.src_path / "api" / "routes" / "refresh.py"
+        main_api_path = self.src_path / "api" / "main.py"
+        worker_tasks_v2_path = self.src_path / "worker_tasks_v2.py"
+
+        refresh_router_exists = refresh_router_path.exists()
+        refresh_router_connected = False
+        if refresh_router_exists and main_api_path.exists():
+            content = main_api_path.read_text(encoding="utf-8")
+            refresh_router_connected = "routes.refresh" in content or "refresh_router" in content
+
+        return {
+            "refresh_router_exists": refresh_router_exists,
+            "refresh_router_connected": refresh_router_connected,
+            "worker_tasks_v2_exists": worker_tasks_v2_path.exists(),
+        }
+
     def print_report(self) -> bool:
         """Print dead code report. Returns True if dead code found."""
         print("=" * 80)
@@ -243,7 +260,22 @@ class DeadCodeDetector:
             print("   - Removing truly dead code")
             print("   - Better documenting module usage")
 
-        return len(self.dead_code) > 0
+        structural_checks = self.get_structural_checks()
+        print("\n" + "=" * 80)
+        print("EPIC-037 STRUCTURAL CHECKS")
+        print("=" * 80)
+        print(f"refresh_router_exists: {structural_checks['refresh_router_exists']}")
+        print(f"refresh_router_connected: {structural_checks['refresh_router_connected']}")
+        print(f"worker_tasks_v2_exists: {structural_checks['worker_tasks_v2_exists']}")
+
+        structural_issue = (
+            structural_checks["refresh_router_exists"] and not structural_checks["refresh_router_connected"]
+        ) or structural_checks["worker_tasks_v2_exists"]
+
+        if structural_issue:
+            print("⚠️  Structural dead-code risks detected (EPIC-037)")
+
+        return len(self.dead_code) > 0 or structural_issue
 
 
 def main():
@@ -267,6 +299,7 @@ def main():
             "dead_code": dead_code,
             "helper_utilization": utilization,
             "avg_utilization": sum(utilization.values()) / len(utilization) if utilization else 0,
+            "structural_checks": detector.get_structural_checks(),
         }
         print(json.dumps(output, indent=2))
         sys.exit(0)

@@ -270,6 +270,10 @@ def analyze_company(company_id: str) -> AnalysisResult:
 logger.info("Processing company", company_id=company_id)
 ```
 
+### Exception Standards
+- Use `docs/standards/exception-handling.md` as the canonical exception policy.
+- Apply the checklist in `docs/reference/code-review-checklist.md` during review.
+
 ## Database
 
 ### Connection

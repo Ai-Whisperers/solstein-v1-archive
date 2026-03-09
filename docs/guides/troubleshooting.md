@@ -171,6 +171,9 @@ curl -v http://localhost:8000/companies
 # 1. Check if Redis is running
 redis-cli ping  # Should return PONG
 
+# 1b. Check Python Redis client
+.venv/bin/python3 -c "import redis"  # Should exit 0
+
 # 2. Check if Celery worker is running
 ps aux | grep celery
 
@@ -1011,6 +1014,7 @@ curl -i http://localhost:8000/health
    ```bash
    redis-cli ping
    # Should return: PONG
+   .venv/bin/python3 -c "import redis"
    ```
 
 2. **Check rate limit configuration**:
@@ -1066,6 +1070,7 @@ curl http://localhost:8000/health | jq .
 2. **Cache down**: Check Redis
    ```bash
    redis-cli ping
+   .venv/bin/python3 -c "import redis"
    ```
 
 3. **Connector down**: Check external API
