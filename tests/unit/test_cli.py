@@ -6,6 +6,7 @@ import json
 
 from click.testing import CliRunner
 
+import solstein.cli as cli_module
 from solstein.cli import cli
 
 
@@ -145,3 +146,117 @@ def test_cli_compare_rejects_unknown_object_payload(tmp_path):
 
     assert result.exit_code != 0
     assert "Unsupported input format" in result.output
+
+
+def test_cli_analyze_market_accepts_wrapped_companies_payload(tmp_path):
+    input_file = tmp_path / "wrapped_companies.json"
+    wrapped_data = {
+        "companies": [
+            {
+                "id": "cmp-101",
+                "name": "Gamma",
+                "industry": "Tech",
+                "financials": {"revenue": 120.0, "valuation": 900.0},
+            }
+        ]
+    }
+    input_file.write_text(json.dumps(wrapped_data))
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["analyze-market", str(input_file), "-n", "Wrapped Market"])
+
+    assert result.exit_code == 0
+    assert "Analyzing market: Wrapped Market" in result.output
+    assert "Companies: 1" in result.output
+
+
+def test_cli_export_excel_rejects_unknown_object_payload(tmp_path):
+    input_file = tmp_path / "invalid_export_payload.json"
+    output_file = tmp_path / "out.xlsx"
+    input_file.write_text(json.dumps({"unexpected": []}))
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["export-excel", str(input_file), str(output_file)])
+
+    assert result.exit_code != 0
+    assert "Unsupported input format" in result.output
+
+
+def test_generate_report_default_output_dir_not_company_nested(monkeypatch):
+    captured = {}
+
+    class DummyScorer:
+        def calculate_scores(self, company):
+            return company
+
+    class DummyLoader:
+        def load_competitors(self, _path=None):
+            return [
+                cli_module.Company(
+                    id="cmp-201", name="Acme", industry="Tech", financials={"revenue": 100.0, "valuation": 500.0}
+                ),
+                cli_module.Company(
+                    id="cmp-202", name="Beta", industry="Tech", financials={"revenue": 80.0, "valuation": 450.0}
+                ),
+            ]
+
+        def load_companies(self, _path=None):
+            return self.load_competitors(_path)
+
+    class DummyGenerator:
+        def __init__(self, output_dir):
+            captured["output_dir"] = str(output_dir)
+
+        def generate_client_report(self, _target, _competitors):
+            return {"client_report": "ok"}
+
+    monkeypatch.setattr(cli_module, "CompetitorDataLoader", DummyLoader)
+    monkeypatch.setattr(cli_module, "GrowthScorer", DummyScorer)
+    monkeypatch.setattr(cli_module, "assert_client_report_ready", lambda *_, **__: None)
+    monkeypatch.setattr(cli_module, "ClientReportGenerator", DummyGenerator)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["generate-report", "Acme"])
+
+    assert result.exit_code == 0
+    assert captured["output_dir"] == "data/output/reports"
+
+
+def test_generate_llm_report_default_output_dir_not_company_nested(monkeypatch):
+    captured = {}
+
+    class DummyScorer:
+        def calculate_scores(self, company):
+            return company
+
+    class DummyLoader:
+        def load_competitors(self, _path=None):
+            return [
+                cli_module.Company(
+                    id="cmp-301", name="Acme", industry="Tech", financials={"revenue": 100.0, "valuation": 500.0}
+                ),
+                cli_module.Company(
+                    id="cmp-302", name="Beta", industry="Tech", financials={"revenue": 80.0, "valuation": 450.0}
+                ),
+            ]
+
+        def load_companies(self, _path=None):
+            return self.load_competitors(_path)
+
+    class DummyGenerator:
+        def __init__(self, output_dir):
+            captured["output_dir"] = str(output_dir)
+
+        def generate_client_report(self, _target, _competitors):
+            return {"client_report": "ok"}
+
+    monkeypatch.setattr(cli_module, "CompetitorDataLoader", DummyLoader)
+    monkeypatch.setattr(cli_module, "GrowthScorer", DummyScorer)
+    monkeypatch.setattr(cli_module, "assert_client_report_ready", lambda *_, **__: None)
+    monkeypatch.setattr(cli_module, "ClientReportGenerator", DummyGenerator)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["generate-llm-report", "Acme", "--no-llm"])
+
+    assert result.exit_code == 0
+    assert captured["output_dir"] == "data/output/reports/llm"

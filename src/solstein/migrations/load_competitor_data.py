@@ -22,6 +22,54 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
+def _parse_float(value: object) -> float | None:
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    return None
+
+
+def _build_company_record(competitor: dict[str, object]) -> CompanyRecord:
+    profitability = competitor.get("profitability")
+    profitability_data = profitability if isinstance(profitability, dict) else {}
+
+    revenue = competitor.get("revenue")
+    revenue_data = revenue if isinstance(revenue, dict) else {}
+    timeline = revenue_data.get("timeline")
+    timeline_data = timeline if isinstance(timeline, list) else []
+    latest_timeline = timeline_data[-1] if timeline_data and isinstance(timeline_data[-1], dict) else {}
+
+    return CompanyRecord(
+        company_id=str(uuid.uuid4()),
+        name=str(competitor.get("company_name") or "unknown"),
+        industry=str(competitor.get("industry") or "Energy Software"),
+        description=str(competitor.get("description") or "") or None,
+        website=str(competitor.get("website") or "") or None,
+        headquarters=str(competitor.get("country") or "") or None,
+        founded_year=competitor.get("founded_year") if isinstance(competitor.get("founded_year"), int) else None,
+        classification=str(competitor.get("classification") or "") or None,
+        ai_maturity=str(competitor.get("ai_maturity") or "") or None,
+        ai_score=_parse_float(competitor.get("ai_score")),
+        revenue_eur_m=_parse_float(latest_timeline.get("eur_millions")),
+        growth_rate_pct=_parse_float(competitor.get("growth_rate")),
+        profit_margin_pct=_parse_float(competitor.get("profit_margin")),
+        ebitda_margin_pct=_parse_float(profitability_data.get("ebitda_margin_pct")),
+        recurring_revenue_pct=_parse_float(profitability_data.get("recurring_revenue_pct")),
+        revenue_per_employee_eur_k=_parse_float(profitability_data.get("revenue_per_employee_eur_k")),
+        revenue_timeline=timeline_data,
+        revenue_cagr_3yr=_parse_float(revenue_data.get("cagr_3yr_pct")),
+        revenue_cagr_5yr=_parse_float(revenue_data.get("cagr_5yr_pct")),
+        total_funding_raised_eur=_parse_float(competitor.get("funding_raised")),
+        latest_valuation_eur=_parse_float(competitor.get("valuation")),
+        employee_count=competitor.get("employees") if isinstance(competitor.get("employees"), int) else None,
+        profitability_raw_metrics=profitability_data,
+        data_source="competitor_data.json",
+        created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        last_updated=datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+
+
 async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
     """
     Load competitor data from JSON file into PostgreSQL.
@@ -68,44 +116,7 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
                     logger.info(f"Company '{company_name}' already exists, skipping")
                     continue
 
-                # Create company record
-                company = CompanyRecord(
-                    company_id=str(uuid.uuid4()),
-                    name=company_name,
-                    industry=competitor.get("industry", "Energy Software"),
-                    description=competitor.get("description"),
-                    website=competitor.get("website"),
-                    headquarters=competitor.get("country"),
-                    founded_year=competitor.get("founded_year"),
-                    # Positioning
-                    classification=competitor.get("classification"),
-                    # Tech maturity
-                    ai_maturity=competitor.get("ai_maturity"),
-                    ai_score=int(competitor.get("ai_score", 0)) if competitor.get("ai_score") else None,
-                    # Financials (latest)
-                    revenue_eur_m=competitor.get("revenue", {}).get("timeline", [{}])[-1].get("eur_millions"),
-                    growth_rate_pct=competitor.get("growth_rate"),
-                    profit_margin_pct=competitor.get("profit_margin"),
-                    ebitda_margin_pct=competitor.get("profitability", {}).get("ebitda_margin_pct"),
-                    recurring_revenue_pct=competitor.get("profitability", {}).get("recurring_revenue_pct"),
-                    revenue_per_employee_eur_k=competitor.get("profitability", {}).get("revenue_per_employee_eur_k"),
-                    # Revenue timeline
-                    revenue_timeline=competitor.get("revenue", {}).get("timeline"),
-                    revenue_cagr_3yr=competitor.get("revenue", {}).get("cagr_3yr_pct"),
-                    revenue_cagr_5yr=competitor.get("revenue", {}).get("cagr_5yr_pct"),
-                    # Funding
-                    total_funding_raised_eur=competitor.get("funding_raised"),
-                    latest_valuation_eur=competitor.get("valuation"),
-                    # Employees
-                    employee_count=competitor.get("employees"),
-                    # Raw profitability metrics
-                    profitability_raw_metrics=competitor.get("profitability"),
-                    # Data quality
-                    data_source="competitor_data.json",
-                    # Metadata
-                    created_at=datetime.now(timezone.utc).replace(tzinfo=None),
-                    last_updated=datetime.now(timezone.utc).replace(tzinfo=None),
-                )
+                company = _build_company_record(competitor)
 
                 companies_to_add.append(company)
                 logger.info(f"Prepared company: {company_name}")
@@ -130,6 +141,7 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
         for company in companies:
             logger.info(
                 f"  - {company.name} ({company.country}): "
+                f"  - {company.name} ({company.headquarters}): "
                 f"Revenue: {company.revenue_eur_m}M EUR, "
                 f"Employees: {company.employee_count}, "
                 f"Classification: {company.classification}"

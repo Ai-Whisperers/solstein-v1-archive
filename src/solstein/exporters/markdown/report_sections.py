@@ -7,10 +7,14 @@ Each method generates one section of the competitive analysis report.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Protocol
 
 if TYPE_CHECKING:
     from solstein.domain.models import Company
+
+
+class _FormatterLike(Protocol):
+    def format_score(self, value: float | None) -> str: ...
 
 
 def _fmt_float(value: float | None) -> str:
@@ -21,7 +25,7 @@ def _fmt_float(value: float | None) -> str:
 class ReportSectionGenerator:
     """Generate individual sections of the competitive analysis report."""
 
-    def __init__(self, formatter):
+    def __init__(self, formatter: _FormatterLike):
         self.formatter = formatter
 
     def generate_executive_summary(
@@ -50,7 +54,7 @@ companies in the {client.industry or "energy software"} market.
 
 ### Key Findings
 
-- **Current Position**: {client.classification or "N/A"} ({client.composite_score or "N/A"}/10)
+- **Current Position**: {client.classification or "N/A"} ({_fmt_float(client.composite_score)}/10)
 - **Revenue**: €{client.financials.revenue or 0:.1f}M (CAGR: {client.revenue_cagr_3yr or "N/A"}%)
 - **Competitive Threats**: {len(threats)} companies with higher composite scores
 - **AI Gap**: {client.ai_score or 0}/10 (Market avg: {_fmt_float(ai_market_avg)})
@@ -62,11 +66,11 @@ companies in the {client.industry or "energy software"} market.
         self,
         client: "Company",
         competitors: list["Company"],
-        rank_revenue_fn,
-        rank_growth_fn,
-        rank_score_fn,
-        rank_ai_fn,
-        rank_saas_fn,
+        rank_revenue_fn: Callable[["Company", list["Company"]], object],
+        rank_growth_fn: Callable[["Company", list["Company"]], object],
+        rank_score_fn: Callable[["Company", list["Company"]], object],
+        rank_ai_fn: Callable[["Company", list["Company"]], object],
+        rank_saas_fn: Callable[["Company", list["Company"]], object],
     ) -> str:
         """Generate client profile section."""
         return f"""## Client Profile
@@ -75,9 +79,9 @@ companies in the {client.industry or "energy software"} market.
 |---|---|---|
 | Revenue | €{client.financials.revenue or 0:.1f}M | {rank_revenue_fn(client, competitors)} |
 | Growth (CAGR) | {client.revenue_cagr_3yr or "N/A"}% | {rank_growth_fn(client, competitors)} |
-| Composite Score | {client.composite_score or "N/A"} | {rank_score_fn(client, competitors)} |
-| AI Score | {client.ai_score or "N/A"}/10 | {rank_ai_fn(client, competitors)} |
-| SaaS Maturity | {client.saas_maturity or "N/A"}/10 | {rank_saas_fn(client, competitors)} |
+| Composite Score | {_fmt_float(client.composite_score)} | {rank_score_fn(client, competitors)} |
+| AI Score | {_fmt_float(client.ai_score)}/10 | {rank_ai_fn(client, competitors)} |
+| SaaS Maturity | {_fmt_float(client.saas_maturity)}/10 | {rank_saas_fn(client, competitors)} |
 
 ---
 """
@@ -108,10 +112,10 @@ companies in the {client.industry or "energy software"} market.
 
 | Dimension | {client.name} | Market Avg | Top Performer |
 |---|---|---|---|
-| Growth Score | {client.growth_score or "N/A"} | {_fmt_float(growth_market_avg)} | {_fmt_float(growth_top)} |
-| Financial Health | {client.financial_health_score or "N/A"} | {_fmt_float(health_market_avg)} | {_fmt_float(health_top)} |
+| Growth Score | {_fmt_float(client.growth_score)} | {_fmt_float(growth_market_avg)} | {_fmt_float(growth_top)} |
+| Financial Health | {_fmt_float(client.financial_health_score)} | {_fmt_float(health_market_avg)} | {_fmt_float(health_top)} |
 | Competitive Position | {self.formatter.format_score(client.competitive_position_score)} | {_fmt_float(position_market_avg)} | {_fmt_float(position_top)} |
-| Composite | {client.composite_score or "N/A"} | {_fmt_float(composite_market_avg)} | {_fmt_float(composite_top)} |
+| Composite | {_fmt_float(client.composite_score)} | {_fmt_float(composite_market_avg)} | {_fmt_float(composite_top)} |
 | Revenue CAGR | {client.revenue_cagr_3yr or "N/A"}% | {self._avg([c.revenue_cagr_3yr for c in sorted_comp if c.revenue_cagr_3yr]):.1f}% | {max([c.revenue_cagr_3yr for c in sorted_comp if c.revenue_cagr_3yr], default=0):.1f}% |
 
 ---
@@ -136,7 +140,7 @@ These companies operate in the same tier with similar market positioning:
 |---|---|---|---|---|---|---|
 """
         for c in direct:
-            section += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {c.ai_score or 'N/A'}/10 | {c.saas_maturity or 'N/A'}/10 | {c.classification or 'N/A'} |\n"
+            section += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {_fmt_float(c.composite_score)} | {_fmt_float(c.ai_score)}/10 | {_fmt_float(c.saas_maturity)}/10 | {c.classification or 'N/A'} |\n"
 
         return section
 
@@ -155,8 +159,8 @@ These companies operate in the same tier with similar market positioning:
 """
         for c in direct:
             section += f"""**{c.name}** ({c.classification or "Unknown"})
-- Revenue: €{c.financials.revenue or 0:.1f}M | CAGR: {c.revenue_cagr_3yr or "N/A"}% | Score: {c.composite_score or "N/A"}/10
-- AI Maturity: {c.ai_score or "N/A"}/10 | SaaS Maturity: {c.saas_maturity or "N/A"}/10
+- Revenue: €{c.financials.revenue or 0:.1f}M | CAGR: {c.revenue_cagr_3yr or "N/A"}% | Score: {_fmt_float(c.composite_score)}/10
+- AI Maturity: {_fmt_float(c.ai_score)}/10 | SaaS Maturity: {_fmt_float(c.saas_maturity)}/10
 """
             # Add relative positioning
             if c.composite_score and client.composite_score:
@@ -195,7 +199,7 @@ Companies with superior composite scores that could disrupt market position:
             for c in threats:
                 score_diff = (c.composite_score or 0) - (client.composite_score or 0)
                 threat = "High" if score_diff > 2 else "Medium" if score_diff > 1 else "Low"
-                section += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {threat} |\n"
+                section += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {_fmt_float(c.composite_score)} | {threat} |\n"
         else:
             section += "| *No companies with higher scores* | - | - | - | *N/A* |\n"
 
@@ -223,7 +227,7 @@ All competitors ranked by composite score:
                 diff_str = f"{score_diff:.2f} (lower)"
             else:
                 diff_str = "0.00 (equal)"
-            section += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.composite_score or 'N/A'} | {diff_str} |\n"
+            section += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {_fmt_float(c.composite_score)} | {diff_str} |\n"
 
         return section
 
@@ -232,8 +236,8 @@ All competitors ranked by composite score:
         client: "Company",
         competitors: list["Company"],
         threats: list["Company"],
-        strengths_fn,
-        weaknesses_fn,
+        strengths_fn: Callable[["Company", list["Company"]], str],
+        weaknesses_fn: Callable[["Company", list["Company"]], str],
     ) -> str:
         """Generate strategic recommendations section."""
         return f"""## Strategic Recommendations
@@ -263,7 +267,7 @@ All competitors ranked by composite score:
     def generate_appendix(
         self,
         sorted_comp: list["Company"],
-        derive_threat_level_fn,
+        derive_threat_level_fn: Callable[[str | None, float], str],
     ) -> str:
         """Generate appendix section."""
         section = """## Appendix: All Competitors
@@ -273,7 +277,7 @@ All competitors ranked by composite score:
 """
         for c in sorted_comp:
             threat = derive_threat_level_fn(c.classification, c.composite_score or 0)
-            section += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {c.ai_score or 'N/A'}/10 | {c.saas_maturity or 'N/A'}/10 | {c.classification or 'N/A'} | {threat} |\n"
+            section += f"| {c.name} | €{c.financials.revenue or 0:.1f}M | {c.revenue_cagr_3yr or 'N/A'}% | {_fmt_float(c.ai_score)}/10 | {_fmt_float(c.saas_maturity)}/10 | {c.classification or 'N/A'} | {threat} |\n"
 
         section += f"""
 

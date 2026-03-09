@@ -311,7 +311,7 @@ def generate_report(company_name: str, input: Path | None, output: Path | None) 
         assert_client_report_ready(target, competitors)
 
         # Generate reports
-        output_dir = output or Path(f"data/output/reports/{target.id}")
+        output_dir = output or Path("data/output/reports")
         generator = ClientReportGenerator(output_dir=output_dir)
 
         generator.generate_client_report(target, competitors)
@@ -365,7 +365,7 @@ def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) ->
         competitors: list[Company] = [c for c in scored_companies if c.id != target.id]
         assert_client_report_ready(target, competitors)
 
-        output_dir = output or Path(f"data/output/reports/llm/{target.id}")
+        output_dir = output or Path("data/output/reports/llm")
 
         if no_llm:
             generator = ClientReportGenerator(output_dir=output_dir)
