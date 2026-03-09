@@ -1,10 +1,22 @@
 from .openclaw_evaluator import OpenClawAPI, OpenClawEvaluation, OpenClawEvaluator
+from .community_prioritization import (
+    APISuggestion,
+    CommunityPrioritizer,
+    CommunityVote,
+    PrioritizedSuggestion,
+    VoteType,
+)
 from .quality import QualityScorer, ReliabilityMetrics, ReliabilityMonitor, SourceQualityScores
 
 __all__ = [
     "OpenClawAPI",
     "OpenClawEvaluation",
     "OpenClawEvaluator",
+    "APISuggestion",
+    "CommunityPrioritizer",
+    "CommunityVote",
+    "PrioritizedSuggestion",
+    "VoteType",
     "QualityScorer",
     "ReliabilityMetrics",
     "ReliabilityMonitor",

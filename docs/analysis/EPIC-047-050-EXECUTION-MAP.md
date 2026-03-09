@@ -55,10 +55,22 @@ This map defines concrete implementation and verification targets for EPIC-047 t
   - Input bounding.
   - Factor preservation.
 
+## EPIC-053 Financial Data Expansion (Validation Slice)
+
+- **Primary code**: `src/solstein/validation/financial_rules.py`
+  - Canonical validation rules and payload validator.
+  - Revenue, valuation, employee-count, and growth sanity checks.
+- **Exports**: `src/solstein/validation/__init__.py`
+- **Tests**: `tests/unit/test_financial_rules.py`
+  - Reasonable payload passes.
+  - Extreme growth / valuation multiple flagged.
+  - Employee out-of-range flagged.
+
 ## Cross-Epic Verification
 
 - `pytest tests/unit/test_load_competitor_data_migration.py`
 - `pytest tests/unit/test_openclaw_evaluator.py`
 - `pytest tests/unit/test_data_source_quality_scoring.py`
+- `pytest tests/unit/test_financial_rules.py`
 - `pytest tests/unit/test_cli.py -k "wrapped or unknown_object_payload or generate_report_default_output_dir or generate_llm_report_default_output_dir"`
 - LSP diagnostics for touched files in `src/solstein` and `tests/unit`.
