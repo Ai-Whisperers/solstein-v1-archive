@@ -22,6 +22,13 @@ if ! redis-cli ping > /dev/null 2>&1; then
 fi
 echo "✅ Redis is running"
 
+if ! .venv/bin/python3 -c "import redis" > /dev/null 2>&1; then
+    echo "❌ Python module 'redis' not installed in .venv"
+    echo "   Install with: .venv/bin/pip install redis"
+    exit 1
+fi
+echo "✅ Python redis module is available"
+
 # Create logs directory
 mkdir -p logs
 

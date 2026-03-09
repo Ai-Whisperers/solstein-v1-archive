@@ -12,8 +12,10 @@ import logging
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, cast
 
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from solstein.infrastructure.database_models import CompanyRecord
@@ -32,13 +34,21 @@ def _parse_float(value: object) -> float | None:
 
 def _build_company_record(competitor: dict[str, object]) -> CompanyRecord:
     profitability = competitor.get("profitability")
-    profitability_data = profitability if isinstance(profitability, dict) else {}
+    profitability_data: dict[str, Any] = {}
+    if isinstance(profitability, dict):
+        profitability_data = cast("dict[str, Any]", profitability)
 
     revenue = competitor.get("revenue")
-    revenue_data = revenue if isinstance(revenue, dict) else {}
+    revenue_data: dict[str, Any] = {}
+    if isinstance(revenue, dict):
+        revenue_data = cast("dict[str, Any]", revenue)
     timeline = revenue_data.get("timeline")
-    timeline_data = timeline if isinstance(timeline, list) else []
-    latest_timeline = timeline_data[-1] if timeline_data and isinstance(timeline_data[-1], dict) else {}
+    timeline_data: list[dict[str, Any]] = []
+    if isinstance(timeline, list):
+        for item_obj in cast("list[object]", timeline):
+            if isinstance(item_obj, dict):
+                timeline_data.append(cast("dict[str, Any]", item_obj))
+    latest_timeline: dict[str, Any] = timeline_data[-1] if timeline_data else {}
 
     return CompanyRecord(
         company_id=str(uuid.uuid4()),
@@ -90,12 +100,22 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
     # Load JSON data
     logger.info(f"Loading JSON from {json_path}")
     with open(json_path) as f:
-        data = json.load(f)
+        loaded = json.load(f)
+
+    if not isinstance(loaded, dict):
+        raise ValueError("JSON root must be an object")
+    data = cast("dict[str, Any]", loaded)
 
     if "competitors" not in data:
         raise ValueError("JSON must contain 'competitors' key")
 
-    competitors = data["competitors"]
+    competitors_raw = data["competitors"]
+    if not isinstance(competitors_raw, list):
+        raise ValueError("'competitors' must be an array")
+    competitors: list[dict[str, object]] = []
+    for item_obj in cast("list[object]", competitors_raw):
+        if isinstance(item_obj, dict):
+            competitors.append(cast("dict[str, object]", item_obj))
     logger.info(f"Found {len(competitors)} companies in JSON")
 
     # Create async engine and session
@@ -103,7 +123,7 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
     async_session = async_sessionmaker(engine, expire_on_commit=False)
 
     async with async_session() as session:
-        companies_to_add = []
+        companies_to_add: list[CompanyRecord] = []
 
         for competitor in competitors:
             try:
@@ -121,7 +141,7 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
                 companies_to_add.append(company)
                 logger.info(f"Prepared company: {company_name}")
 
-            except Exception as e:
+            except (TypeError, ValueError, KeyError) as e:
                 logger.error(f"Error processing company {competitor.get('company_name')}: {e}")
                 raise
 
@@ -139,10 +159,10 @@ async def load_competitor_data(json_path: str | Path, db_url: str) -> None:
         logger.info(f"Verification: {len(companies)} companies in database")
 
         for company in companies:
+            revenue_display = getattr(company, "revenue_eur_m", None)
             logger.info(
-                f"  - {company.name} ({company.country}): "
                 f"  - {company.name} ({company.headquarters}): "
-                f"Revenue: {company.revenue_eur_m}M EUR, "
+                f"Revenue: {revenue_display}M EUR, "
                 f"Employees: {company.employee_count}, "
                 f"Classification: {company.classification}"
             )
@@ -166,7 +186,7 @@ async def main():
     try:
         await load_competitor_data(json_path, db_url)
         logger.info("Migration completed successfully")
-    except Exception as e:
+    except (FileNotFoundError, ValueError, SQLAlchemyError, OSError) as e:
         logger.error(f"Migration failed: {e}")
         raise
 
