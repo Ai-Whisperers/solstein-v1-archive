@@ -1,0 +1,488 @@
+{
+  "companies": [
+    {
+      "ticker": "ENPH",
+      "name": "Enphase Energy, Inc.",
+      "mc_b": 5.36,
+      "tier": "Tier 3",
+      "growth": 1.1,
+      "score": 5.9,
+      "class": "Salt"
+    },
+    {
+      "ticker": "SEDG",
+      "name": "SolarEdge Technologies, Inc.",
+      "mc_b": 2.09,
+      "tier": "Tier 2",
+      "growth": 9.9,
+      "score": 6.97,
+      "class": "Salt"
+    },
+    {
+      "ticker": "FSLR",
+      "name": "First Solar, Inc.",
+      "mc_b": 20.97,
+      "tier": "Tier 4",
+      "growth": -13.7,
+      "score": 4.54,
+      "class": "Salt"
+    },
+    {
+      "ticker": "NEE",
+      "name": "NextEra Energy, Inc.",
+      "mc_b": 191.7,
+      "tier": "Tier 1",
+      "growth": 13.7,
+      "score": 7.47,
+      "class": "Phoenix"
+    },
+    {
+      "ticker": "BEP",
+      "name": "Brookfield Renewable Partners L.P.",
+      "mc_b": 19.42,
+      "tier": "Tier 1",
+      "growth": 13.6,
+      "score": 7.47,
+      "class": "Phoenix"
+    },
+    {
+      "ticker": "AES",
+      "name": "The AES Corporation",
+      "mc_b": 10.11,
+      "tier": "Tier 3",
+      "growth": 2.1,
+      "score": 5.86,
+      "class": "Salt"
+    },
+    {
+      "ticker": "SRE",
+      "name": "Sempra",
+      "mc_b": 61.09,
+      "tier": "Tier 3",
+      "growth": 1.0,
+      "score": 6.24,
+      "class": "Salt"
+    },
+    {
+      "ticker": "DUK",
+      "name": "Duke Energy Corporation",
+      "mc_b": 101.94,
+      "tier": "Tier 3",
+      "growth": 2.7,
+      "score": 5.1,
+      "class": "Salt"
+    },
+    {
+      "ticker": "VWDRY",
+      "name": "Vestas Wind Systems A/S",
+      "mc_b": 24.45,
+      "tier": "Tier 1",
+      "growth": 18.8,
+      "score": 7.39,
+      "class": "Phoenix"
+    },
+    {
+      "ticker": "PEG",
+      "name": "Public Service Enterprise Group Incorporated",
+      "mc_b": 41.95,
+      "tier": "Tier 3",
+      "growth": 4.1,
+      "score": 6.6,
+      "class": "Salt"
+    },
+    {
+      "ticker": "XEL",
+      "name": "Xcel Energy Inc.",
+      "mc_b": 51.22,
+      "tier": "Tier 3",
+      "growth": 4.5,
+      "score": 5.43,
+      "class": "Salt"
+    },
+    {
+      "ticker": "WEC",
+      "name": "WEC Energy Group, Inc.",
+      "mc_b": 37.63,
+      "tier": "Tier 2",
+      "growth": 8.2,
+      "score": 6.15,
+      "class": "Salt"
+    },
+    {
+      "ticker": "EIX",
+      "name": "Edison International",
+      "mc_b": 27.22,
+      "tier": "Tier 2",
+      "growth": 7.4,
+      "score": 6.24,
+      "class": "Salt"
+    },
+    {
+      "ticker": "AWK",
+      "name": "American Water Works Company, Inc.",
+      "mc_b": 26.89,
+      "tier": "Tier 2",
+      "growth": 8.1,
+      "score": 7.33,
+      "class": "Phoenix"
+    },
+    {
+      "ticker": "AEE",
+      "name": "Ameren Corporation",
+      "mc_b": 30.73,
+      "tier": "Tier 3",
+      "growth": 4.0,
+      "score": 5.42,
+      "class": "Salt"
+    },
+    {
+      "ticker": "CMS",
+      "name": "CMS Energy Corporation",
+      "mc_b": 23.67,
+      "tier": "Tier 3",
+      "growth": 1.8,
+      "score": 5.78,
+      "class": "Salt"
+    },
+    {
+      "ticker": "PNW",
+      "name": "Pinnacle West Capital Corporation",
+      "mc_b": 12.25,
+      "tier": "Tier 4",
+      "growth": -5.4,
+      "score": 5.01,
+      "class": "Salt"
+    },
+    {
+      "ticker": "IDA",
+      "name": "IDACORP, Inc.",
+      "mc_b": 7.83,
+      "tier": "Tier 3",
+      "growth": 5.2,
+      "score": 6.82,
+      "class": "Salt"
+    },
+    {
+      "ticker": "OGE",
+      "name": "OGE Energy Corp.",
+      "mc_b": 9.89,
+      "tier": "Tier 2",
+      "growth": 7.8,
+      "score": 7.32,
+      "class": "Phoenix"
+    },
+    {
+      "ticker": "ATO",
+      "name": "Atmos Energy Corporation",
+      "mc_b": 30.65,
+      "tier": "Tier 4",
+      "growth": -10.3,
+      "score": 4.92,
+      "class": "Salt"
+    },
+    {
+      "ticker": "PPL",
+      "name": "PPL Corporation",
+      "mc_b": 28.78,
+      "tier": "Tier 2",
+      "growth": 8.0,
+      "score": 6.63,
+      "class": "Salt"
+    },
+    {
+      "ticker": "ETR",
+      "name": "Entergy Corporation",
+      "mc_b": 47.41,
+      "tier": "Tier 2",
+      "growth": 9.3,
+      "score": 7.35,
+      "class": "Phoenix"
+    },
+    {
+      "ticker": "ORA",
+      "name": "Ormat Technologies, Inc.",
+      "mc_b": 6.68,
+      "tier": "Tier 2",
+      "growth": 7.4,
+      "score": 6.14,
+      "class": "Salt"
+    },
+    {
+      "ticker": "BWXT",
+      "name": "BWX Technologies, Inc.",
+      "mc_b": 18.32,
+      "tier": "Tier 1",
+      "growth": 17.0,
+      "score": 7.94,
+      "class": "Phoenix"
+    },
+    {
+      "ticker": "CEG",
+      "name": "Constellation Energy Corporation",
+      "mc_b": 116.92,
+      "tier": "Tier 2",
+      "growth": 7.3,
+      "score": 6.54,
+      "class": "Salt"
+    },
+    {
+      "ticker": "VST",
+      "name": "Vistra Corp.",
+      "mc_b": 55.44,
+      "tier": "Tier 4",
+      "growth": -7.1,
+      "score": 5.38,
+      "class": "Salt"
+    },
+    {
+      "ticker": "UEC",
+      "name": "Uranium Energy Corp.",
+      "mc_b": 6.55,
+      "tier": "Tier 3",
+      "growth": 1.1,
+      "score": 5.84,
+      "class": "Salt"
+    },
+    {
+      "ticker": "URG",
+      "name": "Ur-Energy Inc.",
+      "mc_b": 0.54,
+      "tier": "Tier 3",
+      "growth": 3.7,
+      "score": 5.82,
+      "class": "Salt"
+    },
+    {
+      "ticker": "LEU",
+      "name": "Centrus Energy Corp.",
+      "mc_b": 3.85,
+      "tier": "Tier 3",
+      "growth": 1.6,
+      "score": 5.47,
+      "class": "Salt"
+    },
+    {
+      "ticker": "NNE",
+      "name": "NANO Nuclear Energy Inc.",
+      "mc_b": 1.23,
+      "tier": "Tier 2",
+      "growth": 10.8,
+      "score": 7.18,
+      "class": "Phoenix"
+    },
+    {
+      "ticker": "PLUG",
+      "name": "Plug Power Inc.",
+      "mc_b": 3.04,
+      "tier": "Tier 2",
+      "growth": 9.0,
+      "score": 6.17,
+      "class": "Salt"
+    },
+    {
+      "ticker": "BLNK",
+      "name": "Blink Charging Co.",
+      "mc_b": 0.09,
+      "tier": "Tier 4",
+      "growth": -1.9,
+      "score": 4.84,
+      "class": "Salt"
+    },
+    {
+      "ticker": "CHPT",
+      "name": "ChargePoint Holdings, Inc.",
+      "mc_b": 0.13,
+      "tier": "Tier 3",
+      "growth": 4.0,
+      "score": 5.42,
+      "class": "Salt"
+    },
+    {
+      "ticker": "ALB",
+      "name": "Albemarle Corporation",
+      "mc_b": 19.98,
+      "tier": "Tier 3",
+      "growth": 1.0,
+      "score": 5.76,
+      "class": "Salt"
+    },
+    {
+      "ticker": "SQM",
+      "name": "Sociedad Qu\u00edmica y Minera de Chile S.A.",
+      "mc_b": 21.42,
+      "tier": "Tier 1",
+      "growth": 19.4,
+      "score": 7.99,
+      "class": "Phoenix"
+    },
+    {
+      "ticker": "NIO",
+      "name": "NIO Inc.",
+      "mc_b": 12.49,
+      "tier": "Tier 4",
+      "growth": -0.8,
+      "score": 4.54,
+      "class": "Salt"
+    },
+    {
+      "ticker": "XPEV",
+      "name": "XPeng Inc.",
+      "mc_b": 17.92,
+      "tier": "Tier 2",
+      "growth": 7.3,
+      "score": 7.31,
+      "class": "Phoenix"
+    },
+    {
+      "ticker": "LCID",
+      "name": "Lucid Group, Inc.",
+      "mc_b": 3.41,
+      "tier": "Tier 3",
+      "growth": 1.6,
+      "score": 5.91,
+      "class": "Salt"
+    },
+    {
+      "ticker": "RIVN",
+      "name": "Rivian Automotive, Inc.",
+      "mc_b": 19.69,
+      "tier": "Tier 3",
+      "growth": 2.3,
+      "score": 6.7,
+      "class": "Salt"
+    },
+    {
+      "ticker": "GOOGL",
+      "name": "Alphabet Inc.",
+      "mc_b": 3706.04,
+      "tier": "Tier 2",
+      "growth": 7.8,
+      "score": 6.92,
+      "class": "Salt"
+    },
+    {
+      "ticker": "MSFT",
+      "name": "Microsoft Corporation",
+      "mc_b": 3042.89,
+      "tier": "Tier 3",
+      "growth": 2.0,
+      "score": 5.92,
+      "class": "Salt"
+    },
+    {
+      "ticker": "AMZN",
+      "name": "Amazon.com, Inc.",
+      "mc_b": 2291.8,
+      "tier": "Tier 4",
+      "growth": -5.3,
+      "score": 4.64,
+      "class": "Salt"
+    },
+    {
+      "ticker": "TSLA",
+      "name": "Tesla, Inc.",
+      "mc_b": 1496.02,
+      "tier": "Tier 2",
+      "growth": 7.5,
+      "score": 6.27,
+      "class": "Salt"
+    },
+    {
+      "ticker": "RACE",
+      "name": "Ferrari N.V.",
+      "mc_b": 61.32,
+      "tier": "Tier 2",
+      "growth": 9.4,
+      "score": 6.18,
+      "class": "Salt"
+    },
+    {
+      "ticker": "HMC",
+      "name": "Honda Motor Co., Ltd.",
+      "mc_b": 36.57,
+      "tier": "Tier 2",
+      "growth": 7.5,
+      "score": 7.32,
+      "class": "Phoenix"
+    },
+    {
+      "ticker": "STLA",
+      "name": "Stellantis N.V.",
+      "mc_b": 20.49,
+      "tier": "Tier 3",
+      "growth": 3.4,
+      "score": 6.58,
+      "class": "Salt"
+    },
+    {
+      "ticker": "MBGAF",
+      "name": "Mercedes-Benz Group AG",
+      "mc_b": 56.9,
+      "tier": "Tier 3",
+      "growth": 2.0,
+      "score": 5.38,
+      "class": "Salt"
+    },
+    {
+      "ticker": "ALK",
+      "name": "Alaska Air Group, Inc.",
+      "mc_b": 4.96,
+      "tier": "Tier 2",
+      "growth": 8.7,
+      "score": 6.57,
+      "class": "Salt"
+    },
+    {
+      "ticker": "LUV",
+      "name": "Southwest Airlines Co.",
+      "mc_b": 22.25,
+      "tier": "Tier 3",
+      "growth": 4.4,
+      "score": 6.6,
+      "class": "Salt"
+    },
+    {
+      "ticker": "DAL",
+      "name": "Delta Air Lines, Inc.",
+      "mc_b": 39.57,
+      "tier": "Tier 1",
+      "growth": 15.2,
+      "score": 7.13,
+      "class": "Phoenix"
+    },
+    {
+      "ticker": "UAL",
+      "name": "United Airlines Holdings, Inc.",
+      "mc_b": 30.6,
+      "tier": "Tier 3",
+      "growth": 2.2,
+      "score": 5.39,
+      "class": "Salt"
+    },
+    {
+      "ticker": "AAL",
+      "name": "American Airlines Group Inc.",
+      "mc_b": 7.55,
+      "tier": "Tier 2",
+      "growth": 8.7,
+      "score": 6.57,
+      "class": "Salt"
+    },
+    {
+      "ticker": "JBLU",
+      "name": "JetBlue Airways Corporation",
+      "mc_b": 1.67,
+      "tier": "Tier 2",
+      "growth": 10.7,
+      "score": 6.71,
+      "class": "Salt"
+    }
+  ],
+  "source": "Yahoo + weighted",
+  "count": 53,
+  "distribution": {
+    "Lead": 0,
+    "Salt": 41,
+    "Phoenix": 12
+  }
+}

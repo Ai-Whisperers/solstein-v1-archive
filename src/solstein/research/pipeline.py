@@ -18,6 +18,7 @@ from loguru import logger
 
 from solstein.analytics.scoring import GrowthScorer
 from solstein.config import Settings
+from solstein.data.report_release_gate import ReportReleaseGate
 from solstein.domain.models import Company, MarketAnalysis
 from solstein.exporters.excel import ExcelExporter
 from solstein.extractors.markdown_extractor import BatchExtractor
@@ -122,6 +123,31 @@ def run_market_intelligence(
         result = stage.execute(context)
         artifact = stage.build_artifact(context, result)
         context.stages.append(artifact)
+
+        if strict_provenance and stage.name == "evidence_readiness":
+            gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
+            gate_result = gate.evaluate(context.companies)
+            gate_payload = gate_result.to_dict()
+
+            context.artifact_hashes["quality_gate_report"] = sha256_canonical_json(gate_payload)
+            (context.output_dir / "quality_gate_report.json").write_text(
+                json.dumps(gate_payload, indent=2),
+                encoding="utf-8",
+            )
+
+            gate_artifact: dict[str, object] = {
+                "stage": "quality_gate",
+                "config_hash": context.config_hash,
+                "description": "Verify release quality gate before scoring stage.",
+                "status": "passed" if gate_result.passed else "failed",
+                "passed": gate_result.passed,
+                "reason_count": len(gate_result.reasons),
+            }
+            context.stages.append(gate_artifact)
+
+            if not gate_result.passed:
+                reason_codes = ", ".join(sorted({reason.code for reason in gate_result.reasons}))
+                raise RuntimeError(f"Quality gate failed before scoring: {reason_codes}")
 
     # Build run summary
     run_summary = {

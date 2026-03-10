@@ -165,6 +165,113 @@ def test_run_market_intelligence_source_volume_gate_fails(tmp_path: Path, monkey
     assert (tmp_path / "stage_report.json").exists()
 
 
+def test_run_market_intelligence_quality_gate_blocks_before_scoring(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _fake_enrich(candidate, registry, batch_id) -> Company:
+        return Company(
+            id=candidate.company_id,
+            name=candidate.name,
+            industry=candidate.industry,
+            source_links=candidate.source_links,
+            metric_sources={
+                "revenue": [],
+                "growth_rate": candidate.source_links,
+                "employees": candidate.source_links,
+                "profit_margin": candidate.source_links,
+                "funding": candidate.source_links,
+                "valuation": candidate.source_links,
+            },
+        )
+
+    monkeypatch.setattr(research_pipeline, "enrich_company", _fake_enrich)
+
+    with pytest.raises(RuntimeError, match="Quality gate failed before scoring"):
+        run_market_intelligence(
+            seed_company="ueno",
+            market="LATAM Financial Services",
+            output_dir=tmp_path,
+            max_companies=5,
+            extra_keywords=["bank", "fintech"],
+            strict_provenance=True,
+        )
+
+    assert (tmp_path / "quality_gate_report.json").exists()
+
+
+def test_run_market_intelligence_quality_gate_passes_with_valid_batch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _fake_enrich(candidate, registry, batch_id) -> Company:
+        return Company(
+            id=candidate.company_id,
+            name=candidate.name,
+            industry=candidate.industry,
+            source_links=candidate.source_links,
+            metric_sources={
+                "revenue": candidate.source_links,
+                "growth_rate": candidate.source_links,
+                "employees": candidate.source_links,
+                "profit_margin": candidate.source_links,
+                "funding": candidate.source_links,
+                "valuation": candidate.source_links,
+            },
+        )
+
+    monkeypatch.setattr(research_pipeline, "enrich_company", _fake_enrich)
+
+    summary = run_market_intelligence(
+        seed_company="ueno",
+        market="LATAM Financial Services",
+        output_dir=tmp_path,
+        max_companies=5,
+        extra_keywords=["bank", "fintech"],
+        strict_provenance=True,
+    )
+
+    assert summary["profiles"] == 5
+    assert (tmp_path / "quality_gate_report.json").exists()
+
+
+def test_run_market_intelligence_quality_gate_blocks_synthetic_batch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _fake_enrich(candidate, registry, batch_id) -> Company:
+        company = Company(
+            id=candidate.company_id,
+            name=candidate.name,
+            industry=candidate.industry,
+            source_links=candidate.source_links,
+            metric_sources={
+                "revenue": candidate.source_links,
+                "growth_rate": candidate.source_links,
+                "employees": candidate.source_links,
+                "profit_margin": candidate.source_links,
+                "funding": candidate.source_links,
+                "valuation": candidate.source_links,
+            },
+        )
+        company.data_source_type = "synthetic"
+        return company
+
+    monkeypatch.setattr(research_pipeline, "enrich_company", _fake_enrich)
+
+    with pytest.raises(RuntimeError, match="synthetic_data"):
+        run_market_intelligence(
+            seed_company="ueno",
+            market="LATAM Financial Services",
+            output_dir=tmp_path,
+            max_companies=5,
+            extra_keywords=["bank", "fintech"],
+            strict_provenance=True,
+        )
+
+    assert (tmp_path / "quality_gate_report.json").exists()
+
+
 def test_evidence_readiness_uses_sources_and_justifications() -> None:
     company = Company(
         id="c1",

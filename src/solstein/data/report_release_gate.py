@@ -8,6 +8,11 @@ from ..analytics.completeness import CompletenessCalculator, DataQualityTier, co
 from ..domain.models import Company
 from ..infrastructure.refresh import RefreshStatus, raise_if_stale
 from .gap_analyzer import analyze_company_gaps
+from .provenance import validate_company_boundary_provenance
+from ..research.reconcile import detect_company_contradictions
+
+
+CRITICAL_CLAIM_FIELDS = {"revenue", "employee_count", "employees", "funding_total", "funding", "valuation"}
 
 
 @dataclass(frozen=True)
@@ -110,6 +115,48 @@ class ReportReleaseGate:
                             details={"company": company.name, "data_source_type": str(data_source_type)},
                         )
                     )
+
+            boundary_violations = validate_company_boundary_provenance(
+                company,
+                min_confidence=self.min_confidence,
+            )
+            if boundary_violations:
+                reasons.append(
+                    GateReason(
+                        code="provenance_boundary",
+                        message="Populated fields missing required boundary provenance metadata",
+                        details={
+                            "company": company.name,
+                            "violations": [
+                                {
+                                    "field": violation.field,
+                                    "type": violation.violation_type,
+                                    "message": violation.message,
+                                }
+                                for violation in boundary_violations
+                            ],
+                        },
+                    )
+                )
+
+            contradictions = detect_company_contradictions(company)
+            critical_contradictions = [
+                contradiction
+                for contradiction in contradictions
+                if str(contradiction.get("metric", "")).lower() in CRITICAL_CLAIM_FIELDS
+            ]
+            if critical_contradictions:
+                reasons.append(
+                    GateReason(
+                        code="critical_claim_contradiction",
+                        message="Critical claims contain contradictory source observations",
+                        details={
+                            "company": company.name,
+                            "count": len(critical_contradictions),
+                            "contradictions": critical_contradictions,
+                        },
+                    )
+                )
 
             gap_result = analyze_company_gaps(company, min_confidence=self.min_confidence)
             if not gap_result["is_ready"]:

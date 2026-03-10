@@ -130,13 +130,21 @@ EPIC-002: Configuration Integrity
 || [EPIC-047](EPICS/EPIC-047-data-loading-fidelity/README.md) | Data Loading Fidelity | P1 | 4 | 🔴 Open |
 || [EPIC-048](EPICS/EPIC-048-report-generation-quality/README.md) | Report Generation Quality | P1 | 5 | 🔴 Open |
 || [EPIC-049](EPICS/EPIC-049-infrastructure-dev-environment/README.md) | Infrastructure & Dev Environment | P1 | 4 | 🔴 Open |
+|| [EPIC-050](EPICS/EPIC-050-web-acquisition-pipeline/README.md) | Web Acquisition Pipeline (Map -> Crawl -> Schema Extract) | P1 | 4 | 🔴 Open |
+|| [EPIC-051](EPICS/EPIC-051-multi-source-growth-signals/README.md) | Multi-Source Growth Signal Enrichment | P1 | 4 | 🔴 Open |
+|| [EPIC-052](EPICS/EPIC-052-provenance-confidence-quality-gates/README.md) | Provenance, Confidence, and Quality Gates | P0 | 4 | 🔴 Open |
+|| [EPIC-053](EPICS/EPIC-053-enrichment-observability-evaluation/README.md) | Enrichment Observability and Evaluation Loop | P1 | 4 | 🔴 Open |
+|| [EPIC-054](EPICS/EPIC-054-stateful-graph-orchestration/README.md) | Durable Research Control Plane | P1 | 4 | 🔴 Open |
+|| [EPIC-055](EPICS/EPIC-055-role-based-agent-runtime/README.md) | Safe Connector Runtime Contracts | P1 | 4 | 🔴 Open |
+|| [EPIC-056](EPICS/EPIC-056-tool-contracts-and-sandboxing/README.md) | Inline Claim Adjudication and Approval Workflow | P1 | 4 | 🔴 Open |
+|| [EPIC-057](EPICS/EPIC-057-human-review-control-plane/README.md) | Declarative Research Recipes and Reviewer Loops | P1 | 4 | 🔴 Open |
 
 ---
 
 ## Story Index
 
 <details>
-<summary>Click to expand full story index (189 stories)</summary>
+<summary>Click to expand full story index (205 stories)</summary>
 
 ### P0 — Ship Blockers (15 stories)
 

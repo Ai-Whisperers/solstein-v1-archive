@@ -8,9 +8,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
-from decimal import Decimal
 from enum import Enum, auto
-from typing import Any, Protocol
+from typing import Any, Protocol, cast
 
 from loguru import logger
 
@@ -74,7 +73,7 @@ class FieldProvenance:
     reliability: SourceReliability = SourceReliability.VERIFIED
     extraction_method: str = "unknown"
     raw_value: Any = None
-    verification_sources: list[str] = field(default_factory=list)
+    verification_sources: list[str] = field(default_factory=lambda: cast(list[str], []))
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
@@ -94,7 +93,7 @@ class DataProvenance:
     H1: Aggregates provenance across all PE-critical fields.
     """
 
-    fields: dict[str, FieldProvenance] = field(default_factory=dict)
+    fields: dict[str, FieldProvenance] = field(default_factory=lambda: cast(dict[str, FieldProvenance], {}))
     company_id: str | None = None
     collection_timestamp: datetime | None = None
     overall_confidence: float = 1.0
@@ -102,8 +101,6 @@ class DataProvenance:
     def get_field_provenance(self, field_name: str) -> FieldProvenance:
         """Get provenance for a specific field."""
         return self.fields.get(field_name, FieldProvenance(confidence=0.0))
-        """Get provenance for a specific field."""
-        return self.fields.get(field_name)
 
     def set_field_provenance(self, field_name: str, provenance: FieldProvenance) -> None:
         """Set provenance for a specific field."""
@@ -113,7 +110,7 @@ class DataProvenance:
         """Check if field has provenance recorded."""
         return field_name in self.fields
 
-    def add_field(self, field_name: str, **kwargs) -> None:
+    def add_field(self, field_name: str, **kwargs: Any) -> None:
         """Add provenance for a field with keyword arguments."""
         self.fields[field_name] = FieldProvenance(**kwargs)
 
@@ -228,9 +225,6 @@ class ProvenanceValidator:
             return False
 
         field_prov = provenance.get_field_provenance(field_name)
-        if field_prov is None:
-            return False
-
         # Check minimum requirements
         if field_prov.source is None:
             return False
@@ -275,9 +269,6 @@ class ProvenanceValidator:
             return violations
 
         field_prov = provenance.get_field_provenance(field_name)
-        if field_prov is None:
-            return violations
-
         # Check confidence
         if field_prov.confidence < self.min_confidence:
             violations.append(
@@ -336,7 +327,7 @@ class ProvenanceValidator:
             field_violations = self.validate_field(
                 field_name,
                 value,
-                type(value) if value is not None else object,
+                object,
                 company.provenance,
             )
             violations.extend(field_violations)
@@ -442,4 +433,149 @@ def create_field_provenance(
         reliability=reliability,
         extraction_method=extraction_method,
         raw_value=raw_value,
+    )
+
+
+_BOUNDARY_CONFIDENCE_MAP = {
+    "revenue": "revenue_confidence",
+    "employees": "employees_confidence",
+    "growth_rate": "growth_confidence",
+    "profit_margin": "margin_confidence",
+    "funding": "funding_confidence",
+    "valuation": "valuation_confidence",
+}
+
+_BOUNDARY_FIELD_ALIASES = {
+    "revenue": ("revenue",),
+    "employees": ("employees", "employee_count"),
+    "growth_rate": ("growth_rate",),
+    "profit_margin": ("profit_margin",),
+    "funding": ("funding", "funding_raised", "funding_total"),
+    "valuation": ("valuation", "latest_valuation_eur"),
+}
+
+
+def _extract_company_field_value(company: Any, field_name: str) -> Any:
+    aliases = _BOUNDARY_FIELD_ALIASES.get(field_name, (field_name,))
+    for alias in aliases:
+        value = getattr(company, alias, None)
+        if value is not None:
+            return value
+
+    financials = getattr(company, "financials", None)
+    if financials is None:
+        return None
+
+    for alias in aliases:
+        value = getattr(financials, alias, None)
+        if value is not None:
+            return value
+
+    return None
+
+
+def _extract_company_confidence(company: Any, field_name: str) -> float | None:
+    confidence_scores = getattr(company, "confidence_scores", {}) or {}
+    raw_score = confidence_scores.get(field_name)
+    if isinstance(raw_score, (int, float)):
+        return float(raw_score)
+
+    financials = getattr(company, "financials", None)
+    if financials is None:
+        return None
+
+    confidence_attr = _BOUNDARY_CONFIDENCE_MAP.get(field_name)
+    if confidence_attr is None:
+        return None
+
+    confidence_value = getattr(financials, confidence_attr, None)
+    if confidence_value is None:
+        return None
+    if isinstance(confidence_value, (int, float)):
+        return float(confidence_value)
+
+    confidence_name = str(confidence_value).lower()
+    if "confirmed" in confidence_name or "certain" in confidence_name:
+        return 1.0
+    if "estimated" in confidence_name or "high" in confidence_name:
+        return 0.8
+    if "medium" in confidence_name:
+        return 0.6
+    if "low" in confidence_name:
+        return 0.4
+    if "unknown" in confidence_name or "uncertain" in confidence_name:
+        return 0.0
+    return None
+
+
+def validate_company_boundary_provenance(
+    company: Any,
+    required_fields: tuple[str, ...] = ("revenue", "employees", "growth_rate", "profit_margin", "funding", "valuation"),
+    min_confidence: float = 0.0,
+) -> list[ProvenanceViolation]:
+    metric_sources = getattr(company, "metric_sources", {}) or {}
+    violations: list[ProvenanceViolation] = []
+
+    for field_name in required_fields:
+        value = _extract_company_field_value(company, field_name)
+        if value is None:
+            continue
+
+        sources = metric_sources.get(field_name, [])
+        if not isinstance(sources, list) or not sources:
+            violations.append(
+                ProvenanceViolation(
+                    field=field_name,
+                    violation_type="missing_source_attribution",
+                    message=f"Populated field '{field_name}' is missing source attribution",
+                    severity="error",
+                )
+            )
+            continue
+
+        confidence = _extract_company_confidence(company, field_name)
+        if confidence is None:
+            violations.append(
+                ProvenanceViolation(
+                    field=field_name,
+                    violation_type="missing_confidence",
+                    message=f"Populated field '{field_name}' is missing confidence metadata",
+                    severity="error",
+                )
+            )
+            continue
+
+        if confidence < min_confidence:
+            violations.append(
+                ProvenanceViolation(
+                    field=field_name,
+                    violation_type="low_confidence",
+                    message=(f"Field '{field_name}' confidence {confidence:.2f} is below minimum {min_confidence:.2f}"),
+                    severity="error",
+                    expected=min_confidence,
+                    actual=confidence,
+                )
+            )
+
+    return violations
+
+
+def enforce_company_boundary_provenance(
+    company: Any,
+    required_fields: tuple[str, ...] = ("revenue", "employees", "growth_rate", "profit_margin", "funding", "valuation"),
+    min_confidence: float = 0.0,
+) -> None:
+    violations = validate_company_boundary_provenance(
+        company=company,
+        required_fields=required_fields,
+        min_confidence=min_confidence,
+    )
+    if not violations:
+        return
+
+    raise ProvenanceError(
+        message=f"Boundary provenance validation failed with {len(violations)} violation(s)",
+        code="PROVENANCE_BOUNDARY_INVALID",
+        violations=violations,
+        company_id=getattr(company, "id", None),
     )
