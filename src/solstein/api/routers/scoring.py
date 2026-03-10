@@ -12,6 +12,7 @@ from solstein.analytics.scoring import GrowthScorer
 from solstein.api.dependencies import get_company_repository, get_current_tenant
 from solstein.api.exceptions import APIError
 from solstein.config import get_settings
+from solstein.data.report_release_gate import ReportReleaseGate
 
 router = APIRouter(tags=["Scoring"])
 growth_scorer = GrowthScorer()
@@ -34,6 +35,17 @@ async def score_company(
 ) -> dict[str, Any]:
     try:
         target_company = await _load_company_for_scoring(company_id, repo)
+
+        gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
+        gate_result = gate.evaluate([target_company])
+        if not gate_result.passed:
+            reason_codes = ", ".join(reason.code for reason in gate_result.reasons)
+            raise APIError(
+                code="RELEASE_GATE_BLOCKED",
+                message=f"Release gate blocked scoring: {reason_codes}",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
         scored_company = growth_scorer.calculate_scores(target_company)
 
         growth_score = scored_company.growth_score or 0.0

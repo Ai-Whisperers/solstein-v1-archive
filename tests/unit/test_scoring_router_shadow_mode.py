@@ -3,9 +3,11 @@ from collections.abc import Coroutine
 from types import SimpleNamespace
 from typing import Any
 
+import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
 from solstein.api.routers import scoring
+from solstein.data.report_release_gate import GateReason, ReportGateResult
 
 
 class _DummyRepo:
@@ -32,6 +34,12 @@ def test_shadow_mode_defaults_to_legacy_when_flag_disabled(monkeypatch: MonkeyPa
     )
 
     monkeypatch.setattr(scoring.unified_score_loader, "load_company_for_scoring", lambda _cid: target_company)
+
+    class _GatePass:
+        def evaluate(self, _companies):
+            return ReportGateResult(passed=True, reasons=[])
+
+    monkeypatch.setattr(scoring, "ReportReleaseGate", lambda *args, **kwargs: _GatePass())
     monkeypatch.setattr(scoring.growth_scorer, "calculate_scores", lambda _company: scored_company)
     monkeypatch.setattr(scoring, "get_settings", lambda: SimpleNamespace(feature_new_classifier=False))
 
@@ -56,6 +64,12 @@ def test_shadow_mode_switches_to_canonical_when_flag_enabled(monkeypatch: Monkey
     )
 
     monkeypatch.setattr(scoring.unified_score_loader, "load_company_for_scoring", lambda _cid: target_company)
+
+    class _GatePass:
+        def evaluate(self, _companies):
+            return ReportGateResult(passed=True, reasons=[])
+
+    monkeypatch.setattr(scoring, "ReportReleaseGate", lambda *args, **kwargs: _GatePass())
     monkeypatch.setattr(scoring.growth_scorer, "calculate_scores", lambda _company: scored_company)
     monkeypatch.setattr(scoring, "get_settings", lambda: SimpleNamespace(feature_new_classifier=True))
 
@@ -66,3 +80,22 @@ def test_shadow_mode_switches_to_canonical_when_flag_enabled(monkeypatch: Monkey
     assert result["classification_shadow"]["canonical"] == "Phoenix"
     assert result["classification_shadow"]["mismatch"] is True
     assert result["classification_shadow"]["feature_new_classifier"] is True
+
+
+def test_score_company_blocks_when_release_gate_fails(monkeypatch: MonkeyPatch) -> None:
+    target_company = SimpleNamespace(id="c3")
+    monkeypatch.setattr(scoring.unified_score_loader, "load_company_for_scoring", lambda _cid: target_company)
+
+    class _GateFail:
+        def evaluate(self, _companies):
+            return ReportGateResult(
+                passed=False,
+                reasons=[GateReason(code="critical_claim_contradiction", message="blocked", details={})],
+            )
+
+    monkeypatch.setattr(scoring, "ReportReleaseGate", lambda *args, **kwargs: _GateFail())
+
+    with pytest.raises(scoring.APIError) as exc_info:
+        _ = _run(scoring.score_company("c3", _={}, repo=_DummyRepo()))
+
+    assert exc_info.value.code == "RELEASE_GATE_BLOCKED"

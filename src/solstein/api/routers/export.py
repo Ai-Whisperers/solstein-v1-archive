@@ -22,11 +22,18 @@ excel_exporter = ExcelExporter()
 def _run_excel_export(repo: Any, filters: dict[str, Any], filename: str) -> None:  # noqa: E501
     """Background task to generate excel report."""
     company_filter = CompanyFilter(**filters) if filters else None
-    companies = repo.get_all(filters=company_filter)
+    companies = cast(list[Any], repo.get_all(filters=company_filter) or [])
+
+    gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
+    gate_result = gate.evaluate(companies)
+    if not gate_result.passed:
+        reason_codes = ", ".join(reason.code for reason in gate_result.reasons)
+        logger.error(f"Release gate blocked Excel export before scoring: {reason_codes}")
+        return
 
     # Apply scoring to all companies before export
     if companies:
-        scored_companies = []
+        scored_companies: list[Any] = []
         for company in companies:
             try:
                 scored = growth_scorer.calculate_scores(company)
@@ -35,13 +42,6 @@ def _run_excel_export(repo: Any, filters: dict[str, Any], filename: str) -> None
                 logger.warning(f"Failed to score company {company.name}: {e}")
                 scored_companies.append(company)
         companies = scored_companies
-
-        gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
-        gate_result = gate.evaluate(companies)
-        if not gate_result.passed:
-            reason_codes = ", ".join(reason.code for reason in gate_result.reasons)
-            logger.error(f"Release gate blocked Excel export: {reason_codes}")
-            return
 
         output_path = settings.data.export_dir / filename
         excel_exporter.create_dashboard(companies, output_path)
@@ -93,9 +93,7 @@ async def export_to_json(
 ) -> JSONResponse:
     """Export company data to JSON."""
     try:
-        filters = CompanyFilter(industry=industry)
-
-        filtered_companies = await repo.get_all_filtered(industry=industry, skip=0, limit=1000)
+        filtered_companies: list[Any] = await repo.get_all_filtered(industry=industry, skip=0, limit=1000)
 
         # Filter by industry if specified (manual check to be safe)
         if industry:
@@ -110,26 +108,26 @@ async def export_to_json(
                 status_code=status.HTTP_404_NOT_FOUND,
             )
 
-        # Convert to dict with JSON serializable values
-        companies_data = []
-        for company in filtered_companies:
-            # Score and map Domain Entity directly to Dict
-            scored = growth_scorer.calculate_scores(company)
-            company_dict = scored.model_dump(mode="json")
-            companies_data.append(company_dict)
-
         gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
         gate_result = gate.evaluate(filtered_companies)
         if not gate_result.passed:
             reason_codes = ", ".join(reason.code for reason in gate_result.reasons)
             raise APIError(
                 code="RELEASE_GATE_BLOCKED",
-                message=f"Release gate blocked JSON export: {reason_codes}",
+                message=f"Release gate blocked JSON export before scoring: {reason_codes}",
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Convert to dict with JSON serializable values
+        companies_data: list[dict[str, Any]] = []
+        for company in filtered_companies:
+            # Score and map Domain Entity directly to Dict
+            scored = growth_scorer.calculate_scores(company)
+            company_dict: dict[str, Any] = scored.model_dump(mode="json")
+            companies_data.append(company_dict)
+
         # Create output
-        export_data = {
+        export_data: dict[str, Any] = {
             "exported_at": datetime.now().isoformat(),
             "total_companies": len(companies_data),
             "companies": companies_data,
@@ -165,8 +163,7 @@ async def search_with_llm(
     This endpoint uses AI to understand natural language criteria and match
     companies based on their full profile, not just keyword matching.
     """
-    repo_any = cast(Any, repo)
-    companies, filter_metadata = await repo_any.get_all_llm_filtered(
+    companies, _ = await repo.get_all_llm_filtered(
         criteria=criteria,
         limit=limit,
     )

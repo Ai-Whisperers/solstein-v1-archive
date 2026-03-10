@@ -103,7 +103,13 @@ def test_excel_export_skips_when_gate_blocks(monkeypatch: MonkeyPatch) -> None:
         return _GateStub()
 
     monkeypatch.setattr(export_router, "ReportReleaseGate", _fake_gate)
-    monkeypatch.setattr(export_router.growth_scorer, "calculate_scores", _identity)
+    scoring_calls = {"count": 0}
+
+    def _counted_identity(company: Company) -> Company:
+        scoring_calls["count"] += 1
+        return company
+
+    monkeypatch.setattr(export_router.growth_scorer, "calculate_scores", _counted_identity)
 
     def _fake_create_dashboard(_companies: object, output_path: object) -> None:
         created_paths.append(str(output_path))
@@ -113,3 +119,4 @@ def test_excel_export_skips_when_gate_blocks(monkeypatch: MonkeyPatch) -> None:
     export_router._run_excel_export(repo, filters={}, filename="test.xlsx")
 
     assert created_paths == []
+    assert scoring_calls["count"] == 0
