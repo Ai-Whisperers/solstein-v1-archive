@@ -100,11 +100,12 @@ class APIConfig(BaseModel):
         return f"http://{self.host}:{self.port}{self.api_prefix}"
 
 
-
 class SecurityConfig(BaseModel):
     """Security configuration."""
 
-    secret_key: str = Field(default="", description="JWT signing secret. Set SECURITY__SECRET_KEY env var to a strong value.")
+    secret_key: str = Field(
+        default="", description="JWT signing secret. Set SECURITY__SECRET_KEY env var to a strong value."
+    )
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30, ge=1)
     admin_email: str | None = Field(default=None, description="Admin login email (set ADMIN_EMAIL env var)")
@@ -199,6 +200,12 @@ class Settings(BaseSettings):
     news_api_key: str | None = Field(default=None)
     patentsview_api_key: str | None = Field(default=None)
 
+    connector_max_attempts: int = Field(default=3, ge=1, le=10)
+    connector_retry_base_delay: float = Field(default=0.25, ge=0.0, le=30.0)
+    connector_retry_max_delay: float = Field(default=2.0, ge=0.0, le=120.0)
+    connector_circuit_failure_threshold: int = Field(default=5, ge=1, le=100)
+    connector_circuit_cooldown_seconds: float = Field(default=30.0, ge=1.0, le=3600.0)
+
     feature_new_classifier: bool = Field(default=False)
     feature_new_readiness_gate: bool = Field(default=False)
     feature_new_unified_loader: bool = Field(default=False)
@@ -278,25 +285,25 @@ class Settings(BaseSettings):
 
     def check_configuration(self) -> None:
         """Check required configuration at startup.
-        
+
         Raises ConfigurationError if critical keys are missing.
         Warns for optional keys. Logs a full startup summary.
         """
         self._validate_runtime_safety()
-        
+
         # Security key
         if not self.security.secret_key:
             logger.warning(
                 "SECURITY__SECRET_KEY is not set. Set this env var to a strong secret before production use."
             )
-        
+
         # Required: GitHub token
         if not (self.github_token or "").strip():
             raise ConfigurationError(
                 "GITHUB_TOKEN environment variable is required. "
                 "Get a token from: https://github.com/settings/tokens and set it before starting."
             )
-        
+
         # Optional data source keys
         optional_data: dict[str, str | None] = {
             "COMPANIES_HOUSE_API_KEY": self.companies_house_api_key,
@@ -308,7 +315,7 @@ class Settings(BaseSettings):
         for name, value in optional_data.items():
             if not value:
                 logger.warning(f"{name} not configured — related data gathering will be disabled.")
-        
+
         # LLM provider summary
         llm_providers: dict[str, str | None] = {
             "OPENAI_API_KEY": self.openai_api_key,
@@ -327,19 +334,21 @@ class Settings(BaseSettings):
         }
         configured = [name for name, val in llm_providers.items() if val]
         missing = [name for name, val in llm_providers.items() if not val]
-        
+
         if not configured:
             logger.warning(
                 "No LLM provider API keys configured. "
                 "AI features (report generation, analysis) will be unavailable. "
                 f"Set any of: {', '.join(llm_providers)}"
             )
-        
+
         status_lines = [f"  \u2713 {n}" for n in configured] + [f"  - {n} (not set)" for n in missing[:5]]
         if len(missing) > 5:
             status_lines.append(f"  - ... and {len(missing) - 5} more not configured")
-        
-        logger.info("Configuration validation passed.\n\u2500\u2500 LLM Providers \u2500\u2500\n" + "\n".join(status_lines))
+
+        logger.info(
+            "Configuration validation passed.\n\u2500\u2500 LLM Providers \u2500\u2500\n" + "\n".join(status_lines)
+        )
 
     @field_validator("environment", mode="before")
     @classmethod

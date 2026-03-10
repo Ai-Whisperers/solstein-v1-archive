@@ -17,13 +17,13 @@ Features:
 
 from __future__ import annotations
 
-import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any
 
 import httpx
 from loguru import logger
 
+from .contracts import ConnectorRequest, ConnectorResponse
 from .constants import (
     HTTP_STATUS_RATE_LIMITED,
     NEWS_SIGNAL_DAILY_QUERY_LIMIT,
@@ -35,6 +35,7 @@ from .signal_detectors import (
     PartnershipSignalDetector,
     Signal,
 )
+from .runtime import ConnectorRuntime
 
 
 class NewsSignalDetector:
@@ -60,6 +61,7 @@ class NewsSignalDetector:
             ValueError: If no API key provided and NEWSAPI_KEY not in environment.
         """
         from solstein.config import get_settings
+        from solstein.infrastructure.retry_policy import CircuitBreaker, RetryPolicy
 
         settings = get_settings()
         self.api_key = api_key or settings.news_api_key
@@ -72,6 +74,17 @@ class NewsSignalDetector:
             PartnershipSignalDetector(),
             KeyHireSignalDetector(),
         ]
+        self._runtime = ConnectorRuntime(
+            retry_policy=RetryPolicy(
+                max_attempts=settings.connector_max_attempts,
+                base_delay_seconds=settings.connector_retry_base_delay,
+                max_delay_seconds=settings.connector_retry_max_delay,
+            ),
+            circuit_breaker=CircuitBreaker(
+                failure_threshold=settings.connector_circuit_failure_threshold,
+                cooldown_seconds=settings.connector_circuit_cooldown_seconds,
+            ),
+        )
 
         # Rate limit tracking
         self._daily_query_count = 0
@@ -197,6 +210,32 @@ class NewsSignalDetector:
                         )
 
         return all_signals
+
+    async def detect_signals_enveloped(
+        self,
+        company_name: str,
+        signal_types: list[str] | None = None,
+    ) -> ConnectorResponse[list[Signal]]:
+        request = ConnectorRequest(
+            connector="news_signal_detector",
+            operation="detect_signals",
+            inputs={
+                "company_name": company_name,
+                "signal_types": signal_types,
+            },
+        )
+
+        async def _operation() -> list[Signal]:
+            return await self.detect_signals(company_name, signal_types)
+
+        return await self._runtime.run(
+            request=request,
+            operation=_operation,
+            retryable_exceptions=(httpx.HTTPError, RuntimeError, TimeoutError),
+            empty_is_degraded=True,
+            empty_error="No signals detected",
+            extra_metadata={"detector_count": len(self._detectors)},
+        )
 
     # Convenience methods for specific signal types
     async def detect_funding_signal(self, company_name: str) -> list[Signal]:

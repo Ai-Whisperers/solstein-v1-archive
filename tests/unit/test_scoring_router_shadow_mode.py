@@ -99,3 +99,60 @@ def test_score_company_blocks_when_release_gate_fails(monkeypatch: MonkeyPatch) 
         _ = _run(scoring.score_company("c3", _={}, repo=_DummyRepo()))
 
     assert exc_info.value.code == "RELEASE_GATE_BLOCKED"
+
+
+def test_adjudicate_company_claim_records_decision(monkeypatch: MonkeyPatch) -> None:
+    target_company = SimpleNamespace(id="c4", metric_justifications={})
+    monkeypatch.setattr(scoring.unified_score_loader, "load_company_for_scoring", lambda _cid: target_company)
+
+    class _Repo:
+        def __init__(self) -> None:
+            self.saved = None
+
+        async def get_by_id(self, _company_id: str):
+            return None
+
+        async def save(self, company):
+            self.saved = company
+            return None
+
+    class _GatePass:
+        def evaluate(self, _companies):
+            return ReportGateResult(passed=True, reasons=[])
+
+    monkeypatch.setattr(scoring, "ReportReleaseGate", lambda *args, **kwargs: _GatePass())
+
+    repo = _Repo()
+    req = scoring.AdjudicationRequest(
+        metric="revenue",
+        decision="override",
+        actor="reviewer@solstein.local",
+        reason="audited source",
+        status="approved",
+        value=180.0,
+    )
+
+    result = _run(scoring.adjudicate_company_claim("c4", request=req, _={}, repo=repo))
+
+    assert result["company_id"] == "c4"
+    assert result["metric"] == "revenue"
+    assert result["decision"] == "override"
+    assert result["gate_passed"] is True
+    assert repo.saved is target_company
+    assert "adjudication:revenue" in target_company.metric_justifications
+
+
+def test_adjudicate_company_claim_not_found(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setattr(scoring.unified_score_loader, "load_company_for_scoring", lambda _cid: None)
+
+    with pytest.raises(scoring.APIError) as exc_info:
+        req = scoring.AdjudicationRequest(
+            metric="revenue",
+            decision="override",
+            actor="reviewer@solstein.local",
+            reason="audited source",
+            status="approved",
+        )
+        _ = _run(scoring.adjudicate_company_claim("missing", request=req, _={}, repo=_DummyRepo()))
+
+    assert exc_info.value.code == "NOT_FOUND"

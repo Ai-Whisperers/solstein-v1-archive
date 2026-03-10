@@ -18,11 +18,16 @@ from typing import Any, Optional
 
 from loguru import logger
 
+from solstein.config import get_settings
+from solstein.infrastructure.retry_policy import CircuitBreaker, RetryPolicy
+
+from .contracts import ConnectorRequest, ConnectorResponse
 from .lookup_strategies import (
     DuckDuckGoStrategy,
     OpenCorporatesStrategy,
     OpenFIGIStrategy,
 )
+from .runtime import ConnectorRuntime
 
 
 class IdentifierLookupService:
@@ -46,6 +51,18 @@ class IdentifierLookupService:
             OpenFIGIStrategy(),
             DuckDuckGoStrategy(),
         ]
+        settings = get_settings()
+        self._runtime = ConnectorRuntime(
+            retry_policy=RetryPolicy(
+                max_attempts=settings.connector_max_attempts,
+                base_delay_seconds=settings.connector_retry_base_delay,
+                max_delay_seconds=settings.connector_retry_max_delay,
+            ),
+            circuit_breaker=CircuitBreaker(
+                failure_threshold=settings.connector_circuit_failure_threshold,
+                cooldown_seconds=settings.connector_circuit_cooldown_seconds,
+            ),
+        )
 
         # Initialize cache
         self._cache: dict[str, dict[str, Any]] = {}
@@ -121,6 +138,38 @@ class IdentifierLookupService:
             self._cache[cache_key] = merged
 
         return merged
+
+    async def resolve_identifiers_enveloped(
+        self,
+        company_name: str,
+        headquarters: Optional[str] = None,
+        use_cache: bool = True,
+    ) -> ConnectorResponse[dict[str, Any]]:
+        request = ConnectorRequest(
+            connector="identifier_lookup_service",
+            operation="resolve_identifiers",
+            inputs={
+                "company_name": company_name,
+                "headquarters": headquarters,
+                "use_cache": use_cache,
+            },
+        )
+
+        async def _operation() -> dict[str, Any]:
+            return await self.resolve_identifiers(
+                company_name=company_name,
+                headquarters=headquarters,
+                use_cache=use_cache,
+            )
+
+        return await self._runtime.run(
+            request=request,
+            operation=_operation,
+            retryable_exceptions=(RuntimeError, TimeoutError),
+            empty_is_degraded=True,
+            empty_error="No identifiers resolved",
+            extra_metadata={"strategy_count": len(self._strategies)},
+        )
 
     def _merge_results(self, results: list[dict[str, Any]]) -> dict[str, Any]:
         """Merge results from multiple strategies with confidence scoring.

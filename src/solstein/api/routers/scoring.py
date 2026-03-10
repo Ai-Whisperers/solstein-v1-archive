@@ -1,9 +1,10 @@
 import asyncio
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query, status
 from loguru import logger
+from pydantic import BaseModel
 
 from solstein.analytics.classification_service import ClassificationService
 from solstein.analytics.company_loader import unified_score_loader
@@ -12,6 +13,7 @@ from solstein.analytics.scoring import GrowthScorer
 from solstein.api.dependencies import get_company_repository, get_current_tenant
 from solstein.api.exceptions import APIError
 from solstein.config import get_settings
+from solstein.data.adjudication import AdjudicationDecision, record_adjudication_decision
 from solstein.data.report_release_gate import ReportReleaseGate
 
 router = APIRouter(tags=["Scoring"])
@@ -25,6 +27,15 @@ def _legacy_classification_from_growth(growth_score: float) -> str:
     if growth_score < SALT_SCORE_THRESHOLD:
         return "Lead"
     return "Salt"
+
+
+class AdjudicationRequest(BaseModel):
+    metric: str
+    decision: str
+    actor: str
+    reason: str
+    status: str = "approved"
+    value: Any = None
 
 
 @router.post("/company/{company_id}/score")
@@ -60,6 +71,54 @@ async def score_company(
         raise APIError(
             code="INTERNAL_ERROR",
             message="Error scoring company",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=str(e),
+        ) from e
+
+
+@router.post("/company/{company_id}/adjudicate")
+async def adjudicate_company_claim(
+    company_id: str,
+    request: AdjudicationRequest,
+    _: dict[str, Any] = Depends(get_current_tenant),
+    repo: Any = Depends(get_company_repository),
+) -> dict[str, Any]:
+    try:
+        target_company = await _load_company_for_scoring(company_id, repo)
+
+        decision_id = f"{company_id}:{request.metric}:{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}"
+        decision = AdjudicationDecision(
+            decision_id=decision_id,
+            metric=request.metric,
+            decision=request.decision,
+            status=request.status,
+            actor=request.actor,
+            reason=request.reason,
+            value=request.value,
+            timestamp=datetime.now(UTC).isoformat(),
+        )
+        record_adjudication_decision(target_company, decision)
+        await repo.save(target_company)
+
+        gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
+        gate_result = gate.evaluate([target_company])
+
+        return {
+            "company_id": company_id,
+            "decision_id": decision_id,
+            "metric": request.metric,
+            "decision": request.decision,
+            "status": request.status,
+            "gate_passed": gate_result.passed,
+            "gate_reason_codes": sorted({reason.code for reason in gate_result.reasons}),
+        }
+    except APIError:
+        raise
+    except Exception as e:
+        logger.error(f"Error adjudicating company {company_id}: {e}")
+        raise APIError(
+            code="INTERNAL_ERROR",
+            message="Error adjudicating company claim",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             details=str(e),
         ) from e
