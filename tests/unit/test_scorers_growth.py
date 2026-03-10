@@ -40,7 +40,8 @@ class TestGrowthMomentumScorer:
         """Test that base score is applied."""
         financials = FinancialMetric()
         score, expl = scorer.score(financials)
-        assert expl.base_score == scorer.config.growth.base_score
+        expected_base = scorer.config.growth.base_score or 0.0
+        assert expl.base_score == expected_base
 
     def test_revenue_growth_high_boost(self, scorer):
         """Test that high growth rate boosts score."""
@@ -48,7 +49,7 @@ class TestGrowthMomentumScorer:
         score, expl = scorer.score(financials)
         assert len(expl.components) > 0
         assert any(c.name == "Revenue Growth" for c in expl.components)
-        assert score > scorer.config.growth.base_score
+        assert score > (scorer.config.growth.base_score or 0.0)
 
     def test_revenue_growth_capped(self, scorer):
         """Test that revenue growth boost is capped."""
@@ -133,7 +134,7 @@ class TestGrowthMomentumScorer:
         )
         score, expl = scorer.score(financials)
         assert len(expl.components) >= 3
-        assert score > scorer.config.growth.base_score
+        assert score > (scorer.config.growth.base_score or 0.0)
 
     def test_custom_config(self):
         """Test with custom configuration."""

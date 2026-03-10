@@ -4,14 +4,11 @@ EPIC-022: Extracted from MarkdownExtractor for modularity.
 """
 
 import re
-from typing import Any
 
 from ...domain.models import (
     AIMaturity,
-    Company,
     CompanyTier,
     ConfidenceLevel,
-    FinancialMetric,
     ThreatLevel,
 )
 
@@ -87,19 +84,22 @@ class DataConverter:
             AIMaturity enum value
         """
         if not value:
-            return AIMaturity.UNKNOWN
+            return AIMaturity.NONE
 
         value_lower = value.lower().strip()
 
         maturity_map = {
-            "advanced": AIMaturity.ADVANCED,
-            "intermediate": AIMaturity.INTERMEDIATE,
-            "emerging": AIMaturity.EMERGING,
-            "limited": AIMaturity.LIMITED,
+            "very strong": AIMaturity.VERY_STRONG,
+            "advanced": AIMaturity.VERY_STRONG,
+            "strong": AIMaturity.STRONG,
+            "moderate": AIMaturity.MODERATE,
+            "intermediate": AIMaturity.MODERATE,
+            "emerging": AIMaturity.LOW,
+            "low": AIMaturity.LOW,
             "none": AIMaturity.NONE,
         }
 
-        return maturity_map.get(value_lower, AIMaturity.UNKNOWN)
+        return maturity_map.get(value_lower, AIMaturity.NONE)
 
     @staticmethod
     def parse_threat_level(value: str | None) -> ThreatLevel:
@@ -112,7 +112,7 @@ class DataConverter:
             ThreatLevel enum value
         """
         if not value:
-            return ThreatLevel.UNKNOWN
+            return ThreatLevel.MEDIUM
 
         value_lower = value.lower().strip()
 
@@ -121,10 +121,11 @@ class DataConverter:
             "high": ThreatLevel.HIGH,
             "medium": ThreatLevel.MEDIUM,
             "low": ThreatLevel.LOW,
-            "none": ThreatLevel.NONE,
         }
 
-        return threat_map.get(value_lower, ThreatLevel.UNKNOWN)
+        if "low" in value_lower:
+            return ThreatLevel.LOW
+        return threat_map.get(value_lower, ThreatLevel.MEDIUM)
 
     @staticmethod
     def parse_tier(value: str | None) -> CompanyTier:
@@ -137,17 +138,21 @@ class DataConverter:
             CompanyTier enum value
         """
         if not value:
-            return CompanyTier.UNKNOWN
+            return CompanyTier.TIER_3
 
         value_lower = value.lower().strip()
 
         tier_map = {
-            "phoenix": CompanyTier.PHOENIX,
-            "salt": CompanyTier.SALT,
-            "lead": CompanyTier.LEAD,
+            "tier 1": CompanyTier.TIER_1,
+            "tier 2": CompanyTier.TIER_2,
+            "tier 3": CompanyTier.TIER_3,
+            "tier 4": CompanyTier.TIER_4,
+            "phoenix": CompanyTier.TIER_1,
+            "salt": CompanyTier.TIER_2,
+            "lead": CompanyTier.TIER_3,
         }
 
-        return tier_map.get(value_lower, CompanyTier.UNKNOWN)
+        return tier_map.get(value_lower, CompanyTier.TIER_3)
 
     @staticmethod
     def parse_confidence(value: str | None) -> ConfidenceLevel:
@@ -160,18 +165,22 @@ class DataConverter:
             ConfidenceLevel enum value
         """
         if not value:
-            return ConfidenceLevel.UNVERIFIED
+            return ConfidenceLevel.UNKNOWN
 
         value_upper = value.upper().strip()
 
         confidence_map = {
-            "HIGH": ConfidenceLevel.HIGH,
-            "MEDIUM": ConfidenceLevel.MEDIUM,
-            "LOW": ConfidenceLevel.LOW,
-            "UNVERIFIED": ConfidenceLevel.UNVERIFIED,
+            "HIGH": ConfidenceLevel.CONFIRMED,
+            "CONFIRMED": ConfidenceLevel.CONFIRMED,
+            "MEDIUM": ConfidenceLevel.ESTIMATED,
+            "ESTIMATED": ConfidenceLevel.ESTIMATED,
+            "LOW": ConfidenceLevel.UNKNOWN,
+            "UNVERIFIED": ConfidenceLevel.UNKNOWN,
+            "UNKNOWN": ConfidenceLevel.UNKNOWN,
+            "SYNTHETIC": ConfidenceLevel.SYNTHETIC,
         }
 
-        return confidence_map.get(value_upper, ConfidenceLevel.UNVERIFIED)
+        return confidence_map.get(value_upper, ConfidenceLevel.UNKNOWN)
 
     @staticmethod
     def determine_tier_from_revenue(revenue: float | None) -> CompanyTier:
@@ -184,11 +193,11 @@ class DataConverter:
             CompanyTier based on revenue thresholds
         """
         if revenue is None:
-            return CompanyTier.UNKNOWN
+            return CompanyTier.TIER_3
 
         if revenue >= 100_000_000:  # €100M+
-            return CompanyTier.PHOENIX
+            return CompanyTier.TIER_1
         elif revenue >= 10_000_000:  # €10M-€100M
-            return CompanyTier.SALT
+            return CompanyTier.TIER_2
         else:
-            return CompanyTier.LEAD
+            return CompanyTier.TIER_3

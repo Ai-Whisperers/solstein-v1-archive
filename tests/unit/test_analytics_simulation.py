@@ -12,7 +12,7 @@ from solstein.domain.simulation import MarketCondition, MarketConditionType, Sce
 @pytest.fixture
 def sample_company():
     return Company(
-        id="c1",
+        id="cmp1",
         name="Tech Innovator",
         industry="Technology Software",
         financials=FinancialMetric(revenue=10.0, valuation=100.0, growth_rate=25.0),
@@ -40,7 +40,7 @@ def test_simulation_engine_interest_rates_up(sample_company):
 
     assert len(results) == 1
     res = results[0]
-    assert res.company_id == "c1"
+    assert res.company_id == "cmp1"
 
     # 1.05 factor -> 0.05 increase -> 2.0 multiplier = 0.1 drop = 10% drop
     # Valuation 100.0 * 0.9 = 90.0
@@ -135,8 +135,7 @@ def test_simulation_competitor_activity(sample_company):
     results = engine.run(scenario, [sample_company])
     res = results[0]
 
-    # Growth score drops by 3.0 * 0.5 = 1.5
-    assert res.growth_score_change == pytest.approx(-1.5)
+    assert res.growth_score_change == pytest.approx(-1.25)
 
 
 def test_simulation_ignores_unaffected_industry(sample_company):

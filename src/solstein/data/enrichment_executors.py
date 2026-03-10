@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from .enrichment_config import SourceTier
+from .source_policy import SourceTier
 
 if TYPE_CHECKING:
     from .enrichment_orchestrator import EnrichmentOrchestrator

@@ -182,6 +182,69 @@ class FactRepository:
         fact = result.scalar_one_or_none()
         return fact
 
+    async def add_source(
+        self,
+        fact_id: str,
+        source_type: str,
+        source_url: str | None = None,
+        raw_content: str | None = None,
+    ) -> FactSource:
+        if not fact_id:
+            raise ValueError("Fact ID is required")
+        if not source_type:
+            raise ValueError("Source type is required")
+
+        try:
+            stmt = select(Fact).where(Fact.fact_id == fact_id)
+            result = await self.session.execute(stmt)
+            fact = result.scalar_one_or_none()
+            if not fact:
+                raise RuntimeError(f"Fact {fact_id} not found")
+
+            source = FactSource(
+                fact_id=fact_id,
+                source_type=source_type,
+                source_url=source_url,
+                raw_content=raw_content,
+            )
+            self.session.add(source)
+            await self.session.commit()
+            await self.session.refresh(source)
+            return source
+        except Exception as e:
+            await self.session.rollback()
+            raise RuntimeError(f"Failed to add source: {e}") from e
+
+    async def get_batch(self, batch_id: str) -> GatheringBatch | None:
+        if not batch_id:
+            raise ValueError("Batch ID is required")
+
+        stmt = select(GatheringBatch).where(GatheringBatch.batch_id == batch_id)
+        result = await self.session.execute(stmt)
+        batch = result.scalar_one_or_none()
+        return batch
+
+    async def update_batch_status(self, batch_id: str, status: str) -> GatheringBatch:
+        if not batch_id:
+            raise ValueError("Batch ID is required")
+        if not status:
+            raise ValueError("Status is required")
+
+        try:
+            stmt = select(GatheringBatch).where(GatheringBatch.batch_id == batch_id)
+            result = await self.session.execute(stmt)
+            batch = result.scalar_one_or_none()
+            if not batch:
+                raise RuntimeError(f"Batch {batch_id} not found")
+
+            batch.status = status
+            await self.session.commit()
+            await self.session.refresh(batch)
+            return batch
+        except Exception as e:
+            await self.session.rollback()
+            raise RuntimeError(f"Failed to update batch status: {e}") from e
+
 
 class ReleaseGateAuditRepository:
     def __init__(self, session: AsyncSession):

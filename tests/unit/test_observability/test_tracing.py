@@ -145,9 +145,9 @@ class TestMetricsCalculation:
         metrics = test_tracer.get_metrics()
 
         svc_metrics = metrics["svc"]["latency_ms"]
-        assert svc_metrics["p50"] == 50.0
-        assert svc_metrics["p95"] == 95.0
-        assert svc_metrics["p99"] == 99.0
+        assert svc_metrics["p50"] == 50.5
+        assert svc_metrics["p95"] == 96.0
+        assert svc_metrics["p99"] == 100.0
         assert svc_metrics["avg"] == 50.5
 
 

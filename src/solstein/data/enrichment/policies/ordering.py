@@ -18,7 +18,7 @@ class SourceOrderingPolicy:
 
     def get_source_policy_tier(self, source: "EnrichmentSource") -> "SourceTier":
         """Get policy tier for a source."""
-        from ..source_policy import SourceTier
+        from ...source_policy import SourceTier
 
         policy = self.source_policies.get(source.value)
         if not policy:
@@ -39,7 +39,7 @@ class SourceOrderingPolicy:
         Returns:
             Ordered list of sources
         """
-        from ..source_policy import SourceTier
+        from ...source_policy import SourceTier
 
         order = []
         stage = stage or SourceTier.FREE
@@ -72,6 +72,6 @@ class SourceOrderingPolicy:
         Returns:
             Ordered list of paid sources
         """
-        from ..source_policy import SourceTier
+        from ...source_policy import SourceTier
 
         return self.get_enrichment_order(company, stage=SourceTier.PAID)

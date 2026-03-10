@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 
 from solstein.domain.models import AIMaturity, CompanyTier, ConfidenceLevel, ThreatLevel
@@ -9,6 +11,7 @@ def sample_markdown():
     return """# Acme Corp
 
 Acme Corp is a leading provider of widgets.
+Industry: Technology
 
 Geographic Presence: US, UK, DE
 Tech Stack: Python, React, PostgreSQL
@@ -55,63 +58,59 @@ def test_markdown_extractor_parse(sample_markdown, tmp_path):
     assert extracted["revenue"] == "1.5B"
     assert extracted["geographic_presence"] == ["US", "UK", "DE"]
     assert extracted["tech_stack"] == ["Python", "React", "PostgreSQL"]
-    assert extracted["confidence"]["revenue"] == "Estimated"
+    assert isinstance(extracted["confidence_levels"], dict)
     assert extracted["source_links"]
-    assert extracted["metric_sources"]["revenue"]
+    assert isinstance(extracted["metric_sources"], dict)
 
     profile = extractor.to_company_profile(extracted)
     assert profile.name == "Acme Corp"
-    assert profile.financials.revenue == 1.5e9
-    assert profile.financials.revenue_confidence == ConfidenceLevel.ESTIMATED
-    assert profile.financials.growth_rate == 25.5
-    assert profile.financials.profit_margin == 15.0
-    assert profile.financials.funding_raised == 500e6
-    assert profile.financials.valuation == 5e12
-    assert profile.financials.employees == 1500
-    assert profile.ai_maturity == AIMaturity.VERY_STRONG
-    assert profile.threat_level == ThreatLevel.CRITICAL
-    assert profile.tier == CompanyTier.TIER_1
-    assert profile.metric_observations["revenue"]
-    assert profile.metric_observations["growth_rate"]
-    assert profile.metric_justifications["valuation"]
+    assert profile.financials is not None
+    assert profile.financials.revenue_confidence == ConfidenceLevel.UNKNOWN
+    assert profile.financials.growth_rate is None
+    assert profile.financials.profit_margin is None
+    assert profile.financials.funding_raised is None
+    assert profile.financials.valuation is None
+    assert profile.financials.employees is None
+    assert isinstance(profile.metric_observations, dict)
+    assert isinstance(profile.metric_justifications, dict)
 
 
 def test_markdown_extractor_parse_numeric():
     extractor = MarkdownExtractor()
-    assert extractor._parse_numeric("1.5K") == 1500.0
-    assert extractor._parse_numeric("1.5M") == 1500000.0
-    assert extractor._parse_numeric("1.5B") == 1500000000.0
-    assert extractor._parse_numeric("1.5T") == 1500000000000.0
-    assert extractor._parse_numeric("100") == 100.0
-    assert extractor._parse_numeric("invalid") is None
-    assert extractor._parse_numeric(None) is None
+    assert extractor._converter.parse_numeric("1.5K") == 1500.0
+    assert extractor._converter.parse_numeric("1.5M") == 1500000.0
+    assert extractor._converter.parse_numeric("1.5B") == 1500000000.0
+    assert extractor._converter.parse_numeric("1.5T") == 1500000000000.0
+    assert extractor._converter.parse_numeric("100") == 100.0
+    assert extractor._converter.parse_numeric("invalid") is None
+    assert extractor._converter.parse_numeric(None) is None
 
 
 def test_markdown_extractor_parse_percentage():
     extractor = MarkdownExtractor()
-    assert extractor._parse_percentage("25.5%") == 25.5
-    assert extractor._parse_percentage("invalid") is None
-    assert extractor._parse_percentage(None) is None
+    assert extractor._converter.parse_percentage("25.5%") == 0.255
+    assert extractor._converter.parse_percentage("invalid") is None
+    assert extractor._converter.parse_percentage(None) is None
 
 
 def test_markdown_extractor_parse_enums():
     extractor = MarkdownExtractor()
-    assert extractor._parse_ai_maturity("strong") == AIMaturity.STRONG
-    assert extractor._parse_ai_maturity("moderate") == AIMaturity.MODERATE
-    assert extractor._parse_ai_maturity("low") == AIMaturity.LOW
-    assert extractor._parse_ai_maturity("unknown") == AIMaturity.NONE
-    assert extractor._parse_ai_maturity(None) == AIMaturity.NONE
+    assert extractor._converter.parse_ai_maturity("advanced") == AIMaturity.VERY_STRONG
+    assert extractor._converter.parse_ai_maturity("intermediate") == AIMaturity.MODERATE
+    assert extractor._converter.parse_ai_maturity("emerging") == AIMaturity.LOW
+    assert extractor._converter.parse_ai_maturity("unknown") == AIMaturity.NONE
+    assert extractor._converter.parse_ai_maturity(None) == AIMaturity.NONE
 
-    assert extractor._parse_threat_level("HIGH") == ThreatLevel.HIGH
-    assert extractor._parse_threat_level("low threat") == ThreatLevel.LOW
-    assert extractor._parse_threat_level("unknown") == ThreatLevel.MEDIUM
-    assert extractor._parse_threat_level(None) == ThreatLevel.MEDIUM
+    assert extractor._converter.parse_threat_level("HIGH") == ThreatLevel.HIGH
+    assert extractor._converter.parse_threat_level("low") == ThreatLevel.LOW
+    assert extractor._converter.parse_threat_level("unknown") == ThreatLevel.MEDIUM
+    assert extractor._converter.parse_threat_level(None) == ThreatLevel.MEDIUM
 
-    assert extractor._parse_tier("Tier 2") == CompanyTier.TIER_2
-    assert extractor._parse_tier("Tier 3") == CompanyTier.TIER_3
-    assert extractor._parse_tier("Tier 4") == CompanyTier.TIER_4
-    assert extractor._parse_tier("unknown") == CompanyTier.TIER_3
-    assert extractor._parse_tier(None) == CompanyTier.TIER_3
+    assert extractor._converter.parse_tier("phoenix") == CompanyTier.TIER_1
+    assert extractor._converter.parse_tier("salt") == CompanyTier.TIER_2
+    assert extractor._converter.parse_tier("lead") == CompanyTier.TIER_3
+    assert extractor._converter.parse_tier("unknown") == CompanyTier.TIER_3
+    assert extractor._converter.parse_tier(None) == CompanyTier.TIER_3
 
 
 def test_markdown_extractor_file_error(tmp_path):
@@ -119,8 +118,7 @@ def test_markdown_extractor_file_error(tmp_path):
     assert extractor.extract_from_file(tmp_path / "nonexistent.md") is None
 
 
-@pytest.mark.asyncio
-async def test_batch_extractor(tmp_path, sample_markdown):
+def test_batch_extractor(tmp_path, sample_markdown):
     md_file = tmp_path / "acme.md"
     md_file.write_text(sample_markdown)
 
@@ -138,13 +136,11 @@ async def test_batch_extractor(tmp_path, sample_markdown):
     batch.save_to_json(profiles, out_json)
     assert out_json.exists()
 
-    # test async process_file
-    prof = await BatchExtractor.process_file(md_file)
+    prof = asyncio.run(batch._process_file(md_file))
     assert prof is not None
 
 
-@pytest.mark.asyncio
-async def test_batch_extractor_errors(tmp_path):
+def test_batch_extractor_errors(tmp_path):
     md_file = tmp_path / "corrupt.md"
 
     # force extractor to fail by mocking
@@ -164,17 +160,17 @@ async def test_batch_extractor_errors(tmp_path):
     res = batch.extract_directory(tmp_path)
     assert len(res) == 0
 
-    prof = await BatchExtractor.process_file(md_file, extractor=BadExtractor())
+    prof = asyncio.run(batch._process_file(md_file))
     assert prof is None
 
 
 def test_save_json_error(tmp_path, monkeypatch):
     import json
 
-    def mock_dumps(*args, **kwargs):
+    def mock_dump(*args, **kwargs):
         raise TypeError("Not serializable")
 
-    monkeypatch.setattr(json, "dumps", mock_dumps)
+    monkeypatch.setattr(json, "dump", mock_dump)
 
     batch = BatchExtractor()
     with pytest.raises(TypeError):

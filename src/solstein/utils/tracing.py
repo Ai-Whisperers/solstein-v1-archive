@@ -84,7 +84,7 @@ class DependencyTracer:
 
             self._record_call(call)
 
-            log_level = "error" if not success else ("warning" if duration_ms > 1000 else "debug")
+            log_level = "ERROR" if not success else ("WARNING" if duration_ms > 1000 else "DEBUG")
             logger.log(
                 log_level,
                 f"Dependency call completed: {service}.{operation}",

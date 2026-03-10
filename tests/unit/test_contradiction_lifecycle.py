@@ -128,7 +128,7 @@ def test_invalid_transition_rejected_without_mutation() -> None:
                 reason="reopen",
             )
 
-        assert exc_info.value.code == "CONTRADICTION_INVALID_TRANSITION"
+        assert exc_info.value.code == "INVALID_TRANSITION"
 
         stored = session.execute(
             select(ContradictionRecord).where(ContradictionRecord.id == contradiction.id)

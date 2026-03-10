@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from solstein.analytics.scoring import GrowthScorer
+from solstein.analytics.scorers.financial_health import FinancialHealthScorer
 from solstein.data.loaders import CompetitorDataLoader
 from solstein.domain.models import FinancialMetric
 from solstein.exporters.excel import ExcelExporter
@@ -120,10 +120,10 @@ def test_excel_auto_adjust_value_error():
 
 def test_financial_score_cushion_thin_penalty():
     """funding/revenue < thin ratio and profit_margin < 5 → cushion thin penalty."""
-    scorer = GrowthScorer()
+    scorer = FinancialHealthScorer()
     # ratio = 1.0 / 100.0 = 0.01 → below thin threshold. margin = 4 < 5.
     fin = FinancialMetric(revenue=100.0, funding_raised=1.0, profit_margin=4.0)
-    score, expl = scorer._calculate_financial_health_score(fin)
+    score, expl = scorer.score(fin)
     # Penalty component for funding cushion should exist
     cushion_comps = [c for c in expl.components if "funding_ratio" in c.formula]
     assert len(cushion_comps) > 0

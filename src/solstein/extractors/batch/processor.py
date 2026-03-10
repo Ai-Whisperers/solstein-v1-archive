@@ -289,7 +289,7 @@ class BatchExtractor:
         """
         import json
 
-        data = [p.to_dict() for p in profiles]
+        data = [p.model_dump(mode="json") if hasattr(p, "model_dump") else p.to_dict() for p in profiles]
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:

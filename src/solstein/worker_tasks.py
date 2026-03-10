@@ -61,6 +61,7 @@ from solstein.worker.enrichment_tasks import (
 # Orchestration
 from solstein.worker.orchestration import refresh_all_sources
 
+
 __all__ = [
     # Base utilities
     "DeadLetterQueue",

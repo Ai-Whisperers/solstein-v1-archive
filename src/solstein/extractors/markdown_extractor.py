@@ -12,12 +12,9 @@ from typing import Any
 from loguru import logger
 
 from ..domain.models import (
-    AIMaturity,
     Company,
     CompanyTier,
-    ConfidenceLevel,
     FinancialMetric,
-    ThreatLevel,
 )
 from .batch import BatchExtractor
 from .parsers import (
@@ -59,13 +56,13 @@ class MarkdownExtractor:
         # Initialize converter
         self._converter = DataConverter()
 
+        self._llm_extractor: Any | None = None
+
         # Optional LLM extractor
         if use_llm:
             from .llm_financial_extractor import LLMFinancialExtractor
 
             self._llm_extractor = LLMFinancialExtractor()
-        else:
-            self._llm_extractor = None
 
     def extract_from_file(self, file_path: Path) -> dict[str, Any] | None:
         """Extract data from a single markdown file.
@@ -139,7 +136,7 @@ class MarkdownExtractor:
         tier = self._converter.parse_tier(extracted_data.get("tier"))
 
         # Determine tier from revenue if not specified
-        if tier == CompanyTier.UNKNOWN and revenue:
+        if tier == CompanyTier.TIER_3 and revenue:
             tier = self._converter.determine_tier_from_revenue(revenue)
 
         # Parse confidence levels

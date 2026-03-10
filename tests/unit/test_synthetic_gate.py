@@ -21,8 +21,8 @@ class TestSyntheticDataGate:
         """Test that authentic data passes validation."""
         # Create authentic companies
         companies = [
-            Company(id="1", name="Real Company 1", data_source_type="api"),
-            Company(id="2", name="Real Company 2", data_source_type="manual"),
+            Company(id="cmp1", name="Real Company 1", data_source_type="api"),
+            Company(id="cmp2", name="Real Company 2", data_source_type="manual"),
         ]
 
         # Should return True with empty warning
@@ -35,8 +35,8 @@ class TestSyntheticDataGate:
         """Test detection of synthetic data by source type."""
         # Create synthetic company via source type
         companies = [
-            Company(id="1", name="Real Company", data_source_type="api"),
-            Company(id="2", name="Test Company", data_source_type="synthetic"),
+            Company(id="cmp1", name="Real Company", data_source_type="api"),
+            Company(id="cmp2", name="Test Company", data_source_type="synthetic"),
         ]
 
         # Should raise exception
@@ -60,7 +60,7 @@ class TestSyntheticDataGate:
         ]
 
         for pattern in test_cases:
-            companies = [Company(id="1", name=pattern, data_source_type="api")]
+            companies = [Company(id="cmp1", name=pattern, data_source_type="api")]
 
             with pytest.raises(SyntheticDataBlockingError) as exc_info:
                 self.generator._check_data_authenticity(companies)
@@ -70,10 +70,10 @@ class TestSyntheticDataGate:
     def test_check_data_authenticity_multiple_synthetic(self):
         """Test detection of multiple synthetic companies."""
         companies = [
-            Company(id="1", name="Real Company", data_source_type="api"),
-            Company(id="2", name="test-company-1", data_source_type="api"),
-            Company(id="3", name="test-company-2", data_source_type="synthetic"),
-            Company(id="4", name="synthetic-corp", data_source_type="api"),
+            Company(id="cmp1", name="Real Company", data_source_type="api"),
+            Company(id="cmp2", name="test-company-1", data_source_type="api"),
+            Company(id="cmp3", name="test-company-2", data_source_type="synthetic"),
+            Company(id="cmp4", name="synthetic-corp", data_source_type="api"),
         ]
 
         with pytest.raises(SyntheticDataBlockingError) as exc_info:
@@ -108,10 +108,10 @@ class TestSyntheticDataGate:
     def test_check_data_authenticity_mixed_sources_and_names(self):
         """Test detection with mixed synthetic indicators."""
         companies = [
-            Company(id="1", name="Real Company", data_source_type="api"),  # OK
-            Company(id="2", name="Real Company 2", data_source_type="synthetic"),  # Synthetic by source
-            Company(id="3", name="synthetic-real", data_source_type="api"),  # Synthetic by name
-            Company(id="4", name="test-company", data_source_type="synthetic"),  # Both indicators
+            Company(id="cmp1", name="Real Company", data_source_type="api"),  # OK
+            Company(id="cmp2", name="Real Company 2", data_source_type="synthetic"),  # Synthetic by source
+            Company(id="cmp3", name="synthetic-real", data_source_type="api"),  # Synthetic by name
+            Company(id="cmp4", name="test-company", data_source_type="synthetic"),  # Both indicators
         ]
 
         with pytest.raises(SyntheticDataBlockingError) as exc_info:
@@ -128,11 +128,11 @@ class TestSyntheticDataGate:
         """
         # These should NOT be flagged as synthetic (they contain but don't START with patterns)
         companies = [
-            Company(id="1", name="Atest Company B", data_source_type="api"),  # Contains "test" but not at start
+            Company(id="cmp1", name="Atest Company B", data_source_type="api"),  # Contains "test" but not at start
             Company(
-                id="2", name="Best Synthetic Resins", data_source_type="api"
+                id="cmp2", name="Best Synthetic Resins", data_source_type="api"
             ),  # Contains "synthetic" but not at start
-            Company(id="3", name="The Fake News", data_source_type="api"),  # Contains "fake" but not at start
+            Company(id="cmp3", name="The Fake News", data_source_type="api"),  # Contains "fake" but not at start
         ]
 
         is_authentic, warning = self.generator._check_data_authenticity(companies)
@@ -143,9 +143,11 @@ class TestSyntheticDataGate:
     def test_check_data_authenticity_partial_matches(self):
         """Test that partial matches don't trigger synthetic detection."""
         companies = [
-            Company(id="1", name="ATestosterone Corp", data_source_type="api"),  # Starts with A, not exactly test-
-            Company(id="2", name="Best-in-Class LLC", data_source_type="api"),  # Contains "test" but not at start
-            Company(id="3", name="Asynthetic Polymer", data_source_type="api"),  # Starts with A, not exactly synthetic
+            Company(id="cmp1", name="ATestosterone Corp", data_source_type="api"),  # Starts with A, not exactly test-
+            Company(id="cmp2", name="Best-in-Class LLC", data_source_type="api"),  # Contains "test" but not at start
+            Company(
+                id="cmp3", name="Asynthetic Polymer", data_source_type="api"
+            ),  # Starts with A, not exactly synthetic
         ]
 
         is_authentic, warning = self.generator._check_data_authenticity(companies)

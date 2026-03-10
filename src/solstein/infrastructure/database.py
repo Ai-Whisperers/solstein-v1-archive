@@ -77,13 +77,14 @@ class DatabaseManager:
 
         self.session_factory = async_sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
 
-
     def init_sync(self):
         """Initialize sync engine and session factory for Alembic migrations.
 
         Uses same optimized pooling settings as async engine.
         """
         url = self.settings.get_database_url()
+        if url.startswith("postgresql+asyncpg://"):
+            url = url.replace("postgresql+asyncpg://", "postgresql+psycopg2://", 1)
         kwargs = {}
         if not url.startswith("sqlite"):
             kwargs = {

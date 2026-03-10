@@ -137,24 +137,24 @@ def test_supabase_repo_methods(mock_get_sb):
 
     # get_by_id
     mock_query = mock_client.table().select().eq()
-    mock_query.execute.return_value.data = [{"id": "1", "name": "Test"}]
-    assert repo.get_by_id("1").name == "Test"
+    mock_query.execute.return_value.data = [{"id": "cmp1", "name": "Test"}]
+    assert repo.get_by_id("cmp1").name == "Test"
 
     mock_query.execute.return_value.data = []
-    assert repo.get_by_id("2") is None
+    assert repo.get_by_id("cmp2") is None
 
     # save
-    c = Company(id="1", name="Test", last_updated=datetime.now(), tier=CompanyTier.TIER_1)
+    c = Company(id="cmp1", name="Test", last_updated=datetime.now(), tier=CompanyTier.TIER_1)
     mock_client.table().upsert().execute = MagicMock()
     repo.save(c)
     mock_client.table().upsert.assert_called()
 
     # delete
-    mock_client.table().delete().eq().execute.return_value.data = [{"id": "1"}]
-    assert repo.delete("1") is True
+    mock_client.table().delete().eq().execute.return_value.data = [{"id": "cmp1"}]
+    assert repo.delete("cmp1") is True
 
     # search
-    mock_client.table().select().ilike().execute.return_value.data = [{"id": "1", "name": "Test"}]
+    mock_client.table().select().ilike().execute.return_value.data = [{"id": "cmp1", "name": "Test"}]
     assert len(repo.search("Test")) == 1
 
 
@@ -164,7 +164,7 @@ def test_supabase_repo_conversions(mock_get_sb):
 
     # _to_domain
     record = {
-        "id": "1",
+        "id": "cmp1",
         "name": "Test",
         "revenue": 100.0,
         "growth_rate": 5.0,

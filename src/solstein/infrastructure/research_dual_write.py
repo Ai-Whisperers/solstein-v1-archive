@@ -119,7 +119,7 @@ def transition_contradiction_status(
             to_status=to_status,
             changed_by=changed_by,
             reason=reason,
-            created_at=now,
+            changed_at=now,
         )
         session.add(transition)
 

@@ -10,10 +10,10 @@
 
 | Metric | Value | Trend |
 |--------|-------|-------|
-| Total Epics | 49 | +6 |
-| Total Stories | 189 | +21 |
-| P0 Stories (Ship Blockers) | 15 | 🔴 Unresolved (+2) |
-| P1 Stories (Current Sprint) | 74 | 🟠 Queued (+12) |
+| Total Epics | 52 | +9 |
+| Total Stories | 202 | +34 |
+| P0 Stories (Ship Blockers) | 19 | 🔴 Unresolved (+6) |
+| P1 Stories (Current Sprint) | 83 | 🟠 Queued (+21) |
 | P2 Stories (Next Quarter) | 78 | 🟡 Backlogged (+5) |
 | P3 Stories (Sustaining) | 22 | 🟢 Deferred (+2) |
 | Total Stories | 168 | — |
@@ -138,6 +138,9 @@ EPIC-002: Configuration Integrity
 || [EPIC-055](EPICS/EPIC-055-role-based-agent-runtime/README.md) | Safe Connector Runtime Contracts | P1 | 4 | 🔴 Open |
 || [EPIC-056](EPICS/EPIC-056-tool-contracts-and-sandboxing/README.md) | Inline Claim Adjudication and Approval Workflow | P1 | 4 | 🔴 Open |
 || [EPIC-057](EPICS/EPIC-057-human-review-control-plane/README.md) | Declarative Research Recipes and Reviewer Loops | P1 | 4 | 🔴 Open |
+|| [EPIC-058](EPICS/EPIC-058-data-conversion-pipeline-consolidation/README.md) | Data Conversion Pipeline Consolidation | P0 | 4 | 🔴 Open |
+|| [EPIC-059](EPICS/EPIC-059-input-validation-graceful-degradation/README.md) | Input Validation & Graceful Degradation | P1 | 5 | 🔴 Open |
+|| [EPIC-060](EPICS/EPIC-060-export-gate-decoupling/README.md) | Export & Release Gate Decoupling | P1 | 4 | 🔴 Open |
 
 ---
 

@@ -39,6 +39,11 @@ from .enrichment_tasks import (
 # Orchestration
 from .orchestration import refresh_all_sources
 
+
+def run_worker():
+    return None
+
+
 __all__ = [
     # Base utilities
     "DeadLetterQueue",
@@ -66,4 +71,5 @@ __all__ = [
     "enrich_companies_batch_async",
     # Orchestration
     "refresh_all_sources",
+    "run_worker",
 ]
