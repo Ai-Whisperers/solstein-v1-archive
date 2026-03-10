@@ -311,3 +311,39 @@ class TestCompositeResolver:
         result = resolver.resolve_merge(existing, incoming)
 
         assert result["revenue"] == 100
+
+    def test_resolve_merge_with_adjudication_keep_existing(self) -> None:
+        resolver = CompositeResolver()
+        existing = {"revenue": 100.0}
+        incoming = {"revenue": 200.0}
+        decisions = {"revenue": {"decision": "keep_existing", "decision_id": "dec-keep-1"}}
+
+        result = resolver.resolve_merge(existing, incoming, adjudication_decisions=decisions)
+
+        assert result["revenue"] == 100.0
+
+    def test_resolve_merge_with_adjudication_approve_incoming(self) -> None:
+        resolver = CompositeResolver()
+        existing = {"employees": 40}
+        incoming = {"employees": 55}
+        decisions = {"employees": {"decision": "approve_incoming", "decision_id": "dec-inc-1"}}
+
+        result = resolver.resolve_merge(existing, incoming, adjudication_decisions=decisions)
+
+        assert result["employees"] == 55
+
+    def test_resolve_merge_with_adjudication_override_value(self) -> None:
+        resolver = CompositeResolver()
+        existing = {"valuation": 1_000_000.0}
+        incoming = {"valuation": 1_200_000.0}
+        decisions = {
+            "valuation": {
+                "decision": "override",
+                "decision_id": "dec-ovr-1",
+                "value": 1_150_000.0,
+            }
+        }
+
+        result = resolver.resolve_merge(existing, incoming, adjudication_decisions=decisions)
+
+        assert result["valuation"] == 1_150_000.0

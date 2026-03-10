@@ -349,6 +349,7 @@ class CompositeResolver(ConflictResolver):
         incoming: dict[str, Any],
         existing_source: str = "unknown",
         incoming_source: str = "unknown",
+        adjudication_decisions: dict[str, dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         """Resolve all conflicts between two records.
 
@@ -376,6 +377,18 @@ class CompositeResolver(ConflictResolver):
 
             if existing_value == incoming_value:
                 continue
+
+            decision = (adjudication_decisions or {}).get(key)
+            if isinstance(decision, dict):
+                action = str(decision.get("decision", decision.get("status", ""))).lower()
+                if action in {"existing", "keep_existing", "approved_existing", "approve_existing"}:
+                    continue
+                if action in {"incoming", "approved", "approve_incoming", "approved_incoming"}:
+                    merged[key] = incoming_value
+                    continue
+                if action in {"override", "resolved"} and "value" in decision:
+                    merged[key] = decision["value"]
+                    continue
 
             # Create conflict and resolve
             conflict = FieldConflict(

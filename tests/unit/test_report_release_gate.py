@@ -67,3 +67,24 @@ def test_report_release_gate_escalates_critical_claim_contradictions() -> None:
     assert result.passed is False
     codes = {reason.code for reason in result.reasons}
     assert "critical_claim_contradiction" in codes
+
+
+def test_report_release_gate_allows_adjudicated_critical_contradictions() -> None:
+    company = _company()
+    company.metric_observations = {
+        "revenue": [
+            {"source": "https://example.com/rev-a", "value": 100.0},
+            {"source": "https://example.com/rev-b", "value": 180.0},
+        ]
+    }
+    company.metric_justifications["adjudication:revenue"] = (
+        "decision_id=dec-001;decision=override;status=approved;"
+        "actor=reviewer@solstein.local;reason=Latest audited filing"
+    )
+
+    result = ReportReleaseGate(min_completeness_score=20.0).evaluate([company])
+
+    assert result.passed is True
+    codes = {reason.code for reason in result.reasons}
+    assert "critical_claim_contradiction" not in codes
+    assert "adjudication_override" in codes

@@ -142,6 +142,7 @@ def run_market_intelligence(
                 "status": "passed" if gate_result.passed else "failed",
                 "passed": gate_result.passed,
                 "reason_count": len(gate_result.reasons),
+                "reason_codes": sorted({reason.code for reason in gate_result.reasons}),
             }
             context.stages.append(gate_artifact)
 

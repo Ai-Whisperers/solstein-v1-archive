@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Mapping, cast
 
 from loguru import logger
 
@@ -13,6 +14,57 @@ from ..research.reconcile import detect_company_contradictions
 
 
 CRITICAL_CLAIM_FIELDS = {"revenue", "employee_count", "employees", "funding_total", "funding", "valuation"}
+
+
+def _is_override_decision(decision: object) -> bool:
+    if not isinstance(decision, Mapping):
+        return False
+    decision_map = cast(Mapping[str, object], decision)
+    status = str(decision_map.get("status", "")).lower()
+    decision_type = str(decision_map.get("decision", "")).lower()
+    return status in {"approved", "override", "resolved"} or decision_type in {"approve", "override", "resolved"}
+
+
+def _get_metric_adjudication(company: Company, metric: str) -> dict[str, object] | None:
+    decisions_obj = getattr(company, "adjudication_decisions", {}) or {}
+    if isinstance(decisions_obj, Mapping):
+        decisions = cast(Mapping[str, object], decisions_obj)
+        direct = decisions.get(metric)
+        if isinstance(direct, Mapping):
+            return dict(cast(Mapping[str, object], direct))
+
+    aliases = {
+        "employees": ("employee_count",),
+        "employee_count": ("employees",),
+        "funding": ("funding_total",),
+        "funding_total": ("funding",),
+    }
+    for alias in aliases.get(metric, ()):
+        if isinstance(decisions_obj, Mapping):
+            candidate = cast(Mapping[str, object], decisions_obj).get(alias)
+            if isinstance(candidate, Mapping):
+                return dict(cast(Mapping[str, object], candidate))
+
+    justifications_obj = getattr(company, "metric_justifications", {}) or {}
+    if not isinstance(justifications_obj, Mapping):
+        return None
+    justifications = cast(Mapping[str, object], justifications_obj)
+
+    keys = [f"adjudication:{metric}"] + [f"adjudication:{alias}" for alias in aliases.get(metric, ())]
+    for key in keys:
+        raw = justifications.get(key)
+        if not isinstance(raw, str):
+            continue
+        parsed: dict[str, object] = {}
+        for token in raw.split(";"):
+            token = token.strip()
+            if "=" not in token:
+                continue
+            name, value = token.split("=", 1)
+            parsed[name.strip()] = value.strip()
+        if parsed:
+            return parsed
+    return None
 
 
 @dataclass(frozen=True)
@@ -146,17 +198,48 @@ class ReportReleaseGate:
                 if str(contradiction.get("metric", "")).lower() in CRITICAL_CLAIM_FIELDS
             ]
             if critical_contradictions:
-                reasons.append(
-                    GateReason(
-                        code="critical_claim_contradiction",
-                        message="Critical claims contain contradictory source observations",
-                        details={
-                            "company": company.name,
-                            "count": len(critical_contradictions),
-                            "contradictions": critical_contradictions,
-                        },
+                unresolved: list[dict[str, object]] = []
+                resolved: list[dict[str, object]] = []
+                for contradiction in critical_contradictions:
+                    metric = str(contradiction.get("metric", "")).lower()
+                    decision = _get_metric_adjudication(company, metric)
+                    if decision is not None and _is_override_decision(decision):
+                        resolved.append(
+                            {
+                                "metric": metric,
+                                "decision_id": decision.get("decision_id"),
+                                "decision": decision.get("decision"),
+                                "status": decision.get("status"),
+                            }
+                        )
+                    else:
+                        unresolved.append(contradiction)
+
+                if unresolved:
+                    reasons.append(
+                        GateReason(
+                            code="critical_claim_contradiction",
+                            message="Critical claims contain contradictory source observations",
+                            details={
+                                "company": company.name,
+                                "count": len(unresolved),
+                                "contradictions": unresolved,
+                                "resolved_overrides": resolved,
+                            },
+                        )
                     )
-                )
+                elif resolved:
+                    reasons.append(
+                        GateReason(
+                            code="adjudication_override",
+                            message="Critical contradictions resolved by adjudication decisions",
+                            details={
+                                "company": company.name,
+                                "resolved_count": len(resolved),
+                                "resolved_overrides": resolved,
+                            },
+                        )
+                    )
 
             gap_result = analyze_company_gaps(company, min_confidence=self.min_confidence)
             if not gap_result["is_ready"]:
@@ -187,7 +270,8 @@ class ReportReleaseGate:
                     )
                 )
 
-        passed = len(reasons) == 0
+        blocking_codes = {reason.code for reason in reasons if reason.code != "adjudication_override"}
+        passed = len(blocking_codes) == 0
         logger.info("Report release gate evaluated", passed=passed, reason_count=len(reasons))
         return ReportGateResult(passed=passed, reasons=reasons)
 
