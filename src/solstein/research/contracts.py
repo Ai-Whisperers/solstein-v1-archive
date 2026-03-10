@@ -2,7 +2,7 @@ import hashlib
 import json
 from collections.abc import Mapping
 from enum import Enum
-from typing import Literal
+from typing import Any, Literal, cast
 
 from pydantic import BaseModel, Field
 
@@ -86,18 +86,30 @@ def build_config_hash(config: Mapping[str, object]) -> str:
 
 def build_stage_artifact(
     stage: StageName,
-    envelope: Mapping[str, object],
-    payload: Mapping[str, object] | None = None,
-    status: str | None = None,
-    description: str | None = None,
+    envelope: object | None = None,
+    payload: object | None = None,
+    **legacy_meta: object,
 ) -> dict[str, object]:
-    artifact_schema_version = str(envelope.get("artifact_schema_version", "1.0.0"))
-    model_version = str(envelope.get("model_version", "research.v2"))
-    prompt_version = str(envelope.get("prompt_version", "research.pipeline.v2"))
-    config_hash = str(envelope.get("config_hash", ""))
+    status = cast("str | None", legacy_meta.pop("status", None))
+    description = cast("str | None", legacy_meta.pop("description", None))
+
+    envelope_map = cast("Mapping[str, Any]", envelope or {})
+    resolved_envelope = dict(envelope_map)
+    if not resolved_envelope:
+        resolved_envelope = {
+            "artifact_schema_version": legacy_meta.get("artifact_schema_version", "1.0.0"),
+            "model_version": legacy_meta.get("model_version", "research.v2"),
+            "prompt_version": legacy_meta.get("prompt_version", "research.pipeline.v2"),
+            "config_hash": legacy_meta.get("config_hash", ""),
+        }
+
+    artifact_schema_version = str(resolved_envelope.get("artifact_schema_version", "1.0.0"))
+    model_version = str(resolved_envelope.get("model_version", "research.v2"))
+    prompt_version = str(resolved_envelope.get("prompt_version", "research.pipeline.v2"))
+    config_hash = str(resolved_envelope.get("config_hash", ""))
     response = StageResponseEnvelope(
         stage=stage,
-        payload=dict(payload or {}),
+        payload=dict(cast("Mapping[str, Any]", payload or {})),
         artifact_schema_version=artifact_schema_version,
         model_version=model_version,
         prompt_version=prompt_version,
