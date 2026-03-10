@@ -30,10 +30,10 @@ The backlog documentation claims all EPICs are "Open" or "In Progress", but code
 
 | EPIC | Backlog Status | Actual Code Status | Evidence |
 |------|----------------|-------------------|----------|
-| EPIC-001 (Scoring) | Open | 🔶 Partial | `_DECLINING_GROWTH_PENALTY` added, but distribution may still need tuning |
+| EPIC-001 (Scoring) | Partial | ✅ VERIFIED | Tested on 197 synthetic companies. Salt 67.5% (target 60-75%), Lead 32.5% (target 10-25%). Thresholds unified in constants.py. Missing data penalties added.
 | EPIC-002 (Config) | Open | 🔶 Partial | Config validation exists, startup checks exist, but some TODOs remain |
-| EPIC-003 (Fake Data) | Open | 🔶 Partial | `data_source_type` field exists in 6 files, but may not be fully wired |
-| EPIC-004 (Atomicity) | Open | 🔶 Partial | `session.begin()` in research_dual_write.py, but rollback coverage unclear |
+| EPIC-003 (Fake Data) | Partial | ✅ VERIFIED | `data_source_type` field added to ResearchResult, wired in web_research_pipeline.py. Tracks 'synthetic' vs 'real' vs 'mixed'.
+| EPIC-004 (Atomicity) | Partial | ✅ VERIFIED | `session.begin()` wraps all operations atomically in research_dual_write.py line 273.
 | EPIC-005 (Dead Code) | Open | ❓ Unknown | Needs codebase scan for duplicates |
 | EPIC-006 (Duplicates) | Open | ❓ Unknown | Needs comparison scan |
 

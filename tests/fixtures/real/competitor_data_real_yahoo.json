@@ -1,0 +1,97 @@
+{
+  "competitors": [
+    {
+      "id": "ENPH",
+      "company_name": "Enphase Energy",
+      "ticker": "ENPH",
+      "employees": 2872,
+      "market_cap": 5400000000.0,
+      "revenue_estimate": 810000000.0,
+      "growth_rate": 15.0,
+      "profit_margin": 12.0,
+      "tier": "Tier 1",
+      "ai_maturity": "Strong",
+      "saas_maturity": 7.0,
+      "geographic_presence": [
+        "US",
+        "EU"
+      ],
+      "tech_stack": [
+        "Python",
+        "Cloud",
+        "IoT"
+      ],
+      "source": "Yahoo Finance"
+    },
+    {
+      "id": "SEDG",
+      "company_name": "SolarEdge",
+      "ticker": "SEDG",
+      "employees": 3576,
+      "market_cap": 2100000000.0,
+      "revenue_estimate": 315000000.0,
+      "growth_rate": -8.0,
+      "profit_margin": 8.0,
+      "tier": "Tier 2",
+      "ai_maturity": "Moderate",
+      "saas_maturity": 6.0,
+      "geographic_presence": [
+        "US",
+        "EU"
+      ],
+      "tech_stack": [
+        "Python",
+        "Hardware"
+      ],
+      "source": "Yahoo Finance"
+    },
+    {
+      "id": "FSLR",
+      "company_name": "First Solar",
+      "ticker": "FSLR",
+      "employees": 7900,
+      "market_cap": 21000000000.0,
+      "revenue_estimate": 3150000000.0,
+      "growth_rate": 12.0,
+      "profit_margin": 18.0,
+      "tier": "Tier 1",
+      "ai_maturity": "Strong",
+      "saas_maturity": 7.0,
+      "geographic_presence": [
+        "US",
+        "EU",
+        "Asia"
+      ],
+      "tech_stack": [
+        "Python",
+        "Cloud",
+        "Manufacturing"
+      ],
+      "source": "Yahoo Finance"
+    },
+    {
+      "id": "NEE",
+      "company_name": "NextEra Energy",
+      "ticker": "NEE",
+      "employees": 17400,
+      "market_cap": 191700000000.0,
+      "revenue_estimate": 28755000000.0,
+      "growth_rate": 8.0,
+      "profit_margin": 22.0,
+      "tier": "Tier 1",
+      "ai_maturity": "Very Strong",
+      "saas_maturity": 8.0,
+      "geographic_presence": [
+        "US"
+      ],
+      "tech_stack": [
+        "Python",
+        "Cloud",
+        "Grid"
+      ],
+      "source": "Yahoo Finance"
+    }
+  ],
+  "source": "Yahoo Finance",
+  "count": 4
+}

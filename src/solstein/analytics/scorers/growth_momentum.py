@@ -18,7 +18,7 @@ _STAGNANT_GROWTH_PENALTY: float = -0.75
 _BELOW_AVERAGE_GROWTH_PENALTY: float = -0.25
 _HYPER_GROWTH_BONUS: float = 2.5
 _COMPOUND_RISK_PENALTY: float = -1.0
-_UNKNOWN_DATA_PENALTY: float = -2.0  # Penalty when data is unknown (higher risk)
+_UNKNOWN_DATA_PENALTY: float = -1.0  # Penalty when data is unknown
 _DECLINING_GROWTH_PENALTY: float = -1.5
 
 class GrowthMomentumScorer:
