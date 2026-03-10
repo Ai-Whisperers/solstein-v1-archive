@@ -7,14 +7,25 @@ Handles enrichment from SEC EDGAR, Companies House, and News Signals.
 from __future__ import annotations
 
 import time
+import asyncio
 from datetime import datetime, timezone
 
 from loguru import logger
 
 from solstein.domain.models import ConfidenceLevel
+from solstein.data.enrichment_orchestrator import EnrichmentConfig, EnrichmentOrchestrator, EnrichmentSource
 
 from .company import UnifiedCompany
 from .error_tracking import format_enrichment_error, build_error_context
+from .sec_edgar_helpers import (
+    _handle_sec_edgar_error,
+    _store_additional_metrics,
+    _track_enrichment_timestamp,
+    _validate_and_fill_employees,
+    _validate_and_fill_growth_rate,
+    _validate_and_fill_profit_margin,
+    _validate_and_fill_revenue,
+)
 
 
 def is_valid_number(val):
@@ -41,9 +52,9 @@ def enrich_from_connectors(loader, company: UnifiedCompany) -> UnifiedCompany:
     Calls SEC EDGAR, Companies House, and News Signal Detector in sequence.
     Only fills NULL fields - never replaces existing data.
     """
-    from solstein.data.enrichment_orchestrator import EnrichmentConfig, EnrichmentOrchestrator, EnrichmentSource
-
     orchestrator = EnrichmentOrchestrator(EnrichmentConfig())
+
+    company = fill_identifiers_from_lookup(loader, company)
 
     if orchestrator.should_skip_enrichment(company):
         logger.debug(f"Skipping enrichment for {company.name} - data already complete or no identifiers")
@@ -66,12 +77,71 @@ def enrich_from_connectors(loader, company: UnifiedCompany) -> UnifiedCompany:
                 enriched = fill_nulls_from_companies_house(loader, enriched)
             elif source == EnrichmentSource.NEWS_SIGNALS:
                 enriched = attach_news_signals(loader, enriched)
-        except Exception as e:
+        except (ValueError, RuntimeError, TypeError, AttributeError) as e:
             logger.error(f"Enrichment from {source} failed for {enriched.name}: {e}")
             enriched = orchestrator.rollback_on_error(company, enriched, str(e))
             break
 
     return enriched
+
+
+def fill_identifiers_from_lookup(loader, company: UnifiedCompany) -> UnifiedCompany:
+    if not hasattr(loader, "lookup_service") or not loader.lookup_service:
+        return company
+
+    if not company.name:
+        return company
+
+    missing_fields = [
+        field for field in ("ticker", "company_number", "isin", "geography_code") if not getattr(company, field, None)
+    ]
+    if not missing_fields:
+        return company
+
+    try:
+        service = loader.lookup_service
+        if not hasattr(service, "resolve_identifiers_enveloped"):
+            return company
+
+        response = asyncio.run(service.resolve_identifiers_enveloped(company.name, headquarters=company.headquarters))
+        company.metric_justifications["identifier_lookup_status"] = str(response.status)
+        company.metric_justifications["identifier_lookup_attempts"] = str(response.metadata.get("attempts"))
+
+        payload = response.payload or {}
+        if payload:
+            company.metric_observations["identifier_lookup"] = [payload]
+
+        for field in missing_fields:
+            candidate = payload.get(field)
+            if not candidate:
+                continue
+            try:
+                setattr(company, field, candidate)
+                if "identifier_lookup_service" not in company.metric_sources.get(field, []):
+                    company.metric_sources.setdefault(field, []).append("identifier_lookup_service")
+            except (ValueError, RuntimeError, TypeError, AttributeError) as field_error:
+                error_context = build_error_context(ticker=company.ticker, company_number=company.company_number)
+                error_msg = format_enrichment_error(
+                    "Identifier Lookup",
+                    error_context,
+                    f"Invalid {field} value '{candidate}': {field_error}",
+                )
+                company.enrichment_errors.append(error_msg)
+
+        if payload and "identifier_lookup" not in company.enrichment_sources:
+            company.enrichment_sources.append("identifier_lookup")
+
+        if response.status in {"degraded", "failure"} and response.error:
+            error_context = build_error_context(ticker=company.ticker, company_number=company.company_number)
+            error_msg = format_enrichment_error("Identifier Lookup", error_context, response.error)
+            company.enrichment_errors.append(error_msg)
+
+        return company
+    except (ValueError, RuntimeError, TypeError, AttributeError) as e:
+        error_context = build_error_context(ticker=company.ticker, company_number=company.company_number)
+        error_msg = format_enrichment_error("Identifier Lookup", error_context, str(e))
+        company.enrichment_errors.append(error_msg)
+        return company
 
 
 def enrich_batch(loader, companies: list[UnifiedCompany], batch_size: int = 10) -> list[UnifiedCompany]:
@@ -116,7 +186,7 @@ def enrich_batch(loader, companies: list[UnifiedCompany], batch_size: int = 10) 
                 loader.cache.set(cache_key, enriched)
                 loader.metrics.record_enrichment(0, True)
 
-            except Exception as e:
+            except (ValueError, RuntimeError, TypeError, AttributeError) as e:
                 logger.warning(f"Batch enrichment failed for {company.name}: {e}")
                 enriched_companies.append(company)  # Use original if enrichment fails
                 loader.metrics.record_enrichment(0, False)
@@ -154,17 +224,6 @@ def fill_nulls_from_sec_edgar(loader, company: UnifiedCompany) -> UnifiedCompany
 
     EPIC-020: Refactored to use sec_edgar_helpers module.
     """
-    from .sec_edgar_helpers import (
-        _validate_and_fill_revenue,
-        _validate_and_fill_growth_rate,
-        _validate_and_fill_employees,
-        _validate_and_fill_profit_margin,
-        _store_additional_metrics,
-        _track_enrichment_timestamp,
-        _handle_sec_edgar_error,
-    )
-    from loguru import logger
-
     logger.info(f"[CONNECTOR-SEC-START] SEC EDGAR enrichment STARTED for {company.name} (ticker={company.ticker})")
 
     # Skip if no SEC connector available
@@ -230,54 +289,52 @@ def fill_nulls_from_sec_edgar(loader, company: UnifiedCompany) -> UnifiedCompany
         return company
 
 
-
-
 def fill_nulls_from_companies_house(loader, company: UnifiedCompany) -> UnifiedCompany:
     """
     Fill NULL fields from Companies House for UK companies.
-    
+
     Note: Companies House primarily provides registration details rather than
     financial metrics. This function updates company metadata from Companies House.
-    
+
     Args:
         loader: UnifiedCompanyLoader instance
         company: Company to enrich
-        
+
     Returns:
         Enriched company
     """
-    from loguru import logger
-    
-    logger.debug(f"[CONNECTOR-CH] Companies House enrichment for {company.name} (company_number={company.company_number})")
-    
+    logger.debug(
+        f"[CONNECTOR-CH] Companies House enrichment for {company.name} (company_number={company.company_number})"
+    )
+
     # Skip if no Companies House connector available
-    if not hasattr(loader, 'companies_house_connector') or not loader.companies_house_connector:
+    if not hasattr(loader, "companies_house_connector") or not loader.companies_house_connector:
         return company
-    
+
     # Skip if no company number
     if not company.company_number or not company.company_number.strip():
         return company
-    
+
     try:
         # Fetch company details from Companies House
         metrics = loader.companies_house_connector.get_company_metrics(company.company_number)
-        
+
         # Update company metadata (not financials)
         if metrics.get("company_name") and not company.name:
             company.name = metrics["company_name"]
-        
+
         if metrics.get("company_status"):
             company.metadata = company.metadata or {}
             company.metadata["company_status"] = metrics["company_status"]
-        
+
         if metrics.get("sic_codes"):
             company.metadata = company.metadata or {}
             company.metadata["sic_codes"] = metrics["sic_codes"]
-        
+
         logger.debug(f"[CONNECTOR-CH-END] Companies House enrichment completed for {company.name}")
         return company
-        
-    except Exception as e:
+
+    except (ValueError, RuntimeError, TypeError, AttributeError) as e:
         logger.warning(f"Companies House enrichment failed for {company.name}: {e}")
         error_context = build_error_context(company_number=company.company_number)
         error_msg = format_enrichment_error("Companies House", error_context, str(e))
@@ -288,27 +345,67 @@ def fill_nulls_from_companies_house(loader, company: UnifiedCompany) -> UnifiedC
 def attach_news_signals(loader, company: UnifiedCompany) -> UnifiedCompany:
     """
     Attach news signals to company data.
-    
+
     Args:
         loader: UnifiedCompanyLoader instance
         company: Company to enrich
-        
+
     Returns:
         Enriched company
     """
-    from loguru import logger
-    
     logger.debug(f"[CONNECTOR-NEWS] News signals enrichment for {company.name}")
-    
+
     # Skip if no news signal detector available
-    if not hasattr(loader, 'news_signal_detector') or not loader.news_signal_detector:
+    if not hasattr(loader, "news_signal_detector") or not loader.news_signal_detector:
         return company
-    
+
     try:
-        # This is a placeholder - actual implementation would fetch news signals
+        detector = loader.news_signal_detector
+        if not hasattr(detector, "detect_signals_enveloped"):
+            logger.debug(f"[CONNECTOR-NEWS-SKIP] Enveloped detector method unavailable for {company.name}")
+            return company
+
+        response = asyncio.run(detector.detect_signals_enveloped(company.name))
+        company.metric_justifications["news_signal_status"] = str(response.status)
+        company.metric_justifications["news_signal_attempts"] = str(response.metadata.get("attempts"))
+
+        signals = response.payload or []
+        company.metric_justifications["news_signal_count"] = str(len(signals))
+        if signals:
+            signal_summaries = [
+                {
+                    "signal_type": getattr(signal, "signal_type", None),
+                    "description": getattr(signal, "description", None),
+                    "confidence": getattr(signal, "confidence", None),
+                    "source": getattr(signal, "source", None),
+                }
+                for signal in signals
+            ]
+            company.metric_observations["news_signals"] = signal_summaries
+            if "news_signals" not in company.enrichment_sources:
+                company.enrichment_sources.append("news_signals")
+
+        if response.status in {"degraded", "failure"} and response.error:
+            error_context = build_error_context(
+                ticker=company.ticker,
+                company_number=company.company_number,
+            )
+            error_msg = format_enrichment_error(
+                "News Signals",
+                error_context,
+                response.error,
+            )
+            company.enrichment_errors.append(error_msg)
+
         logger.debug(f"[CONNECTOR-NEWS-END] News signals enrichment completed for {company.name}")
         return company
-        
-    except Exception as e:
+
+    except (ValueError, RuntimeError, TypeError, AttributeError) as e:
         logger.warning(f"News signals enrichment failed for {company.name}: {e}")
+        error_context = build_error_context(
+            ticker=company.ticker,
+            company_number=company.company_number,
+        )
+        error_msg = format_enrichment_error("News Signals", error_context, str(e))
+        company.enrichment_errors.append(error_msg)
         return company

@@ -14,9 +14,14 @@ from pathlib import Path
 from loguru import logger
 
 from solstein.core.scoring_utils import populate_signal_confidences
+from solstein.data.connectors.lookup_service import IdentifierLookupService
+from solstein.data.loaders import CompetitorDataLoader
 from solstein.extractors.markdown_extractor import MarkdownExtractor
 
+from ..enrichment_config import UnifiedCompanyLoaderConfig, get_config
+from ..enrichment_service import CacheService, ConnectorFactory, MetricsService
 from .company import UnifiedCompany
+from .enrichment import enrich_batch as _enrich_batch
 from .enrichment import enrich_from_connectors
 from .merger import merge_companies, convert_to_unified
 
@@ -31,11 +36,8 @@ class UnifiedCompanyLoader:
         sec_connector=None,
         companies_house_connector=None,
         news_detector=None,
+        lookup_service=None,
     ):
-        from solstein.data.loaders import CompetitorDataLoader
-        from ..enrichment_config import UnifiedCompanyLoaderConfig, get_config
-        from ..enrichment_service import CacheService, MetricsService, ConnectorFactory
-
         self.json_loader = CompetitorDataLoader()
         self.markdown_extractor = MarkdownExtractor()
 
@@ -43,18 +45,17 @@ class UnifiedCompanyLoader:
         try:
             self.config = get_config()
             logger.info("✅ Enrichment configuration loaded successfully")
-        except Exception as e:
+        except (ValueError, RuntimeError, TypeError, AttributeError, OSError) as e:
             logger.warning(f"Configuration initialization failed: {e}, using defaults")
             self.config = UnifiedCompanyLoaderConfig()
 
         # Initialize connectors via factory
         factory = ConnectorFactory()
-
         try:
             self.sec_connector = sec_connector or factory.create_sec_connector(self.config)
             if self.sec_connector:
                 logger.info("✅ SEC EDGAR connector initialized via factory")
-        except Exception as e:
+        except (ValueError, RuntimeError, TypeError, AttributeError, OSError) as e:
             logger.warning(f"SEC EDGAR connector initialization failed: {e}")
             self.sec_connector = None
 
@@ -64,7 +65,7 @@ class UnifiedCompanyLoader:
             )
             if self.companies_house_connector:
                 logger.info("✅ Companies House connector initialized via factory")
-        except Exception as e:
+        except (ValueError, RuntimeError, TypeError, AttributeError, OSError) as e:
             logger.warning(f"Companies House connector initialization failed: {e}")
             self.companies_house_connector = None
 
@@ -72,9 +73,16 @@ class UnifiedCompanyLoader:
             self.news_detector = news_detector or factory.create_news_detector(self.config)
             if self.news_detector:
                 logger.info("✅ News Signal detector initialized via factory")
-        except Exception as e:
+        except (ValueError, RuntimeError, TypeError, AttributeError, OSError) as e:
             logger.warning(f"News Signal Detector initialization failed: {e}")
             self.news_detector = None
+
+        try:
+            self.lookup_service = lookup_service or IdentifierLookupService()
+            logger.info("✅ Identifier lookup service initialized")
+        except (ValueError, RuntimeError, TypeError, AttributeError, OSError) as e:
+            logger.warning(f"Identifier lookup service initialization failed: {e}")
+            self.lookup_service = None
 
         # EPIC-FIX-003: Configurable markdown directory (was hardcoded to 2026-02-23/dutch_market)
         # Use config if available, otherwise use environment variable, then fallback to default
@@ -150,7 +158,7 @@ class UnifiedCompanyLoader:
                 enriched = enrich_from_connectors(self, company)
                 enriched_companies.append(enriched)
 
-            except Exception as e:
+            except (ValueError, RuntimeError, TypeError, AttributeError) as e:
                 logger.warning(f"Enrichment failed for {company.name}: {e}")
                 enriched_companies.append(company)  # Use original if enrichment fails
 
@@ -180,15 +188,13 @@ class UnifiedCompanyLoader:
                     company = self.markdown_extractor.to_company_profile(extracted_data)
                     companies.append(company)
                     logger.debug(f"Loaded Markdown company: {company.name}")
-            except Exception as e:
+            except (ValueError, RuntimeError, TypeError, AttributeError, OSError) as e:
                 logger.warning(f"Failed to load Markdown file {md_file}: {e}")
 
         return companies
 
     def enrich_batch(self, companies: list[UnifiedCompany], batch_size: int = 10) -> list[UnifiedCompany]:
         """Batch enrich companies with caching and performance tracking."""
-        from .enrichment import enrich_batch as _enrich_batch
-
         return _enrich_batch(self, companies, batch_size)
 
     def get_enrichment_metrics(self) -> dict:
