@@ -24,8 +24,8 @@ def test_pipeline_run_state_invalid_transition_raises() -> None:
         run.transition_to(RunState.COMPLETED)
 
 
-def test_pipeline_run_state_terminal_states_do_not_transition() -> None:
-    run = PipelineRunState(run_id="run-3", state=RunState.FAILED)
+def test_pipeline_run_state_completed_terminal_state_does_not_transition() -> None:
+    run = PipelineRunState(run_id="run-3", state=RunState.COMPLETED)
 
     with pytest.raises(RunStateTransitionError):
         run.transition_to(RunState.RUNNING)

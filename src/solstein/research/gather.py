@@ -88,7 +88,6 @@ def build_company_profile(candidate: DiscoveryCandidate) -> Company:
         build_company_profile_yfinance_missing,
         build_company_profile_ticker_failed,
         build_company_profile_from_ticker,
-        _get_yfinance,
     )
 
     # No ticker available
@@ -349,11 +348,7 @@ def build_company_from_signals(
     signals = {s.signal_name: s for s in signal_record.signals}
     facts = {f.fact_type: f for f in aggregated.facts}
 
-    return build_company_entity_from_signals(
-        candidate, signal_record, aggregated, signals, facts
-    )
-
-
+    return build_company_entity_from_signals(candidate, signal_record, aggregated, signals, facts)
 
 
 async def enrich_company_async(
@@ -366,6 +361,7 @@ async def enrich_company_async(
     Runs the synchronous enrichment in a thread pool for non-blocking execution.
     """
     import asyncio
+
     return await asyncio.to_thread(
         enrich_company,
         candidate,

@@ -54,7 +54,7 @@ _RUN_STATE_TRANSITIONS: dict[RunState, set[RunState]] = {
     RunState.CREATED: {RunState.RUNNING, RunState.CANCELLED},
     RunState.RUNNING: {RunState.PAUSED, RunState.FAILED, RunState.COMPLETED, RunState.CANCELLED},
     RunState.PAUSED: {RunState.RUNNING, RunState.CANCELLED},
-    RunState.FAILED: set(),
+    RunState.FAILED: {RunState.RUNNING, RunState.CANCELLED},
     RunState.COMPLETED: set(),
     RunState.CANCELLED: set(),
 }
