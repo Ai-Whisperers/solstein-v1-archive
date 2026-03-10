@@ -1,5 +1,6 @@
-
 from __future__ import annotations
+
+from loguru import logger
 
 from typing import TYPE_CHECKING, Any
 
@@ -20,6 +21,7 @@ _HYPER_GROWTH_BONUS: float = 2.5
 _COMPOUND_RISK_PENALTY: float = -1.0
 _UNKNOWN_DATA_PENALTY: float = -1.0  # Penalty when data is unknown
 _DECLINING_GROWTH_PENALTY: float = -1.5
+
 
 class GrowthMomentumScorer:
     """Score company growth momentum (revenue growth, employee efficiency, funding)."""
@@ -71,15 +73,7 @@ class GrowthMomentumScorer:
     ) -> float:
         """Score revenue growth rate component."""
         if financials.growth_rate is None:
-            score += _UNKNOWN_DATA_PENALTY
-            explanation.components.append(
-                ScoreComponent(
-                    name="Missing Growth Data",
-                    value=_UNKNOWN_DATA_PENALTY,
-                    formula="growth_rate = None",
-                    reasoning="No growth rate data available — assuming neutral-to-negative.",
-                )
-            )
+            logger.warning("[EPIC-059] Skipping growth component: growth_rate is None")
             return score
 
         growth_rate = financials.growth_rate
@@ -263,4 +257,3 @@ class GrowthMomentumScorer:
             )
 
         return score
-

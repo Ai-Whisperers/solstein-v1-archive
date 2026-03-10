@@ -638,7 +638,7 @@ class TestErrorHandling:
             id="test-incomplete",
             name="Incomplete Company",
             industry="Tech",
-            financials=FinancialMetric(),  # Empty financials
+            financials=FinancialMetric(allow_empty_primary=True),  # Empty financials
         )
 
         scored = growth_scorer.calculate_scores(company)

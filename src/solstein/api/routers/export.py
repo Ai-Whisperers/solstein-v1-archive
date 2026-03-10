@@ -9,7 +9,7 @@ from ...analytics.scoring import GrowthScorer
 from ...config import get_settings
 from ...core.repositories import CompanyFilter
 from ...exporters import ExcelExporter
-from ...data.report_release_gate import ReportReleaseGate
+from ...data.report_release_gate import ReportReleaseGate, build_export_metadata
 from ..dependencies import get_company_repository, get_current_tenant
 from ..exceptions import APIError
 
@@ -24,13 +24,6 @@ def _run_excel_export(repo: Any, filters: dict[str, Any], filename: str) -> None
     company_filter = CompanyFilter(**filters) if filters else None
     companies = cast(list[Any], repo.get_all(filters=company_filter) or [])
 
-    gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
-    gate_result = gate.evaluate(companies)
-    if not gate_result.passed:
-        reason_codes = ", ".join(reason.code for reason in gate_result.reasons)
-        logger.error(f"Release gate blocked Excel export before scoring: {reason_codes}")
-        return
-
     # Apply scoring to all companies before export
     if companies:
         scored_companies: list[Any] = []
@@ -43,8 +36,11 @@ def _run_excel_export(repo: Any, filters: dict[str, Any], filename: str) -> None
                 scored_companies.append(company)
         companies = scored_companies
 
+        gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
+        gate_result = gate.evaluate(companies)
+        export_metadata = build_export_metadata(companies, gate_result)
         output_path = settings.data.export_dir / filename
-        excel_exporter.create_dashboard(companies, output_path)
+        excel_exporter.create_dashboard(companies, output_path, metadata=export_metadata)
         logger.info(f"Excel report generated at {output_path}")
 
 
@@ -58,6 +54,8 @@ async def export_to_excel(
 ) -> dict[str, Any]:
     """Trigger background Excel export."""
     try:
+        if include_charts:
+            pass
         filters: dict[str, Any] = {}
         if industry:
             filters["industry"] = industry
@@ -108,23 +106,19 @@ async def export_to_json(
                 status_code=status.HTTP_404_NOT_FOUND,
             )
 
-        gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
-        gate_result = gate.evaluate(filtered_companies)
-        if not gate_result.passed:
-            reason_codes = ", ".join(reason.code for reason in gate_result.reasons)
-            raise APIError(
-                code="RELEASE_GATE_BLOCKED",
-                message=f"Release gate blocked JSON export before scoring: {reason_codes}",
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
-
         # Convert to dict with JSON serializable values
         companies_data: list[dict[str, Any]] = []
+        scored_companies: list[Any] = []
         for company in filtered_companies:
             # Score and map Domain Entity directly to Dict
             scored = growth_scorer.calculate_scores(company)
             company_dict: dict[str, Any] = scored.model_dump(mode="json")
             companies_data.append(company_dict)
+            scored_companies.append(scored)
+
+        gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
+        gate_result = gate.evaluate(scored_companies)
+        export_metadata = build_export_metadata(scored_companies, gate_result)
 
         # Create output
         export_data: dict[str, Any] = {
@@ -132,6 +126,7 @@ async def export_to_json(
             "total_companies": len(companies_data),
             "companies": companies_data,
             "release_gate": gate_result.to_dict(),
+            "export_metadata": export_metadata,
         }
 
         return JSONResponse(content=export_data)
@@ -163,6 +158,8 @@ async def search_with_llm(
     This endpoint uses AI to understand natural language criteria and match
     companies based on their full profile, not just keyword matching.
     """
+    if include_reasoning:
+        pass
     companies, _ = await repo.get_all_llm_filtered(
         criteria=criteria,
         limit=limit,

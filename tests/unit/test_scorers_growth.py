@@ -38,14 +38,14 @@ class TestGrowthMomentumScorer:
 
     def test_base_score_applied(self, scorer):
         """Test that base score is applied."""
-        financials = FinancialMetric()
+        financials = FinancialMetric(employees=1)
         score, expl = scorer.score(financials)
         expected_base = scorer.config.growth.base_score or 0.0
         assert expl.base_score == expected_base
 
     def test_revenue_growth_high_boost(self, scorer):
         """Test that high growth rate boosts score."""
-        financials = FinancialMetric(growth_rate=30.0)
+        financials = FinancialMetric(growth_rate=30.0, employees=1)
         score, expl = scorer.score(financials)
         assert len(expl.components) > 0
         assert any(c.name == "Revenue Growth" for c in expl.components)
@@ -53,7 +53,7 @@ class TestGrowthMomentumScorer:
 
     def test_revenue_growth_capped(self, scorer):
         """Test that revenue growth boost is capped."""
-        financials = FinancialMetric(growth_rate=200.0)
+        financials = FinancialMetric(growth_rate=200.0, employees=1)
         score, _ = scorer.score(financials)
         assert score <= 10.0
 
@@ -78,26 +78,26 @@ class TestGrowthMomentumScorer:
 
     def test_funding_momentum_high_bonus(self, scorer):
         """Test funding momentum scoring at high level."""
-        financials = FinancialMetric(funding_raised=5_000_000.0)
+        financials = FinancialMetric(funding_raised=5_000_000.0, employees=1)
         score, expl = scorer.score(financials)
         assert any(c.name == "Funding Momentum" for c in expl.components)
 
     def test_profitability_positive_margin(self, scorer):
         """Test profitability scoring with positive margin."""
-        financials = FinancialMetric(profit_margin=20.0)
+        financials = FinancialMetric(profit_margin=20.0, employees=1)
         score, expl = scorer.score(financials)
         assert any(c.name == "Profitability Profile" for c in expl.components)
 
     def test_profitability_negative_margin(self, scorer):
         """Test profitability scoring with negative margin."""
-        financials = FinancialMetric(profit_margin=-5.0)
+        financials = FinancialMetric(profit_margin=-5.0, employees=1)
         score, expl = scorer.score(financials)
         components = [c.name for c in expl.components]
         assert "Profitability Profile" in components
 
     def test_zero_growth_rate(self, scorer):
         """Test with zero growth rate."""
-        financials = FinancialMetric(growth_rate=0.0)
+        financials = FinancialMetric(growth_rate=0.0, employees=1)
         score, _ = scorer.score(financials)
         assert 0.0 <= score <= 10.0
 
@@ -109,6 +109,7 @@ class TestGrowthMomentumScorer:
             revenue=None,
             funding_raised=None,
             profit_margin=None,
+            allow_empty_primary=True,
         )
         score, _ = scorer.score(financials)
         assert 0.0 <= score <= 10.0
@@ -141,7 +142,7 @@ class TestGrowthMomentumScorer:
         config = ScoringSettings()
         config.growth.base_score = 5.0
         scorer = GrowthMomentumScorer(config)
-        financials = FinancialMetric()
+        financials = FinancialMetric(employees=1)
         score, expl = scorer.score(financials)
         assert expl.base_score == 5.0
 
@@ -164,7 +165,7 @@ class TestGrowthMomentumScorer:
 
     def test_funding_medium_threshold(self, scorer):
         """Test funding at medium threshold."""
-        financials = FinancialMetric(funding_raised=1_000_000.0)
+        financials = FinancialMetric(funding_raised=1_000_000.0, employees=1)
         score, expl = scorer.score(financials)
         if financials.funding_raised > scorer.config.growth.funding_med_threshold:
             assert any(c.name == "Funding Momentum" for c in expl.components)
@@ -173,7 +174,7 @@ class TestGrowthMomentumScorer:
         """Test profit margin at various boundaries."""
         margins = [0.0, 5.0, 10.0, 20.0, -5.0]
         for margin in margins:
-            financials = FinancialMetric(profit_margin=margin)
+            financials = FinancialMetric(profit_margin=margin, employees=1)
             score, _ = scorer.score(financials)
             assert 0.0 <= score <= 10.0
 

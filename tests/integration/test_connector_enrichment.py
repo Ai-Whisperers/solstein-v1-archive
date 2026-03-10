@@ -29,6 +29,7 @@ def sample_company_with_null_revenue():
             revenue_confidence=ConfidenceLevel.UNKNOWN,
             employees=None,
             profit_margin=None,
+            allow_empty_primary=True,
         ),
         data_source_per_field={},
     )
@@ -46,6 +47,7 @@ def sample_company_with_existing_revenue():
             revenue_confidence=ConfidenceLevel.CONFIRMED,
             employees=None,
             profit_margin=None,
+            allow_empty_primary=True,
         ),
         data_source_per_field={"revenue": "JSON"},
     )
@@ -61,6 +63,7 @@ def sample_company_without_ticker():
         financials=FinancialMetric(
             revenue=None,
             revenue_confidence=ConfidenceLevel.UNKNOWN,
+            allow_empty_primary=True,
         ),
         data_source_per_field={},
     )
@@ -120,7 +123,7 @@ class TestNewsSignalEnrichment:
             id="test-004",
             name=None,
             ticker="TEST4",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
             data_source_per_field={},
         )
         result = loader.attach_news_signals(company)

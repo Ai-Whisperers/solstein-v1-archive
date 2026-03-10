@@ -8,6 +8,8 @@ Tests for all 17 Phase 5 items:
 - Edge Case Tests (6)
 """
 
+# pyright: reportAttributeAccessIssue=false
+
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
@@ -113,7 +115,7 @@ class TestAPITimeoutHandling:
             id="AAPL",
             name="Apple Inc",
             ticker="AAPL",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -131,7 +133,7 @@ class TestAPITimeoutHandling:
             id="TEST",
             name="Test Company",
             company_number="12345678",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_ch = Mock()
@@ -147,7 +149,7 @@ class TestAPITimeoutHandling:
         company = UnifiedCompany(
             id="TEST",
             name="Test Company",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_news = Mock()
@@ -165,9 +167,15 @@ class TestPartialFailure:
     def test_enrichment_continues_with_multiple_companies(self):
         """Verify enrichment handles multiple companies with varied results."""
         companies = [
-            UnifiedCompany(id="TEST1", name="Company 1", ticker="TST1", financials=FinancialMetric()),
-            UnifiedCompany(id="TEST2", name="Company 2", ticker="TST2", financials=FinancialMetric()),
-            UnifiedCompany(id="TEST3", name="Company 3", ticker="TST3", financials=FinancialMetric()),
+            UnifiedCompany(
+                id="TEST1", name="Company 1", ticker="TST1", financials=FinancialMetric(allow_empty_primary=True)
+            ),
+            UnifiedCompany(
+                id="TEST2", name="Company 2", ticker="TST2", financials=FinancialMetric(allow_empty_primary=True)
+            ),
+            UnifiedCompany(
+                id="TEST3", name="Company 3", ticker="TST3", financials=FinancialMetric(allow_empty_primary=True)
+            ),
         ]
 
         mock_sec = Mock()
@@ -191,7 +199,7 @@ class TestPartialFailure:
             name="Test Company",
             ticker="TST1",
             company_number="12345678",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -220,7 +228,7 @@ class TestMultiSourceFailure:
             name="Test Company",
             ticker="TST1",
             company_number="12345678",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -244,7 +252,7 @@ class TestMultiSourceFailure:
             name="Test Company",
             ticker="TST1",
             company_number="12345678",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -274,7 +282,7 @@ class TestErrorMessageValidation:
             id="TEST",
             name="Test Company",
             ticker="TST1",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -293,7 +301,7 @@ class TestErrorMessageValidation:
             id="TEST",
             name="Test Company",
             ticker="TST1",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -315,7 +323,7 @@ class TestDataCorruption:
             id="TEST",
             name="Test Company",
             ticker="TST1",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -337,7 +345,7 @@ class TestDataCorruption:
             id="TEST",
             name="Test Company",
             ticker="TST1",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -359,7 +367,7 @@ class TestDataCorruption:
             id="TEST",
             name="Test Company",
             ticker="TST1",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -439,7 +447,7 @@ class TestEnrichmentSourceTracking:
             id="TEST",
             name="Test Company",
             ticker="TST1",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -461,7 +469,7 @@ class TestEnrichmentSourceTracking:
             id="TEST",
             name="Test Company",
             ticker="TST1",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
             enrichment_sources=[],
         )
 
@@ -489,7 +497,7 @@ class TestEnrichmentTimestamps:
             id="TEST",
             name="Test Company",
             ticker="TST1",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -513,7 +521,7 @@ class TestEnrichmentTimestamps:
             id="TEST",
             name="Test Company",
             ticker="TST1",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -566,7 +574,7 @@ class TestLargeDataset:
                 id=f"TEST{i}",
                 name=f"Test Company {i}",
                 ticker=f"TST{i % 100}",
-                financials=FinancialMetric(),
+                financials=FinancialMetric(allow_empty_primary=True),
             )
             for i in range(100)
         ]
@@ -597,7 +605,7 @@ class TestIdempotency:
             id="TEST",
             name="Test Company",
             ticker="TST1",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()
@@ -622,7 +630,7 @@ class TestIdempotency:
             id="TEST",
             name="Test Company",
             ticker="TST1",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         orchestrator = EnrichmentOrchestrator()
@@ -644,7 +652,7 @@ class TestInvalidTicker:
             id="TEST",
             name="Test Company",
             ticker="",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         should_skip = orchestrator.should_skip_enrichment(company)
@@ -658,7 +666,7 @@ class TestInvalidTicker:
             id="TEST",
             name="Test Company",
             ticker="   ",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         should_skip = orchestrator.should_skip_enrichment(company)
@@ -676,7 +684,7 @@ class TestInvalidCompanyNumber:
             id="TEST",
             name="Test Company",
             company_number="",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         order = orchestrator.get_enrichment_order(company)
@@ -690,7 +698,7 @@ class TestInvalidCompanyNumber:
             id="TEST",
             name="Test Company",
             company_number="   ",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         order = orchestrator.get_enrichment_order(company)
@@ -707,7 +715,7 @@ class TestConcurrency:
                 id=f"TEST{i}",
                 name=f"Test Company {i}",
                 ticker=f"TST{i}",
-                financials=FinancialMetric(),
+                financials=FinancialMetric(allow_empty_primary=True),
             )
             for i in range(10)
         ]
@@ -738,7 +746,7 @@ class TestConcurrency:
             id="TEST",
             name="Test Company",
             ticker="TST1",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
 
         mock_sec = Mock()

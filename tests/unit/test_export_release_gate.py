@@ -5,10 +5,7 @@ from collections.abc import Coroutine
 from dataclasses import dataclass
 from typing import TypeVar
 
-import pytest
 from _pytest.monkeypatch import MonkeyPatch
-
-from solstein.api.exceptions import APIError
 from solstein.api.routers import export as export_router
 from solstein.data.report_release_gate import GateReason, ReportGateResult
 from solstein.domain.models import Company, FinancialMetric
@@ -62,7 +59,7 @@ def _identity(company: Company) -> Company:
     return company
 
 
-def test_export_to_json_blocks_on_release_gate(monkeypatch: MonkeyPatch) -> None:
+def test_export_to_json_includes_gate_metadata_on_failure(monkeypatch: MonkeyPatch) -> None:
     companies = [_company("Synthetic Co")]
     repo = _DummyRepo(companies=companies)
 
@@ -80,13 +77,14 @@ def test_export_to_json_blocks_on_release_gate(monkeypatch: MonkeyPatch) -> None
 
     monkeypatch.setattr(export_router.growth_scorer, "calculate_scores", _identity)
 
-    with pytest.raises(APIError) as exc_info:
-        _ = _run(export_router.export_to_json(industry=None, _={}, repo=repo))
+    response = _run(export_router.export_to_json(industry=None, _={}, repo=repo))
+    payload = bytes(response.body).decode("utf-8")
+    assert "export_metadata" in payload
+    assert "release_gate" in payload
+    assert "gap_analysis" in payload
 
-    assert exc_info.value.code == "RELEASE_GATE_BLOCKED"
 
-
-def test_excel_export_skips_when_gate_blocks(monkeypatch: MonkeyPatch) -> None:
+def test_excel_export_runs_when_gate_blocks(monkeypatch: MonkeyPatch) -> None:
     companies = [_company("Synthetic Co")]
     repo = _DummyRepo(companies=companies)
 
@@ -111,12 +109,13 @@ def test_excel_export_skips_when_gate_blocks(monkeypatch: MonkeyPatch) -> None:
 
     monkeypatch.setattr(export_router.growth_scorer, "calculate_scores", _counted_identity)
 
-    def _fake_create_dashboard(_companies: object, output_path: object) -> None:
+    def _fake_create_dashboard(_companies: object, output_path: object, metadata: object | None = None) -> None:
+        _ = metadata
         created_paths.append(str(output_path))
 
     monkeypatch.setattr(export_router.excel_exporter, "create_dashboard", _fake_create_dashboard)
 
     export_router._run_excel_export(repo, filters={}, filename="test.xlsx")
 
-    assert created_paths == []
-    assert scoring_calls["count"] == 0
+    assert created_paths == [str(export_router.settings.data.export_dir / "test.xlsx")]
+    assert scoring_calls["count"] == 1

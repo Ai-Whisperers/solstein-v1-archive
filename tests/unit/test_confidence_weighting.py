@@ -61,6 +61,7 @@ class TestPopulateSignalConfidences:
             financials=FinancialMetric(
                 growth_rate=20.0,
                 growth_confidence=ConfidenceLevel.ESTIMATED,
+                employees=1,
             ),
         )
 
@@ -129,7 +130,7 @@ class TestPopulateSignalConfidences:
         company = Company(
             id="test-6",
             name="Test Company",
-            financials=FinancialMetric(),  # Empty financials
+            financials=FinancialMetric(allow_empty_primary=True),  # Empty financials
         )
 
         result = populate_signal_confidences(company)

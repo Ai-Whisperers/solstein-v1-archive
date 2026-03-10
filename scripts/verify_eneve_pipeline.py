@@ -14,7 +14,7 @@ from solstein.analytics.scorers.financial_health import FinancialHealthScorer
 from solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
 from solstein.core.scoring_config import CompetitivePositionConfig, FinancialHealthConfig, GrowthScoringConfig
 from solstein.data.eneve_enrichment import EnveEnrichmentService
-from solstein.data.loaders import CompetitorDataLoader
+from solstein.data.loaders import CompetitorDataLoader, convert_to_domain_company
 from solstein.domain.models import Company, FinancialMetric
 from solstein.extractors.llm_financial_extractor import LLMFinancialExtractor
 from solstein.extractors.markdown_extractor import BatchExtractor, MarkdownExtractor
@@ -175,6 +175,7 @@ def main():
         verify_json_loader()
         verify_extractors()
         verify_enrichment()
+        verify_unified_converter()
         verify_data_consistency()
         verify_cli_integration()
 
@@ -190,6 +191,7 @@ def main():
         logger.info("  ✓ File grouping and merging")
         logger.info("  ✓ Enrichment service")
         logger.info("  ✓ Data consistency through pipeline")
+        logger.info("  ✓ Unified converter (EPIC-058)")
         logger.info("  ✓ CLI integration")
 
         return 0
@@ -204,6 +206,40 @@ def main():
         traceback.print_exc()
         return 1
 
+def verify_unified_converter():
+    """Verify unified converter works with real data (EPIC-058)."""
+    logger.info("Verifying unified converter with real data...")
+    import json
+    
+    enriched_path = Path("data/input/competitor_data_real_enriched.json")
+    input_path = enriched_path if enriched_path.exists() else Path("data/input/competitor_data_real.json")
+    
+    if not input_path.exists():
+        logger.warning(f"Real data file not found, skipping converter test")
+        return
+    
+    with open(input_path) as f:
+        data = json.load(f)
+    
+    companies_raw = data["competitors"]
+    logger.info(f"  Testing conversion on {len(companies_raw)} real companies...")
+    
+    errors = []
+    for i, raw in enumerate(companies_raw[:3]):
+        try:
+            company = convert_to_domain_company(raw, i)
+            assert company.name, f"name is empty"
+            assert company.financials is not None, f"financials is None"
+            if raw.get("growth_rate") is not None:
+                assert company.financials.growth_rate is not None
+            logger.info(f"  OK {company.name}")
+        except Exception as e:
+            errors.append(str(e))
+            logger.error(f"  FAILED: {e}")
+    
+    if errors:
+        raise AssertionError(f"Converter failed")
+    logger.info("OK Unified converter verified")
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -7,7 +7,7 @@ Each builder creates a Company profile for a specific scenario.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 from solstein.domain.models import (
     AIMaturity,
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-def _build_metric_sources(candidate: DiscoveryCandidate, ticker_url: str | None) -> dict[str, list[str | None]]:
+def _build_metric_sources(candidate: DiscoveryCandidate, ticker_url: str | None) -> dict[str, list[str]]:
     """Build metric sources dictionary."""
     return {
         "revenue": [ticker_url] if ticker_url else [],
@@ -36,7 +36,7 @@ def _build_metric_sources(candidate: DiscoveryCandidate, ticker_url: str | None)
     }
 
 
-def _build_metric_observations_empty() -> dict[str, list]:
+def _build_metric_observations_empty() -> dict[str, list[dict[str, Any]]]:
     """Build empty metric observations for all metrics."""
     return {
         metric: []
@@ -78,7 +78,7 @@ def build_company_profile_no_ticker(candidate: DiscoveryCandidate) -> Company:
         tier=CompanyTier.TIER_3,
         threat_level=ThreatLevel.MEDIUM,
         ai_maturity=AIMaturity.MODERATE,
-        financials=FinancialMetric(),
+        financials=FinancialMetric(allow_empty_primary=True),
         geographic_presence=[candidate.region],
         tech_stack=candidate.tags,
         data_source="Automated market discovery catalog",
@@ -117,7 +117,7 @@ def build_company_profile_yfinance_missing(candidate: DiscoveryCandidate) -> Com
         tier=CompanyTier.TIER_3,
         threat_level=ThreatLevel.MEDIUM,
         ai_maturity=AIMaturity.LOW,
-        financials=FinancialMetric(),
+        financials=FinancialMetric(allow_empty_primary=True),
         geographic_presence=[candidate.region],
         tech_stack=candidate.tags,
         data_source="Discovery catalog (yfinance missing)",
@@ -156,7 +156,7 @@ def build_company_profile_ticker_failed(candidate: DiscoveryCandidate, exc: Exce
         tier=CompanyTier.TIER_3,
         threat_level=ThreatLevel.MEDIUM,
         ai_maturity=AIMaturity.LOW,
-        financials=FinancialMetric(),
+        financials=FinancialMetric(allow_empty_primary=True),
         geographic_presence=[candidate.region],
         tech_stack=candidate.tags,
         data_source="Discovery + yfinance (lookup failed)",

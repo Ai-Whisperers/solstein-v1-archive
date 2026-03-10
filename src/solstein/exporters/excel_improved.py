@@ -14,6 +14,7 @@ Components are now modularized in the excel/ package:
 
 from pathlib import Path
 from typing import Any
+import json
 
 from loguru import logger
 from openpyxl import Workbook
@@ -45,7 +46,12 @@ class ImprovedExcelExporter:
         self.styles = ExcelStyles()
         self.template_path = template_path
 
-    def create_dashboard(self, profiles: list[Company], output_path: Path) -> None:
+    def create_dashboard(
+        self,
+        profiles: list[Company],
+        output_path: Path,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
         """Create a complete Excel dashboard.
 
         Args:
@@ -59,7 +65,8 @@ class ImprovedExcelExporter:
             wb = Workbook()
 
             # Remove default sheet
-            wb.remove(wb.active)
+            if wb.active is not None:
+                wb.remove(wb.active)
 
             # Create sheets using modular generators
             # Executive Summary
@@ -74,6 +81,9 @@ class ImprovedExcelExporter:
             ws_financial = wb.create_sheet("Financial Intelligence")
             add_financial_intelligence(ws_financial, self.styles, profiles)
 
+            if metadata:
+                self._add_metadata_sheet(wb, metadata)
+
             # Save workbook
             output_path.parent.mkdir(parents=True, exist_ok=True)
             wb.save(output_path)
@@ -83,3 +93,13 @@ class ImprovedExcelExporter:
         except Exception as e:
             logger.error(f"Failed to create Excel dashboard: {e}")
             raise
+
+    def _add_metadata_sheet(self, workbook: Workbook, metadata: dict[str, Any]) -> None:
+        worksheet = workbook.create_sheet("Export Metadata")
+        worksheet.append(["key", "value"])
+        for key, value in metadata.items():
+            if isinstance(value, (dict, list)):
+                rendered = json.dumps(value, indent=2, sort_keys=True)
+            else:
+                rendered = value
+            worksheet.append([key, rendered])

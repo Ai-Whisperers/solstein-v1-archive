@@ -1,1 +1,791 @@
-[]
+{
+  "exported_at": "2026-03-10T23:22:21.663459+00:00",
+  "total_companies": 3,
+  "companies": [
+    {
+      "id": "abb-0",
+      "name": "ABB",
+      "company_name": "ABB",
+      "industry": "Energy Software",
+      "description": "Avanza erbjuder ett enklare sparande i fonder och aktier. Kom ig\u00e5ng med ett sparande p\u00e5 3 minuter. V\u00e4lkommen till Avanza \u2013 en bank som den borde vara.",
+      "website": "https://www.avanza.se/aktier/om-aktien.html/5447/abb",
+      "headquarters": "Unknown",
+      "founded_year": null,
+      "last_updated": "2026-03-10T23:22:21.661426Z",
+      "data_source": "Solstein Competitive Intelligence",
+      "notes": null,
+      "source_links": [],
+      "metric_sources": {},
+      "metric_justifications": {},
+      "metric_observations": {},
+      "signal_confidences": {
+        "revenue": 0.78,
+        "employees": 0.7,
+        "growth_rate": 0.72,
+        "profit_margin": 0.74,
+        "valuation": 0.76
+      },
+      "tier": "Tier 1",
+      "threat_level": "Low",
+      "ai_maturity": "Low",
+      "saas_maturity": 5,
+      "tech_stack": [],
+      "financials": {
+        "revenue": 33219.999744,
+        "revenue_confidence": "Confirmed",
+        "growth_rate": 5.4,
+        "growth_confidence": "Estimated",
+        "employees": 111900,
+        "employees_confidence": "Confirmed",
+        "profit_margin": 14.249999999999998,
+        "margin_confidence": "Confirmed",
+        "ebitda_margin": null,
+        "recurring_revenue_pct": null,
+        "funding_raised": null,
+        "funding_confidence": "Unknown",
+        "valuation": 155363.278848,
+        "valuation_confidence": "Estimated"
+      },
+      "revenue": 33219.999744,
+      "employees": 111900,
+      "growth_rate": 5.4,
+      "profit_margin": 14.249999999999998,
+      "funding": null,
+      "valuation": 155363.278848,
+      "geographic_presence": [],
+      "key_customers": [],
+      "parent_company": null,
+      "subsidiaries": [],
+      "acquisitions": [],
+      "confidence_scores": {
+        "revenue": 0.78,
+        "employees": 0.7,
+        "growth_rate": 0.72,
+        "profit_margin": 0.74,
+        "valuation": 0.76
+      },
+      "enrichment_source_count": 0,
+      "data_quality_tier": "unknown",
+      "data_source_type": "real",
+      "enrichment_quality_metrics": {},
+      "ticker": null,
+      "company_number": null,
+      "isin": null,
+      "geography_code": null,
+      "enrichment_sources": [],
+      "enrichment_timestamps": {},
+      "enrichment_errors": [],
+      "enrichment_errors_per_field": {},
+      "enrichment_error_timestamps": {},
+      "enrichment_error_count": 0,
+      "enrichment_error_categories": {},
+      "growth_score": 1.4243999999999999,
+      "financial_health_score": 5.375,
+      "competitive_position_score": 7.578899999999999,
+      "composite_score": 4.46,
+      "scoring_breakdown": {
+        "growth": {
+          "base_score": 0.0,
+          "components": [
+            {
+              "name": "Below-Average Growth Penalty",
+              "value": -0.25,
+              "formula": "growth_rate 5-10% \u2192 -0.25",
+              "reasoning": "Growth rate below 10% is below sector average.",
+              "confidence_weight": 1.0
+            },
+            {
+              "name": "Revenue Growth",
+              "value": 0.1944,
+              "formula": "min(5.4% / 20.0, 4.0)",
+              "reasoning": "Moderate growth rate identified.",
+              "confidence_weight": 0.72
+            },
+            {
+              "name": "Employee Efficiency",
+              "value": 0.74,
+              "formula": "rev_per_emp(296,872 EUR) > threshold",
+              "reasoning": "Revenue per employee is above efficiency benchmarks.",
+              "confidence_weight": 0.74
+            },
+            {
+              "name": "Profitability Profile",
+              "value": 0.74,
+              "formula": "margin(14.249999999999998%) -> adjustment",
+              "reasoning": "Healthy margins contribute to growth score.",
+              "confidence_weight": 0.74
+            }
+          ],
+          "final_score": 1.4243999999999999
+        },
+        "financial": {
+          "base_score": 2.5,
+          "components": [
+            {
+              "name": "Revenue Scale",
+              "value": 1.95,
+              "formula": "revenue(\u20ac33220.0M) -> adjustment",
+              "reasoning": "Revenue scale impacts financial stability. Thresholds: <\u20ac1.0M small, >\u20ac10.0M medium, >\u20ac100.0M large.",
+              "confidence_weight": 0.78
+            },
+            {
+              "name": "Profitability Health",
+              "value": 0.925,
+              "formula": "margin(14.249999999999998%) -> adjustment",
+              "reasoning": "Operating margin is a key indicator of financial health.",
+              "confidence_weight": 0.74
+            }
+          ],
+          "final_score": 5.375
+        },
+        "competitive": {
+          "base_score": 5.0,
+          "components": [
+            {
+              "name": "Market Tier",
+              "value": 2.19,
+              "formula": "tier(Tier 1)",
+              "reasoning": "Positioned as a Tier 1 player in the market.",
+              "confidence_weight": 0.73
+            },
+            {
+              "name": "AI Maturity",
+              "value": -0.5,
+              "formula": "ai_maturity(Low)",
+              "reasoning": "Technological advantage: AI maturity is Low.",
+              "confidence_weight": 1.0
+            },
+            {
+              "name": "SaaS Maturity",
+              "value": 0.8889,
+              "formula": "(5-1)/9 * 2.0",
+              "reasoning": "SaaS transformation index: 5/10.",
+              "confidence_weight": 1.0
+            }
+          ],
+          "final_score": 7.578899999999999
+        }
+      },
+      "classification": "Lead",
+      "revenue_timeline": [],
+      "revenue_cagr_3yr": null,
+      "revenue_cagr_5yr": null,
+      "ebitda_margin": null,
+      "recurring_revenue_pct": null,
+      "revenue_per_employee_eur_k": null,
+      "profitability_raw_metrics": {},
+      "funding_rounds": [],
+      "total_funding_raised_eur": null,
+      "latest_valuation_eur": null,
+      "lead_investors": [],
+      "funding_war_chest": null,
+      "employee_count": null,
+      "employee_cagr_3yr": null,
+      "open_positions": null,
+      "ai_score": 1.5,
+      "ai_signal_level": null,
+      "ai_key_capabilities": null,
+      "ai_in_production": null,
+      "data_availability": null
+    },
+    {
+      "id": "enphase-energy-1",
+      "name": "Enphase Energy",
+      "company_name": "Enphase Energy",
+      "industry": "Energy Software",
+      "description": "Explore Enphase Energy's in-depth company profile, including funding details, key investors, leadership, competitors, and acquisitions.",
+      "website": "https://tracxn.com/d/companies/enphaseenergy/__C8EjVOCBLViU1R5Vuc1QvurDukWDFe1l29shYNIOrxE",
+      "headquarters": "Unknown",
+      "founded_year": null,
+      "last_updated": "2026-03-10T23:22:21.661641Z",
+      "data_source": "Solstein Competitive Intelligence",
+      "notes": null,
+      "source_links": [],
+      "metric_sources": {},
+      "metric_justifications": {},
+      "metric_observations": {},
+      "signal_confidences": {
+        "revenue": 0.78,
+        "employees": 0.7,
+        "growth_rate": 0.72,
+        "profit_margin": 0.74,
+        "valuation": 0.76
+      },
+      "tier": "Tier 1",
+      "threat_level": "Low",
+      "ai_maturity": "Low",
+      "saas_maturity": 5,
+      "tech_stack": [],
+      "financials": {
+        "revenue": 1472.98496,
+        "revenue_confidence": "Confirmed",
+        "growth_rate": -10.299999999999999,
+        "growth_confidence": "Estimated",
+        "employees": 2872,
+        "employees_confidence": "Confirmed",
+        "profit_margin": 11.686,
+        "margin_confidence": "Confirmed",
+        "ebitda_margin": null,
+        "recurring_revenue_pct": null,
+        "funding_raised": null,
+        "funding_confidence": "Unknown",
+        "valuation": 5394.716672,
+        "valuation_confidence": "Estimated"
+      },
+      "revenue": 1472.98496,
+      "employees": 2872,
+      "growth_rate": -10.299999999999999,
+      "profit_margin": 11.686,
+      "funding": null,
+      "valuation": 5394.716672,
+      "geographic_presence": [],
+      "key_customers": [],
+      "parent_company": null,
+      "subsidiaries": [],
+      "acquisitions": [],
+      "confidence_scores": {
+        "revenue": 0.78,
+        "employees": 0.7,
+        "growth_rate": 0.72,
+        "profit_margin": 0.74,
+        "valuation": 0.76
+      },
+      "enrichment_source_count": 0,
+      "data_quality_tier": "unknown",
+      "data_source_type": "real",
+      "enrichment_quality_metrics": {},
+      "ticker": null,
+      "company_number": null,
+      "isin": null,
+      "geography_code": null,
+      "enrichment_sources": [],
+      "enrichment_timestamps": {},
+      "enrichment_errors": [],
+      "enrichment_errors_per_field": {},
+      "enrichment_error_timestamps": {},
+      "enrichment_error_count": 0,
+      "enrichment_error_categories": {},
+      "growth_score": 0.0,
+      "financial_health_score": 6.3,
+      "competitive_position_score": 7.578899999999999,
+      "composite_score": 4.16,
+      "scoring_breakdown": {
+        "growth": {
+          "base_score": 0.0,
+          "components": [
+            {
+              "name": "Declining Revenue Penalty",
+              "value": -1.5,
+              "formula": "growth_rate < 0% \u2192 -1.5",
+              "reasoning": "Negative growth indicates revenue contraction \u2014 serious viability concern.",
+              "confidence_weight": 1.0
+            },
+            {
+              "name": "Revenue Growth",
+              "value": -0.3708,
+              "formula": "min(-10.299999999999999% / 20.0, 4.0)",
+              "reasoning": "Moderate growth rate identified.",
+              "confidence_weight": 0.72
+            },
+            {
+              "name": "Employee Efficiency",
+              "value": 1.48,
+              "formula": "rev_per_emp(512,878 EUR) > threshold",
+              "reasoning": "Revenue per employee is above efficiency benchmarks.",
+              "confidence_weight": 0.74
+            },
+            {
+              "name": "Profitability Profile",
+              "value": 0.74,
+              "formula": "margin(11.686%) -> adjustment",
+              "reasoning": "Healthy margins contribute to growth score.",
+              "confidence_weight": 0.74
+            },
+            {
+              "name": "Compound Risk Penalty",
+              "value": -1.0,
+              "formula": "growth_rate < 0 AND no_funding \u2192 -1.0",
+              "reasoning": "Negative growth with no funding raises serious viability concerns.",
+              "confidence_weight": 1.0
+            }
+          ],
+          "final_score": 0.0
+        },
+        "financial": {
+          "base_score": 2.5,
+          "components": [
+            {
+              "name": "Revenue Scale",
+              "value": 1.95,
+              "formula": "revenue(\u20ac1473.0M) -> adjustment",
+              "reasoning": "Revenue scale impacts financial stability. Thresholds: <\u20ac1.0M small, >\u20ac10.0M medium, >\u20ac100.0M large.",
+              "confidence_weight": 0.78
+            },
+            {
+              "name": "Profitability Health",
+              "value": 0.925,
+              "formula": "margin(11.686%) -> adjustment",
+              "reasoning": "Operating margin is a key indicator of financial health.",
+              "confidence_weight": 0.74
+            },
+            {
+              "name": "Operating Efficiency",
+              "value": 0.925,
+              "formula": "rev_per_emp(\u20ac512,878) -> adjustment",
+              "reasoning": "Revenue per employee indicates operational efficiency. \u20ac1473.0M revenue / 2872 employees = \u20ac512,878 per employee.",
+              "confidence_weight": 0.74
+            }
+          ],
+          "final_score": 6.3
+        },
+        "competitive": {
+          "base_score": 5.0,
+          "components": [
+            {
+              "name": "Market Tier",
+              "value": 2.19,
+              "formula": "tier(Tier 1)",
+              "reasoning": "Positioned as a Tier 1 player in the market.",
+              "confidence_weight": 0.73
+            },
+            {
+              "name": "AI Maturity",
+              "value": -0.5,
+              "formula": "ai_maturity(Low)",
+              "reasoning": "Technological advantage: AI maturity is Low.",
+              "confidence_weight": 1.0
+            },
+            {
+              "name": "SaaS Maturity",
+              "value": 0.8889,
+              "formula": "(5-1)/9 * 2.0",
+              "reasoning": "SaaS transformation index: 5/10.",
+              "confidence_weight": 1.0
+            }
+          ],
+          "final_score": 7.578899999999999
+        }
+      },
+      "classification": "Lead",
+      "revenue_timeline": [],
+      "revenue_cagr_3yr": null,
+      "revenue_cagr_5yr": null,
+      "ebitda_margin": null,
+      "recurring_revenue_pct": null,
+      "revenue_per_employee_eur_k": null,
+      "profitability_raw_metrics": {},
+      "funding_rounds": [],
+      "total_funding_raised_eur": null,
+      "latest_valuation_eur": null,
+      "lead_investors": [],
+      "funding_war_chest": null,
+      "employee_count": null,
+      "employee_cagr_3yr": null,
+      "open_positions": null,
+      "ai_score": 1.5,
+      "ai_signal_level": null,
+      "ai_key_capabilities": null,
+      "ai_in_production": null,
+      "data_availability": null
+    },
+    {
+      "id": "sunrun-4",
+      "name": "Sunrun",
+      "company_name": "Sunrun",
+      "industry": "Energy Software",
+      "description": "\u5317\u6781\u661f\u592a\u9633\u80fd\u5149\u4f0f\u7f51\u4e3a\u60a8\u63d0\u4f9bSunrun\u76f8\u5173\u65b0\u95fb\uff0c\u4e86\u89e3Sunrun\u6700\u65b0\u76f8\u5173\u7684\u62a5\u9053\u653f\u7b56\u62db\u6295\u6807\u7b49\u76f8\u5173\u4fe1\u606f\uff0c\u5c31\u6765\u5317\u6781\u661f\u592a\u9633\u80fd\u5149\u4f0f\u7f51\u3002",
+      "website": "https://guangfu.bjx.com.cn/topics/sunrun/",
+      "headquarters": "Unknown",
+      "founded_year": null,
+      "last_updated": "2026-03-10T23:22:21.661871Z",
+      "data_source": "Solstein Competitive Intelligence",
+      "notes": null,
+      "source_links": [],
+      "metric_sources": {},
+      "metric_justifications": {},
+      "metric_observations": {},
+      "signal_confidences": {
+        "revenue": 0.78,
+        "employees": 0.7,
+        "growth_rate": 0.72,
+        "profit_margin": 0.74,
+        "valuation": 0.76
+      },
+      "tier": "Tier 1",
+      "threat_level": "Low",
+      "ai_maturity": "Low",
+      "saas_maturity": 5,
+      "tech_stack": [],
+      "financials": {
+        "revenue": 2956.99712,
+        "revenue_confidence": "Confirmed",
+        "growth_rate": 1.235,
+        "growth_confidence": "Estimated",
+        "employees": 9059,
+        "employees_confidence": "Confirmed",
+        "profit_margin": 15.215999,
+        "margin_confidence": "Confirmed",
+        "ebitda_margin": null,
+        "recurring_revenue_pct": null,
+        "funding_raised": null,
+        "funding_confidence": "Unknown",
+        "valuation": 2735.773184,
+        "valuation_confidence": "Estimated"
+      },
+      "revenue": 2956.99712,
+      "employees": 9059,
+      "growth_rate": 1.235,
+      "profit_margin": 15.215999,
+      "funding": null,
+      "valuation": 2735.773184,
+      "geographic_presence": [],
+      "key_customers": [],
+      "parent_company": null,
+      "subsidiaries": [],
+      "acquisitions": [],
+      "confidence_scores": {
+        "revenue": 0.78,
+        "employees": 0.7,
+        "growth_rate": 0.72,
+        "profit_margin": 0.74,
+        "valuation": 0.76
+      },
+      "enrichment_source_count": 0,
+      "data_quality_tier": "unknown",
+      "data_source_type": "real",
+      "enrichment_quality_metrics": {},
+      "ticker": null,
+      "company_number": null,
+      "isin": null,
+      "geography_code": null,
+      "enrichment_sources": [],
+      "enrichment_timestamps": {},
+      "enrichment_errors": [],
+      "enrichment_errors_per_field": {},
+      "enrichment_error_timestamps": {},
+      "enrichment_error_count": 0,
+      "enrichment_error_categories": {},
+      "growth_score": 0.7745,
+      "financial_health_score": 6.300000000000001,
+      "competitive_position_score": 7.578899999999999,
+      "composite_score": 4.47,
+      "scoring_breakdown": {
+        "growth": {
+          "base_score": 0.0,
+          "components": [
+            {
+              "name": "Stagnant Growth Penalty",
+              "value": -0.75,
+              "formula": "growth_rate < 5% \u2192 -0.75",
+              "reasoning": "Growth rate below 5% indicates stagnation.",
+              "confidence_weight": 1.0
+            },
+            {
+              "name": "Revenue Growth",
+              "value": 0.0445,
+              "formula": "min(1.235% / 20.0, 4.0)",
+              "reasoning": "Moderate growth rate identified.",
+              "confidence_weight": 0.72
+            },
+            {
+              "name": "Employee Efficiency",
+              "value": 0.74,
+              "formula": "rev_per_emp(326,415 EUR) > threshold",
+              "reasoning": "Revenue per employee is above efficiency benchmarks.",
+              "confidence_weight": 0.74
+            },
+            {
+              "name": "Profitability Profile",
+              "value": 0.74,
+              "formula": "margin(15.215999%) -> adjustment",
+              "reasoning": "Healthy margins contribute to growth score.",
+              "confidence_weight": 0.74
+            }
+          ],
+          "final_score": 0.7745
+        },
+        "financial": {
+          "base_score": 2.5,
+          "components": [
+            {
+              "name": "Revenue Scale",
+              "value": 1.95,
+              "formula": "revenue(\u20ac2957.0M) -> adjustment",
+              "reasoning": "Revenue scale impacts financial stability. Thresholds: <\u20ac1.0M small, >\u20ac10.0M medium, >\u20ac100.0M large.",
+              "confidence_weight": 0.78
+            },
+            {
+              "name": "Profitability Health",
+              "value": 1.85,
+              "formula": "margin(15.215999%) -> adjustment",
+              "reasoning": "Operating margin is a key indicator of financial health.",
+              "confidence_weight": 0.74
+            }
+          ],
+          "final_score": 6.300000000000001
+        },
+        "competitive": {
+          "base_score": 5.0,
+          "components": [
+            {
+              "name": "Market Tier",
+              "value": 2.19,
+              "formula": "tier(Tier 1)",
+              "reasoning": "Positioned as a Tier 1 player in the market.",
+              "confidence_weight": 0.73
+            },
+            {
+              "name": "AI Maturity",
+              "value": -0.5,
+              "formula": "ai_maturity(Low)",
+              "reasoning": "Technological advantage: AI maturity is Low.",
+              "confidence_weight": 1.0
+            },
+            {
+              "name": "SaaS Maturity",
+              "value": 0.8889,
+              "formula": "(5-1)/9 * 2.0",
+              "reasoning": "SaaS transformation index: 5/10.",
+              "confidence_weight": 1.0
+            }
+          ],
+          "final_score": 7.578899999999999
+        }
+      },
+      "classification": "Lead",
+      "revenue_timeline": [],
+      "revenue_cagr_3yr": null,
+      "revenue_cagr_5yr": null,
+      "ebitda_margin": null,
+      "recurring_revenue_pct": null,
+      "revenue_per_employee_eur_k": null,
+      "profitability_raw_metrics": {},
+      "funding_rounds": [],
+      "total_funding_raised_eur": null,
+      "latest_valuation_eur": null,
+      "lead_investors": [],
+      "funding_war_chest": null,
+      "employee_count": null,
+      "employee_cagr_3yr": null,
+      "open_positions": null,
+      "ai_score": 1.5,
+      "ai_signal_level": null,
+      "ai_key_capabilities": null,
+      "ai_in_production": null,
+      "data_availability": null
+    }
+  ],
+  "export_metadata": {
+    "gate_evaluation": {
+      "passed": true,
+      "skipped": false,
+      "warn_mode": true,
+      "reason_count": 6,
+      "reasons": [
+        {
+          "code": "provenance_boundary",
+          "message": "Populated fields missing required boundary provenance metadata",
+          "details": {
+            "company": "ABB",
+            "violations": [
+              {
+                "field": "revenue",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'revenue' is missing source attribution"
+              },
+              {
+                "field": "employees",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'employees' is missing source attribution"
+              },
+              {
+                "field": "growth_rate",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'growth_rate' is missing source attribution"
+              },
+              {
+                "field": "profit_margin",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'profit_margin' is missing source attribution"
+              },
+              {
+                "field": "valuation",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'valuation' is missing source attribution"
+              }
+            ]
+          }
+        },
+        {
+          "code": "gap_analysis",
+          "message": "Required fields missing or invalid",
+          "details": {
+            "company": "ABB",
+            "unresolved": [
+              {
+                "field": "revenue",
+                "status": "provenance_invalid",
+                "confidence": 1.0,
+                "reason": "missing canonical source uri"
+              },
+              {
+                "field": "employees",
+                "status": "provenance_invalid",
+                "confidence": 1.0,
+                "reason": "missing canonical source uri"
+              },
+              {
+                "field": "growth_rate",
+                "status": "provenance_invalid",
+                "confidence": 0.6,
+                "reason": "missing canonical source uri"
+              },
+              {
+                "field": "profit_margin",
+                "status": "provenance_invalid",
+                "confidence": 1.0,
+                "reason": "missing canonical source uri"
+              }
+            ]
+          }
+        },
+        {
+          "code": "provenance_boundary",
+          "message": "Populated fields missing required boundary provenance metadata",
+          "details": {
+            "company": "Enphase Energy",
+            "violations": [
+              {
+                "field": "revenue",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'revenue' is missing source attribution"
+              },
+              {
+                "field": "employees",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'employees' is missing source attribution"
+              },
+              {
+                "field": "growth_rate",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'growth_rate' is missing source attribution"
+              },
+              {
+                "field": "profit_margin",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'profit_margin' is missing source attribution"
+              },
+              {
+                "field": "valuation",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'valuation' is missing source attribution"
+              }
+            ]
+          }
+        },
+        {
+          "code": "gap_analysis",
+          "message": "Required fields missing or invalid",
+          "details": {
+            "company": "Enphase Energy",
+            "unresolved": [
+              {
+                "field": "revenue",
+                "status": "provenance_invalid",
+                "confidence": 1.0,
+                "reason": "missing canonical source uri"
+              },
+              {
+                "field": "employees",
+                "status": "provenance_invalid",
+                "confidence": 1.0,
+                "reason": "missing canonical source uri"
+              },
+              {
+                "field": "growth_rate",
+                "status": "provenance_invalid",
+                "confidence": 0.6,
+                "reason": "missing canonical source uri"
+              },
+              {
+                "field": "profit_margin",
+                "status": "provenance_invalid",
+                "confidence": 1.0,
+                "reason": "missing canonical source uri"
+              }
+            ]
+          }
+        },
+        {
+          "code": "provenance_boundary",
+          "message": "Populated fields missing required boundary provenance metadata",
+          "details": {
+            "company": "Sunrun",
+            "violations": [
+              {
+                "field": "revenue",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'revenue' is missing source attribution"
+              },
+              {
+                "field": "employees",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'employees' is missing source attribution"
+              },
+              {
+                "field": "growth_rate",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'growth_rate' is missing source attribution"
+              },
+              {
+                "field": "profit_margin",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'profit_margin' is missing source attribution"
+              },
+              {
+                "field": "valuation",
+                "type": "missing_source_attribution",
+                "message": "Populated field 'valuation' is missing source attribution"
+              }
+            ]
+          }
+        },
+        {
+          "code": "gap_analysis",
+          "message": "Required fields missing or invalid",
+          "details": {
+            "company": "Sunrun",
+            "unresolved": [
+              {
+                "field": "revenue",
+                "status": "provenance_invalid",
+                "confidence": 1.0,
+                "reason": "missing canonical source uri"
+              },
+              {
+                "field": "employees",
+                "status": "provenance_invalid",
+                "confidence": 1.0,
+                "reason": "missing canonical source uri"
+              },
+              {
+                "field": "growth_rate",
+                "status": "provenance_invalid",
+                "confidence": 0.6,
+                "reason": "missing canonical source uri"
+              },
+              {
+                "field": "profit_margin",
+                "status": "provenance_invalid",
+                "confidence": 1.0,
+                "reason": "missing canonical source uri"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "data_quality_tier": "bronze",
+    "completeness_score": 52.6
+  }
+}

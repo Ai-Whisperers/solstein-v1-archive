@@ -16,35 +16,50 @@ from solstein.data.parsers.confidence import convert_confidence
 
 
 def extract_revenue_data(raw_data: dict[str, Any]) -> dict[str, Any]:
-    """Extract revenue data from raw JSON."""
+    """Extract revenue data from raw JSON.
+
+    EPIC-058: Supports both flat (float at top level) and nested (dict with timeline) formats.
+    Auto-detects format and extracts with no field loss.
+    """
     revenue_data = raw_data.get("revenue", {})
+    growth_rate_data = raw_data.get("growth_rate")
 
-    if isinstance(revenue_data, dict):
-        timeline = revenue_data.get("timeline", [])
-        cagr_3yr = revenue_data.get("cagr_3yr_pct")
-        cagr_5yr = revenue_data.get("cagr_5yr_pct")
-    else:
-        timeline = []
-        cagr_3yr = raw_data.get("revenue_cagr_3yr")
-        cagr_5yr = raw_data.get("revenue_cagr_5yr")
-
+    timeline = []
     latest_revenue = None
     latest_growth = None
     revenue_confidence = ConfidenceLevel.UNKNOWN
+    cagr_3yr = None
+    cagr_5yr = None
+    detected_format = None
 
-    if timeline:
-        latest = timeline[0]
-        latest_revenue = latest.get("eur_millions")
-        latest_growth = latest.get("yoy_growth_pct")
-        revenue_confidence = convert_confidence(latest.get("confidence"))
-    elif isinstance(revenue_data, (int, float)):
+    if isinstance(revenue_data, dict) and revenue_data:
+        detected_format = "nested"
+        timeline = revenue_data.get("timeline", [])
+        cagr_3yr = revenue_data.get("cagr_3yr_pct")
+        cagr_5yr = revenue_data.get("cagr_5yr_pct")
+
+        if timeline and len(timeline) > 0:
+            latest = timeline[0]
+            latest_revenue = latest.get("eur_millions")
+            latest_growth = latest.get("yoy_growth_pct")
+            revenue_confidence = convert_confidence(latest.get("confidence"))
+            logger.debug(f"[EPIC-058] Detected nested format: revenue={latest_revenue}, growth={latest_growth}")
+
+    if latest_revenue is None and isinstance(revenue_data, (int, float)):
+        detected_format = "flat"
         latest_revenue = float(revenue_data)
-        growth_rate = raw_data.get("growth_rate")
-        if isinstance(growth_rate, (int, float)):
-            latest_growth = float(growth_rate)
         revenue_confidence = ConfidenceLevel.CONFIRMED
+        logger.debug(f"[EPIC-058] Detected flat format: revenue={latest_revenue}")
 
-    # Calculate CAGR from timeline
+    if latest_growth is None and isinstance(growth_rate_data, (int, float)):
+        latest_growth = float(growth_rate_data)
+        logger.debug(f"[EPIC-058] Extracted growth_rate from flat field: {latest_growth}")
+
+    if cagr_3yr is None:
+        cagr_3yr = raw_data.get("revenue_cagr_3yr")
+    if cagr_5yr is None:
+        cagr_5yr = raw_data.get("revenue_cagr_5yr")
+
     calculated_cagr_3yr = cagr_3yr
     if not calculated_cagr_3yr and timeline and len(timeline) >= 2:
         try:
@@ -64,25 +79,41 @@ def extract_revenue_data(raw_data: dict[str, Any]) -> dict[str, Any]:
         "revenue_confidence": revenue_confidence,
         "cagr_3yr": calculated_cagr_3yr if calculated_cagr_3yr else cagr_3yr,
         "cagr_5yr": cagr_5yr,
+        "detected_format": detected_format,
     }
 
 
 def extract_profitability_data(raw_data: dict[str, Any]) -> dict[str, Any]:
-    """Extract profitability data from raw JSON."""
+    """Extract profitability data from raw JSON.
+
+    EPIC-058: Supports both flat and nested formats.
+    """
     profitability_data = raw_data.get("profitability", {})
 
-    if isinstance(profitability_data, dict):
+    ebitda_margin = None
+    recurring_rev_pct = None
+    rev_per_employee = None
+    raw_metrics = {}
+    detected_format = None
+
+    if isinstance(profitability_data, dict) and profitability_data:
+        detected_format = "nested"
         ebitda_margin = profitability_data.get("ebitda_margin_pct")
         recurring_rev_pct = profitability_data.get("recurring_revenue_pct")
         rev_per_employee = profitability_data.get("revenue_per_employee_eur_k")
         raw_metrics = profitability_data.get("raw_metrics", {})
-    else:
-        ebitda_margin = None
-        recurring_rev_pct = None
-        rev_per_employee = None
-        raw_metrics = {}
+        if ebitda_margin:
+            logger.debug(f"[EPIC-058] Detected nested profitability: ebitda={ebitda_margin}%")
 
-    # Extract profit margin using multiple strategies
+    if ebitda_margin is None and isinstance(raw_data.get("ebitda_margin_pct"), (int, float)):
+        detected_format = "flat"
+        ebitda_margin = float(raw_data.get("ebitda_margin_pct"))
+        logger.debug(f"[EPIC-058] Detected flat profitability: ebitda={ebitda_margin}%")
+
+    if recurring_rev_pct is None and isinstance(raw_data.get("recurring_revenue_pct"), (int, float)):
+        recurring_rev_pct = float(raw_data.get("recurring_revenue_pct"))
+        logger.debug(f"[EPIC-058] Extracted flat recurring_revenue_pct: {recurring_rev_pct}%")
+
     profit_margin = _extract_profit_margin(raw_metrics, raw_data)
 
     return {
@@ -91,6 +122,7 @@ def extract_profitability_data(raw_data: dict[str, Any]) -> dict[str, Any]:
         "revenue_per_employee_eur_k": rev_per_employee,
         "profit_margin": profit_margin,
         "raw_metrics": raw_metrics,
+        "detected_format": detected_format,
     }
 
 
@@ -385,6 +417,20 @@ def build_confidence_scores(raw_data: dict[str, Any]) -> dict[str, float]:
         confidence_scores["funding"] = convert_confidence_value(raw_data["funding_confidence"])
     if raw_data.get("valuation_confidence"):
         confidence_scores["valuation"] = convert_confidence_value(raw_data["valuation_confidence"])
+    if raw_data.get("valuation_confidence"):
+        confidence_scores["valuation"] = convert_confidence_value(raw_data["valuation_confidence"])
+
+    # EPIC-058: Extract confidence from metric_lineage if available
+    metric_lineage = raw_data.get("metric_lineage", {})
+    if isinstance(metric_lineage, dict):
+        for field_name, metadata in metric_lineage.items():
+            if isinstance(metadata, dict) and "confidence" in metadata:
+                confidence_value = metadata.get("confidence")
+                if isinstance(confidence_value, (int, float)):
+                    confidence_scores[field_name] = float(confidence_value)
+                    logger.debug(
+                        f"[EPIC-058] Extracted {field_name} confidence from metric_lineage: {confidence_value}"
+                    )
 
     return confidence_scores
 

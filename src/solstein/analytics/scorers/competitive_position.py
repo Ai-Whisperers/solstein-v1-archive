@@ -50,37 +50,39 @@ class CompetitivePositionScorer:
             )
         )
 
-        if len(profile.geographic_presence) > cfg.geo_global_count:
+        geographic_presence: list[str] = list(profile.geographic_presence or [])
+        if len(geographic_presence) > cfg.geo_global_count:
             adj = cfg.geo_global_bonus
             score += adj
             explanation.components.append(
                 ScoreComponent(
                     name="Geographic Footprint",
                     value=adj,
-                    formula=f"regions({len(profile.geographic_presence)}) > {cfg.geo_global_count}",
+                    formula=f"regions({len(geographic_presence)}) > {cfg.geo_global_count}",
                     reasoning="Global presence identified.",
                 )
             )
-        elif len(profile.geographic_presence) > cfg.geo_regional_count:
+        elif len(geographic_presence) > cfg.geo_regional_count:
             adj = cfg.geo_regional_bonus
             score += adj
             explanation.components.append(
                 ScoreComponent(
                     name="Geographic Footprint",
                     value=adj,
-                    formula=f"regions({len(profile.geographic_presence)}) > {cfg.geo_regional_count}",
+                    formula=f"regions({len(geographic_presence)}) > {cfg.geo_regional_count}",
                     reasoning="Regional presence identified.",
                 )
             )
 
-        if len(profile.tech_stack) > cfg.tech_diverse_count:
+        tech_stack: list[str] = list(profile.tech_stack or [])
+        if len(tech_stack) > cfg.tech_diverse_count:
             adj = cfg.tech_diverse_bonus
             score += adj
             explanation.components.append(
                 ScoreComponent(
                     name="Stack Diversity",
                     value=adj,
-                    formula=f"tech_count({len(profile.tech_stack)}) > {cfg.tech_diverse_count}",
+                    formula=f"tech_count({len(tech_stack)}) > {cfg.tech_diverse_count}",
                     reasoning="Diverse technical capabilities identified.",
                 )
             )

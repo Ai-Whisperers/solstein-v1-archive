@@ -78,7 +78,7 @@ class TestGrowthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric(growth_rate=10)  # Original: 10%
+        financials = FinancialMetric(growth_rate=10, employees=1)  # Original: 10%
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -123,7 +123,7 @@ class TestGrowthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -185,7 +185,7 @@ class TestGrowthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -208,7 +208,7 @@ class TestGrowthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -231,7 +231,7 @@ class TestGrowthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -262,7 +262,7 @@ class TestGrowthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -285,7 +285,7 @@ class TestGrowthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -307,7 +307,7 @@ class TestGrowthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric(growth_rate=15)
+        financials = FinancialMetric(growth_rate=15, employees=1)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 

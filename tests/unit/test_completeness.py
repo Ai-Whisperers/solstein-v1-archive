@@ -141,7 +141,7 @@ class TestCompletenessCalculator:
         company = Company(
             id="insufficient-1",
             name="Insufficient Corp",
-            financials=FinancialMetric(),
+            financials=FinancialMetric(allow_empty_primary=True),
         )
         score = calc.calculate_completeness_score(company)
         tier = calc.assign_tier(score)

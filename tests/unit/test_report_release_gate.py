@@ -1,4 +1,4 @@
-from solstein.data.report_release_gate import ReportReleaseGate
+from solstein.data.report_release_gate import ReportGateResult, ReportReleaseGate, GateReason, determine_quality_tier
 from solstein.domain.models import Company, ConfidenceLevel
 
 
@@ -51,6 +51,61 @@ def test_report_release_gate_blocks_missing_boundary_provenance() -> None:
     assert result.passed is False
     codes = {reason.code for reason in result.reasons}
     assert "provenance_boundary" in codes
+
+
+def test_report_release_gate_warn_mode_allows_export_with_reasons() -> None:
+    company = _company()
+    company.metric_sources["revenue"] = []
+
+    result = ReportReleaseGate(min_completeness_score=20.0, warn_mode=True).evaluate([company])
+
+    assert result.passed is True
+    assert result.warn_mode is True
+    codes = {reason.code for reason in result.reasons}
+    assert "provenance_boundary" in codes
+
+
+def test_report_release_gate_skip_gate_allows_export_with_reasons() -> None:
+    company = _company()
+    company.data_source_type = "synthetic"
+
+    result = ReportReleaseGate(min_completeness_score=20.0, skip_gate=True).evaluate([company])
+
+    assert result.passed is True
+    assert result.skipped is True
+    codes = {reason.code for reason in result.reasons}
+    assert "synthetic_data" in codes
+
+
+def test_report_release_gate_min_completeness_threshold_applies() -> None:
+    company = _company()
+
+    result = ReportReleaseGate(min_completeness_score=99.0).evaluate([company])
+
+    assert result.passed is False
+    codes = {reason.code for reason in result.reasons}
+    assert "completeness" in codes
+
+
+def test_determine_quality_tier_maps_completeness_only_to_silver() -> None:
+    result = ReportGateResult(
+        passed=False,
+        reasons=[GateReason(code="completeness", message="low", details={})],
+    )
+
+    assert determine_quality_tier(result) == "silver"
+
+
+def test_determine_quality_tier_maps_two_issues_to_bronze() -> None:
+    result = ReportGateResult(
+        passed=False,
+        reasons=[
+            GateReason(code="completeness", message="low", details={}),
+            GateReason(code="gap_analysis", message="gap", details={}),
+        ],
+    )
+
+    assert determine_quality_tier(result) == "bronze"
 
 
 def test_report_release_gate_escalates_critical_claim_contradictions() -> None:

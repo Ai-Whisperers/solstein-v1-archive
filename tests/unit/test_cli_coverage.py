@@ -113,7 +113,7 @@ def test_score_command(mock_scorer_cls: MagicMock, runner: CliRunner, mock_profi
     scored = Company(
         id="xxx",
         name="X",
-        financials=FinancialMetric(),
+        financials=FinancialMetric(allow_empty_primary=True),
         growth_score=5.0,
         financial_health_score=None,
         competitive_position_score=10.0,

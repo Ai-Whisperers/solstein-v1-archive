@@ -6,6 +6,8 @@ without creating circular dependencies with the analytics layer.
 EPIC-021: Module boundary violation fix - moved from analytics to core.
 """
 
+from typing import Any, cast
+
 from solstein.domain.models import Company, ConfidenceLevel
 
 
@@ -46,44 +48,55 @@ def populate_signal_confidences(company: Company) -> Company:
     # Map financial metrics to signal names
     _COMPONENT_SIGNAL_MAP: dict[str, list[str]] = {
         "Revenue Growth": ["growth_rate"],
-        "Employee Efficiency": ["revenue_level", "company_size"],
-        "Funding Momentum": ["funding"],
-        "Profitability Profile": ["profitability"],
-        "Revenue Scale": ["revenue_level"],
-        "Profitability Health": ["profitability"],
-        "Operating Efficiency": ["revenue_level", "company_size"],
-        "Funding Cushion": ["funding", "revenue_level"],
-        "Market Tier": ["company_size", "valuation"],
-        "AI Maturity": ["ai_maturity"],
+        "Employee Efficiency": ["revenue", "employees", "revenue_level", "company_size"],
+        "Funding Momentum": ["funding", "funding_raised"],
+        "Profitability Profile": ["profitability", "profit_margin"],
+        "Revenue Scale": ["revenue", "revenue_level"],
+        "Profitability Health": ["profitability", "profit_margin"],
+        "Operating Efficiency": ["revenue", "employees", "revenue_level", "company_size"],
+        "Funding Cushion": ["funding", "funding_raised", "revenue", "revenue_level"],
+        "Market Tier": ["company_size", "employees", "valuation"],
+        "AI Maturity": ["ai_maturity", "ai_score"],
         "SaaS Maturity": [],
         "Geographic Footprint": [],
         "Stack Diversity": [],
     }
 
-    # Initialize signal_confidences if not present
-    if not hasattr(company, "signal_confidences") or company.signal_confidences is None:
-        company.signal_confidences = {}
+    raw_signal_confidences = cast(dict[str, Any], company.signal_confidences or {})
 
     # Extract confidence levels from financial metrics
     financials = company.financials
 
     # Map each financial metric confidence to signal confidences
+    signal_confidences: dict[str, float] = {
+        str(key): float(value) for key, value in raw_signal_confidences.items() if isinstance(value, (int, float))
+    }
+    company.signal_confidences = signal_confidences
+
+    def set_if_missing(key: str, value: float) -> None:
+        if key not in signal_confidences:
+            signal_confidences[key] = value
+
     if hasattr(financials, "growth_confidence") and financials.growth_confidence:
-        company.signal_confidences["growth_rate"] = confidence_level_to_weight(financials.growth_confidence)
+        set_if_missing("growth_rate", confidence_level_to_weight(financials.growth_confidence))
 
     if hasattr(financials, "revenue_confidence") and financials.revenue_confidence:
-        company.signal_confidences["revenue_level"] = confidence_level_to_weight(financials.revenue_confidence)
+        set_if_missing("revenue_level", confidence_level_to_weight(financials.revenue_confidence))
+        set_if_missing("revenue", confidence_level_to_weight(financials.revenue_confidence))
 
     if hasattr(financials, "funding_confidence") and financials.funding_confidence:
-        company.signal_confidences["funding"] = confidence_level_to_weight(financials.funding_confidence)
+        set_if_missing("funding", confidence_level_to_weight(financials.funding_confidence))
+        set_if_missing("funding_raised", confidence_level_to_weight(financials.funding_confidence))
 
     if hasattr(financials, "margin_confidence") and financials.margin_confidence:
-        company.signal_confidences["profitability"] = confidence_level_to_weight(financials.margin_confidence)
+        set_if_missing("profitability", confidence_level_to_weight(financials.margin_confidence))
+        set_if_missing("profit_margin", confidence_level_to_weight(financials.margin_confidence))
 
     if hasattr(financials, "employees_confidence") and financials.employees_confidence:
-        company.signal_confidences["company_size"] = confidence_level_to_weight(financials.employees_confidence)
+        set_if_missing("company_size", confidence_level_to_weight(financials.employees_confidence))
+        set_if_missing("employees", confidence_level_to_weight(financials.employees_confidence))
 
     if hasattr(financials, "ai_maturity") and financials.ai_maturity:
-        company.signal_confidences["ai_maturity"] = 0.7  # Default to estimated
+        set_if_missing("ai_maturity", 0.7)  # Default to estimated
 
     return company

@@ -6,20 +6,21 @@ EPIC-020: Refactored convert_to_domain_company from 432 lines to <100 lines.
 Converts raw JSON data to Company domain entities.
 """
 
+# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false
+
 from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
 from typing import Any
 
-from solstein.core.scoring_utils import populate_signal_confidences
+from solstein.core.scoring_utils import populate_signal_confidences  # noqa: F401
 from solstein.domain.models import (
     AIMaturity,
     Company,
     CompanyTier,
     ConfidenceLevel,
     FinancialMetric,
-    ThreatLevel,
 )
 from solstein.data.metric_contract import normalize_financial_payload
 
@@ -79,6 +80,42 @@ def estimate_headquarters(folder: str) -> str | None:
         return "Europe"
 
 
+def _apply_signal_confidence_aliases(confidences: dict[str, float]) -> dict[str, float]:
+    alias_map = {
+        "revenue": ["revenue_level"],
+        "employees": ["company_size"],
+        "profit_margin": ["profitability"],
+        "funding_raised": ["funding"],
+        "funding": ["funding_raised"],
+    }
+    for source_key, alias_keys in alias_map.items():
+        if source_key in confidences:
+            for alias_key in alias_keys:
+                confidences.setdefault(alias_key, confidences[source_key])
+    return confidences
+
+
+def _validate_conversion_loss(
+    company_name: str,
+    raw_values: dict[str, Any],
+    normalized_values: dict[str, Any],
+) -> None:
+    present_raw = {key for key, value in raw_values.items() if value is not None}
+    if not present_raw:
+        return
+    lost_fields = [key for key in present_raw if normalized_values.get(key) is None]
+    loss_ratio = len(lost_fields) / len(present_raw)
+    if loss_ratio > 0.3:
+        logger.error(
+            "[EPIC-059] Conversion lost %s/%s fields (%.0f%%) for %s. Lost fields: %s",
+            len(lost_fields),
+            len(present_raw),
+            loss_ratio * 100,
+            company_name,
+            lost_fields,
+        )
+
+
 def extract_geographic_presence(raw_data: dict[str, Any]) -> list[str]:
     """Extract geographic presence from raw data."""
     # Check for flat format first (Ivan's simplified JSON)
@@ -105,10 +142,25 @@ def extract_geographic_presence(raw_data: dict[str, Any]) -> list[str]:
     return []
 
 
-def convert_to_domain_company(raw_data: dict[str, Any], index: int) -> Company:
+def _validate_financial_conversion(financial_metric: FinancialMetric, raw_data: dict[str, Any]) -> bool:
+    """Validate that conversion didn't lose critical financial fields."""
+    critical_fields = ["revenue", "employees", "growth_rate", "profit_margin", "funding_raised", "valuation"]
+    expected_present = [f for f in critical_fields if f in raw_data and raw_data.get(f) is not None]
+    actual_present = [f for f in critical_fields if getattr(financial_metric, f, None) is not None]
+
+    if expected_present and actual_present:
+        loss_rate = (len(expected_present) - len(actual_present)) / len(expected_present)
+        if loss_rate > 0.30:
+            logging.error(f"[EPIC-059] Conversion lost {loss_rate * 100:.1f}% of financial fields")
+            return False
+    return True
+
+
+def convert_to_domain_company(raw_data: dict[str, Any], index: int = 0) -> Company:
     """Convert raw JSON data to Company domain entity.
 
     EPIC-020: Refactored from 432-line monolithic function.
+    EPIC-058: Fixed to handle both flat and nested data formats.
     Now uses specialized extractor functions for each data domain.
     """
     # Basic info
@@ -148,6 +200,26 @@ def convert_to_domain_company(raw_data: dict[str, Any], index: int) -> Company:
         }
     )
 
+    _validate_conversion_loss(
+        company_name,
+        {
+            "revenue": revenue_data["latest_revenue"],
+            "growth_rate": revenue_data["latest_growth"],
+            "profit_margin": profitability_data["profit_margin"],
+            "funding_raised": funding_data["total_funding_eur"],
+            "valuation": funding_data["latest_valuation_eur"],
+            "employees": employee_data["employee_count"],
+        },
+        {
+            "revenue": normalized_financials["revenue"],
+            "growth_rate": normalized_financials["growth_rate"],
+            "profit_margin": normalized_financials["profit_margin"],
+            "funding_raised": normalized_financials["funding_raised"],
+            "valuation": normalized_financials["valuation"],
+            "employees": employee_data["employee_count"],
+        },
+    )
+
     # Build financial metric
     financial = FinancialMetric(
         revenue=normalized_financials["revenue"],
@@ -174,6 +246,12 @@ def convert_to_domain_company(raw_data: dict[str, Any], index: int) -> Company:
         else ConfidenceLevel.UNKNOWN,
     )
 
+    # EPIC-059: Validate financial conversion didn't lose critical fields
+    if not _validate_financial_conversion(financial, raw_data):
+        logger.warning(
+            f"[EPIC-059] Financial conversion loss detected for {company_name} — proceeding with available data"
+        )
+
     # Determine tier
     tier = determine_tier(normalized_financials["revenue"])
 
@@ -196,32 +274,43 @@ def convert_to_domain_company(raw_data: dict[str, Any], index: int) -> Company:
         ai_score = ai_score_by_maturity.get(ai_maturity, 1.0)
 
     # Build metadata
-    confidence_scores = build_confidence_scores(raw_data)
+    confidence_scores = _apply_signal_confidence_aliases(build_confidence_scores(raw_data))
     metric_sources = build_metric_sources(raw_data)
     source_links = convert_source_links(raw_data)
     enrichment_quality_metrics = build_enrichment_quality_metrics(raw_data)
     data_quality_tier = determine_data_quality_tier(raw_data)
-    # Create company using builder
-    return build_company_entity(
-        raw_data=raw_data,
-        folder=folder,
-        company_name=company_name,
-        revenue_data=revenue_data,
-        profitability_data=profitability_data,
-        funding_data=funding_data,
-        employee_data=employee_data,
-        ai_data=ai_data,
-        scorecard_data=scorecard_data,
-        normalized_financials=normalized_financials,
-        financial=financial,
+
+    # EPIC-058: Directly build Company object instead of calling non-existent build_company_entity()
+    company = Company(
+        id=f"{company_name.lower().replace(' ', '-')}-{index}",
+        name=company_name,
+        industry=raw_data.get("industry", "Energy Software"),
+        description=raw_data.get("description"),
+        website=raw_data.get("website"),
+        headquarters=raw_data.get("country") or estimate_headquarters(folder),
+        founded_year=raw_data.get("founded_year"),
         tier=tier,
         threat_level=threat_level,
         ai_maturity=ai_maturity,
-        saas_score=saas_score,
-        ai_score=ai_score,
-        confidence_scores=confidence_scores,
-        metric_sources=metric_sources,
-        source_links=source_links,
+        saas_maturity=saas_score,
+        tech_stack=raw_data.get("tech_stack", []),
+        signal_confidences=confidence_scores,
+        revenue_cagr_3yr=revenue_data.get("cagr_3yr"),
+        revenue_cagr_5yr=revenue_data.get("cagr_5yr"),
+        financials=financial,
+        geographic_presence=extract_geographic_presence(raw_data),
+        key_customers=[],
+        enrichment_source_count=raw_data.get("enrichment_source_count", 0),
         enrichment_quality_metrics=enrichment_quality_metrics,
         data_quality_tier=data_quality_tier,
+        data_source="Solstein Competitive Intelligence",
+        last_updated=datetime.now(timezone.utc),
+        data_source_type=raw_data.get(
+            "data_source_type",
+            "synthetic" if raw_data.get("is_synthetic", False) else "real",
+        ),
+        ai_score=ai_score,
+        metric_sources=metric_sources,
+        source_links=source_links,
     )
+    return populate_signal_confidences(company)

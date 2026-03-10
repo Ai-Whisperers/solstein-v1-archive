@@ -102,9 +102,9 @@ def test_calculate_scores_returns_same_company_object(scorer):
     "growth_rate,expected_min,expected_max",
     [
         (0.0, -0.01, 0.01),  # base(0) + growth(0) + stagnant_penalty(-0.75) → clamped to 0.0
-        (20.0, 0.9, 1.1),    # base(0) + 20/20=1.0 = 1.0
-        (45.0, 2.2, 2.3),    # base(0) + 2.25 = 2.25 (no margin, no funding)
-        (400.0, 6.4, 6.6),   # base(0) + cap(4.0) + hyper_growth(≥50%→+2.5) = 6.5
+        (20.0, 0.9, 1.1),  # base(0) + 20/20=1.0 = 1.0
+        (45.0, 2.2, 2.3),  # base(0) + 2.25 = 2.25 (no margin, no funding)
+        (400.0, 6.4, 6.6),  # base(0) + cap(4.0) + hyper_growth(≥50%→+2.5) = 6.5
         (-10.0, -0.01, 0.01),  # base(0) + (-0.5) + compound(-1.0) → clamped to 0.0
         (
             -40.0,
@@ -116,7 +116,7 @@ def test_calculate_scores_returns_same_company_object(scorer):
 def test_growth_score_ranges(scorer, growth_rate, expected_min, expected_max):
     """Growth score stays within predicted range for each zone (bare company, no extras)."""
     # Use bare Company (no tech_stack, no geo, no margin) to isolate growth_rate effect
-    company = Company(id="xxx", name="X", financials=FinancialMetric(growth_rate=growth_rate))
+    company = Company(id="xxx", name="X", financials=FinancialMetric(growth_rate=growth_rate, employees=1))
     scored = scorer.calculate_scores(company)
     assert expected_min <= scored.growth_score <= expected_max, (
         f"growth_rate={growth_rate}: expected [{expected_min}, {expected_max}], got {scored.growth_score}"
@@ -125,14 +125,14 @@ def test_growth_score_ranges(scorer, growth_rate, expected_min, expected_max):
 
 def test_growth_score_always_clamped_to_10(scorer):
     """Extreme growth_rate must never produce a score > 10.0."""
-    company = make_company(financials=FinancialMetric(growth_rate=10_000.0))
+    company = make_company(financials=FinancialMetric(growth_rate=10_000.0, employees=1))
     scored = scorer.calculate_scores(company)
     assert scored.growth_score <= 10.0
 
 
 def test_growth_score_never_below_zero(scorer):
     """Extreme negative growth_rate must never produce a score < 0.0."""
-    company = make_company(financials=FinancialMetric(growth_rate=-10_000.0))
+    company = make_company(financials=FinancialMetric(growth_rate=-10_000.0, employees=1))
     scored = scorer.calculate_scores(company)
     assert scored.growth_score >= 0.0
 
@@ -192,7 +192,7 @@ def test_custom_scoring_config_is_respected():
     custom_config.growth.revenue_growth_divisor = 40.0  # was 20.0
     custom_scorer = GrowthScorer(config=custom_config)
 
-    company = make_company(financials=FinancialMetric(growth_rate=40.0))
+    company = make_company(financials=FinancialMetric(growth_rate=40.0, employees=1))
 
     default_scored = default_scorer.calculate_scores(company)
     default_score = default_scored.growth_score

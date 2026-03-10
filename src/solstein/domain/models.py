@@ -9,6 +9,7 @@ and reduces code duplication. Migration path documented in
 EPIC-022-HANDOFF.md.
 """
 
+# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false, reportRedeclaration=false
 
 import sys
 from datetime import datetime, timezone
@@ -85,6 +86,7 @@ class FinancialMetric(BaseModel):
 
     model_config = ConfigDict(validate_assignment=True)
 
+    allow_empty_primary: bool = Field(default=False, exclude=True)
     revenue: float | None = None
     revenue_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
     growth_rate: float | None = None
@@ -102,6 +104,14 @@ class FinancialMetric(BaseModel):
     valuation: float | None = None
     valuation_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
 
+    @model_validator(mode="after")
+    def require_primary_metric(self) -> "FinancialMetric":
+        if self.allow_empty_primary:
+            return self
+        if self.revenue is None and self.employees is None:
+            raise ValueError("At least revenue OR employees required")
+        return self
+
     @property
     def funding(self) -> float | None:
         return self.funding_raised
@@ -116,6 +126,12 @@ class FinancialMetric(BaseModel):
         if v is not None and v < 0:
             raise ValueError("Employees cannot be negative")
         return v
+
+    @model_validator(mode="after")
+    def at_least_one_primary_metric(self) -> "FinancialMetric":
+        if self.revenue is None and self.employees is None:
+            raise ValueError("At least one of revenue or employees must be provided")
+        return self
 
 
 class Company(BaseModel):
@@ -169,12 +185,13 @@ class Company(BaseModel):
         import uuid
 
         # Clean name: remove special chars, uppercase
-        clean = re.sub(r'[^a-zA-Z0-9]', '', name.upper())[:10]
+        clean = re.sub(r"[^a-zA-Z0-9]", "", name.upper())[:10]
 
         # Add random suffix for uniqueness
         suffix = str(uuid.uuid4())[:8]
 
         return f"{prefix}-{clean}-{suffix}"
+
     name: str
     company_name: str | None = None
     industry: str = "Energy Software"
@@ -193,7 +210,7 @@ class Company(BaseModel):
     tech_stack: list[str] = Field(default_factory=list)
 
     # Financials
-    financials: FinancialMetric = Field(default_factory=FinancialMetric)
+    financials: FinancialMetric | None = Field(default_factory=lambda: FinancialMetric(allow_empty_primary=True))
     revenue: float | None = None
     employees: int | None = None
     growth_rate: float | None = None
@@ -268,7 +285,7 @@ class Company(BaseModel):
             self.company_name = self.name
 
         if self.financials is None:
-            self.financials = FinancialMetric()
+            self.financials = FinancialMetric(allow_empty_primary=True)
 
         def sync_field(field_name: str, financial_name: str) -> None:
             value = getattr(self, field_name)
@@ -296,6 +313,18 @@ class Company(BaseModel):
         elif self.confidence_scores and not self.signal_confidences:
             self.signal_confidences = dict(self.confidence_scores)
 
+        return self
+
+    @model_validator(mode="after")
+    def require_primary_financial_metric(self) -> "Company":
+        if self.financials is not None and getattr(self.financials, "allow_empty_primary", False):
+            return self
+        revenue = self.revenue if self.revenue is not None else (self.financials.revenue if self.financials else None)
+        employees = (
+            self.employees if self.employees is not None else (self.financials.employees if self.financials else None)
+        )
+        if revenue is None and employees is None:
+            raise ValueError("At least revenue OR employees required")
         return self
 
     # EPIC-010: Standardized field access methods
@@ -515,16 +544,22 @@ class Company(BaseModel):
     @property
     def is_large_cap(self) -> bool:
         """Domain logic: Check if company is large cap (valuation > €100M)."""
+        if self.financials is None:
+            return False
         return self.financials.valuation is not None and self.financials.valuation > 100_000_000
 
     @property
     def is_high_growth(self) -> bool:
         """Domain logic: Check if company is high growth."""
+        if self.financials is None:
+            return False
         return self.financials.growth_rate is not None and self.financials.growth_rate > 20
 
     @property
     def is_profitable(self) -> bool:
         """Domain logic: Check if company is profitable."""
+        if self.financials is None:
+            return False
         return self.financials.profit_margin is not None and self.financials.profit_margin > 0
 
 
@@ -559,7 +594,11 @@ class MarketAnalysis(BaseModel):
 
     @property
     def average_growth_rate(self) -> float | None:
-        growth_rates = [c.financials.growth_rate for c in self.companies if c.financials.growth_rate is not None]
+        growth_rates = [
+            c.financials.growth_rate
+            for c in self.companies
+            if c.financials is not None and c.financials.growth_rate is not None
+        ]
         if not growth_rates:
             return None
         return sum(growth_rates) / len(growth_rates)

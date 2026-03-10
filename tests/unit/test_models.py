@@ -39,7 +39,7 @@ class TestFinancialMetric:
 
     def test_all_fields_default_to_none(self):
         """FinancialMetric fields are all optional — defaults should be None."""
-        metric = FinancialMetric()
+        metric = FinancialMetric(allow_empty_primary=True)
         assert metric.revenue is None
         assert metric.growth_rate is None
         assert metric.profit_margin is None
@@ -123,17 +123,17 @@ class TestCompany:
 
     def test_is_high_growth_false_when_growth_rate_none(self):
         """is_high_growth must return False when growth_rate is None."""
-        profile = Company(id="x", name="X", financials=FinancialMetric(growth_rate=None))
+        profile = Company(id="x", name="X", financials=FinancialMetric(growth_rate=None, employees=1))
         assert profile.is_high_growth is False
 
     def test_is_high_growth_false_at_exactly_20(self):
         """is_high_growth boundary: growth_rate=20.0 is NOT high growth (must be > 20)."""
-        profile = Company(id="x", name="X", financials=FinancialMetric(growth_rate=20.0))
+        profile = Company(id="x", name="X", financials=FinancialMetric(growth_rate=20.0, employees=1))
         assert profile.is_high_growth is False
 
     def test_is_high_growth_true_above_20(self):
         """is_high_growth must return True only when growth_rate > 20."""
-        profile = Company(id="x", name="X", financials=FinancialMetric(growth_rate=20.1))
+        profile = Company(id="x", name="X", financials=FinancialMetric(growth_rate=20.1, employees=1))
         assert profile.is_high_growth is True
 
     def test_is_profitable_false_when_profit_margin_none(self):
@@ -162,14 +162,16 @@ class TestCompany:
         assert profile.tech_stack == []
 
     def test_company_with_no_employees_is_valid(self):
-        """Company with no employee data is valid."""
-        profile = Company(id="x", name="X", financials=FinancialMetric(employees=None))
+        profile = Company(id="x", name="X", financials=FinancialMetric(revenue=10.0))
         assert profile.financials.employees is None
 
     def test_company_with_no_revenue_is_valid(self):
-        """Company with no revenue data is valid."""
-        profile = Company(id="x", name="X", financials=FinancialMetric(revenue=None))
+        profile = Company(id="x", name="X", financials=FinancialMetric(employees=10))
         assert profile.financials.revenue is None
+
+    def test_company_requires_revenue_or_employees(self):
+        with pytest.raises(ValueError, match="revenue OR employees"):
+            Company(id="x", name="X", financials=FinancialMetric(allow_empty_primary=False))
 
     def test_scores_default_to_none(self):
         """Unscored company has None scores."""
@@ -216,8 +218,8 @@ class TestMarketAnalysis:
     def test_create_market_analysis(self):
         """Test creating a MarketAnalysis."""
         companies = [
-            Company(id="co1", name="Co1", financials=FinancialMetric(growth_rate=20.0)),
-            Company(id="co2", name="Co2", financials=FinancialMetric(growth_rate=10.0)),
+            Company(id="co1", name="Co1", financials=FinancialMetric(growth_rate=20.0, employees=1)),
+            Company(id="co2", name="Co2", financials=FinancialMetric(growth_rate=10.0, employees=1)),
         ]
         analysis = MarketAnalysis(
             market_name="Tech",
@@ -239,15 +241,15 @@ class TestMarketAnalysis:
     def test_average_growth_rate_property(self):
         """average_growth_rate computes correctly."""
         companies = [
-            Company(id="co1", name="Co1", financials=FinancialMetric(growth_rate=20.0)),
-            Company(id="co2", name="Co2", financials=FinancialMetric(growth_rate=10.0)),
+            Company(id="co1", name="Co1", financials=FinancialMetric(growth_rate=20.0, employees=1)),
+            Company(id="co2", name="Co2", financials=FinancialMetric(growth_rate=10.0, employees=1)),
         ]
         analysis = MarketAnalysis(market_name="Tech", companies=companies)
         assert analysis.average_growth_rate == pytest.approx(15.0)
 
     def test_average_growth_rate_none_when_no_data(self):
         """average_growth_rate returns None when no companies have growth data."""
-        companies = [Company(id="co1", name="Co1", financials=FinancialMetric(growth_rate=None))]
+        companies = [Company(id="co1", name="Co1", financials=FinancialMetric(growth_rate=None, employees=1))]
         analysis = MarketAnalysis(market_name="Tech", companies=companies)
         assert analysis.average_growth_rate is None
 

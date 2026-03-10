@@ -6,7 +6,11 @@ Provides comprehensive test fixtures for different company scenarios.
 import pytest
 from datetime import datetime
 from solstein.domain.models import (
-    Company, FinancialMetric, CompanyTier, AIMaturity, CompanyClassification,
+    Company,
+    FinancialMetric,
+    CompanyTier,
+    AIMaturity,
+    CompanyClassification,
 )
 
 
@@ -160,7 +164,7 @@ def missing_data_company() -> Company:
         tier=CompanyTier.TIER_3,
         ai_maturity=AIMaturity.UNKNOWN,
         saas_maturity=1,
-        financials=FinancialMetric(),
+        financials=FinancialMetric(allow_empty_primary=True),
         founded_year=None,
         headquarters=None,
         website=None,

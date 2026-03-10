@@ -16,7 +16,7 @@ from solstein.domain.models import (
 
 
 def make_company(**kwargs):
-    fin = FinancialMetric()
+    fin = FinancialMetric(allow_empty_primary=True)
     base = {
         "id": "c1",
         "name": "C1",
@@ -63,7 +63,7 @@ def test_growth_scorer_growth_score_employee_efficiency():
 def test_growth_scorer_growth_score_funding():
     scorer = GrowthScorer()
     # High funding
-    fin = FinancialMetric(funding_raised=60_000_000.0)
+    fin = FinancialMetric(funding_raised=60_000_000.0, employees=1)
     company = make_company(financials=fin)
     scorer.calculate_scores(company)
 
@@ -139,10 +139,10 @@ def test_market_analyzer_growth_metrics():
     assert analyzer._calculate_growth_metrics([make_company()])["average"] == 0.0
 
     # Even count for median, some high growth, some declining
-    c1 = make_company(financials=FinancialMetric(growth_rate=30.0))
-    c2 = make_company(financials=FinancialMetric(growth_rate=-10.0))
-    c3 = make_company(financials=FinancialMetric(growth_rate=10.0))
-    c4 = make_company(financials=FinancialMetric(growth_rate=5.0))
+    c1 = make_company(financials=FinancialMetric(growth_rate=30.0, employees=1))
+    c2 = make_company(financials=FinancialMetric(growth_rate=-10.0, employees=1))
+    c3 = make_company(financials=FinancialMetric(growth_rate=10.0, employees=1))
+    c4 = make_company(financials=FinancialMetric(growth_rate=5.0, employees=1))
 
     metrics = analyzer._calculate_growth_metrics([c1, c2, c3, c4])
     # sorted: -10, 5, 10, 30. Median of 5 and 10 is 7.5

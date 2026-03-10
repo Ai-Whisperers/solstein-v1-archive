@@ -124,7 +124,7 @@ class TestFinancialHealthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -188,7 +188,7 @@ class TestFinancialHealthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -228,7 +228,7 @@ class TestFinancialHealthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -250,7 +250,7 @@ class TestFinancialHealthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -282,7 +282,7 @@ class TestFinancialHealthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -314,7 +314,7 @@ class TestFinancialHealthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
@@ -338,7 +338,7 @@ class TestFinancialHealthScorerWithFacts:
         ]
         mock_fact_repo.get_company_facts.return_value = facts
 
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 

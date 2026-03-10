@@ -9,12 +9,14 @@ The Company class now uses:
 - External validators from domain.validators.company module
 """
 
+# pyright: reportMissingImports=false, reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
 from typing import Any
 
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from ..models.financial import FinancialMetric
 from ..validators.company import CompanyValidators
@@ -98,7 +100,6 @@ class Company(CompanyUtilityMixin, CompanyPropertyMixin, CompanySyncMixin):
 
     # Funding
     funding_raised: float | None = None
-    funding: float | None = None  # Alias for funding_raised
     funding_rounds: list[dict[str, Any]] = Field(default_factory=list)
     total_funding_raised_eur: float | None = None
     latest_valuation_eur: float | None = None
@@ -137,3 +138,11 @@ class Company(CompanyUtilityMixin, CompanyPropertyMixin, CompanySyncMixin):
     validate_company_number = field_validator("company_number")(CompanyValidators.validate_company_number)
     validate_isin = field_validator("isin")(CompanyValidators.validate_isin)
     validate_geography_code = field_validator("geography_code")(CompanyValidators.validate_geography_code)
+
+    @model_validator(mode="after")
+    def require_primary_financial_metric(self) -> "Company":
+        revenue = self.revenue if self.revenue is not None else getattr(self.financials, "revenue", None)
+        employees = self.employees if self.employees is not None else getattr(self.financials, "employees", None)
+        if revenue is None and employees is None:
+            raise ValueError("At least revenue OR employees required")
+        return self

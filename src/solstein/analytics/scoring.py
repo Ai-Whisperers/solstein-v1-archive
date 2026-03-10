@@ -36,15 +36,15 @@ from .scorers.growth_momentum import GrowthMomentumScorer
 
 _COMPONENT_SIGNAL_MAP: dict[str, list[str]] = {
     "Revenue Growth": ["growth_rate"],
-    "Employee Efficiency": ["revenue_level", "company_size"],
-    "Funding Momentum": ["funding"],
-    "Profitability Profile": ["profitability"],
-    "Revenue Scale": ["revenue_level"],
-    "Profitability Health": ["profitability"],
-    "Operating Efficiency": ["revenue_level", "company_size"],
-    "Funding Cushion": ["funding", "revenue_level"],
-    "Market Tier": ["company_size", "valuation"],
-    "AI Maturity": ["ai_maturity"],
+    "Employee Efficiency": ["revenue", "employees", "revenue_level", "company_size"],
+    "Funding Momentum": ["funding", "funding_raised"],
+    "Profitability Profile": ["profitability", "profit_margin"],
+    "Revenue Scale": ["revenue", "revenue_level"],
+    "Profitability Health": ["profitability", "profit_margin"],
+    "Operating Efficiency": ["revenue", "employees", "revenue_level", "company_size"],
+    "Funding Cushion": ["funding", "funding_raised", "revenue", "revenue_level"],
+    "Market Tier": ["company_size", "employees", "valuation"],
+    "AI Maturity": ["ai_maturity", "ai_score"],
     "SaaS Maturity": [],
     "Geographic Footprint": [],
     "Stack Diversity": [],
@@ -154,9 +154,30 @@ class GrowthScorer:
 
         profile.scoring_breakdown = {}
 
-        growth_score, growth_expl = self.growth_momentum_scorer.score(profile.financials)
-        financial_health_score, fin_expl = self.financial_health_scorer.score(profile.financials)
-        competitive_position_score, comp_expl = self.competitive_position_scorer.score(profile)
+        growth_base = self.config.growth.base_score or 0.0
+        financial_base = self.config.financial.base_score or 0.0
+        competitive_base = self.config.competitive.base_score or 0.0
+
+        try:
+            growth_score, growth_expl = self.growth_momentum_scorer.score(profile.financials)
+        except Exception as exc:
+            logger.warning(f"[EPIC-059] Growth scoring degraded for {profile.name}: {exc}")
+            growth_score = growth_base
+            growth_expl = ScoringExplanation(base_score=growth_base, final_score=growth_base)
+
+        try:
+            financial_health_score, fin_expl = self.financial_health_scorer.score(profile.financials)
+        except Exception as exc:
+            logger.warning(f"[EPIC-059] Financial scoring degraded for {profile.name}: {exc}")
+            financial_health_score = financial_base
+            fin_expl = ScoringExplanation(base_score=financial_base, final_score=financial_base)
+
+        try:
+            competitive_position_score, comp_expl = self.competitive_position_scorer.score(profile)
+        except Exception as exc:
+            logger.warning(f"[EPIC-059] Competitive scoring degraded for {profile.name}: {exc}")
+            competitive_position_score = competitive_base
+            comp_expl = ScoringExplanation(base_score=competitive_base, final_score=competitive_base)
 
         # Apply confidence weighting when signal confidences are available
         if profile.signal_confidences:

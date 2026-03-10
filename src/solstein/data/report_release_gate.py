@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Mapping, cast
+import json
 
 from loguru import logger
 
@@ -85,10 +86,14 @@ class GateReason:
 class ReportGateResult:
     passed: bool
     reasons: list[GateReason]
+    skipped: bool = False
+    warn_mode: bool = False
 
     def to_dict(self) -> dict[str, object]:
         return {
             "passed": self.passed,
+            "skipped": self.skipped,
+            "warn_mode": self.warn_mode,
             "reason_count": len(self.reasons),
             "reasons": [reason.to_dict() for reason in self.reasons],
         }
@@ -101,11 +106,15 @@ class ReportReleaseGate:
         min_completeness_score: float = 50.0,
         min_confidence: float = 0.5,
         allow_synthetic: bool = False,
+        warn_mode: bool = False,
+        skip_gate: bool = False,
     ) -> None:
         self.completeness: CompletenessCalculator = completeness or completeness_calculator
         self.min_completeness_score: float = min_completeness_score
         self.min_confidence: float = min_confidence
         self.allow_synthetic: bool = allow_synthetic
+        self.warn_mode: bool = warn_mode
+        self.skip_gate: bool = skip_gate
 
     def evaluate(
         self,
@@ -273,7 +282,17 @@ class ReportReleaseGate:
         blocking_codes = {reason.code for reason in reasons if reason.code != "adjudication_override"}
         passed = len(blocking_codes) == 0
         logger.info("Report release gate evaluated", passed=passed, reason_count=len(reasons))
-        return ReportGateResult(passed=passed, reasons=reasons)
+
+        if self.skip_gate:
+            logger.warning("Report release gate skipped", reason_count=len(reasons))
+            return ReportGateResult(passed=True, reasons=reasons, skipped=True, warn_mode=False)
+
+        if self.warn_mode and reasons:
+            for reason in reasons:
+                logger.warning(f"WARNING: {reason.code} - {reason.message}")
+            return ReportGateResult(passed=True, reasons=reasons, skipped=False, warn_mode=True)
+
+        return ReportGateResult(passed=passed, reasons=reasons, skipped=False, warn_mode=False)
 
     def ensure_release_ready(
         self,
@@ -294,3 +313,44 @@ class ReportReleaseGate:
         )
         if not result.passed:
             raise ValueError("Report release gate failed: " + "; ".join(reason.code for reason in result.reasons))
+
+
+def determine_quality_tier(result: ReportGateResult) -> str:
+    blocking_codes = {reason.code for reason in result.reasons if reason.code != "adjudication_override"}
+    if not blocking_codes:
+        return "gold"
+    if blocking_codes == {"completeness"}:
+        return "silver"
+    if len(blocking_codes) <= 2:
+        return "bronze"
+    return "warning"
+
+
+def calculate_completeness_score(
+    companies: list[Company],
+    completeness: CompletenessCalculator | None = None,
+) -> float:
+    calculator = completeness or completeness_calculator
+    if not companies:
+        return 0.0
+    scores = [calculator.calculate_completeness_score(company) for company in companies]
+    return round(sum(scores) / len(scores), 1)
+
+
+def build_export_metadata(
+    companies: list[Company],
+    result: ReportGateResult,
+    completeness: CompletenessCalculator | None = None,
+) -> dict[str, object]:
+    completeness_score = calculate_completeness_score(companies, completeness)
+    metadata: dict[str, object] = {
+        "gate_evaluation": result.to_dict(),
+        "data_quality_tier": determine_quality_tier(result),
+        "completeness_score": completeness_score,
+    }
+    try:
+        json.dumps(metadata)
+    except TypeError as exc:
+        logger.error(f"Failed to serialize export metadata: {exc}")
+        raise
+    return metadata

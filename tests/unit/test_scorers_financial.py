@@ -53,13 +53,13 @@ class TestFinancialHealthScorer:
 
     def test_high_profitability_bonus(self, scorer):
         """Test that high profit margin gets bonus."""
-        financials = FinancialMetric(profit_margin=25.0)
+        financials = FinancialMetric(profit_margin=25.0, employees=1)
         score, expl = scorer.score(financials)
         assert any(c.name == "Profitability Health" for c in expl.components)
 
     def test_negative_profitability_penalty(self, scorer):
         """Test that negative profit margin gets penalty."""
-        financials = FinancialMetric(profit_margin=-10.0)
+        financials = FinancialMetric(profit_margin=-10.0, employees=1)
         score, expl = scorer.score(financials)
         assert any(c.name == "Profitability Health" for c in expl.components)
 
@@ -119,6 +119,7 @@ class TestFinancialHealthScorer:
             profit_margin=None,
             employees=None,
             funding_raised=None,
+            allow_empty_primary=True,
         )
         score, _ = scorer.score(financials)
         assert 0.0 <= score <= 10.0
@@ -156,7 +157,7 @@ class TestFinancialHealthScorer:
         config = ScoringSettings()
         config.financial.base_score = 4.0
         scorer = FinancialHealthScorer(config)
-        financials = FinancialMetric()
+        financials = FinancialMetric(allow_empty_primary=True)
         _, expl = scorer.score(financials)
         assert expl.base_score == 4.0
 
