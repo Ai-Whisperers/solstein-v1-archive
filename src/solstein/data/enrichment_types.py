@@ -14,3 +14,7 @@ class EnrichableCompany(Protocol):
     metric_justifications: dict[str, str]
     enrichment_sources: list[str]
     enrichment_timestamps: dict[str, object]
+    data_source_type: str  # 'synthetic', 'real', 'mixed', 'unknown'
+    metric_justifications: dict[str, str]
+    enrichment_sources: list[str]
+    enrichment_timestamps: dict[str, object]

@@ -51,6 +51,7 @@ class ResearchResult:
     confidence: float = 0.0
     last_updated: datetime = field(default_factory=datetime.now)
     raw_data: dict[str, Any] = field(default_factory=dict)
+    data_source_type: str = "unknown"  # 'synthetic', 'real', 'mixed', 'unknown'
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary format."""
@@ -81,6 +82,7 @@ class ResearchResult:
             "confidence": self.confidence,
             "last_updated": self.last_updated.isoformat(),
             "is_synthetic": False,  # Explicitly mark as real data
+            "data_source_type": "real",  # Track data source for transparency
         }
 
 
