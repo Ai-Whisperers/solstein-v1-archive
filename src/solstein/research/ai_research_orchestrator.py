@@ -342,9 +342,73 @@ class ContentExtractorAgent:
 
     async def _fetch_page(self, url: str) -> str:
         headers = {"User-Agent": "Mozilla/5.0 (compatible; SolsteinResearchBot/1.0)"}
-        response = await self.http.get(url, headers=headers)
-        response.raise_for_status()
-        return response.text
+        primary_error: Exception | None = None
+
+        try:
+            response = await self.http.get(url, headers=headers)
+            response.raise_for_status()
+            text = response.text
+            content_type = (response.headers.get("content-type") or "").lower()
+            if self._is_usable_content(text, content_type):
+                return text
+        except Exception as error:
+            primary_error = error
+
+        reader_url = self._reader_url(url)
+        try:
+            response = await self.http.get(reader_url, headers=headers)
+            response.raise_for_status()
+            text = response.text
+            if text:
+                return text
+        except Exception as fallback_error:
+            if primary_error is not None:
+                raise primary_error from fallback_error
+            raise
+
+        if primary_error is not None:
+            raise primary_error
+        raise ValueError(f"Unable to fetch usable content from {url}")
+
+    @staticmethod
+    def _reader_url(url: str) -> str:
+        return f"https://r.jina.ai/{url.strip()}"
+
+    @staticmethod
+    def _looks_blocked_page(text: str) -> bool:
+        lower = text.lower()
+        blocked_markers = [
+            "enable javascript",
+            "access denied",
+            "are you a human",
+            "captcha",
+            "bot detection",
+            "cloudflare",
+            "forbidden",
+            "please sign in",
+            "login required",
+        ]
+        return any(marker in lower for marker in blocked_markers)
+
+    @staticmethod
+    def _visible_text_length(text: str) -> int:
+        try:
+            soup = BeautifulSoup(text, "html.parser")
+            visible = soup.get_text(" ", strip=True)
+            if visible:
+                return len(visible)
+        except Exception:
+            pass
+        return len(" ".join(text.split()))
+
+    def _is_usable_content(self, text: str, content_type: str) -> bool:
+        if not text:
+            return False
+        if "application/pdf" in content_type:
+            return False
+        if self._looks_blocked_page(text):
+            return False
+        return len(text) >= 300 and self._visible_text_length(text) >= 120
 
     def _clean_html(self, html: str) -> str:
         soup = BeautifulSoup(html, "html.parser")
@@ -522,6 +586,29 @@ class AIResearchOrchestrator:
         "funding_rounds",
     ]
 
+    ADAPTIVE_QUERY_BY_FIELD = {
+        "website": ["{company} official website", "{company} contact us"],
+        "description": ["{company} company overview", "{company} about us"],
+        "industry": ["{company} business model", "{company} services"],
+        "headquarters": ["{company} headquarters location", "{company} address"],
+        "founded_year": ["{company} founded year", "{company} company history"],
+        "employees": ["{company} employee count", "{company} headcount"],
+        "revenue": ["{company} annual report pdf", "{company} revenue 2025"],
+        "revenue_currency": ["{company} revenue currency", "{company} annual report"],
+        "valuation": ["{company} valuation", "{company} market cap"],
+        "funding_raised": ["{company} funding rounds", "{company} raised capital"],
+        "funding_rounds": ["{company} series funding", "{company} investors"],
+    }
+
+    VOLATILE_FIELDS = {
+        "employees",
+        "revenue",
+        "revenue_currency",
+        "valuation",
+        "funding_raised",
+        "funding_rounds",
+    }
+
     def __init__(self) -> None:
         self.planner = ResearchPlannerAgent()
         self.searcher = WebSearchAgent()
@@ -614,6 +701,19 @@ class AIResearchOrchestrator:
             filled += 1
         return filled / len(fields)
 
+    @staticmethod
+    def _is_report_stale(report_dict: dict[str, Any], max_age_hours: int = 24 * 7) -> bool:
+        metadata = report_dict.get("metadata", {}) if isinstance(report_dict.get("metadata"), dict) else {}
+        research_date = metadata.get("research_date")
+        if not isinstance(research_date, str) or not research_date:
+            return True
+        try:
+            ts = datetime.fromisoformat(research_date.replace("Z", "+00:00"))
+        except Exception:
+            return True
+        age_seconds = (datetime.now(ts.tzinfo) - ts).total_seconds()
+        return age_seconds > (max_age_hours * 3600)
+
     def _previous_report(self, company_name: str) -> dict[str, Any] | None:
         company_key = self._company_key(company_name)
         company_entry = self._memory.get("companies", {}).get(company_key, {})
@@ -653,6 +753,7 @@ class AIResearchOrchestrator:
             return current, 0
 
         previous_fields = self._flatten_report_fields(previous)
+        previous_is_stale = self._is_report_stale(previous, max_age_hours=24 * 30)
         merged_fields = self._flatten_report_fields(
             {
                 "basic_info": current.basic_info,
@@ -664,6 +765,8 @@ class AIResearchOrchestrator:
         carry_forward_count = 0
         for field_name in self.TARGET_FIELDS:
             if merged_fields.get(field_name) in (None, "", [], {}):
+                if previous_is_stale and field_name in self.VOLATILE_FIELDS:
+                    continue
                 previous_value = previous_fields.get(field_name)
                 if previous_value not in (None, "", [], {}):
                     merged_fields[field_name] = previous_value
@@ -733,6 +836,52 @@ class AIResearchOrchestrator:
         entry["updated_at"] = datetime.now().isoformat()
         self._save_memory()
 
+    def _missing_fields(self, final_data: dict[str, Any]) -> list[str]:
+        missing: list[str] = []
+        for field_name in self.TARGET_FIELDS:
+            value = final_data.get(field_name)
+            if value in (None, "", [], {}):
+                missing.append(field_name)
+        return missing
+
+    def _build_adaptive_queries(self, company_name: str, missing_fields: list[str], max_queries: int = 6) -> list[dict[str, str]]:
+        seen: set[str] = set()
+        queries: list[dict[str, str]] = []
+        for field_name in missing_fields:
+            templates = self.ADAPTIVE_QUERY_BY_FIELD.get(field_name, [])
+            for template in templates:
+                query = template.format(company=company_name)
+                if query in seen:
+                    continue
+                seen.add(query)
+                intent = "financials" if field_name in {"revenue", "revenue_currency", "valuation"} else "funding"
+                if field_name in {"website", "description", "industry", "headquarters", "founded_year", "employees"}:
+                    intent = "website"
+                queries.append({"query": query, "intent": intent})
+                if len(queries) >= max_queries:
+                    return queries
+        return queries
+
+    async def _extract_and_validate(self, company_name: str, results: list[SearchResult]) -> list[dict[str, Any]]:
+        validated_data: list[dict[str, Any]] = []
+        for result in results:
+            extracted = await self.extractor.extract(result.url, company_name)
+            if extracted.confidence <= 0.2:
+                await asyncio.sleep(0.2)
+                continue
+            validation = await self.validator.validate(extracted)
+            adjusted_confidence = max(0.0, min(1.0, extracted.confidence + validation.confidence_adjustment))
+            if adjusted_confidence > 0.3:
+                validated_data.append(
+                    {
+                        "extraction": extracted,
+                        "validation": validation,
+                        "confidence": adjusted_confidence,
+                    }
+                )
+            await asyncio.sleep(0.2)
+        return validated_data
+
     async def research_company(
         self, company_name: str, industry: str | None = None, max_sources: int = 8
     ) -> ResearchReport:
@@ -745,7 +894,8 @@ class AIResearchOrchestrator:
         if previous_report:
             previous_flat = self._flatten_report_fields(previous_report)
             completeness = self._score_completeness(previous_flat, self.TARGET_FIELDS)
-            if completeness >= 0.65:
+            report_is_stale = self._is_report_stale(previous_report, max_age_hours=24 * 7)
+            if completeness >= 0.65 and not report_is_stale:
                 report = ResearchReport(
                     company_name=company_name,
                     is_synthetic=bool(previous_report.get("is_synthetic", False)),
@@ -759,6 +909,7 @@ class AIResearchOrchestrator:
                         "research_date": datetime.now().isoformat(),
                         "cache_reuse": True,
                         "previous_completeness": round(completeness, 3),
+                        "previous_report_stale": report_is_stale,
                         "sources_reused": len(previous_urls),
                         "research_time_seconds": (datetime.now() - start_time).total_seconds(),
                     },
@@ -828,8 +979,65 @@ class AIResearchOrchestrator:
                         }
                     )
 
+            additional_pass_used = False
+            additional_queries_executed = 0
+            additional_sources_used = 0
+
+            initial_synthesized = self._synthesize_data(validated_data)
+            missing_before = self._missing_fields(initial_synthesized)
+            initial_completeness = self._score_completeness(initial_synthesized, self.TARGET_FIELDS)
+
+            if missing_before and initial_completeness < 0.8:
+                adaptive_queries = self._build_adaptive_queries(company_name, missing_before)
+                adaptive_results: list[SearchResult] = []
+                adaptive_seen = {r.url for r in unique_results}
+                adaptive_known: list[SearchResult] = []
+
+                for query_info in adaptive_queries:
+                    query = query_info["query"]
+                    intent = query_info["intent"]
+                    additional_queries_executed += 1
+                    results = await self.searcher.search(query, intent, max_results=5)
+                    for result in results:
+                        normalized_url = self._normalize_url(result.url) if result.url else ""
+                        if not normalized_url or normalized_url in adaptive_seen:
+                            continue
+                        adaptive_seen.add(normalized_url)
+                        normalized_result = SearchResult(
+                            title=result.title,
+                            url=normalized_url,
+                            snippet=result.snippet,
+                            source=result.source,
+                            relevance_score=result.relevance_score,
+                            intent_match=result.intent_match,
+                        )
+                        if normalized_url in previous_urls:
+                            adaptive_known.append(normalized_result)
+                        else:
+                            adaptive_results.append(normalized_result)
+                        if len(adaptive_results) >= 6:
+                            break
+                    if len(adaptive_results) >= 6:
+                        break
+                    await asyncio.sleep(0.3)
+
+                if len(adaptive_results) < 4:
+                    for result in adaptive_known:
+                        adaptive_results.append(result)
+                        if len(adaptive_results) >= 6:
+                            break
+
+                if adaptive_results:
+                    additional_validated = await self._extract_and_validate(company_name, adaptive_results)
+                    if additional_validated:
+                        validated_data.extend(additional_validated)
+                        unique_results.extend(adaptive_results)
+                        additional_sources_used = len(additional_validated)
+                        additional_pass_used = True
+
             final_data = self._synthesize_data(validated_data)
             revisited_count = len([r for r in unique_results if r.url in previous_urls])
+            missing_after = self._missing_fields(final_data)
             report = ResearchReport(
                 company_name=company_name,
                 is_synthetic=False,
@@ -866,6 +1074,11 @@ class AIResearchOrchestrator:
                     "sources_used": len(validated_data),
                     "known_sources_skipped": len(deferred_known) - revisited_count,
                     "known_sources_revisited": revisited_count,
+                    "adaptive_pass_used": additional_pass_used,
+                    "adaptive_queries_executed": additional_queries_executed,
+                    "adaptive_sources_used": additional_sources_used,
+                    "missing_fields_before_adaptive": missing_before,
+                    "missing_fields_after_adaptive": missing_after,
                     "research_time_seconds": (datetime.now() - start_time).total_seconds(),
                 },
             )
