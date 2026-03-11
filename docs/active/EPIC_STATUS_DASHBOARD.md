@@ -1,7 +1,7 @@
 # 📊 SOLSTEIN EPIC STATUS DASHBOARD
 
-> **Last Updated:** 2026-03-07  
-> **Source of Truth:** This document  
+> **Last Updated:** 2026-03-07
+> **Source of Truth:** This document
 > **Owner:** Engineering Team
 
 ---
@@ -86,6 +86,30 @@
 ## 🔴 PENDING EPICS (Core Business Logic)
 
 These EPICS are **critical for business value** but not started:
+
+### 🆕 NEW: Root Cause EPICs (P0 - Created 2026-03-11)
+
+**Based on ROOT_CAUSE_ANALYSIS.md** - These address fundamental system flaws.
+See `docs/active/epics/ROOT_CAUSE_EPICS_INDEX.md` for full details.
+
+| EPIC | Title | Priority | Business Impact | Effort |
+|------|-------|----------|-----------------|--------|
+| **EPIC-021** | Fix Confidence Scoring System | P0 | High confidence on fake data | 13 pts |
+| **EPIC-022** | Implement Data Validation Pipeline | P0 | Unit/currency mismatches | 13 pts |
+| **EPIC-023** | Fix Synthetic Data Detection | P0 | 98.5% fake data unflagged | 13 pts |
+| **EPIC-024** | Fix Financial Scoring Algorithm | P0 | ALL companies = 5.5 | 13 pts |
+| **EPIC-025** | Consolidate Documentation | P0 | False status claims | 8 pts |
+| **EPIC-026** | Architecture Realignment | P1 | Doc-implementation gap | 21 pts |
+
+**Total Root Cause EPICs: 81 points (~10-12 weeks)**
+
+**⚠️ NOTE:** These NEW EPICs supersede similar legacy EPICs below.
+The legacy EPICs (EPIC-001 through EPIC-010) are documented here for reference
+but should be considered superseded by the Root Cause EPICs above.
+
+---
+
+### Legacy EPICs (Reference Only - Superseded):
 
 | EPIC | Title | Priority | Business Impact | Effort |
 |------|-------|----------|-----------------|--------|
@@ -230,5 +254,5 @@ To achieve **Minimum Viable Product (MVP)**:
 
 ---
 
-*This dashboard is the single source of truth for EPIC status.*  
+*This dashboard is the single source of truth for EPIC status.*
 *Updates should be made here and reflected in individual EPIC documents.*
