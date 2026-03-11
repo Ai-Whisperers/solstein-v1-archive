@@ -1,0 +1,289 @@
+# European Energy Software Companies - 200 Companies
+# Format: Company Name | Country | Industry
+# Generated for Solstein Research Pipeline
+
+# UK Energy Software Companies
+Octopus Energy | UK | Energy Software
+Kraken Technologies | UK | Energy Software
+OVO Energy | UK | Energy Software
+Bulb Energy | UK | Energy Software
+Good Energy | UK | Energy Software
+Ecotricity | UK | Energy Software
+Green Energy UK | UK | Energy Software
+Utilita Energy | UK | Energy Software
+EON Next | UK | Energy Software
+Scottish Power | UK | Energy Software
+British Gas | UK | Energy Software
+EDF Energy | UK | Energy Software
+SSE Energy | UK | Energy Software
+Shell Energy | UK | Energy Software
+Tonik Energy | UK | Energy Software
+So Energy | UK | Energy Software
+Pure Planet | UK | Energy Software
+Igloo Energy | UK | Energy Software
+Outfox the Market | UK | Energy Software
+Yorkshire Energy | UK | Energy Software
+
+# German Energy Software Companies
+Siemens Energy | Germany | Energy Software
+E.ON | Germany | Energy Software
+RWE | Germany | Energy Software
+Innogy | Germany | Energy Software
+EnBW | Germany | Energy Software
+LEAG | Germany | Energy Software
+MVV Energie | Germany | Energy Software
+Stadtwerke München | Germany | Energy Software
+Hamburg Energie | Germany | Energy Software
+Vattenfall Germany | Germany | Energy Software
+Schneider Electric Germany | Germany | Energy Software
+Agora Energiewende | Germany | Energy Software
+Energy Web Foundation | Germany | Energy Software
+Kiwi Power | Germany | Energy Software
+Solarize | Germany | Energy Software
+Solytic | Germany | Energy Software
+Meteocontrol | Germany | Energy Software
+SMA Solar Technology | Germany | Energy Software
+Solarwatt | Germany | Energy Software
+Sunfire | Germany | Energy Software
+
+# French Energy Software Companies
+EDF | France | Energy Software
+Engie | France | Energy Software
+TotalEnergies | France | Energy Software
+Schneider Electric | France | Energy Software
+Veolia | France | Energy Software
+Suez | France | Energy Software
+Vinci Energies | France | Energy Software
+Bouygues Energies | France | Energy Software
+Actility | France | Energy Software
+Wattics | France | Energy Software
+Energy Pool | France | Energy Software
+RTE | France | Energy Software
+Enedis | France | Energy Software
+GRDF | France | Energy Software
+Electricite de Strasbourg | France | Energy Software
+Soregies | France | Energy Software
+Siemens Energy France | France | Energy Software
+GE Renewable Energy | France | Energy Software
+Alstom Energy | France | Energy Software
+Saft Batteries | France | Energy Software
+
+# Nordic Energy Software Companies
+Vattenfall | Sweden | Energy Software
+Statkraft | Norway | Energy Software
+Equinor | Norway | Energy Software
+Orsted | Denmark | Energy Software
+Fortum | Finland | Energy Software
+Neste | Finland | Energy Software
+SSAB | Sweden | Energy Software
+Svenska Kraftnät | Sweden | Energy Software
+Energinet | Denmark | Energy Software
+Fingrid | Finland | Energy Software
+Statnett | Norway | Energy Software
+Svensk Energi | Sweden | Energy Software
+Energiforsk | Sweden | Energy Software
+Volue | Norway | Energy Software
+Enoro | Norway | Energy Software
+Greensight | Denmark | Energy Software
+Monta | Denmark | Energy Software
+Spirii | Denmark | Energy Software
+Enevo | Finland | Energy Software
+Wirepas | Finland | Energy Software
+
+# Netherlands Energy Software Companies
+Eneco | Netherlands | Energy Software
+Essent | Netherlands | Energy Software
+Nuon | Netherlands | Energy Software
+Vandebron | Netherlands | Energy Software
+TenneT | Netherlands | Energy Software
+Stedin | Netherlands | Energy Software
+Liander | Netherlands | Energy Software
+Alliander | Netherlands | Energy Software
+Gasunie | Netherlands | Energy Software
+Energieopwek | Netherlands | Energy Software
+Flower Power | Netherlands | Energy Software
+Fudura | Netherlands | Energy Software
+The Green Choice | Netherlands | Energy Software
+Qurrent | Netherlands | Energy Software
+OM | Netherlands | Energy Software
+New Motion | Netherlands | Energy Software
+EVBox | Netherlands | Energy Software
+Alfen | Netherlands | Energy Software
+Fagne | Netherlands | Energy Software
+Spectral | Netherlands | Energy Software
+
+# Spain & Italy Energy Software Companies
+Iberdrola | Spain | Energy Software
+Endesa | Spain | Energy Software
+Acciona Energia | Spain | Energy Software
+EDP Spain | Spain | Energy Software
+Naturgy | Spain | Energy Software
+Red Electrica | Spain | Energy Software
+Enagas | Spain | Energy Software
+Siemens Gamesa | Spain | Energy Software
+Saica Natur | Spain | Energy Software
+Aqualogy | Spain | Energy Software
+Enel | Italy | Energy Software
+Terna | Italy | Energy Software
+Snam | Italy | Energy Software
+Hera Group | Italy | Energy Software
+A2A | Italy | Energy Software
+Iren | Italy | Energy Software
+Acegas | Italy | Energy Software
+Edison | Italy | Energy Software
+Energia | Italy | Energy Software
+Italgas | Italy | Energy Software
+
+# Switzerland & Austria Energy Software Companies
+Axpo | Switzerland | Energy Software
+BKW | Switzerland | Energy Software
+Alpiq | Switzerland | Energy Software
+Repower | Switzerland | Energy Software
+Romande Energie | Switzerland | Energy Software
+Energie 360 | Switzerland | Energy Software
+IWB | Switzerland | Energy Software
+EOS Holding | Switzerland | Energy Software
+Swissgrid | Switzerland | Energy Software
+Amstein Walthert | Switzerland | Energy Software
+Verbund | Austria | Energy Software
+EVN | Austria | Energy Software
+Wien Energie | Austria | Energy Software
+Energie AG | Austria | Energy Software
+Kelag | Austria | Energy Software
+Salzburg AG | Austria | Energy Software
+Tiroler Wasserkraft | Austria | Energy Software
+Vorarlberger Energienetze | Austria | Energy Software
+APCS | Austria | Energy Software
+Linz AG | Austria | Energy Software
+
+# Belgium & Ireland Energy Software Companies
+Elia | Belgium | Energy Software
+Fluxys | Belgium | Energy Software
+Engie Electrabel | Belgium | Energy Software
+Luminus | Belgium | Energy Software
+TotalEnergies Belgium | Belgium | Energy Software
+EDF Luminus | Belgium | Energy Software
+RESA | Belgium | Energy Software
+Ores | Belgium | Energy Software
+Sibelga | Belgium | Energy Software
+Gaselwest | Belgium | Energy Software
+ESB | Ireland | Energy Software
+SSE Airtricity | Ireland | Energy Software
+Electric Ireland | Ireland | Energy Software
+Bord Gais | Ireland | Energy Software
+Energia | Ireland | Energy Software
+Pinergy | Ireland | Energy Software
+Prepay Power | Ireland | Energy Software
+Iberdrola Ireland | Ireland | Energy Software
+Flogas | Ireland | Energy Software
+Glowpower | Ireland | Energy Software
+
+# Poland & Eastern Europe Energy Software Companies
+PGE | Poland | Energy Software
+Tauron | Poland | Energy Software
+Enea | Poland | Energy Software
+Energa | Poland | Energy Software
+PGE Dystrybucja | Poland | Energy Software
+Innogy Poland | Poland | Energy Software
+CEZ | Czech Republic | Energy Software
+EON Czech | Czech Republic | Energy Software
+Skoda Auto Energy | Czech Republic | Energy Software
+EPH | Czech Republic | Energy Software
+Slovenske Elektrarne | Slovakia | Energy Software
+ZSE | Slovakia | Energy Software
+MOL Group | Hungary | Energy Software
+EON Hungary | Hungary | Energy Software
+OPUS | Hungary | Energy Software
+NEK | Bulgaria | Energy Software
+CEZ Bulgaria | Bulgaria | Energy Software
+Energoproekt | Bulgaria | Energy Software
+Hidroelectrica | Romania | Energy Software
+Electrica | Romania | Energy Software
+
+# Energy Software & Technology Specialists
+Autogrid | UK | Energy Software
+Opus One | Canada | Energy Software
+Virtual Peaker | USA | Energy Software
+Likewatt | France | Energy Software
+BeeBryte | Switzerland | Energy Software
+GridBeyond | Ireland | Energy Software
+Moixa | UK | Energy Software
+Electron | UK | Energy Software
+Verv | UK | Energy Software
+PassivSystems | UK | Energy Software
+Origami Energy | UK | Energy Software
+Open Energi | UK | Energy Software
+Reactive Technologies | UK | Energy Software
+Tempus Energy | UK | Energy Software
+Switchee | UK | Energy Software
+Mojo Power | Australia | Energy Software
+Flick Electric | New Zealand | Energy Software
+Powershop | Australia | Energy Software
+Amber Electric | Australia | Energy Software
+GreenSync | Australia | Energy Software
+
+# Additional European Energy Tech Companies
+Entelios | Germany | Energy Software
+Next Kraftwerke | Germany | Energy Software
+Clean Energy Wire | Germany | Energy Software
+Energy Ledger | Germany | Energy Software
+Sunamp | UK | Energy Software
+Tepeo | UK | Energy Software
+BuffaloGrid | UK | Energy Software
+BBOXX | UK | Energy Software
+Offgrid Electric | UK | Energy Software
+ZOLA Electric | UK | Energy Software
+Bramble Energy | UK | Energy Software
+ITM Power | UK | Energy Software
+Ceramic Fuel Cells | UK | Energy Software
+AFC Energy | UK | Energy Software
+Ceres Power | UK | Energy Software
+Intelligent Energy | UK | Energy Software
+Blue World Technologies | Denmark | Energy Software
+Haldor Topsoe | Denmark | Energy Software
+Nordic Green | Denmark | Energy Software
+Green Hydrogen Systems | Denmark | Energy Software
+
+# More Energy Analytics & Management
+C3 AI | USA | Energy Software
+Uptake | USA | Energy Software
+SparkCognition | USA | Energy Software
+Digital Globe | USA | Energy Software
+GE Digital | USA | Energy Software
+Honeywell Forge | USA | Energy Software
+Schneider Electric EcoStruxure | France | Energy Software
+Siemens MindSphere | Germany | Energy Software
+ABB Ability | Switzerland | Energy Software
+Hitachi Vantara | Japan | Energy Software
+OSIsoft | USA | Energy Software
+Wonderware | USA | Energy Software
+Inductive Automation | USA | Energy Software
+Canary Labs | USA | Energy Software
+Iconics | USA | Energy Software
+Rockwell Automation | USA | Energy Software
+Emerson Electric | USA | Energy Software
+Yokogawa | Japan | Energy Software
+Mitsubishi Electric | Japan | Energy Software
+Endress+Hauser | Switzerland | Energy Software
+
+# Grid & Utility Software Specialists
+OPAL RT | Canada | Energy Software
+PowerWorld | USA | Energy Software
+ETAP | USA | Energy Software
+SKM PowerTools | USA | Energy Software
+EasyPower | USA | Energy Software
+CYME | USA | Energy Software
+PSS E | USA | Energy Software
+DIgSILENT | Germany | Energy Software
+PowerFactory | Germany | Energy Software
+Neplan | Switzerland | Energy Software
+IPS | USA | Energy Software
+ASPEN | USA | Energy Software
+OTS | USA | Energy Software
+GAMS | USA | Energy Software
+MATPOWER | USA | Energy Software
+OpenDSS | USA | Energy Software
+GridLAB D | USA | Energy Software
+Helioscope | USA | Energy Software
+PVsyst | Switzerland | Energy Software
+SAM | USA | Energy Software

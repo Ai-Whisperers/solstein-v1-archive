@@ -4,25 +4,45 @@
       "latest_report": {
         "company_name": "Eneve",
         "is_synthetic": false,
-        "confidence_score": 0.7500000000000001,
+        "confidence_score": 0.7730769230769232,
         "basic_info": {
-          "website": "https://eneve.com",
-          "description": "Smart software for the energy value chain",
+          "website": "www.enve.no",
+          "description": "Platform specializing in providing data room services for M&A transactions",
           "industry": "Energy",
-          "headquarters": "Netherlands",
-          "founded_year": 1997,
-          "employees": null
+          "headquarters": "Trondheim, Norway",
+          "founded_year": 2021,
+          "employees": 9
         },
         "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
+          "revenue": 71900,
+          "revenue_currency": "USD",
           "valuation": null
         },
         "funding": {
           "total_raised": null,
-          "rounds": []
+          "rounds": 1
         },
         "data_sources": [
+          {
+            "url": "https://enve.com/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://eneve.com/news",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://eneva.com.br/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/enve/__F-xWAmfgXgweMTsGKJI-aUGSRkhoW7_07I-Ey0DM5NA",
+            "type": "company_website",
+            "confidence": 0.7750000000000001
+          },
           {
             "url": "https://eneve.com/about-eneve",
             "type": "company_website",
@@ -37,28 +57,41 @@
             "url": "https://eneve.com/",
             "type": "company_website",
             "confidence": 0.675
-          },
-          {
-            "url": "https://eneve.com",
-            "type": "company_website",
-            "confidence": 0.675
           }
         ],
         "metadata": {
-          "research_date": "2026-03-11T00:49:30.238269",
+          "research_date": "2026-03-11T03:01:42.789555",
           "queries_executed": 8,
           "sources_found": 8,
           "sources_used": 4,
-          "research_time_seconds": 147.933315
+          "known_sources_skipped": 2,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "research_time_seconds": 127.098103,
+          "fields_carried_forward": 0
         },
         "errors": []
       },
       "known_urls": [
+        "https://eneva.com.br/",
         "https://eneve.com/",
         "https://eneve.com/about-eneve",
-        "https://eneve.recruitee.com/"
+        "https://eneve.com/news",
+        "https://eneve.recruitee.com/",
+        "https://enve.com/",
+        "https://tracxn.com/d/companies/enve/__F-xWAmfgXgweMTsGKJI-aUGSRkhoW7_07I-Ey0DM5NA"
       ],
-      "updated_at": "2026-03-11T01:01:40.802100"
+      "updated_at": "2026-03-11T03:01:42.789889"
     },
     "octopus energy group / kraken technologies": {
       "latest_report": {
@@ -115,11 +148,11 @@
       },
       "known_urls": [
         "https://octopus.energy/",
-        "https://octopus.energy/contact-us",
+        "https://octopus.energy/contact-us/",
         "https://octopusenergy.group/",
-        "https://octopusenergygeneration.com/"
+        "https://www.octopusenergygeneration.com/"
       ],
-      "updated_at": "2026-03-11T01:01:40.802148"
+      "updated_at": "2026-03-11T02:39:17.976367"
     },
     "volue asa": {
       "latest_report": {
@@ -185,14 +218,14 @@
         "errors": []
       },
       "known_urls": [
-        "https://bloomberg.com/profile/company/VOLUE:NO",
-        "https://linkedin.com/posts/ta-associates_ta-is-pleased-to-announce-a-strategic-investment-activity-7428091159786283008-G4AH",
         "https://tracxn.com/d/companies/volue/__3NpJvBep98NgfgPyH9vAshrooS-6USe1z3W2WKfaT2g/funding-and-investors",
-        "https://volue.com/",
-        "https://volue.com/en/about-volue/corporate-governance",
-        "https://volue.com/energy-market-services"
+        "https://www.bloomberg.com/profile/company/VOLUE:NO",
+        "https://www.linkedin.com/posts/ta-associates_ta-is-pleased-to-announce-a-strategic-investment-activity-7428091159786283008-G4AH",
+        "https://www.volue.com/",
+        "https://www.volue.com/en/about-volue/corporate-governance",
+        "https://www.volue.com/energy-market-services"
       ],
-      "updated_at": "2026-03-11T01:01:40.802197"
+      "updated_at": "2026-03-11T02:39:17.976373"
     },
     "cgi inc.": {
       "latest_report": {
@@ -268,33 +301,33 @@
         "errors": []
       },
       "known_urls": [
-        "https://cgi.com/en",
-        "https://cgi.com/en/careers",
-        "https://cgi.com/en/investors",
-        "https://cgi.com/us/en-us",
-        "https://cgi.com/us/en-us/federal",
-        "https://cgimotion.com/",
         "https://en.wikipedia.org/wiki/CGI_Inc.",
-        "https://tracxn.com/d/companies/cgi/__xiZiqQKg5aM0D-ft5NI1xgi_e3wetnSsnl18LkN3-mA"
+        "https://tracxn.com/d/companies/cgi/__xiZiqQKg5aM0D-ft5NI1xgi_e3wetnSsnl18LkN3-mA",
+        "https://www.cgi.com/en",
+        "https://www.cgi.com/en/careers",
+        "https://www.cgi.com/en/investors",
+        "https://www.cgi.com/us/en-us",
+        "https://www.cgi.com/us/en-us/federal",
+        "https://www.cgimotion.com/"
       ],
-      "updated_at": "2026-03-11T01:01:40.802255"
+      "updated_at": "2026-03-11T02:39:17.976385"
     },
     "accenture": {
       "latest_report": {
         "company_name": "Accenture",
         "is_synthetic": false,
-        "confidence_score": 0.8250000000000001,
+        "confidence_score": 0.95,
         "basic_info": {
           "website": "https://www.accenture.com",
-          "description": "A global professional services company that provides strategy, consulting, technology, and operations services",
-          "industry": "Technology",
-          "headquarters": "Dublin",
-          "founded_year": null,
-          "employees": 784000
+          "description": "Multinational technology consulting company",
+          "industry": "Professional services, Information technology consulting",
+          "headquarters": "Dublin, Ireland",
+          "founded_year": 1989,
+          "employees": 779000
         },
         "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
+          "revenue": 69670,
+          "revenue_currency": "USD",
           "valuation": null
         },
         "funding": {
@@ -302,6 +335,21 @@
           "rounds": []
         },
         "data_sources": [
+          {
+            "url": "https://www.accenture.com/us-en/about/company/annual-report",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://newsroom.accenture.com/news/2025/accenture-reports-fourth-quarter-and-full-year-fiscal-2025-results",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Accenture",
+            "type": "wikipedia",
+            "confidence": 0.9500000000000002
+          },
           {
             "url": "https://www.accenture.com/us-en/about/company-index",
             "type": "company_website",
@@ -334,23 +382,29 @@
           }
         ],
         "metadata": {
-          "research_date": "2026-03-11T01:01:35.513439",
+          "research_date": "2026-03-11T02:40:24.157371",
           "queries_executed": 8,
           "sources_found": 8,
-          "sources_used": 6,
-          "research_time_seconds": 192.998368
+          "sources_used": 3,
+          "known_sources_skipped": 6,
+          "known_sources_revisited": 0,
+          "research_time_seconds": 66.180922,
+          "fields_carried_forward": 0
         },
         "errors": []
       },
       "known_urls": [
-        "https://accenture.com/content/dam/accenture/final/accenture-com/document-4/Annual-Report-2025.pdf",
-        "https://accenture.com/us-en",
-        "https://accenture.com/us-en/about/company-index",
-        "https://accenture.com/us-en/about/contact-us",
-        "https://accenture.com/us-en/careers",
-        "https://accenture.com/us-en/careers/jobsearch"
+        "https://en.wikipedia.org/wiki/Accenture",
+        "https://newsroom.accenture.com/news/2025/accenture-reports-fourth-quarter-and-full-year-fiscal-2025-results",
+        "https://www.accenture.com/content/dam/accenture/final/accenture-com/document-4/Annual-Report-2025.pdf",
+        "https://www.accenture.com/us-en",
+        "https://www.accenture.com/us-en/about/company-index",
+        "https://www.accenture.com/us-en/about/company/annual-report",
+        "https://www.accenture.com/us-en/about/contact-us",
+        "https://www.accenture.com/us-en/careers",
+        "https://www.accenture.com/us-en/careers/jobsearch"
       ],
-      "updated_at": "2026-03-11T01:01:40.802297"
+      "updated_at": "2026-03-11T02:40:24.157551"
     },
     "capgemini": {
       "latest_report": {
@@ -421,15 +475,15 @@
         "errors": []
       },
       "known_urls": [
-        "https://capgemini.com/",
-        "https://capgemini.com/careers",
-        "https://capgemini.com/careers/join-capgemini/job-search",
-        "https://capgemini.com/news",
-        "https://capgemini.com/news/press-releases/full-year-2025-results",
-        "https://capgemini.com/us-en",
-        "https://tracxn.com/d/companies/capgemini/__jjVut3QWaaYeew6cUlXE3g71q4l56bXf7Og-IXyhbUU"
+        "https://tracxn.com/d/companies/capgemini/__jjVut3QWaaYeew6cUlXE3g71q4l56bXf7Og-IXyhbUU",
+        "https://www.capgemini.com/",
+        "https://www.capgemini.com/careers/",
+        "https://www.capgemini.com/careers/join-capgemini/job-search/",
+        "https://www.capgemini.com/news/",
+        "https://www.capgemini.com/news/press-releases/full-year-2025-results/",
+        "https://www.capgemini.com/us-en/"
       ],
-      "updated_at": "2026-03-11T01:01:40.802349"
+      "updated_at": "2026-03-11T02:39:17.976394"
     },
     "tcs (tata consultancy services)": {
       "latest_report": {
@@ -501,14 +555,14 @@
       },
       "known_urls": [
         "https://en.wikipedia.org/wiki/Tata_Consultancy_Services",
-        "https://startuptalky.com/tcs-success-story",
-        "https://tata.com/business/tcs",
-        "https://tcs.com/",
-        "https://tcs.com/careers",
-        "https://tcsion.com/",
-        "https://tracxn.com/d/companies/tcs/__3_AETZlGlcPjROzTv3Kf6pDJr9uvxvM7oNJ_Z-YrbVI"
+        "https://startuptalky.com/tcs-success-story/",
+        "https://tracxn.com/d/companies/tcs/__3_AETZlGlcPjROzTv3Kf6pDJr9uvxvM7oNJ_Z-YrbVI",
+        "https://www.tata.com/business/tcs",
+        "https://www.tcs.com/",
+        "https://www.tcs.com/careers",
+        "https://www.tcsion.com/"
       ],
-      "updated_at": "2026-03-11T01:01:40.802400"
+      "updated_at": "2026-03-11T02:39:17.976403"
     },
     "infosys": {
       "latest_report": {
@@ -566,10 +620,10 @@
       "known_urls": [
         "https://en.wikipedia.org/wiki/Infosys",
         "https://find-and-update.company-information.service.gov.uk/company/FC020086",
-        "https://startuptalky.com/infosys-success-story",
+        "https://startuptalky.com/infosys-success-story/",
         "https://tracxn.com/d/companies/infosys/__aXRJC82TzaJDQOtKfrLhJCBFVM-eZUDVsYA0BfXMmXQ"
       ],
-      "updated_at": "2026-03-11T01:01:40.802427"
+      "updated_at": "2026-03-11T02:39:17.976406"
     },
     "sopra steria": {
       "latest_report": {
@@ -631,12 +685,12 @@
       },
       "known_urls": [
         "https://en.wikipedia.org/wiki/Sopra_Steria",
-        "https://linkedin.com/company/soprasteria",
-        "https://soprasteria.com/",
-        "https://soprasteria.com/about-us",
-        "https://soprasteria.in/"
+        "https://www.linkedin.com/company/soprasteria",
+        "https://www.soprasteria.com/",
+        "https://www.soprasteria.com/about-us",
+        "https://www.soprasteria.in"
       ],
-      "updated_at": "2026-03-11T01:01:40.802461"
+      "updated_at": "2026-03-11T02:39:17.976410"
     },
     "eneco": {
       "latest_report": {
@@ -702,14 +756,14 @@
         "errors": []
       },
       "known_urls": [
-        "https://eneco.co.uk/",
-        "https://eneco.nl/-/media/eneco-com/files/eneco-annual-report-2023.pdf?rev=5f1d046154e14c3083fcfcf253955d07&sc_lang=en",
-        "https://eneco.nl/en/about-us",
-        "https://eneco.nl/en/about-us/who-we-are/contact",
         "https://enecoenergy.com/",
-        "https://jobsateneco.com/"
+        "https://www.eneco.co.uk/",
+        "https://www.eneco.nl/-/media/eneco-com/files/eneco-annual-report-2023.pdf?rev=5f1d046154e14c3083fcfcf253955d07&sc_lang=en",
+        "https://www.eneco.nl/en/about-us/",
+        "https://www.eneco.nl/en/about-us/who-we-are/contact/",
+        "https://www.jobsateneco.com/"
       ],
-      "updated_at": "2026-03-11T01:01:40.802526"
+      "updated_at": "2026-03-11T02:39:17.976414"
     },
     "vattenfall": {
       "latest_report": {
@@ -779,10 +833,10 @@
         "https://history.vattenfall.com/",
         "https://history.vattenfall.com/stories",
         "https://powerplants.vattenfall.com/",
-        "https://powerplants.vattenfall.com/slufterdam",
+        "https://powerplants.vattenfall.com/slufterdam/",
         "https://tracxn.com/d/companies/vattenfall/__aVy5L3n8sXoBQmSiM3o2myPlL7JoGFWCWOE1lWtaKRI"
       ],
-      "updated_at": "2026-03-11T01:01:40.802572"
+      "updated_at": "2026-03-11T02:39:17.976417"
     },
     "tennet": {
       "latest_report": {
@@ -828,10 +882,10 @@
         "errors": []
       },
       "known_urls": [
-        "https://gic.com.sg/newsroom/all/tennet-secures-equity-funding-for-tennet-germany-through-future-partnership-with-large-institutional-investors-in-europe",
-        "https://leadiq.com/c/tennet-tso-bv/5a1d89ab24000024006304ab"
+        "https://leadiq.com/c/tennet-tso-bv/5a1d89ab24000024006304ab",
+        "https://www.gic.com.sg/newsroom/all/tennet-secures-equity-funding-for-tennet-germany-through-future-partnership-with-large-institutional-investors-in-europe/"
       ],
-      "updated_at": "2026-03-11T01:01:40.802589"
+      "updated_at": "2026-03-11T02:39:17.976421"
     },
     "stedin": {
       "latest_report": {
@@ -897,14 +951,14 @@
         "errors": []
       },
       "known_urls": [
-        "https://irissmartcities.eu/stedin-netbeheer-bv-sted-the-nederlands",
-        "https://stedin.net/",
-        "https://stedingroep.nl/eng",
-        "https://stedingroep.nl/eng/investor-relations",
+        "https://irissmartcities.eu/stedin-netbeheer-bv-sted-the-nederlands/",
         "https://tracxn.com/d/companies/energyweb/__HqWziTjKIHo-QqGfrXFesTXGbxrVNrS8ZViMmVd3oPE",
-        "https://tracxn.com/d/companies/stedin/__bJ_CfJLgB2QiyqskB0nQFjeFhBmkGBLIVsG_a-X2p2o"
+        "https://tracxn.com/d/companies/stedin/__bJ_CfJLgB2QiyqskB0nQFjeFhBmkGBLIVsG_a-X2p2o",
+        "https://www.stedin.net/",
+        "https://www.stedingroep.nl/eng",
+        "https://www.stedingroep.nl/eng/investor-relations"
       ],
-      "updated_at": "2026-03-11T01:01:40.802632"
+      "updated_at": "2026-03-11T02:39:17.976425"
     },
     "alliander": {
       "latest_report": {
@@ -965,13 +1019,13 @@
         "errors": []
       },
       "known_urls": [
-        "https://alliander.com/en",
-        "https://alliander.com/en/contact",
-        "https://alliander.com/en/disclaimer",
-        "https://energystoragenl.nl/en/lid/alliander",
-        "https://scopegroup.com/ScopeGroupApi/api/analysis?id=f79ed9f9-3f71-4955-bcd9-27b8c812984b"
+        "https://www.alliander.com/en/",
+        "https://www.alliander.com/en/contact/",
+        "https://www.alliander.com/en/disclaimer/",
+        "https://www.energystoragenl.nl/en/lid/alliander/",
+        "https://www.scopegroup.com/ScopeGroupApi/api/analysis?id=f79ed9f9-3f71-4955-bcd9-27b8c812984b"
       ],
-      "updated_at": "2026-03-11T01:01:40.802684"
+      "updated_at": "2026-03-11T02:39:17.976429"
     },
     "shell": {
       "latest_report": {
@@ -1014,7 +1068,7 @@
       "known_urls": [
         "https://shellfoundation.org/"
       ],
-      "updated_at": "2026-03-11T01:01:40.802695"
+      "updated_at": "2026-03-11T02:39:17.976431"
     },
     "bp": {
       "latest_report": {
@@ -1090,16 +1144,16 @@
         "errors": []
       },
       "known_urls": [
-        "https://bp.com/",
-        "https://bp.com/en/global/corporate/careers.html",
-        "https://bp.com/en/global/corporate/contact-us.html",
-        "https://bp.com/en/global/corporate/investors.html",
-        "https://bp.com/en_us/united-states/home/community/bp-foundation.html",
-        "https://bp.org.br/privacy-policy",
-        "https://earth.org/bp-increases-oil-and-gas-investments-drops-renewable-targets",
-        "https://pharmacopoeia.com/"
+        "https://earth.org/bp-increases-oil-and-gas-investments-drops-renewable-targets/",
+        "https://www.bp.com/",
+        "https://www.bp.com/en/global/corporate/careers.html",
+        "https://www.bp.com/en/global/corporate/contact-us.html",
+        "https://www.bp.com/en/global/corporate/investors.html",
+        "https://www.bp.com/en_us/united-states/home/community/bp-foundation.html",
+        "https://www.bp.org.br/privacy-policy",
+        "https://www.pharmacopoeia.com/"
       ],
-      "updated_at": "2026-03-11T01:01:40.802750"
+      "updated_at": "2026-03-11T02:39:17.976436"
     },
     "totalenergies": {
       "latest_report": {
@@ -1184,7 +1238,7 @@
         "https://totalenergies.com/news/press-releases/2025-strategy-and-outlook-presentation",
         "https://totalenergies.com/sites/g/files/nytnzq121/files/documents/2022-08/Factbook_2021.pdf"
       ],
-      "updated_at": "2026-03-11T01:01:40.802803"
+      "updated_at": "2026-03-11T02:39:17.976441"
     },
     "equinor": {
       "latest_report": {
@@ -1246,12 +1300,12 @@
       },
       "known_urls": [
         "https://cryptorank.io/funds/equinor-ventures/rounds",
-        "https://equinor.com/",
-        "https://equinor.com/where-we-are/brazil",
-        "https://equinorout.com/",
-        "https://equinorout.com/about-us"
+        "https://www.equinor.com/",
+        "https://www.equinor.com/where-we-are/brazil",
+        "https://www.equinorout.com/",
+        "https://www.equinorout.com/about-us"
       ],
-      "updated_at": "2026-03-11T01:01:40.802840"
+      "updated_at": "2026-03-11T02:39:17.976444"
     },
     "orsted": {
       "latest_report": {
@@ -1300,7 +1354,7 @@
         "https://en.wikipedia.org/wiki/%C3%98rsted_(company)",
         "https://tracxn.com/d/companies/orsted/__bFFWxbDkKmMpM-RGJZvHs5U9l3lyqWjhHmgFGfdBsQ4"
       ],
-      "updated_at": "2026-03-11T01:01:40.802854"
+      "updated_at": "2026-03-11T02:39:17.976448"
     },
     "siemens energy": {
       "latest_report": {
@@ -1361,13 +1415,13 @@
         "errors": []
       },
       "known_urls": [
-        "https://siemens-energy.com/global/en/home.html",
-        "https://siemens-energy.com/global/en/home/careers/working-with-us.html",
-        "https://siemens-energy.com/global/en/home/company/about.html",
-        "https://siemens-energy.com/global/en/home/contact.html",
-        "https://siemens-energy.com/global/en/home/investor-relations.html"
+        "https://www.siemens-energy.com/global/en/home.html",
+        "https://www.siemens-energy.com/global/en/home/careers/working-with-us.html",
+        "https://www.siemens-energy.com/global/en/home/company/about.html",
+        "https://www.siemens-energy.com/global/en/home/contact.html",
+        "https://www.siemens-energy.com/global/en/home/investor-relations.html"
       ],
-      "updated_at": "2026-03-11T01:01:40.802895"
+      "updated_at": "2026-03-11T02:39:17.976451"
     },
     "ge vernova": {
       "latest_report": {
@@ -1434,13 +1488,13 @@
       },
       "known_urls": [
         "https://careers.gevernova.com/",
-        "https://fieldcore.com/",
-        "https://gevernova.com/",
-        "https://gevernova.com/company/about",
-        "https://gevernova.com/grid-solutions",
-        "https://gevernova.com/news/press-releases/ge-vernova-invest-almost-600-million-us-factories-facilities-over-next-two-years"
+        "https://www.fieldcore.com/",
+        "https://www.gevernova.com/",
+        "https://www.gevernova.com/company/about",
+        "https://www.gevernova.com/grid-solutions/",
+        "https://www.gevernova.com/news/press-releases/ge-vernova-invest-almost-600-million-us-factories-facilities-over-next-two-years"
       ],
-      "updated_at": "2026-03-11T01:01:40.802939"
+      "updated_at": "2026-03-11T02:39:17.976455"
     },
     "schneider electric": {
       "latest_report": {
@@ -1512,14 +1566,14 @@
       },
       "known_urls": [
         "https://en.wikipedia.org/wiki/Schneider_Electric",
-        "https://se.com/ng/en/all-products",
-        "https://se.com/us/en",
-        "https://se.com/ww/en",
-        "https://se.com/ww/en/about-us",
-        "https://se.com/ww/en/about-us/university",
-        "https://tracxn.com/d/companies/schneiderelectric/__AN73wDA0Ir5h0d-EHkk74UUEXHL6RnliBx6y_s8ya-U"
+        "https://tracxn.com/d/companies/schneiderelectric/__AN73wDA0Ir5h0d-EHkk74UUEXHL6RnliBx6y_s8ya-U",
+        "https://www.se.com/ng/en/all-products/",
+        "https://www.se.com/us/en/",
+        "https://www.se.com/ww/en/",
+        "https://www.se.com/ww/en/about-us/",
+        "https://www.se.com/ww/en/about-us/university/"
       ],
-      "updated_at": "2026-03-11T01:01:40.802986"
+      "updated_at": "2026-03-11T02:39:17.976459"
     },
     "abb": {
       "latest_report": {
@@ -1562,7 +1616,7 @@
       "known_urls": [
         "https://prospeo.io/c/abb-revenue"
       ],
-      "updated_at": "2026-03-11T01:01:40.802995"
+      "updated_at": "2026-03-11T02:39:17.976463"
     },
     "hitachi energy": {
       "latest_report": {
@@ -1629,1076 +1683,13 @@
       },
       "known_urls": [
         "https://en.wikipedia.org/wiki/Hitachi",
-        "https://hitachi.com/en",
-        "https://hitachi.com/products/energy/portal/index.html",
-        "https://hitachienergy.com/",
-        "https://hitachienergy.com/about-us/company-profile",
-        "https://hitachienergy.com/careers"
+        "https://www.hitachi.com/en/",
+        "https://www.hitachi.com/products/energy/portal/index.html",
+        "https://www.hitachienergy.com/",
+        "https://www.hitachienergy.com/about-us/company-profile",
+        "https://www.hitachienergy.com/careers"
       ],
-      "updated_at": "2026-03-11T01:01:40.803036"
-    },
-    "kraken technologies": {
-      "latest_report": {
-        "company_name": "Kraken Technologies",
-        "is_synthetic": false,
-        "confidence_score": 0.7538461538461539,
-        "basic_info": {
-          "website": "http://www.asapp.com",
-          "description": "ASAPP is an artificial intelligence solution provider committed to solving the toughest problems in customer service.",
-          "industry": "Technology, Information and Internet",
-          "headquarters": "New York, NY",
-          "founded_year": 2014,
-          "employees": "201-500"
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": 1600000000
-        },
-        "funding": {
-          "total_raised": 400000000,
-          "rounds": 3
-        },
-        "data_sources": [
-          {
-            "url": "https://reddit.com/r/CryptoCurrency/comments/ph5n60/why_are_trading_fees_so_high_on_kraken",
-            "type": "company_website",
-            "confidence": 0.625
-          },
-          {
-            "url": "https://linkedin.com/company/asappco",
-            "type": "linkedin",
-            "confidence": 0.8000000000000002
-          },
-          {
-            "url": "https://tracxn.com/d/companies/asapp/__OfhHO0fOuy9PjRrZQj2AR39htZk0527BqnDemcbzb6k",
-            "type": "company_website",
-            "confidence": 0.6500000000000001
-          }
-        ],
-        "metadata": {
-          "research_date": "2026-03-11T01:51:34.499054",
-          "queries_executed": 8,
-          "sources_found": 8,
-          "sources_used": 3,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 0,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "revenue",
-            "revenue_currency"
-          ],
-          "missing_fields_after_adaptive": [
-            "revenue",
-            "revenue_currency"
-          ],
-          "research_time_seconds": 0.000152,
-          "fields_carried_forward": 0,
-          "cache_reuse": true,
-          "previous_completeness": 0.909,
-          "previous_report_stale": false,
-          "sources_reused": 3
-        },
-        "errors": []
-      },
-      "known_urls": [
-        "https://linkedin.com/company/asappco",
-        "https://reddit.com/r/CryptoCurrency/comments/ph5n60/why_are_trading_fees_so_high_on_kraken",
-        "https://tracxn.com/d/companies/asapp/__OfhHO0fOuy9PjRrZQj2AR39htZk0527BqnDemcbzb6k"
-      ],
-      "updated_at": "2026-03-11T01:51:34.499113"
-    },
-    "octopus energy": {
-      "latest_report": {
-        "company_name": "Octopus Energy",
-        "is_synthetic": false,
-        "confidence_score": 0.43461538461538457,
-        "basic_info": {
-          "website": "octopusenergygeneration.com",
-          "description": "A clean energy technology company providing green energy solutions",
-          "industry": "Energy",
-          "headquarters": "London",
-          "founded_year": 2015,
-          "employees": "5001-10000"
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": 7800000000
-        },
-        "funding": {
-          "total_raised": 2900000000.0,
-          "rounds": 9
-        },
-        "data_sources": [
-          {
-            "url": "https://climate-court.com/post/octopus-energy-surges-to-7-8-billion-valuation-with-800-million-funding-boost",
-            "type": "company_website",
-            "confidence": 0.3000000000000001
-          },
-          {
-            "url": "https://clay.com/dossier/octopus-energy-funding",
-            "type": "company_website",
-            "confidence": 0.42500000000000004
-          },
-          {
-            "url": "https://parsers.vc/startup/octopusenergygeneration.com",
-            "type": "company_website",
-            "confidence": 0.55
-          }
-        ],
-        "metadata": {
-          "research_date": "2026-03-11T01:51:34.494472",
-          "queries_executed": 8,
-          "sources_found": 8,
-          "sources_used": 3,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 0,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "revenue",
-            "revenue_currency"
-          ],
-          "missing_fields_after_adaptive": [
-            "revenue",
-            "revenue_currency"
-          ],
-          "research_time_seconds": 0.000133,
-          "fields_carried_forward": 0,
-          "cache_reuse": true,
-          "previous_completeness": 0.909,
-          "previous_report_stale": false,
-          "sources_reused": 3
-        },
-        "errors": []
-      },
-      "known_urls": [
-        "https://clay.com/dossier/octopus-energy-funding",
-        "https://climate-court.com/post/octopus-energy-surges-to-7-8-billion-valuation-with-800-million-funding-boost",
-        "https://parsers.vc/startup/octopusenergygeneration.com"
-      ],
-      "updated_at": "2026-03-11T01:51:34.494525"
-    },
-    "bulb energy": {
-      "latest_report": {
-        "company_name": "Bulb Energy",
-        "is_synthetic": false,
-        "confidence_score": 0.9000000000000002,
-        "basic_info": {
-          "website": "https://bulb.co.uk/",
-          "description": "Energy supply company in the United Kingdom",
-          "industry": "Energy supply",
-          "headquarters": "London, United Kingdom",
-          "founded_year": 2013,
-          "employees": 1000
-        },
-        "financials": {
-          "revenue": 1.52,
-          "revenue_currency": "GBP",
-          "valuation": null
-        },
-        "funding": {
-          "total_raised": 60,
-          "rounds": 2
-        },
-        "data_sources": [
-          {
-            "url": "https://octopus.energy/press/bulb-finds-new-home-with-octopus",
-            "type": "company_website",
-            "confidence": 0.625
-          },
-          {
-            "url": "https://en.wikipedia.org/wiki/Bulb_Energy",
-            "type": "wikipedia",
-            "confidence": 0.9
-          },
-          {
-            "url": "https://octopus.energy/press/octopus-energy-completes-migration-of-bulb-customers-in-record-time",
-            "type": "company_website",
-            "confidence": 0.425
-          }
-        ],
-        "metadata": {
-          "research_date": "2026-03-11T01:53:24.789047",
-          "queries_executed": 8,
-          "sources_found": 6,
-          "sources_used": 3,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 0,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "valuation"
-          ],
-          "missing_fields_after_adaptive": [
-            "valuation"
-          ],
-          "research_time_seconds": 109.818208,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [
-        "https://en.wikipedia.org/wiki/Bulb_Energy",
-        "https://octopus.energy/press/bulb-finds-new-home-with-octopus",
-        "https://octopus.energy/press/octopus-energy-completes-migration-of-bulb-customers-in-record-time"
-      ],
-      "updated_at": "2026-03-11T01:53:24.789146"
-    },
-    "ovo energy": {
-      "latest_report": {
-        "company_name": "OVO Energy",
-        "is_synthetic": false,
-        "confidence_score": 0.5442307692307693,
-        "basic_info": {
-          "website": "https://www.ovoenergy.com",
-          "description": "an app-based renewable energy supplier providing electricity, biogas, EV charging bundles, and smart-home energy solutions",
-          "industry": "Energy",
-          "headquarters": "Bristol, UK",
-          "founded_year": 2009,
-          "employees": 1115
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": 1000000000
-        },
-        "funding": {
-          "total_raised": 516000000,
-          "rounds": 3
-        },
-        "data_sources": [
-          {
-            "url": "https://forum.ovoenergy.com/my-account-140",
-            "type": "company_website",
-            "confidence": 0.625
-          },
-          {
-            "url": "https://my.ovoenergy.com/login",
-            "type": "company_website",
-            "confidence": 0.47500000000000003
-          },
-          {
-            "url": "https://products.ovoenergy.com/energy/customer-property",
-            "type": "company_website",
-            "confidence": 0.55
-          },
-          {
-            "url": "https://plans.ovoenergy.com/",
-            "type": "company_website",
-            "confidence": 0.47500000000000003
-          },
-          {
-            "url": "https://texau.com/profiles/ovo-energy",
-            "type": "company_website",
-            "confidence": 0.45
-          }
-        ],
-        "metadata": {
-          "research_date": "2026-03-11T01:54:09.552102",
-          "queries_executed": 8,
-          "sources_found": 6,
-          "sources_used": 5,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 0,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "revenue",
-            "revenue_currency"
-          ],
-          "missing_fields_after_adaptive": [
-            "revenue",
-            "revenue_currency"
-          ],
-          "research_time_seconds": 155.05004,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [
-        "https://forum.ovoenergy.com/my-account-140",
-        "https://my.ovoenergy.com/login",
-        "https://plans.ovoenergy.com/",
-        "https://products.ovoenergy.com/energy/customer-property",
-        "https://texau.com/profiles/ovo-energy"
-      ],
-      "updated_at": "2026-03-11T01:54:09.552240"
-    },
-    "good energy": {
-      "latest_report": {
-        "company_name": "Good Energy",
-        "is_synthetic": false,
-        "confidence_score": 0.5516666666666666,
-        "basic_info": {
-          "website": "https://goodenergy.com",
-          "description": "Community and government energy aggregation expert",
-          "industry": "Energy",
-          "headquarters": "Chippenham, Wiltshire, England",
-          "founded_year": 2003,
-          "employees": "11-50"
-        },
-        "financials": {
-          "revenue": 124300000,
-          "revenue_currency": "GBP",
-          "valuation": 99400000
-        },
-        "funding": {
-          "total_raised": 100000000,
-          "rounds": 1
-        },
-        "data_sources": [
-          {
-            "url": "https://goodenergy.com/about",
-            "type": "company_website",
-            "confidence": 0.675
-          },
-          {
-            "url": "https://leadsontrees.com/news/breaking-news-good-energy-secures-100-million-in-funding-to-revolutionize-clean-energy-solutions-for-power-generation-and-mobility",
-            "type": "company_website",
-            "confidence": 0.5500000000000002
-          },
-          {
-            "url": "https://find-and-update.company-information.service.gov.uk/company/04000623",
-            "type": "company_website",
-            "confidence": 0.425
-          },
-          {
-            "url": "https://en.wikipedia.org/wiki/Good_Energy",
-            "type": "wikipedia",
-            "confidence": 0.45000000000000007
-          }
-        ],
-        "metadata": {
-          "research_date": "2026-03-11T01:59:59.319443",
-          "queries_executed": 8,
-          "sources_found": 12,
-          "sources_used": 4,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": true,
-          "adaptive_queries_executed": 2,
-          "adaptive_sources_used": 2,
-          "missing_fields_before_adaptive": [
-            "headquarters",
-            "founded_year",
-            "revenue",
-            "revenue_currency",
-            "valuation"
-          ],
-          "missing_fields_after_adaptive": [],
-          "research_time_seconds": 504.34645,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [
-        "https://en.wikipedia.org/wiki/Good_Energy",
-        "https://find-and-update.company-information.service.gov.uk/company/04000623",
-        "https://goodenergy.com/about",
-        "https://leadsontrees.com/news/breaking-news-good-energy-secures-100-million-in-funding-to-revolutionize-clean-energy-solutions-for-power-generation-and-mobility"
-      ],
-      "updated_at": "2026-03-11T01:59:59.319559"
-    },
-    "ecotricity": {
-      "latest_report": {
-        "company_name": "Ecotricity",
-        "is_synthetic": false,
-        "confidence_score": 0.0,
-        "basic_info": {
-          "website": null,
-          "description": null,
-          "industry": null,
-          "headquarters": null,
-          "founded_year": null,
-          "employees": null
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": null
-        },
-        "funding": {
-          "total_raised": null,
-          "rounds": []
-        },
-        "data_sources": [],
-        "metadata": {
-          "research_date": "2026-03-11T01:15:09.654948",
-          "queries_executed": 8,
-          "sources_found": 0,
-          "sources_used": 0,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 6,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "missing_fields_after_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "research_time_seconds": 22.716736,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [],
-      "updated_at": "2026-03-11T01:15:09.655005"
-    },
-    "green energy uk": {
-      "latest_report": {
-        "company_name": "Green Energy UK",
-        "is_synthetic": false,
-        "confidence_score": 0.6055555555555555,
-        "basic_info": {
-          "website": "https://greenenergy.org.uk/",
-          "description": "Specialises in helping UK homes and businesses start using renewable energy to reduce carbon emissions and save thousands of pounds per year",
-          "industry": "Renewable Energy",
-          "headquarters": "London, UK",
-          "founded_year": 2001,
-          "employees": null
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": null
-        },
-        "funding": {
-          "total_raised": null,
-          "rounds": []
-        },
-        "data_sources": [
-          {
-            "url": "https://greenenergy.org.uk/",
-            "type": "company_website",
-            "confidence": 0.675
-          },
-          {
-            "url": "https://greenergy.com/",
-            "type": "company_website",
-            "confidence": 0.675
-          },
-          {
-            "url": "https://goodenergy.co.uk/",
-            "type": "company_website",
-            "confidence": 0.675
-          },
-          {
-            "url": "https://find-and-update.company-information.service.gov.uk/company/04194006",
-            "type": "company_website",
-            "confidence": 0.425
-          },
-          {
-            "url": "https://greenergy.com/contact",
-            "type": "company_website",
-            "confidence": 0.55
-          }
-        ],
-        "metadata": {
-          "research_date": "2026-03-11T01:58:02.591786",
-          "queries_executed": 8,
-          "sources_found": 12,
-          "sources_used": 5,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": true,
-          "adaptive_queries_executed": 2,
-          "adaptive_sources_used": 2,
-          "missing_fields_before_adaptive": [
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "missing_fields_after_adaptive": [
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "research_time_seconds": 233.036499,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [
-        "https://find-and-update.company-information.service.gov.uk/company/04194006",
-        "https://goodenergy.co.uk/",
-        "https://greenenergy.org.uk/",
-        "https://greenergy.com/",
-        "https://greenergy.com/contact"
-      ],
-      "updated_at": "2026-03-11T01:58:02.591936"
-    },
-    "utilita energy": {
-      "latest_report": {
-        "company_name": "Utilita Energy",
-        "is_synthetic": false,
-        "confidence_score": 0.0,
-        "basic_info": {
-          "website": null,
-          "description": null,
-          "industry": null,
-          "headquarters": null,
-          "founded_year": null,
-          "employees": null
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": null
-        },
-        "funding": {
-          "total_raised": null,
-          "rounds": []
-        },
-        "data_sources": [],
-        "metadata": {
-          "research_date": "2026-03-11T01:15:13.085948",
-          "queries_executed": 8,
-          "sources_found": 0,
-          "sources_used": 0,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 6,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "missing_fields_after_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "research_time_seconds": 25.412489,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [],
-      "updated_at": "2026-03-11T01:15:13.086001"
-    },
-    "eon next": {
-      "latest_report": {
-        "company_name": "EON Next",
-        "is_synthetic": false,
-        "confidence_score": 0.0,
-        "basic_info": {
-          "website": null,
-          "description": null,
-          "industry": null,
-          "headquarters": null,
-          "founded_year": null,
-          "employees": null
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": null
-        },
-        "funding": {
-          "total_raised": null,
-          "rounds": []
-        },
-        "data_sources": [],
-        "metadata": {
-          "research_date": "2026-03-11T01:16:08.821950",
-          "queries_executed": 8,
-          "sources_found": 0,
-          "sources_used": 0,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 6,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "missing_fields_after_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "research_time_seconds": 59.161167,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [],
-      "updated_at": "2026-03-11T01:16:08.822005"
-    },
-    "scottish power": {
-      "latest_report": {
-        "company_name": "Scottish Power",
-        "is_synthetic": false,
-        "confidence_score": 0.0,
-        "basic_info": {
-          "website": null,
-          "description": null,
-          "industry": null,
-          "headquarters": null,
-          "founded_year": null,
-          "employees": null
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": null
-        },
-        "funding": {
-          "total_raised": null,
-          "rounds": []
-        },
-        "data_sources": [],
-        "metadata": {
-          "research_date": "2026-03-11T01:15:46.432147",
-          "queries_executed": 8,
-          "sources_found": 0,
-          "sources_used": 0,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 6,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "missing_fields_after_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "research_time_seconds": 34.32783,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [],
-      "updated_at": "2026-03-11T01:15:46.432212"
-    },
-    "british gas": {
-      "latest_report": {
-        "company_name": "British Gas",
-        "is_synthetic": false,
-        "confidence_score": 0.0,
-        "basic_info": {
-          "website": null,
-          "description": null,
-          "industry": null,
-          "headquarters": null,
-          "founded_year": null,
-          "employees": null
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": null
-        },
-        "funding": {
-          "total_raised": null,
-          "rounds": []
-        },
-        "data_sources": [],
-        "metadata": {
-          "research_date": "2026-03-11T01:15:53.993349",
-          "queries_executed": 8,
-          "sources_found": 0,
-          "sources_used": 0,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 6,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "missing_fields_after_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "research_time_seconds": 40.904827,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [],
-      "updated_at": "2026-03-11T01:15:53.993407"
-    },
-    "edf energy": {
-      "latest_report": {
-        "company_name": "EDF Energy",
-        "is_synthetic": false,
-        "confidence_score": 0.0,
-        "basic_info": {
-          "website": null,
-          "description": null,
-          "industry": null,
-          "headquarters": null,
-          "founded_year": null,
-          "employees": null
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": null
-        },
-        "funding": {
-          "total_raised": null,
-          "rounds": []
-        },
-        "data_sources": [],
-        "metadata": {
-          "research_date": "2026-03-11T01:16:10.156912",
-          "queries_executed": 8,
-          "sources_found": 0,
-          "sources_used": 0,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 6,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "missing_fields_after_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "research_time_seconds": 23.719451,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [],
-      "updated_at": "2026-03-11T01:16:10.156966"
-    },
-    "sse energy": {
-      "latest_report": {
-        "company_name": "SSE Energy",
-        "is_synthetic": false,
-        "confidence_score": 0.0,
-        "basic_info": {
-          "website": null,
-          "description": null,
-          "industry": null,
-          "headquarters": null,
-          "founded_year": null,
-          "employees": null
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": null
-        },
-        "funding": {
-          "total_raised": null,
-          "rounds": []
-        },
-        "data_sources": [],
-        "metadata": {
-          "research_date": "2026-03-11T01:16:25.716443",
-          "queries_executed": 8,
-          "sources_found": 0,
-          "sources_used": 0,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 6,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "missing_fields_after_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "research_time_seconds": 31.720618,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [],
-      "updated_at": "2026-03-11T01:16:25.716522"
-    },
-    "shell energy": {
-      "latest_report": {
-        "company_name": "Shell Energy",
-        "is_synthetic": false,
-        "confidence_score": 0.0,
-        "basic_info": {
-          "website": null,
-          "description": null,
-          "industry": null,
-          "headquarters": null,
-          "founded_year": null,
-          "employees": null
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": null
-        },
-        "funding": {
-          "total_raised": null,
-          "rounds": []
-        },
-        "data_sources": [],
-        "metadata": {
-          "research_date": "2026-03-11T01:16:33.404949",
-          "queries_executed": 8,
-          "sources_found": 0,
-          "sources_used": 0,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 6,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "missing_fields_after_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "research_time_seconds": 24.563355,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [],
-      "updated_at": "2026-03-11T01:16:33.405004"
-    },
-    "tonik energy": {
-      "latest_report": {
-        "company_name": "Tonik Energy",
-        "is_synthetic": false,
-        "confidence_score": 0.0,
-        "basic_info": {
-          "website": null,
-          "description": null,
-          "industry": null,
-          "headquarters": null,
-          "founded_year": null,
-          "employees": null
-        },
-        "financials": {
-          "revenue": null,
-          "revenue_currency": "EUR",
-          "valuation": null
-        },
-        "funding": {
-          "total_raised": null,
-          "rounds": []
-        },
-        "data_sources": [],
-        "metadata": {
-          "research_date": "2026-03-11T01:09:24.668837",
-          "queries_executed": 8,
-          "sources_found": 0,
-          "sources_used": 0,
-          "known_sources_skipped": 0,
-          "known_sources_revisited": 0,
-          "adaptive_pass_used": false,
-          "adaptive_queries_executed": 6,
-          "adaptive_sources_used": 0,
-          "missing_fields_before_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "missing_fields_after_adaptive": [
-            "website",
-            "description",
-            "industry",
-            "headquarters",
-            "founded_year",
-            "employees",
-            "revenue",
-            "revenue_currency",
-            "valuation",
-            "funding_raised",
-            "funding_rounds"
-          ],
-          "research_time_seconds": 24.29814,
-          "fields_carried_forward": 0
-        },
-        "errors": []
-      },
-      "known_urls": [],
-      "updated_at": "2026-03-11T01:09:24.668880"
+      "updated_at": "2026-03-11T02:39:17.976467"
     }
   }
 }
