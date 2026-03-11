@@ -1,0 +1,1663 @@
+{
+  "companies": {
+    "eneve": {
+      "latest_report": {
+        "company_name": "Eneve",
+        "is_synthetic": false,
+        "confidence_score": 0.7500000000000001,
+        "basic_info": {
+          "website": "https://eneve.com",
+          "description": "Smart software for the energy value chain",
+          "industry": "Energy",
+          "headquarters": "Netherlands",
+          "founded_year": 1997,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://eneve.com/about-eneve",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://eneve.recruitee.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://eneve.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://eneve.com",
+            "type": "company_website",
+            "confidence": 0.675
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T00:49:30.238269",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 4,
+          "research_time_seconds": 147.933315
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://eneve.com",
+        "https://eneve.com/",
+        "https://eneve.com/about-eneve",
+        "https://eneve.recruitee.com/"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976345"
+    },
+    "octopus energy group / kraken technologies": {
+      "latest_report": {
+        "company_name": "Octopus Energy Group / Kraken Technologies",
+        "is_synthetic": false,
+        "confidence_score": 0.5875,
+        "basic_info": {
+          "website": "https://www.octopusenergygeneration.com/",
+          "description": "Transforming the world of renewable generation by backing, building, and managing renewable energy projects",
+          "industry": "Renewable Energy",
+          "headquarters": null,
+          "founded_year": 2016,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": 8000000000
+        },
+        "funding": {
+          "total_raised": 800000000,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://www.octopusenergygeneration.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://octopusenergy.group/",
+            "type": "company_website",
+            "confidence": 0.5000000000000002
+          },
+          {
+            "url": "https://octopus.energy/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://octopus.energy/contact-us/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T00:51:58.310569",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 4,
+          "research_time_seconds": 148.072152
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://octopus.energy/",
+        "https://octopus.energy/contact-us/",
+        "https://octopusenergy.group/",
+        "https://www.octopusenergygeneration.com/"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976367"
+    },
+    "volue asa": {
+      "latest_report": {
+        "company_name": "Volue ASA",
+        "is_synthetic": false,
+        "confidence_score": 0.5700000000000001,
+        "basic_info": {
+          "website": "https://www.volue.com/",
+          "description": "Energy market services and software provider",
+          "industry": "Energy",
+          "headquarters": "Oslo, Norway",
+          "founded_year": null,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 54,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://www.bloomberg.com/profile/company/VOLUE:NO",
+            "type": "news",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://www.volue.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.volue.com/energy-market-services",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.volue.com/en/about-volue/corporate-governance",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/volue/__3NpJvBep98NgfgPyH9vAshrooS-6USe1z3W2WKfaT2g/funding-and-investors",
+            "type": "company_website",
+            "confidence": 0.325
+          },
+          {
+            "url": "https://www.linkedin.com/posts/ta-associates_ta-is-pleased-to-announce-a-strategic-investment-activity-7428091159786283008-G4AH",
+            "type": "linkedin",
+            "confidence": 0.47500000000000003
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T00:54:25.709422",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "research_time_seconds": 147.398695
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://tracxn.com/d/companies/volue/__3NpJvBep98NgfgPyH9vAshrooS-6USe1z3W2WKfaT2g/funding-and-investors",
+        "https://www.bloomberg.com/profile/company/VOLUE:NO",
+        "https://www.linkedin.com/posts/ta-associates_ta-is-pleased-to-announce-a-strategic-investment-activity-7428091159786283008-G4AH",
+        "https://www.volue.com/",
+        "https://www.volue.com/en/about-volue/corporate-governance",
+        "https://www.volue.com/energy-market-services"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976373"
+    },
+    "cgi inc.": {
+      "latest_report": {
+        "company_name": "CGI Inc.",
+        "is_synthetic": false,
+        "confidence_score": 0.8500000000000002,
+        "basic_info": {
+          "website": "www.cgi.com/en",
+          "description": "Provider of information technology and business process outsourcing services",
+          "industry": "Information Technology",
+          "headquarters": "Montreal, Canada",
+          "founded_year": 1976,
+          "employees": 27000
+        },
+        "financials": {
+          "revenue": 10.33,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 34
+        },
+        "data_sources": [
+          {
+            "url": "https://www.cgi.com/en/careers",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://www.cgi.com/us/en-us",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.cgi.com/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.cgi.com/us/en-us/federal",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.cgimotion.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/cgi/__xiZiqQKg5aM0D-ft5NI1xgi_e3wetnSsnl18LkN3-mA",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/CGI_Inc.",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://www.cgi.com/en/investors",
+            "type": "company_website",
+            "confidence": 0.7750000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T00:58:22.514863",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 8,
+          "research_time_seconds": 236.805306
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/CGI_Inc.",
+        "https://tracxn.com/d/companies/cgi/__xiZiqQKg5aM0D-ft5NI1xgi_e3wetnSsnl18LkN3-mA",
+        "https://www.cgi.com/en",
+        "https://www.cgi.com/en/careers",
+        "https://www.cgi.com/en/investors",
+        "https://www.cgi.com/us/en-us",
+        "https://www.cgi.com/us/en-us/federal",
+        "https://www.cgimotion.com/"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976385"
+    },
+    "accenture": {
+      "latest_report": {
+        "company_name": "Accenture",
+        "is_synthetic": false,
+        "confidence_score": 0.95,
+        "basic_info": {
+          "website": "https://www.accenture.com",
+          "description": "Multinational technology consulting company",
+          "industry": "Professional services, Information technology consulting",
+          "headquarters": "Dublin, Ireland",
+          "founded_year": 1989,
+          "employees": 779000
+        },
+        "financials": {
+          "revenue": 69670,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://www.accenture.com/us-en/about/company/annual-report",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://newsroom.accenture.com/news/2025/accenture-reports-fourth-quarter-and-full-year-fiscal-2025-results",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Accenture",
+            "type": "wikipedia",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://www.accenture.com/us-en/about/company-index",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://www.accenture.com/us-en/careers",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.accenture.com/us-en/careers/jobsearch",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://www.accenture.com/us-en",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://www.accenture.com/us-en/about/contact-us",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://www.accenture.com/content/dam/accenture/final/accenture-com/document-4/Annual-Report-2025.pdf",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T02:40:24.157371",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 3,
+          "known_sources_skipped": 6,
+          "known_sources_revisited": 0,
+          "research_time_seconds": 66.180922,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Accenture",
+        "https://newsroom.accenture.com/news/2025/accenture-reports-fourth-quarter-and-full-year-fiscal-2025-results",
+        "https://www.accenture.com/content/dam/accenture/final/accenture-com/document-4/Annual-Report-2025.pdf",
+        "https://www.accenture.com/us-en",
+        "https://www.accenture.com/us-en/about/company-index",
+        "https://www.accenture.com/us-en/about/company/annual-report",
+        "https://www.accenture.com/us-en/about/contact-us",
+        "https://www.accenture.com/us-en/careers",
+        "https://www.accenture.com/us-en/careers/jobsearch"
+      ],
+      "updated_at": "2026-03-11T02:40:24.157551"
+    },
+    "capgemini": {
+      "latest_report": {
+        "company_name": "Capgemini",
+        "is_synthetic": false,
+        "confidence_score": 0.8500000000000002,
+        "basic_info": {
+          "website": "www.capgemini.com",
+          "description": "Provider of IT consulting services for business transformation and management",
+          "industry": "IT consulting",
+          "headquarters": "Paris, France",
+          "founded_year": 1967,
+          "employees": 16755
+        },
+        "financials": {
+          "revenue": 22.1,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 28
+        },
+        "data_sources": [
+          {
+            "url": "https://www.capgemini.com/careers/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.capgemini.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.capgemini.com/us-en/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.capgemini.com/news/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.capgemini.com/careers/join-capgemini/job-search/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/capgemini/__jjVut3QWaaYeew6cUlXE3g71q4l56bXf7Og-IXyhbUU",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://www.capgemini.com/news/press-releases/full-year-2025-results/",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:05:15.408256",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 7,
+          "research_time_seconds": 219.894596
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://tracxn.com/d/companies/capgemini/__jjVut3QWaaYeew6cUlXE3g71q4l56bXf7Og-IXyhbUU",
+        "https://www.capgemini.com/",
+        "https://www.capgemini.com/careers/",
+        "https://www.capgemini.com/careers/join-capgemini/job-search/",
+        "https://www.capgemini.com/news/",
+        "https://www.capgemini.com/news/press-releases/full-year-2025-results/",
+        "https://www.capgemini.com/us-en/"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976394"
+    },
+    "tcs (tata consultancy services)": {
+      "latest_report": {
+        "company_name": "TCS (Tata Consultancy Services)",
+        "is_synthetic": false,
+        "confidence_score": 0.9375,
+        "basic_info": {
+          "website": "www.tcs.com",
+          "description": "Provides global IT services consulting solutions for diverse industries",
+          "industry": "IT services",
+          "headquarters": "Mumbai, India",
+          "founded_year": 1968,
+          "employees": 519206
+        },
+        "financials": {
+          "revenue": 259000,
+          "revenue_currency": "INR",
+          "valuation": 21300
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://www.tcs.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.tata.com/business/tcs",
+            "type": "company_website",
+            "confidence": 0.7750000000000001
+          },
+          {
+            "url": "https://www.tcs.com/careers",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.tcsion.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/tcs/__3_AETZlGlcPjROzTv3Kf6pDJr9uvxvM7oNJ_Z-YrbVI",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Tata_Consultancy_Services",
+            "type": "wikipedia",
+            "confidence": 0.5500000000000002
+          },
+          {
+            "url": "https://startuptalky.com/tcs-success-story/",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:09:30.792887",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 7,
+          "research_time_seconds": 255.384516
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Tata_Consultancy_Services",
+        "https://startuptalky.com/tcs-success-story/",
+        "https://tracxn.com/d/companies/tcs/__3_AETZlGlcPjROzTv3Kf6pDJr9uvxvM7oNJ_Z-YrbVI",
+        "https://www.tata.com/business/tcs",
+        "https://www.tcs.com/",
+        "https://www.tcs.com/careers",
+        "https://www.tcsion.com/"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976403"
+    },
+    "infosys": {
+      "latest_report": {
+        "company_name": "Infosys",
+        "is_synthetic": false,
+        "confidence_score": 0.9133333333333333,
+        "basic_info": {
+          "website": "www.infosys.com",
+          "description": "Provider of digital marketing, data analytics, and IT services",
+          "industry": "IT services",
+          "headquarters": "Bengaluru, India",
+          "founded_year": 1981,
+          "employees": 224921
+        },
+        "financials": {
+          "revenue": 167000,
+          "revenue_currency": "INR",
+          "valuation": 100000000000
+        },
+        "funding": {
+          "total_raised": 200000000,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://find-and-update.company-information.service.gov.uk/company/FC020086",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Infosys",
+            "type": "wikipedia",
+            "confidence": 0.5500000000000002
+          },
+          {
+            "url": "https://tracxn.com/d/companies/infosys/__aXRJC82TzaJDQOtKfrLhJCBFVM-eZUDVsYA0BfXMmXQ",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://startuptalky.com/infosys-success-story/",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:13:33.956132",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 4,
+          "research_time_seconds": 243.163098
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Infosys",
+        "https://find-and-update.company-information.service.gov.uk/company/FC020086",
+        "https://startuptalky.com/infosys-success-story/",
+        "https://tracxn.com/d/companies/infosys/__aXRJC82TzaJDQOtKfrLhJCBFVM-eZUDVsYA0BfXMmXQ"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976406"
+    },
+    "sopra steria": {
+      "latest_report": {
+        "company_name": "Sopra Steria",
+        "is_synthetic": false,
+        "confidence_score": 0.8500000000000002,
+        "basic_info": {
+          "website": "https://www.soprasteria.com",
+          "description": "European-based consulting, digital services, and software development company",
+          "industry": "Information technology consulting and services",
+          "headquarters": "Paris, France",
+          "founded_year": 1968,
+          "employees": 58000
+        },
+        "financials": {
+          "revenue": 4.682,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://www.linkedin.com/company/soprasteria",
+            "type": "linkedin",
+            "confidence": 0.7750000000000001
+          },
+          {
+            "url": "https://www.soprasteria.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Sopra_Steria",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://www.soprasteria.com/about-us",
+            "type": "company_website",
+            "confidence": 0.7000000000000002
+          },
+          {
+            "url": "https://www.soprasteria.in",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:16:42.959197",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 5,
+          "research_time_seconds": 189.002947
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Sopra_Steria",
+        "https://www.linkedin.com/company/soprasteria",
+        "https://www.soprasteria.com/",
+        "https://www.soprasteria.com/about-us",
+        "https://www.soprasteria.in"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976410"
+    },
+    "eneco": {
+      "latest_report": {
+        "company_name": "Eneco",
+        "is_synthetic": false,
+        "confidence_score": 0.8100000000000002,
+        "basic_info": {
+          "website": "https://enecoenergy.com/",
+          "description": "Logistics services sector",
+          "industry": "Logistics",
+          "headquarters": "Singapore",
+          "founded_year": 1992,
+          "employees": 4000
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://www.eneco.nl/en/about-us/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://enecoenergy.com/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://www.eneco.co.uk/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.jobsateneco.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.eneco.nl/en/about-us/who-we-are/contact/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.eneco.nl/-/media/eneco-com/files/eneco-annual-report-2023.pdf?rev=5f1d046154e14c3083fcfcf253955d07&sc_lang=en",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:23:37.660274",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "research_time_seconds": 414.70092
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://enecoenergy.com/",
+        "https://www.eneco.co.uk/",
+        "https://www.eneco.nl/-/media/eneco-com/files/eneco-annual-report-2023.pdf?rev=5f1d046154e14c3083fcfcf253955d07&sc_lang=en",
+        "https://www.eneco.nl/en/about-us/",
+        "https://www.eneco.nl/en/about-us/who-we-are/contact/",
+        "https://www.jobsateneco.com/"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976414"
+    },
+    "vattenfall": {
+      "latest_report": {
+        "company_name": "Vattenfall",
+        "is_synthetic": false,
+        "confidence_score": 0.8500000000000002,
+        "basic_info": {
+          "website": "https://group.vattenfall.com",
+          "description": "Producer of heat and power generating services",
+          "industry": "Energy",
+          "headquarters": "Stockholm, Sweden",
+          "founded_year": 1909,
+          "employees": 8785
+        },
+        "financials": {
+          "revenue": 27.4,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 19
+        },
+        "data_sources": [
+          {
+            "url": "https://group.vattenfall.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://powerplants.vattenfall.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://history.vattenfall.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://powerplants.vattenfall.com/slufterdam/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://history.vattenfall.com/stories",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://tracxn.com/d/companies/vattenfall/__aVy5L3n8sXoBQmSiM3o2myPlL7JoGFWCWOE1lWtaKRI",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:28:10.831451",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "research_time_seconds": 273.171042
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://group.vattenfall.com/",
+        "https://history.vattenfall.com/",
+        "https://history.vattenfall.com/stories",
+        "https://powerplants.vattenfall.com/",
+        "https://powerplants.vattenfall.com/slufterdam/",
+        "https://tracxn.com/d/companies/vattenfall/__aVy5L3n8sXoBQmSiM3o2myPlL7JoGFWCWOE1lWtaKRI"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976417"
+    },
+    "tennet": {
+      "latest_report": {
+        "company_name": "TenneT",
+        "is_synthetic": false,
+        "confidence_score": 0.7818181818181817,
+        "basic_info": {
+          "website": "tennet.eu",
+          "description": "TenneT is actively investing in extensive grid expansion projects, including offshore and onshore development, with a focus on accelerating the transition to renewable energy sources.",
+          "industry": "Utilities",
+          "headquarters": "Arnhem, Gelderland, Netherlands",
+          "founded_year": null,
+          "employees": 3600
+        },
+        "financials": {
+          "revenue": 5,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 11,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://leadiq.com/c/tennet-tso-bv/5a1d89ab24000024006304ab",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://www.gic.com.sg/newsroom/all/tennet-secures-equity-funding-for-tennet-germany-through-future-partnership-with-large-institutional-investors-in-europe/",
+            "type": "company_website",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:31:59.500443",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 2,
+          "research_time_seconds": 228.668828
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://leadiq.com/c/tennet-tso-bv/5a1d89ab24000024006304ab",
+        "https://www.gic.com.sg/newsroom/all/tennet-secures-equity-funding-for-tennet-germany-through-future-partnership-with-large-institutional-investors-in-europe/"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976421"
+    },
+    "stedin": {
+      "latest_report": {
+        "company_name": "Stedin",
+        "is_synthetic": false,
+        "confidence_score": 0.8833333333333336,
+        "basic_info": {
+          "website": "www.stedin.net/",
+          "description": "Provider of electricity and gas network infrastructure. This company manages and maintains the networks that deliver energy to consumers.",
+          "industry": "Energy",
+          "headquarters": "Rotterdam, Netherlands",
+          "founded_year": 1886,
+          "employees": 2949
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 17000000,
+          "rounds": 3
+        },
+        "data_sources": [
+          {
+            "url": "https://www.stedingroep.nl/eng",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.stedingroep.nl/eng/investor-relations",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://irissmartcities.eu/stedin-netbeheer-bv-sted-the-nederlands/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://www.stedin.net/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://tracxn.com/d/companies/stedin/__bJ_CfJLgB2QiyqskB0nQFjeFhBmkGBLIVsG_a-X2p2o",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/energyweb/__HqWziTjKIHo-QqGfrXFesTXGbxrVNrS8ZViMmVd3oPE",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:36:02.066684",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "research_time_seconds": 242.566095
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://irissmartcities.eu/stedin-netbeheer-bv-sted-the-nederlands/",
+        "https://tracxn.com/d/companies/energyweb/__HqWziTjKIHo-QqGfrXFesTXGbxrVNrS8ZViMmVd3oPE",
+        "https://tracxn.com/d/companies/stedin/__bJ_CfJLgB2QiyqskB0nQFjeFhBmkGBLIVsG_a-X2p2o",
+        "https://www.stedin.net/",
+        "https://www.stedingroep.nl/eng",
+        "https://www.stedingroep.nl/eng/investor-relations"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976425"
+    },
+    "alliander": {
+      "latest_report": {
+        "company_name": "Alliander",
+        "is_synthetic": false,
+        "confidence_score": 0.7500000000000001,
+        "basic_info": {
+          "website": "https://www.alliander.com/",
+          "description": "Network company responsible for the distribution of energy, such as electricity, (bio)gas and heat",
+          "industry": "Energy",
+          "headquarters": "Arnhem, Netherlands",
+          "founded_year": null,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://www.alliander.com/en/disclaimer/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://www.alliander.com/en/contact/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://www.alliander.com/en/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.energystoragenl.nl/en/lid/alliander/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.scopegroup.com/ScopeGroupApi/api/analysis?id=f79ed9f9-3f71-4955-bcd9-27b8c812984b",
+            "type": "company_website",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:38:50.836931",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 5,
+          "research_time_seconds": 168.770071
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://www.alliander.com/en/",
+        "https://www.alliander.com/en/contact/",
+        "https://www.alliander.com/en/disclaimer/",
+        "https://www.energystoragenl.nl/en/lid/alliander/",
+        "https://www.scopegroup.com/ScopeGroupApi/api/analysis?id=f79ed9f9-3f71-4955-bcd9-27b8c812984b"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976429"
+    },
+    "shell": {
+      "latest_report": {
+        "company_name": "Shell",
+        "is_synthetic": false,
+        "confidence_score": 0.675,
+        "basic_info": {
+          "website": "https://shellfoundation.org/",
+          "description": "A philanthropic foundation that enables millions of people in Africa and Asia to increase their incomes with clean energy solutions",
+          "industry": "Non-Profit",
+          "headquarters": null,
+          "founded_year": null,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://shellfoundation.org/",
+            "type": "company_website",
+            "confidence": 0.675
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:40:10.571158",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 1,
+          "research_time_seconds": 79.734057
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://shellfoundation.org/"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976431"
+    },
+    "bp": {
+      "latest_report": {
+        "company_name": "BP",
+        "is_synthetic": false,
+        "confidence_score": 0.9499999999999998,
+        "basic_info": {
+          "website": "https://www.bp.com",
+          "description": "Energy company",
+          "industry": "Energy",
+          "headquarters": "London, United Kingdom",
+          "founded_year": 1909,
+          "employees": 70000
+        },
+        "financials": {
+          "revenue": 278395,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://www.bp.com/en/global/corporate/contact-us.html",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.pharmacopoeia.com/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://www.bp.com/en/global/corporate/careers.html",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://www.bp.org.br/privacy-policy",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://www.bp.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://earth.org/bp-increases-oil-and-gas-investments-drops-renewable-targets/",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://www.bp.com/en/global/corporate/investors.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.bp.com/en_us/united-states/home/community/bp-foundation.html",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:43:12.909040",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 8,
+          "research_time_seconds": 182.337729
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://earth.org/bp-increases-oil-and-gas-investments-drops-renewable-targets/",
+        "https://www.bp.com/",
+        "https://www.bp.com/en/global/corporate/careers.html",
+        "https://www.bp.com/en/global/corporate/contact-us.html",
+        "https://www.bp.com/en/global/corporate/investors.html",
+        "https://www.bp.com/en_us/united-states/home/community/bp-foundation.html",
+        "https://www.bp.org.br/privacy-policy",
+        "https://www.pharmacopoeia.com/"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976436"
+    },
+    "totalenergies": {
+      "latest_report": {
+        "company_name": "TotalEnergies",
+        "is_synthetic": false,
+        "confidence_score": 0.7535714285714287,
+        "basic_info": {
+          "website": "https://totalenergies.com/",
+          "description": "Global integrated energy company that produces and markets energies",
+          "industry": "Energy",
+          "headquarters": "France",
+          "founded_year": 1924,
+          "employees": 100000
+        },
+        "financials": {
+          "revenue": 184786,
+          "revenue_currency": "USD million",
+          "valuation": 673683200000
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://totalenergies.com/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://totalenergies.com/brazil",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://totalenergies.com/clients-websites",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://totalenergies.com/energy-transition",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://totalenergies.com/info/help-and-contact",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://prospeo.io/c/totalenergies-revenue",
+            "type": "company_website",
+            "confidence": 0.4750000000000001
+          },
+          {
+            "url": "https://totalenergies.com/sites/g/files/nytnzq121/files/documents/2022-08/Factbook_2021.pdf",
+            "type": "company_website",
+            "confidence": 0.75
+          },
+          {
+            "url": "https://totalenergies.com/news/press-releases/2025-strategy-and-outlook-presentation",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:46:55.703702",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 8,
+          "research_time_seconds": 222.79451
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://prospeo.io/c/totalenergies-revenue",
+        "https://totalenergies.com/",
+        "https://totalenergies.com/brazil",
+        "https://totalenergies.com/clients-websites",
+        "https://totalenergies.com/energy-transition",
+        "https://totalenergies.com/info/help-and-contact",
+        "https://totalenergies.com/news/press-releases/2025-strategy-and-outlook-presentation",
+        "https://totalenergies.com/sites/g/files/nytnzq121/files/documents/2022-08/Factbook_2021.pdf"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976441"
+    },
+    "equinor": {
+      "latest_report": {
+        "company_name": "Equinor",
+        "is_synthetic": false,
+        "confidence_score": 0.7500000000000001,
+        "basic_info": {
+          "website": "https://www.equinor.com",
+          "description": "Norwegian oil giant",
+          "industry": "Energy",
+          "headquarters": "Norway",
+          "founded_year": null,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://www.equinor.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.equinorout.com/about-us",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.equinorout.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.equinor.com/where-we-are/brazil",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://cryptorank.io/funds/equinor-ventures/rounds",
+            "type": "company_website",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:49:46.390914",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 5,
+          "research_time_seconds": 170.687048
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://cryptorank.io/funds/equinor-ventures/rounds",
+        "https://www.equinor.com/",
+        "https://www.equinor.com/where-we-are/brazil",
+        "https://www.equinorout.com/",
+        "https://www.equinorout.com/about-us"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976444"
+    },
+    "orsted": {
+      "latest_report": {
+        "company_name": "Orsted",
+        "is_synthetic": false,
+        "confidence_score": 0.8500000000000002,
+        "basic_info": {
+          "website": "https://orsted.com",
+          "description": "Danish multinational energy company",
+          "industry": "Electricity generation",
+          "headquarters": "Fredericia, Denmark",
+          "founded_year": 2006,
+          "employees": 8905
+        },
+        "financials": {
+          "revenue": 79.26,
+          "revenue_currency": "billion kr.",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 8
+        },
+        "data_sources": [
+          {
+            "url": "https://en.wikipedia.org/wiki/%C3%98rsted_(company)",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://tracxn.com/d/companies/orsted/__bFFWxbDkKmMpM-RGJZvHs5U9l3lyqWjhHmgFGfdBsQ4",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:50:51.833153",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 2,
+          "research_time_seconds": 65.4421
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/%C3%98rsted_(company)",
+        "https://tracxn.com/d/companies/orsted/__bFFWxbDkKmMpM-RGJZvHs5U9l3lyqWjhHmgFGfdBsQ4"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976448"
+    },
+    "siemens energy": {
+      "latest_report": {
+        "company_name": "Siemens Energy",
+        "is_synthetic": false,
+        "confidence_score": 0.6431818181818184,
+        "basic_info": {
+          "website": "https://www.siemens-energy.com",
+          "description": "A global company that aims to energize society and shape the future of the energy sector",
+          "industry": "Energy",
+          "headquarters": "Germany",
+          "founded_year": null,
+          "employees": 100000
+        },
+        "financials": {
+          "revenue": 9.7,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://www.siemens-energy.com/global/en/home/careers/working-with-us.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.siemens-energy.com/global/en/home/contact.html",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://www.siemens-energy.com/global/en/home/company/about.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.siemens-energy.com/global/en/home.html",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.siemens-energy.com/global/en/home/investor-relations.html",
+            "type": "company_website",
+            "confidence": 0.525
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:53:17.852728",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 5,
+          "research_time_seconds": 146.019425
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://www.siemens-energy.com/global/en/home.html",
+        "https://www.siemens-energy.com/global/en/home/careers/working-with-us.html",
+        "https://www.siemens-energy.com/global/en/home/company/about.html",
+        "https://www.siemens-energy.com/global/en/home/contact.html",
+        "https://www.siemens-energy.com/global/en/home/investor-relations.html"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976451"
+    },
+    "ge vernova": {
+      "latest_report": {
+        "company_name": "GE Vernova",
+        "is_synthetic": false,
+        "confidence_score": 0.8022727272727274,
+        "basic_info": {
+          "website": "https://www.gevernova.com",
+          "description": "A company focused on building a more sustainable electric power system and improving climate change emissions",
+          "industry": "Energy",
+          "headquarters": "Cambridge, MA",
+          "founded_year": 1894,
+          "employees": 85000
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 600000000,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://www.fieldcore.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.gevernova.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.gevernova.com/company/about",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://www.gevernova.com/grid-solutions/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://careers.gevernova.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.gevernova.com/news/press-releases/ge-vernova-invest-almost-600-million-us-factories-facilities-over-next-two-years",
+            "type": "company_website",
+            "confidence": 0.7250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:56:14.164276",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "research_time_seconds": 176.311393
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://careers.gevernova.com/",
+        "https://www.fieldcore.com/",
+        "https://www.gevernova.com/",
+        "https://www.gevernova.com/company/about",
+        "https://www.gevernova.com/grid-solutions/",
+        "https://www.gevernova.com/news/press-releases/ge-vernova-invest-almost-600-million-us-factories-facilities-over-next-two-years"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976455"
+    },
+    "schneider electric": {
+      "latest_report": {
+        "company_name": "Schneider Electric",
+        "is_synthetic": false,
+        "confidence_score": 0.8500000000000002,
+        "basic_info": {
+          "website": "www.se.com",
+          "description": "Provider of energy management and automation services",
+          "industry": "Energy Management and Automation",
+          "headquarters": "Rueil malmaison, France",
+          "founded_year": 1836,
+          "employees": 86825
+        },
+        "financials": {
+          "revenue": 38.2,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 28
+        },
+        "data_sources": [
+          {
+            "url": "https://www.se.com/ww/en/about-us/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.se.com/ww/en/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://www.se.com/us/en/",
+            "type": "company_website",
+            "confidence": 0.5750000000000001
+          },
+          {
+            "url": "https://www.se.com/ng/en/all-products/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://www.se.com/ww/en/about-us/university/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://tracxn.com/d/companies/schneiderelectric/__AN73wDA0Ir5h0d-EHkk74UUEXHL6RnliBx6y_s8ya-U",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Schneider_Electric",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T01:59:58.757759",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 7,
+          "research_time_seconds": 224.59333
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Schneider_Electric",
+        "https://tracxn.com/d/companies/schneiderelectric/__AN73wDA0Ir5h0d-EHkk74UUEXHL6RnliBx6y_s8ya-U",
+        "https://www.se.com/ng/en/all-products/",
+        "https://www.se.com/us/en/",
+        "https://www.se.com/ww/en/",
+        "https://www.se.com/ww/en/about-us/",
+        "https://www.se.com/ww/en/about-us/university/"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976459"
+    },
+    "abb": {
+      "latest_report": {
+        "company_name": "ABB",
+        "is_synthetic": false,
+        "confidence_score": 0.37500000000000006,
+        "basic_info": {
+          "website": "https://www.abb.com",
+          "description": "ABB is a technology leader in electrification and automation, enabling a more sustainable and resource-efficient future.",
+          "industry": "Automation Machinery Manufacturing",
+          "headquarters": "Affolternstrasse 44, Zurich, ZH 8050, CH",
+          "founded_year": null,
+          "employees": 110000
+        },
+        "financials": {
+          "revenue": 32915000000,
+          "revenue_currency": "USD",
+          "valuation": 105328000000
+        },
+        "funding": {
+          "total_raised": 545900000,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://prospeo.io/c/abb-revenue",
+            "type": "company_website",
+            "confidence": 0.3750000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T02:03:17.337781",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 1,
+          "research_time_seconds": 198.579891
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://prospeo.io/c/abb-revenue"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976463"
+    },
+    "hitachi energy": {
+      "latest_report": {
+        "company_name": "Hitachi Energy",
+        "is_synthetic": false,
+        "confidence_score": 0.9499999999999998,
+        "basic_info": {
+          "website": "hitachi.com",
+          "description": "Japanese multinational engineering and electronics company",
+          "industry": "Conglomerate",
+          "headquarters": "Marunouchi, Chiyoda-ku, Tokyo, Japan",
+          "founded_year": 1910,
+          "employees": 268655
+        },
+        "financials": {
+          "revenue": 10530,
+          "revenue_currency": "USD billion",
+          "valuation": 169
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://www.hitachi.com/products/energy/portal/index.html",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.hitachienergy.com/about-us/company-profile",
+            "type": "company_website",
+            "confidence": 0.7750000000000001
+          },
+          {
+            "url": "https://www.hitachi.com/en/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://www.hitachienergy.com/careers",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://www.hitachienergy.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Hitachi",
+            "type": "wikipedia",
+            "confidence": 0.9500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T02:06:18.545625",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "research_time_seconds": 181.207705
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Hitachi",
+        "https://www.hitachi.com/en/",
+        "https://www.hitachi.com/products/energy/portal/index.html",
+        "https://www.hitachienergy.com/",
+        "https://www.hitachienergy.com/about-us/company-profile",
+        "https://www.hitachienergy.com/careers"
+      ],
+      "updated_at": "2026-03-11T02:39:17.976467"
+    }
+  }
+}

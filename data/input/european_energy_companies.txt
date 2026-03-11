@@ -1,0 +1,26 @@
+# European Energy Software Market - 24 Companies
+# Format: Company Name | Industry
+Eneve | Energy Software
+Octopus Energy Group / Kraken Technologies | Energy Software
+Volue ASA | Energy Software
+CGI Inc. | IT Services
+Accenture | IT Services
+Capgemini | IT Services
+TCS (Tata Consultancy Services) | IT Services
+Infosys | IT Services
+Sopra Steria | IT Services
+Eneco | Energy Utility
+Vattenfall | Energy Utility
+TenneT | Grid Operator
+Stedin | Grid Operator
+Alliander | Grid Operator
+Shell | Integrated Energy
+BP | Integrated Energy
+TotalEnergies | Integrated Energy
+Equinor | Integrated Energy
+Orsted | Renewables Developer
+Siemens Energy | Energy Technology
+GE Vernova | Energy Technology
+Schneider Electric | Energy Management
+ABB | Electrification
+Hitachi Energy | Grid Technology
