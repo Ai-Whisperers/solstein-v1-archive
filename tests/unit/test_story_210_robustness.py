@@ -30,20 +30,20 @@ class TestRealDataRobustness:
     def real_companies_data(self) -> list[dict]:
         """Load real companies from test data."""
         data_file = Path(__file__).parent.parent / "data" / "input" / "competitor_data_real_enriched.json"
-        
+
         if not data_file.exists():
             # Try relative to project root
             data_file = Path(__file__).parent.parent.parent / "data" / "input" / "competitor_data_real_enriched.json"
-        
+
         if not data_file.exists():
             pytest.skip(f"Real data file not found: {data_file}")
-        
+
         with open(data_file) as f:
             data = json.load(f)
-        
+
         # Data structure: {"competitors": [...], "metadata": {...}}
         companies = data.get("competitors", data) if isinstance(data, dict) else data
-        
+
         assert len(companies) >= 5, f"Expected at least 5 real companies, got {len(companies)}"
         return companies[:5]
 

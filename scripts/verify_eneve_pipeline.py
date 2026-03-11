@@ -210,20 +210,20 @@ def verify_unified_converter():
     """Verify unified converter works with real data (EPIC-058)."""
     logger.info("Verifying unified converter with real data...")
     import json
-    
+
     enriched_path = Path("data/input/competitor_data_real_enriched.json")
     input_path = enriched_path if enriched_path.exists() else Path("data/input/competitor_data_real.json")
-    
+
     if not input_path.exists():
         logger.warning(f"Real data file not found, skipping converter test")
         return
-    
+
     with open(input_path) as f:
         data = json.load(f)
-    
+
     companies_raw = data["competitors"]
     logger.info(f"  Testing conversion on {len(companies_raw)} real companies...")
-    
+
     errors = []
     for i, raw in enumerate(companies_raw[:3]):
         try:
@@ -236,7 +236,7 @@ def verify_unified_converter():
         except Exception as e:
             errors.append(str(e))
             logger.error(f"  FAILED: {e}")
-    
+
     if errors:
         raise AssertionError(f"Converter failed")
     logger.info("OK Unified converter verified")
