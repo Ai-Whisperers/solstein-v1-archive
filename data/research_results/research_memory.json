@@ -8870,6 +8870,2490 @@
         "https://tracxn.com/d/companies/gasunie/__OxkDvQrHb0QciNzIR2phy-PSUDUXdW84KdFP_fmvJlA"
       ],
       "updated_at": "2026-03-11T05:58:25.527131"
+    },
+    "energieopwek": {
+      "latest_report": {
+        "company_name": "Energieopwek",
+        "is_synthetic": false,
+        "confidence_score": 0.8375,
+        "basic_info": {
+          "website": "https://gasunie.nl",
+          "description": "Energy infrastructure company",
+          "industry": "Energy",
+          "headquarters": "Netherlands",
+          "founded_year": 2016,
+          "employees": 196
+        },
+        "financials": {
+          "revenue": 190,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://hanze.nl/en/research/centres/entrance-centre-of-expertise-energy/professorships/energy-transition",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://topsectorenergie.nl/en",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://entrance.eu/en/about-entrance/lectorates/energy-transition",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://gasunie.nl/en/organisation/annual-report/$15517/$15518/Gasunie%202020%20annual%20report.pdf",
+            "type": "company_website",
+            "confidence": 0.8750000000000001
+          },
+          {
+            "url": "https://energystoragenl.nl/en/2025/07/24/compliment-van-de-maand-nationaal-klimaat-platform-en-energieopwek-nl",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://energie-nederland.nl/en/topics/renewable-energy/facts-figures",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://nltimes.nl/2024/08/01/growth-sustainable-energy-generation-stagnating-platform",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:03:33.943554",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 308.409427,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://energie-nederland.nl/en/topics/renewable-energy/facts-figures",
+        "https://energystoragenl.nl/en/2025/07/24/compliment-van-de-maand-nationaal-klimaat-platform-en-energieopwek-nl",
+        "https://entrance.eu/en/about-entrance/lectorates/energy-transition",
+        "https://gasunie.nl/en/organisation/annual-report/$15517/$15518/Gasunie%202020%20annual%20report.pdf",
+        "https://hanze.nl/en/research/centres/entrance-centre-of-expertise-energy/professorships/energy-transition",
+        "https://nltimes.nl/2024/08/01/growth-sustainable-energy-generation-stagnating-platform",
+        "https://topsectorenergie.nl/en"
+      ],
+      "updated_at": "2026-03-11T06:03:33.943639"
+    },
+    "flower power": {
+      "latest_report": {
+        "company_name": "Flower Power",
+        "is_synthetic": false,
+        "confidence_score": 0.740909090909091,
+        "basic_info": {
+          "website": "https://flowerpower.com.au/",
+          "description": "Sydney's Trusted Online Garden Centre",
+          "industry": "Retail",
+          "headquarters": "Sydney, Australia",
+          "founded_year": 1954,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 100000000,
+          "rounds": [
+            "Series A"
+          ]
+        },
+        "data_sources": [
+          {
+            "url": "https://flowerpower.com.au/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://flowerpowercruise.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://getflowerpower.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://flowerpower.net/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://flowerpowerdispensers.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://arctictoday.com/%F0%9F%87%B8%F0%9F%87%AA-flower-completes-e45m-series-a-round",
+            "type": "company_website",
+            "confidence": 0.7250000000000001
+          },
+          {
+            "url": "https://dnb.com/business-directory/company-profiles.flower_power_pty_ltd.7a8f66798a2c86a6bcbbf5d0665890e8.html",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://flowers-power.pl/index.php/front_page/partnership",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://payscale.com/research/AU/Employer=Flower_Power/Salary",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:08:42.356117",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "research_time_seconds": 308.405227,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://arctictoday.com/%F0%9F%87%B8%F0%9F%87%AA-flower-completes-e45m-series-a-round",
+        "https://dnb.com/business-directory/company-profiles.flower_power_pty_ltd.7a8f66798a2c86a6bcbbf5d0665890e8.html",
+        "https://flowerpower.com.au/",
+        "https://flowerpower.net/",
+        "https://flowerpowercruise.com/",
+        "https://flowerpowerdispensers.com/",
+        "https://flowers-power.pl/index.php/front_page/partnership",
+        "https://getflowerpower.com/",
+        "https://payscale.com/research/AU/Employer=Flower_Power/Salary"
+      ],
+      "updated_at": "2026-03-11T06:08:42.356214"
+    },
+    "fudura": {
+      "latest_report": {
+        "company_name": "Fudura",
+        "is_synthetic": false,
+        "confidence_score": 0.9267857142857141,
+        "basic_info": {
+          "website": "www.fudura.nl/nl/",
+          "description": "Energy infrastructure and measurement service provider",
+          "industry": "Energy",
+          "headquarters": "Zwolle, Netherlands",
+          "founded_year": 2011,
+          "employees": 287
+        },
+        "financials": {
+          "revenue": 67.3,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": true,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://fudura.nl/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://fudura.nl/en/about",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://infosupport.com/en/cases/fudura-and-info-support-realize-metering-company-of-the-future",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://tracxn.com/d/companies/fudura/__k0PBcfvIupinbYo4xApHwmM0cuMrTOJLHWJ-rv1YcLk",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://enexisgroep.com/media/x4qlyfxc/annual-report-2024-enexis-holding-nv.pdf",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://investormeetcompany.com/meeting/investor-presentation-819/presentation.pdf",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://enexisgroep.com/media/dzibrrwu/annual-report-2023-enexis-holding-nv-3.pdf",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://rocketreach.co/fudura-profile_b5e0e9e8f42e69e3",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:19:05.013286",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 323.431154,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://enexisgroep.com/media/dzibrrwu/annual-report-2023-enexis-holding-nv-3.pdf",
+        "https://enexisgroep.com/media/x4qlyfxc/annual-report-2024-enexis-holding-nv.pdf",
+        "https://fudura.nl/en",
+        "https://fudura.nl/en/about",
+        "https://infosupport.com/en/cases/fudura-and-info-support-realize-metering-company-of-the-future",
+        "https://investormeetcompany.com/meeting/investor-presentation-819/presentation.pdf",
+        "https://rocketreach.co/fudura-profile_b5e0e9e8f42e69e3",
+        "https://tracxn.com/d/companies/fudura/__k0PBcfvIupinbYo4xApHwmM0cuMrTOJLHWJ-rv1YcLk"
+      ],
+      "updated_at": "2026-03-11T06:19:05.013395"
+    },
+    "the green choice": {
+      "latest_report": {
+        "company_name": "The Green Choice",
+        "is_synthetic": false,
+        "confidence_score": 0.7821428571428574,
+        "basic_info": {
+          "website": "https://about.greenchoicenow.com/",
+          "description": "The food health & sustainability intelligence company. Used by food retailers & brands driving sales with transparency.",
+          "industry": "Technology, Information and Internet",
+          "headquarters": "San Diego, California",
+          "founded_year": 2019,
+          "employees": 11
+        },
+        "financials": {
+          "revenue": 0,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 100000,
+          "rounds": 3
+        },
+        "data_sources": [
+          {
+            "url": "https://greenchoices.org/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://greenchoiceenergy.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://greenchoice.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://about.greenchoicenow.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://greenchoicefoods.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://cbinsights.com/company/greenchoice/financials",
+            "type": "company_website",
+            "confidence": 0.525
+          },
+          {
+            "url": "https://linkedin.com/company/greenchoicepbc",
+            "type": "linkedin",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://about.greenchoicenow.com/contact",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://greenchoice1.com/contact-us",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://find-and-update.company-information.service.gov.uk/company/12129769",
+            "type": "company_website",
+            "confidence": 0.425
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:23:39.078260",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 10,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "headquarters",
+            "employees",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 274.057434,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://about.greenchoicenow.com/",
+        "https://about.greenchoicenow.com/contact",
+        "https://cbinsights.com/company/greenchoice/financials",
+        "https://find-and-update.company-information.service.gov.uk/company/12129769",
+        "https://greenchoice.com/",
+        "https://greenchoice1.com/contact-us",
+        "https://greenchoiceenergy.com/",
+        "https://greenchoicefoods.com/",
+        "https://greenchoices.org/",
+        "https://linkedin.com/company/greenchoicepbc"
+      ],
+      "updated_at": "2026-03-11T06:23:39.078400"
+    },
+    "qurrent": {
+      "latest_report": {
+        "company_name": "Qurrent",
+        "is_synthetic": false,
+        "confidence_score": 0.7375000000000002,
+        "basic_info": {
+          "website": "https://qurrent.energy",
+          "description": "Develops intelligent software solutions for the optimization, control, and automated trading of decentralized renewable energy assets",
+          "industry": "Energy",
+          "headquarters": "Sweden",
+          "founded_year": 2022,
+          "employees": 4
+        },
+        "financials": {
+          "revenue": 122000,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 0,
+          "rounds": 0
+        },
+        "data_sources": [
+          {
+            "url": "https://qurrent.energy/about-us",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://qurrent.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://qurrent.energy/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://qurrent.com/terms-of-service",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://qurrent.energy/offerings",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/qurrent/__APwyLO984pylm8ejwduNbkjE_jjuo7ezm1TBe094f2w",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://tracxn.com/d/companies/qurrent/__IoexGz9gfwuysPBBm3u5W_TeNJD5OabB7VmovnOv4PM",
+            "type": "company_website",
+            "confidence": 0.5499999999999999
+          },
+          {
+            "url": "https://verbund.com/en/group/news-press/press-releases/2025/7/16/qurrent",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://qurrent.com/about-us",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:26:36.623841",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 177.537809,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://qurrent.com/",
+        "https://qurrent.com/about-us",
+        "https://qurrent.com/terms-of-service",
+        "https://qurrent.energy/",
+        "https://qurrent.energy/about-us",
+        "https://qurrent.energy/offerings",
+        "https://tracxn.com/d/companies/qurrent/__APwyLO984pylm8ejwduNbkjE_jjuo7ezm1TBe094f2w",
+        "https://tracxn.com/d/companies/qurrent/__IoexGz9gfwuysPBBm3u5W_TeNJD5OabB7VmovnOv4PM",
+        "https://verbund.com/en/group/news-press/press-releases/2025/7/16/qurrent"
+      ],
+      "updated_at": "2026-03-11T06:26:36.623956"
+    },
+    "om": {
+      "latest_report": {
+        "company_name": "OM",
+        "is_synthetic": false,
+        "confidence_score": 0.8250000000000003,
+        "basic_info": {
+          "website": "https://omltd.co.jp/new_site_demo/html/en/omm/en/company.html?id=3",
+          "description": "Production and Sales of automatic machinery and other machines",
+          "industry": "Machinery",
+          "headquarters": "10-10 Ueno 1-chome, Taito-ku, Tokyo, 110-0005",
+          "founded_year": 1920,
+          "employees": 131
+        },
+        "financials": {
+          "revenue": 847,
+          "revenue_currency": "INR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 36.93,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://zhihu.com/question/2004904347956441729",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://forum.lephoceen.fr/",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://zhihu.com/question/392441539",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://zhihu.com/question/11431717101",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://dropstab.com/coins/mantra-dao/fundraising",
+            "type": "company_website",
+            "confidence": 0.525
+          },
+          {
+            "url": "https://find-and-update.company-information.service.gov.uk/company/13114020",
+            "type": "company_website",
+            "confidence": 0.425
+          },
+          {
+            "url": "https://omltd.co.jp/new_site_demo/html/en/omm/en/company.html?id=3",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://omltd.co.jp/new_site_demo/html/en/group.html?id=1",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://screener.in/company/OMINFRAL/consolidated",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://euromonitor.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:30:22.028882",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 10,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 5,
+          "missing_fields_before_adaptive": [
+            "description",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 225.397139,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://dropstab.com/coins/mantra-dao/fundraising",
+        "https://euromonitor.com/",
+        "https://find-and-update.company-information.service.gov.uk/company/13114020",
+        "https://forum.lephoceen.fr/",
+        "https://omltd.co.jp/new_site_demo/html/en/group.html?id=1",
+        "https://omltd.co.jp/new_site_demo/html/en/omm/en/company.html?id=3",
+        "https://screener.in/company/OMINFRAL/consolidated",
+        "https://zhihu.com/question/11431717101",
+        "https://zhihu.com/question/2004904347956441729",
+        "https://zhihu.com/question/392441539"
+      ],
+      "updated_at": "2026-03-11T06:30:22.029016"
+    },
+    "new motion": {
+      "latest_report": {
+        "company_name": "New Motion",
+        "is_synthetic": false,
+        "confidence_score": 0.9499999999999998,
+        "basic_info": {
+          "website": "www.newmotionlabs.com",
+          "description": "Manufacturer of automotive transmission systems",
+          "industry": "Automotive",
+          "headquarters": "London, United Kingdom",
+          "founded_year": 2019,
+          "employees": 10
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 3.31,
+          "rounds": 4
+        },
+        "data_sources": [
+          {
+            "url": "https://newmotion.world/en/privacy-policy",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://numotion.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://numotion.com/careers",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://neomotion.in/neobolt",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://ai.motion.com/motion-ai-launches-new-website",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://tracxn.com/d/companies/newmotion/__3FlrFvmD1f4NlXpCT_qJ0CrOlIWAoaCtXKqzytuLgAc",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://linkedin.com/company/motionindustries",
+            "type": "linkedin",
+            "confidence": 0.7250000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/new-motion-labs/__jV9HeXllShPoH--N-gShP2d5go8TkwZMNyWgsZgADNY",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:34:28.495659",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "research_time_seconds": 246.458937,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://ai.motion.com/motion-ai-launches-new-website",
+        "https://linkedin.com/company/motionindustries",
+        "https://neomotion.in/neobolt",
+        "https://newmotion.world/en/privacy-policy",
+        "https://numotion.com/",
+        "https://numotion.com/careers",
+        "https://tracxn.com/d/companies/new-motion-labs/__jV9HeXllShPoH--N-gShP2d5go8TkwZMNyWgsZgADNY",
+        "https://tracxn.com/d/companies/newmotion/__3FlrFvmD1f4NlXpCT_qJ0CrOlIWAoaCtXKqzytuLgAc"
+      ],
+      "updated_at": "2026-03-11T06:34:28.495748"
+    },
+    "evbox": {
+      "latest_report": {
+        "company_name": "EVBox",
+        "is_synthetic": false,
+        "confidence_score": 0.9285714285714286,
+        "basic_info": {
+          "website": "https://evbox.com/",
+          "description": "Electric vehicle supply equipment company",
+          "industry": "Electric vehicle infrastructure",
+          "headquarters": "Amsterdam, Netherlands",
+          "founded_year": 2010,
+          "employees": 650
+        },
+        "financials": {
+          "revenue": 70,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 6062564,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://evaftersales.com/terms-of-service",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://evbox.com/en",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://evbox.com/en/support",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://evbox.com/en/complete-ev-battery-guide",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://eboxelectric.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/evbox/__krmFnpC1ZI1Lb_Sw3mN3OLqB3wR4akDiZCvEgZ_1yOY",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://content.presspage.com/uploads/2519/c44dd76f-7519-4fb2-8ab5-d2c355f968cb/fastnedannualreport2023websiteversion.pdf?10000=",
+            "type": "company_website",
+            "confidence": 0.65
+          },
+          {
+            "url": "https://futuretransport-news.com/wp-content/uploads/sites/3/2021/03/EVBox-Corporate-Brochure.pdf",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/EVBox",
+            "type": "wikipedia",
+            "confidence": 0.9500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:38:44.756396",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 256.253073,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://content.presspage.com/uploads/2519/c44dd76f-7519-4fb2-8ab5-d2c355f968cb/fastnedannualreport2023websiteversion.pdf?10000=",
+        "https://eboxelectric.com/",
+        "https://en.wikipedia.org/wiki/EVBox",
+        "https://evaftersales.com/terms-of-service",
+        "https://evbox.com/en",
+        "https://evbox.com/en/complete-ev-battery-guide",
+        "https://evbox.com/en/support",
+        "https://futuretransport-news.com/wp-content/uploads/sites/3/2021/03/EVBox-Corporate-Brochure.pdf",
+        "https://tracxn.com/d/companies/evbox/__krmFnpC1ZI1Lb_Sw3mN3OLqB3wR4akDiZCvEgZ_1yOY"
+      ],
+      "updated_at": "2026-03-11T06:38:44.756525"
+    },
+    "alfen": {
+      "latest_report": {
+        "company_name": "Alfen",
+        "is_synthetic": false,
+        "confidence_score": 0.8538461538461539,
+        "basic_info": {
+          "website": "https://alfen.com",
+          "description": "With transformer substations, energy storage systems, charging stations for electric vehicles and a diverse portfolio of other products and services, Alfen has a central and connecting role in the energy grid.",
+          "industry": "Appliances, Electrical, and Electronics Manufacturing",
+          "headquarters": "Almere, Flevoland",
+          "founded_year": 1937,
+          "employees": 501
+        },
+        "financials": {
+          "revenue": 504000000,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://linkedin.com/company/alfen-nv",
+            "type": "linkedin",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://alfen.com/en/about-alfen",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://alfen.com/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://alfen.com/en/esg/environment",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://alfenelkamo.fi/nb/nb-smart-grids",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/alfen/__we-xoQVz4FQusIY_tbEW4WAVQpYJxaJxUj6a3QNtHKs",
+            "type": "company_website",
+            "confidence": 0.7000000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:40:44.021275",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "research_time_seconds": 119.25691,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://alfen.com/en",
+        "https://alfen.com/en/about-alfen",
+        "https://alfen.com/en/esg/environment",
+        "https://alfenelkamo.fi/nb/nb-smart-grids",
+        "https://linkedin.com/company/alfen-nv",
+        "https://tracxn.com/d/companies/alfen/__we-xoQVz4FQusIY_tbEW4WAVQpYJxaJxUj6a3QNtHKs"
+      ],
+      "updated_at": "2026-03-11T06:40:44.021353"
+    },
+    "fagne": {
+      "latest_report": {
+        "company_name": "Fagne",
+        "is_synthetic": false,
+        "confidence_score": 0.6895833333333333,
+        "basic_info": {
+          "website": "https://fagne.no/",
+          "description": "Activities of banking agents and brokers",
+          "industry": "Financial Services",
+          "headquarters": "Bd du Centenaire 25, 5600 Philippeville",
+          "founded_year": 2002,
+          "employees": 1.2
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 25,
+          "rounds": "Series B"
+        },
+        "data_sources": [
+          {
+            "url": "https://fagnes.com/en/legal-information",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://companyweb.be/en/0476757671/fagne-finances",
+            "type": "company_website",
+            "confidence": 0.7
+          },
+          {
+            "url": "https://afry.com/en/newsroom/press-releases/afry-signs-framework-agreement-norwegian-fagne-electricity-grid-upgrade",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://fagne.no/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://businesswire.com/news/home/20240716656922/en/Heimdall-Power-raises-%2425-Million-USD-Series-B-to-Accelerate-Power-Grid-Optimization-Globally",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://fraserandneave.com/investor-relations/annual-reports/2024",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://fraserandneave.com/investor-relations/annual-reports/2025",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:44:54.597922",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "research_time_seconds": 250.56869,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://afry.com/en/newsroom/press-releases/afry-signs-framework-agreement-norwegian-fagne-electricity-grid-upgrade",
+        "https://businesswire.com/news/home/20240716656922/en/Heimdall-Power-raises-%2425-Million-USD-Series-B-to-Accelerate-Power-Grid-Optimization-Globally",
+        "https://companyweb.be/en/0476757671/fagne-finances",
+        "https://fagne.no/",
+        "https://fagnes.com/en/legal-information",
+        "https://fraserandneave.com/investor-relations/annual-reports/2024",
+        "https://fraserandneave.com/investor-relations/annual-reports/2025"
+      ],
+      "updated_at": "2026-03-11T06:44:54.598053"
+    },
+    "spectral": {
+      "latest_report": {
+        "company_name": "Spectral",
+        "is_synthetic": false,
+        "confidence_score": 0.9178571428571427,
+        "basic_info": {
+          "website": "https://spectral.finance",
+          "description": "Creditworthiness and credit risk management solutions",
+          "industry": "Credit Risk Management",
+          "headquarters": "New York City, United States",
+          "founded_year": 2020,
+          "employees": 23
+        },
+        "financials": {
+          "revenue": 450000000,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 29.8,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://spectral.energy/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://spectral-ai.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://spectralcapital.com/",
+            "type": "company_website",
+            "confidence": 0.7250000000000001
+          },
+          {
+            "url": "https://spectralproducts.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://spectral.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/spectral/__kUru7meDEaWTEzAbsV7Y8JwRS7PFMYEcQZnjhH_aJgE",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:47:05.564969",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 130.95918,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://spectral-ai.com/",
+        "https://spectral.com/",
+        "https://spectral.energy/",
+        "https://spectralcapital.com/",
+        "https://spectralproducts.com/",
+        "https://tracxn.com/d/companies/spectral/__kUru7meDEaWTEzAbsV7Y8JwRS7PFMYEcQZnjhH_aJgE"
+      ],
+      "updated_at": "2026-03-11T06:47:05.565059"
+    },
+    "iberdrola": {
+      "latest_report": {
+        "company_name": "Iberdrola",
+        "is_synthetic": false,
+        "confidence_score": 0.8500000000000002,
+        "basic_info": {
+          "website": "https://www.iberdrola.com/",
+          "description": "Spanish multinational electric utility company",
+          "industry": "Electric utility",
+          "headquarters": "Bilbao, Spain",
+          "founded_year": 1992,
+          "employees": 42200
+        },
+        "financials": {
+          "revenue": 44.739,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://iberdrola.es/en",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://iberdrola.com/home",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://iberdrola.com/",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://iberdrola.com/careers",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://iberdrolainternacional.com/corporate-governance",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Iberdrola",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://iberdrola.com/shareholders-investors",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://iberdrola.com/shareholders-investors/share/price",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:50:49.022012",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 1,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 223.449205,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Iberdrola",
+        "https://iberdrola.com/",
+        "https://iberdrola.com/careers",
+        "https://iberdrola.com/home",
+        "https://iberdrola.com/shareholders-investors",
+        "https://iberdrola.com/shareholders-investors/share/price",
+        "https://iberdrola.es/en",
+        "https://iberdrolainternacional.com/corporate-governance"
+      ],
+      "updated_at": "2026-03-11T06:50:49.022107"
+    },
+    "endesa": {
+      "latest_report": {
+        "company_name": "Endesa",
+        "is_synthetic": false,
+        "confidence_score": 0.828846153846154,
+        "basic_info": {
+          "website": "http://www.endesa.com/en/",
+          "description": "Spanish multinational electric utility company",
+          "industry": "Public utility",
+          "headquarters": "Madrid, Spain",
+          "founded_year": 1944,
+          "employees": 8914
+        },
+        "financials": {
+          "revenue": 21.307,
+          "revenue_currency": "EUR",
+          "valuation": 43.2
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://endesa.com/en",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://globaldata.com/company-profile/endesa-sa",
+            "type": "company_website",
+            "confidence": 0.5750000000000001
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Endesa",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://plparchitecture.com/endesa-headquarters",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://endesa.com/en/legal-notice-endesa",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:56:39.545778",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 5,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 350.515216,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Endesa",
+        "https://endesa.com/en",
+        "https://endesa.com/en/legal-notice-endesa",
+        "https://globaldata.com/company-profile/endesa-sa",
+        "https://plparchitecture.com/endesa-headquarters"
+      ],
+      "updated_at": "2026-03-11T06:56:39.545874"
+    },
+    "acciona energia": {
+      "latest_report": {
+        "company_name": "Acciona Energia",
+        "is_synthetic": false,
+        "confidence_score": 0.9250000000000002,
+        "basic_info": {
+          "website": "www.acciona-energia.com/es",
+          "description": "Provider of renewable energy solutions",
+          "industry": "Energy",
+          "headquarters": "Madrid, Spain",
+          "founded_year": 1997,
+          "employees": null
+        },
+        "financials": {
+          "revenue": 5.07,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 567,
+          "rounds": 4
+        },
+        "data_sources": [
+          {
+            "url": "https://acciona-energia.com/updates",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://acciona.com/solutions/energy",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://acciona-energia.com/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://acciona.com/",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://solutions.acciona-energia.com/en/hogares/luz",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://tracxn.com/d/companies/acciona-energy/__sm4ZRE9bmh4Zt8xpGXUqMRisP-_XRJJBLYZMsDZdaYI",
+            "type": "company_website",
+            "confidence": 0.925
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T06:59:17.901543",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "employees",
+            "valuation"
+          ],
+          "research_time_seconds": 158.347438,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://acciona-energia.com/",
+        "https://acciona-energia.com/updates",
+        "https://acciona.com/",
+        "https://acciona.com/solutions/energy",
+        "https://solutions.acciona-energia.com/en/hogares/luz",
+        "https://tracxn.com/d/companies/acciona-energy/__sm4ZRE9bmh4Zt8xpGXUqMRisP-_XRJJBLYZMsDZdaYI"
+      ],
+      "updated_at": "2026-03-11T06:59:17.901625"
+    },
+    "edp spain": {
+      "latest_report": {
+        "company_name": "EDP Spain",
+        "is_synthetic": false,
+        "confidence_score": 0.6833333333333335,
+        "basic_info": {
+          "website": "https://edp.com/en",
+          "description": "Energy company invested in renewable energy, creating new opportunities worldwide",
+          "industry": "Energy",
+          "headquarters": "Spain",
+          "founded_year": 1976,
+          "employees": 2000
+        },
+        "financials": {
+          "revenue": 8795759669,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://edp.com/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://edp.com/en/edprcom-has-new-home",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://strategicenergy.eu/spain-edp-renewables",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://edp.com/en/europe/spain",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://edp.com/en/europe/spain/what-we-do",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://ruralelec.org/edp-launches-global-programme-invest-more-300-million-eur-social-impact-projects-2030",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://portersfiveforce.com/blogs/brief-history/edp",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://edp.com/sites/default/files/document/2025-04/Handout%25209M08%2520Results_EN.pdf",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://edp.com/en/investors/investor-information/reports-and-presentations",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://edp.com/sites/default/files/document/2026-03/EDP_SFE_2025AnnualReport.pdf",
+            "type": "company_website",
+            "confidence": 0.45000000000000007
+          },
+          {
+            "url": "https://edpr-investors.com/sites/edpr-investors/files/document/2025-03/EDPR_AnnualReport2024.pdf",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://edp.com/en/responsible-action/transparency-and-reports/reports",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://annualreports.com/Company/edp-renewables",
+            "type": "company_website",
+            "confidence": 0.7250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T07:03:37.241095",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 13,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 5,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 259.331257,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://annualreports.com/Company/edp-renewables",
+        "https://edp.com/en",
+        "https://edp.com/en/edprcom-has-new-home",
+        "https://edp.com/en/europe/spain",
+        "https://edp.com/en/europe/spain/what-we-do",
+        "https://edp.com/en/investors/investor-information/reports-and-presentations",
+        "https://edp.com/en/responsible-action/transparency-and-reports/reports",
+        "https://edp.com/sites/default/files/document/2025-04/Handout%25209M08%2520Results_EN.pdf",
+        "https://edp.com/sites/default/files/document/2026-03/EDP_SFE_2025AnnualReport.pdf",
+        "https://edpr-investors.com/sites/edpr-investors/files/document/2025-03/EDPR_AnnualReport2024.pdf",
+        "https://portersfiveforce.com/blogs/brief-history/edp",
+        "https://ruralelec.org/edp-launches-global-programme-invest-more-300-million-eur-social-impact-projects-2030",
+        "https://strategicenergy.eu/spain-edp-renewables"
+      ],
+      "updated_at": "2026-03-11T07:03:37.241266"
+    },
+    "naturgy": {
+      "latest_report": {
+        "company_name": "Naturgy",
+        "is_synthetic": false,
+        "confidence_score": 0.0,
+        "basic_info": {
+          "website": null,
+          "description": null,
+          "industry": null,
+          "headquarters": null,
+          "founded_year": null,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [],
+        "metadata": {
+          "research_date": "2026-03-11T07:06:04.859379",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 0,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 3,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "website",
+            "description",
+            "industry",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "website",
+            "description",
+            "industry",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 147.609652,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [],
+      "updated_at": "2026-03-11T07:06:04.859415"
+    },
+    "red electrica": {
+      "latest_report": {
+        "company_name": "Red Electrica",
+        "is_synthetic": false,
+        "confidence_score": 0.8115384615384618,
+        "basic_info": {
+          "website": "http://www.ree.es/en",
+          "description": "A partly state-owned and public limited Spanish corporation which operates the national electricity grid in Spain",
+          "industry": "Utilities",
+          "headquarters": "Alcobendas, Spain",
+          "founded_year": 1985,
+          "employees": 2477
+        },
+        "financials": {
+          "revenue": 2.13,
+          "revenue_currency": "EUR",
+          "valuation": 7.99
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://redeia.com/en/about-us/ree-2-minutes/mission-and-vision",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://ree.es/en",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://ree.es/en/operation",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://ree.es/en/press-office/news",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Red_El%C3%A9ctrica_de_Espa%C3%B1a",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://redeia.com/sites/webgrupo/files/06_ACCIONISTAS/Documentos/Informacion_financiera/Redeia_Company_Overview_2024.pdf",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://uk.finance.yahoo.com/quote/RDEIY/key-statistics",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://companiesmarketcap.com/eur/red-electrica/marketcap",
+            "type": "company_website",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T07:19:54.544084",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 207.875591,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://companiesmarketcap.com/eur/red-electrica/marketcap",
+        "https://en.wikipedia.org/wiki/Red_El%C3%A9ctrica_de_Espa%C3%B1a",
+        "https://redeia.com/en/about-us/ree-2-minutes/mission-and-vision",
+        "https://redeia.com/sites/webgrupo/files/06_ACCIONISTAS/Documentos/Informacion_financiera/Redeia_Company_Overview_2024.pdf",
+        "https://ree.es/en",
+        "https://ree.es/en/operation",
+        "https://ree.es/en/press-office/news",
+        "https://uk.finance.yahoo.com/quote/RDEIY/key-statistics"
+      ],
+      "updated_at": "2026-03-11T07:19:54.544292"
+    },
+    "enagas": {
+      "latest_report": {
+        "company_name": "Enagas",
+        "is_synthetic": false,
+        "confidence_score": 0.8450000000000001,
+        "basic_info": {
+          "website": "www.enagas.es/es/",
+          "description": "Provider of pipeline based natural gas transportation and ware-housing services",
+          "industry": "Energy",
+          "headquarters": "Madrid, Spain",
+          "founded_year": 1972,
+          "employees": 1211
+        },
+        "financials": {
+          "revenue": 339,
+          "revenue_currency": "EUR",
+          "valuation": 3800000000.0
+        },
+        "funding": {
+          "total_raised": 125000000,
+          "rounds": 17
+        },
+        "data_sources": [
+          {
+            "url": "https://enagas.es/en",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://enagas.es/en/technical-management-system/gas-system-processes/planning-operation",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://enagas.es/en/energy-transition/gas-network/gas-infrastructure",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://enagas.es/en/energy-transition/innovation-digitalisation/entrepreneurship-open-innovation",
+            "type": "company_website",
+            "confidence": 0.5750000000000001
+          },
+          {
+            "url": "https://enagas.es/en/press-room/news-room/press-releases/2025-results-2026-targets",
+            "type": "company_website",
+            "confidence": 0.45000000000000007
+          },
+          {
+            "url": "https://enagas.es/en/investor-relations/financial-information/results-reports-presentations",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://tracxn.com/d/companies/enagas/__1je7PiAi27k-6GloRO81qt_mf5CpsWfzpPH7ir1w0SI",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://perplexity.ai/finance/ENG.MC/history",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Enag%C3%A1s",
+            "type": "wikipedia",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://bnamericas.com/en/company-profile/enagas-sa",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://enagas.es/content/dam/enagas/en/files/enagas-communication-room/publications/otras-publicaciones/corporate-enagas-brochure.pdf",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T07:26:06.616906",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 11,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 5,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "valuation",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [],
+          "research_time_seconds": 372.063735,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://bnamericas.com/en/company-profile/enagas-sa",
+        "https://en.wikipedia.org/wiki/Enag%C3%A1s",
+        "https://enagas.es/content/dam/enagas/en/files/enagas-communication-room/publications/otras-publicaciones/corporate-enagas-brochure.pdf",
+        "https://enagas.es/en",
+        "https://enagas.es/en/energy-transition/gas-network/gas-infrastructure",
+        "https://enagas.es/en/energy-transition/innovation-digitalisation/entrepreneurship-open-innovation",
+        "https://enagas.es/en/investor-relations/financial-information/results-reports-presentations",
+        "https://enagas.es/en/press-room/news-room/press-releases/2025-results-2026-targets",
+        "https://enagas.es/en/technical-management-system/gas-system-processes/planning-operation",
+        "https://perplexity.ai/finance/ENG.MC/history",
+        "https://tracxn.com/d/companies/enagas/__1je7PiAi27k-6GloRO81qt_mf5CpsWfzpPH7ir1w0SI"
+      ],
+      "updated_at": "2026-03-11T07:26:06.617043"
+    },
+    "siemens gamesa": {
+      "latest_report": {
+        "company_name": "Siemens Gamesa",
+        "is_synthetic": false,
+        "confidence_score": 0.7000000000000001,
+        "basic_info": {
+          "website": "https://siemensgamesa.com",
+          "description": "A global leader in the wind industry, providing clean energy solutions and unlocking the full potential of wind power.",
+          "industry": "Renewable Energy",
+          "headquarters": "Zamudio, Spain",
+          "founded_year": null,
+          "employees": 28150
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://siemensgamesa.com/global/en/home/about-us.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://siemens.com/en-us",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://siemensgamesa.com/global/en/home.html",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://siemensgamesa.com/global/en/home/career.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://siemensgamesa.com/global/en/home/general/corporate-information.html",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://siemens.com/en-us/company/global-locations",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T07:29:36.506989",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "headquarters",
+            "founded_year",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "founded_year",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 209.88188,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://siemens.com/en-us",
+        "https://siemens.com/en-us/company/global-locations",
+        "https://siemensgamesa.com/global/en/home.html",
+        "https://siemensgamesa.com/global/en/home/about-us.html",
+        "https://siemensgamesa.com/global/en/home/career.html",
+        "https://siemensgamesa.com/global/en/home/general/corporate-information.html"
+      ],
+      "updated_at": "2026-03-11T07:29:36.507078"
+    },
+    "saica natur": {
+      "latest_report": {
+        "company_name": "Saica Natur",
+        "is_synthetic": false,
+        "confidence_score": 0.785,
+        "basic_info": {
+          "website": "https://saica.com/",
+          "description": "Provides sustainable solutions for paper and packaging manufacturing, as well as for waste management and recovery",
+          "industry": "Packaging and Waste Management",
+          "headquarters": "Spain",
+          "founded_year": 1943,
+          "employees": 12000
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://saica.com/en/saica-natur",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://saica.com/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://saica.com/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://saica.com/en/saica-natur-certificates",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://companycheck.co.uk/company/02952592/SAICA-NATUR-UK-LIMITED/companies-house-data",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://saica.com/en/news/the-saica-group-celebrates-its-80th-anniversary",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://paperfirst.info/the-saica-group-celebrates-its-80th-anniversary",
+            "type": "company_website",
+            "confidence": 0.7
+          },
+          {
+            "url": "https://saica.com/en/about-us",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T07:34:40.823747",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 304.308296,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://companycheck.co.uk/company/02952592/SAICA-NATUR-UK-LIMITED/companies-house-data",
+        "https://paperfirst.info/the-saica-group-celebrates-its-80th-anniversary",
+        "https://saica.com/",
+        "https://saica.com/en",
+        "https://saica.com/en/about-us",
+        "https://saica.com/en/news/the-saica-group-celebrates-its-80th-anniversary",
+        "https://saica.com/en/saica-natur",
+        "https://saica.com/en/saica-natur-certificates"
+      ],
+      "updated_at": "2026-03-11T07:34:40.823851"
+    },
+    "aqualogy": {
+      "latest_report": {
+        "company_name": "Aqualogy",
+        "is_synthetic": false,
+        "confidence_score": 0.6625,
+        "basic_info": {
+          "website": "https://www.aqualogy.net/",
+          "description": "Leading service provider of solenoid operated valves, Ro Water Purifier, Ro Membrane in India",
+          "industry": "Water Treatment",
+          "headquarters": "Khed, Maharashtra, India",
+          "founded_year": 2021,
+          "employees": 10
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 0,
+          "rounds": 0
+        },
+        "data_sources": [
+          {
+            "url": "https://bnamericas.com/es/perfil-empresa/aqualogy-sa-aqualogy",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://hidrometering.com/comunicacion-ambiental",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://agua.org.mx/iaqualogy-el-nuevo-catalogo-virtual-de-aqualogy",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://tracxn.com/d/companies/aqualogy/__A4-bLz2YM-MIAfVojDFN35GN7J9F6sHjuT9kUp0LaGE",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://tracxn.com/d/companies/aqualogy/__6vG4Ore4m-AIU0NAliOjvHP7229Ca33Y8D1eJyHSigg",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://zoominfo.com/companies-search/location-united-kingdom--kent--new-romney-industry-software",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://tradeindia.com/infinity-aqualogy-41680592",
+            "type": "company_website",
+            "confidence": 0.7
+          },
+          {
+            "url": "https://intangiblecapital.org/index.php/ic/article/view/1083/679",
+            "type": "company_website",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T07:39:53.398448",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "research_time_seconds": 312.56579,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://agua.org.mx/iaqualogy-el-nuevo-catalogo-virtual-de-aqualogy",
+        "https://bnamericas.com/es/perfil-empresa/aqualogy-sa-aqualogy",
+        "https://hidrometering.com/comunicacion-ambiental",
+        "https://intangiblecapital.org/index.php/ic/article/view/1083/679",
+        "https://tracxn.com/d/companies/aqualogy/__6vG4Ore4m-AIU0NAliOjvHP7229Ca33Y8D1eJyHSigg",
+        "https://tracxn.com/d/companies/aqualogy/__A4-bLz2YM-MIAfVojDFN35GN7J9F6sHjuT9kUp0LaGE",
+        "https://tradeindia.com/infinity-aqualogy-41680592",
+        "https://zoominfo.com/companies-search/location-united-kingdom--kent--new-romney-industry-software"
+      ],
+      "updated_at": "2026-03-11T07:39:53.398552"
+    },
+    "enel": {
+      "latest_report": {
+        "company_name": "Enel",
+        "is_synthetic": false,
+        "confidence_score": 0.7812500000000001,
+        "basic_info": {
+          "website": "http://www.enel.com",
+          "description": "We are a multinational company changing the face of energy, one of the world\u2019s leading integrated utilities.",
+          "industry": "Utilities",
+          "headquarters": "Rome, Italy",
+          "founded_year": 1962,
+          "employees": 60000
+        },
+        "financials": {
+          "revenue": 98,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://enelamericas.com/en.html",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://enelgreenpower.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://enel.it/en.html",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://enelnorthamerica.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://parsers.vc/startup/enel.com",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://linkedin.com/company/enelgroup",
+            "type": "linkedin",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://supplychaindigital.com/company/enel-group",
+            "type": "company_website",
+            "confidence": 0.65
+          },
+          {
+            "url": "https://enelx.com/au/en/who-we-are",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://enelamericas.com/en/interactive-sustainability-report/people.html",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://enel.com/content/dam/enel-com/documenti/investitori/informazioni-finanziarie/2024/trimestrali/fy-2024-risultati.pdf",
+            "type": "company_website",
+            "confidence": 0.525
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T07:45:12.857606",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 10,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 5,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 319.450296,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://enel.com/content/dam/enel-com/documenti/investitori/informazioni-finanziarie/2024/trimestrali/fy-2024-risultati.pdf",
+        "https://enel.it/en.html",
+        "https://enelamericas.com/en.html",
+        "https://enelamericas.com/en/interactive-sustainability-report/people.html",
+        "https://enelgreenpower.com/",
+        "https://enelnorthamerica.com/",
+        "https://enelx.com/au/en/who-we-are",
+        "https://linkedin.com/company/enelgroup",
+        "https://parsers.vc/startup/enel.com",
+        "https://supplychaindigital.com/company/enel-group"
+      ],
+      "updated_at": "2026-03-11T07:45:12.857724"
+    },
+    "terna": {
+      "latest_report": {
+        "company_name": "Terna",
+        "is_synthetic": false,
+        "confidence_score": 0.7958333333333334,
+        "basic_info": {
+          "website": "https://terna-energy.com/",
+          "description": "Clean Energy production and implementation of innovative projects, contributing to Sustainable Development",
+          "industry": "Renewable Energy",
+          "headquarters": "Greece",
+          "founded_year": 1997,
+          "employees": 5400
+        },
+        "financials": {
+          "revenue": 3.1,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://terna-energy.com/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://energydigital.com/company/terna",
+            "type": "company_website",
+            "confidence": 0.65
+          },
+          {
+            "url": "https://terna-reports.it/2022/assets/pdf/Terna_Annual%20report_Integrated%20Report%202022_EN_LIA.pdf",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T07:48:44.499575",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 3,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 211.632875,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://energydigital.com/company/terna",
+        "https://terna-energy.com/",
+        "https://terna-reports.it/2022/assets/pdf/Terna_Annual%20report_Integrated%20Report%202022_EN_LIA.pdf"
+      ],
+      "updated_at": "2026-03-11T07:48:44.499649"
+    },
+    "snam": {
+      "latest_report": {
+        "company_name": "Snam",
+        "is_synthetic": false,
+        "confidence_score": 0.7520833333333335,
+        "basic_info": {
+          "website": "https://snam.com/en/home-2",
+          "description": "Battery collection and recycling company",
+          "industry": "Waste Management and Recycling",
+          "headquarters": "Avenue Jean Jaur\u00e8s, 12110 Viviez, FRANCE",
+          "founded_year": 1977,
+          "employees": 3800
+        },
+        "financials": {
+          "revenue": 963000000,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://thesnamgroup.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://snam.com/en/home-2",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://fintechmagazine.com/company/snam",
+            "type": "company_website",
+            "confidence": 0.65
+          },
+          {
+            "url": "https://sustainabilitymag.com/company/snam",
+            "type": "company_website",
+            "confidence": 0.65
+          },
+          {
+            "url": "https://reports.snam.it/2019/annual-report/directors-report/summary-data-and-information/operating-review.html",
+            "type": "company_website",
+            "confidence": 0.6500000000000001
+          },
+          {
+            "url": "https://supplychaindigital.com/company/snam",
+            "type": "company_website",
+            "confidence": 0.65
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T07:51:48.002572",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 183.494354,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://fintechmagazine.com/company/snam",
+        "https://reports.snam.it/2019/annual-report/directors-report/summary-data-and-information/operating-review.html",
+        "https://snam.com/en/home-2",
+        "https://supplychaindigital.com/company/snam",
+        "https://sustainabilitymag.com/company/snam",
+        "https://thesnamgroup.com/"
+      ],
+      "updated_at": "2026-03-11T07:51:48.002653"
+    },
+    "hera group": {
+      "latest_report": {
+        "company_name": "Hera Group",
+        "is_synthetic": false,
+        "confidence_score": 0.8714285714285717,
+        "basic_info": {
+          "website": "https://eng.gruppohera.it/",
+          "description": "A multiservices company managing energy, water, and environmental services, as well as public lighting and telecommunications",
+          "industry": "Energy, Water, and Environmental Services",
+          "headquarters": "Emilia-Romagna, Italy",
+          "founded_year": 2002,
+          "employees": 9400
+        },
+        "financials": {
+          "revenue": 15331.1,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": true,
+          "rounds": 3
+        },
+        "data_sources": [
+          {
+            "url": "https://eng.gruppohera.it/",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://ha.gruppohera.it/eng",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://eng.gruppohera.it/group_eng/innovation",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://int.hera.com/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://tracxn.com/d/companies/heragroup/__B97m7KyNjE2W13CACqymDSiwlAjJGWcebqa7wuGEJJo",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://tracxn.com/d/companies/hera-group/__B97m7KyNjE2W13CACqymDSiwlAjJGWcebqa7wuGEJJo",
+            "type": "company_website",
+            "confidence": 0.7750000000000001
+          },
+          {
+            "url": "https://eng.gruppohera.it/group_eng/investor-relations/results-and-presentations/online-report-fy2024",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T07:56:57.867838",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 1,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 309.856451,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://eng.gruppohera.it/",
+        "https://eng.gruppohera.it/group_eng/innovation",
+        "https://eng.gruppohera.it/group_eng/investor-relations/results-and-presentations/online-report-fy2024",
+        "https://ha.gruppohera.it/eng",
+        "https://int.hera.com/",
+        "https://tracxn.com/d/companies/hera-group/__B97m7KyNjE2W13CACqymDSiwlAjJGWcebqa7wuGEJJo",
+        "https://tracxn.com/d/companies/heragroup/__B97m7KyNjE2W13CACqymDSiwlAjJGWcebqa7wuGEJJo"
+      ],
+      "updated_at": "2026-03-11T07:56:57.867946"
     }
   }
 }
