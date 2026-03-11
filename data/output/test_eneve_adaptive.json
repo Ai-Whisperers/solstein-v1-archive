@@ -1,0 +1,81 @@
+{
+  "company_name": "Eneve",
+  "is_synthetic": false,
+  "confidence_score": 0.7730769230769232,
+  "basic_info": {
+    "website": "www.enve.no",
+    "description": "Platform specializing in providing data room services for M&A transactions",
+    "industry": "Energy",
+    "headquarters": "Trondheim, Norway",
+    "founded_year": 2021,
+    "employees": 9
+  },
+  "financials": {
+    "revenue": 71900,
+    "revenue_currency": "USD",
+    "valuation": null
+  },
+  "funding": {
+    "total_raised": null,
+    "rounds": 1
+  },
+  "data_sources": [
+    {
+      "url": "https://enve.com/",
+      "type": "company_website",
+      "confidence": 0.47500000000000003
+    },
+    {
+      "url": "https://eneve.com/news",
+      "type": "company_website",
+      "confidence": 0.7500000000000001
+    },
+    {
+      "url": "https://eneva.com.br/",
+      "type": "company_website",
+      "confidence": 0.675
+    },
+    {
+      "url": "https://tracxn.com/d/companies/enve/__F-xWAmfgXgweMTsGKJI-aUGSRkhoW7_07I-Ey0DM5NA",
+      "type": "company_website",
+      "confidence": 0.7750000000000001
+    },
+    {
+      "url": "https://eneve.com/about-eneve",
+      "type": "company_website",
+      "confidence": 0.7500000000000001
+    },
+    {
+      "url": "https://eneve.recruitee.com/",
+      "type": "company_website",
+      "confidence": 0.7500000000000001
+    },
+    {
+      "url": "https://eneve.com/",
+      "type": "company_website",
+      "confidence": 0.675
+    }
+  ],
+  "metadata": {
+    "research_date": "2026-03-11T03:01:42.789555",
+    "queries_executed": 8,
+    "sources_found": 8,
+    "sources_used": 4,
+    "known_sources_skipped": 2,
+    "known_sources_revisited": 0,
+    "adaptive_pass_used": false,
+    "adaptive_queries_executed": 0,
+    "adaptive_sources_used": 0,
+    "missing_fields_before_adaptive": [
+      "valuation",
+      "funding_raised"
+    ],
+    "missing_fields_after_adaptive": [
+      "valuation",
+      "funding_raised"
+    ],
+    "research_time_seconds": 127.098103,
+    "fields_carried_forward": 0
+  },
+  "errors": []
+}
