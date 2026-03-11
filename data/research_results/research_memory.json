@@ -8331,7 +8331,7 @@
           }
         ],
         "metadata": {
-          "research_date": "2026-03-11T05:38:39.458426",
+          "research_date": "2026-03-11T05:41:02.521695",
           "queries_executed": 8,
           "sources_found": 14,
           "sources_used": 8,
@@ -8348,8 +8348,12 @@
           "missing_fields_after_adaptive": [
             "valuation"
           ],
-          "research_time_seconds": 255.174784,
-          "fields_carried_forward": 0
+          "research_time_seconds": 0.000172,
+          "fields_carried_forward": 0,
+          "cache_reuse": true,
+          "previous_completeness": 0.909,
+          "previous_report_stale": false,
+          "sources_reused": 8
         },
         "errors": []
       },
@@ -8363,7 +8367,509 @@
         "https://wirepas.com/static/8278bcb54d78f3beb01725398e814f97/Wirepas-fact-sheet.pdf",
         "https://wirepas.com/wirepas-mesh"
       ],
-      "updated_at": "2026-03-11T05:38:39.458535"
+      "updated_at": "2026-03-11T05:41:02.521793"
+    },
+    "essent": {
+      "latest_report": {
+        "company_name": "Essent",
+        "is_synthetic": false,
+        "confidence_score": 0.7821428571428573,
+        "basic_info": {
+          "website": "http://essentgroup.com/",
+          "description": "A Bermuda-based holding company offering private mortgage insurance and reinsurance, and title insurance and settlement services",
+          "industry": "Non-life Insurance",
+          "headquarters": "Clarendon House, 2 Church Street HAMILTON HM 11 Bermuda BMU",
+          "founded_year": 2008,
+          "employees": 514
+        },
+        "financials": {
+          "revenue": 1.26,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 224000000,
+          "rounds": 4
+        },
+        "data_sources": [
+          {
+            "url": "https://essent.us/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://essent.com/AboutUs.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://ir.essentgroup.com/home/default.aspx",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://essent.us/mortgage-insurance/tools-resources/essent-online",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://essent.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://swottemplate.com/blogs/brief-history/essentgroup-brief-history",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://matrixbcg.com/blogs/brief-history/essentgroup",
+            "type": "company_website",
+            "confidence": 0.525
+          },
+          {
+            "url": "https://markets.ft.com/data/equities/tearsheet/profile?s=ESNT%3ANYQ",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://bitscale.ai/directory/essent",
+            "type": "company_website",
+            "confidence": 0.7000000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T05:44:44.048902",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 221.52073,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://bitscale.ai/directory/essent",
+        "https://essent.com/",
+        "https://essent.com/AboutUs.html",
+        "https://essent.us/",
+        "https://essent.us/mortgage-insurance/tools-resources/essent-online",
+        "https://ir.essentgroup.com/home/default.aspx",
+        "https://markets.ft.com/data/equities/tearsheet/profile?s=ESNT%3ANYQ",
+        "https://matrixbcg.com/blogs/brief-history/essentgroup",
+        "https://swottemplate.com/blogs/brief-history/essentgroup-brief-history"
+      ],
+      "updated_at": "2026-03-11T05:44:44.049241"
+    },
+    "nuon": {
+      "latest_report": {
+        "company_name": "Nuon",
+        "is_synthetic": false,
+        "confidence_score": 0.9499999999999998,
+        "basic_info": {
+          "website": "https://nuon.ai",
+          "description": "AI-based insurance product development solutions for insurers and brokers",
+          "industry": "Insurance",
+          "headquarters": "Royal Tunbridge Wells, United Kingdom",
+          "founded_year": 2020,
+          "employees": 6
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 1.73,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://nuon.co/about",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://nuon.co/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://nuonmedical.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://nuon.ai/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://nuon.consulting/en",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/nuon/__wKzsJZWiBUFx-7jJw0C0g128XYDhB_CIU49CNOQy8-o",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://siliconangle.com/2024/12/17/nuon-raises-16-5m-transform-software-service-deployment",
+            "type": "company_website",
+            "confidence": 0.525
+          },
+          {
+            "url": "https://tracxn.com/d/companies/nuon/__ynmI7smrF8ZgfyCOdHBqaWRRKkkLHEfUiI9LvklUR7U",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://preqin.com/data/profile/asset/nuon-therapeutics--inc-/84211",
+            "type": "company_website",
+            "confidence": 0.675
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T05:48:07.384379",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "research_time_seconds": 203.327364,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://nuon.ai/",
+        "https://nuon.co/",
+        "https://nuon.co/about",
+        "https://nuon.consulting/en",
+        "https://nuonmedical.com/",
+        "https://preqin.com/data/profile/asset/nuon-therapeutics--inc-/84211",
+        "https://siliconangle.com/2024/12/17/nuon-raises-16-5m-transform-software-service-deployment",
+        "https://tracxn.com/d/companies/nuon/__wKzsJZWiBUFx-7jJw0C0g128XYDhB_CIU49CNOQy8-o",
+        "https://tracxn.com/d/companies/nuon/__ynmI7smrF8ZgfyCOdHBqaWRRKkkLHEfUiI9LvklUR7U"
+      ],
+      "updated_at": "2026-03-11T05:48:07.384495"
+    },
+    "vandebron": {
+      "latest_report": {
+        "company_name": "Vandebron",
+        "is_synthetic": false,
+        "confidence_score": 0.9499999999999998,
+        "basic_info": {
+          "website": "vandebron.nl",
+          "description": "Online marketplace for retail power consumers",
+          "industry": "Energy",
+          "headquarters": "Amsterdam, Netherlands",
+          "founded_year": 2013,
+          "employees": 272
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 2.24,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://werkenbij.vandebron.nl/l/en/over-ons",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://werkenbij.vandebron.nl/l/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Vandebron",
+            "type": "wikipedia",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://triodos-im.com/articles/projects/vandebron",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://tracxn.com/d/companies/vandebron/__2Sesy1Rqu0A-_9vahKgvgMJg7AwRGm3jL0q_Qu0m-Fo",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://statista.com/statistics/753410/leading-energy-suppliers-in-the-netherlands-by-number-of-clients",
+            "type": "company_website",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T05:52:08.406327",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 1,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "research_time_seconds": 241.015113,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Vandebron",
+        "https://statista.com/statistics/753410/leading-energy-suppliers-in-the-netherlands-by-number-of-clients",
+        "https://tracxn.com/d/companies/vandebron/__2Sesy1Rqu0A-_9vahKgvgMJg7AwRGm3jL0q_Qu0m-Fo",
+        "https://triodos-im.com/articles/projects/vandebron",
+        "https://werkenbij.vandebron.nl/l/en",
+        "https://werkenbij.vandebron.nl/l/en/over-ons"
+      ],
+      "updated_at": "2026-03-11T05:52:08.406425"
+    },
+    "liander": {
+      "latest_report": {
+        "company_name": "Liander",
+        "is_synthetic": false,
+        "confidence_score": 0.8839285714285715,
+        "basic_info": {
+          "website": "alliander.com",
+          "description": "Dutch energy network company that develops and operates energy distribution networks throughout the Netherlands",
+          "industry": "utilities",
+          "headquarters": "68 Utrechtseweg, Arnhem, Gelderland, 6812 AH, Netherlands",
+          "founded_year": 2009,
+          "employees": 8800
+        },
+        "financials": {
+          "revenue": 3.2,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 350.1,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://liander.nl/regio/amsterdam/amsterdam/schipluidenlaan/invitation-to-drop-in-meeting-3-july-2024",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://alliander.com/en",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://liander.nl/contact/letters/free-smart-meter",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://liander.nl/contact/letters/moving-house",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/liander/__9fPdDbHiSgabCbxMxYHr8pCstLGczz90XPzUH-hXWsc",
+            "type": "company_website",
+            "confidence": 0.8750000000000001
+          },
+          {
+            "url": "https://annualreport.alliander.com/annual-reports/annual-report-2024/about-alliander-1/profile-of-alliander",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://rocketreach.co/liander-profile_b5c38a04f42e0fbf",
+            "type": "company_website",
+            "confidence": 0.8750000000000001
+          },
+          {
+            "url": "https://alliander.com/en/investors/key-figures",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://bitscale.ai/directory/alliander",
+            "type": "company_website",
+            "confidence": 0.9
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T05:56:08.645124",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 240.231175,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://alliander.com/en",
+        "https://alliander.com/en/investors/key-figures",
+        "https://annualreport.alliander.com/annual-reports/annual-report-2024/about-alliander-1/profile-of-alliander",
+        "https://bitscale.ai/directory/alliander",
+        "https://liander.nl/contact/letters/free-smart-meter",
+        "https://liander.nl/contact/letters/moving-house",
+        "https://liander.nl/regio/amsterdam/amsterdam/schipluidenlaan/invitation-to-drop-in-meeting-3-july-2024",
+        "https://rocketreach.co/liander-profile_b5c38a04f42e0fbf",
+        "https://tracxn.com/d/companies/liander/__9fPdDbHiSgabCbxMxYHr8pCstLGczz90XPzUH-hXWsc"
+      ],
+      "updated_at": "2026-03-11T05:56:08.645277"
+    },
+    "gasunie": {
+      "latest_report": {
+        "company_name": "Gasunie",
+        "is_synthetic": false,
+        "confidence_score": 0.9307692307692306,
+        "basic_info": {
+          "website": "http://gasunie.nl/en/",
+          "description": "Dutch natural gas infrastructure and transportation company",
+          "industry": "Energy",
+          "headquarters": "Groningen, Netherlands",
+          "founded_year": 1963,
+          "employees": 1448
+        },
+        "financials": {
+          "revenue": 1506,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Gasunie",
+            "type": "wikipedia",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://gasunie.nl/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://gasunietransportservices.nl/en",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://gasunie.nl/en/expertise/hydrogen/gasunie-and-hydrogen",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://gasunie.de/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/gasunie/__OxkDvQrHb0QciNzIR2phy-PSUDUXdW84KdFP_fmvJlA",
+            "type": "company_website",
+            "confidence": 0.7
+          },
+          {
+            "url": "https://gasunietransportservices.nl/uploads/fckconnector/44b862e9-2896-50e4-b03f-1fcd04fba5e3",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T05:58:25.527047",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "research_time_seconds": 136.874928,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Gasunie",
+        "https://gasunie.de/en",
+        "https://gasunie.nl/en",
+        "https://gasunie.nl/en/expertise/hydrogen/gasunie-and-hydrogen",
+        "https://gasunietransportservices.nl/en",
+        "https://gasunietransportservices.nl/uploads/fckconnector/44b862e9-2896-50e4-b03f-1fcd04fba5e3",
+        "https://tracxn.com/d/companies/gasunie/__OxkDvQrHb0QciNzIR2phy-PSUDUXdW84KdFP_fmvJlA"
+      ],
+      "updated_at": "2026-03-11T05:58:25.527131"
     }
   }
 }
