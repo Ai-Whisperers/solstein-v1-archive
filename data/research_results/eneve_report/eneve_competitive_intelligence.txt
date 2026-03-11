@@ -1,0 +1,260 @@
+================================================================================
+               ENEVE COMPETITIVE INTELLIGENCE REPORT - 2026-03-11               
+                        Generated: 2026-03-11 17:20 UTC                         
+                                 Companies: 64                                  
+================================================================================
+
+  1. Autogrid
+     Tier: Direct Competitor  |  Score: 1.00  |  Industry: Energy
+     IoT enabled distributed energy resource management solutions provider
+
+  2. GridBeyond
+     Tier: Direct Competitor  |  Score: 1.00  |  Industry: Energy
+     AI-based platform for balancing distributed energy resources and demand...
+
+  3. Vandebron
+     Tier: Netherlands Software  |  Score: 0.95  |  Industry: Energy
+     Online marketplace for retail power consumers
+
+  4. Likewatt
+     Tier: Direct Competitor  |  Score: 0.95  |  Industry: Energy
+     Provider of solutions for energy optimization
+
+  5. Flick Electric
+     Tier: Energy Sector Software  |  Score: 0.95  |  Industry: Energy
+     Online electricity retailer
+
+  6. Next Kraftwerke
+     Tier: Direct Competitor  |  Score: 0.95  |  Industry: Energy
+     Virtual power plant digital platform & power trading
+
+  7. Wattics
+     Tier: Direct Competitor  |  Score: 0.94  |  Industry: Software Development, Business Intelligence (Bi) Software, Clean Energy, Software Development & Design, Software, Energy, Sustainability, SaaS
+     Wattics energy and IoT analytics software is trusted by major global...
+
+  8. Solarwatt
+     Tier: European Energy Software  |  Score: 0.94  |  Industry: Renewable Energy
+     The Dresden-based company with over 300 employees is active throughout...
+
+  9. Gasunie
+     Tier: Netherlands Energy  |  Score: 0.93  |  Industry: Energy
+     Dutch natural gas infrastructure and transportation company
+
+ 10. Fudura
+     Tier: Netherlands Energy  |  Score: 0.93  |  Industry: Energy
+     Energy infrastructure and measurement service provider
+
+ 11. Acciona Energia
+     Tier: European Energy Software  |  Score: 0.93  |  Industry: Energy
+     Provider of renewable energy solutions
+
+ 12. Reactive Technologies
+     Tier: European Energy Software  |  Score: 0.90  |  Industry: Energy
+     Developer of cloud-based demand-side management solutions
+
+ 13. Veolia
+     Tier: European Energy Software  |  Score: 0.90  |  Industry: Energy, Utilities, Waste Management, Water Treatment
+     Veolia is a company that provides solutions in energy, water, and waste...
+
+ 14. Verv
+     Tier: European Energy Software  |  Score: 0.90  |  Industry: Energy
+     AI-driven energy monitoring solution for homes
+
+ 15. Shell Energy
+     Tier: Netherlands Energy  |  Score: 0.89  |  Industry: Manufacturing
+     A global team of energy & petrochemical companies
+
+ 16. Energa
+     Tier: Energy Sector Software  |  Score: 0.89  |  Industry: Solar Energy
+     Energa is a company based in Australia that provides commercial solar...
+
+ 17. Sunfire
+     Tier: European Energy Software  |  Score: 0.88  |  Industry: Audio Equipment
+     Sunfire is a world-leading industrial electrolysis company with two...
+
+ 18. Liander
+     Tier: Netherlands Energy  |  Score: 0.88  |  Industry: utilities
+     Dutch energy network company that develops and operates energy...
+
+ 19. Stedin
+     Tier: Netherlands Software  |  Score: 0.88  |  Industry: Energy
+     Provider of electricity and gas network infrastructure. This company...
+
+ 20. GRDF
+     Tier: European Energy Software  |  Score: 0.88  |  Industry: Energy
+     Operator of the natural gas distribution network in France, offering...
+
+ 21. Kiwi Power
+     Tier: Direct Competitor  |  Score: 0.86  |  Industry: Renewable Energy Semiconductor Manufacturing
+     Kiwi Power’s vision is to simplify distributed energy for global...
+
+ 22. Pinergy
+     Tier: European Energy Software  |  Score: 0.86  |  Industry: Energy
+     Smart energy management solution provider
+
+ 23. Electricite de Strasbourg
+     Tier: European Energy Software  |  Score: 0.86  |  Industry: Energy
+     Electricite de Strasbourg (ES) produces electricity and gas. It operates,...
+
+ 24. Origami Energy
+     Tier: Direct Competitor  |  Score: 0.86  |  Industry: IT Services and IT Consulting
+     A green energy world, powered by smart technology.
+
+ 25. Moixa
+     Tier: European Energy Software  |  Score: 0.85  |  Industry: Design, Technology and Research
+     British cleantech company that develops software and hardware to optimise...
+
+ 26. Schneider Electric
+     Tier: European Energy Software  |  Score: 0.85  |  Industry: Energy Management and Automation
+     Provider of energy management and automation services
+
+ 27. Bouygues Energies
+     Tier: European Energy Software  |  Score: 0.85  |  Industry: Energy and Services
+     Design, construction, and maintenance of high-tech plant systems,...
+
+ 28. A2A
+     Tier: European Energy Software  |  Score: 0.85  |  Industry: Utilities
+     A2A S.p.A. is an Italian company that generates, distributes, and markets...
+
+ 29. SMA Solar Technology
+     Tier: European Energy Software  |  Score: 0.85  |  Industry: Renewable Energy
+     A leading global specialist in system technology for decentralized and...
+
+ 30. Utilita Energy
+     Tier: European Energy Software  |  Score: 0.84  |  Industry: Utilities, Custom Software & Technical Consulting, Energy, Smart Metering, Software, Prepayment
+     Founded in 2003, Utilita Energy was created to challenge the Big 6 energy...
+
+ 31. Energieopwek
+     Tier: Netherlands Energy  |  Score: 0.84  |  Industry: Energy
+     Energy infrastructure company
+
+ 32. EVN
+     Tier: European Energy Software  |  Score: 0.84  |  Industry: Utilities
+     Austrian-based producer and transporter of electricity, operating in...
+
+ 33. BKW
+     Tier: European Energy Software  |  Score: 0.83  |  Industry: Energy and Infrastructure
+     An international energy and infrastructure company offering integrated...
+
+ 34. Tempus Energy
+     Tier: Energy Sector Software  |  Score: 0.83  |  Industry: Energy
+     Demand management by using electricity during non peak hours at cheap rates
+
+ 35. BeeBryte
+     Tier: Direct Competitor  |  Score: 0.82  |  Industry: Energy Management
+     BeeBryte combines predictive maintenance and energy management to...
+
+ 36. Electron
+     Tier: Direct Competitor  |  Score: 0.82  |  Industry: Energy
+     Building the foundations for an affordable, reliable, and flexible energy...
+
+ 37. Red Electrica
+     Tier: European Energy Software  |  Score: 0.81  |  Industry: Utilities
+     A partly state-owned and public limited Spanish corporation which...
+
+ 38. Flogas
+     Tier: European Energy Software  |  Score: 0.81  |  Industry: Energy
+     Energy supplier and sustainability services provider
+
+ 39. GE Vernova
+     Tier: Energy Sector Software  |  Score: 0.80  |  Industry: Energy
+     A company focused on building a more sustainable electric power system...
+
+ 40. Vorarlberger Energienetze
+     Tier: European Energy Software  |  Score: 0.80  |  Industry: Energy management
+     Energy management company responsible for the management of international...
+
+ 41. Terna
+     Tier: Energy Sector Software  |  Score: 0.80  |  Industry: Renewable Energy
+     Clean Energy production and implementation of innovative projects,...
+
+ 42. Entelios
+     Tier: European Energy Software  |  Score: 0.79  |  Industry: Energy
+     The energy partner optimising businesses' energy consumption with...
+
+ 43. Vinci Energies
+     Tier: European Energy Software  |  Score: 0.78  |  Industry: Energy, Infrastructure, Industry, ICT, Building Solutions
+     Accelerator of the environmental transition
+
+ 44. TenneT
+     Tier: Netherlands Energy  |  Score: 0.78  |  Industry: Utilities
+     TenneT is actively investing in extensive grid expansion projects,...
+
+ 45. PassivSystems
+     Tier: Direct Competitor  |  Score: 0.78  |  Industry: Energy Technology
+     Smart energy technology business developing software solutions to...
+
+ 46. Schneider Electric Germany
+     Tier: European Energy Software  |  Score: 0.77  |  Industry: Energy Management
+     Schneider Electric in Deutschland, Österreich & der Schweiz
+
+ 47. Energie 360
+     Tier: Energy Sector Software  |  Score: 0.76  |  Industry: Energy and Environment
+     Energy and Carbon Management Solutions
+
+ 48. Eneve
+     Tier: Netherlands Software  |  Score: 0.75  |  Industry: Energy
+     Smart software for the energy value chain
+
+ 49. Alliander
+     Tier: Netherlands Energy  |  Score: 0.75  |  Industry: Energy
+     Network company responsible for the distribution of energy, such as...
+
+ 50. Pure Planet
+     Tier: European Energy Software  |  Score: 0.74  |  Industry: Energy
+     A digital renewable energy supplier in the energy sector
+
+ 51. Qurrent
+     Tier: Direct Competitor  |  Score: 0.74  |  Industry: Energy
+     Develops intelligent software solutions for the optimization, control,...
+
+ 52. Siemens Energy
+     Tier: Energy Sector Software  |  Score: 0.73  |  Industry: Renewable Energy
+     One of the world’s leading energy technology companies, driving...
+
+ 53. Innogy Poland
+     Tier: European Energy Software  |  Score: 0.73  |  Industry: Energy
+     App-based platform for on-demand electric car rentals in select Polish...
+
+ 54. Siemens Gamesa
+     Tier: European Energy Software  |  Score: 0.70  |  Industry: Renewable Energy
+     A global leader in the wind industry, providing clean energy solutions...
+
+ 55. SSE Energy
+     Tier: Energy Sector Software  |  Score: 0.69  |  Industry: Energy
+     Provider of renewable energy plans and low-carbon solutions for businesses
+
+ 56. Open Energi
+     Tier: Direct Competitor  |  Score: 0.68  |  Industry: Renewable Energy
+     The leading marketplace for renewable energy finance & corporate...
+
+ 57. Engie
+     Tier: European Energy Software  |  Score: 0.65  |  Industry: Energy
+     A leading energy expert in international supply and energy management
+
+ 58. Ores
+     Tier: Energy Sector Software  |  Score: 0.65  |  Industry: Sustainable Energy
+     Clean iron producer using a low-temperature process to electrochemically...
+
+ 59. RTE
+     Tier: European Energy Software  |  Score: 0.63  |  Industry: Energy
+     Transmission System Operator
+
+ 60. Volue ASA
+     Tier: Direct Competitor  |  Score: 0.57  |  Industry: Energy
+     Energy market services and software provider
+
+ 61. OVO Energy
+     Tier: European Energy Software  |  Score: 0.54  |  Industry: Energy
+     an app-based renewable energy supplier providing electricity, biogas, EV...
+
+ 62. Romande Energie
+     Tier: European Energy Software  |  Score: 0.52  |  Industry: Energy
+     A full-service energy provider and the leading electricity supplier in...
+
+ 63. Octopus Energy
+     Tier: Energy Sector Software  |  Score: 0.43  |  Industry: Energy
+     A clean energy technology company providing green energy solutions
+
+ 64. Volue
+     Tier: Direct Competitor  |  Score: 0.00  |  Industry: N/A
