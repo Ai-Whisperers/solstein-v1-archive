@@ -303,9 +303,9 @@ billiard==4.2.4 \
     --hash=sha256:525b42bdec68d2b983347ac312f892db930858495db601b5836ac24e6477cde5 \
     --hash=sha256:55f542c371209e03cd5862299b74e52e4fbcba8250ba611ad94276b369b6a85f
     # via celery
-cachetools==6.2.6 \
-    --hash=sha256:16c33e1f276b9a9c0b49ab5782d901e3ad3de0dd6da9bf9bcd29ac5672f2f9e6 \
-    --hash=sha256:8c9717235b3c651603fff0076db52d6acbfd1b338b8ed50256092f7ce9c85bda
+cachetools==7.0.5 \
+    --hash=sha256:0cd042c24377200c1dcd225f8b7b12b0ca53cc2c961b43757e774ebe190fd990 \
+    --hash=sha256:46bc8ebefbe485407621d0a4264b23c080cedd913921bad7ac3ed2f26c183114
     # via pyiceberg
 celery==5.6.2 \
     --hash=sha256:3ffafacbe056951b629c7abcf9064c4a2366de0bdfc9fdba421b97ebb68619a5 \
