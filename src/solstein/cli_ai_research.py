@@ -253,7 +253,10 @@ def _display_report(report: ResearchReport, verbose: bool):
     if basic.get("founded_year"):
         click.echo(f"   Founded: {basic['founded_year']}")
     if basic.get("employees"):
-        click.echo(f"   Employees: {basic['employees']:,}")
+        try:
+            click.echo(f"   Employees: {int(basic['employees']):,}")
+        except (ValueError, TypeError):
+            click.echo(f"   Employees: {basic['employees']}")
 
     # Financials
     if report.financials:
@@ -270,7 +273,13 @@ def _display_report(report: ResearchReport, verbose: bool):
         fund = report.funding
         click.echo(f"   Total Raised: €{fund['total_raised']:.1f}M")
         if fund.get("rounds"):
-            click.echo(f"   Rounds: {len(fund['rounds'])}")
+            rounds = fund["rounds"]
+            if isinstance(rounds, list):
+                click.echo(f"   Rounds: {len(rounds)}")
+            elif isinstance(rounds, (int, float)):
+                click.echo(f"   Rounds: {int(rounds)}")
+            else:
+                click.echo(f"   Rounds: {rounds}")
 
     # Data Sources
     if verbose and report.data_sources:

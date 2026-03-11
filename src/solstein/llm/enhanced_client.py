@@ -33,21 +33,23 @@ class LLMGenerationError(Exception):
 class EnhancedLLMClient:
     """Enhanced LLM client with health tracking and automatic failover."""
 
-    # Provider priority order
+    # Provider priority order — only working providers included.
+    # Tested 2026-03-11: DeepInfra ✅, Mistral ✅, NVIDIA ✅ — all others 401/404/429/503.
+    # Dead providers commented out to avoid ~20s wasted per LLM call.
     PROVIDER_PRIORITY = [
-        "ollama",
-        "groq",
-        "fireworks",
-        "siliconflow",
-        "alibaba",
-        "mistral",
-        "deepinfra",
-        "gemini",
-        "nvidia",
-        "cerebras",
-        "kimi",
-        "anthropic",
-        "openai",
+        "deepinfra",   # ✅ 200 OK — cheapest working provider
+        "mistral",     # ✅ 200 OK
+        "nvidia",      # ✅ 200 OK
+        # --- broken as of 2026-03-11 (re-enable when keys/endpoints fixed) ---
+        # "groq",       # 401 Unauthorized
+        # "cerebras",   # 404 Not Found (wrong model?)
+        # "kimi",       # 401 Unauthorized
+        # "fireworks",  # 503 Service Unavailable
+        # "siliconflow",# 401 Unauthorized
+        # "alibaba",    # 404 Not Found (wrong base_url)
+        # "gemini",     # 404 Not Found (wrong base_url)
+        # "openai",     # 429 Too Many Requests
+        # "anthropic",  # 401 (not OpenAI-compatible)
     ]
 
     def __init__(self, health_checker: ProviderHealthChecker | None = None):
@@ -162,7 +164,8 @@ class EnhancedLLMClient:
     ) -> Any:
         """Query a specific provider."""
         if provider == "ollama":
-            return await self.ollama_querier.query(prompt, system_prompt)
+            # Ollama removed from this deployment — skip to next provider
+            raise Exception("Ollama is not available (removed from VPS)")
 
         client = self._get_client(provider)
         if not client:

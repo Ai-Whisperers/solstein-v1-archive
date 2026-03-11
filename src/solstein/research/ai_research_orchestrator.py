@@ -11,6 +11,7 @@ import importlib.util
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -166,7 +167,13 @@ Return ONLY valid JSON in this format:
 
 
 class WebSearchAgent:
-    """Performs web searches and relevance ranking."""
+    """Performs web searches and relevance ranking.
+
+    Primary backend: SearXNG (local instance, aggregates Brave+DDG+Google).
+    Fallback: direct DuckDuckGo library.
+    """
+
+    SEARXNG_URL = "http://localhost:8889/search"
 
     def __init__(self) -> None:
         self.ddgs = _ddgs_class() if _duckduckgo_available and _ddgs_class is not None else None
@@ -180,21 +187,73 @@ class WebSearchAgent:
 
         results: list[SearchResult] = []
 
-        if self.ddgs is not None:
+        # Primary: SearXNG (aggregates Brave, DDG, Google, Wikipedia)
+        try:
+            searxng_results = await self._search_searxng(query, max_results)
+            results.extend(searxng_results)
+            if searxng_results:
+                logger.info(f"SearXNG returned {len(searxng_results)} results for '{query}'")
+        except Exception as error:
+            logger.warning(f"SearXNG search failed for '{query}': {error}")
+
+        # Fallback: direct DuckDuckGo library
+        if not results and self.ddgs is not None:
             try:
                 ddg_results = await asyncio.to_thread(self._search_duckduckgo, query, max_results)
                 results.extend(ddg_results)
+                if ddg_results:
+                    logger.info(f"DDG fallback returned {len(ddg_results)} results for '{query}'")
             except Exception as error:
-                logger.warning(f"DuckDuckGo search failed for '{query}': {error}")
-        else:
-            logger.warning("DuckDuckGo backend unavailable; returning empty search results")
+                logger.warning(f"DuckDuckGo fallback failed for '{query}': {error}")
+
+        if not results:
+            logger.warning(f"All search backends returned 0 results for '{query}'")
 
         ranked = self._rank_by_relevance(results, intent)
         self.cache[cache_key] = ranked
         return ranked
 
+    async def _search_searxng(self, query: str, max_results: int) -> list[SearchResult]:
+        """Search using local SearXNG instance (aggregates multiple engines)."""
+        results: list[SearchResult] = []
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            response = await client.get(
+                self.SEARXNG_URL,
+                params={"q": query, "format": "json", "language": "en"},
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            for item in data.get("results", [])[:max_results]:
+                url = item.get("url", "")
+                if not url:
+                    continue
+                results.append(
+                    SearchResult(
+                        title=item.get("title", ""),
+                        url=url,
+                        snippet=item.get("content", ""),
+                        source=urlparse(url).netloc,
+                    )
+                )
+
+            # Also pull infobox data as a bonus result if available
+            for infobox in data.get("infoboxes", []):
+                ib_url = infobox.get("id", "")
+                if ib_url and ib_url.startswith("http"):
+                    results.append(
+                        SearchResult(
+                            title=infobox.get("infobox", ""),
+                            url=ib_url,
+                            snippet=infobox.get("content", ""),
+                            source=urlparse(ib_url).netloc,
+                        )
+                    )
+
+        return results
+
     def _search_duckduckgo(self, query: str, max_results: int) -> list[SearchResult]:
-        """Search using DuckDuckGo."""
+        """Fallback: search using DuckDuckGo library."""
         if self.ddgs is None:
             return []
 
@@ -298,7 +357,7 @@ class ContentExtractorAgent:
 Company: {company_name}
 Source: {url}
 
-Return ONLY valid JSON with keys:
+Return ONLY valid JSON (no markdown, no explanation) with these keys:
 company_name, website, description, industry, headquarters, founded_year,
 employees, revenue, revenue_currency, funding_raised, valuation,
 funding_rounds, key_executives, products, is_public.
@@ -312,10 +371,36 @@ Content:
             if response is None or response == "":
                 raise ValueError("Extractor returned empty response")
             response_text = str(response)
-            return json.loads(response_text)
+            # Strip markdown code fences and extract JSON object
+            json_str = self._extract_json_from_response(response_text)
+            return json.loads(json_str)
         except Exception as error:
             logger.error(f"LLM extraction failed for {url}: {error}")
             return {}
+
+    @staticmethod
+    def _extract_json_from_response(text: str) -> str:
+        """Extract JSON payload from an LLM response that may contain markdown fences."""
+        # Strip markdown code fences
+        if "```json" in text:
+            start = text.find("```json") + 7
+            end = text.find("```", start)
+            if end > start:
+                return text[start:end].strip()
+
+        if "```" in text:
+            start = text.find("```") + 3
+            end = text.find("```", start)
+            if end > start:
+                return text[start:end].strip()
+
+        # Find raw JSON object
+        start = text.find("{")
+        end = text.rfind("}")
+        if start >= 0 and end > start:
+            return text[start : end + 1]
+
+        return text
 
     def _classify_source(self, url: str) -> str:
         domain = urlparse(url).netloc.lower()
@@ -352,6 +437,24 @@ class DataValidatorAgent:
         "valuation": {"min": 0, "max": 1_000_000},
     }
 
+    @staticmethod
+    def _to_number(value: Any) -> float | int | None:
+        """Coerce a value to a number, returning None if impossible."""
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            return value
+        if isinstance(value, str):
+            # Strip currency symbols, commas, whitespace
+            cleaned = value.replace(",", "").replace("$", "").replace("€", "").replace("£", "").strip()
+            if not cleaned:
+                return None
+            try:
+                return float(cleaned) if "." in cleaned else int(cleaned)
+            except ValueError:
+                return None
+        return None
+
     async def validate(self, data: ExtractedData) -> ValidationResult:
         issues: list[str] = []
         recommendations: list[str] = []
@@ -359,27 +462,30 @@ class DataValidatorAgent:
         payload = data.data
 
         for field_name, rule in self.VALIDATION_RULES.items():
-            value = payload.get(field_name)
-            if value is None:
+            raw_value = payload.get(field_name)
+            if raw_value is None:
                 continue
-            if not isinstance(value, (int, float)):
-                issues.append(f"{field_name} is not numeric: {value}")
+            value = self._to_number(raw_value)
+            if value is None:
+                issues.append(f"{field_name} is not numeric: {raw_value}")
                 confidence_adjustment -= 0.1
                 continue
+            # Write back the coerced numeric value for downstream use
+            payload[field_name] = value
             if value < rule["min"] or value > rule["max"]:
                 issues.append(f"{field_name}={value} outside [{rule['min']}, {rule['max']}]")
                 confidence_adjustment -= 0.15
 
-        funding = payload.get("funding_raised") or 0
-        valuation = payload.get("valuation") or 0
+        funding = self._to_number(payload.get("funding_raised")) or 0
+        valuation = self._to_number(payload.get("valuation")) or 0
         if funding > 0 and valuation > 0 and funding > valuation * 0.9:
             issues.append(f"Funding ({funding}M) unusually high vs valuation ({valuation}M)")
             recommendations.append("Verify funding and valuation values")
             confidence_adjustment -= 0.1
 
-        employees = payload.get("employees")
-        revenue = payload.get("revenue")
-        if employees and revenue:
+        employees = self._to_number(payload.get("employees"))
+        revenue = self._to_number(payload.get("revenue"))
+        if employees and revenue and employees > 0:
             revenue_per_employee = revenue / employees
             if revenue_per_employee > 10:
                 issues.append(f"Revenue per employee unusually high: {revenue_per_employee:.2f}M")
@@ -399,11 +505,207 @@ class DataValidatorAgent:
 class AIResearchOrchestrator:
     """Orchestrates the multi-agent research workflow."""
 
+    TARGET_FIELDS = [
+        "website",
+        "description",
+        "industry",
+        "headquarters",
+        "founded_year",
+        "employees",
+        "revenue",
+        "revenue_currency",
+        "valuation",
+        "funding_raised",
+        "funding_rounds",
+    ]
+
     def __init__(self) -> None:
         self.planner = ResearchPlannerAgent()
         self.searcher = WebSearchAgent()
         self.extractor = ContentExtractorAgent()
         self.validator = DataValidatorAgent()
+        self.memory_path = Path("data/research_results/research_memory.json")
+        self._memory = self._load_memory()
+
+    def _load_memory(self) -> dict[str, Any]:
+        if self.memory_path.exists():
+            try:
+                with open(self.memory_path) as f:
+                    data = json.load(f)
+                if isinstance(data, dict):
+                    return data
+            except Exception as error:
+                logger.warning(f"Failed loading research memory from {self.memory_path}: {error}")
+
+        bootstrap_path = Path("data/research_results/research_results.json")
+        if bootstrap_path.exists():
+            try:
+                with open(bootstrap_path) as f:
+                    bootstrap = json.load(f)
+                companies = bootstrap.get("companies", []) if isinstance(bootstrap, dict) else []
+                if isinstance(companies, list):
+                    memory: dict[str, Any] = {"companies": {}}
+                    for report in companies:
+                        if not isinstance(report, dict):
+                            continue
+                        company_name = report.get("company_name")
+                        if not isinstance(company_name, str) or not company_name.strip():
+                            continue
+                        key = self._company_key(company_name)
+                        urls: set[str] = set()
+                        for source in report.get("data_sources", []):
+                            if isinstance(source, dict):
+                                url = source.get("url")
+                                if isinstance(url, str) and url:
+                                    urls.add(url)
+                        memory["companies"][key] = {
+                            "latest_report": report,
+                            "known_urls": sorted(urls),
+                            "updated_at": datetime.now().isoformat(),
+                        }
+                    return memory
+            except Exception as error:
+                logger.warning(f"Failed bootstrapping research memory from {bootstrap_path}: {error}")
+
+        return {"companies": {}}
+
+    def _save_memory(self) -> None:
+        try:
+            self.memory_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.memory_path, "w") as f:
+                json.dump(self._memory, f, indent=2)
+        except Exception as error:
+            logger.warning(f"Failed saving research memory to {self.memory_path}: {error}")
+
+    @staticmethod
+    def _company_key(company_name: str) -> str:
+        return " ".join(company_name.lower().split())
+
+    @staticmethod
+    def _score_completeness(payload: dict[str, Any], fields: list[str]) -> float:
+        if not fields:
+            return 0.0
+        filled = 0
+        for field_name in fields:
+            value = payload.get(field_name)
+            if value in (None, "", [], {}):
+                continue
+            filled += 1
+        return filled / len(fields)
+
+    def _previous_report(self, company_name: str) -> dict[str, Any] | None:
+        company_key = self._company_key(company_name)
+        company_entry = self._memory.get("companies", {}).get(company_key, {})
+        report = company_entry.get("latest_report")
+        return report if isinstance(report, dict) else None
+
+    def _previous_urls(self, company_name: str) -> set[str]:
+        company_key = self._company_key(company_name)
+        company_entry = self._memory.get("companies", {}).get(company_key, {})
+        urls = company_entry.get("known_urls", [])
+        if isinstance(urls, list):
+            return {url for url in urls if isinstance(url, str) and url}
+        return set()
+
+    @staticmethod
+    def _flatten_report_fields(report_dict: dict[str, Any]) -> dict[str, Any]:
+        basic = report_dict.get("basic_info", {}) if isinstance(report_dict.get("basic_info"), dict) else {}
+        financials = report_dict.get("financials", {}) if isinstance(report_dict.get("financials"), dict) else {}
+        funding = report_dict.get("funding", {}) if isinstance(report_dict.get("funding"), dict) else {}
+        return {
+            "website": basic.get("website"),
+            "description": basic.get("description"),
+            "industry": basic.get("industry"),
+            "headquarters": basic.get("headquarters"),
+            "founded_year": basic.get("founded_year"),
+            "employees": basic.get("employees"),
+            "revenue": financials.get("revenue"),
+            "revenue_currency": financials.get("revenue_currency"),
+            "valuation": financials.get("valuation"),
+            "funding_raised": funding.get("total_raised"),
+            "funding_rounds": funding.get("rounds"),
+        }
+
+    def _merge_with_previous(self, company_name: str, current: ResearchReport) -> tuple[ResearchReport, int]:
+        previous = self._previous_report(company_name)
+        if not previous:
+            return current, 0
+
+        previous_fields = self._flatten_report_fields(previous)
+        merged_fields = self._flatten_report_fields(
+            {
+                "basic_info": current.basic_info,
+                "financials": current.financials,
+                "funding": current.funding,
+            }
+        )
+
+        carry_forward_count = 0
+        for field_name in self.TARGET_FIELDS:
+            if merged_fields.get(field_name) in (None, "", [], {}):
+                previous_value = previous_fields.get(field_name)
+                if previous_value not in (None, "", [], {}):
+                    merged_fields[field_name] = previous_value
+                    carry_forward_count += 1
+
+        current.basic_info = {
+            "website": merged_fields.get("website"),
+            "description": merged_fields.get("description"),
+            "industry": merged_fields.get("industry"),
+            "headquarters": merged_fields.get("headquarters"),
+            "founded_year": merged_fields.get("founded_year"),
+            "employees": merged_fields.get("employees"),
+        }
+        current.financials = {
+            "revenue": merged_fields.get("revenue"),
+            "revenue_currency": merged_fields.get("revenue_currency") or "EUR",
+            "valuation": merged_fields.get("valuation"),
+        }
+        current.funding = {
+            "total_raised": merged_fields.get("funding_raised"),
+            "rounds": merged_fields.get("funding_rounds") if merged_fields.get("funding_rounds") is not None else [],
+        }
+
+        previous_sources = previous.get("data_sources", []) if isinstance(previous.get("data_sources"), list) else []
+        seen_urls: set[str] = set()
+        merged_sources: list[dict[str, Any]] = []
+        for source in current.data_sources + previous_sources:
+            if not isinstance(source, dict):
+                continue
+            url = source.get("url")
+            if not isinstance(url, str) or not url or url in seen_urls:
+                continue
+            seen_urls.add(url)
+            merged_sources.append(source)
+        current.data_sources = merged_sources
+
+        return current, carry_forward_count
+
+    def _persist_report(self, report: ResearchReport) -> None:
+        company_key = self._company_key(report.company_name)
+        companies = self._memory.setdefault("companies", {})
+        entry = companies.setdefault(company_key, {})
+        report_dict = {
+            "company_name": report.company_name,
+            "is_synthetic": report.is_synthetic,
+            "confidence_score": report.confidence_score,
+            "basic_info": report.basic_info,
+            "financials": report.financials,
+            "funding": report.funding,
+            "data_sources": report.data_sources,
+            "metadata": report.metadata,
+            "errors": report.errors,
+        }
+        known_urls = {url for url in self._previous_urls(report.company_name)}
+        for source in report.data_sources:
+            url = source.get("url") if isinstance(source, dict) else None
+            if isinstance(url, str) and url:
+                known_urls.add(url)
+
+        entry["latest_report"] = report_dict
+        entry["known_urls"] = sorted(known_urls)
+        entry["updated_at"] = datetime.now().isoformat()
+        self._save_memory()
 
     async def research_company(
         self, company_name: str, industry: str | None = None, max_sources: int = 8
@@ -411,6 +713,33 @@ class AIResearchOrchestrator:
         """Perform full autonomous research on a company."""
         start_time = datetime.now()
         report = ResearchReport(company_name=company_name)
+        previous_report = self._previous_report(company_name)
+        previous_urls = self._previous_urls(company_name)
+
+        if previous_report:
+            previous_flat = self._flatten_report_fields(previous_report)
+            completeness = self._score_completeness(previous_flat, self.TARGET_FIELDS)
+            if completeness >= 0.65:
+                report = ResearchReport(
+                    company_name=company_name,
+                    is_synthetic=bool(previous_report.get("is_synthetic", False)),
+                    confidence_score=float(previous_report.get("confidence_score", 0.0)),
+                    basic_info=previous_report.get("basic_info", {}),
+                    financials=previous_report.get("financials", {}),
+                    funding=previous_report.get("funding", {}),
+                    data_sources=previous_report.get("data_sources", []),
+                    metadata={
+                        **(previous_report.get("metadata", {}) if isinstance(previous_report.get("metadata"), dict) else {}),
+                        "research_date": datetime.now().isoformat(),
+                        "cache_reuse": True,
+                        "previous_completeness": round(completeness, 3),
+                        "sources_reused": len(previous_urls),
+                        "research_time_seconds": (datetime.now() - start_time).total_seconds(),
+                    },
+                    errors=list(previous_report.get("errors", [])) if isinstance(previous_report.get("errors"), list) else [],
+                )
+                self._persist_report(report)
+                return report
 
         try:
             plan = await self.planner.create_plan(company_name, industry)
@@ -426,12 +755,23 @@ class AIResearchOrchestrator:
 
             unique_results: list[SearchResult] = []
             seen_urls: set[str] = set()
+            known_urls = set(previous_urls)
+            deferred_known: list[SearchResult] = []
             for result in all_search_results:
                 if result.url and result.url not in seen_urls:
                     seen_urls.add(result.url)
-                    unique_results.append(result)
+                    if result.url in known_urls:
+                        deferred_known.append(result)
+                    else:
+                        unique_results.append(result)
                 if len(unique_results) >= max_sources:
                     break
+
+            if len(unique_results) < max_sources:
+                for result in deferred_known:
+                    unique_results.append(result)
+                    if len(unique_results) >= max_sources:
+                        break
 
             extracted_data_list: list[ExtractedData] = []
             for result in unique_results:
@@ -488,13 +828,19 @@ class AIResearchOrchestrator:
                     "queries_executed": len(plan.queries),
                     "sources_found": len(unique_results),
                     "sources_used": len(validated_data),
+                    "known_sources_skipped": max(0, len(previous_urls) - len([r for r in unique_results if r.url in previous_urls])),
+                    "known_sources_revisited": len([r for r in unique_results if r.url in previous_urls]),
                     "research_time_seconds": (datetime.now() - start_time).total_seconds(),
                 },
             )
+
+            report, carry_forward_count = self._merge_with_previous(company_name, report)
+            report.metadata["fields_carried_forward"] = carry_forward_count
         except Exception as error:
             logger.error(f"Research failed for {company_name}: {error}")
             report.errors.append(str(error))
 
+        self._persist_report(report)
         return report
 
     def _synthesize_data(self, validated_data: list[dict[str, Any]]) -> dict[str, Any]:

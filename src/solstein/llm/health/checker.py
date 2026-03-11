@@ -71,25 +71,17 @@ class HealthChecker:
             return self._unhealthy_from_error(provider, error)
 
     async def check_all_providers(self) -> dict[str, ProviderHealth]:
-        """Check all configured providers."""
-        providers = [
-            "ollama",
-            "openai",
-            "anthropic",
-            "groq",
-            "fireworks",
-            "mistral",
+        """Check only active providers (matching EnhancedLLMClient.PROVIDER_PRIORITY)."""
+        # Only check providers that are in the active priority list.
+        # Dead providers are commented out in enhanced_client.py — no point probing them.
+        active_providers = [
             "deepinfra",
-            "gemini",
+            "mistral",
             "nvidia",
-            "cerebras",
-            "kimi",
-            "siliconflow",
-            "alibaba",
         ]
 
         results = {}
-        for provider in providers:
+        for provider in active_providers:
             results[provider] = await self.check_provider(provider)
 
         return results

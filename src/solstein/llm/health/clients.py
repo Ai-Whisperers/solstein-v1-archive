@@ -72,7 +72,7 @@ class ProviderClientManager:
             "mistral": settings.mistral_api_key,
             "deepinfra": settings.deepinfra_api_key,
             "gemini": settings.gemini_api_key,
-            "nvidia": settings.nvidia_api_key,
+            "nvidia": settings.nvidia_nim_api_key,
             "cerebras": settings.cerebras_api_key,
             "kimi": settings.kimi_api_key,
             "siliconflow": settings.siliconflow_api_key,
