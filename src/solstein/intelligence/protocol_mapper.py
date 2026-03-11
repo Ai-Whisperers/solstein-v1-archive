@@ -191,6 +191,10 @@ class ProtocolMapper:
             "austria": "AT",
             "switzerland": "CH",
             "portugal": "PT",
+            "united states": "US",
+            "usa": "US",
+            "us": "US",
+            "america": "US",
         }
 
         for name, code in country_mappings.items():
@@ -227,6 +231,8 @@ class ProtocolMapper:
             protocol_presences.append(presence)
 
         if not any(p.is_active for p in protocol_presences):
+            # Don't fabricate protocol usage - be honest about lack of evidence
+            pass
             protocol_presences[0].is_active = True
 
         market = MarketPresence(

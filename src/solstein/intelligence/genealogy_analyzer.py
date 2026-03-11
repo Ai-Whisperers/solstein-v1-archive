@@ -89,7 +89,7 @@ STRATEGIC_INVESTORS = {
     "suez",
     "veolia",
     "siemens",
-    "ge",
+    "ge",  # General Electric - short but kept for explicit mentions
     "abb",
     "schneider",
     "honeywell",
@@ -100,7 +100,6 @@ STRATEGIC_INVESTORS = {
     "vestas",
     "siemens gamesa",
 }
-
 ENERGY_UTILITIES = {
     "rwe",
     "eon",
@@ -312,9 +311,13 @@ class GenealogyAnalyzer:
         company_name: str,
     ) -> list[OwnershipStake]:
         stakes = []
+        text_lower = text.lower()
 
         for investor in self.strategic_investors:
-            if investor in text.lower():
+            # Use word boundary matching to avoid false positives
+            # e.g., 'ge' should not match inside 'management' or 'energy'
+            pattern = rf'\\b{re.escape(investor.lower())}\\b'
+            if re.search(pattern, text_lower):
                 percentage = self._extract_ownership_percentage(text, investor)
                 stakes.append(
                     OwnershipStake(
@@ -325,7 +328,8 @@ class GenealogyAnalyzer:
                 )
 
         for utility in self.energy_utilities:
-            if utility in text.lower() and utility not in [s.owner_name.lower() for s in stakes]:
+            pattern = rf'\\b{re.escape(utility.lower())}\\b'
+            if re.search(pattern, text_lower) and utility not in [s.owner_name.lower() for s in stakes]:
                 percentage = self._extract_ownership_percentage(text, utility)
                 stakes.append(
                     OwnershipStake(
@@ -334,7 +338,6 @@ class GenealogyAnalyzer:
                         acquisition_date=None,
                     )
                 )
-
         parent_pattern = rf"(?:subsidiary|owned|part)\s+of\s+([A-Za-z][A-Za-z\s]+?)(?:\.|,|\s)"
         match = re.search(parent_pattern, text.lower())
         if match:
