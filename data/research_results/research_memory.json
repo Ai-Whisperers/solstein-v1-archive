@@ -16036,6 +16036,2942 @@
         "https://robinhood.com/stocks/PCG"
       ],
       "updated_at": "2026-03-11T11:53:32.780095"
+    },
+    "tauron": {
+      "latest_report": {
+        "company_name": "Tauron",
+        "is_synthetic": false,
+        "confidence_score": 0.6295454545454546,
+        "basic_info": {
+          "website": "https://tauron.pl/tauron",
+          "description": "Grupa TAURON jest kluczowym podmiotem w bran\u017cy energetycznej i wa\u017cnym ogniwem w systemie bezpiecze\u0144stwa energetycznego Polski.",
+          "industry": "Energetyka",
+          "headquarters": "Katowice, Poland",
+          "founded_year": null,
+          "employees": 18693
+        },
+        "financials": {
+          "revenue": 8.9,
+          "revenue_currency": "USD",
+          "valuation": 4.8
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://raport.tauron.pl/en/tauron-group/our-group-key-information",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://tauronarenakrakow.pl/en/homepage",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://tauron.pl/tauron",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tarom.ro/en",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://globaldata.com/company-profile/tauron-polska-energia-sa",
+            "type": "company_website",
+            "confidence": 0.5750000000000001
+          },
+          {
+            "url": "https://raport.tauron.pl/en/about-the-report/contact",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://lusha.com/business/546ac67121ef14b8",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:00:51.908002",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "founded_year",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 439.114793,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://globaldata.com/company-profile/tauron-polska-energia-sa",
+        "https://lusha.com/business/546ac67121ef14b8",
+        "https://raport.tauron.pl/en/about-the-report/contact",
+        "https://raport.tauron.pl/en/tauron-group/our-group-key-information",
+        "https://tarom.ro/en",
+        "https://tauron.pl/tauron",
+        "https://tauronarenakrakow.pl/en/homepage"
+      ],
+      "updated_at": "2026-03-11T12:00:51.908102"
+    },
+    "enea": {
+      "latest_report": {
+        "company_name": "Enea",
+        "is_synthetic": false,
+        "confidence_score": 0.7928571428571429,
+        "basic_info": {
+          "website": "https://enea.com",
+          "description": "A global leader in software for telecommunications and cybersecurity",
+          "industry": "Telecommunications, Cybersecurity",
+          "headquarters": "Stockholm, Sweden",
+          "founded_year": 1968,
+          "employees": 500
+        },
+        "financials": {
+          "revenue": 8.3,
+          "revenue_currency": "USD",
+          "valuation": 3.3
+        },
+        "funding": {
+          "total_raised": "15 million euros",
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://enea.com/investors/financial-reporting",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://ir.enea.pl/en",
+            "type": "company_website",
+            "confidence": 0.525
+          },
+          {
+            "url": "https://linkedin.com/company/enea-ab",
+            "type": "linkedin",
+            "confidence": 0.7250000000000001
+          },
+          {
+            "url": "https://enea.com/about",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://eneagrupo.com/",
+            "type": "company_website",
+            "confidence": 0.7000000000000002
+          },
+          {
+            "url": "https://globaldata.com/company-profile/enea-sa",
+            "type": "company_website",
+            "confidence": 0.5750000000000001
+          },
+          {
+            "url": "https://enea.com/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://linkedin.com/posts/enea-ab_enea-headquarters-newoffice-activity-7415379370497798144-86Fx",
+            "type": "linkedin",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:12:14.410750",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 3,
+          "adaptive_sources_used": 6,
+          "missing_fields_before_adaptive": [
+            "description",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "funding_rounds"
+          ],
+          "research_time_seconds": 232.021616,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://enea.com/",
+        "https://enea.com/about",
+        "https://enea.com/investors/financial-reporting",
+        "https://eneagrupo.com/",
+        "https://globaldata.com/company-profile/enea-sa",
+        "https://ir.enea.pl/en",
+        "https://linkedin.com/company/enea-ab",
+        "https://linkedin.com/posts/enea-ab_enea-headquarters-newoffice-activity-7415379370497798144-86Fx"
+      ],
+      "updated_at": "2026-03-11T12:12:14.410875"
+    },
+    "energa": {
+      "latest_report": {
+        "company_name": "Energa",
+        "is_synthetic": false,
+        "confidence_score": 0.885714285714286,
+        "basic_info": {
+          "website": "https://energa.com.au",
+          "description": "Energa is a company based in Australia that provides commercial solar services. Claims to have installed 3k systems. Services include design, optimization, engineering, installation, construction, commissioning and others. Also provides battery storage solutions and financing options. Developed solar PV systems for universities and other commercial units.",
+          "industry": "Solar Energy",
+          "headquarters": "Brisbane, Australia",
+          "founded_year": 2016,
+          "employees": 2
+        },
+        "financials": {
+          "revenue": 2.2,
+          "revenue_currency": "PLN billion",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 0,
+          "rounds": 0
+        },
+        "data_sources": [
+          {
+            "url": "https://ir.energa.pl/en/ir/investor-relations-web-site/for-shareholders/shareholding-structure/information-on-shares-and-shareholders",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://grupa.energa.pl/en",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://energia.nu/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/energa-operator/__fSQCyq5YnELhaoQfT1S1TNb6qdJEHoq5b9ChGm00zCw",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/energa/__tdpN8Tk6Pqom7M4F-hnZ-p_jUCCBOdSnUWXFIfv3CKA",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://ir.energa.pl/en/pr/851736/estimated-financial-and-operational-data-of-the-energa-group-for-q1-2025",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://dailymare.com/news/solid-performance-and-new-business-segmentation---energa-group-summarizes-q1-2025,1377",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://ir.energa.pl/en/pr/856826/strong-distribution-and-continuous-business-optimization-energa-group-delivers-solid-results-for-h1-2025",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://ir.energa.pl/en/pr/862506/energa-group-s-favorable-results-after-three-quarters-of-2025-investments-and-business-diversification-are-paying-off",
+            "type": "company_website",
+            "confidence": 0.7250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:16:01.831426",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 3,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 227.407216,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://dailymare.com/news/solid-performance-and-new-business-segmentation---energa-group-summarizes-q1-2025,1377",
+        "https://energia.nu/",
+        "https://grupa.energa.pl/en",
+        "https://ir.energa.pl/en/ir/investor-relations-web-site/for-shareholders/shareholding-structure/information-on-shares-and-shareholders",
+        "https://ir.energa.pl/en/pr/851736/estimated-financial-and-operational-data-of-the-energa-group-for-q1-2025",
+        "https://ir.energa.pl/en/pr/856826/strong-distribution-and-continuous-business-optimization-energa-group-delivers-solid-results-for-h1-2025",
+        "https://ir.energa.pl/en/pr/862506/energa-group-s-favorable-results-after-three-quarters-of-2025-investments-and-business-diversification-are-paying-off",
+        "https://tracxn.com/d/companies/energa-operator/__fSQCyq5YnELhaoQfT1S1TNb6qdJEHoq5b9ChGm00zCw",
+        "https://tracxn.com/d/companies/energa/__tdpN8Tk6Pqom7M4F-hnZ-p_jUCCBOdSnUWXFIfv3CKA"
+      ],
+      "updated_at": "2026-03-11T12:16:01.831545"
+    },
+    "pge dystrybucja": {
+      "latest_report": {
+        "company_name": "PGE Dystrybucja",
+        "is_synthetic": false,
+        "confidence_score": 0.8269230769230769,
+        "basic_info": {
+          "website": "www.gkpge.pl",
+          "description": "Provider of renewable energy production services",
+          "industry": "Energy",
+          "headquarters": "Lublin, Poland",
+          "founded_year": 1990,
+          "employees": 2444
+        },
+        "financials": {
+          "revenue": 16.73,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 784.45,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://raportzintegrowany2022.gkpge.pl/en/esg-foundation-of-development/society/customers",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://ewsdata.rightsindevelopment.org/projects/20220251-pge-electricity-distribution",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://pgedystrybucja.pl/content/download/0b474cb37a6f15718d4afaf899e6d6de/file/information-clause-for-entites-registering-in-the-purchasing-system.pdf?inLanguage=pol-PL&version=3&contentId=24510",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://raportzintegrowany2023.gkpge.pl/en/social-s/customers-and-contractors/customers",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/pge/__1paMMQRrrCJTexJCDNQmi4Bx4ljQwcEq3cwofON7jEs",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://gkpge.pl/content/download/c1ed6a04db49234856f3f7379fafd09b/file/pge_prezentacja-inwestorska-jezyk-angielski-styczen-2026.pdf?inLanguage=pol-PL&version=22&contentId=96600",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://ceenergynews.com/electricity/record-breaking-eu-co-financing-for-polish-grid-development",
+            "type": "company_website",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:18:49.083407",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 167.238719,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://ceenergynews.com/electricity/record-breaking-eu-co-financing-for-polish-grid-development",
+        "https://ewsdata.rightsindevelopment.org/projects/20220251-pge-electricity-distribution",
+        "https://gkpge.pl/content/download/c1ed6a04db49234856f3f7379fafd09b/file/pge_prezentacja-inwestorska-jezyk-angielski-styczen-2026.pdf?inLanguage=pol-PL&version=22&contentId=96600",
+        "https://pgedystrybucja.pl/content/download/0b474cb37a6f15718d4afaf899e6d6de/file/information-clause-for-entites-registering-in-the-purchasing-system.pdf?inLanguage=pol-PL&version=3&contentId=24510",
+        "https://raportzintegrowany2022.gkpge.pl/en/esg-foundation-of-development/society/customers",
+        "https://raportzintegrowany2023.gkpge.pl/en/social-s/customers-and-contractors/customers",
+        "https://tracxn.com/d/companies/pge/__1paMMQRrrCJTexJCDNQmi4Bx4ljQwcEq3cwofON7jEs"
+      ],
+      "updated_at": "2026-03-11T12:18:49.083631"
+    },
+    "innogy poland": {
+      "latest_report": {
+        "company_name": "Innogy Poland",
+        "is_synthetic": false,
+        "confidence_score": 0.7269230769230771,
+        "basic_info": {
+          "website": "innogygo.pl",
+          "description": "App-based platform for on-demand electric car rentals in select Polish cities",
+          "industry": "Energy",
+          "headquarters": "Warsaw, Poland",
+          "founded_year": 2018,
+          "employees": 221
+        },
+        "financials": {
+          "revenue": 1633,
+          "revenue_currency": "CZK",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 0,
+          "rounds": 0
+        },
+        "data_sources": [
+          {
+            "url": "https://tracxn.com/d/companies/innogy-go/__01yaVjqFchJ262mFW72xk7Yd-NpdMOCwdbNzIlmRcx0",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://htgf.de/en/heliatek-raises-e80-million",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://privateequitywire.co.uk/innogy-innovation-hub-invests-finnish-ai-company-skenariolabs",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://czgs.cz/files/annual-report-2019.pdf",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://annualreport.eon.com/content/dam/eon-annualreport/documents/en/GB24-gesamt-EN_final.pdf",
+            "type": "company_website",
+            "confidence": 0.325
+          },
+          {
+            "url": "https://sse.com/media/qkhjx5xj/innogy_se_financial_statements_2016.pdf",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:21:55.072969",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 185.975356,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://annualreport.eon.com/content/dam/eon-annualreport/documents/en/GB24-gesamt-EN_final.pdf",
+        "https://czgs.cz/files/annual-report-2019.pdf",
+        "https://htgf.de/en/heliatek-raises-e80-million",
+        "https://privateequitywire.co.uk/innogy-innovation-hub-invests-finnish-ai-company-skenariolabs",
+        "https://sse.com/media/qkhjx5xj/innogy_se_financial_statements_2016.pdf",
+        "https://tracxn.com/d/companies/innogy-go/__01yaVjqFchJ262mFW72xk7Yd-NpdMOCwdbNzIlmRcx0"
+      ],
+      "updated_at": "2026-03-11T12:21:55.073061"
+    },
+    "cez": {
+      "latest_report": {
+        "company_name": "CEZ",
+        "is_synthetic": false,
+        "confidence_score": 0.7346153846153847,
+        "basic_info": {
+          "website": "https://cez.cz/en/cez-group/about-cez",
+          "description": "A stable energy group, one of the largest economic entities in Czechia and Central Europe, contributing significantly to the development of the region's energy sector",
+          "industry": "Energy",
+          "headquarters": "Czech Republic",
+          "founded_year": 1992,
+          "employees": 33000
+        },
+        "financials": {
+          "revenue": 21,
+          "revenue_currency": "CZK",
+          "valuation": 41000000000
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://cez.cz/en/home",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://cez.cz/en/cez-group/cez-group",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://cez-motorsport.com/",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://f4-cez.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://cez.cz/en/cez-group/about-cez",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://energydigital.com/company/cez-group",
+            "type": "company_website",
+            "confidence": 0.65
+          },
+          {
+            "url": "https://supplychaindigital.com/company/cez-group",
+            "type": "company_website",
+            "confidence": 0.65
+          },
+          {
+            "url": "https://morningstar.com/stocks/xpra/cez/quote",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://multiples.vc/public-comps/cez-group-valuation-multiples",
+            "type": "company_website",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:26:00.738702",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 245.653157,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://cez-motorsport.com/",
+        "https://cez.cz/en/cez-group/about-cez",
+        "https://cez.cz/en/cez-group/cez-group",
+        "https://cez.cz/en/home",
+        "https://energydigital.com/company/cez-group",
+        "https://f4-cez.com/",
+        "https://morningstar.com/stocks/xpra/cez/quote",
+        "https://multiples.vc/public-comps/cez-group-valuation-multiples",
+        "https://supplychaindigital.com/company/cez-group"
+      ],
+      "updated_at": "2026-03-11T12:26:00.738815"
+    },
+    "eon czech": {
+      "latest_report": {
+        "company_name": "EON Czech",
+        "is_synthetic": false,
+        "confidence_score": 0.6666666666666669,
+        "basic_info": {
+          "website": "https://eon.cz/en",
+          "description": "Energy supplier in the Czech Republic",
+          "industry": "Energy",
+          "headquarters": "Czech Republic",
+          "founded_year": 2024,
+          "employees": 707
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": 4000000000
+        },
+        "funding": {
+          "total_raised": 500000000,
+          "rounds": 4
+        },
+        "data_sources": [
+          {
+            "url": "https://eonreality.com/eon-reality-launches-revolutionary-ai-powered-reseller-program",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://eon.cz/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://eon.com/en.html",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://eon.com/en/investor-relations.html",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://linkedin.com/posts/jordanwahbeh_eon-the-first-cloud-storage-platform-to-activity-7405351060309020673-r1or",
+            "type": "linkedin",
+            "confidence": 0.5000000000000002
+          },
+          {
+            "url": "https://prnewswire.com/il/news-releases/eons-valuation-reaches-1-4-billion-in-under-a-year-becoming-the-fastest-growing-company-in-cloud-infrastructure-302316568.html",
+            "type": "company_website",
+            "confidence": 0.4250000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/e.on/__9EV0Xl1cqOynET6xXfjg7bpzJe27YRXIJN3RxorI86g",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:28:41.803778",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency"
+          ],
+          "research_time_seconds": 161.051872,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://eon.com/en.html",
+        "https://eon.com/en/investor-relations.html",
+        "https://eon.cz/en",
+        "https://eonreality.com/eon-reality-launches-revolutionary-ai-powered-reseller-program",
+        "https://linkedin.com/posts/jordanwahbeh_eon-the-first-cloud-storage-platform-to-activity-7405351060309020673-r1or",
+        "https://prnewswire.com/il/news-releases/eons-valuation-reaches-1-4-billion-in-under-a-year-becoming-the-fastest-growing-company-in-cloud-infrastructure-302316568.html",
+        "https://tracxn.com/d/companies/e.on/__9EV0Xl1cqOynET6xXfjg7bpzJe27YRXIJN3RxorI86g"
+      ],
+      "updated_at": "2026-03-11T12:28:41.803887"
+    },
+    "skoda auto energy": {
+      "latest_report": {
+        "company_name": "Skoda Auto Energy",
+        "is_synthetic": false,
+        "confidence_score": 0.8884615384615385,
+        "basic_info": {
+          "website": "https://skoda-auto.com",
+          "description": "Automobile manufacturer",
+          "industry": "Automotive",
+          "headquarters": "Mlad\u00e1 Boleslav, Czech Republic",
+          "founded_year": 1895,
+          "employees": 25750
+        },
+        "financials": {
+          "revenue": 14.5,
+          "revenue_currency": "Billion USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://skoda.co.uk/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://skodamobil.cz/en/06-2024-1/greenfuture-greener-future",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://skoda-auto.com/emobility/electrified-models",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://skoda-auto.com/company/environment",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://skoda-auto.com/emobility/tips-tricks-energy-efficiency",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://tracxn.com/d/companies/skodaauto/__COf8LX2abWb_uENsP7ddavuvam9tBlMLwn_a9DceyJg",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://just-auto.com/news/skoda-battery-assembly-plant-czech-republic",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://skoda-auto.com/_doc/5fcf0f33-72f6-4dd3-9344-d782d6416069",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:31:17.899424",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "research_time_seconds": 156.082267,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://just-auto.com/news/skoda-battery-assembly-plant-czech-republic",
+        "https://skoda-auto.com/_doc/5fcf0f33-72f6-4dd3-9344-d782d6416069",
+        "https://skoda-auto.com/company/environment",
+        "https://skoda-auto.com/emobility/electrified-models",
+        "https://skoda-auto.com/emobility/tips-tricks-energy-efficiency",
+        "https://skoda.co.uk/",
+        "https://skodamobil.cz/en/06-2024-1/greenfuture-greener-future",
+        "https://tracxn.com/d/companies/skodaauto/__COf8LX2abWb_uENsP7ddavuvam9tBlMLwn_a9DceyJg"
+      ],
+      "updated_at": "2026-03-11T12:31:17.899524"
+    },
+    "eph": {
+      "latest_report": {
+        "company_name": "EPH",
+        "is_synthetic": false,
+        "confidence_score": 0.9392857142857142,
+        "basic_info": {
+          "website": "www.epholding.cz",
+          "description": "Provider of energy production and distribution services",
+          "industry": "Energy",
+          "headquarters": "Prague, Czech Republic",
+          "founded_year": 2009,
+          "employees": 108
+        },
+        "financials": {
+          "revenue": 27549,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": true,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://europeanpropertyholdings.com/investor-relations/financial-reporting",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://eph-group.com/en/reporting-events",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://epholding.cz/en/results-centre",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://epholding.cz/en/reports_and_presentations",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://epgroup.eu/documents/aboutus/EP_Group_AR_2024.pdf",
+            "type": "company_website",
+            "confidence": 0.8750000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/eph-holding/__9OLeS_oHPBZKnOg9Tlr9xqKUiOtbuvC2J62c0FMNpEo",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://stockanalysis.com/quote/bit/EPH/employees",
+            "type": "company_website",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:34:14.764029",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 176.850998,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://epgroup.eu/documents/aboutus/EP_Group_AR_2024.pdf",
+        "https://eph-group.com/en/reporting-events",
+        "https://epholding.cz/en/reports_and_presentations",
+        "https://epholding.cz/en/results-centre",
+        "https://europeanpropertyholdings.com/investor-relations/financial-reporting",
+        "https://stockanalysis.com/quote/bit/EPH/employees",
+        "https://tracxn.com/d/companies/eph-holding/__9OLeS_oHPBZKnOg9Tlr9xqKUiOtbuvC2J62c0FMNpEo"
+      ],
+      "updated_at": "2026-03-11T12:34:14.764112"
+    },
+    "slovenske elektrarne": {
+      "latest_report": {
+        "company_name": "Slovenske Elektrarne",
+        "is_synthetic": false,
+        "confidence_score": 0.6181818181818183,
+        "basic_info": {
+          "website": "https://seas.sk",
+          "description": "Electricity and heat production company",
+          "industry": "Energy",
+          "headquarters": "Slovakia",
+          "founded_year": null,
+          "employees": 2500
+        },
+        "financials": {
+          "revenue": 363000000,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://balkangreenenergynews.com/slovenia-publishes-call-for-incentives-for-wind-solar-power-projects",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://globalcapital.com/article/2fl8bngtn1aks4jlbd9fk/emerging-markets/slovenske-elektrarne-secures-blowout-book-on-debut",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://lobbyfacts.eu/datacard/slovensk%C3%A9-elektr%C3%A1rne-as?rid=648546927951-39&sid=100740",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://seas.sk/wp-content/uploads/a5/b5/SEAS-Annual-Report_woDTP_en.pdf",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://seas.sk/wp-content/uploads/a2/b5/annual-report-2020.pdf",
+            "type": "company_website",
+            "confidence": 0.6250000000000001
+          },
+          {
+            "url": "https://seas.sk/en/about-us/key-information/history",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://seas.sk/en/about-us/key-information/shareholders",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://seas.sk/en/about-us",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:40:21.836939",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "founded_year",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 367.059559,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://balkangreenenergynews.com/slovenia-publishes-call-for-incentives-for-wind-solar-power-projects",
+        "https://globalcapital.com/article/2fl8bngtn1aks4jlbd9fk/emerging-markets/slovenske-elektrarne-secures-blowout-book-on-debut",
+        "https://lobbyfacts.eu/datacard/slovensk%C3%A9-elektr%C3%A1rne-as?rid=648546927951-39&sid=100740",
+        "https://seas.sk/en/about-us",
+        "https://seas.sk/en/about-us/key-information/history",
+        "https://seas.sk/en/about-us/key-information/shareholders",
+        "https://seas.sk/wp-content/uploads/a2/b5/annual-report-2020.pdf",
+        "https://seas.sk/wp-content/uploads/a5/b5/SEAS-Annual-Report_woDTP_en.pdf"
+      ],
+      "updated_at": "2026-03-11T12:40:21.837066"
+    },
+    "zse": {
+      "latest_report": {
+        "company_name": "ZSE",
+        "is_synthetic": false,
+        "confidence_score": 0.8442307692307695,
+        "basic_info": {
+          "website": "www.skupinazse.sk",
+          "description": "Provider of electricity and natural gas distribution and supply",
+          "industry": "Energy",
+          "headquarters": "Slovakia",
+          "founded_year": 1922,
+          "employees": 259
+        },
+        "financials": {
+          "revenue": 228000000,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 9
+        },
+        "data_sources": [
+          {
+            "url": "https://zse.hr/en",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://zse.sk/english",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://zse.co.zw/",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://skupinazse.sk/Home/ZSE-History",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://seczim.co.zw/exchanges/zimbabwe-stock-exchange-zse",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://tracxn.com/d/companies/zpadoslovensk-energetika-a.s.skupina-zse/__RetKD8dSg_siitkW8zsBSUbHiNb0Gw_LfV5kG5RT23M",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://skupinazse.sk/Home/About-us/Annual-reports",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://skupinazse.sk/documents/29798/ZSE_AnnualReport2024.pdf",
+            "type": "company_website",
+            "confidence": 0.6500000000000001
+          },
+          {
+            "url": "https://zse.co.zw/annual-reports",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://zse.co.zw/wp-content/uploads/2025/07/FML.zw-2021-Annual-Report.pdf",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://zse.co.zw/wp-content/uploads/2025/09/ZECO.zw-HY25-Unaudited-Financials.pdf",
+            "type": "company_website",
+            "confidence": 0.4
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:44:40.865039",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 11,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 5,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "research_time_seconds": 259.014356,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://seczim.co.zw/exchanges/zimbabwe-stock-exchange-zse",
+        "https://skupinazse.sk/Home/About-us/Annual-reports",
+        "https://skupinazse.sk/Home/ZSE-History",
+        "https://skupinazse.sk/documents/29798/ZSE_AnnualReport2024.pdf",
+        "https://tracxn.com/d/companies/zpadoslovensk-energetika-a.s.skupina-zse/__RetKD8dSg_siitkW8zsBSUbHiNb0Gw_LfV5kG5RT23M",
+        "https://zse.co.zw/",
+        "https://zse.co.zw/annual-reports",
+        "https://zse.co.zw/wp-content/uploads/2025/07/FML.zw-2021-Annual-Report.pdf",
+        "https://zse.co.zw/wp-content/uploads/2025/09/ZECO.zw-HY25-Unaudited-Financials.pdf",
+        "https://zse.hr/en",
+        "https://zse.sk/english"
+      ],
+      "updated_at": "2026-03-11T12:44:40.865170"
+    },
+    "mol group": {
+      "latest_report": {
+        "company_name": "MOL Group",
+        "is_synthetic": false,
+        "confidence_score": 0.0,
+        "basic_info": {
+          "website": null,
+          "description": null,
+          "industry": null,
+          "headquarters": null,
+          "founded_year": null,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [],
+        "metadata": {
+          "research_date": "2026-03-11T12:45:27.630945",
+          "queries_executed": 8,
+          "sources_found": 0,
+          "sources_used": 0,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 6,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "website",
+            "description",
+            "industry",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "website",
+            "description",
+            "industry",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 46.751514,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [],
+      "updated_at": "2026-03-11T12:45:27.630980"
+    },
+    "eon hungary": {
+      "latest_report": {
+        "company_name": "EON Hungary",
+        "is_synthetic": false,
+        "confidence_score": 0.0,
+        "basic_info": {
+          "website": null,
+          "description": null,
+          "industry": null,
+          "headquarters": null,
+          "founded_year": null,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [],
+        "metadata": {
+          "research_date": "2026-03-11T12:46:11.968492",
+          "queries_executed": 8,
+          "sources_found": 0,
+          "sources_used": 0,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 6,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "website",
+            "description",
+            "industry",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "website",
+            "description",
+            "industry",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 44.324102,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [],
+      "updated_at": "2026-03-11T12:46:11.968524"
+    },
+    "opus": {
+      "latest_report": {
+        "company_name": "OPUS",
+        "is_synthetic": false,
+        "confidence_score": 0.0,
+        "basic_info": {
+          "website": null,
+          "description": null,
+          "industry": null,
+          "headquarters": null,
+          "founded_year": null,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [],
+        "metadata": {
+          "research_date": "2026-03-11T12:46:59.666697",
+          "queries_executed": 8,
+          "sources_found": 0,
+          "sources_used": 0,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 6,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "website",
+            "description",
+            "industry",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "website",
+            "description",
+            "industry",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 47.68421,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [],
+      "updated_at": "2026-03-11T12:46:59.666733"
+    },
+    "nek": {
+      "latest_report": {
+        "company_name": "NEK",
+        "is_synthetic": false,
+        "confidence_score": 0.0,
+        "basic_info": {
+          "website": null,
+          "description": null,
+          "industry": null,
+          "headquarters": null,
+          "founded_year": null,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [],
+        "metadata": {
+          "research_date": "2026-03-11T12:47:50.159418",
+          "queries_executed": 8,
+          "sources_found": 0,
+          "sources_used": 0,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 6,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "website",
+            "description",
+            "industry",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "website",
+            "description",
+            "industry",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 50.478208,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [],
+      "updated_at": "2026-03-11T12:47:50.159452"
+    },
+    "cez bulgaria": {
+      "latest_report": {
+        "company_name": "CEZ Bulgaria",
+        "is_synthetic": false,
+        "confidence_score": 0.7964285714285716,
+        "basic_info": {
+          "website": "www.cez.cz",
+          "description": "conglomerate of 96 companies, core business is the generation, distribution, trade in, and sales of electricity and heat, trade in and sales of natural gas, and coal extraction",
+          "industry": "Energy",
+          "headquarters": "Prague, Czech Republic",
+          "founded_year": 1992,
+          "employees": 33617
+        },
+        "financials": {
+          "revenue": 12.7,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": "335 million EUR",
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://cez.cz/en/home",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/%C4%8CEZ_Group",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://cez.cz/en/media/press-releases/cez-group-completes-sale-of-bulgarian-assets-for-eur-335-million-147494",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://cez.cz/en/investors/inside-information",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://cez.cz/en/investors/financial-reports/half-year-reports",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://ebrd.com/home/news-and-events/news/2021/ebrd-eurohold-cez-bulgaria.html",
+            "type": "company_website",
+            "confidence": 0.5000000000000001
+          },
+          {
+            "url": "https://ewsdata.rightsindevelopment.org/projects/47632-cez-distribution-bulgaria",
+            "type": "company_website",
+            "confidence": 0.45000000000000007
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:50:14.669089",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 144.495985,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://cez.cz/en/home",
+        "https://cez.cz/en/investors/financial-reports/half-year-reports",
+        "https://cez.cz/en/investors/inside-information",
+        "https://cez.cz/en/media/press-releases/cez-group-completes-sale-of-bulgarian-assets-for-eur-335-million-147494",
+        "https://ebrd.com/home/news-and-events/news/2021/ebrd-eurohold-cez-bulgaria.html",
+        "https://en.wikipedia.org/wiki/%C4%8CEZ_Group",
+        "https://ewsdata.rightsindevelopment.org/projects/47632-cez-distribution-bulgaria"
+      ],
+      "updated_at": "2026-03-11T12:50:14.669180"
+    },
+    "energoproekt": {
+      "latest_report": {
+        "company_name": "Energoproekt",
+        "is_synthetic": false,
+        "confidence_score": 0.8150000000000002,
+        "basic_info": {
+          "website": "https://energovg.rs/en",
+          "description": "The largest Serbian construction company capable of realising the most complex projects",
+          "industry": "Construction",
+          "headquarters": "Belgrade, Serbia",
+          "founded_year": 1951,
+          "employees": 800
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://energoprojekt.rs/?lang=en",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://energovg.rs/en",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://janicenergoprojekt.com/en/homepage",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://bouncewatch.com/explore/startup/energoprojekt",
+            "type": "company_website",
+            "confidence": 0.7
+          },
+          {
+            "url": "http://energoprojekt.rs/wp-content/uploads//2021/07/ENHL-Godisnji-izvestaj-za-2020.-godinu-ENG.pdf",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "http://energo-pro.com/uploads/files/2024-07-08_10-59-17_epas_ar_2023_final.pdf",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://seenews.com/news/serbias-energoprojekt-holding-grows-net-profit-in-h1-1282365",
+            "type": "company_website",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T12:54:13.276691",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 238.593198,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "http://energo-pro.com/uploads/files/2024-07-08_10-59-17_epas_ar_2023_final.pdf",
+        "http://energoprojekt.rs/wp-content/uploads//2021/07/ENHL-Godisnji-izvestaj-za-2020.-godinu-ENG.pdf",
+        "https://bouncewatch.com/explore/startup/energoprojekt",
+        "https://energoprojekt.rs/?lang=en",
+        "https://energovg.rs/en",
+        "https://janicenergoprojekt.com/en/homepage",
+        "https://seenews.com/news/serbias-energoprojekt-holding-grows-net-profit-in-h1-1282365"
+      ],
+      "updated_at": "2026-03-11T12:54:13.276808"
+    },
+    "hidroelectrica": {
+      "latest_report": {
+        "company_name": "Hidroelectrica",
+        "is_synthetic": false,
+        "confidence_score": 0.7884615384615384,
+        "basic_info": {
+          "website": "https://www.hidroelectrica.ro/",
+          "description": "Romania's state-controlled hydropower producer",
+          "industry": "Energy",
+          "headquarters": "Bucharest, Romania",
+          "founded_year": 2000,
+          "employees": 1001
+        },
+        "financials": {
+          "revenue": 38,
+          "revenue_currency": "USD million",
+          "valuation": 2800000000
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://m.bvb.ro/infocont/infocont26/H2O_20260226190049_H2O-EN-Preliminary-financial-results-FY-2025.pdf",
+            "type": "company_website",
+            "confidence": 0.525
+          },
+          {
+            "url": "https://marketscreener.com/news/hidroelectrica-q3-2025-consolidated-report-of-the-management-board-of-hidroelectrica-ce7d5fd2dc81f02d",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://bvb.ro/infocont/infocont25/H2O_20250430132056_H2O-EN-FY-2024-Report-merged2.pdf",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://hydropower-dams.com/news/hidroelectrica-tenders-completion-of-nehoiasu-ii-project",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://theworldfolio.com/company/hidroelectrica-romania/151",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://linkedin.com/company/hidroelectrica-s-a",
+            "type": "linkedin",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://energyindustryreview.com/power/hidroelectrica-awarded-ahe-vidraru-refurbishment-contract",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:01:19.271001",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 3,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "website",
+            "founded_year",
+            "employees",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 425.980756,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://bvb.ro/infocont/infocont25/H2O_20250430132056_H2O-EN-FY-2024-Report-merged2.pdf",
+        "https://energyindustryreview.com/power/hidroelectrica-awarded-ahe-vidraru-refurbishment-contract",
+        "https://hydropower-dams.com/news/hidroelectrica-tenders-completion-of-nehoiasu-ii-project",
+        "https://linkedin.com/company/hidroelectrica-s-a",
+        "https://m.bvb.ro/infocont/infocont26/H2O_20260226190049_H2O-EN-Preliminary-financial-results-FY-2025.pdf",
+        "https://marketscreener.com/news/hidroelectrica-q3-2025-consolidated-report-of-the-management-board-of-hidroelectrica-ce7d5fd2dc81f02d",
+        "https://theworldfolio.com/company/hidroelectrica-romania/151"
+      ],
+      "updated_at": "2026-03-11T13:01:19.271137"
+    },
+    "electrica": {
+      "latest_report": {
+        "company_name": "Electrica",
+        "is_synthetic": false,
+        "confidence_score": 0.8500000000000002,
+        "basic_info": {
+          "website": "http://www.electrica.ro/",
+          "description": "Electrica is a public company, listed on the Bucharest and London stock exchanges, and is the only listed Romanian company in the field of electricity distribution and supply in Romania.",
+          "industry": "Electricity",
+          "headquarters": "Bucharest, Romania",
+          "founded_year": 1990,
+          "employees": 8000
+        },
+        "financials": {
+          "revenue": 10.01,
+          "revenue_currency": "RON million",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://se.com/ww/en",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://sandc.com/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://find-and-update.company-information.service.gov.uk/company/03100654",
+            "type": "company_website",
+            "confidence": 0.425
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Electrica",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:05:33.297015",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 4,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "description",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 254.009047,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Electrica",
+        "https://find-and-update.company-information.service.gov.uk/company/03100654",
+        "https://sandc.com/",
+        "https://se.com/ww/en"
+      ],
+      "updated_at": "2026-03-11T13:05:33.297099"
+    },
+    "autogrid": {
+      "latest_report": {
+        "company_name": "Autogrid",
+        "is_synthetic": false,
+        "confidence_score": 1.0,
+        "basic_info": {
+          "website": "auto-grid.com",
+          "description": "IoT enabled distributed energy resource management solutions provider",
+          "industry": "Energy",
+          "headquarters": "Redwood City, United States",
+          "founded_year": 2011,
+          "employees": 38
+        },
+        "financials": {
+          "revenue": 8.11,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 160,
+          "rounds": 9
+        },
+        "data_sources": [
+          {
+            "url": "https://tracxn.com/d/companies/autogrid/__XZl_p5p5pF3Vvslzzifw0DvwV2OZXDTF40vKlSjAzto",
+            "type": "company_website",
+            "confidence": 1.0
+          },
+          {
+            "url": "https://seedtable.com/startups/Autogrid_Systems-99BW49K",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://inc42.com/company/autogrid",
+            "type": "company_website",
+            "confidence": 0.75
+          },
+          {
+            "url": "https://qurator.com/vendors/autogrid-systems",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:09:00.730792",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 4,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 207.419,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://inc42.com/company/autogrid",
+        "https://qurator.com/vendors/autogrid-systems",
+        "https://seedtable.com/startups/Autogrid_Systems-99BW49K",
+        "https://tracxn.com/d/companies/autogrid/__XZl_p5p5pF3Vvslzzifw0DvwV2OZXDTF40vKlSjAzto"
+      ],
+      "updated_at": "2026-03-11T13:09:00.730908"
+    },
+    "likewatt": {
+      "latest_report": {
+        "company_name": "Likewatt",
+        "is_synthetic": false,
+        "confidence_score": 0.9499999999999998,
+        "basic_info": {
+          "website": "https://www.likewatt.com",
+          "description": "Provider of solutions for energy optimization",
+          "industry": "Energy",
+          "headquarters": "Lyon, France",
+          "founded_year": 2019,
+          "employees": 15
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": true,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://energaia.fr/wp-content/uploads/2022/12/EnerGaia2022_NouveautesExposants-GB.pdf",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://tracxn.com/d/companies/likewatt/__t0cyVXl6Nf2VBh-1VN2CjQmo2zyiUFehRZM1YfW4Ozo",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://wattutilities.com.au/corporate-energy-management",
+            "type": "company_website",
+            "confidence": 0.675
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:13:56.964993",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 3,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 1,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "research_time_seconds": 296.217,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://energaia.fr/wp-content/uploads/2022/12/EnerGaia2022_NouveautesExposants-GB.pdf",
+        "https://tracxn.com/d/companies/likewatt/__t0cyVXl6Nf2VBh-1VN2CjQmo2zyiUFehRZM1YfW4Ozo",
+        "https://wattutilities.com.au/corporate-energy-management"
+      ],
+      "updated_at": "2026-03-11T13:13:56.965076"
+    },
+    "beebryte": {
+      "latest_report": {
+        "company_name": "BeeBryte",
+        "is_synthetic": false,
+        "confidence_score": 0.8249999999999998,
+        "basic_info": {
+          "website": "https://beebryte.com",
+          "description": "BeeBryte combines predictive maintenance and energy management to anticipate failures and optimize the performance of refrigeration and HVAC equipment.",
+          "industry": "Energy Management",
+          "headquarters": "Lyon, France",
+          "founded_year": 2015,
+          "employees": 80
+        },
+        "financials": {
+          "revenue": 2.8,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 2.95,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://beebryte.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://beebryte.com/en/our-story",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://beebryte.com/en/beebryte-refrigeration-hvac",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://beebryte.com/contact-beebryte",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/beebryte/__GtU2kkCYx2V4YqhhbSi9yNcNd7qNY1fGINe2nBLSsdw",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:16:16.640408",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 5,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 139.660239,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://beebryte.com/",
+        "https://beebryte.com/contact-beebryte",
+        "https://beebryte.com/en/beebryte-refrigeration-hvac",
+        "https://beebryte.com/en/our-story",
+        "https://tracxn.com/d/companies/beebryte/__GtU2kkCYx2V4YqhhbSi9yNcNd7qNY1fGINe2nBLSsdw"
+      ],
+      "updated_at": "2026-03-11T13:16:16.640489"
+    },
+    "gridbeyond": {
+      "latest_report": {
+        "company_name": "GridBeyond",
+        "is_synthetic": false,
+        "confidence_score": 1.0,
+        "basic_info": {
+          "website": "gridbeyond.com",
+          "description": "AI-based platform for balancing distributed energy resources and demand response",
+          "industry": "Energy",
+          "headquarters": "London, United Kingdom",
+          "founded_year": 2007,
+          "employees": 16
+        },
+        "financials": {
+          "revenue": 5.53,
+          "revenue_currency": "GBP",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 76.1,
+          "rounds": 10
+        },
+        "data_sources": [
+          {
+            "url": "https://gridbeyond.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://gridbeyond.com/insights",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://gridbeyond.com/about-us",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://gridbeyond.com/an-introduction-to-gridbeyond",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://gridbeyond.com/category/news",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://gridbeyond.com/gridbeyond-closes-e52m-series-c-funding-round-to-continue-its-platform-evolution-and-invest-in-new-existing-markets",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://tracxn.com/d/companies/gridbeyond/__daPNKjX7iJeCorgZpCcWcbuK_n5V6xLpirIFg1oJdzY",
+            "type": "company_website",
+            "confidence": 1.0
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:19:10.289929",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 173.634372,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://gridbeyond.com/",
+        "https://gridbeyond.com/about-us",
+        "https://gridbeyond.com/an-introduction-to-gridbeyond",
+        "https://gridbeyond.com/category/news",
+        "https://gridbeyond.com/gridbeyond-closes-e52m-series-c-funding-round-to-continue-its-platform-evolution-and-invest-in-new-existing-markets",
+        "https://gridbeyond.com/insights",
+        "https://tracxn.com/d/companies/gridbeyond/__daPNKjX7iJeCorgZpCcWcbuK_n5V6xLpirIFg1oJdzY"
+      ],
+      "updated_at": "2026-03-11T13:19:10.290033"
+    },
+    "moixa": {
+      "latest_report": {
+        "company_name": "Moixa",
+        "is_synthetic": false,
+        "confidence_score": 0.8500000000000003,
+        "basic_info": {
+          "website": "https://www.moixa.com/",
+          "description": "British cleantech company that develops software and hardware to optimise use of renewable energy",
+          "industry": "Design, Technology and Research",
+          "headquarters": "London, England, UK",
+          "founded_year": 2004,
+          "employees": 70
+        },
+        "financials": {
+          "revenue": 720000,
+          "revenue_currency": "INR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 30.83,
+          "rounds": [
+            "Series C"
+          ]
+        },
+        "data_sources": [
+          {
+            "url": "https://moixa.com/",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://moixa.com/terms",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://moixa.com/case-study/smart-energy-islands",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Moixa",
+            "type": "wikipedia",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://moixaclothing.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://nordic9.com/news/moixa-raised-4-6-million-in-a-series-c-funding-round-led-by-itochu-news6669697851",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/moixa/__IWmMbCAgboqvHqMZWt_N3mOrsJ9BYD8w7LD-MBPWkPI/funding-and-investors",
+            "type": "company_website",
+            "confidence": 0.325
+          },
+          {
+            "url": "https://cbinsights.com/company/moixa-energy",
+            "type": "company_website",
+            "confidence": 0.8750000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/legal-entities/india/moixa-dealers-private-limited/__ijlmSqi2-pU3wGSAhhcTz00mPZsRpQo0z4vTXNCOB-Q",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://energy-storage.news/year-in-review-lunar-energy-on-the-progress-of-us-home-energy-storage-through-turbulent-2025-and-the-way-ahead-for-virtual-power-plants",
+            "type": "company_website",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:24:27.918118",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 10,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 317.613538,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://cbinsights.com/company/moixa-energy",
+        "https://en.wikipedia.org/wiki/Moixa",
+        "https://energy-storage.news/year-in-review-lunar-energy-on-the-progress-of-us-home-energy-storage-through-turbulent-2025-and-the-way-ahead-for-virtual-power-plants",
+        "https://moixa.com/",
+        "https://moixa.com/case-study/smart-energy-islands",
+        "https://moixa.com/terms",
+        "https://moixaclothing.com/",
+        "https://nordic9.com/news/moixa-raised-4-6-million-in-a-series-c-funding-round-led-by-itochu-news6669697851",
+        "https://tracxn.com/d/companies/moixa/__IWmMbCAgboqvHqMZWt_N3mOrsJ9BYD8w7LD-MBPWkPI/funding-and-investors",
+        "https://tracxn.com/d/legal-entities/india/moixa-dealers-private-limited/__ijlmSqi2-pU3wGSAhhcTz00mPZsRpQo0z4vTXNCOB-Q"
+      ],
+      "updated_at": "2026-03-11T13:24:27.918267"
+    },
+    "electron": {
+      "latest_report": {
+        "company_name": "Electron",
+        "is_synthetic": false,
+        "confidence_score": 0.8204545454545453,
+        "basic_info": {
+          "website": "https://electron.net",
+          "description": "Building the foundations for an affordable, reliable, and flexible energy system",
+          "industry": "Energy",
+          "headquarters": "London",
+          "founded_year": 2015,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 1.5,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://elektron.se/",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://electronenergy.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://electronjs.org/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://electroninks.com/",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://tracxn.com/d/companies/electron/__GdgWtRgk1joRvcJidneBrUeSm-IJwuptEqCKmRq8918/funding-and-investors",
+            "type": "company_website",
+            "confidence": 0.325
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Electron_(software_framework)",
+            "type": "wikipedia",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://electron.net/about",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:27:59.386182",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "research_time_seconds": 211.452091,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://electron.net/about",
+        "https://electronenergy.com/",
+        "https://electroninks.com/",
+        "https://electronjs.org/",
+        "https://elektron.se/",
+        "https://en.wikipedia.org/wiki/Electron_(software_framework)",
+        "https://tracxn.com/d/companies/electron/__GdgWtRgk1joRvcJidneBrUeSm-IJwuptEqCKmRq8918/funding-and-investors"
+      ],
+      "updated_at": "2026-03-11T13:27:59.386328"
+    },
+    "verv": {
+      "latest_report": {
+        "company_name": "Verv",
+        "is_synthetic": false,
+        "confidence_score": 0.8999999999999998,
+        "basic_info": {
+          "website": "https://verv.energy",
+          "description": "AI-driven energy monitoring solution for homes",
+          "industry": "Energy",
+          "headquarters": "London, United Kingdom",
+          "founded_year": 2009,
+          "employees": 7
+        },
+        "financials": {
+          "revenue": 59.61,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 21.8,
+          "rounds": 15
+        },
+        "data_sources": [
+          {
+            "url": "https://linkedin.com/company/verv",
+            "type": "linkedin",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://verv.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://verv.energy/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://verv.energy/about",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/verv/__Z1t8Mzyvrc6Jrz0m08ZDFfC95OWnvSxElcMZek0P0wE",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://stockanalysis.com/stocks/verv/revenue",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:31:58.184026",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 1,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 238.780259,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://linkedin.com/company/verv",
+        "https://stockanalysis.com/stocks/verv/revenue",
+        "https://tracxn.com/d/companies/verv/__Z1t8Mzyvrc6Jrz0m08ZDFfC95OWnvSxElcMZek0P0wE",
+        "https://verv.com/",
+        "https://verv.energy/",
+        "https://verv.energy/about"
+      ],
+      "updated_at": "2026-03-11T13:31:58.184122"
+    },
+    "passivsystems": {
+      "latest_report": {
+        "company_name": "PassivSystems",
+        "is_synthetic": false,
+        "confidence_score": 0.7785714285714286,
+        "basic_info": {
+          "website": "https://passivuk.com",
+          "description": "Smart energy technology business developing software solutions to decarbonise homes",
+          "industry": "Energy Technology",
+          "headquarters": "Newbury",
+          "founded_year": 2008,
+          "employees": 50
+        },
+        "financials": {
+          "revenue": 4.37,
+          "revenue_currency": "GBP",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 25,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://passivuk.com/about-us",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://passivuk.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://passivuk.com/innovation",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://passivliving.com/",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://linkedin.com/posts/passivsystems-2_sif-ofgemsif-heatpumps-activity-7240281123828690946-yNa7",
+            "type": "linkedin",
+            "confidence": 0.5000000000000001
+          },
+          {
+            "url": "https://shiftenvironment.co.uk/news/funding-for-heat-pump-monitoring",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://committees.parliament.uk/writtenevidence/14395/pdf",
+            "type": "company_website",
+            "confidence": 0.75
+          },
+          {
+            "url": "https://connectedresponse.co.uk/wp-content/uploads/2021/06/4D-Heat-Final-Report.pdf",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://iea.blob.core.windows.net/assets/imports/events/167/ColinCalder.pdf",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://tracxn.com/d/legal-entities/germany/passivsystems-limited/__q3HiW_XCuGLkbCDd5qHXQIH9JiiwhCMIZh5yp3-JV8A",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:35:44.074074",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 10,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 225.874614,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://committees.parliament.uk/writtenevidence/14395/pdf",
+        "https://connectedresponse.co.uk/wp-content/uploads/2021/06/4D-Heat-Final-Report.pdf",
+        "https://iea.blob.core.windows.net/assets/imports/events/167/ColinCalder.pdf",
+        "https://linkedin.com/posts/passivsystems-2_sif-ofgemsif-heatpumps-activity-7240281123828690946-yNa7",
+        "https://passivliving.com/",
+        "https://passivuk.com/",
+        "https://passivuk.com/about-us",
+        "https://passivuk.com/innovation",
+        "https://shiftenvironment.co.uk/news/funding-for-heat-pump-monitoring",
+        "https://tracxn.com/d/legal-entities/germany/passivsystems-limited/__q3HiW_XCuGLkbCDd5qHXQIH9JiiwhCMIZh5yp3-JV8A"
+      ],
+      "updated_at": "2026-03-11T13:35:44.074229"
+    },
+    "origami energy": {
+      "latest_report": {
+        "company_name": "Origami Energy",
+        "is_synthetic": false,
+        "confidence_score": 0.8571428571428573,
+        "basic_info": {
+          "website": "http://www.origamienergy.com",
+          "description": "A green energy world, powered by smart technology.",
+          "industry": "IT Services and IT Consulting",
+          "headquarters": "Cambridge, Cambridgeshire",
+          "founded_year": 2013,
+          "employees": 51
+        },
+        "financials": {
+          "revenue": 786000,
+          "revenue_currency": "GBP",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 81600000,
+          "rounds": 4
+        },
+        "data_sources": [
+          {
+            "url": "https://uk.linkedin.com/company/origamienergy",
+            "type": "linkedin",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/origami-energy/__bnORJIID7Rxne5nz7xng7bjW4aTXo-j6U0w65f8gYXs",
+            "type": "company_website",
+            "confidence": 0.75
+          },
+          {
+            "url": "https://tracxn.com/d/companies/origami-energy/__bnORJIID7Rxne5nz7xng7bjW4aTXo-j6U0w65f8gYXs/funding-and-investors",
+            "type": "company_website",
+            "confidence": 0.325
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:38:38.355021",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 3,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 174.265343,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://tracxn.com/d/companies/origami-energy/__bnORJIID7Rxne5nz7xng7bjW4aTXo-j6U0w65f8gYXs",
+        "https://tracxn.com/d/companies/origami-energy/__bnORJIID7Rxne5nz7xng7bjW4aTXo-j6U0w65f8gYXs/funding-and-investors",
+        "https://uk.linkedin.com/company/origamienergy"
+      ],
+      "updated_at": "2026-03-11T13:38:38.355084"
+    },
+    "open energi": {
+      "latest_report": {
+        "company_name": "Open Energi",
+        "is_synthetic": false,
+        "confidence_score": 0.675,
+        "basic_info": {
+          "website": "https://openenergygroup.com/",
+          "description": "The leading marketplace for renewable energy finance & corporate sustainability solutions",
+          "industry": "Renewable Energy",
+          "headquarters": "London, United Kingdom",
+          "founded_year": 1999,
+          "employees": 30
+        },
+        "financials": {
+          "revenue": 417000,
+          "revenue_currency": "GBP",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 167000000,
+          "rounds": 8
+        },
+        "data_sources": [
+          {
+            "url": "https://openenergi.com/",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://openenergi.com/our-services",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://openenergi.com/meet-the-team",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://openenergygroup.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/openenergi/__a5gio2y01d9EJA4ZHJZR6jMLy2jIl3JIGgsux82pozw",
+            "type": "company_website",
+            "confidence": 0.675
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:40:50.478697",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 5,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 132.108551,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://openenergi.com/",
+        "https://openenergi.com/meet-the-team",
+        "https://openenergi.com/our-services",
+        "https://openenergygroup.com/",
+        "https://tracxn.com/d/companies/openenergi/__a5gio2y01d9EJA4ZHJZR6jMLy2jIl3JIGgsux82pozw"
+      ],
+      "updated_at": "2026-03-11T13:40:50.478823"
+    },
+    "reactive technologies": {
+      "latest_report": {
+        "company_name": "Reactive Technologies",
+        "is_synthetic": false,
+        "confidence_score": 0.9000000000000002,
+        "basic_info": {
+          "website": "https://reactive-technologies.com",
+          "description": "Developer of cloud-based demand-side management solutions",
+          "industry": "Energy",
+          "headquarters": "Oxford, United Kingdom",
+          "founded_year": 2010,
+          "employees": "11-50"
+        },
+        "financials": {
+          "revenue": 2.68,
+          "revenue_currency": "GBP",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 94.6,
+          "rounds": 11
+        },
+        "data_sources": [
+          {
+            "url": "https://linkedin.com/company/reactive-technologies-limited",
+            "type": "linkedin",
+            "confidence": 0.7
+          },
+          {
+            "url": "https://reactive-technologies.com/post-an-event",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://reactive-technologies.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://reactive-technologies.com/contact-us",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/reactive-technologies/__2gYu72Z9CvKKT3QOGJEtt5j2Liy0NYEEylvB59PiSp0",
+            "type": "company_website",
+            "confidence": 0.9
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:45:53.917374",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 5,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 303.422942,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://linkedin.com/company/reactive-technologies-limited",
+        "https://reactive-technologies.com/",
+        "https://reactive-technologies.com/contact-us",
+        "https://reactive-technologies.com/post-an-event",
+        "https://tracxn.com/d/companies/reactive-technologies/__2gYu72Z9CvKKT3QOGJEtt5j2Liy0NYEEylvB59PiSp0"
+      ],
+      "updated_at": "2026-03-11T13:45:53.917489"
+    },
+    "tempus energy": {
+      "latest_report": {
+        "company_name": "Tempus Energy",
+        "is_synthetic": false,
+        "confidence_score": 0.8285714285714286,
+        "basic_info": {
+          "website": "tempusenergy.com",
+          "description": "Demand management by using electricity during non peak hours at cheap rates",
+          "industry": "Energy",
+          "headquarters": "Worcester, United States",
+          "founded_year": 2013,
+          "employees": "11-50"
+        },
+        "financials": {
+          "revenue": 1000000,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 8.18,
+          "rounds": 4
+        },
+        "data_sources": [
+          {
+            "url": "https://leadiq.com/c/tempus-energy/5a1daaef23000059009fb423",
+            "type": "company_website",
+            "confidence": 0.75
+          },
+          {
+            "url": "https://tracxn.com/d/companies/tempus-energy/__y53WiezLl3mlYmMCFrxmJIbEh0TmeZyxgKOr5jWgm1U",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://climatebase.org/company/6710/tempus-energy",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://ashden.org/awards/winners/tempus-energy",
+            "type": "company_website",
+            "confidence": 0.625
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:49:26.113318",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 4,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 212.178843,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://ashden.org/awards/winners/tempus-energy",
+        "https://climatebase.org/company/6710/tempus-energy",
+        "https://leadiq.com/c/tempus-energy/5a1daaef23000059009fb423",
+        "https://tracxn.com/d/companies/tempus-energy/__y53WiezLl3mlYmMCFrxmJIbEh0TmeZyxgKOr5jWgm1U"
+      ],
+      "updated_at": "2026-03-11T13:49:26.113393"
+    },
+    "switchee": {
+      "latest_report": {
+        "company_name": "Switchee",
+        "is_synthetic": false,
+        "confidence_score": 0.7660714285714286,
+        "basic_info": {
+          "website": "https://placesforpeople.co.uk",
+          "description": "UK's leading social enterprises, creating and supporting thriving communities",
+          "industry": "Real Estate",
+          "headquarters": "London, England",
+          "founded_year": 2015,
+          "employees": 12900
+        },
+        "financials": {
+          "revenue": 1059,
+          "revenue_currency": "GBP",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 5000000,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://uk.linkedin.com/company/switchee-limited",
+            "type": "linkedin",
+            "confidence": 0.7
+          },
+          {
+            "url": "https://switchee.com/overview",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://switchee.com/",
+            "type": "company_website",
+            "confidence": 0.5750000000000001
+          },
+          {
+            "url": "https://startupmap.iamsterdam.com/news/feed/switchee-secures-5m-investment-funding",
+            "type": "company_website",
+            "confidence": 0.45000000000000007
+          },
+          {
+            "url": "https://futureshg.co.uk/media/xukgqmqn/fhg-2024.pdf",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://switchee.com/wp-content/uploads/2025/05/Switchee_Impact_Report_2024.pdf",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://placesforpeople.co.uk/media/5wnasjzg/annual-report-2025.pdf",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://switchee.com/wp-content/uploads/2024/09/Switchee-Case-Study-Pack-2024-3.pdf",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://platformhg.com/sites/default/files/2023-10/Platform_Customer_Annual_Report_2023%20v12%20%28DIGITAL%29.pdf",
+            "type": "company_website",
+            "confidence": 0.7250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:54:07.616947",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 5,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 281.48802,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://futureshg.co.uk/media/xukgqmqn/fhg-2024.pdf",
+        "https://placesforpeople.co.uk/media/5wnasjzg/annual-report-2025.pdf",
+        "https://platformhg.com/sites/default/files/2023-10/Platform_Customer_Annual_Report_2023%20v12%20%28DIGITAL%29.pdf",
+        "https://startupmap.iamsterdam.com/news/feed/switchee-secures-5m-investment-funding",
+        "https://switchee.com/",
+        "https://switchee.com/overview",
+        "https://switchee.com/wp-content/uploads/2024/09/Switchee-Case-Study-Pack-2024-3.pdf",
+        "https://switchee.com/wp-content/uploads/2025/05/Switchee_Impact_Report_2024.pdf",
+        "https://uk.linkedin.com/company/switchee-limited"
+      ],
+      "updated_at": "2026-03-11T13:54:07.617080"
+    },
+    "flick electric": {
+      "latest_report": {
+        "company_name": "Flick Electric",
+        "is_synthetic": false,
+        "confidence_score": 0.9499999999999998,
+        "basic_info": {
+          "website": "flickelectric.co.nz",
+          "description": "Online electricity retailer",
+          "industry": "Energy",
+          "headquarters": "Wellington, New Zealand",
+          "founded_year": 2013,
+          "employees": 50
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 14.8,
+          "rounds": 3
+        },
+        "data_sources": [
+          {
+            "url": "https://flick-elec.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/flickelectric/__WjEioCjz6SdJhWWbUKtbrPkpp9qo7SGoMK0vdaJPpTg",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://mbie.govt.nz/dmsdocument/4853-flick-energy-submission-electricity-price-review-options-paper-pdf",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://company-announcements.afr.com/asx/ald/147a5e02-1036-11f1-bc68-96c56ccf4ea1.pdf",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T13:57:53.527889",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 4,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "research_time_seconds": 225.895,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://company-announcements.afr.com/asx/ald/147a5e02-1036-11f1-bc68-96c56ccf4ea1.pdf",
+        "https://flick-elec.com/",
+        "https://mbie.govt.nz/dmsdocument/4853-flick-energy-submission-electricity-price-review-options-paper-pdf",
+        "https://tracxn.com/d/companies/flickelectric/__WjEioCjz6SdJhWWbUKtbrPkpp9qo7SGoMK0vdaJPpTg"
+      ],
+      "updated_at": "2026-03-11T13:57:53.527970"
     }
   }
 }
