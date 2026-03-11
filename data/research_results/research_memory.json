@@ -13815,6 +13815,2227 @@
         "https://tracxn.com/d/companies/apcs/__kY_53mNs__yK5e7ZleXBRecLXw9Mmtj7SiUMtRQ3p8g"
       ],
       "updated_at": "2026-03-11T09:59:14.809479"
+    },
+    "linz ag": {
+      "latest_report": {
+        "company_name": "Linz AG",
+        "is_synthetic": false,
+        "confidence_score": 0.8076923076923077,
+        "basic_info": {
+          "website": "https://www.linzag.at/",
+          "description": "A city-owned company providing energy supply, municipal services and public transport in the city of Linz and another 115 municipalities in Upper Austria",
+          "industry": "Energy supply, Municipal services, Public transport",
+          "headquarters": "Linz, Austria",
+          "founded_year": 2000,
+          "employees": 3000
+        },
+        "financials": {
+          "revenue": 80,
+          "revenue_currency": "USD",
+          "valuation": 75
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Linz_AG",
+            "type": "wikipedia",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://linzag.at/portal/de/ueber_die_linzag/unternehmen/gesellschaften/linz_strom_gas_waerme_gmbh/energiehandelsgeschaeft/energy_trading_business",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://linzag.at/portal/de/privatkunden/freizeit/poestlingbergbahn/poestlingbergbahn_englisch",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://linzag-telekom.at/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://linz.at/english/life/7399.php",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://stockanalysis.com/quote/vie/LTH/employees",
+            "type": "company_website",
+            "confidence": 0.425
+          },
+          {
+            "url": "https://netavis.net/linz-ag?lang=en",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://multiples.vc/public-comps/linz-textil-holding-valuation-multiples",
+            "type": "company_website",
+            "confidence": 0.75
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T10:04:16.852709",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 302.032396,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Linz_AG",
+        "https://linz.at/english/life/7399.php",
+        "https://linzag-telekom.at/",
+        "https://linzag.at/portal/de/privatkunden/freizeit/poestlingbergbahn/poestlingbergbahn_englisch",
+        "https://linzag.at/portal/de/ueber_die_linzag/unternehmen/gesellschaften/linz_strom_gas_waerme_gmbh/energiehandelsgeschaeft/energy_trading_business",
+        "https://multiples.vc/public-comps/linz-textil-holding-valuation-multiples",
+        "https://netavis.net/linz-ag?lang=en",
+        "https://stockanalysis.com/quote/vie/LTH/employees"
+      ],
+      "updated_at": "2026-03-11T10:04:16.852835"
+    },
+    "elia": {
+      "latest_report": {
+        "company_name": "Elia",
+        "is_synthetic": false,
+        "confidence_score": 0.8727272727272729,
+        "basic_info": {
+          "website": "www.eliagroup.eu",
+          "description": "Provides a robust electricity grid",
+          "industry": "Energy",
+          "headquarters": "Brussels, Belgium",
+          "founded_year": 2001,
+          "employees": 2188
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 4
+        },
+        "data_sources": [
+          {
+            "url": "https://elia.be/en/company",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://elia.ngo/about",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://eliagroup.eu/en/about-elia-group",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://eliagroup.eu/",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://elia.be/en",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://tracxn.com/d/companies/eliagroup/__U4WmV9ltcSG6e_CzpoEXT9FKuFXtI-QK0H_qrsj4MKI",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://eliagroup.eu/en/publications",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://issuu.com/eliagroup/docs/elia_transmission_belgium_s_2024_annual_integrated?fr=sNTA3Njg0NTQ2NDY",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://elia.be/en/publications",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://annualreports.com/Company/elia",
+            "type": "company_website",
+            "confidence": 0.7250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T10:08:13.343365",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 10,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised"
+          ],
+          "research_time_seconds": 236.479502,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://annualreports.com/Company/elia",
+        "https://elia.be/en",
+        "https://elia.be/en/company",
+        "https://elia.be/en/publications",
+        "https://elia.ngo/about",
+        "https://eliagroup.eu/",
+        "https://eliagroup.eu/en/about-elia-group",
+        "https://eliagroup.eu/en/publications",
+        "https://issuu.com/eliagroup/docs/elia_transmission_belgium_s_2024_annual_integrated?fr=sNTA3Njg0NTQ2NDY",
+        "https://tracxn.com/d/companies/eliagroup/__U4WmV9ltcSG6e_CzpoEXT9FKuFXtI-QK0H_qrsj4MKI"
+      ],
+      "updated_at": "2026-03-11T10:08:13.343493"
+    },
+    "fluxys": {
+      "latest_report": {
+        "company_name": "Fluxys",
+        "is_synthetic": false,
+        "confidence_score": 0.9499999999999998,
+        "basic_info": {
+          "website": "www.fluxys.com",
+          "description": "Gas transmission, storage, and LNG terminal operator",
+          "industry": "Energy",
+          "headquarters": "Brussels, Belgium",
+          "founded_year": 2001,
+          "employees": 884
+        },
+        "financials": {
+          "revenue": 12.5,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 10
+        },
+        "data_sources": [
+          {
+            "url": "https://fluxys.com/en/about-us/fluxys-group/about-fluxys",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://fluxys.com/en/about-us/fluxys-group",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://fluxys.com/en/about-us/fluxys-belgium",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://fluxys.com/en",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://fluxys.com/en/about-us/company",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://globalwitness.org/en/press-releases/fluxys-helped-export-107-billion-of-russian-liquified-gas-since-the-ukraine-invasion",
+            "type": "company_website",
+            "confidence": 0.325
+          },
+          {
+            "url": "https://dcfmodeling.com/blogs/health/fluxbr-financial-health",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://fluxys.com/de/about-us/fluxys-group/financial-information",
+            "type": "company_website",
+            "confidence": 0.6500000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/fluxys/__ggikg3pOkmildDQinVKZ8NLm3akzFXHOrNeylRa4AdI",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Fluxys",
+            "type": "wikipedia",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://fluxys.com/en/about-us/fluxys-belgium/company",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T10:13:27.718751",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 11,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "research_time_seconds": 314.36404,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://dcfmodeling.com/blogs/health/fluxbr-financial-health",
+        "https://en.wikipedia.org/wiki/Fluxys",
+        "https://fluxys.com/de/about-us/fluxys-group/financial-information",
+        "https://fluxys.com/en",
+        "https://fluxys.com/en/about-us/company",
+        "https://fluxys.com/en/about-us/fluxys-belgium",
+        "https://fluxys.com/en/about-us/fluxys-belgium/company",
+        "https://fluxys.com/en/about-us/fluxys-group",
+        "https://fluxys.com/en/about-us/fluxys-group/about-fluxys",
+        "https://globalwitness.org/en/press-releases/fluxys-helped-export-107-billion-of-russian-liquified-gas-since-the-ukraine-invasion",
+        "https://tracxn.com/d/companies/fluxys/__ggikg3pOkmildDQinVKZ8NLm3akzFXHOrNeylRa4AdI"
+      ],
+      "updated_at": "2026-03-11T10:13:27.718875"
+    },
+    "engie electrabel": {
+      "latest_report": {
+        "company_name": "Engie Electrabel",
+        "is_synthetic": false,
+        "confidence_score": 0.8500000000000002,
+        "basic_info": {
+          "website": "www.engie.com",
+          "description": "Provider of electricity generation and other energy services",
+          "industry": "Energy",
+          "headquarters": "Paris, France",
+          "founded_year": 2008,
+          "employees": 44814
+        },
+        "financials": {
+          "revenue": 73.8,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://nuclear.engie-electrabel.be/en/about/engie-group-and-electrabel",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://engie.com/en/group/who-we-are",
+            "type": "company_website",
+            "confidence": 0.7000000000000002
+          },
+          {
+            "url": "https://engie.myengie.com/en",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://nuclear.engie-electrabel.be/en",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://nuclear.engie-electrabel.be/en/nuclear-energy/nuclear-power-plants-and-safety/security",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://tracxn.com/d/companies/engie/__Rew2DVgeWxe9_dPHyBuhj-O8zsG5qg1JPaFUAf4coMQ",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://engie-sem.com/story-and-vision",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://engie.com/sites/default/files/assets/documents/2026-02/2025%20Management%20report%20and%20annual%20consolidated%20financial%20statements.pdf",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://engie.com/sites/default/files/assets/documents/2025-04/Credit_Opinion-Electrabel-SA-Update-following-01Apr2025-PBC_1425147.pdf",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://engie.com/sites/default/files/assets/documents/2025-02/2024%20Management%20report%20and%20Annual%20consolidated%20financial%20statements.pdf",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://nuclear.engie-electrabel.be/sites/default/files/uploads/page_downloads/Charte%20EN_0.pdf",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T10:18:36.650343",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 11,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 308.920159,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://engie-sem.com/story-and-vision",
+        "https://engie.com/en/group/who-we-are",
+        "https://engie.com/sites/default/files/assets/documents/2025-02/2024%20Management%20report%20and%20Annual%20consolidated%20financial%20statements.pdf",
+        "https://engie.com/sites/default/files/assets/documents/2025-04/Credit_Opinion-Electrabel-SA-Update-following-01Apr2025-PBC_1425147.pdf",
+        "https://engie.com/sites/default/files/assets/documents/2026-02/2025%20Management%20report%20and%20annual%20consolidated%20financial%20statements.pdf",
+        "https://engie.myengie.com/en",
+        "https://nuclear.engie-electrabel.be/en",
+        "https://nuclear.engie-electrabel.be/en/about/engie-group-and-electrabel",
+        "https://nuclear.engie-electrabel.be/en/nuclear-energy/nuclear-power-plants-and-safety/security",
+        "https://nuclear.engie-electrabel.be/sites/default/files/uploads/page_downloads/Charte%20EN_0.pdf",
+        "https://tracxn.com/d/companies/engie/__Rew2DVgeWxe9_dPHyBuhj-O8zsG5qg1JPaFUAf4coMQ"
+      ],
+      "updated_at": "2026-03-11T10:18:36.650463"
+    },
+    "luminus": {
+      "latest_report": {
+        "company_name": "Luminus",
+        "is_synthetic": false,
+        "confidence_score": 0.7000000000000002,
+        "basic_info": {
+          "website": "https://luminous.energy/",
+          "description": "Luminous Energy is dedicated to delivering top-tier renewable energy projects that contribute to the decarbonisation of electricity supply, addressing climate change challenges.",
+          "industry": "Renewable Energy",
+          "headquarters": "UK",
+          "founded_year": 2011,
+          "employees": null
+        },
+        "financials": {
+          "revenue": 0,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 138.5,
+          "rounds": 10
+        },
+        "data_sources": [
+          {
+            "url": "https://luminus.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://luminousindia.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://luminous.energy/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://cbinsights.com/company/luminus-devices/financials",
+            "type": "company_website",
+            "confidence": 0.525
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T10:22:42.333084",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 4,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "employees",
+            "valuation"
+          ],
+          "research_time_seconds": 245.671157,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://cbinsights.com/company/luminus-devices/financials",
+        "https://luminous.energy/",
+        "https://luminousindia.com/",
+        "https://luminus.com/"
+      ],
+      "updated_at": "2026-03-11T10:22:42.333188"
+    },
+    "totalenergies belgium": {
+      "latest_report": {
+        "company_name": "TotalEnergies Belgium",
+        "is_synthetic": false,
+        "confidence_score": 0.7840909090909091,
+        "basic_info": {
+          "website": "https://totalenergies.com/belgium",
+          "description": "Major player in the refining, petrochemical, polymer recycling and electric mobility sectors in Belgium",
+          "industry": "Energy",
+          "headquarters": "Belgium",
+          "founded_year": 1924,
+          "employees": 3900
+        },
+        "financials": {
+          "revenue": 183.534,
+          "revenue_currency": "billion USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://totalenergies-be.net/privacy_en",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://totalenergies.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://totalenergies.com/belgium",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://connect.totalenergies.com/",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://investingnews.com/electric-mobility-totalenergies-and-tikehau-capital-join-forces-to-develop-public-charging-networks-in-belgium-and-the-netherlands",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://totalenergies.com/news/press-releases/electric-mobility-totalenergies-and-tikehau-capital-join-forces-develop-public",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://evinfrastructurenews.com/private-charging/totalenergies-tikehau-capital-to-invest-in-ev-chargers-in-belgium-and-the-netherlands",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://dcfmodeling.com/blogs/history/tte-history-mission-ownership",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://companyweb.be/en/0438021316/total-energies-one-tech-belgium",
+            "type": "company_website",
+            "confidence": 0.5
+          },
+          {
+            "url": "https://totalenergies.com/company/identity/history/pioneers-hundred-years",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T10:35:22.271265",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 10,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 557.469279,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://companyweb.be/en/0438021316/total-energies-one-tech-belgium",
+        "https://connect.totalenergies.com/",
+        "https://dcfmodeling.com/blogs/history/tte-history-mission-ownership",
+        "https://evinfrastructurenews.com/private-charging/totalenergies-tikehau-capital-to-invest-in-ev-chargers-in-belgium-and-the-netherlands",
+        "https://investingnews.com/electric-mobility-totalenergies-and-tikehau-capital-join-forces-to-develop-public-charging-networks-in-belgium-and-the-netherlands",
+        "https://totalenergies-be.net/privacy_en",
+        "https://totalenergies.com/",
+        "https://totalenergies.com/belgium",
+        "https://totalenergies.com/company/identity/history/pioneers-hundred-years",
+        "https://totalenergies.com/news/press-releases/electric-mobility-totalenergies-and-tikehau-capital-join-forces-develop-public"
+      ],
+      "updated_at": "2026-03-11T10:35:22.271395"
+    },
+    "edf luminus": {
+      "latest_report": {
+        "company_name": "EDF Luminus",
+        "is_synthetic": false,
+        "confidence_score": 0.8375000000000002,
+        "basic_info": {
+          "website": "www.luminus.be",
+          "description": "Electricity producer and energy supplier",
+          "industry": "Energy",
+          "headquarters": "Brussels, Belgium",
+          "founded_year": 1978,
+          "employees": 2000
+        },
+        "financials": {
+          "revenue": 113266,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://luminus.be/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Luminus",
+            "type": "wikipedia",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://luminussolutions.be/en",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://edf.fr/en/the-edf-group/edf-at-a-glance/promoting-our-low-carbon-model-around-the-world",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://luminus.be/fr/corporate",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://edf.fr/sites/groupe/files/2026-02/annual-results-2025-consolidated-financial-statements.pdf",
+            "type": "company_website",
+            "confidence": 0.525
+          },
+          {
+            "url": "https://enerdata.net/publications/daily-energy-news/edf-plans-listing-edf-luminus-belgium.html",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://edf.publispeak.com/2021-universal-registration-document/article/75",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T10:49:01.814827",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 819.531512,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://edf.fr/en/the-edf-group/edf-at-a-glance/promoting-our-low-carbon-model-around-the-world",
+        "https://edf.fr/sites/groupe/files/2026-02/annual-results-2025-consolidated-financial-statements.pdf",
+        "https://edf.publispeak.com/2021-universal-registration-document/article/75",
+        "https://en.wikipedia.org/wiki/Luminus",
+        "https://enerdata.net/publications/daily-energy-news/edf-plans-listing-edf-luminus-belgium.html",
+        "https://luminus.be/",
+        "https://luminus.be/fr/corporate",
+        "https://luminussolutions.be/en"
+      ],
+      "updated_at": "2026-03-11T10:49:01.814949"
+    },
+    "resa": {
+      "latest_report": {
+        "company_name": "RESA",
+        "is_synthetic": false,
+        "confidence_score": 0.9000000000000002,
+        "basic_info": {
+          "website": "shop-resa.com",
+          "description": "Online clothing brand offering a wide range of fashion apparel for women. The products include dresses, crop tops, pants, loungewear, bridesmaid dresses, wedding dresses, and more.",
+          "industry": "Fashion",
+          "headquarters": "Los Angeles, United States",
+          "founded_year": 2015,
+          "employees": 4
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 0,
+          "rounds": 0
+        },
+        "data_sources": [
+          {
+            "url": "https://gruporesa.com/en",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://realestatestagingassociation.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://resa.aero/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://resa.aero/en/about-us",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://resapower.com/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://resa.es/en/contact",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://shop-resa.com/pages/contact",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://resapower.com/contact",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://resa.es/en",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://resa.aero/en/contact",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://tracxn.com/d/companies/resa/__9YtZU-rr2khqYSwOJfSsJ1mPvGKTgK3R0gDTeZvekxE",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T10:57:59.552016",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 11,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 3,
+          "adaptive_sources_used": 6,
+          "missing_fields_before_adaptive": [
+            "headquarters",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "research_time_seconds": 537.72588,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://gruporesa.com/en",
+        "https://realestatestagingassociation.com/",
+        "https://resa.aero/en",
+        "https://resa.aero/en/about-us",
+        "https://resa.aero/en/contact",
+        "https://resa.es/en",
+        "https://resa.es/en/contact",
+        "https://resapower.com/",
+        "https://resapower.com/contact",
+        "https://shop-resa.com/pages/contact",
+        "https://tracxn.com/d/companies/resa/__9YtZU-rr2khqYSwOJfSsJ1mPvGKTgK3R0gDTeZvekxE"
+      ],
+      "updated_at": "2026-03-11T10:57:59.552138"
+    },
+    "ores": {
+      "latest_report": {
+        "company_name": "Ores",
+        "is_synthetic": false,
+        "confidence_score": 0.6519230769230769,
+        "basic_info": {
+          "website": "www.ores.be",
+          "description": "Clean iron producer using a low-temperature process to electrochemically refine iron ore into 99% pure iron",
+          "industry": "Sustainable Energy",
+          "headquarters": "Colorado",
+          "founded_year": 2020,
+          "employees": 1
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": 7117030
+        },
+        "funding": {
+          "total_raised": 274,
+          "rounds": 3
+        },
+        "data_sources": [
+          {
+            "url": "https://tracxn.com/d/companies/ores/__XjFnfh2Jtz97i0sML5h7ylWYr95tlLvU2Si39fn45k8",
+            "type": "company_website",
+            "confidence": 0.5750000000000002
+          },
+          {
+            "url": "https://esgtoday.com/jpmorgan-backs-clean-iron-startup-electra",
+            "type": "company_website",
+            "confidence": 0.675
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:01:07.177801",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 2,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency"
+          ],
+          "research_time_seconds": 187.613899,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://esgtoday.com/jpmorgan-backs-clean-iron-startup-electra",
+        "https://tracxn.com/d/companies/ores/__XjFnfh2Jtz97i0sML5h7ylWYr95tlLvU2Si39fn45k8"
+      ],
+      "updated_at": "2026-03-11T11:01:07.177874"
+    },
+    "sibelga": {
+      "latest_report": {
+        "company_name": "Sibelga",
+        "is_synthetic": false,
+        "confidence_score": 0.90625,
+        "basic_info": {
+          "website": "http://www.sibelga.be",
+          "description": "Sibelga is the operator of the electricity and natural gas distribution network for the 19 municipalities of the Brussels-Capital Region.",
+          "industry": "Utilities, Electricity, Oil & Gas, Distribution Network Operator, Energy, Utilities & Waste Treatment",
+          "headquarters": "Quai des Usines 16, Werkhuizenkaai 16, Brussels, Brussels 1000, BE",
+          "founded_year": 2003,
+          "employees": 921
+        },
+        "financials": {
+          "revenue": 390.1,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://powercellgroup.com/wp-content/uploads/2025/04/Powercell_ASR2024_EN-1.pdf",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://2023.sibelga.be/wp-content/uploads/2024/06/SIB-RAPPOR-ANNUEL-MAQUETTE-24-EN-vBD-2.pdf",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://sibelga.be/en/about-sibelga/numbers-and-publications/annual-reports-and-halfyearly-reports",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://rocketreach.co/sibelga-profile_b5c49193f42e0dcb",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://companyweb.be/en/0222869673/sibelga",
+            "type": "company_website",
+            "confidence": 0.525
+          },
+          {
+            "url": "https://privco.com/company/sibelga",
+            "type": "company_website",
+            "confidence": 0.525
+          },
+          {
+            "url": "https://2024.sibelga.be/wp-content/uploads/2025/06/SIBELGA-RAPPORT-FINANCIER-2024-EN.pdf",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://atelierdesign.be/sibelga",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/how-to-participate/org-details/897361551",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:07:45.390669",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 5,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 398.20128,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://2023.sibelga.be/wp-content/uploads/2024/06/SIB-RAPPOR-ANNUEL-MAQUETTE-24-EN-vBD-2.pdf",
+        "https://2024.sibelga.be/wp-content/uploads/2025/06/SIBELGA-RAPPORT-FINANCIER-2024-EN.pdf",
+        "https://atelierdesign.be/sibelga",
+        "https://companyweb.be/en/0222869673/sibelga",
+        "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/how-to-participate/org-details/897361551",
+        "https://powercellgroup.com/wp-content/uploads/2025/04/Powercell_ASR2024_EN-1.pdf",
+        "https://privco.com/company/sibelga",
+        "https://rocketreach.co/sibelga-profile_b5c49193f42e0dcb",
+        "https://sibelga.be/en/about-sibelga/numbers-and-publications/annual-reports-and-halfyearly-reports"
+      ],
+      "updated_at": "2026-03-11T11:07:45.390774"
+    },
+    "gaselwest": {
+      "latest_report": {
+        "company_name": "Gaselwest",
+        "is_synthetic": false,
+        "confidence_score": 0.7704545454545456,
+        "basic_info": {
+          "website": "https://fluxys.com/en",
+          "description": "Fluxys Belgium is a Euronext-listed subsidiary of infrastructure group Fluxys headquartered in Belgium, operating in the energy sector",
+          "industry": "Energy",
+          "headquarters": "Avenue des Arts 31, B-1040 Brussels",
+          "founded_year": null,
+          "employees": 950
+        },
+        "financials": {
+          "revenue": 760000.0,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://fluxys.com/en/about-us/fluxys-belgium",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://sociedad.info/belgium/buyer/gaselwest-be",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://over.fluvius.be/sites/fluvius/files/2025-03/fluvius-system-operator-annual-report-2024.pdf",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://over.fluvius.be/sites/fluvius/files/2024-02/investor-presentation-february-2024.pdf",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://over.fluvius.be/sites/fluvius/files/2024-04/investor-presentation-april-2024.pdf",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:11:59.938233",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 5,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "founded_year",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 254.535897,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://fluxys.com/en/about-us/fluxys-belgium",
+        "https://over.fluvius.be/sites/fluvius/files/2024-02/investor-presentation-february-2024.pdf",
+        "https://over.fluvius.be/sites/fluvius/files/2024-04/investor-presentation-april-2024.pdf",
+        "https://over.fluvius.be/sites/fluvius/files/2025-03/fluvius-system-operator-annual-report-2024.pdf",
+        "https://sociedad.info/belgium/buyer/gaselwest-be"
+      ],
+      "updated_at": "2026-03-11T11:11:59.938325"
+    },
+    "esb": {
+      "latest_report": {
+        "company_name": "ESB",
+        "is_synthetic": false,
+        "confidence_score": 0.8500000000000002,
+        "basic_info": {
+          "website": "https://www.esb.ie/",
+          "description": "A state-owned electricity company based in Ireland with operations worldwide",
+          "industry": "Energy generation, Electricity transmission, Electricity distribution",
+          "headquarters": "Dublin, Ireland",
+          "founded_year": 1927,
+          "employees": 7870
+        },
+        "financials": {
+          "revenue": 3.7,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://esb.ie/who-we-are/our-story/about-esb",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://esbinternational.ie/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://esbenergy.co.uk/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://esb.ie/",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://esbnetworks.ie/about-us/company/our-people",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://esbnetworks.ie/about-us/company",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://esb.ie/news---insights/press-releases/article/2022/03/10/esb-group-announces-full-year-results-for-the-year-ended-31-december-2021",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/ESB_Group",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://rise.esmap.org/sites/default/files/library/ireland/Renewable%20Energy/Ireland_%20ESB-Annual%20Report%20and%20Financial%20Statements,%202020_2021.pdf",
+            "type": "company_website",
+            "confidence": 0.7
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:17:47.621727",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 5,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 347.671569,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/ESB_Group",
+        "https://esb.ie/",
+        "https://esb.ie/news---insights/press-releases/article/2022/03/10/esb-group-announces-full-year-results-for-the-year-ended-31-december-2021",
+        "https://esb.ie/who-we-are/our-story/about-esb",
+        "https://esbenergy.co.uk/",
+        "https://esbinternational.ie/",
+        "https://esbnetworks.ie/about-us/company",
+        "https://esbnetworks.ie/about-us/company/our-people",
+        "https://rise.esmap.org/sites/default/files/library/ireland/Renewable%20Energy/Ireland_%20ESB-Annual%20Report%20and%20Financial%20Statements,%202020_2021.pdf"
+      ],
+      "updated_at": "2026-03-11T11:17:47.621820"
+    },
+    "sse airtricity": {
+      "latest_report": {
+        "company_name": "SSE Airtricity",
+        "is_synthetic": false,
+        "confidence_score": 0.8211538461538462,
+        "basic_info": {
+          "website": "http://www.sseairtricity.com/",
+          "description": "An energy company founded in Ireland in 1997, now a subsidiary of SSE plc, supplying and distributing electricity and gas to Northern Ireland and the Republic of Ireland.",
+          "industry": "Electricity distribution",
+          "headquarters": "Dublin, Ireland",
+          "founded_year": 1997,
+          "employees": 750
+        },
+        "financials": {
+          "revenue": 2419.2,
+          "revenue_currency": "GBP",
+          "valuation": 1455000000
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://northernirelandchamber.com/member-news/sse-airtricity-awards-over-550000-to-sustainability-projects-in-northern-ireland-through-its-4-3m-generation-green-community-fund",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/SSE_Airtricity",
+            "type": "wikipedia",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://sseairtricity.com/ie/home/about-us",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://fidelity.co.uk/factsheet-data/factsheet/GB0007908733-sse-plc/financials",
+            "type": "company_website",
+            "confidence": 0.525
+          },
+          {
+            "url": "https://ssen-transmission.co.uk/about-us/financial-information",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://sse.com/news-and-views/2025/05/sse-announces-full-year-202425-financial-results",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://irishtimes.com/business/2024/05/22/sse-airtricity-earns-111m-profits",
+            "type": "company_website",
+            "confidence": 0.45000000000000007
+          },
+          {
+            "url": "https://lightsoninnewcastleandnorthtyneside.co.uk/Public/Services/Media.ashx/MediaId%7C50/a%7C0",
+            "type": "company_website",
+            "confidence": 0.475
+          },
+          {
+            "url": "https://tendly.eu/company/sse-airtricity-energy-supply-ni-limited",
+            "type": "company_website",
+            "confidence": 0.525
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:22:10.956354",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 263.322989,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/SSE_Airtricity",
+        "https://fidelity.co.uk/factsheet-data/factsheet/GB0007908733-sse-plc/financials",
+        "https://irishtimes.com/business/2024/05/22/sse-airtricity-earns-111m-profits",
+        "https://lightsoninnewcastleandnorthtyneside.co.uk/Public/Services/Media.ashx/MediaId%7C50/a%7C0",
+        "https://northernirelandchamber.com/member-news/sse-airtricity-awards-over-550000-to-sustainability-projects-in-northern-ireland-through-its-4-3m-generation-green-community-fund",
+        "https://sse.com/news-and-views/2025/05/sse-announces-full-year-202425-financial-results",
+        "https://sseairtricity.com/ie/home/about-us",
+        "https://ssen-transmission.co.uk/about-us/financial-information",
+        "https://tendly.eu/company/sse-airtricity-energy-supply-ni-limited"
+      ],
+      "updated_at": "2026-03-11T11:22:10.956465"
+    },
+    "electric ireland": {
+      "latest_report": {
+        "company_name": "Electric Ireland",
+        "is_synthetic": false,
+        "confidence_score": 0.7350000000000001,
+        "basic_info": {
+          "website": "https://electricireland.ie/",
+          "description": "Electricity and Gas for your home and business",
+          "industry": "Energy",
+          "headquarters": "Republic of Ireland",
+          "founded_year": 2011,
+          "employees": 321
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://electricireland.ie/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://electricirelandrewards.ie/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://youraccountonline.electricireland.ie/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://electricireland.ie/residential/online-services",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://electricireland.com/",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://energyireland.ie/25-years-of-electricity-market-liberalisation",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/ESB_Group",
+            "type": "wikipedia",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://highperformr.ai/company/electric-ireland",
+            "type": "company_website",
+            "confidence": 0.7
+          },
+          {
+            "url": "https://electricireland.ie/residential/about-us",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://electricireland.ie/business/about-us",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Electric_Ireland",
+            "type": "wikipedia",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://sponsorship.org/member-spotlight-electric-ireland",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://esb.ie/who-we-are/our-story/about-esb",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:26:30.058031",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 13,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 6,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 259.090048,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://electricireland.com/",
+        "https://electricireland.ie/",
+        "https://electricireland.ie/business/about-us",
+        "https://electricireland.ie/residential/about-us",
+        "https://electricireland.ie/residential/online-services",
+        "https://electricirelandrewards.ie/",
+        "https://en.wikipedia.org/wiki/ESB_Group",
+        "https://en.wikipedia.org/wiki/Electric_Ireland",
+        "https://energyireland.ie/25-years-of-electricity-market-liberalisation",
+        "https://esb.ie/who-we-are/our-story/about-esb",
+        "https://highperformr.ai/company/electric-ireland",
+        "https://sponsorship.org/member-spotlight-electric-ireland",
+        "https://youraccountonline.electricireland.ie/"
+      ],
+      "updated_at": "2026-03-11T11:26:30.058161"
+    },
+    "bord gais": {
+      "latest_report": {
+        "company_name": "Bord Gais",
+        "is_synthetic": false,
+        "confidence_score": 0.9846153846153847,
+        "basic_info": {
+          "website": "http://www.bordgaisenergy.ie",
+          "description": "Bord G\u00e1is Energy generates, sells and trades energy for use in the Republic of Ireland.",
+          "industry": "Energy, Utilities, Electricity, Oil & Gas",
+          "headquarters": "1 Warrington Dublin 2 Pl, Dublin, Leinster, IE",
+          "founded_year": 1976,
+          "employees": 592
+        },
+        "financials": {
+          "revenue": 342.2,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 125,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://bordgaisenergy.ie/",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://bordgaisenergy.ie/sign-in",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://bordgaisenergytheatre.ie/show/i-should-be-so-lucky",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://bordgaisenergy.ie/home/help",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://bordgaisenergytheatre.ie/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://centrica.com/media-centre/news/2025/bord-gais-energy-to-become-ireland-s-largest-off-taker-of-solar-power",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://bordgaisenergy.ie/company/about-us",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://ie.linkedin.com/company/bord-gais-energy",
+            "type": "linkedin",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://rocketreach.co/bord-gais-energy-profile_b5c359d5f42e0f7f",
+            "type": "company_website",
+            "confidence": 1.0
+          },
+          {
+            "url": "https://fr.linkedin.com/company/bord-gais-energy",
+            "type": "linkedin",
+            "confidence": 0.8000000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:30:59.344025",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 10,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 269.273635,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://bordgaisenergy.ie/",
+        "https://bordgaisenergy.ie/company/about-us",
+        "https://bordgaisenergy.ie/home/help",
+        "https://bordgaisenergy.ie/sign-in",
+        "https://bordgaisenergytheatre.ie/",
+        "https://bordgaisenergytheatre.ie/show/i-should-be-so-lucky",
+        "https://centrica.com/media-centre/news/2025/bord-gais-energy-to-become-ireland-s-largest-off-taker-of-solar-power",
+        "https://fr.linkedin.com/company/bord-gais-energy",
+        "https://ie.linkedin.com/company/bord-gais-energy",
+        "https://rocketreach.co/bord-gais-energy-profile_b5c359d5f42e0f7f"
+      ],
+      "updated_at": "2026-03-11T11:30:59.344142"
+    },
+    "pinergy": {
+      "latest_report": {
+        "company_name": "Pinergy",
+        "is_synthetic": false,
+        "confidence_score": 0.8625,
+        "basic_info": {
+          "website": "https://pinergy.ie",
+          "description": "Smart energy management solution provider",
+          "industry": "Energy",
+          "headquarters": "Dublin, Ireland",
+          "founded_year": 2012,
+          "employees": 48
+        },
+        "financials": {
+          "revenue": 175.5,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 32.1,
+          "rounds": 0
+        },
+        "data_sources": [
+          {
+            "url": "https://pinergy.ie/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://mlspin.com/learn/training-library/pinergy",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://pinergy.ie/home-electricity/solar",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://pinergy.payzone.ie/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://pinergy.ie/home-electricity/top-up-online",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://tracxn.com/d/companies/pinergy/__tDb0mM2QSAq5OadeDDHEse1jRV4oWp2QIfD3aQk8Q9k",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://pinergy.ie/electricity-firm-pinergy-to-raise-up-to-10m-as-it-plugs-into-business-custo",
+            "type": "company_website",
+            "confidence": 0.375
+          },
+          {
+            "url": "https://owler.com/company/pinergy",
+            "type": "company_website",
+            "confidence": 0.725
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:33:41.709447",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 162.35319,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://mlspin.com/learn/training-library/pinergy",
+        "https://owler.com/company/pinergy",
+        "https://pinergy.ie/",
+        "https://pinergy.ie/electricity-firm-pinergy-to-raise-up-to-10m-as-it-plugs-into-business-custo",
+        "https://pinergy.ie/home-electricity/solar",
+        "https://pinergy.ie/home-electricity/top-up-online",
+        "https://pinergy.payzone.ie/",
+        "https://tracxn.com/d/companies/pinergy/__tDb0mM2QSAq5OadeDDHEse1jRV4oWp2QIfD3aQk8Q9k"
+      ],
+      "updated_at": "2026-03-11T11:33:41.709548"
+    },
+    "prepay power": {
+      "latest_report": {
+        "company_name": "Prepay Power",
+        "is_synthetic": false,
+        "confidence_score": 0.9000000000000001,
+        "basic_info": {
+          "website": "https://www.prepaypower.ie",
+          "description": "Prepay Power is the leading provider of Pay-As-You-Go electricity and gas in Ireland.",
+          "industry": "Utilities",
+          "headquarters": "Dublin",
+          "founded_year": 2010,
+          "employees": 361
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://ie.linkedin.com/company/prepaypower-ie",
+            "type": "linkedin",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://prepaypower.ie/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://prepaypower.ie/why-switch/how-it-works",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://bonkers.ie/guides/gas-electricity/the-pros-and-cons-of-prepay-electricity",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:36:11.350606",
+          "queries_executed": 8,
+          "sources_found": 6,
+          "sources_used": 4,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 5,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "website",
+            "description",
+            "industry",
+            "headquarters",
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 149.628788,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://bonkers.ie/guides/gas-electricity/the-pros-and-cons-of-prepay-electricity",
+        "https://ie.linkedin.com/company/prepaypower-ie",
+        "https://prepaypower.ie/",
+        "https://prepaypower.ie/why-switch/how-it-works"
+      ],
+      "updated_at": "2026-03-11T11:36:11.350692"
+    },
+    "iberdrola ireland": {
+      "latest_report": {
+        "company_name": "Iberdrola Ireland",
+        "is_synthetic": false,
+        "confidence_score": 0.7166666666666667,
+        "basic_info": {
+          "website": "https://iberdrola.com",
+          "description": "IBERDROLA IRELAND LIMITED is a Private limited company (Ltd.) company located at FITZWILLIAM HOUSE, Ireland.",
+          "industry": "Electricity Production",
+          "headquarters": "Ireland",
+          "founded_year": 2018,
+          "employees": 5
+        },
+        "financials": {
+          "revenue": 25.0,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://iberdrola.com/home",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://iberdrolainternacional.com/contact",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://iberdrola.com/contact/group-offices",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://iberdrola.com/documents/20125/5693151/report-25FY.pdf",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://iberdrola.com/documents/20125/5613162/gsm26-annual-accounts-consolidated-2025.pdf",
+            "type": "company_website",
+            "confidence": 0.45000000000000007
+          },
+          {
+            "url": "https://iberdrolainternacional.com/about-us/our-company/iberdrola-renovables-internacional",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://worldbenchmarkingalliance.org/company/iberdrola",
+            "type": "company_website",
+            "confidence": 0.5750000000000001
+          },
+          {
+            "url": "https://iberdrolainternacional.com/about-us/our-company/iberdrola-renovables-internacional/iberdrola-ireland",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://ie.globaldatabase.com/company/iberdrola-ireland-limited",
+            "type": "company_website",
+            "confidence": 0.75
+          },
+          {
+            "url": "https://ie.globaldatabase.com/company/iberdrola-renewables-ireland-limited",
+            "type": "company_website",
+            "confidence": 0.7
+          },
+          {
+            "url": "https://iberdrola.com/press-room/news/detail/iberdrola-hires-more-than-5600-people",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:40:52.642984",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 11,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 3,
+          "adaptive_sources_used": 6,
+          "missing_fields_before_adaptive": [
+            "description",
+            "employees",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 281.280158,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://iberdrola.com/contact/group-offices",
+        "https://iberdrola.com/documents/20125/5613162/gsm26-annual-accounts-consolidated-2025.pdf",
+        "https://iberdrola.com/documents/20125/5693151/report-25FY.pdf",
+        "https://iberdrola.com/home",
+        "https://iberdrola.com/press-room/news/detail/iberdrola-hires-more-than-5600-people",
+        "https://iberdrolainternacional.com/about-us/our-company/iberdrola-renovables-internacional",
+        "https://iberdrolainternacional.com/about-us/our-company/iberdrola-renovables-internacional/iberdrola-ireland",
+        "https://iberdrolainternacional.com/contact",
+        "https://ie.globaldatabase.com/company/iberdrola-ireland-limited",
+        "https://ie.globaldatabase.com/company/iberdrola-renewables-ireland-limited",
+        "https://worldbenchmarkingalliance.org/company/iberdrola"
+      ],
+      "updated_at": "2026-03-11T11:40:52.643112"
+    },
+    "flogas": {
+      "latest_report": {
+        "company_name": "Flogas",
+        "is_synthetic": false,
+        "confidence_score": 0.8071428571428573,
+        "basic_info": {
+          "website": "https://flogasenterprise.ie/",
+          "description": "Energy supplier and sustainability services provider",
+          "industry": "Energy",
+          "headquarters": "Dublin, Ireland",
+          "founded_year": 2003,
+          "employees": "1,001 - 5,000"
+        },
+        "financials": {
+          "revenue": 179.8,
+          "revenue_currency": "GBP",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 0,
+          "rounds": 0
+        },
+        "data_sources": [
+          {
+            "url": "https://flogas.co.uk/home",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://flogas.co.uk/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://flogasenterprise.ie/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://flogas.ie/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://flogasni.com/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://flogas.ie/news/flogas-energy-celebrates-250-000-customer-milestone",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://flogasenterprise.ie/flogas-celebrates-250000-customer-milestone",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/flogas/__iZ-wjfQwKeR1GJQz_A1kw8qoeXxrW9NY0pfKpxJfyR0",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://ie.linkedin.com/company/flogasireland",
+            "type": "linkedin",
+            "confidence": 0.7250000000000001
+          },
+          {
+            "url": "https://supplychaindigital.com/company/flogas-10",
+            "type": "company_website",
+            "confidence": 0.75
+          },
+          {
+            "url": "https://uk.linkedin.com/company/flogas-uk-ltd",
+            "type": "linkedin",
+            "confidence": 0.8000000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:45:11.670462",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 11,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 259.014811,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://flogas.co.uk/",
+        "https://flogas.co.uk/home",
+        "https://flogas.ie/",
+        "https://flogas.ie/news/flogas-energy-celebrates-250-000-customer-milestone",
+        "https://flogasenterprise.ie/",
+        "https://flogasenterprise.ie/flogas-celebrates-250000-customer-milestone",
+        "https://flogasni.com/",
+        "https://ie.linkedin.com/company/flogasireland",
+        "https://supplychaindigital.com/company/flogas-10",
+        "https://tracxn.com/d/companies/flogas/__iZ-wjfQwKeR1GJQz_A1kw8qoeXxrW9NY0pfKpxJfyR0",
+        "https://uk.linkedin.com/company/flogas-uk-ltd"
+      ],
+      "updated_at": "2026-03-11T11:45:11.670589"
+    },
+    "glowpower": {
+      "latest_report": {
+        "company_name": "Glowpower",
+        "is_synthetic": false,
+        "confidence_score": 0.8166666666666669,
+        "basic_info": {
+          "website": "https://glowpowerrental.com/",
+          "description": "Glow Power Rental provides temporary power, cooling, and lighting systems for events, construction, and industrial projects across the UAE.",
+          "industry": "Commercial and Industrial Equipment Rental",
+          "headquarters": "Dubai, Dubai",
+          "founded_year": 2020,
+          "employees": 11
+        },
+        "financials": {
+          "revenue": 48.4,
+          "revenue_currency": "THB",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://glowpower.org/",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://glowpowerrental.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://glowpowerrental.com/news",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://glowpower.ie/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/legal-entities/thailand/glow-power-technology-company-limited/__VGaY3lDkUIvyXfMNfQfMo3BvJ40HI5aW5hCY_pEbhMk",
+            "type": "company_website",
+            "confidence": 0.39999999999999997
+          },
+          {
+            "url": "https://glowpowerrental.com/about-us",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://linkedin.com/company/glowpowerrental",
+            "type": "linkedin",
+            "confidence": 0.9000000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:49:27.500655",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 4,
+          "adaptive_sources_used": 1,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 255.817334,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://glowpower.ie/",
+        "https://glowpower.org/",
+        "https://glowpowerrental.com/",
+        "https://glowpowerrental.com/about-us",
+        "https://glowpowerrental.com/news",
+        "https://linkedin.com/company/glowpowerrental",
+        "https://tracxn.com/d/legal-entities/thailand/glow-power-technology-company-limited/__VGaY3lDkUIvyXfMNfQfMo3BvJ40HI5aW5hCY_pEbhMk"
+      ],
+      "updated_at": "2026-03-11T11:49:27.500750"
+    },
+    "pge": {
+      "latest_report": {
+        "company_name": "PGE",
+        "is_synthetic": false,
+        "confidence_score": 0.9192307692307692,
+        "basic_info": {
+          "website": "https://www.pge.com",
+          "description": "Pacific Gas and Electric Company is an American energy company",
+          "industry": "Energy",
+          "headquarters": "San Francisco, California",
+          "founded_year": 1905,
+          "employees": 24000
+        },
+        "financials": {
+          "revenue": 20186,
+          "revenue_currency": "USD million",
+          "valuation": 40290000000.0
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://pge.com/en/about/company-information.html",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://pge.com/en.html",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://grupopge.com/en",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://portlandgeneral.com/",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://pge.com/en/account/manage-my-account.html",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://investor.pgecorp.com/news-events/press-releases/press-release-details/2025/PGE-Corporation-Reports-Strong-Third-Quarter-Results-Narrows-2025-Guidance-Initiates-2026-Guidance/default.aspx",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Pacific_Gas_and_Electric_Company",
+            "type": "wikipedia",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://multiples.vc/public-comps/pge-valuation-multiples",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://robinhood.com/stocks/PCG",
+            "type": "company_website",
+            "confidence": 0.5499999999999999
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T11:53:32.780000",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 245.265661,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Pacific_Gas_and_Electric_Company",
+        "https://grupopge.com/en",
+        "https://investor.pgecorp.com/news-events/press-releases/press-release-details/2025/PGE-Corporation-Reports-Strong-Third-Quarter-Results-Narrows-2025-Guidance-Initiates-2026-Guidance/default.aspx",
+        "https://multiples.vc/public-comps/pge-valuation-multiples",
+        "https://pge.com/en.html",
+        "https://pge.com/en/about/company-information.html",
+        "https://pge.com/en/account/manage-my-account.html",
+        "https://portlandgeneral.com/",
+        "https://robinhood.com/stocks/PCG"
+      ],
+      "updated_at": "2026-03-11T11:53:32.780095"
     }
   }
 }
