@@ -11354,6 +11354,2467 @@
         "https://tracxn.com/d/companies/heragroup/__B97m7KyNjE2W13CACqymDSiwlAjJGWcebqa7wuGEJJo"
       ],
       "updated_at": "2026-03-11T07:56:57.867946"
+    },
+    "a2a": {
+      "latest_report": {
+        "company_name": "A2A",
+        "is_synthetic": false,
+        "confidence_score": 0.8500000000000002,
+        "basic_info": {
+          "website": "https://www.gruppoa2a.it/en",
+          "description": "A2A S.p.A. is an Italian company that generates, distributes, and markets renewable energy, electricity, gas, integrated water supply, and waste management services.",
+          "industry": "Utilities",
+          "headquarters": "Brescia, Italy",
+          "founded_year": 2008,
+          "employees": 14385
+        },
+        "financials": {
+          "revenue": 12.86,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://gruppoa2a.it/en/home",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://gruppoa2a.it/en/about-us/our-organization",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://a2acaloreservizi.it/en/who-we-are/company",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://a2a.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://gruppoa2a.it/en/about-us",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/A2A",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://archello.com/project/a2a-headquarters",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T08:03:08.058013",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "headquarters",
+            "founded_year",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 370.180955,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://a2a.com/",
+        "https://a2acaloreservizi.it/en/who-we-are/company",
+        "https://archello.com/project/a2a-headquarters",
+        "https://en.wikipedia.org/wiki/A2A",
+        "https://gruppoa2a.it/en/about-us",
+        "https://gruppoa2a.it/en/about-us/our-organization",
+        "https://gruppoa2a.it/en/home"
+      ],
+      "updated_at": "2026-03-11T08:03:08.058112"
+    },
+    "iren": {
+      "latest_report": {
+        "company_name": "Iren",
+        "is_synthetic": false,
+        "confidence_score": 0.9125000000000003,
+        "basic_info": {
+          "website": "https://www.iren.com",
+          "description": "A dual-engine data center operator combining Bitcoin mining and AI Cloud services",
+          "industry": "Technology",
+          "headquarters": "Sydney, Australia",
+          "founded_year": 2018,
+          "employees": 10583
+        },
+        "financials": {
+          "revenue": 501.0,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 436.5,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://iren.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://iren.com/data-centers",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://gruppoiren.it/en.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://iren.com/solutions/gpu-cloud/ai-cloud",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://startupmap.iamsterdam.com/news/feed/iris-energy-secures-413m-in-funding",
+            "type": "company_website",
+            "confidence": 0.45000000000000007
+          },
+          {
+            "url": "https://dcfmodeling.com/blogs/history/iren-history-mission-ownership",
+            "type": "company_website",
+            "confidence": 0.925
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T08:07:23.945178",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 1,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 255.877917,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://dcfmodeling.com/blogs/history/iren-history-mission-ownership",
+        "https://gruppoiren.it/en.html",
+        "https://iren.com/",
+        "https://iren.com/data-centers",
+        "https://iren.com/solutions/gpu-cloud/ai-cloud",
+        "https://startupmap.iamsterdam.com/news/feed/iris-energy-secures-413m-in-funding"
+      ],
+      "updated_at": "2026-03-11T08:07:23.945357"
+    },
+    "acegas": {
+      "latest_report": {
+        "company_name": "Acegas",
+        "is_synthetic": false,
+        "confidence_score": 0.7928571428571429,
+        "basic_info": {
+          "website": "https://acegas.info/",
+          "description": "Accredited Gas Engineers in Norwich, providing plumbing and heating services across Norfolk",
+          "industry": "Construction",
+          "headquarters": "Norwich, Norfolk",
+          "founded_year": 2012,
+          "employees": 2
+        },
+        "financials": {
+          "revenue": 25,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 0,
+          "rounds": 0
+        },
+        "data_sources": [
+          {
+            "url": "https://acegass.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://eng.gruppohera.it/group_eng/who-we-are/the-hera-group-companies/acegasapsamga-spa",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://acegas.info/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/acegas/__TLDez153O6ToMqFgF7mhYw_Myxg_8gTZRBo10F0EH2Q",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://rocketreach.co/acegas-aps-spa-profile_b5d6aef8f42e3366",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://press.siemens.com/global/en/pressrelease/acegasapsamga-leverages-siemens-gridscale-x-build-digital-twin-triestes-energy-grid",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T08:28:41.933997",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 237.383224,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://acegas.info/",
+        "https://acegass.com/",
+        "https://eng.gruppohera.it/group_eng/who-we-are/the-hera-group-companies/acegasapsamga-spa",
+        "https://press.siemens.com/global/en/pressrelease/acegasapsamga-leverages-siemens-gridscale-x-build-digital-twin-triestes-energy-grid",
+        "https://rocketreach.co/acegas-aps-spa-profile_b5d6aef8f42e3366",
+        "https://tracxn.com/d/companies/acegas/__TLDez153O6ToMqFgF7mhYw_Myxg_8gTZRBo10F0EH2Q"
+      ],
+      "updated_at": "2026-03-11T08:28:41.934089"
+    },
+    "edison": {
+      "latest_report": {
+        "company_name": "Edison",
+        "is_synthetic": false,
+        "confidence_score": 0.7961538461538464,
+        "basic_info": {
+          "website": "https://edison.com",
+          "description": "Leading the transformation of the electric power industry toward a clean energy future",
+          "industry": "Energy",
+          "headquarters": "Rosemead, California",
+          "founded_year": 1886,
+          "employees": 14013
+        },
+        "financials": {
+          "revenue": 17.599,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 70,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://edison.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://edison.com/about-us",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://conedison.com/en",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://edison.com/investors",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://bloomberg.com/news/articles/2025-12-18/ai-startup-edison-raises-70-million-to-speed-up-scientific-research",
+            "type": "news",
+            "confidence": 0.525
+          },
+          {
+            "url": "https://aidash.com/news/edison-international-joins-aidash-series-b-funding-round",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T08:31:01.993613",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 140.050129,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://aidash.com/news/edison-international-joins-aidash-series-b-funding-round",
+        "https://bloomberg.com/news/articles/2025-12-18/ai-startup-edison-raises-70-million-to-speed-up-scientific-research",
+        "https://conedison.com/en",
+        "https://edison.com/",
+        "https://edison.com/about-us",
+        "https://edison.com/investors"
+      ],
+      "updated_at": "2026-03-11T08:31:01.993754"
+    },
+    "energia": {
+      "latest_report": {
+        "company_name": "Energia",
+        "is_synthetic": false,
+        "confidence_score": 0.7500000000000001,
+        "basic_info": {
+          "website": "https://energia.ie",
+          "description": "Electricity, Gas & Dual Fuel Supplier in Ireland",
+          "industry": "Energy",
+          "headquarters": "Ireland",
+          "founded_year": null,
+          "employees": null
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://energia.ie/home",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://energia.ie:8443/",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://energiaco.com.au/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://acciona-energia.com/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://energaia.fr/infos-pratiques",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://bancomundial.org/es/topic/energy/overview",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://energaia.fr/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T08:35:48.112981",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 6,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 286.110089,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://acciona-energia.com/",
+        "https://bancomundial.org/es/topic/energy/overview",
+        "https://energaia.fr/",
+        "https://energaia.fr/infos-pratiques",
+        "https://energia.ie/home",
+        "https://energia.ie:8443/",
+        "https://energiaco.com.au/"
+      ],
+      "updated_at": "2026-03-11T08:35:48.113076"
+    },
+    "italgas": {
+      "latest_report": {
+        "company_name": "Italgas",
+        "is_synthetic": false,
+        "confidence_score": 0.8999999999999998,
+        "basic_info": {
+          "website": "https://www.italgas.it/en/",
+          "description": "Italian Network Tech Company operating in the gas distribution, water services, energy efficiency, and IT sectors",
+          "industry": "Gas distribution, water services, energy efficiency, and IT",
+          "headquarters": "Milan and Turin, Italy",
+          "founded_year": 1837,
+          "employees": 4339
+        },
+        "financials": {
+          "revenue": 1778.8,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 544000000,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://italgas.it/en",
+            "type": "company_website",
+            "confidence": 0.8750000000000001
+          },
+          {
+            "url": "https://italgas.it/en/about-us",
+            "type": "company_website",
+            "confidence": 0.8750000000000001
+          },
+          {
+            "url": "https://italgas.it/en/about-us/geographical-presence",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://italgas.it/en/clients/help",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Italgas",
+            "type": "wikipedia",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://leadiq.com/c/italgas/5a1d8b05240000240065cb1c",
+            "type": "company_website",
+            "confidence": 0.6
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T08:37:57.335092",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 129.212967,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Italgas",
+        "https://italgas.it/en",
+        "https://italgas.it/en/about-us",
+        "https://italgas.it/en/about-us/geographical-presence",
+        "https://italgas.it/en/clients/help",
+        "https://leadiq.com/c/italgas/5a1d8b05240000240065cb1c"
+      ],
+      "updated_at": "2026-03-11T08:37:57.335185"
+    },
+    "axpo": {
+      "latest_report": {
+        "company_name": "Axpo",
+        "is_synthetic": false,
+        "confidence_score": 0.8589285714285714,
+        "basic_info": {
+          "website": "www.axpo.com/us/en.html",
+          "description": "Developer of hydro power projects",
+          "industry": "Energy",
+          "headquarters": "Baden, Switzerland",
+          "founded_year": 2001,
+          "employees": 22
+        },
+        "financials": {
+          "revenue": 25.7,
+          "revenue_currency": "USD",
+          "valuation": 36601200000
+        },
+        "funding": {
+          "total_raised": 11699999999,
+          "rounds": 7
+        },
+        "data_sources": [
+          {
+            "url": "https://axpo.com/gb/en.html",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://axpo.com/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://axpo.com/ch/en/about-us.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://axpo.com/us/en.html",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://axposystemsag.teamtailor.com/en-GB",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://prospeo.io/c/axpo-group-revenue",
+            "type": "company_website",
+            "confidence": 0.375
+          },
+          {
+            "url": "https://tracxn.com/d/companies/axpo/__BmZvVbSHjSZKCmi_KAQCGXgjX9NATS38rItirZzG8Ig",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T08:39:55.696917",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [],
+          "missing_fields_after_adaptive": [],
+          "research_time_seconds": 118.35267,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://axpo.com/",
+        "https://axpo.com/ch/en/about-us.html",
+        "https://axpo.com/gb/en.html",
+        "https://axpo.com/us/en.html",
+        "https://axposystemsag.teamtailor.com/en-GB",
+        "https://prospeo.io/c/axpo-group-revenue",
+        "https://tracxn.com/d/companies/axpo/__BmZvVbSHjSZKCmi_KAQCGXgjX9NATS38rItirZzG8Ig"
+      ],
+      "updated_at": "2026-03-11T08:39:55.697010"
+    },
+    "bkw": {
+      "latest_report": {
+        "company_name": "BKW",
+        "is_synthetic": false,
+        "confidence_score": 0.832692307692308,
+        "basic_info": {
+          "website": "https://bkw.com",
+          "description": "An international energy and infrastructure company offering integrated solutions in energy, buildings, and infrastructure",
+          "industry": "Energy and Infrastructure",
+          "headquarters": "Switzerland",
+          "founded_year": 1898,
+          "employees": 12000
+        },
+        "financials": {
+          "revenue": 918695,
+          "revenue_currency": "AUD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://bkw.com/en",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://bkw.com/en/about-us/the-bkw-group",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://bkwtechnologies.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://bkwinc.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://thebkwgroup.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/bkw/__7SS4WPfPl_1kwn9MAwlBfSenhYAPgk4ftWyO1BcHCgU",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://investors.brickworks.com.au/wp-content/uploads/2020/12/BKW-Annual-Report-2019.pdf",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://collectionswa.net.au/items/4be4f7e6-8011-4ac1-ab0e-f0917f75a5ff",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://bkw.com/en/about-us/investor-relations/reports-and-presentations",
+            "type": "company_website",
+            "confidence": 0.4
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T08:43:46.591875",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "research_time_seconds": 230.885421,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://bkw.com/en",
+        "https://bkw.com/en/about-us/investor-relations/reports-and-presentations",
+        "https://bkw.com/en/about-us/the-bkw-group",
+        "https://bkwinc.com/",
+        "https://bkwtechnologies.com/",
+        "https://collectionswa.net.au/items/4be4f7e6-8011-4ac1-ab0e-f0917f75a5ff",
+        "https://investors.brickworks.com.au/wp-content/uploads/2020/12/BKW-Annual-Report-2019.pdf",
+        "https://thebkwgroup.com/",
+        "https://tracxn.com/d/companies/bkw/__7SS4WPfPl_1kwn9MAwlBfSenhYAPgk4ftWyO1BcHCgU"
+      ],
+      "updated_at": "2026-03-11T08:43:46.591997"
+    },
+    "alpiq": {
+      "latest_report": {
+        "company_name": "Alpiq",
+        "is_synthetic": false,
+        "confidence_score": 0.8089285714285717,
+        "basic_info": {
+          "website": "https://alpiq.com",
+          "description": "Leading Swiss electricity producer and energy service provider",
+          "industry": "Energy",
+          "headquarters": "Lausanne",
+          "founded_year": 2009,
+          "employees": 1400
+        },
+        "financials": {
+          "revenue": 6696.95,
+          "revenue_currency": "CHF",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 301000000,
+          "rounds": 3
+        },
+        "data_sources": [
+          {
+            "url": "https://alpiq.com/about-us",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://alpiq.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://alpiq.com/energy/energy-solutions",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://alpiq.com/about-us/our-activities",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://alpiq.com/career/you-at-alpiq",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tracxn.com/d/companies/alpiq/__2OC4esB2xh7sQoWrxVQLfTWsDVNigtrWFkA_8cnYwl0",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://reports.alpiq.com/24/app/uploads/Annual_Report_2024_en.pdf",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://alpiq.com/fileadmin/ALPIQ/newsroom/publications/consolidated_financial_statements_of_alpiq_ltd/alpiq_ltd_consolidated_financial_statements_2024_en.pdf",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T08:46:35.671805",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 169.070561,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://alpiq.com/",
+        "https://alpiq.com/about-us",
+        "https://alpiq.com/about-us/our-activities",
+        "https://alpiq.com/career/you-at-alpiq",
+        "https://alpiq.com/energy/energy-solutions",
+        "https://alpiq.com/fileadmin/ALPIQ/newsroom/publications/consolidated_financial_statements_of_alpiq_ltd/alpiq_ltd_consolidated_financial_statements_2024_en.pdf",
+        "https://reports.alpiq.com/24/app/uploads/Annual_Report_2024_en.pdf",
+        "https://tracxn.com/d/companies/alpiq/__2OC4esB2xh7sQoWrxVQLfTWsDVNigtrWFkA_8cnYwl0"
+      ],
+      "updated_at": "2026-03-11T08:46:35.671897"
+    },
+    "repower": {
+      "latest_report": {
+        "company_name": "Repower",
+        "is_synthetic": false,
+        "confidence_score": 0.8153846153846156,
+        "basic_info": {
+          "website": "http://www.repower.com/",
+          "description": "An international energy utility",
+          "industry": "Energy",
+          "headquarters": "Poschiavo, Switzerland",
+          "founded_year": 1904,
+          "employees": 658
+        },
+        "financials": {
+          "revenue": 3.36,
+          "revenue_currency": "CHF",
+          "valuation": 4190
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Repower_(company)",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://repower.com/ch/en/about-us",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://repower.com/ch/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://repower.com/ch/en/about-us/investors-shareholders",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://onlinereport.repower.com/24/ar/en/valuation-principles",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://bloomberg.com/quote/REDC:PM",
+            "type": "news",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://stockanalysis.com/quote/pse/REDC/market-cap",
+            "type": "company_website",
+            "confidence": 0.39999999999999997
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T08:55:05.666562",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 509.985508,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://bloomberg.com/quote/REDC:PM",
+        "https://en.wikipedia.org/wiki/Repower_(company)",
+        "https://onlinereport.repower.com/24/ar/en/valuation-principles",
+        "https://repower.com/ch/en",
+        "https://repower.com/ch/en/about-us",
+        "https://repower.com/ch/en/about-us/investors-shareholders",
+        "https://stockanalysis.com/quote/pse/REDC/market-cap"
+      ],
+      "updated_at": "2026-03-11T08:55:05.666662"
+    },
+    "romande energie": {
+      "latest_report": {
+        "company_name": "Romande Energie",
+        "is_synthetic": false,
+        "confidence_score": 0.5173076923076922,
+        "basic_info": {
+          "website": "https://www.romande-energie.ch/",
+          "description": "A full-service energy provider and the leading electricity supplier in French-speaking Switzerland, offering sustainable solutions to reduce CO2 emissions.",
+          "industry": "Energy",
+          "headquarters": "Vaud, Switzerland",
+          "founded_year": 1997,
+          "employees": 1467
+        },
+        "financials": {
+          "revenue": 569292000,
+          "revenue_currency": "CHF",
+          "valuation": 1082762
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://investor.romande-energie.ch/about-us/at-a-glance/organization.aspx?sc_lang=en",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://investor.romande-energie.ch/",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://investor.romande-energie.ch/about-us/at-a-glance/group-presentation.aspx?sc_lang=en",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://investor.romande-energie.ch/~/media/Files/R/Romande-Energie-IR/documents/english/2025/2025-report-interim-en.pdf",
+            "type": "company_website",
+            "confidence": 0.42500000000000004
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/Romande_%C3%89nergie",
+            "type": "wikipedia",
+            "confidence": 0.525
+          },
+          {
+            "url": "https://investor.romande-energie.ch/about-us/at-a-glance/our-vision-and-values.aspx?sc_lang=en",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://invest-vaud.ch/success/success-stories/romande-energie",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T08:59:34.739280",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 3,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "description",
+            "founded_year",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 269.062262,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://en.wikipedia.org/wiki/Romande_%C3%89nergie",
+        "https://invest-vaud.ch/success/success-stories/romande-energie",
+        "https://investor.romande-energie.ch/",
+        "https://investor.romande-energie.ch/about-us/at-a-glance/group-presentation.aspx?sc_lang=en",
+        "https://investor.romande-energie.ch/about-us/at-a-glance/organization.aspx?sc_lang=en",
+        "https://investor.romande-energie.ch/about-us/at-a-glance/our-vision-and-values.aspx?sc_lang=en",
+        "https://investor.romande-energie.ch/~/media/Files/R/Romande-Energie-IR/documents/english/2025/2025-report-interim-en.pdf"
+      ],
+      "updated_at": "2026-03-11T08:59:34.739601"
+    },
+    "energie 360": {
+      "latest_report": {
+        "company_name": "Energie 360",
+        "is_synthetic": false,
+        "confidence_score": 0.7642857142857143,
+        "basic_info": {
+          "website": "https://360energy.net/",
+          "description": "Energy and Carbon Management Solutions",
+          "industry": "Energy and Environment",
+          "headquarters": "Canada",
+          "founded_year": 1995,
+          "employees": 400
+        },
+        "financials": {
+          "revenue": 69.0,
+          "revenue_currency": "CHF",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 0,
+          "rounds": 0
+        },
+        "data_sources": [
+          {
+            "url": "https://energie360.ch/en/our-services/mobility",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://energie360.ch/en/company/innovation/lab360",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://energie360.ch/en/company/innovation-fund",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://energie360.ch/en/general-information/privacy-policy",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://360energy.net/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/energy-360/__UvuYRJeHgBVOlLU2-keoDWDd7AVUpMIHuFNs5hzF9sU",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://bachofen.ch/en/references/energie-360-ag",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://moneyhouse.ch/en/company/energie-360-grad-ag-5698335211",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://energie360.ch/en/contact/zurich",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:03:56.766468",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 262.017318,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://360energy.net/",
+        "https://bachofen.ch/en/references/energie-360-ag",
+        "https://energie360.ch/en/company/innovation-fund",
+        "https://energie360.ch/en/company/innovation/lab360",
+        "https://energie360.ch/en/contact/zurich",
+        "https://energie360.ch/en/general-information/privacy-policy",
+        "https://energie360.ch/en/our-services/mobility",
+        "https://moneyhouse.ch/en/company/energie-360-grad-ag-5698335211",
+        "https://tracxn.com/d/companies/energy-360/__UvuYRJeHgBVOlLU2-keoDWDd7AVUpMIHuFNs5hzF9sU"
+      ],
+      "updated_at": "2026-03-11T09:03:56.766576"
+    },
+    "iwb": {
+      "latest_report": {
+        "company_name": "IWB",
+        "is_synthetic": false,
+        "confidence_score": 0.7636363636363637,
+        "basic_info": {
+          "website": "https://iwb-engineering.de/en",
+          "description": "IWB is an expert in automation, offering a complete range of ICA engineering services, including software development and project management.",
+          "industry": "Technology",
+          "headquarters": "Munich, Germany",
+          "founded_year": 1989,
+          "employees": 16
+        },
+        "financials": {
+          "revenue": 4000000,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://iwbco.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://iwb-engineering.de/en",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://iwb.gmbh/en",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://italianwinebrands.it/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://iwbusiness.ch/en/platform-web-b2b-b2c-integrated-with-management-systems.html",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://roic.ai/quote/IWB",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://mlq.ai/stocks/IWB/employee-count",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://rocketreach.co/iwb-profile_b5c6d89df42e0cfa",
+            "type": "company_website",
+            "confidence": 0.6250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:09:01.474498",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 304.69833,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://italianwinebrands.it/en",
+        "https://iwb-engineering.de/en",
+        "https://iwb.gmbh/en",
+        "https://iwbco.com/",
+        "https://iwbusiness.ch/en/platform-web-b2b-b2c-integrated-with-management-systems.html",
+        "https://mlq.ai/stocks/IWB/employee-count",
+        "https://rocketreach.co/iwb-profile_b5c6d89df42e0cfa",
+        "https://roic.ai/quote/IWB"
+      ],
+      "updated_at": "2026-03-11T09:09:01.474588"
+    },
+    "eos holding": {
+      "latest_report": {
+        "company_name": "EOS Holding",
+        "is_synthetic": false,
+        "confidence_score": 0.8208333333333334,
+        "basic_info": {
+          "website": "eos-solutions.com",
+          "description": "Debt collection and purchase services",
+          "industry": "Debt collection and purchase services",
+          "headquarters": "Hamburg, Germany",
+          "founded_year": 1974,
+          "employees": "1-10"
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 0,
+          "rounds": 0
+        },
+        "data_sources": [
+          {
+            "url": "https://zhihu.com/tardis/bd/art/373784495",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://zhihu.com/question/305078461",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://tracxn.com/d/companies/eosholding/__36oiygoD9i9yqHe8SepUfiZUn10ywofh1vTdQksQ_x8",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://eosvc.com/category/eos-ventures",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://tracxn.com/d/companies/eosholding/__sdTe8BoJnGuHo-vZ9c6AhuRRP0--1WvZN8Xqygk0OoM",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://tracxn.com/d/companies/eos-holding/__sdTe8BoJnGuHo-vZ9c6AhuRRP0--1WvZN8Xqygk0OoM",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://eos.info/about-us/who-we-are/people-and-culture",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://res.cloudinary.com/investorhub/raw/upload/v1744851683/leaf-prod/236/documents/EOS_2024_Annual_Report_tbqgkh.pdf",
+            "type": "company_website",
+            "confidence": 0.525
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:13:13.444640",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 3,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "research_time_seconds": 251.960153,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://eos.info/about-us/who-we-are/people-and-culture",
+        "https://eosvc.com/category/eos-ventures",
+        "https://res.cloudinary.com/investorhub/raw/upload/v1744851683/leaf-prod/236/documents/EOS_2024_Annual_Report_tbqgkh.pdf",
+        "https://tracxn.com/d/companies/eos-holding/__sdTe8BoJnGuHo-vZ9c6AhuRRP0--1WvZN8Xqygk0OoM",
+        "https://tracxn.com/d/companies/eosholding/__36oiygoD9i9yqHe8SepUfiZUn10ywofh1vTdQksQ_x8",
+        "https://tracxn.com/d/companies/eosholding/__sdTe8BoJnGuHo-vZ9c6AhuRRP0--1WvZN8Xqygk0OoM",
+        "https://zhihu.com/question/305078461",
+        "https://zhihu.com/tardis/bd/art/373784495"
+      ],
+      "updated_at": "2026-03-11T09:13:13.444749"
+    },
+    "swissgrid": {
+      "latest_report": {
+        "company_name": "Swissgrid",
+        "is_synthetic": false,
+        "confidence_score": 0.7944444444444445,
+        "basic_info": {
+          "website": "https://www.swissgrid.ch",
+          "description": "Nationally responsible for the entire high-voltage grid, managing the balance between electricity production and consumption",
+          "industry": "Energy",
+          "headquarters": "Switzerland",
+          "founded_year": 2006,
+          "employees": 600
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://swissgrid.ch/en/home.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://swissgrid.ch/en/home/operation/grid-data/generation.html",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://swissgrid.ch/en/home/about-us/research-development.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://swissgrid.ch/en/home/newsroom/positions.html",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://swissgrid.ch/en/home/newsroom/blog/2021/swissgrid-anniversary.html",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://swissgrid.ch/en/home/about-us/company/history.html",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://one-inside.com/case-study/swissgrid-aem-cloud",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://addexpert.ch/en/swissgrid-en",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:18:23.810003",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 310.355156,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://addexpert.ch/en/swissgrid-en",
+        "https://one-inside.com/case-study/swissgrid-aem-cloud",
+        "https://swissgrid.ch/en/home.html",
+        "https://swissgrid.ch/en/home/about-us/company/history.html",
+        "https://swissgrid.ch/en/home/about-us/research-development.html",
+        "https://swissgrid.ch/en/home/newsroom/blog/2021/swissgrid-anniversary.html",
+        "https://swissgrid.ch/en/home/newsroom/positions.html",
+        "https://swissgrid.ch/en/home/operation/grid-data/generation.html"
+      ],
+      "updated_at": "2026-03-11T09:18:23.810107"
+    },
+    "amstein walthert": {
+      "latest_report": {
+        "company_name": "Amstein Walthert",
+        "is_synthetic": false,
+        "confidence_score": 0.8071428571428573,
+        "basic_info": {
+          "website": "https://amstein-walthert.ch/en/uber-w-en/company-profile",
+          "description": "High-quality services in the field of building services engineering",
+          "industry": "Building Services Engineering",
+          "headquarters": "Zurich, Switzerland",
+          "founded_year": 1927,
+          "employees": 1100
+        },
+        "financials": {
+          "revenue": 257.3,
+          "revenue_currency": "CHF",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 12000000,
+          "rounds": "Seed Round"
+        },
+        "data_sources": [
+          {
+            "url": "https://enastra.ch/en/datenschutz",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://amstein-walthert.ch/en/uber-w-en/company-profile",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://amstein-walthert.ch/en",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://amstein-walthert.ch/en/competences/energy-climate",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://amstein-walthert.ch/en/contact",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://linkedin.com/posts/alexmodon_announcing-our-12m-seed-round-co-led-by-activity-7402037898281480193-5uo6",
+            "type": "linkedin",
+            "confidence": 0.375
+          },
+          {
+            "url": "https://belimo.com/mam/corporate-communications/investor-relations/Reports%20and%20Presentations/2025_03_Annual_Report_2024_EN.pdf",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://amstein-walthert.ch/media/files/2023/04/Deloitte_AmsteinWalthert_presentation_2023_final.pdf",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://mobimo.ch/api/mobimo/files/gb25_mob_geschaftsbericht_2025_en.pdf?fileId=1f10-8f74-0ee4f201-8037-0e057e349113&timestamp=2026-02-13T16%3A15%3A46.450Z&storageContext=direct&filename=GB25_MOB_Geschaftsbericht_2025_EN.pdf",
+            "type": "company_website",
+            "confidence": 0.8750000000000001
+          },
+          {
+            "url": "https://zugestates.ch/assets/documents/Zug_Estates_Sustainability_Report_GRI_standards_2025.pdf",
+            "type": "company_website",
+            "confidence": 0.6500000000000001
+          },
+          {
+            "url": "https://group.phoenix-mecano.com/fileadmin/user_upload/pdf/en/Annual_reports/2024/Phoenix-Mecano-Annual-report-2024-en.pdf",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:23:09.867429",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 11,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 5,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 286.046682,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://amstein-walthert.ch/en",
+        "https://amstein-walthert.ch/en/competences/energy-climate",
+        "https://amstein-walthert.ch/en/contact",
+        "https://amstein-walthert.ch/en/uber-w-en/company-profile",
+        "https://amstein-walthert.ch/media/files/2023/04/Deloitte_AmsteinWalthert_presentation_2023_final.pdf",
+        "https://belimo.com/mam/corporate-communications/investor-relations/Reports%20and%20Presentations/2025_03_Annual_Report_2024_EN.pdf",
+        "https://enastra.ch/en/datenschutz",
+        "https://group.phoenix-mecano.com/fileadmin/user_upload/pdf/en/Annual_reports/2024/Phoenix-Mecano-Annual-report-2024-en.pdf",
+        "https://linkedin.com/posts/alexmodon_announcing-our-12m-seed-round-co-led-by-activity-7402037898281480193-5uo6",
+        "https://mobimo.ch/api/mobimo/files/gb25_mob_geschaftsbericht_2025_en.pdf?fileId=1f10-8f74-0ee4f201-8037-0e057e349113&timestamp=2026-02-13T16%3A15%3A46.450Z&storageContext=direct&filename=GB25_MOB_Geschaftsbericht_2025_EN.pdf",
+        "https://zugestates.ch/assets/documents/Zug_Estates_Sustainability_Report_GRI_standards_2025.pdf"
+      ],
+      "updated_at": "2026-03-11T09:23:09.867617"
+    },
+    "verbund": {
+      "latest_report": {
+        "company_name": "Verbund",
+        "is_synthetic": false,
+        "confidence_score": 0.7615384615384616,
+        "basic_info": {
+          "website": "https://verbund.com/en/group",
+          "description": "Austria\u2019s leading energy company and one of the largest producers of electricity using hydropower in Europe",
+          "industry": "Energy",
+          "headquarters": "Austria",
+          "founded_year": 1947,
+          "employees": 1200
+        },
+        "financials": {
+          "revenue": 10.16,
+          "revenue_currency": "EUR",
+          "valuation": 24319.1
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://verbund.com/en/group/company",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://verbund.com/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://verbund.com/en/group",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://verbundx.com/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://verbund.com/en/business",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://verbund.com/media/qcwgsj5i/verbund-annual-financial-report-2024-englisch-final.pdf",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://verbund.com/media/knlh3iey/verbund-integrated-annual-report-2024-englisch-final-1.pdf",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://supplychaindigital.com/company/verbund",
+            "type": "company_website",
+            "confidence": 0.65
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:27:24.579402",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 254.701322,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://supplychaindigital.com/company/verbund",
+        "https://verbund.com/en",
+        "https://verbund.com/en/business",
+        "https://verbund.com/en/group",
+        "https://verbund.com/en/group/company",
+        "https://verbund.com/media/knlh3iey/verbund-integrated-annual-report-2024-englisch-final-1.pdf",
+        "https://verbund.com/media/qcwgsj5i/verbund-annual-financial-report-2024-englisch-final.pdf",
+        "https://verbundx.com/en"
+      ],
+      "updated_at": "2026-03-11T09:27:24.579502"
+    },
+    "evn": {
+      "latest_report": {
+        "company_name": "EVN",
+        "is_synthetic": false,
+        "confidence_score": 0.8357142857142857,
+        "basic_info": {
+          "website": "https://www.evn.at",
+          "description": "Austrian-based producer and transporter of electricity, operating in water treatment, natural gas supply, and waste management business areas",
+          "industry": "Utilities",
+          "headquarters": "Maria Enzersdorf, Lower Austria, Austria",
+          "founded_year": 1922,
+          "employees": 8540
+        },
+        "financials": {
+          "revenue": 2.752,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 10000000.0,
+          "rounds": 2
+        },
+        "data_sources": [
+          {
+            "url": "https://bio-invest.be/en/investments/evn-finance-joint-stock-company",
+            "type": "company_website",
+            "confidence": 0.6500000000000001
+          },
+          {
+            "url": "https://en.evn.com.vn/",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://en.evn.com.vn/en-US/tong-quan/Introduction--60-2",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://evnltd.co.uk/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://en.wikipedia.org/wiki/EVN_Group",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://tracxn.com/d/companies/evn/__L4qV1Pyn5e045omQ64DtvSp8rG3IXOM5o0-GKoYHE9Y",
+            "type": "company_website",
+            "confidence": 0.8500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:30:07.906780",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 163.316868,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://bio-invest.be/en/investments/evn-finance-joint-stock-company",
+        "https://en.evn.com.vn/",
+        "https://en.evn.com.vn/en-US/tong-quan/Introduction--60-2",
+        "https://en.wikipedia.org/wiki/EVN_Group",
+        "https://evnltd.co.uk/",
+        "https://tracxn.com/d/companies/evn/__L4qV1Pyn5e045omQ64DtvSp8rG3IXOM5o0-GKoYHE9Y"
+      ],
+      "updated_at": "2026-03-11T09:30:07.906900"
+    },
+    "wien energie": {
+      "latest_report": {
+        "company_name": "Wien Energie",
+        "is_synthetic": false,
+        "confidence_score": 0.8634615384615387,
+        "basic_info": {
+          "website": "https://wienenergie.at",
+          "description": "Largest regional energy provider in Austria, supplying environmentally friendly power, cooling, heating, electromobility, and telecommunications",
+          "industry": "Energy",
+          "headquarters": "Vienna, Austria",
+          "founded_year": 1899,
+          "employees": 2424
+        },
+        "financials": {
+          "revenue": 3347.1,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 0
+        },
+        "data_sources": [
+          {
+            "url": "https://advantageaustria.org/mk/company/en/energy-eastern-europe-hydro-power-gmbh",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://wienenergie.at/en/about-us",
+            "type": "company_website",
+            "confidence": 0.8750000000000001
+          },
+          {
+            "url": "https://wienenergie.at/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://wienenergie.at/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://wienerstadtwerke.at/",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://tracxn.com/d/companies/wien-energie/__btsyN59fE84vQ8xTLnFHeill8BUBs8rQRQbOSPJ3Xl4",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://wienerstadtwerke.at/o/document/wiener-stadtwerke-allocation-and-impact-report-as-of-31-12-2024",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:33:03.006077",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "research_time_seconds": 175.088906,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://advantageaustria.org/mk/company/en/energy-eastern-europe-hydro-power-gmbh",
+        "https://tracxn.com/d/companies/wien-energie/__btsyN59fE84vQ8xTLnFHeill8BUBs8rQRQbOSPJ3Xl4",
+        "https://wienenergie.at/",
+        "https://wienenergie.at/en",
+        "https://wienenergie.at/en/about-us",
+        "https://wienerstadtwerke.at/",
+        "https://wienerstadtwerke.at/o/document/wiener-stadtwerke-allocation-and-impact-report-as-of-31-12-2024"
+      ],
+      "updated_at": "2026-03-11T09:33:03.006178"
+    },
+    "energie ag": {
+      "latest_report": {
+        "company_name": "Energie AG",
+        "is_synthetic": false,
+        "confidence_score": 0.7812500000000001,
+        "basic_info": {
+          "website": "https://energieag.at/",
+          "description": "Energieversorger in \u00d6sterreich",
+          "industry": "Energieversorgung",
+          "headquarters": "Ober\u00f6sterreich",
+          "founded_year": 1891,
+          "employees": 6811
+        },
+        "financials": {
+          "revenue": 6083,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://reports.energieag.at/2024/annual-report/non-financial-report/governance-information/g1-business-conduct/management-of-impacts-risks-and-opportunities.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://eqs-news.com/news/corporate-news/lenzing-und-energie-ag-umwelt-service-verlaengern-rvl-partnerschaft-bis-2040/d0137dcd-1f54-4414-a52c-7666df8ee410_en",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://energieag.at/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://energieag.at/geschaeftskunden/dienstleistungen/biogasanlagen-en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://mvv.de/en/investors/company-profile/history",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://reports.energieag.at/2024/annual-report/_assets/downloads/cfs-konzernabschluss-energieag-ar2024.pdf",
+            "type": "company_website",
+            "confidence": 0.6000000000000001
+          },
+          {
+            "url": "https://mvv.de/en/about-us/overview/key-figures",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://reports.energieag.at/reporting-home/_assets/downloads/Energie_AG_Annual_Report_20172018.pdf?h=CYWhQQuB",
+            "type": "company_website",
+            "confidence": 0.675
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:37:43.096000",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 280.079431,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://energieag.at/",
+        "https://energieag.at/geschaeftskunden/dienstleistungen/biogasanlagen-en",
+        "https://eqs-news.com/news/corporate-news/lenzing-und-energie-ag-umwelt-service-verlaengern-rvl-partnerschaft-bis-2040/d0137dcd-1f54-4414-a52c-7666df8ee410_en",
+        "https://mvv.de/en/about-us/overview/key-figures",
+        "https://mvv.de/en/investors/company-profile/history",
+        "https://reports.energieag.at/2024/annual-report/_assets/downloads/cfs-konzernabschluss-energieag-ar2024.pdf",
+        "https://reports.energieag.at/2024/annual-report/non-financial-report/governance-information/g1-business-conduct/management-of-impacts-risks-and-opportunities.html",
+        "https://reports.energieag.at/reporting-home/_assets/downloads/Energie_AG_Annual_Report_20172018.pdf?h=CYWhQQuB"
+      ],
+      "updated_at": "2026-03-11T09:37:43.096106"
+    },
+    "kelag": {
+      "latest_report": {
+        "company_name": "Kelag",
+        "is_synthetic": false,
+        "confidence_score": 0.78125,
+        "basic_info": {
+          "website": "www.kelag.at",
+          "description": "Energiedienstleistungsunternehmen in \u00d6sterreich",
+          "industry": "Utilities",
+          "headquarters": "Austria",
+          "founded_year": 1975,
+          "employees": 520
+        },
+        "financials": {
+          "revenue": 10058,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://kelag-international.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://kelag.at/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://kelag-international.com/corporate/get-to-know-us.htm",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://kelag.ch/en",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://kelag-international.com/eng/solar.htm",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://exnaton.ai/en/blog/series-a-funding-exnaton-ai-energy-platform",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://companydata.com/austria/energy-companies",
+            "type": "company_website",
+            "confidence": 0.5
+          },
+          {
+            "url": "https://rwe.com/en/rwe-interim-report-H1-2025",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://leadiq.com/c/kelag-energie/5a1d97e02300005e008679be/employee-directory",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:41:43.681000",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 9,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 240.574027,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://companydata.com/austria/energy-companies",
+        "https://exnaton.ai/en/blog/series-a-funding-exnaton-ai-energy-platform",
+        "https://kelag-international.com/",
+        "https://kelag-international.com/corporate/get-to-know-us.htm",
+        "https://kelag-international.com/eng/solar.htm",
+        "https://kelag.at/",
+        "https://kelag.ch/en",
+        "https://leadiq.com/c/kelag-energie/5a1d97e02300005e008679be/employee-directory",
+        "https://rwe.com/en/rwe-interim-report-H1-2025"
+      ],
+      "updated_at": "2026-03-11T09:41:43.681371"
+    },
+    "salzburg ag": {
+      "latest_report": {
+        "company_name": "Salzburg AG",
+        "is_synthetic": false,
+        "confidence_score": 0.8846153846153848,
+        "basic_info": {
+          "website": "www.salzburg-ag.at",
+          "description": "Supplier of energy, telecommunications, and internet services",
+          "industry": "Energy, Telecommunications, Internet Services",
+          "headquarters": "Salzburg, Austria",
+          "founded_year": 2000,
+          "employees": 412
+        },
+        "financials": {
+          "revenue": 1.72,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 4
+        },
+        "data_sources": [
+          {
+            "url": "https://salzburg-ag.at/strom/privat/stromprodukte/umsteigen/new-electricity-tariff.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://salzburg-ag.at/bus-bahn/stadtverkehr/servicecenter-fundbuero.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://salzburg.info/en/travel-info/arrival-traffic/public-transport-obus-albus",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://5schaetze.at/en.html",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://eggsunimedia.com/de/en/insights/success-story/salzburg-ag-customer-portal",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://linkedin.com/company/salzburg-ag",
+            "type": "linkedin",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://tracxn.com/d/companies/salzburg-ag/__IXqSHYrT7kEbyV98kmvNb0wtZiBe3nrdMlFROCawhdY",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://rocketreach.co/salzburg-ag-profile_b5956150f68581e1",
+            "type": "company_website",
+            "confidence": 0.7000000000000002
+          },
+          {
+            "url": "https://leitbetriebe.at/en/profiles/salzburg-ag",
+            "type": "company_website",
+            "confidence": 0.7
+          },
+          {
+            "url": "https://hycom.digital/insights/driving-customer-centric-change-in-Salzburg-AG",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:46:02.625327",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 10,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 5,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "research_time_seconds": 258.933739,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://5schaetze.at/en.html",
+        "https://eggsunimedia.com/de/en/insights/success-story/salzburg-ag-customer-portal",
+        "https://hycom.digital/insights/driving-customer-centric-change-in-Salzburg-AG",
+        "https://leitbetriebe.at/en/profiles/salzburg-ag",
+        "https://linkedin.com/company/salzburg-ag",
+        "https://rocketreach.co/salzburg-ag-profile_b5956150f68581e1",
+        "https://salzburg-ag.at/bus-bahn/stadtverkehr/servicecenter-fundbuero.html",
+        "https://salzburg-ag.at/strom/privat/stromprodukte/umsteigen/new-electricity-tariff.html",
+        "https://salzburg.info/en/travel-info/arrival-traffic/public-transport-obus-albus",
+        "https://tracxn.com/d/companies/salzburg-ag/__IXqSHYrT7kEbyV98kmvNb0wtZiBe3nrdMlFROCawhdY"
+      ],
+      "updated_at": "2026-03-11T09:46:02.625440"
+    },
+    "tiroler wasserkraft": {
+      "latest_report": {
+        "company_name": "Tiroler Wasserkraft",
+        "is_synthetic": false,
+        "confidence_score": 0.8729166666666668,
+        "basic_info": {
+          "website": "https://tiwag.at",
+          "description": "Hydropower and grid infrastructure company",
+          "industry": "Energy",
+          "headquarters": "Tyrol, Austria",
+          "founded_year": 1924,
+          "employees": 1413
+        },
+        "financials": {
+          "revenue": 450.8,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Tiroler_Wasserkraft",
+            "type": "wikipedia",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://advantageaustria.org/in/company/en/tiwag-tiroler-wasserkraft-ag",
+            "type": "company_website",
+            "confidence": 0.35
+          },
+          {
+            "url": "https://hydropower-dams.com/supplier-guide/tiwag-tiroler-wasserkraft-ag-o01522",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://tiwag.at/uploads/tx_bh/2306/tiwag_geschaeftsbericht_2024_en.pdf?mod=1750665569",
+            "type": "company_website",
+            "confidence": 0.8750000000000001
+          },
+          {
+            "url": "https://de.wikipedia.org/wiki/Tiwag",
+            "type": "wikipedia",
+            "confidence": 0.8500000000000002
+          },
+          {
+            "url": "https://grokipedia.com/page/tiroler_wasserkraft",
+            "type": "company_website",
+            "confidence": 0.625
+          },
+          {
+            "url": "https://krone.at/3351532",
+            "type": "company_website",
+            "confidence": 0.35
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:51:06.895923",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 7,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 4,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 304.259788,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://advantageaustria.org/in/company/en/tiwag-tiroler-wasserkraft-ag",
+        "https://de.wikipedia.org/wiki/Tiwag",
+        "https://en.wikipedia.org/wiki/Tiroler_Wasserkraft",
+        "https://grokipedia.com/page/tiroler_wasserkraft",
+        "https://hydropower-dams.com/supplier-guide/tiwag-tiroler-wasserkraft-ag-o01522",
+        "https://krone.at/3351532",
+        "https://tiwag.at/uploads/tx_bh/2306/tiwag_geschaeftsbericht_2024_en.pdf?mod=1750665569"
+      ],
+      "updated_at": "2026-03-11T09:51:06.896038"
+    },
+    "vorarlberger energienetze": {
+      "latest_report": {
+        "company_name": "Vorarlberger Energienetze",
+        "is_synthetic": false,
+        "confidence_score": 0.8,
+        "basic_info": {
+          "website": "https://www.aggm.at",
+          "description": "Energy management company responsible for the management of international gas transmission systems in Austria",
+          "industry": "Energy management",
+          "headquarters": "Vienna, Austria",
+          "founded_year": 2002,
+          "employees": "11-50"
+        },
+        "financials": {
+          "revenue": null,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://illwerkevkw.at/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://energiegemeinschaften.vorarlbergnetz.at/eeg_auskunft",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://bouncewatch.com/explore/startup/vorarlberger-energienetze",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://pacw.org/commissioning-of-a-220-kv-four-terminal-line-protection-system",
+            "type": "company_website",
+            "confidence": 0.55
+          },
+          {
+            "url": "https://golden.com/wiki/Austrian_Gas_Grid_Management-A83564",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://vertigis.com/customers/gis3-more-than-an-upgrade",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:55:17.453536",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 3,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 250.54645,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://bouncewatch.com/explore/startup/vorarlberger-energienetze",
+        "https://energiegemeinschaften.vorarlbergnetz.at/eeg_auskunft",
+        "https://golden.com/wiki/Austrian_Gas_Grid_Management-A83564",
+        "https://illwerkevkw.at/",
+        "https://pacw.org/commissioning-of-a-220-kv-four-terminal-line-protection-system",
+        "https://vertigis.com/customers/gis3-more-than-an-upgrade"
+      ],
+      "updated_at": "2026-03-11T09:55:17.453633"
+    },
+    "apcs": {
+      "latest_report": {
+        "company_name": "APCS",
+        "is_synthetic": false,
+        "confidence_score": 0.769230769230769,
+        "basic_info": {
+          "website": "https://apcs-pmw.com/",
+          "description": "Provides support throughout Indonesia and Southeast Asia to those desiring and committed to changing their management of natural resources to achieve a higher equilibrium of economic-environmental-social bottom lines through sustainable resource management.",
+          "industry": "Consulting",
+          "headquarters": "Jakarta, Indonesia",
+          "founded_year": 2010,
+          "employees": null
+        },
+        "financials": {
+          "revenue": 5418,
+          "revenue_currency": "Million Bath",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": "*****",
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://apcs.co.th/th/lang/en",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://apcs.net.au/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://apcs-pmw.com/",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://apcs.com.pg/portal",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://apcs.net.au/find/index.html",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://tracxn.com/d/companies/apcs/__kY_53mNs__yK5e7ZleXBRecLXw9Mmtj7SiUMtRQ3p8g",
+            "type": "company_website",
+            "confidence": 0.5000000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T09:59:14.809403",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "employees",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "employees",
+            "valuation"
+          ],
+          "research_time_seconds": 237.344648,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://apcs-pmw.com/",
+        "https://apcs.co.th/th/lang/en",
+        "https://apcs.com.pg/portal",
+        "https://apcs.net.au/",
+        "https://apcs.net.au/find/index.html",
+        "https://tracxn.com/d/companies/apcs/__kY_53mNs__yK5e7ZleXBRecLXw9Mmtj7SiUMtRQ3p8g"
+      ],
+      "updated_at": "2026-03-11T09:59:14.809479"
     }
   }
 }
