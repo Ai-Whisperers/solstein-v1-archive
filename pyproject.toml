@@ -7,6 +7,7 @@ requires-python = ">=3.10"
 authors = [
     { name = "AI Whisperers", email = "team@ai-whisperers.com" },
 ]
+# Updated 2026-03-11: langgraph>=1.0.10, langgraph-checkpoint>=4.0.1
 dependencies = [
     "pydantic>=2.0,<3.0",
     "pydantic-settings>=2.0",
