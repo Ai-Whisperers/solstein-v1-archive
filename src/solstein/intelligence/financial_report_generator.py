@@ -8,15 +8,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-XZ|from typing import TYPE_CHECKING
-
-from .narrative_synthesis import NarrativeContext, NarrativeSynthesisEngine
-
 if TYPE_CHECKING:
-    from .financial_models import FinancialIntelligence
-
-
-class FinancialGrowthReportGenerator:
     from .financial_models import FinancialIntelligence, FundingRound, GrowthVector
 
 
@@ -377,3 +369,42 @@ class BatchFinancialReportGenerator:
             lines.append(f"| {company_name} | {revenue} | {cagr} | {traj} | {funding} | {health} |")
 
         return "\n".join(lines)
+
+
+
+    async def generate_narratives(
+        self,
+        company_name: str,
+        financial_intelligence: "FinancialIntelligence",
+        industry: str = "energy software",
+        region: str = "Europe",
+    ) -> dict[str, str]:
+        from .narrative_synthesis import NarrativeContext, NarrativeSynthesisEngine
+        context = NarrativeContext(
+            company_name=company_name,
+            industry=industry,
+            region=region,
+            data_quality="medium",
+        )
+        engine = NarrativeSynthesisEngine()
+        return await engine.generate_financial_thesis(financial_intelligence, context)
+
+    def generate_with_narratives(
+        self,
+        company_name: str,
+        financial_intelligence: "FinancialIntelligence",
+        narratives: dict[str, str],
+    ) -> str:
+        sections = [
+            self._generate_header(company_name),
+            narratives.get("investment_thesis", ""),
+            self._generate_growth_trajectory(financial_intelligence),
+            self._generate_funding_intelligence(financial_intelligence),
+            self._generate_growth_vectors(financial_intelligence),
+            self._generate_projection(financial_intelligence),
+            narratives.get("strategic_recommendations", ""),
+            narratives.get("competitive_context", ""),
+            self._generate_health_assessment(financial_intelligence),
+            self._generate_footer(),
+        ]
+        return "\n\n".join(sections)
