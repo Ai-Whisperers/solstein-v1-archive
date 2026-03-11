@@ -80,11 +80,28 @@ def transform_for_financial_analysis(company: dict) -> dict:
     funding_rounds = []
     total_raised = funding.get("total_raised")
 
+    # Only create round entries if we have actual round-by-round data
+    # Don't fabricate synthetic rounds with averaged amounts - that's misleading
     if total_raised and num_rounds > 0:
-        avg_per_round = total_raised / num_rounds
-        for i in range(num_rounds):
-            year = founded_year + (i * (company_age // max(num_rounds, 1))) if founded_year and company_age else None
-            funding_rounds.append({"round": f"Round {i + 1}", "amount": round(avg_per_round, 2), "year": year})
+        # Check if we have detailed round data or just a count
+        if isinstance(rounds_raw, list) and len(rounds_raw) > 0 and isinstance(rounds_raw[0], dict):
+            # We have actual round data - parse it
+            for raw_round in rounds_raw:
+                funding_rounds.append({
+                    "round": raw_round.get("round", "Unknown"),
+                    "amount": raw_round.get("amount"),
+                    "date": raw_round.get("date"),
+                    "lead_investor": raw_round.get("lead_investor"),
+                })
+        else:
+            # Only have total + count - don't fabricate individual rounds
+            # Just record the summary to avoid misleading data
+            funding_rounds = [{
+                "round": f"{num_rounds} rounds (details unknown)",
+                "amount": total_raised,
+                "date": None,
+                "lead_investor": None,
+            }]
     elif total_raised:
         funding_rounds = [{"round": "Total Known", "amount": total_raised}]
 

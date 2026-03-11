@@ -153,17 +153,30 @@ class FinancialGrowthReportGenerator:
             sections.append("")
             sections.append("### Funding History")
             sections.append("")
-            sections.append("| Round | Amount | Date | Lead Investor | Valuation |")
-            sections.append("|-------|--------|------|---------------|-----------|")
 
-            for round_data in fi.funding_rounds_enhanced[:10]:  # Top 10
-                amount_str = self.currency_format.format(round_data.amount) if round_data.amount else "Undisclosed"
-                date_str = round_data.date.isoformat() if round_data.date else "Unknown"
-                lead_str = round_data.lead_investor or "Unknown"
-                val_str = self.currency_format.format(round_data.valuation) if round_data.valuation else "Undisclosed"
+            # Check if we have detailed round data or just summary
+            has_detailed_rounds = any(
+                r.date is not None or r.lead_investor is not None
+                for r in fi.funding_rounds_enhanced
+            )
 
-                sections.append(f"| {round_data.round_name} | {amount_str} | {date_str} | {lead_str} | {val_str} |")
+            if has_detailed_rounds:
+                sections.append("| Round | Amount | Date | Lead Investor | Valuation |")
+                sections.append("|-------|--------|------|---------------|-----------|")
 
+                for round_data in fi.funding_rounds_enhanced[:10]:  # Top 10
+                    amount_str = self.currency_format.format(round_data.amount) if round_data.amount else "Undisclosed"
+                    date_str = round_data.date.isoformat() if round_data.date else "Unknown"
+                    lead_str = round_data.lead_investor or "Unknown"
+                    val_str = self.currency_format.format(round_data.valuation) if round_data.valuation else "Undisclosed"
+
+                    sections.append(f"| {round_data.round_name} | {amount_str} | {date_str} | {lead_str} | {val_str} |")
+            else:
+                # Summary only - no detailed table
+                sections.append(
+                    "*Detailed funding round data not available. "
+                    f"Total of {len(fi.funding_rounds_enhanced)} funding event(s) recorded.*"
+                )
         # Narrative
         if fi.funding_narrative:
             sections.append("")
