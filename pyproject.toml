@@ -27,7 +27,8 @@ dependencies = [
     "edgartools",
     "lxml>=4.9",
     "yfinance>=0.2",
-    "langgraph>=0.0.20,<1.0",
+    "langgraph>=1.0.10",  # Fixes CVE-2025-64439, CVE-2026-28277 - requires >=1.0.10 for checkpoint 4.x compatibility
+    "langgraph-checkpoint>=4.0.1",  # Fixes CVE-2026-28277 - unsafe msgpack deserialization
     "asyncpg>=0.31.0",
     "pytest-asyncio>=1.3.0",
     "redis>=5.0",
