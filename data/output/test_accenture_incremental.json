@@ -1,0 +1,80 @@
+{
+  "company_name": "Accenture",
+  "is_synthetic": false,
+  "confidence_score": 0.95,
+  "basic_info": {
+    "website": "https://www.accenture.com",
+    "description": "Multinational technology consulting company",
+    "industry": "Professional services, Information technology consulting",
+    "headquarters": "Dublin, Ireland",
+    "founded_year": 1989,
+    "employees": 779000
+  },
+  "financials": {
+    "revenue": 69670,
+    "revenue_currency": "USD",
+    "valuation": null
+  },
+  "funding": {
+    "total_raised": null,
+    "rounds": []
+  },
+  "data_sources": [
+    {
+      "url": "https://www.accenture.com/us-en/about/company/annual-report",
+      "type": "company_website",
+      "confidence": 0.4
+    },
+    {
+      "url": "https://newsroom.accenture.com/news/2025/accenture-reports-fourth-quarter-and-full-year-fiscal-2025-results",
+      "type": "company_website",
+      "confidence": 0.55
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Accenture",
+      "type": "wikipedia",
+      "confidence": 0.9500000000000002
+    },
+    {
+      "url": "https://www.accenture.com/us-en/about/company-index",
+      "type": "company_website",
+      "confidence": 0.8250000000000001
+    },
+    {
+      "url": "https://www.accenture.com/us-en/careers",
+      "type": "company_website",
+      "confidence": 0.7500000000000001
+    },
+    {
+      "url": "https://www.accenture.com/us-en/careers/jobsearch",
+      "type": "company_website",
+      "confidence": 0.4
+    },
+    {
+      "url": "https://www.accenture.com/us-en",
+      "type": "company_website",
+      "confidence": 0.47500000000000003
+    },
+    {
+      "url": "https://www.accenture.com/us-en/about/contact-us",
+      "type": "company_website",
+      "confidence": 0.4
+    },
+    {
+      "url": "https://www.accenture.com/content/dam/accenture/final/accenture-com/document-4/Annual-Report-2025.pdf",
+      "type": "company_website",
+      "confidence": 0.47500000000000003
+    }
+  ],
+  "metadata": {
+    "research_date": "2026-03-11T02:40:24.157371",
+    "queries_executed": 8,
+    "sources_found": 8,
+    "sources_used": 3,
+    "known_sources_skipped": 6,
+    "known_sources_revisited": 0,
+    "research_time_seconds": 66.180922,
+    "fields_carried_forward": 0
+  },
+  "errors": []
+}

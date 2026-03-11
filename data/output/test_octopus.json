@@ -1,0 +1,62 @@
+{
+  "company_name": "Octopus Energy",
+  "is_synthetic": false,
+  "confidence_score": 0.9000000000000002,
+  "basic_info": {
+    "website": "https://octopus.energy",
+    "description": "Provider of utility bill management platform",
+    "industry": "Energy",
+    "headquarters": "London, United Kingdom",
+    "founded_year": 2015,
+    "employees": 4789
+  },
+  "financials": {
+    "revenue": 7.97,
+    "revenue_currency": "GBP",
+    "valuation": 9
+  },
+  "funding": {
+    "total_raised": 1.96,
+    "rounds": 5
+  },
+  "data_sources": [
+    {
+      "url": "https://octopus.energy/",
+      "type": "company_website",
+      "confidence": 0.675
+    },
+    {
+      "url": "https://octopus.energy/contact-us/",
+      "type": "company_website",
+      "confidence": 0.47500000000000003
+    },
+    {
+      "url": "https://octopusenergy.group/",
+      "type": "company_website",
+      "confidence": 0.6000000000000001
+    },
+    {
+      "url": "https://tracxn.com/d/companies/octopus-energy/__hHfeDjyXsXB1aDkxFLdN0dWUBFnwaLI89sSwmJtvZr8",
+      "type": "company_website",
+      "confidence": 0.9
+    },
+    {
+      "url": "https://www.cnbc.com/2025/12/30/octopus-energy-to-spinoff-ai-unit-kraken-at-8point65-billion-valuation.html",
+      "type": "company_website",
+      "confidence": 0.4000000000000001
+    },
+    {
+      "url": "https://www.otpp.com/en-ca/about-us/news-and-insights/2026/octopus-energy-group-to-spin-out-kraken-at-valuation-of-8-65bn/",
+      "type": "company_website",
+      "confidence": 0.625
+    }
+  ],
+  "metadata": {
+    "research_date": "2026-03-11T00:44:15.209943",
+    "queries_executed": 8,
+    "sources_found": 8,
+    "sources_used": 6,
+    "research_time_seconds": 143.197469
+  },
+  "errors": []
+}
