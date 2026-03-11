@@ -14,6 +14,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
+from urllib.parse import parse_qsl
+from urllib.parse import urlencode
+from urllib.parse import urlunparse
 
 import httpx
 from bs4 import BeautifulSoup
@@ -524,8 +527,26 @@ class AIResearchOrchestrator:
         self.searcher = WebSearchAgent()
         self.extractor = ContentExtractorAgent()
         self.validator = DataValidatorAgent()
-        self.memory_path = Path("data/research_results/research_memory.json")
+        self.repo_root = Path(__file__).resolve().parents[3]
+        self.memory_path = self.repo_root / "data/research_results/research_memory.json"
         self._memory = self._load_memory()
+
+    @staticmethod
+    def _normalize_url(url: str) -> str:
+        try:
+            parsed = urlparse(url.strip())
+            if not parsed.scheme or not parsed.netloc:
+                return url.strip()
+            scheme = parsed.scheme.lower()
+            netloc = parsed.netloc.lower()
+            if netloc.startswith("www."):
+                netloc = netloc[4:]
+            path = parsed.path.rstrip("/") or "/"
+            query_params = [(k, v) for k, v in parse_qsl(parsed.query, keep_blank_values=True) if not k.startswith("utm_")]
+            query = urlencode(query_params)
+            return urlunparse((scheme, netloc, path, "", query, ""))
+        except Exception:
+            return url.strip()
 
     def _load_memory(self) -> dict[str, Any]:
         if self.memory_path.exists():
@@ -537,7 +558,7 @@ class AIResearchOrchestrator:
             except Exception as error:
                 logger.warning(f"Failed loading research memory from {self.memory_path}: {error}")
 
-        bootstrap_path = Path("data/research_results/research_results.json")
+        bootstrap_path = self.repo_root / "data/research_results/research_results.json"
         if bootstrap_path.exists():
             try:
                 with open(bootstrap_path) as f:
@@ -557,7 +578,7 @@ class AIResearchOrchestrator:
                             if isinstance(source, dict):
                                 url = source.get("url")
                                 if isinstance(url, str) and url:
-                                    urls.add(url)
+                                    urls.add(self._normalize_url(url))
                         memory["companies"][key] = {
                             "latest_report": report,
                             "known_urls": sorted(urls),
@@ -604,7 +625,7 @@ class AIResearchOrchestrator:
         company_entry = self._memory.get("companies", {}).get(company_key, {})
         urls = company_entry.get("known_urls", [])
         if isinstance(urls, list):
-            return {url for url in urls if isinstance(url, str) and url}
+            return {self._normalize_url(url) for url in urls if isinstance(url, str) and url}
         return set()
 
     @staticmethod
@@ -672,11 +693,16 @@ class AIResearchOrchestrator:
         for source in current.data_sources + previous_sources:
             if not isinstance(source, dict):
                 continue
-            url = source.get("url")
-            if not isinstance(url, str) or not url or url in seen_urls:
+            raw_url = source.get("url")
+            if not isinstance(raw_url, str) or not raw_url:
+                continue
+            url = self._normalize_url(raw_url)
+            if not url or url in seen_urls:
                 continue
             seen_urls.add(url)
-            merged_sources.append(source)
+            merged_source = dict(source)
+            merged_source["url"] = url
+            merged_sources.append(merged_source)
         current.data_sources = merged_sources
 
         return current, carry_forward_count
@@ -700,7 +726,7 @@ class AIResearchOrchestrator:
         for source in report.data_sources:
             url = source.get("url") if isinstance(source, dict) else None
             if isinstance(url, str) and url:
-                known_urls.add(url)
+                known_urls.add(self._normalize_url(url))
 
         entry["latest_report"] = report_dict
         entry["known_urls"] = sorted(known_urls)
@@ -758,12 +784,21 @@ class AIResearchOrchestrator:
             known_urls = set(previous_urls)
             deferred_known: list[SearchResult] = []
             for result in all_search_results:
-                if result.url and result.url not in seen_urls:
-                    seen_urls.add(result.url)
-                    if result.url in known_urls:
-                        deferred_known.append(result)
+                normalized_url = self._normalize_url(result.url) if result.url else ""
+                if normalized_url and normalized_url not in seen_urls:
+                    seen_urls.add(normalized_url)
+                    normalized_result = SearchResult(
+                        title=result.title,
+                        url=normalized_url,
+                        snippet=result.snippet,
+                        source=result.source,
+                        relevance_score=result.relevance_score,
+                        intent_match=result.intent_match,
+                    )
+                    if normalized_url in known_urls:
+                        deferred_known.append(normalized_result)
                     else:
-                        unique_results.append(result)
+                        unique_results.append(normalized_result)
                 if len(unique_results) >= max_sources:
                     break
 
@@ -794,6 +829,7 @@ class AIResearchOrchestrator:
                     )
 
             final_data = self._synthesize_data(validated_data)
+            revisited_count = len([r for r in unique_results if r.url in previous_urls])
             report = ResearchReport(
                 company_name=company_name,
                 is_synthetic=False,
@@ -828,8 +864,8 @@ class AIResearchOrchestrator:
                     "queries_executed": len(plan.queries),
                     "sources_found": len(unique_results),
                     "sources_used": len(validated_data),
-                    "known_sources_skipped": max(0, len(previous_urls) - len([r for r in unique_results if r.url in previous_urls])),
-                    "known_sources_revisited": len([r for r in unique_results if r.url in previous_urls]),
+                    "known_sources_skipped": len(deferred_known) - revisited_count,
+                    "known_sources_revisited": revisited_count,
                     "research_time_seconds": (datetime.now() - start_time).total_seconds(),
                 },
             )
@@ -838,6 +874,23 @@ class AIResearchOrchestrator:
             report.metadata["fields_carried_forward"] = carry_forward_count
         except Exception as error:
             logger.error(f"Research failed for {company_name}: {error}")
+            if previous_report:
+                report = ResearchReport(
+                    company_name=company_name,
+                    is_synthetic=bool(previous_report.get("is_synthetic", False)),
+                    confidence_score=float(previous_report.get("confidence_score", 0.0)),
+                    basic_info=previous_report.get("basic_info", {}),
+                    financials=previous_report.get("financials", {}),
+                    funding=previous_report.get("funding", {}),
+                    data_sources=previous_report.get("data_sources", []),
+                    metadata={
+                        **(previous_report.get("metadata", {}) if isinstance(previous_report.get("metadata"), dict) else {}),
+                        "research_date": datetime.now().isoformat(),
+                        "fallback_to_previous_on_error": True,
+                        "error": str(error),
+                    },
+                    errors=list(previous_report.get("errors", [])) if isinstance(previous_report.get("errors"), list) else [],
+                )
             report.errors.append(str(error))
 
         self._persist_report(report)
