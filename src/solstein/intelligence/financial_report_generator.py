@@ -8,7 +8,15 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+XZ|from typing import TYPE_CHECKING
+
+from .narrative_synthesis import NarrativeContext, NarrativeSynthesisEngine
+
 if TYPE_CHECKING:
+    from .financial_models import FinancialIntelligence
+
+
+class FinancialGrowthReportGenerator:
     from .financial_models import FinancialIntelligence, FundingRound, GrowthVector
 
 
