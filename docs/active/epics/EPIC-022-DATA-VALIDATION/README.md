@@ -50,7 +50,7 @@ def _validate_research_data(self, data: Dict) -> Dict:
 
 ### Root Cause Analysis Reference
 
-See `docs/ROOT_CAUSE_ANALYSIS.md` - Section "Root Cause 3: Data Quality Cascade"
+See `docs/active/programs/root-cause/ROOT_CAUSE_ANALYSIS.md` - Section "Root Cause 3: Data Quality Cascade"
 
 ---
 
@@ -193,7 +193,7 @@ docs/active/epics/EPIC-022-DATA-VALIDATION/
 
 ## 🔗 Related Documentation
 
-- [ROOT_CAUSE_ANALYSIS.md](../../../../ROOT_CAUSE_ANALYSIS.md) - Root cause context
+- [ROOT_CAUSE_ANALYSIS.md](../../programs/root-cause/ROOT_CAUSE_ANALYSIS.md) - Root cause context
 - [EPIC-021](../EPIC-021-CONFIDENCE-SCORING-FIX/) - Confidence scoring (uses validation)
 - [EPIC-024](../EPIC-024-SCORING-ALGORITHM/) - Scoring algorithm (needs validated data)
 - `src/solstein/research/ai_research_orchestrator.py` - Current validation (none)

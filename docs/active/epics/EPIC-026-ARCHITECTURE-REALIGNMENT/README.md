@@ -81,7 +81,7 @@ def _execute_research_workflow(self, company_id, company_name):
 
 ### Root Cause Analysis Reference
 
-See `docs/ROOT_CAUSE_ANALYSIS.md` - Section "Root Cause 2: Architecture-Implementation Gap"
+See `docs/active/programs/root-cause/ROOT_CAUSE_ANALYSIS.md` - Section "Root Cause 2: Architecture-Implementation Gap"
 
 ---
 
@@ -293,7 +293,7 @@ docs/active/epics/EPIC-026-ARCHITECTURE-REALIGNMENT/
 
 ## 🔗 Related Documentation
 
-- [ROOT_CAUSE_ANALYSIS.md](../../../../ROOT_CAUSE_ANALYSIS.md) - Root cause context
+- [ROOT_CAUSE_ANALYSIS.md](../../programs/root-cause/ROOT_CAUSE_ANALYSIS.md) - Root cause context
 - [AI_RESEARCH_ARCHITECTURE.md](../../../research/AI_RESEARCH_ARCHITECTURE.md) - Current architecture docs
 - `src/solstein/research/ai_research_orchestrator.py` - Current implementation
 

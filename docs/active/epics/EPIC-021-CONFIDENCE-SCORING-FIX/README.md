@@ -49,7 +49,7 @@ def _calculate_confidence_score(self, data: Dict) -> float:
 
 ### Root Cause Analysis Reference
 
-See `docs/ROOT_CAUSE_ANALYSIS.md` - Section "Root Cause 3: Data Quality Cascade"
+See `docs/active/programs/root-cause/ROOT_CAUSE_ANALYSIS.md` - Section "Root Cause 3: Data Quality Cascade"
 
 ---
 
@@ -186,7 +186,7 @@ docs/active/epics/EPIC-021-CONFIDENCE-SCORING-FIX/
 
 ## 🔗 Related Documentation
 
-- [ROOT_CAUSE_ANALYSIS.md](../../../../ROOT_CAUSE_ANALYSIS.md) - Root cause context
+- [ROOT_CAUSE_ANALYSIS.md](../../programs/root-cause/ROOT_CAUSE_ANALYSIS.md) - Root cause context
 - [EPIC-022](../EPIC-022-DATA-VALIDATION/) - Data validation (dependency)
 - [EPIC-023](../EPIC-023-SYNTHETIC-DETECTION/) - Synthetic detection (dependency)
 - `src/solstein/research/ai_research_orchestrator.py` - Current implementation

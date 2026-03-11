@@ -61,7 +61,7 @@
 | Field | Value |
 |-------|-------|
 | **Status** | 🟡 ~60% Complete |
-| **Location** | `docs/active/epics/EPIC-020-GOD-FUNCTION-REFACTORING-FINAL.md` |
+| **Location** | `docs/active/epics/EPIC-020-GOD-FUNCTION-REFACTORING.md` |
 | **Priority** | P0 |
 | **Verification** | `EPIC-020-VERIFICATION-REPORT.md` |
 
@@ -90,7 +90,7 @@ These EPICS are **critical for business value** but not started:
 ### 🆕 NEW: Root Cause EPICs (P0 - Created 2026-03-11)
 
 **Based on ROOT_CAUSE_ANALYSIS.md** - These address fundamental system flaws.
-See `docs/active/epics/ROOT_CAUSE_EPICS_INDEX.md` for full details.
+See `docs/active/programs/root-cause/ROOT_CAUSE_EPICS_INDEX.md` for full details.
 
 | EPIC | Title | Priority | Business Impact | Effort |
 |------|-------|----------|-----------------|--------|

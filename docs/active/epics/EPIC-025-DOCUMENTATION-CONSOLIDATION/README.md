@@ -46,7 +46,7 @@ docs/ folder:
 
 ### Root Cause Analysis Reference
 
-See `docs/ROOT_CAUSE_ANALYSIS.md` - Sections "Root Cause 1: Documentation Drift" and "Root Cause 4: Process Issues"
+See `docs/active/programs/root-cause/ROOT_CAUSE_ANALYSIS.md` - Sections "Root Cause 1: Documentation Drift" and "Root Cause 4: Process Issues"
 
 ---
 
@@ -205,7 +205,7 @@ docs/active/epics/EPIC-025-DOCUMENTATION-CONSOLIDATION/
 
 ## 🔗 Related Documentation
 
-- [ROOT_CAUSE_ANALYSIS.md](../../../../ROOT_CAUSE_ANALYSIS.md) - Root cause context
+- [ROOT_CAUSE_ANALYSIS.md](../../programs/root-cause/ROOT_CAUSE_ANALYSIS.md) - Root cause context
 - [EPIC_ANALYSIS_AND_ORGANIZATION_PLAN.md](../../../../EPIC_ANALYSIS_AND_ORGANIZATION_PLAN.md) - Previous analysis
 - `docs/active/EPIC_STATUS_DASHBOARD.md` - Current dashboard
 

@@ -19,7 +19,7 @@ solstein/
 │   │   ├── epics/                       # Active EPIC docs
 │   │   │   ├── EPIC-018-OBSERVABILITY-REFACTOR/
 │   │   │   ├── EPIC-019-AUTOMATED-CODE-QUALITY-GUARDRAILS.md
-│   │   │   ├── EPIC-020-GOD-FUNCTION-REFACTORING-FINAL.md
+│   │   │   ├── EPIC-020-GOD-FUNCTION-REFACTORING.md
 │   │   │   └── ...
 │   │   ├── backlog/                     # Future work (renumbered)
 │   │   │   ├── EPIC-001-security-restoration/

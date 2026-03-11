@@ -49,7 +49,7 @@ print(f"Unique scores: {len(set(scores))}")  # 1
 
 ### Root Cause Analysis Reference
 
-See `docs/ROOT_CAUSE_ANALYSIS.md` - Section "Root Cause 3: Data Quality Cascade"
+See `docs/active/programs/root-cause/ROOT_CAUSE_ANALYSIS.md` - Section "Root Cause 3: Data Quality Cascade"
 
 ---
 
@@ -226,7 +226,7 @@ docs/active/epics/EPIC-024-SCORING-ALGORITHM/
 
 ## 🔗 Related Documentation
 
-- [ROOT_CAUSE_ANALYSIS.md](../../../../ROOT_CAUSE_ANALYSIS.md) - Root cause context
+- [ROOT_CAUSE_ANALYSIS.md](../../programs/root-cause/ROOT_CAUSE_ANALYSIS.md) - Root cause context
 - [EPIC-001](../EPIC-001-FIX-FINANCIAL-SCORING/) - Original financial scoring EPIC
 - [EPIC-002](../EPIC-002-FIX-CLASSIFICATION/) - Classification system
 - [EPIC-022](../EPIC-022-DATA-VALIDATION/) - Data validation (dependency)

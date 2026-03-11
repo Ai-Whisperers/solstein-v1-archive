@@ -52,7 +52,7 @@ Marked as Synthetic: 0 (0%)
 
 ### Root Cause Analysis Reference
 
-See `docs/ROOT_CAUSE_ANALYSIS.md` - Section "Root Cause 3: Data Quality Cascade"
+See `docs/active/programs/root-cause/ROOT_CAUSE_ANALYSIS.md` - Section "Root Cause 3: Data Quality Cascade"
 
 ---
 
@@ -225,7 +225,7 @@ docs/active/epics/EPIC-023-SYNTHETIC-DETECTION/
 
 ## 🔗 Related Documentation
 
-- [ROOT_CAUSE_ANALYSIS.md](../../../../ROOT_CAUSE_ANALYSIS.md) - Root cause context
+- [ROOT_CAUSE_ANALYSIS.md](../../programs/root-cause/ROOT_CAUSE_ANALYSIS.md) - Root cause context
 - [EPIC-021](../EPIC-021-CONFIDENCE-SCORING-FIX/) - Confidence scoring
 - [EPIC-022](../EPIC-022-DATA-VALIDATION/) - Data validation
 - `data/research_results/research_results.json` - Current data
