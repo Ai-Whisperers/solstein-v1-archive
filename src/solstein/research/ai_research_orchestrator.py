@@ -220,40 +220,94 @@ class WebSearchAgent:
         """Search using local SearXNG instance (aggregates multiple engines)."""
         results: list[SearchResult] = []
         async with httpx.AsyncClient(timeout=20.0) as client:
-            response = await client.get(
-                self.SEARXNG_URL,
-                params={"q": query, "format": "json", "language": "en"},
-            )
-            response.raise_for_status()
-            data = response.json()
-
-            for item in data.get("results", [])[:max_results]:
-                url = item.get("url", "")
-                if not url:
-                    continue
-                results.append(
-                    SearchResult(
-                        title=item.get("title", ""),
-                        url=url,
-                        snippet=item.get("content", ""),
-                        source=urlparse(url).netloc,
-                    )
+            try:
+                # Try JSON format first
+                response = await client.get(
+                    self.SEARXNG_URL,
+                    params={"q": query, "format": "json", "language": "en"},
                 )
 
-            # Also pull infobox data as a bonus result if available
-            for infobox in data.get("infoboxes", []):
-                ib_url = infobox.get("id", "")
-                if ib_url and ib_url.startswith("http"):
+                # If JSON is forbidden (403), fall back to HTML parsing
+                if response.status_code == 403:
+                    logger.debug(f"SearXNG JSON returned 403, falling back to HTML for: {query}")
+                    return await self._search_searxng_html(client, query, max_results)
+
+                response.raise_for_status()
+                data = response.json()
+
+                for item in data.get("results", [])[:max_results]:
+                    url = item.get("url", "")
+                    if not url:
+                        continue
                     results.append(
                         SearchResult(
-                            title=infobox.get("infobox", ""),
-                            url=ib_url,
-                            snippet=infobox.get("content", ""),
-                            source=urlparse(ib_url).netloc,
+                            title=item.get("title", ""),
+                            url=url,
+                            snippet=item.get("content", ""),
+                            source=urlparse(url).netloc,
                         )
                     )
 
+                # Also pull infobox data as a bonus result if available
+                for infobox in data.get("infoboxes", []):
+                    ib_url = infobox.get("id", "")
+                    if ib_url and ib_url.startswith("http"):
+                        results.append(
+                            SearchResult(
+                                title=infobox.get("infobox", ""),
+                                url=ib_url,
+                                snippet=infobox.get("content", ""),
+                                source=urlparse(ib_url).netloc,
+                            )
+                        )
+            except Exception as e:
+                logger.warning(f"SearXNG search failed: {e}")
+
         return results
+
+    async def _search_searxng_html(
+        self, client: httpx.AsyncClient, query: str, max_results: int
+) -> list[SearchResult]:
+        """Fallback: Parse SearXNG HTML results when JSON is unavailable."""
+        results: list[SearchResult] = []
+        try:
+            response = await client.get(
+                self.SEARXNG_URL,
+                params={"q": query, "language": "en"},
+                headers={"Accept": "text/html"},
+            )
+            response.raise_for_status()
+
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            # Find all result articles
+            for article in soup.find_all("article", class_="result")[:max_results]:
+                link_elem = article.find("a", href=True)
+                if not link_elem:
+                    continue
+
+                url = link_elem.get("href", "")
+                title_elem = article.find("h3")
+                title = title_elem.get_text(strip=True) if title_elem else ""
+                content_elem = article.find("p", class_="content")
+                if not content_elem:
+                    content_elem = article.find("p")
+                snippet = content_elem.get_text(strip=True) if content_elem else ""
+
+                if url:
+                    results.append(
+                        SearchResult(
+                            title=title,
+                            url=url,
+                            snippet=snippet,
+                            source=urlparse(url).netloc,
+                        )
+                    )
+        except Exception as e:
+            logger.warning(f"SearXNG HTML parsing failed: {e}")
+
+        return results
+
 
     def _search_duckduckgo(self, query: str, max_results: int) -> list[SearchResult]:
         """Fallback: search using DuckDuckGo library."""

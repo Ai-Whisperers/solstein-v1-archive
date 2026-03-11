@@ -11,6 +11,46 @@ def _current_year() -> str:
 
 
 def _ddg_search_fallback(query: str, max_results: int = 20) -> list[dict[str, Any]]:
+    """Fallback search using DuckDuckGo.
+
+    Tries both 'ddgs' and 'duckduckgo_search' module names for compatibility."""
+    # Try both module names for compatibility
+    ddgs_cls = None
+
+    try:
+        ddgs_module = importlib.import_module("duckduckgo_search")
+        ddgs_cls = getattr(ddgs_module, "DDGS")
+    except Exception:
+        try:
+            ddgs_module = importlib.import_module("ddgs")
+            ddgs_cls = getattr(ddgs_module, "DDGS")
+        except Exception as e:
+            logger.warning(f"DuckDuckGo module not available: {e}")
+            return []
+
+    if ddgs_cls is None:
+        return []
+
+    try:
+        with ddgs_cls() as ddgs:
+            results = list(ddgs.text(query, max_results=max_results))
+
+        items = []
+        for result in results:
+            url = result.get("href") or result.get("url") or ""
+            items.append(
+                {
+                    "title": result.get("title", ""),
+                    "snippet": (result.get("body") or result.get("snippet") or "")[:500],
+                    "url": url,
+                    "date": None,
+                    "source": url.split("/")[2] if "/" in url else "Web",
+                }
+            )
+        return items
+    except Exception as e:
+        logger.error(f"DDG search error: {e}")
+        return []
     try:
         ddgs_module = importlib.import_module("ddgs")
         ddgs_cls = getattr(ddgs_module, "DDGS")

@@ -8265,6 +8265,105 @@
       },
       "known_urls": [],
       "updated_at": "2026-03-11T03:24:55.054530"
+    },
+    "wirepas": {
+      "latest_report": {
+        "company_name": "Wirepas",
+        "is_synthetic": false,
+        "confidence_score": 0.9964285714285713,
+        "basic_info": {
+          "website": "https://wirepas.com",
+          "description": "Wirepas is changing the face of IoT with infinitely scalable connectivity and self-managing networks for commercial and industrial applications.",
+          "industry": "Technology",
+          "headquarters": "Tampere, Finland",
+          "founded_year": 2010,
+          "employees": 100
+        },
+        "financials": {
+          "revenue": 6,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 60,
+          "rounds": 9
+        },
+        "data_sources": [
+          {
+            "url": "https://wirepas.com/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://wirepas.com/ai-info-page",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://wirepas.com/wirepas-mesh",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://wirepas.com/all-resources",
+            "type": "company_website",
+            "confidence": 0.4
+          },
+          {
+            "url": "https://wirepas.com/downloadables",
+            "type": "company_website",
+            "confidence": 0.47500000000000003
+          },
+          {
+            "url": "https://tracxn.com/d/companies/wirepas/__0-0jot6XeFteXMXLMmB7Y3snTUrJ1uCY16dkoZjWmAk",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://wirepas.com/static/8278bcb54d78f3beb01725398e814f97/Wirepas-fact-sheet.pdf",
+            "type": "company_website",
+            "confidence": 1.0
+          },
+          {
+            "url": "https://equityzen.com/company/wirepas",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T05:38:39.458426",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 8,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 2,
+          "missing_fields_before_adaptive": [
+            "revenue",
+            "revenue_currency",
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 255.174784,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://equityzen.com/company/wirepas",
+        "https://tracxn.com/d/companies/wirepas/__0-0jot6XeFteXMXLMmB7Y3snTUrJ1uCY16dkoZjWmAk",
+        "https://wirepas.com/",
+        "https://wirepas.com/ai-info-page",
+        "https://wirepas.com/all-resources",
+        "https://wirepas.com/downloadables",
+        "https://wirepas.com/static/8278bcb54d78f3beb01725398e814f97/Wirepas-fact-sheet.pdf",
+        "https://wirepas.com/wirepas-mesh"
+      ],
+      "updated_at": "2026-03-11T05:38:39.458535"
     }
   }
 }
