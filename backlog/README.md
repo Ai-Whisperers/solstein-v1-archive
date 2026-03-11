@@ -141,6 +141,11 @@ EPIC-002: Configuration Integrity
 || [EPIC-058](EPICS/EPIC-058-data-conversion-pipeline-consolidation/README.md) | Data Conversion Pipeline Consolidation | P0 | 4 | 🔴 Open |
 || [EPIC-059](EPICS/EPIC-059-input-validation-graceful-degradation/README.md) | Input Validation & Graceful Degradation | P1 | 5 | 🔴 Open |
 || [EPIC-060](EPICS/EPIC-060-export-gate-decoupling/README.md) | Export & Release Gate Decoupling | P1 | 4 | 🔴 Open |
+|| [EPIC-061](EPICS/EPIC-061-adaptive-research-planning/README.md) | Adaptive Research Planning and Source Intelligence | P1 | 4 | 🔴 Open |
+|| [EPIC-062](EPICS/EPIC-062-scraping-resilience-evidence-ledger/README.md) | Scraping Resilience and Field Evidence Ledger | P0 | 4 | 🔴 Open |
+|| [EPIC-063](EPICS/EPIC-063-documentation-topology-source-of-truth/README.md) | Documentation Topology and Source-of-Truth Governance | P1 | 4 | 🔴 Open |
+|| [EPIC-064](EPICS/EPIC-064-markdown-integrity-registry-correctness/README.md) | Markdown Integrity and Registry Correctness | P0 | 4 | 🔴 Open |
+|| [EPIC-065](EPICS/EPIC-065-documentation-lifecycle-automation-ci-enforcement/README.md) | Documentation Lifecycle Automation and CI Enforcement | P1 | 4 | 🔴 Open |
 
 ---
 
