@@ -18972,6 +18972,307 @@
         "https://tracxn.com/d/companies/flickelectric/__WjEioCjz6SdJhWWbUKtbrPkpp9qo7SGoMK0vdaJPpTg"
       ],
       "updated_at": "2026-03-11T13:57:53.527970"
+    },
+    "entelios": {
+      "latest_report": {
+        "company_name": "Entelios",
+        "is_synthetic": false,
+        "confidence_score": 0.7892857142857143,
+        "basic_info": {
+          "website": "https://entelios.com/en",
+          "description": "The energy partner optimising businesses' energy consumption with predictable and sustainable solutions.",
+          "industry": "Energy",
+          "headquarters": "Norway",
+          "founded_year": 2011,
+          "employees": 654
+        },
+        "financials": {
+          "revenue": 14,
+          "revenue_currency": "NOK",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": 3899410,
+          "rounds": 1
+        },
+        "data_sources": [
+          {
+            "url": "https://entelios.com/en/aboutus",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://entelios.com/",
+            "type": "company_website",
+            "confidence": 0.7250000000000001
+          },
+          {
+            "url": "https://entelios.com/en/redirectpage",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://htgf.de/en/portfolio/htgffamily/entelios-3",
+            "type": "company_website",
+            "confidence": 0.8250000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/entelios/__LwvJUHkIo0v4RA_hjArznds5b2fEbeKVmHQEqPOWC-w",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://enspired-trading.com/press-releases/enspired-and-entelios-to-optimize-eco-stors-103.5-mw/238.5-mwh-bess",
+            "type": "company_website",
+            "confidence": 0.55
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T14:00:09.503081",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation"
+          ],
+          "research_time_seconds": 135.960031,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://enspired-trading.com/press-releases/enspired-and-entelios-to-optimize-eco-stors-103.5-mw/238.5-mwh-bess",
+        "https://entelios.com/",
+        "https://entelios.com/en/aboutus",
+        "https://entelios.com/en/redirectpage",
+        "https://htgf.de/en/portfolio/htgffamily/entelios-3",
+        "https://tracxn.com/d/companies/entelios/__LwvJUHkIo0v4RA_hjArznds5b2fEbeKVmHQEqPOWC-w"
+      ],
+      "updated_at": "2026-03-11T14:00:09.503174"
+    },
+    "next kraftwerke": {
+      "latest_report": {
+        "company_name": "Next Kraftwerke",
+        "is_synthetic": false,
+        "confidence_score": 0.9499999999999998,
+        "basic_info": {
+          "website": "www.next-kraftwerke.com",
+          "description": "Virtual power plant digital platform & power trading",
+          "industry": "Energy",
+          "headquarters": "Cologne, Germany",
+          "founded_year": 2009,
+          "employees": 259
+        },
+        "financials": {
+          "revenue": 5.0,
+          "revenue_currency": "EUR",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": 3
+        },
+        "data_sources": [
+          {
+            "url": "https://miba.com/",
+            "type": "company_website",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://next-kraftwerke.com/",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://next-kraftwerke.com/products/trading",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://next-kraftwerke.com/download-center",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://next-kraftwerke.com/vpp",
+            "type": "company_website",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://tracxn.com/d/companies/nextkraftwerke/__wS2-oxOb5_ULpjztuCsaEedFPb87QIIGN0emO6fdatE",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T14:02:36.922064",
+          "queries_executed": 8,
+          "sources_found": 8,
+          "sources_used": 6,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": false,
+          "adaptive_queries_executed": 0,
+          "adaptive_sources_used": 0,
+          "missing_fields_before_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised"
+          ],
+          "research_time_seconds": 147.403427,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://miba.com/",
+        "https://next-kraftwerke.com/",
+        "https://next-kraftwerke.com/download-center",
+        "https://next-kraftwerke.com/products/trading",
+        "https://next-kraftwerke.com/vpp",
+        "https://tracxn.com/d/companies/nextkraftwerke/__wS2-oxOb5_ULpjztuCsaEedFPb87QIIGN0emO6fdatE"
+      ],
+      "updated_at": "2026-03-11T14:02:36.922158"
+    },
+    "clean energy wire": {
+      "latest_report": {
+        "company_name": "Clean Energy Wire",
+        "is_synthetic": false,
+        "confidence_score": 0.9333333333333332,
+        "basic_info": {
+          "website": "http://www.cleanenergywire.org",
+          "description": "Produces & facilitates quality journalism about Europe's move to climate neutrality",
+          "industry": "Media Production, Electricity, Oil & Gas, Energy, Utilities & Waste Treatment",
+          "headquarters": "Dresdener Stra\u00dfe 15, 4th floor, Hinterhaus, Berlin, Berlin 10999, DE",
+          "founded_year": 2014,
+          "employees": 21
+        },
+        "financials": {
+          "revenue": 14.7,
+          "revenue_currency": "USD",
+          "valuation": null
+        },
+        "funding": {
+          "total_raised": null,
+          "rounds": []
+        },
+        "data_sources": [
+          {
+            "url": "https://cleanenergywire.org/news",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://journalismfund.eu/media/clean-energy-wire",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://cleanenergywire.org/",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://cleanenergywire.org/experts",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://cleanenergywire.org/factsheets",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://cleanenergywire.org/news/new-germany-fund-aims-unlock-private-capital-municipal-energy-infrastructure",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://cleanenergywire.org/news/germany-fund-energy-infrastructure-falls-short-business-initiative",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          },
+          {
+            "url": "https://de.linkedin.com/company/cleanenergywire",
+            "type": "linkedin",
+            "confidence": 0.8000000000000002
+          },
+          {
+            "url": "https://hk.linkedin.com/company/cleanenergywire",
+            "type": "linkedin",
+            "confidence": 0.9000000000000001
+          },
+          {
+            "url": "https://cleanenergywire.org/news/brief-9-december-25",
+            "type": "company_website",
+            "confidence": 0.675
+          },
+          {
+            "url": "https://rocketreach.co/clean-energy-wire-clew-profile_b40e6e64ffe68339",
+            "type": "company_website",
+            "confidence": 0.9500000000000002
+          },
+          {
+            "url": "https://cleanenergywire.org/dossiers/history-energiewende",
+            "type": "company_website",
+            "confidence": 0.7500000000000001
+          }
+        ],
+        "metadata": {
+          "research_date": "2026-03-11T14:07:12.841137",
+          "queries_executed": 8,
+          "sources_found": 14,
+          "sources_used": 12,
+          "known_sources_skipped": 0,
+          "known_sources_revisited": 0,
+          "adaptive_pass_used": true,
+          "adaptive_queries_executed": 2,
+          "adaptive_sources_used": 5,
+          "missing_fields_before_adaptive": [
+            "founded_year",
+            "employees",
+            "revenue",
+            "revenue_currency",
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "missing_fields_after_adaptive": [
+            "valuation",
+            "funding_raised",
+            "funding_rounds"
+          ],
+          "research_time_seconds": 275.903565,
+          "fields_carried_forward": 0
+        },
+        "errors": []
+      },
+      "known_urls": [
+        "https://cleanenergywire.org/",
+        "https://cleanenergywire.org/dossiers/history-energiewende",
+        "https://cleanenergywire.org/experts",
+        "https://cleanenergywire.org/factsheets",
+        "https://cleanenergywire.org/news",
+        "https://cleanenergywire.org/news/brief-9-december-25",
+        "https://cleanenergywire.org/news/germany-fund-energy-infrastructure-falls-short-business-initiative",
+        "https://cleanenergywire.org/news/new-germany-fund-aims-unlock-private-capital-municipal-energy-infrastructure",
+        "https://de.linkedin.com/company/cleanenergywire",
+        "https://hk.linkedin.com/company/cleanenergywire",
+        "https://journalismfund.eu/media/clean-energy-wire",
+        "https://rocketreach.co/clean-energy-wire-clew-profile_b40e6e64ffe68339"
+      ],
+      "updated_at": "2026-03-11T14:07:12.841298"
     }
   }
 }
