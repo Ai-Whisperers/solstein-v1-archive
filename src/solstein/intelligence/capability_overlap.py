@@ -261,8 +261,9 @@ class OverlapAnalyzer:
             entity_name=entity_name,
         )
 
-        # Combine all source texts
-        combined_text = " ".join(source_texts).lower()
+        #HS|        # Combine all source texts (filter out None values)
+        filtered_texts = [str(t) if t is not None else "" for t in source_texts]
+        combined_text = " ".join(filtered_texts).lower()
 
         # Analyze each capability
         for capability in self.eneve_capabilities:
