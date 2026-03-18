@@ -9,10 +9,11 @@ Extracts product info, tech stack, and company details from websites.
 from datetime import datetime
 from typing import Any
 
-import httpx
+import requests
 from loguru import logger
 
 from solstein.domain.models import RawDataSource
+from solstein.infrastructure.database import DatabaseManager, db_manager as default_db_manager
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
@@ -28,15 +29,15 @@ class WebsiteUnifiedAdapter(BaseRefreshConnector):
     Authority: WEBSITE
     """
 
-    def __init__(self, db_manager=None):
+    def __init__(self, db_manager: DatabaseManager | None = None):
         super().__init__(
             source_name="website_unified",
             source_type="website",
-            db_manager=db_manager,
+            db_manager=db_manager or default_db_manager,
             confidence=0.70,
         )
 
-    async def _scrape_website(self, website: str) -> dict[str, Any]:
+    def _scrape_website(self, website: str) -> dict[str, Any]:
         """Scrape company website for product/tech info."""
         try:
             if not website.startswith(("http://", "https://")):
@@ -169,11 +170,13 @@ class WebsiteUnifiedAdapter(BaseRefreshConnector):
 
         Note: This requires website URLs, not just company names.
         """
-        facts = []
+        import asyncio
+
+        facts: list[dict[str, Any]] = []
 
         for company_name in company_ids:
             website = f"www.{company_name.lower().replace(' ', '')}.com"
-            data = self._scrape_website(website)
+            data = await asyncio.to_thread(self._scrape_website, website)
 
             if data["product_count"] > 0:
                 facts.append(

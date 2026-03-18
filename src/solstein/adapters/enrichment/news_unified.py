@@ -9,10 +9,11 @@ Uses NewsAPI.org as primary with web search fallback.
 from datetime import datetime, timedelta
 from typing import Any
 
-import httpx
+import requests
 from loguru import logger
 
 from solstein.domain.models import RawDataSource
+from solstein.infrastructure.database import DatabaseManager, db_manager as default_db_manager
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
@@ -28,11 +29,11 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
     Authority: NEWS_API
     """
 
-    def __init__(self, db_manager=None, news_api_key: str | None = None):
+    def __init__(self, db_manager: DatabaseManager | None = None, news_api_key: str | None = None):
         super().__init__(
             source_name="news_unified",
             source_type="news",
-            db_manager=db_manager,
+            db_manager=db_manager or default_db_manager,
             confidence=0.70,
         )
         self.news_api_key = news_api_key
@@ -86,7 +87,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
             return "negative"
         return "neutral"
 
-    async def _get_news_from_api(self, company_name: str, days_back: int = 30) -> list[dict[str, Any]]:
+    def _get_news_from_api(self, company_name: str, days_back: int = 30) -> list[dict[str, Any]]:
         """Get news using NewsAPI.org."""
         if not self.news_api_key:
             return []
@@ -106,7 +107,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
             response = requests.get(url, params=params, timeout=10)
             data = response.json()
 
-            articles = []
+            articles: list[dict[str, Any]] = []
             for article in data.get("articles", [])[:20]:
                 published = article.get("publishedAt")
                 if published:
@@ -147,18 +148,22 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
 
         articles = self._get_news_from_api(query, days_back=90)
 
-        candidates = []
+        candidates: list[DiscoveryCandidate] = []
         for article in articles[:max_results]:
+            name = article.get("title", "").split(":")[0][:100] or "unknown-company"
+            company_id = "-".join(part for part in "".join(ch if ch.isalnum() else " " for ch in name.lower()).split())
+            source_url = article.get("url", "")
             candidate = DiscoveryCandidate(
-                name=article.get("title", "").split(":")[0][:100],
-                source_url=article.get("url", ""),
-                source_type="news",
-                confidence=0.55,
-                discovery_metadata={
-                    "snippet": article.get("description", "")[:200],
-                    "market": market,
-                    "sentiment": article.get("sentiment"),
-                },
+                company_id=company_id or "unknown-company",
+                name=name,
+                market=market,
+                ticker=None,
+                industry="Unknown",
+                region="Unknown",
+                tags=["news", market.lower()],
+                seed_relevance=0.55,
+                discovery_reason=f"news mention: {article.get('sentiment', 'neutral')}",
+                source_links=[source_url] if source_url else [],
             )
             candidates.append(candidate)
 
@@ -213,10 +218,12 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
         end_date: datetime | None = None,
     ) -> list[dict[str, Any]]:
         """Fetch news facts for companies."""
-        facts = []
+        import asyncio
+
+        facts: list[dict[str, Any]] = []
 
         for company_name in company_ids:
-            articles = self._get_news_from_api(company_name, days_back=7)
+            articles = await asyncio.to_thread(self._get_news_from_api, company_name, 7)
 
             if articles:
                 facts.append(
@@ -239,7 +246,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
         return 0.70
 
     def get_authority(self) -> SourceAuthority:
-        return SourceAuthority.NEWS_API
+        return SourceAuthority.NEWS
 
     def supports_incremental(self) -> bool:
         return True

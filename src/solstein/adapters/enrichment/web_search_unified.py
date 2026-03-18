@@ -20,6 +20,7 @@ from solstein.data.web_search_client import (
     search_company_news,
 )
 from solstein.domain.models import RawDataSource
+from solstein.infrastructure.database import DatabaseManager, db_manager as default_db_manager
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
@@ -35,11 +36,11 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
     Authority: WEB_SEARCH (lower authority than official sources)
     """
 
-    def __init__(self, db_manager=None):
+    def __init__(self, db_manager: DatabaseManager | None = None):
         super().__init__(
             source_name="web_search",
             source_type="web_search",
-            db_manager=db_manager,
+            db_manager=db_manager or default_db_manager,
             confidence=0.70,
         )
 
@@ -75,23 +76,27 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
             # Search for companies
             results = search_company_info(query, query_type="general")
 
-            candidates = []
+            candidates: list[DiscoveryCandidate] = []
             for result in results[:max_results]:
                 # Extract company name from title
                 title = result.get("title", "")
                 snippet = result.get("snippet", "")
+                name = title.split(" - ")[0].split(" | ")[0][:100] or "unknown-company"
+                company_id = "-".join(part for part in "".join(ch if ch.isalnum() else " " for ch in name.lower()).split())
+                source_url = result.get("url", "")
 
                 # Create candidate
                 candidate = DiscoveryCandidate(
-                    name=title.split(" - ")[0].split(" | ")[0][:100],
-                    source_url=result.get("url", ""),
-                    source_type="web_search",
-                    confidence=0.60,  # Web search discovery has lower confidence
-                    discovery_metadata={
-                        "snippet": snippet[:200],
-                        "market": market,
-                        "source": "web_search",
-                    },
+                    company_id=company_id or "unknown-company",
+                    name=name,
+                    market=market,
+                    ticker=None,
+                    industry="Unknown",
+                    region="Unknown",
+                    tags=["web_search", market.lower()],
+                    seed_relevance=0.60,
+                    discovery_reason=f"web search snippet: {snippet[:80]}",
+                    source_links=[source_url] if source_url else [],
                 )
                 candidates.append(candidate)
 
@@ -189,13 +194,15 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
         Returns:
             List of fact dictionaries
         """
+        import asyncio
+
         logger.info(f"Fetching web search facts for {len(company_ids)} companies")
-        facts = []
+        facts: list[dict[str, Any]] = []
 
         for company_name in company_ids:
             try:
                 # Search for news
-                news = search_company_news(company_name, max_results=10)
+                news = await asyncio.to_thread(search_company_news, company_name, 10)
 
                 # Create news fact
                 if news:
@@ -218,7 +225,7 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
                     )
 
                 # Search for general updates
-                info = search_company_info(company_name, query_type="general")
+                info = await asyncio.to_thread(search_company_info, company_name, "general")
                 if info:
                     facts.append(
                         {

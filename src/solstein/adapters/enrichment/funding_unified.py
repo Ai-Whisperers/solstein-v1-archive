@@ -9,15 +9,11 @@ Uses Crunchbase API when available, falls back to public sources.
 from datetime import datetime
 from typing import Any
 
-import httpx
+import requests
 from loguru import logger
 
 from solstein.domain.models import RawDataSource
-from solstein.infrastructure.conflict_resolution import SourceAuthority
-from solstein.infrastructure.refresh import BaseRefreshConnector
-from solstein.infrastructure.conflict_resolution import SourceAuthority
-from solstein.infrastructure.refresh import BaseRefreshConnector
-from solstein.research.discovery import DiscoveryCandidate
+from solstein.infrastructure.database import DatabaseManager, db_manager as default_db_manager
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
@@ -33,16 +29,16 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
     Authority: FUNDING
     """
 
-    def __init__(self, db_manager=None, crunchbase_api_key: str | None = None):
+    def __init__(self, db_manager: DatabaseManager | None = None, crunchbase_api_key: str | None = None):
         super().__init__(
             source_name="funding_unified",
             source_type="funding",
-            db_manager=db_manager,
+            db_manager=db_manager or default_db_manager,
             confidence=0.65,
         )
         self.crunchbase_api_key = crunchbase_api_key
 
-    async def _get_crunchbase_data(self, company_name: str) -> dict[str, Any] | None:
+    def _get_crunchbase_data(self, company_name: str) -> dict[str, Any] | None:
         """Get funding data from Crunchbase API."""
         if not self.crunchbase_api_key:
             return None
@@ -76,7 +72,7 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
             additional = AdditionalDataSources()
             news = additional.get_news(company_name, days_back=180)
 
-            rounds = []
+            rounds: list[dict[str, Any]] = []
             for article in news.articles:
                 title = article.title.lower()
                 if any(word in title for word in ["funding", "raised", "series", "investment"]):
@@ -101,10 +97,6 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
         extra_keywords: list[str] | None = None,
     ) -> list[DiscoveryCandidate]:
         """Discover recently funded companies in market."""
-        from solstein.research.discovery import DiscoveryCandidate
-
-        logger.info(f"Discovering funded companies in {market}")
-        """Discover recently funded companies in market."""
         logger.info(f"Discovering funded companies in {market}")
 
         query = f"{market} funding raised investment"
@@ -113,18 +105,21 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
 
         rounds = self._get_public_funding_data(query)
 
-        candidates = []
+        candidates: list[DiscoveryCandidate] = []
         for funding_news in rounds[:max_results]:
+            name = funding_news.get("title", "").split(":")[0][:100] or "unknown-company"
+            company_id = "-".join(part for part in "".join(ch if ch.isalnum() else " " for ch in name.lower()).split())
             candidate = DiscoveryCandidate(
-                name=funding_news.get("title", "").split(":")[0][:100],
-                source_url="",
-                source_type="funding",
-                confidence=0.60,
-                discovery_metadata={
-                    "funding_news": funding_news.get("title", ""),
-                    "date": funding_news.get("date"),
-                    "market": market,
-                },
+                company_id=company_id or "unknown-company",
+                name=name,
+                market=market,
+                ticker=None,
+                industry="Unknown",
+                region="Unknown",
+                tags=["funding", market.lower()],
+                seed_relevance=0.60,
+                discovery_reason="funding activity mention",
+                source_links=[],
             )
             candidates.append(candidate)
 
@@ -174,10 +169,12 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
         end_date: datetime | None = None,
     ) -> list[dict[str, Any]]:
         """Fetch funding facts for companies."""
-        facts = []
+        import asyncio
+
+        facts: list[dict[str, Any]] = []
 
         for company_name in company_ids:
-            crunchbase_data = self._get_crunchbase_data(company_name)
+            crunchbase_data = await asyncio.to_thread(self._get_crunchbase_data, company_name)
 
             if crunchbase_data:
                 facts.append(

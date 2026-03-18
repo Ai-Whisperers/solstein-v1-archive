@@ -16,11 +16,6 @@
 | P1 Stories (Current Sprint) | 83 | 🟠 Queued (+21) |
 | P2 Stories (Next Quarter) | 78 | 🟡 Backlogged (+5) |
 | P3 Stories (Sustaining) | 22 | 🟢 Deferred (+2) |
-| Total Stories | 168 | — |
-| P0 Stories (Ship Blockers) | 13 | 🔴 Unresolved |
-| P1 Stories (Current Sprint) | 62 | 🟠 Queued |
-| P2 Stories (Next Quarter) | 73 | 🟡 Backlogged |
-| P3 Stories (Sustaining) | 20 | 🟢 Deferred |
 | Overall System Status | **CRITICAL** | 🔴 Do Not Ship |
 
 ---
@@ -125,27 +120,27 @@ EPIC-002: Configuration Integrity
 | [EPIC-042](EPICS/EPIC-042-rapid-market-validation/README.md) | Rapid Market Validation Methodology | P2 | 4 | 🔴 Open |
 | [EPIC-043](EPICS/EPIC-043-repository-cleanup/README.md) | Repository Cleanup & Organization | P2 | 4 | 🔴 Open |
 | [EPIC-044](EPICS/EPIC-044-quick-wins/README.md) | Quick Wins — High Impact, Low Effort | P1 | 10 | 🔴 Open |
-|| [EPIC-045](EPICS/EPIC-045-cli-runtime-correctness/README.md) | CLI Runtime Correctness | P0 | 4 | 🔴 Open |
-|| [EPIC-046](EPICS/EPIC-046-scoring-engine-correctness/README.md) | Scoring Engine Correctness | P0 | 4 | 🔴 Open |
-|| [EPIC-047](EPICS/EPIC-047-data-loading-fidelity/README.md) | Data Loading Fidelity | P1 | 4 | 🔴 Open |
-|| [EPIC-048](EPICS/EPIC-048-report-generation-quality/README.md) | Report Generation Quality | P1 | 5 | 🔴 Open |
-|| [EPIC-049](EPICS/EPIC-049-infrastructure-dev-environment/README.md) | Infrastructure & Dev Environment | P1 | 4 | 🔴 Open |
-|| [EPIC-050](EPICS/EPIC-050-web-acquisition-pipeline/README.md) | Web Acquisition Pipeline (Map -> Crawl -> Schema Extract) | P1 | 4 | 🔴 Open |
-|| [EPIC-051](EPICS/EPIC-051-multi-source-growth-signals/README.md) | Multi-Source Growth Signal Enrichment | P1 | 4 | 🔴 Open |
-|| [EPIC-052](EPICS/EPIC-052-provenance-confidence-quality-gates/README.md) | Provenance, Confidence, and Quality Gates | P0 | 4 | 🔴 Open |
-|| [EPIC-053](EPICS/EPIC-053-enrichment-observability-evaluation/README.md) | Enrichment Observability and Evaluation Loop | P1 | 4 | 🔴 Open |
-|| [EPIC-054](EPICS/EPIC-054-stateful-graph-orchestration/README.md) | Durable Research Control Plane | P1 | 4 | 🔴 Open |
-|| [EPIC-055](EPICS/EPIC-055-role-based-agent-runtime/README.md) | Safe Connector Runtime Contracts | P1 | 4 | 🔴 Open |
-|| [EPIC-056](EPICS/EPIC-056-tool-contracts-and-sandboxing/README.md) | Inline Claim Adjudication and Approval Workflow | P1 | 4 | 🔴 Open |
-|| [EPIC-057](EPICS/EPIC-057-human-review-control-plane/README.md) | Declarative Research Recipes and Reviewer Loops | P1 | 4 | 🔴 Open |
-|| [EPIC-058](EPICS/EPIC-058-data-conversion-pipeline-consolidation/README.md) | Data Conversion Pipeline Consolidation | P0 | 4 | 🔴 Open |
-|| [EPIC-059](EPICS/EPIC-059-input-validation-graceful-degradation/README.md) | Input Validation & Graceful Degradation | P1 | 5 | 🔴 Open |
-|| [EPIC-060](EPICS/EPIC-060-export-gate-decoupling/README.md) | Export & Release Gate Decoupling | P1 | 4 | 🔴 Open |
-|| [EPIC-061](EPICS/EPIC-061-adaptive-research-planning/README.md) | Adaptive Research Planning and Source Intelligence | P1 | 4 | 🔴 Open |
-|| [EPIC-062](EPICS/EPIC-062-scraping-resilience-evidence-ledger/README.md) | Scraping Resilience and Field Evidence Ledger | P0 | 4 | 🔴 Open |
-|| [EPIC-063](EPICS/EPIC-063-documentation-topology-source-of-truth/README.md) | Documentation Topology and Source-of-Truth Governance | P1 | 4 | 🔴 Open |
-|| [EPIC-064](EPICS/EPIC-064-markdown-integrity-registry-correctness/README.md) | Markdown Integrity and Registry Correctness | P0 | 4 | 🔴 Open |
-|| [EPIC-065](EPICS/EPIC-065-documentation-lifecycle-automation-ci-enforcement/README.md) | Documentation Lifecycle Automation and CI Enforcement | P1 | 4 | 🔴 Open |
+| [EPIC-045](EPICS/EPIC-045-cli-runtime-correctness/README.md) | CLI Runtime Correctness | P0 | 4 | 🔴 Open |
+| [EPIC-046](EPICS/EPIC-046-scoring-engine-correctness/README.md) | Scoring Engine Correctness | P0 | 4 | 🔴 Open |
+| [EPIC-047](EPICS/EPIC-047-data-loading-fidelity/README.md) | Data Loading Fidelity | P1 | 4 | 🔴 Open |
+| [EPIC-048](EPICS/EPIC-048-report-generation-quality/README.md) | Report Generation Quality | P1 | 5 | 🔴 Open |
+| [EPIC-049](EPICS/EPIC-049-infrastructure-dev-environment/README.md) | Infrastructure & Dev Environment | P1 | 4 | 🔴 Open |
+| [EPIC-050](EPICS/EPIC-050-web-acquisition-pipeline/README.md) | Web Acquisition Pipeline (Map -> Crawl -> Schema Extract) | P1 | 4 | 🔴 Open |
+| [EPIC-051](EPICS/EPIC-051-multi-source-growth-signals/README.md) | Multi-Source Growth Signal Enrichment | P1 | 4 | 🔴 Open |
+| [EPIC-052](EPICS/EPIC-052-provenance-confidence-quality-gates/README.md) | Provenance, Confidence, and Quality Gates | P0 | 4 | 🔴 Open |
+| [EPIC-053](EPICS/EPIC-053-enrichment-observability-evaluation/README.md) | Enrichment Observability and Evaluation Loop | P1 | 4 | 🔴 Open |
+| [EPIC-054](EPICS/EPIC-054-stateful-graph-orchestration/README.md) | Durable Research Control Plane | P1 | 4 | 🔴 Open |
+| [EPIC-055](EPICS/EPIC-055-role-based-agent-runtime/README.md) | Safe Connector Runtime Contracts | P1 | 4 | 🔴 Open |
+| [EPIC-056](EPICS/EPIC-056-tool-contracts-and-sandboxing/README.md) | Inline Claim Adjudication and Approval Workflow | P1 | 4 | 🔴 Open |
+| [EPIC-057](EPICS/EPIC-057-human-review-control-plane/README.md) | Declarative Research Recipes and Reviewer Loops | P1 | 4 | 🔴 Open |
+| [EPIC-058](EPICS/EPIC-058-data-conversion-pipeline-consolidation/README.md) | Data Conversion Pipeline Consolidation | P0 | 4 | 🔴 Open |
+| [EPIC-059](EPICS/EPIC-059-input-validation-graceful-degradation/README.md) | Input Validation & Graceful Degradation | P1 | 5 | 🔴 Open |
+| [EPIC-060](EPICS/EPIC-060-export-gate-decoupling/README.md) | Export & Release Gate Decoupling | P1 | 4 | 🔴 Open |
+| [EPIC-061](EPICS/EPIC-061-adaptive-research-planning/README.md) | Adaptive Research Planning and Source Intelligence | P1 | 4 | 🔴 Open |
+| [EPIC-062](EPICS/EPIC-062-scraping-resilience-evidence-ledger/README.md) | Scraping Resilience and Field Evidence Ledger | P0 | 4 | 🔴 Open |
+| [EPIC-063](EPICS/EPIC-063-documentation-topology-source-of-truth/README.md) | Documentation Topology and Source-of-Truth Governance | P1 | 4 | 🔴 Open |
+| [EPIC-064](EPICS/EPIC-064-markdown-integrity-registry-correctness/README.md) | Markdown Integrity and Registry Correctness | P0 | 4 | 🔴 Open |
+| [EPIC-065](EPICS/EPIC-065-documentation-lifecycle-automation-ci-enforcement/README.md) | Documentation Lifecycle Automation and CI Enforcement | P1 | 4 | 🔴 Open |
 
 ---
 
