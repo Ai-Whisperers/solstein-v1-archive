@@ -13,16 +13,16 @@
 | Metric | Value |
 |---|---|
 | **Total `.py` files in `src/solstein/`** | 555 |
-| **Files directly read** | ~490 |
-| **Coverage** | ~88% |
-| **Total issues found** | 243 (1 false positive closed, 1 issue corrected) |
-| **Open 🔴 HIGH** | 116 |
-| **Open 🟡 MED** | 91 |
-| **Open 🟢 LOW** | 36 |
+| **Files directly read** | ~530 |
+| **Coverage** | ~95% |
+| **Total issues found** | 274 (1 false positive closed, 1 issue corrected) |
+| **Open 🔴 HIGH** | 126 |
+| **Open 🟡 MED** | 107 |
+| **Open 🟢 LOW** | 41 |
 | **Closed (false positive)** | 1 (ISSUE-43) |
 | **Confirmed fixes** | 3 |
-| **Last pass** | Fourteenth-pass — deep dives ISSUE-105–116 / ISSUE-151–162 (blast radius + field-level verification), all infrastructure refresh connectors, analytics/, validation/, presentation/, data_sources/, utils/, remaining llm/, remaining api/, data/connectors/ (2026-03-19) |
-| **Last commit** | `4328341` — pushed to `origin/master` 2026-03-19 |
+| **Last pass** | Fifteenth-pass — analytics/, adapters/enrichment/, api/ (all routers + services), domain/models remaining, core/scoring_utils, presentation/, research/ remaining, data/unified/, intelligence/ remaining (2026-03-19) |
+| **Last commit** | `c316abd` — 2026-03-19 |
 
 ### Directories with meaningful coverage
 | Directory | Files read / est. total | Notes |
@@ -6819,4 +6819,290 @@ domain=self._extract_domain(claim.source_url)
 | ISSUE-226 | `_extract_domain` method missing on `ClaimRepository` — `AttributeError` on every `create()` | `evidence/repositories/claim.py:37` | 🔴 HIGH | Open |
 
 **Running totals: 243 issues (116 HIGH, 91 MED, 36 LOW). 1 prior issue corrected (ISSUE-159 → source.py exists; real bug now ISSUE-226). Files read this pass: ~70 new (cumulative: ~490/555 = ~88%).**
+
+
+---
+
+## FIFTEENTH PASS — 2026-03-19
+**Scope:** analytics/, adapters/enrichment/, api/ (all routers + services), domain/models remaining, core/scoring_utils, presentation/data_quality_indicators, research/ remaining (pipeline_stages, company_builder, signals, gather), data/unified/ (merger, unified, company), intelligence/ remaining (financial_analyzer, financial_models)
+**New issues:** ISSUE-227 through ISSUE-257 (31 new issues: 10 HIGH, 16 MED, 5 LOW)
+
+---
+
+### ISSUE-227
+**File:** `src/solstein/analytics/completeness.py:188–204`
+**Severity:** 🔴 HIGH
+**Category:** schema-drift
+**Title:** `revenue_per_employee_eur_k` and `employee_cagr_3yr` read from `company.financials` — they live on `Company` directly
+**Detail:** `_get_field_value()` routes `revenue_per_employee_eur_k` and `employee_cagr_3yr` to the `financial_fields` branch which reads `getattr(company.financials, field, None)`. These two fields are defined on `Company` (models.py lines 411, 421), NOT on `FinancialMetric`. The lookup against `company.financials` always returns `None` even when the values are populated on the `Company` object. Both fields are permanently counted as "missing" in every completeness score, silently under-reporting data completeness for all companies.
+
+---
+
+### ISSUE-228
+**File:** `src/solstein/analytics/scoring.py:16–21`
+**Severity:** 🟡 MED
+**Category:** import-error
+**Title:** `CompanyClassification` import ambiguity — only in models package, not flat models.py
+**Detail:** `from ..domain.models import (..., CompanyClassification, ...)`. `CompanyClassification` is defined in the models package `__init__.py`, not in the flat `domain/models.py` file. Both a flat file and a package exist at `solstein/domain/models`. Python resolves to the package at runtime (works), but mypy / pylance resolves to the flat file (import error in IDE / strict type checking). This will cause CI type-check failures if strict mode is enabled.
+
+---
+
+### ISSUE-229
+**File:** `src/solstein/analytics/scoring.py:240, 243, 310, 328, 384`
+**Severity:** 🟡 MED
+**Category:** attribute-error
+**Title:** `p.financials.revenue` accessed without guarding `p.financials is None` (multiple sites)
+**Detail:** `revenues = [p.financials.revenue for p in profiles if p.financials.revenue]` — if `p.financials` is `None`, evaluating `p.financials.revenue` raises `AttributeError` before the condition is tested. Although `Company.financials` has a `default_factory`, `Company` objects constructed with explicit `financials=None` (valid per model) will crash `MarketAnalyzer.analyze_market` and related methods. Pattern repeated at lines 243, 310, 328, 384. Must guard with `if p.financials and p.financials.revenue`.
+
+---
+
+### ISSUE-230
+**File:** `src/solstein/adapters/enrichment/funding_unified.py:153–162`
+**Severity:** 🔴 HIGH
+**Category:** schema-drift
+**Title:** `source_type="funding"` is not a valid `DataSourceType` member — Pydantic `ValidationError` at runtime
+**Detail:** `self.source_type` is set to `"funding"` via `BaseRefreshConnector.__init__(source_type="funding", ...)`. This plain string is passed to `RawDataSource(source_type=self.source_type, ...)`. `RawDataSource.source_type` is typed `DataSourceType` (a StrEnum). Valid members include `"github"`, `"company_filings"`, `"news"`, `"crunchbase"`, `"linkedin"`, `"patents"`, `"website"`, `"yahoo_finance"`, `"exa_search"`, `"google_search"`, etc. `"funding"` is not in the enum. Pydantic v2 raises `ValidationError` on every `enrich()` call, meaning the funding adapter produces zero data for all companies.
+
+---
+
+### ISSUE-231
+**File:** `src/solstein/adapters/enrichment/web_search_unified.py:146–163, 169–175`
+**Severity:** 🔴 HIGH
+**Category:** schema-drift
+**Title:** `source_type="web_search"` is not a valid `DataSourceType` member — Pydantic `ValidationError` at runtime
+**Detail:** Same pattern as ISSUE-230. `self.source_type = "web_search"`. `DataSourceType` has `EXA_SEARCH = "exa_search"` and `GOOGLE_SEARCH = "google_search"` but no `"web_search"` member. Both `enrich()` calls at lines 146 and 169 construct `RawDataSource(source_type="web_search", ...)`, raising `ValidationError` on every call. The web search enrichment adapter produces zero output.
+
+---
+
+### ISSUE-232
+**File:** `src/solstein/adapters/enrichment/patents_unified.py:71–83`
+**Severity:** 🔴 HIGH
+**Category:** schema-drift
+**Title:** `DiscoveryCandidate` constructed with entirely wrong field names
+**Detail:** `DiscoveryCandidate(name=..., source_url=..., source_type=..., confidence=..., discovery_metadata=...)`. The actual `DiscoveryCandidate` dataclass (`research/discovery.py`) has fields: `company_id`, `name`, `market`, `ticker`, `industry`, `region`, `tags`, `seed_relevance`, `discovery_reason`, `source_links`. The fields `source_url`, `source_type`, `confidence`, `discovery_metadata` do not exist. `market` and `ticker` are required but not passed. This raises `TypeError: unexpected keyword arguments` at runtime whenever `patents_unified.discover()` finds any patents. Patent discovery is permanently broken.
+
+---
+
+### ISSUE-233
+**File:** `src/solstein/adapters/enrichment/linkedin_unified.py:109`, `news_unified.py:205`, `website_unified.py:155`, `funding_unified.py:156`, `web_search_unified.py:151`
+**Severity:** 🟢 LOW
+**Category:** schema-drift
+**Title:** Naive `datetime.now()` used for `retrieval_timestamp` — all other adapters use `datetime.now(timezone.utc)`
+**Detail:** All five unified enrichment adapters pass `retrieval_timestamp=datetime.now()` (no timezone). `RawDataSource` default factory uses `datetime.now(timezone.utc)`. All other adapters (yahoo_finance, patents, github) use timezone-aware UTC timestamps. Comparison of naive and aware datetimes raises `TypeError` in Python 3. When these sources are sorted or deduplicated alongside timezone-aware sources, any `>` or `<` comparison will raise `TypeError`.
+
+---
+
+### ISSUE-234
+**File:** `src/solstein/analytics/scoring.py:162`
+**Severity:** 🟡 MED
+**Category:** attribute-error
+**Title:** `profile.financials` passed directly to `GrowthMomentumScorer.score()` — crashes if `None`
+**Detail:** `growth_score, growth_expl = self.growth_momentum_scorer.score(profile.financials)`. If `profile.financials` is `None`, `GrowthMomentumScorer.score()` receives `None` as `financials: FinancialMetric` and calls `financials.growth_rate` on line 75 → `AttributeError`. The surrounding `try/except` at lines 161–167 catches the exception and silently degrades to `growth_score = 0.0`, masking the bug in production logs.
+
+---
+
+### ISSUE-235
+**File:** `src/solstein/analytics/scorers/_shared.py:28–29`
+**Severity:** 🟢 LOW
+**Category:** async-bug
+**Title:** `asyncio.iscoroutine()` guard misses non-coroutine awaitables
+**Detail:** `if asyncio.iscoroutine(facts_result): return financials` — this guard is intended to detect when `merge_facts_into_financials` is called in an async context where `get_company_facts()` returned an unawaited coroutine. `asyncio.iscoroutine()` returns `True` only for coroutine objects, not for `asyncio.Future`, custom `__await__` objects, or coroutine-based generators. If the repo returns a non-coroutine awaitable, `list(awaitable)` is called, yielding a list containing the awaitable rather than actual facts, silently corrupting the merge.
+
+---
+
+### ISSUE-236
+**File:** `src/solstein/api/main.py:103–110`
+**Severity:** 🟡 MED
+**Category:** async-bug
+**Title:** Cache warming failure silently swallowed — startup continues with cold cache, no error surfaced
+**Detail:** `asyncio.create_task(warm_cache(_cache))` is wrapped in `try/except Exception as e: logger.warning(...)`. If the cache warming task raises (network error, wrong config), the exception is logged as a warning and startup proceeds. The application never indicates to its caller (health checks, orchestrators) that the cache is cold. Additionally, the `import asyncio as _asyncio` on line 103 is inside the try block — if it fails, the exception is swallowed and the cache task is never scheduled. Should reraise or set a startup health flag.
+
+---
+
+### ISSUE-237
+**File:** `src/solstein/api/routers/market.py:87–88, 98–99`
+**Severity:** 🔴 HIGH
+**Category:** schema-drift
+**Title:** `peer.company_id` and `target.company_id` do not exist — correct field is `.id`
+**Detail:** `Company` domain model (`domain/models.py:135`) declares `id: str`. There is no `company_id` field on `Company`. Lines 87 (`if peer.company_id == target.company_id`), 98 (`company_a_id=target.company_id`), and 99 (`company_b_id=peer.company_id`) all raise `AttributeError` at runtime for every comparison and every competitive analysis request. The entire market comparison endpoint is broken.
+
+---
+
+### ISSUE-238
+**File:** `src/solstein/api/routers/scoring.py:243, 255`
+**Severity:** 🔴 HIGH
+**Category:** attribute-error
+**Title:** Unguarded `c.financials.revenue` and `c.financials.growth_rate` — crashes when `financials` is `None`
+**Detail:** `_calculate_revenue_stats`: `revenues = [c.financials.revenue for c in companies if c.financials.revenue]` — if `c.financials` is `None`, accessing `c.financials.revenue` raises `AttributeError` before the condition is evaluated. Same at line 255: `growth_rates = [c.financials.growth_rate for c in companies if c.financials.growth_rate]`. Any company with `financials=None` in a bulk scoring request brings down the entire stats calculation. Fix: `if c.financials and c.financials.revenue`.
+
+---
+
+### ISSUE-239
+**File:** `src/solstein/api/services/drill_down_service.py:109, 111` and `src/solstein/api/routers/drill_down.py:69`
+**Severity:** 🔴 HIGH
+**Category:** attribute-error
+**Title:** `source.id` accessed on `RawDataSource` — field does not exist
+**Detail:** `RawDataSource` (`domain/models.py:662–677`) defines: `source_type`, `source_name`, `raw_content`, `url`, `retrieval_timestamp`, `publication_date`, `confidence`, `relevance_score`, `metadata`, `extraction_method`, `notes`. There is no `id` field. `drill_down_service.py:109` (`if source.id == source_id`) and line 111 (`"source_id": source.id`), plus `routers/drill_down.py:69` (`"source_id": s.id`), all raise `AttributeError` at runtime. Every call to `GET /drill-down/company/{id}/sources` fails.
+
+---
+
+### ISSUE-240
+**File:** `src/solstein/api/services/drill_down_service.py:148`
+**Severity:** 🟡 MED
+**Category:** attribute-error
+**Title:** `contradiction_detected` checked instead of `contradictions_detected` (plural) — always empty
+**Detail:** `if hasattr(fact, "contradiction_detected") and fact.contradiction_detected` — `AggregatedFact` (`domain/models.py:717`) defines the field as `contradictions_detected: list[dict[str, Any]]` (plural). The `hasattr` check returns `False` for the singular form, so no contradictions are ever returned by `get_contradictions()`. The drill-down contradictions endpoint silently returns `[]` for all companies regardless of actual contradiction data.
+
+---
+
+### ISSUE-241
+**File:** `src/solstein/api/routers/enrichment_single.py:65–88`
+**Severity:** 🟡 MED
+**Category:** logic-bug
+**Title:** Cache hit detected but ignored — enrichment always re-runs from scratch
+**Detail:** Lines 65–82 check for a cached enrichment result and set `cached_company` when found. However lines 84–88 unconditionally create a new `UnifiedCompany` and call `enrich_from_connectors(company)` regardless of whether `cached_company` was set. The cache hit result is fetched but never used in the response. The cache is effectively dead for this endpoint — every request re-enriches from source, defeating the caching layer entirely.
+
+---
+
+### ISSUE-242
+**File:** `src/solstein/api/routers/dashboard.py:132–139`
+**Severity:** 🟡 MED
+**Category:** logic-bug
+**Title:** Tier filter appended after `.limit(n)` — filters an already-truncated result set
+**Detail:** The dashboard top-companies query builds `.where(score.isnot(None)).order_by(...).limit(n)` then appends `.where(CompanyRecord.tier == tier)` at lines 138–139. SQLAlchemy correctly translates this to SQL `WHERE score IS NOT NULL ... LIMIT n ... WHERE tier = ?` which actually places both conditions before the LIMIT in SQL. However the intent is to return the top-N companies from within a specific tier, but the query returns the top-N companies overall and then filters — if any of the top-N are not in the requested tier, the result set silently shrinks below N. The tier filter must be part of the initial WHERE clause.
+
+---
+
+### ISSUE-243
+**File:** `src/solstein/domain/models.py:393–405`
+**Severity:** 🟡 MED
+**Category:** logic-bug
+**Title:** `get_data_completeness` does not count `Company.funding` — only checks `FinancialMetric.funding_raised`
+**Detail:** `get_data_completeness` includes `"funding_raised"` in `key_fields` and accesses it via `self.financials.funding_raised`. The `Company` model also has a separate `funding: FundingInfo | None` field (line 203) which tracks funding rounds, investors, and total raised. This field is never considered in completeness scoring. Companies with rich `Company.funding` data but no `FinancialMetric.funding_raised` value are incorrectly scored as missing funding data.
+
+---
+
+### ISSUE-244
+**File:** `src/solstein/presentation/data_quality_indicators.py:92–98, 132–135`
+**Severity:** 🟡 MED
+**Category:** attribute-error
+**Title:** `company.financials.revenue` accessed without `None` guard on `financials`
+**Detail:** `get_data_provenance_table` at lines 92–98 accesses `company.financials.revenue`, `company.financials.employees`, etc. without first checking `if company.financials`. Same pattern at lines 132–135 in `get_data_quality_flags`. If a `Company` is constructed with explicit `financials=None`, all accesses raise `AttributeError`. The presentation layer should handle missing financials gracefully.
+
+---
+
+### ISSUE-245
+**File:** `src/solstein/api/routers/async_jobs.py:91–93`
+**Severity:** 🟢 LOW
+**Category:** attribute-error
+**Title:** `request.client.host` accessed without `None` guard — `AttributeError` when client is `None`
+**Detail:** `_get_client_id` returns `request.client.host or "unknown"`. If `request.client` is `None` (internal test requests, Unix socket proxies), evaluating `request.client.host` raises `AttributeError` before the `or "unknown"` fallback applies. Fix: `(request.client.host if request.client else None) or "unknown"`.
+
+---
+
+### ISSUE-246
+**File:** `src/solstein/core/scoring_utils.py:99`
+**Severity:** 🟢 LOW
+**Category:** attribute-error
+**Title:** `financials.ai_maturity` checked but `ai_maturity` is on `Company`, not `FinancialMetric`
+**Detail:** `if hasattr(financials, "ai_maturity") and financials.ai_maturity` — `FinancialMetric` (`domain/models.py:84–119`) has no `ai_maturity` field. That field is on `Company`. The `hasattr` guard prevents a crash, but this branch can never execute because `FinancialMetric` objects never have `ai_maturity`. The ai_maturity signal confidence is permanently unset from this code path.
+
+---
+
+### ISSUE-247
+**File:** `src/solstein/research/pipeline_stages.py:477–575`
+**Severity:** 🟡 MED
+**Category:** logic-bug
+**Title:** `GatherStage._run_async` is physically indented inside `ExportStage` — becomes an `ExportStage` method
+**Detail:** Lines 477–575: `ExportStage` starts at line 477. A `_run_async` method starting at line 512 is indented one level inside `ExportStage`, making it a method of `ExportStage`. This method calls `discover_companies` and `enrich_company_async` — it is clearly the async implementation of `GatherStage`. Result: `ExportStage.execute_async()` will run discovery+enrichment logic instead of exporting, and `GatherStage` falls back to the base `_run_async` which just wraps the sync `_run` in `asyncio.to_thread`. The async pipeline gather→export phase is completely broken.
+
+---
+
+### ISSUE-248
+**File:** `src/solstein/research/company_builder.py:63`
+**Severity:** 🔴 HIGH
+**Category:** attribute-error
+**Title:** Unguarded `int(employees_raw.value)` cast — `ValueError` when value is non-integer string
+**Detail:** `employees = int(employees_raw.value) if employees_raw and employees_raw.value else None`. If `employees_raw.value` is a string like `"1,500"`, `"~2000"`, or `"N/A"` (common in extracted text), `int()` raises `ValueError`. No exception handler wraps this cast. Any candidate with a non-clean numeric employee count causes `build_company_profile` to raise unhandled `ValueError`, propagating up through the gather stage and dropping the company from the pipeline entirely.
+
+---
+
+### ISSUE-249
+**File:** `src/solstein/research/signals.py:228`
+**Severity:** 🔴 HIGH
+**Category:** attribute-error
+**Title:** `ai_strength.value` accessed without guard — `AttributeError` if `ai_strength` is not an `AggregatedFact`
+**Detail:** When `ai_score is None and ai_strength is not None`, line 228 evaluates `ai_strength.value`. `ai_strength` is set from `facts.get("ai_signal_strength")` which returns an `AggregatedFact`. However `FinancialIntelligence` (from `financial_models.py`) is a `@dataclass` with no Pydantic validation — if a non-standard source injects a raw value (string or int) directly into the facts dict under `"ai_signal_strength"`, `.value` raises `AttributeError: 'str' object has no attribute 'value'`. Additionally line 222 (`f"Signal: {ai_strength.value}"`) has the same unguarded access.
+
+---
+
+### ISSUE-250
+**File:** `src/solstein/data/unified/merger.py:27`
+**Severity:** 🔴 HIGH
+**Category:** schema-drift
+**Title:** `UnifiedCompany(**json_company.model_dump())` fails validation for stub profiles — `allow_empty_primary=True` excluded from dump
+**Detail:** `FinancialMetric` has `allow_empty_primary: bool = Field(default=False, exclude=True)`. The `exclude=True` means it is stripped from `model_dump()`. When `model_dump()` output is passed to `UnifiedCompany(...)`, the reconstructed `FinancialMetric` is instantiated with `allow_empty_primary=False` (default). The `require_primary_metric` model validator then fires: if `revenue is None and employees is None`, it raises `ValueError: At least revenue OR employees required`. Any stub company profile created with `allow_empty_primary=True` (e.g., from `build_company_profile_no_ticker`) will crash `merge_companies` and `convert_to_unified` during every merger pass.
+
+---
+
+### ISSUE-251
+**File:** `src/solstein/data/unified/merger.py:40`
+**Severity:** 🟡 MED
+**Category:** schema-drift
+**Title:** `tier` comparison: `CompanyTier` enum vs. plain string — spurious conflicts on every merge
+**Detail:** `if markdown_company.tier != json_company.tier` — `Company.tier` is `CompanyTier` StrEnum. If one company is deserialized via a JSON path where Pydantic coerces the string `"Tier 3"` back to `CompanyTier.TIER_3`, and the other is loaded from a raw dict where `tier` stays as a plain string `"Tier 3"`, the comparison `CompanyTier.TIER_3 != "Tier 3"` evaluates to `True` (enum is never `==` plain string unless it's a `StrEnum`). Since `CompanyTier` IS a `StrEnum`, equality should work. However if `company_refactored.py` (EPIC-022) defines `tier: str | None`, the field type is inconsistent across code paths. Spurious `conflicts.append("tier")` entries will appear in merged company objects.
+
+---
+
+### ISSUE-252
+**File:** `src/solstein/data/unified/unified.py:14, 28`
+**Severity:** 🟡 MED
+**Category:** logic-bug
+**Title:** `loguru.logger` immediately overwritten by `stdlib.logging.getLogger` — structured logging silently broken
+**Detail:** Line 14: `from loguru import logger`. Line 28: `logger = logging.getLogger(__name__)`. The stdlib logger assignment overwrites the loguru import. All subsequent `logger.info(...)` calls in this module use the stdlib logger, not loguru. If no stdlib handler is configured (common when loguru is the sole sink), these log calls produce no output. The loguru import is dead code.
+
+---
+
+### ISSUE-253
+**File:** `src/solstein/research/gather.py:165–175`
+**Severity:** 🟡 MED
+**Category:** logic-bug
+**Title:** Fallback `build_company_profile` path has no exception handling — unhandled `ValueError` kills entire batch
+**Detail:** When `not raw_sources` (line 165), `build_company_profile(candidate)` is called. If `candidate` has a malformed `company_id` or no ticker, `build_company_profile` may raise `ValueError`. This path has no `try/except` — unlike the per-source enrichment failures which are caught and logged as warnings, an exception in the fallback path propagates unhandled through `enrich_company`, killing the entire gather batch for all remaining candidates.
+
+---
+
+### ISSUE-254
+**File:** `src/solstein/intelligence/financial_analyzer.py:191`
+**Severity:** 🟡 MED
+**Category:** attribute-error
+**Title:** `fi.growth_trajectory.value` — `AttributeError` if `fi` was constructed with raw string `"accelerating"`
+**Detail:** `_generate_health_assessment` at line 191: `if fi.growth_trajectory.value == "accelerating"`. `FinancialIntelligence` is a `@dataclass` (confirmed in `financial_models.py`), not a Pydantic model — no field validation occurs on assignment. If `fi.growth_trajectory` was set to a raw string `"accelerating"` rather than the `TrajectoryDirection` enum, accessing `.value` raises `AttributeError: 'str' object has no attribute 'value'`. This is particularly likely when `FinancialIntelligence` is populated from deserialized JSON/dict data rather than from the typed `financial_analyzer` itself.
+
+---
+
+### ISSUE-255
+**File:** `src/solstein/intelligence/financial_models.py:43`
+**Severity:** 🟡 MED
+**Category:** schema-drift
+**Title:** Shadow `ConfidenceLevel` enum with incompatible values silently accepted where `domain.models.ConfidenceLevel` expected
+**Detail:** `solstein.domain.models.ConfidenceLevel` is `StrEnum` with values `CONFIRMED`, `ESTIMATED`, `UNKNOWN`, `SYNTHETIC`. `solstein.intelligence.financial_models.ConfidenceLevel` is a separate `str, Enum` with values `HIGH`, `MEDIUM`, `LOW`, `UNKNOWN`. Both are imported in `financial_analyzer.py` (line 127 imports the intelligence one). Code that passes `domain.models.ConfidenceLevel.CONFIRMED` into a `RevenuePoint.confidence` field (typed as the intelligence `ConfidenceLevel`) stores a semantically wrong value. Both are plain strings at runtime so no `ValidationError` fires — the corruption is silent.
+
+---
+
+### ISSUE-256
+**File:** `src/solstein/research/pipeline_stages.py:186–210`
+**Severity:** 🟡 MED
+**Category:** logic-bug
+**Title:** `GatherStage._run` re-calls `discover_companies` instead of reusing `DiscoveryStage` results
+**Detail:** `DiscoveryStage._run` (line 142) runs company discovery and writes results to disk. `GatherStage._run` (line 186) then re-calls `discover_companies` with identical parameters — doubling the discovery API cost, potentially getting different results from non-deterministic sources (meaning the gather phase enriches different companies than what DiscoveryStage reported), and producing a hash mismatch between the discovery output file and the actually-enriched candidates. The comment at line 187 acknowledges the intent was to pass candidates via context, but this was never implemented.
+
+---
+
+### ISSUE-257
+**File:** `src/solstein/api/routers/jobs.py:12–15`
+**Severity:** 🟢 LOW
+**Category:** logic-bug
+**Title:** `APIRouter` instance created twice — second assignment overwrites the first
+**Detail:** `router = APIRouter(tags=["Jobs"])` appears at line 12, then again at line 15. The first instance is immediately discarded. While functionally benign here (both invocations use identical arguments), any route handlers registered between the two assignments (there are none currently) would be silently lost.
 
