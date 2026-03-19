@@ -21,6 +21,8 @@ excel_exporter = ExcelExporter()
 
 async def _run_excel_export(repo: Any, filters: dict[str, Any], filename: str) -> None:  # noqa: E501
     """Background task to generate excel report."""
+    # Extract non-CompanyFilter keys before constructing the filter
+    include_charts: bool = filters.pop("include_charts", True)
     company_filter = CompanyFilter(**filters) if filters else None
     companies = cast(list[Any], await repo.get_all(filters=company_filter) or [])
 
@@ -54,9 +56,7 @@ async def export_to_excel(
 ) -> dict[str, Any]:
     """Trigger background Excel export."""
     try:
-        if include_charts:
-            pass
-        filters: dict[str, Any] = {}
+        filters: dict[str, Any] = {"include_charts": include_charts}
         if industry:
             filters["industry"] = industry
 
@@ -158,9 +158,7 @@ async def search_with_llm(
     This endpoint uses AI to understand natural language criteria and match
     companies based on their full profile, not just keyword matching.
     """
-    if include_reasoning:
-        pass
-    companies, _ = await repo.get_all_llm_filtered(
+    companies, reasoning_data = await repo.get_all_llm_filtered(
         criteria=criteria,
         limit=limit,
     )
@@ -174,19 +172,20 @@ async def search_with_llm(
             status_code=200,
         )
 
-    return JSONResponse(
-        content={
-            "criteria": criteria,
-            "total_matched": len(companies),
-            "companies": [
-                {
-                    "id": str(c.id),
-                    "name": c.name,
-                    "industry": c.industry,
-                    "classification": c.classification,
-                }
-                for c in companies
-            ],
-        },
-        status_code=200,
-    )
+    response_payload: dict[str, Any] = {
+        "criteria": criteria,
+        "total_matched": len(companies),
+        "companies": [
+            {
+                "id": str(c.id),
+                "name": c.name,
+                "industry": c.industry,
+                "classification": c.classification,
+            }
+            for c in companies
+        ],
+    }
+    if include_reasoning and reasoning_data:
+        response_payload["reasoning"] = reasoning_data
+
+    return JSONResponse(content=response_payload, status_code=200)

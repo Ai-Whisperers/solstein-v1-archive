@@ -57,10 +57,6 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         if request.url.path in self.EXCLUDED_PATHS:
             return await call_next(request)
 
-        # Skip authentication for public endpoints
-        if request.url.path.startswith(("/companies", "/enrichment")):
-            return await call_next(request)
-
         # For any other path, let it through to get a proper 404 from FastAPI
         # instead of blocking with 401
         if not request.url.path.startswith(("/api", "/admin")):
