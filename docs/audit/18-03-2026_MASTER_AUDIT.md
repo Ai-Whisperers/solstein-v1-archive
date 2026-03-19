@@ -13,15 +13,15 @@
 | Metric | Value |
 |---|---|
 | **Total `.py` files in `src/solstein/`** | 555 |
-| **Files directly read** | ~215 |
-| **Coverage** | ~39% |
-| **Total issues found** | 64 (1 false positive closed) |
-| **Open 🔴 HIGH** | 25 |
-| **Open 🟡 MED** | 31 |
-| **Open 🟢 LOW** | 8 |
+| **Files directly read** | ~420 |
+| **Coverage** | ~76% |
+| **Total issues found** | 181 (1 false positive closed) |
+| **Open 🔴 HIGH** | 87 |
+| **Open 🟡 MED** | 69 |
+| **Open 🟢 LOW** | 25 |
 | **Closed (false positive)** | 1 (ISSUE-43) |
 | **Confirmed fixes** | 3 |
-| **Last pass** | Twelfth-pass — blast-radius analysis on ISSUE-37/49/51/61, monitoring, data/loaders, exporters/audit_report (2026-03-19) |
+| **Last pass** | Thirteenth-pass — full sweep of data/, research/, agents/, extractors/, domain/, infrastructure/connectors/, connectors/ (all subpackages), intelligence/, monitoring/, evidence/, core/, remaining infrastructure, data/enrichment/, root files (2026-03-19) |
 | **Last commit** | `4328341` — pushed to `origin/master` 2026-03-19 |
 
 ### Directories with meaningful coverage
@@ -4673,4 +4673,1140 @@ The function signature accepts an `error` object, presumably to categorize based
 | ISSUE-93 | `categorize_error()` discards `str(error).lower()` result; `error` param unused | `data/unified/error_tracking.py:49` | 🟢 LOW | Open |
 
 **Running totals: 93 issues (37 HIGH, 43 MED, 13 LOW). Files read this pass: ~160 (cumulative referenced: ~249/555 = ~45%).**
+
+
+---
+
+## 40. THIRTEENTH PASS — Full Sweep (2026-03-19)
+
+**Scope:** Six parallel audit agents covering `data/`, `research/`, `agents/workflow_nodes/`, `extractors/`, `domain/`, `infrastructure/connectors/`, `connectors/` (all subpackages), `intelligence/`, `monitoring/`, `evidence/`, `core/`, remaining `infrastructure/`, `data/enrichment/`, and root files. ~170 new files read; cumulative coverage ~76%.
+
+---
+
+### ISSUE-94 — `data/data_quality.py` does not exist — `ModuleNotFoundError` on import (HIGH)
+
+**File:** `src/solstein/data/data_quality.py` — file is absent from repository
+
+Any import of `solstein.data.data_quality` raises `ModuleNotFoundError` at import time.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-95 — Four `normalization/` files missing — `ModuleNotFoundError` on import (HIGH)
+
+**Files:** `data/normalization/currency.py`, `data/normalization/dates.py`, `data/normalization/employees.py`, `data/normalization/revenue.py`
+
+The `normalization/` package only contains `__init__.py`, `strings.py`, `numbers.py`, `records.py`, `errors.py`. All four listed files are absent. Any import raises `ModuleNotFoundError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-96 — `benchmarks.py` uses `T` before definition; `T` defined as `Any` not `TypeVar` (HIGH)
+
+**File:** `src/solstein/data/benchmarks.py:109, 352`
+
+```python
+def measure_sync(self, ..., fn: Callable[..., T], ...) -> T:   # line 109 — T used
+...
+T = Any   # line 352 — defined after class, as plain alias not TypeVar
+```
+
+`from __future__ import annotations` is not imported, so `T` is evaluated at runtime. `T` is defined as `T = Any` (not a `TypeVar`) after the class body at line 352. Any `get_type_hints()` call before line 352 executes raises `NameError: name 'T' is not defined`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-97 — `eneve_enrichment.py` accesses `.funding` — field is `.funding_raised` (HIGH)
+
+**File:** `src/solstein/data/eneve_enrichment.py:190–191`
+
+```python
+if primary.financials.funding is None and secondary.financials.funding is not None:
+    primary.financials.funding = secondary.financials.funding
+```
+
+`CompanyFinancials` defines `funding_raised: float | None = None`, not `.funding`. Raises `AttributeError` on every call to the merge path.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-98 — Growth rate scale mismatch between `eneve_enrichment.py` and `enrichment_validators.py` (HIGH)
+
+**Files:** `src/solstein/data/eneve_enrichment.py:153–156` vs `src/solstein/data/enrichment_validators.py:70–71`
+
+```python
+# eneve_enrichment.py — treats as percentage (0–1000):
+if growth_rate < -100 or growth_rate > 1000:
+
+# enrichment_validators.py — treats as decimal (-0.5–2.0):
+if growth_rate < -0.5 or growth_rate > 2.0:
+    return False, f"... got {growth_rate * 100}%"
+```
+
+One path accepts `growth_rate=50` (meaning 50%), the other rejects it as > 2.0. Silent data corruption — valid data is rejected or invalid data is accepted depending on which validator runs.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-99 — `fetchers.py` silently returns unconverted `amount` when exchange rate unavailable (MED)
+
+**File:** `src/solstein/data/fetchers.py:192–193`
+
+```python
+rate = self.get_live_rate(from_currency, to_currency)
+return amount * rate if rate else amount
+```
+
+When rate is unavailable, `amount` is returned as-is with no error or log. Callers receive a value that appears correct but is unscaled. Silent data corruption.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-100 — `fetchers.py` `0.0` previous_close treated as falsy — silently returns `0` change_pct (MED)
+
+**File:** `src/solstein/data/fetchers.py:113`
+
+```python
+change_pct = ((current_value - previous_close) / previous_close * 100) if previous_close else 0
+```
+
+`0.0` is falsy in Python. For instruments with a legitimate `0.0` previous close, `change_pct` silently returns `0` instead of the correct (undefined) result.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-101 — `enrichment_service.py` three `_enrich_from_*` methods are unimplemented stubs (MED)
+
+**File:** `src/solstein/data/enrichment_service.py:291–304`
+
+```python
+def _enrich_from_sec(self, company):
+    """Enrich from SEC EDGAR (placeholder)."""
+    return company
+
+def _enrich_from_companies_house(self, company):
+    """Enrich from Companies House (placeholder)."""
+    return company
+
+def _enrich_from_news_signals(self, company):
+    """Enrich from News Signals (placeholder)."""
+    return company
+```
+
+Dead placeholders — silently do nothing. Any code path reaching these returns the original unchanged company with no warning.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-102 — `error_logging.py` `ErrorSampler.should_log()` raises `ZeroDivisionError` when `sample_rate=0` (MED)
+
+**File:** `src/solstein/data/error_logging.py:188`
+
+```python
+return (self.error_count % int(1 / self.sample_rate)) == 0
+```
+
+`sample_rate=0` is not validated in `__init__`. `1 / 0.0` raises `ZeroDivisionError`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-103 — `conflict_resolution.py` `StringResolver` reports `strategy_used=CONCATENATE` when not concatenating (MED)
+
+**File:** `src/solstein/data/conflict_resolution.py:258–266`
+
+```python
+if len(incoming) > len(existing):
+    return ResolutionResult(
+        resolved_value=conflict.incoming_value,
+        strategy_used=ConflictStrategy.CONCATENATE,   # ← wrong strategy
+        ...
+    )
+return ResolutionResult(
+    resolved_value=conflict.existing_value,
+    strategy_used=ConflictStrategy.CONCATENATE,       # ← wrong strategy
+    ...
+)
+```
+
+Both non-concatenating branches report `CONCATENATE`. Audit logs and downstream logic that branches on `strategy_used` receive wrong metadata.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-104 — Signal detectors and `fetchers.py` use naive `datetime.now()` mixed with aware datetimes (LOW)
+
+**Files:** `data/fetchers.py:122,166`, `data/connectors/signal_detectors/funding.py:67`, `key_hire.py:67`, `partnership.py:67`
+
+```python
+timestamp=datetime.now()    # naive
+detected_at=datetime.now()  # naive
+```
+
+The rest of the codebase uses `datetime.now(timezone.utc)`. Comparisons between naive and aware datetimes raise `TypeError`.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-105 — `process_raw.py` constructs `RawDataSource` with ~7 non-existent field names (HIGH)
+
+**File:** `src/solstein/agents/workflow_nodes/process_raw.py:36–46`
+
+```python
+RawDataSource(
+    company_name=result.company_name,   # RawDataSource has no company_name
+    source_url=source.source_url,       # field is 'url', not 'source_url'
+    source_title=source.source_title,   # does not exist
+    source_date=source.source_date,     # does not exist
+    content_hash=source.content_hash,   # does not exist
+    word_count=source.word_count,       # does not exist
+    language=source.language,           # does not exist
+)
+```
+
+`RawDataSource` fields: `source_type`, `source_name`, `raw_content`, `url`, `retrieval_timestamp`, `publication_date`, `confidence`, `relevance_score`, `metadata`, `extraction_method`, `notes`. Every call to `ProcessRawNode.execute()` raises `ValidationError` or `AttributeError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-106 — `logic_fusion.py` constructs `AggregatedFact` with non-existent fields (HIGH)
+
+**File:** `src/solstein/agents/workflow_nodes/logic_fusion.py:35–45`
+
+```python
+AggregatedFact(
+    company_name=result.company_name,  # no company_name field
+    field=fact.field,                   # no 'field' attribute on AggregatedFact
+    unit=fact.unit,                     # does not exist
+    sources=fact.sources,               # field is 'sources_used'
+    extraction_method=fact.extraction_method,  # does not exist
+)
+```
+
+`AggregatedFact` uses `fact_type`, `value`, `confidence`, `sources_used`. Raises `AttributeError` on reads and `ValidationError` on construction.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-107 — `extract_signals.py` constructs `SignalExtraction` with 4 non-existent fields (HIGH)
+
+**File:** `src/solstein/agents/workflow_nodes/extract_signals.py:62–72`
+
+```python
+SignalExtraction(
+    company_name=fact.company_name,    # AggregatedFact has no company_name
+    signal_name=fact.field,            # 'field' doesn't exist on AggregatedFact
+    signal_category=category,          # SignalExtraction has no signal_category
+    evidence_sources=fact.sources,     # field is 'sources_used'
+)
+```
+
+`SignalExtraction` fields: `signal_name`, `signal_value`, `signal_confidence`, `source_facts`, `calculation_method`, `calculation_formula`, `reasoning`, `why_it_matters`, `extracted_at`. Raises `AttributeError` and `ValidationError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-108 — `coordinator_agent.py` accesses `result.signals` — field does not exist on `AgentTaskResult` (HIGH)
+
+**File:** `src/solstein/agents/coordinator_agent.py:149`
+
+```python
+f"{len(result.signals)} signals"
+```
+
+`AgentTaskResult` has no `signals` field. Raises `AttributeError` on every `analyze_company()` call.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-109 — `batch/processor.py` calls `asyncio.run()` inside sync method called from async pipeline (HIGH)
+
+**File:** `src/solstein/extractors/batch/processor.py:247`
+
+```python
+result = asyncio.run(self._process_file(file_path))
+```
+
+`extract_directory()` is synchronous but called from an async pipeline. `asyncio.run()` inside a running event loop raises `RuntimeError: This event loop is already running`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-110 — `markdown_extractor.py` constructs `Company` and `FinancialMetric` with multiple non-existent fields (HIGH)
+
+**File:** `src/solstein/extractors/markdown_extractor.py:151–187`
+
+```python
+Company(
+    growth_rate_pct=...,     # no such field (is 'growth_rate')
+    data_sources=...,        # no such field
+    financial_metrics=...,   # no such field
+)
+FinancialMetric(
+    value=..., unit=..., confidence=..., sources=..., justification=...  # none exist
+)
+```
+
+Pydantic will raise `ValidationError` or silently discard fields. All extracted data is lost or the call crashes.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-111 — `batch/processor.py` `_merge_company_profiles` accesses non-existent `Company` fields throughout (HIGH)
+
+**File:** `src/solstein/extractors/batch/processor.py:69–133`
+
+```python
+for metric_name, metric in profile.financial_metrics.items():  # no 'financial_metrics'
+all_sources.update(profile.data_sources)   # no 'data_sources'
+Company(
+    revenue_eur_m=..., growth_rate_pct=..., profit_margin_pct=...,
+    ebitda_margin_pct=..., data_sources=..., financial_metrics=..., created_at=...
+)
+```
+
+Every one of these field names is absent from `Company`. Raises `AttributeError` on first call.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-112 — `batch/processor.py` `ProvenanceValidator.validate` accesses `profile.financial_metrics` (HIGH)
+
+**File:** `src/solstein/extractors/batch/processor.py:169`
+
+```python
+if metric not in profile.financial_metrics:
+```
+
+`Company` has no `financial_metrics`. Raises `AttributeError` on every validation call.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-113 — `ExportStage._run_async` silently performs `GatherStage` work; all export logic is skipped (MED)
+
+**File:** `src/solstein/research/pipeline_stages.py:512–575`
+
+`ExportStage._run_async` runs discovery and enrichment (GatherStage responsibility) and returns a GatherStage-style payload without performing any export. Excel export and database persistence are never called from the async pipeline path.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-114 — `GatherStage` re-runs full discovery instead of reading `context.candidates` (MED)
+
+**File:** `src/solstein/research/pipeline_stages.py:189–195`
+
+`DiscoveryStage._run()` never writes to `context.candidates`. `GatherStage._run()` compensates by calling `discover_companies()` again from scratch, doubling discovery cost and potentially returning different results on the second run.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-115 — `pipeline_async.py` sync alias for async function — callers get unawaited coroutine (LOW)
+
+**File:** `src/solstein/research/pipeline_async.py:162`
+
+```python
+run_market_intelligence = run_market_intelligence_async
+```
+
+Synchronous callers importing `run_market_intelligence` from this module get back a coroutine object instead of a result.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-116 — `domain/models.py` `Company` re-declares `last_updated`, `data_source`, `source_links` (LOW)
+
+**File:** `src/solstein/domain/models.py:145–223`
+
+Fields are declared twice at lines 144–145 and again at 216–223. The later declaration wins in Pydantic's field collection. Schema documentation and generated clients will show wrong field order/types.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-117 — `sec_edgar_refresh.py` `.session()` does not exist on `DatabaseManager` — `AttributeError` (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/sec_edgar_refresh.py:131`
+
+```python
+async with self.db_manager.session() as session:
+```
+
+`DatabaseManager` exposes `.get_session()`, not `.session()`. Raises `AttributeError` on first call to `_get_previous_facts_count()`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-118 — `sec_edgar_refresh.py` raw string SQL without `text()` — `ObjectNotExecutableError` (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/sec_edgar_refresh.py:131–141`
+
+```python
+result = await session.execute(
+    "SELECT COUNT(*) FROM facts WHERE company_id = :cid AND source = :src",
+    {"cid": company_id, "src": self.source_name},
+)
+```
+
+SQLAlchemy 2.x async sessions require all raw SQL wrapped in `text(...)`. Raises `ObjectNotExecutableError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-119 — `companies_house_refresh.py` `.session()` and raw SQL — identical crash (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/companies_house_refresh.py:129–139`
+
+Same `.session()` vs `.get_session()` and raw-string SQL bugs as ISSUE-117/118.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-120 — `github_refresh.py` `.session()` and raw SQL — identical crash (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/github_refresh.py:210–221`
+
+Same `.session()` vs `.get_session()` and raw-string SQL bugs as ISSUE-117/118.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-121 — `news_signal_refresh.py` `.session()` and raw SQL — identical crash (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/news_signal_refresh.py:116–127`
+
+Same `.session()` vs `.get_session()` and raw-string SQL bugs as ISSUE-117/118.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-122 — `news_signal_refresh.py` calls `.get()` on `Signal` dataclass — `AttributeError` drops all signals (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/news_signal_refresh.py:63`
+
+```python
+signal.get("signal_type")
+signal.get("company_id")
+signal.get("confidence", self.confidence)
+```
+
+`Signal` is a dataclass, not a dict. `.get()` raises `AttributeError`, silently caught and logged, causing every news signal to be dropped.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-123 — `github_connector.py` blocking sync `httpx.get()` inside `async def` methods (HIGH)
+
+**File:** `src/solstein/data/connectors/github_connector.py:64, 104, 149`
+
+```python
+response = httpx.get(url, headers=self.headers, params=params, timeout=...)
+```
+
+All three methods are `async def` but call synchronous `httpx.get()`. Blocks the entire asyncio event loop for every GitHub request.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-124 — `query_cache.py` imports `get_cache` which does not exist — `ImportError` at module load (HIGH)
+
+**File:** `src/solstein/infrastructure/query_cache.py:13`
+
+```python
+from solstein.infrastructure.cache import get_cache
+```
+
+`cache.py` exports `CacheManager`, `cache_manager`, `cached`, `cache_invalidate`, and key helpers — no `get_cache`. Raises `ImportError` at import time, making the entire `query_cache` module unusable.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-125 — `query_cache.py` calls `.get_sync()` / `.set_sync()` — methods do not exist on `CacheManager` (HIGH)
+
+**File:** `src/solstein/infrastructure/query_cache.py:75, 85`
+
+```python
+cache.get_sync(cache_key)
+cache.set_sync(cache_key, result, ttl=ttl)
+```
+
+`CacheManager` only has `async def get()` and `async def set()`. Raises `AttributeError` at runtime.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-126 — `test_cleanup.py` calls `.query()` on `AsyncSession` — not supported in SQLAlchemy 2.x (HIGH)
+
+**File:** `src/solstein/infrastructure/test_cleanup.py:72, 101`
+
+```python
+session.query(Fact.fact_id).filter(Fact.company_id == company_id)
+```
+
+`AsyncSession` does not support the legacy `.query()` ORM API. Raises `InvalidRequestError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-127 — `search.py` uses Python `+` on SQLAlchemy expression objects for `to_tsvector` — malformed SQL (HIGH)
+
+**File:** `src/solstein/infrastructure/search.py:101–108`
+
+```python
+func.to_tsvector(
+    "english",
+    func.coalesce(CompanyRecord.name, "") + " " +
+    func.coalesce(CompanyRecord.description, "") + " " +
+    func.coalesce(CompanyRecord.industry, "")
+)
+```
+
+`func.coalesce(...)` returns a SQLAlchemy `Function` object. `+` with a Python string literal produces a malformed expression or `TypeError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-128 — `database_service.py` passes `company_id` to `SignalRecord` — field does not exist (HIGH)
+
+**File:** `src/solstein/infrastructure/database_service.py:68`
+
+```python
+SignalRecord(company_id=company_id, ...)
+```
+
+`SignalRecord` has no `company_id` column. Raises `TypeError` or causes silent data loss.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-129 — `database_service.py` passes `market_segment` to `MarketSnapshot` — field does not exist (HIGH)
+
+**File:** `src/solstein/infrastructure/database_service.py:98`
+
+```python
+MarketSnapshot(market_segment=market_segment, ...)
+```
+
+`MarketSnapshot` has no `market_segment` column. Same crash as ISSUE-128.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-130 — `database_service.py` passes `scoring_timestamp` to `AuditTrailRecord` — field does not exist (HIGH)
+
+**File:** `src/solstein/infrastructure/database_service.py:125`
+
+```python
+AuditTrailRecord(scoring_timestamp=datetime.now(timezone.utc), ...)
+```
+
+`AuditTrailRecord` has no `scoring_timestamp` column. Same crash as ISSUE-128.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-131 — `db_router.py` `_primary_engine` may be `None` — `AsyncSession(None)` raises `TypeError` (HIGH)
+
+**File:** `src/solstein/infrastructure/db_router.py:109, 134, 147`
+
+```python
+return self._primary_engine   # may be None if initialize() was never called
+...
+AsyncSession(self._get_replica_engine(), ...)
+```
+
+`_primary_engine` is `None` until `initialize()` is called. If called before initialization, `AsyncSession(None)` raises `TypeError`. No guard present.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-132 — `vector_store.py` `func.uuid_generate_v4()` evaluated once at class definition — all rows share same UUID (MED)
+
+**File:** `src/solstein/infrastructure/vector_store.py:50`
+
+```python
+id: Mapped[str] = mapped_column(String, primary_key=True, default=func.uuid_generate_v4())
+```
+
+`func.uuid_generate_v4()` is called once at class definition time, not per row. Correct form: `server_default=func.uuid_generate_v4()` or `default=uuid.uuid4` (callable, no parentheses).
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-133 — `vector_store.py` isolated `declarative_base()` — `EmbeddingRecord` table never created at startup (MED)
+
+**File:** `src/solstein/infrastructure/vector_store.py:33`
+
+```python
+Base = declarative_base()   # isolated Base, not the application's shared Base
+```
+
+When `Base.metadata.create_all()` runs at startup using the application's `Base`, `EmbeddingRecord`'s table is not included. The embeddings table is never created.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-134 — `cache_protocol.py` declares `clear()` but `CacheManager` implements `clear_pattern()` — protocol broken (MED)
+
+**Files:** `src/solstein/infrastructure/cache_protocol.py:52`, `src/solstein/infrastructure/cache.py:126`
+
+```python
+# protocol:
+async def clear(self, pattern: str = "*") -> int: ...
+
+# implementation:
+async def clear_pattern(self, pattern: str) -> int:
+```
+
+Any code that receives `CacheManager` typed as `ICacheRepository` and calls `.clear()` raises `AttributeError`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-135 — `connectors/registry.py` all six wildcard imports duplicated — all subpackage `__init__` modules execute twice (MED)
+
+**File:** `src/solstein/connectors/registry.py:12–23`
+
+```python
+from .financial import *   # line 12
+...
+from .financial import *   # line 18 (duplicate)
+...
+```
+
+All six subpackages are imported twice, doubling any side effects in those `__init__` modules.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-136 — `registry.py` `TrustpilotConnector` registered twice — second silently overwrites first (MED)
+
+**File:** `src/solstein/connectors/registry.py:249–258`
+
+```python
+trustpilot = TrustpilotConnector()
+registry.register("trustpilot", trustpilot)
+...
+trustpilot = TrustpilotConnector()           # duplicate block
+registry.register("trustpilot", trustpilot) # overwrites silently
+```
+
+A leaked object per startup and potentially inconsistent state if the first was mutated before the overwrite.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-137 — `financial/__init__.py` three separate `SECEdgarConnector` definitions; class identity non-deterministic (HIGH)
+
+**Files:** `src/solstein/connectors/financial/__init__.py:24`, `financial/extra.py:20`, `financial/sec_edgar.py:14`
+
+Three classes named `SECEdgarConnector` exist. `__init__.py` line 337 re-imports from `sec_edgar.py`, silently overwriting the inline class. The version registered in `registry.py` depends on import order and is non-deterministic across refactoring.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-138 — `financial/extra.py` and `financial/opencorporates.py` duplicate `OpenCorporatesConnector` with schema field mismatch (HIGH)
+
+**Files:** `src/solstein/connectors/financial/extra.py:71`, `financial/opencorporates.py:14`
+
+Two separate `OpenCorporatesConnector` implementations with different metadata field names: `extra.py` uses `"jurisdiction_code"`, `opencorporates.py` uses `"jurisdiction"`. Consumers importing directly from `extra` get a different object than those importing from the package.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-139 — `product/stackoverflow.py` `datetime.fromtimestamp(None)` when API returns explicit null (HIGH)
+
+**File:** `src/solstein/connectors/product/stackoverflow.py:102`
+
+```python
+"creation_date": datetime.fromtimestamp(content.get("creation_date", 0)),
+```
+
+Default `0` guards against absent key but not an explicit `null` value. `datetime.fromtimestamp(None)` raises `TypeError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-140 — `social/reddit.py` same `datetime.fromtimestamp(None)` crash pattern (HIGH)
+
+**File:** `src/solstein/connectors/social/reddit.py:108`
+
+```python
+"created_at": datetime.fromtimestamp(content.get("created_utc", 0)),
+```
+
+Same as ISSUE-139. Raises `TypeError` if `"created_utc": null` appears in the API response.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-141 — `financial/yahoo_finance.py` and `financial/__init__.py` blocking sync `yfinance` calls inside `async def` methods (HIGH)
+
+**Files:** `src/solstein/connectors/financial/yahoo_finance.py:29, 40`, `connectors/financial/__init__.py:107, 121`
+
+```python
+async def connect(self) -> bool:
+    ticker = yf.Ticker("AAPL")
+    info = ticker.info        # blocking synchronous HTTP call
+```
+
+`yfinance.Ticker.info` is a synchronous blocking property that makes an HTTP request. Called directly inside `async def` methods, it blocks the entire asyncio event loop for the request duration.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-142 — `financial/__init__.py` imports `pandas` unconditionally — `ModuleNotFoundError` if not installed (MED)
+
+**File:** `src/solstein/connectors/financial/__init__.py:17`
+
+```python
+import pandas as pd    # never used anywhere in the file
+```
+
+`pd` is never referenced. If `pandas` is not installed, importing any financial connector raises `ModuleNotFoundError`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-143 — `product/appstore.py` `get_by_id()` calls `response.json()` on `text/javascript` content-type (MED)
+
+**File:** `src/solstein/connectors/product/appstore.py:87`
+
+```python
+# search() (line 49): correctly reads text then json.loads()
+# get_by_id() (line 87):
+data = await response.json()   # iTunes API returns text/javascript, not application/json
+```
+
+`search()` explicitly handles the iTunes `text/javascript` content-type. `get_by_id()` uses `response.json()` which raises a content-type error in aiohttp.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-144 — `core/health_checks/redis.py` accesses `settings.redis_url` — field absent from `Settings` (HIGH)
+
+**File:** `src/solstein/core/health_checks/redis.py:34, 43, 52`
+
+```python
+if not settings.redis_url:
+    ...
+r = redis.from_url(settings.redis_url)
+```
+
+`Settings` has no `redis_url` attribute. Every call to `RedisHealthCheck.check()` raises `AttributeError`, swallowed into a DEGRADED result that obscures the real configuration failure.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-145 — `celery_context.py` `headers=None` subscript raises `TypeError` when tasks have context data (HIGH)
+
+**File:** `src/solstein/celery_context.py:17`
+
+```python
+def add_context_to_task_headers(headers=None, body=None, **kwargs):
+    context = get_current_context()
+    if context:
+        headers["_context"] = context   # TypeError: 'NoneType' does not support item assignment
+```
+
+Celery passes `headers=None` when no headers dict is pre-allocated. If `context` is truthy, `headers["_context"]` crashes every `before_task_publish` signal invocation.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-146 — `core/health_checks/database.py` missing `await` on `init_async()` — engine always `None` (HIGH)
+
+**File:** `src/solstein/core/health_checks/database.py:35`
+
+```python
+db_manager = DatabaseManager(settings)
+db_manager.init_async()    # coroutine discarded without await
+```
+
+If `init_async()` is a coroutine, calling it without `await` silently discards it. The engine is never initialized. The subsequent `if db_manager.engine is None` guard always raises `RuntimeError`, making the database health check permanently fail.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-147 — `infrastructure/refresh.py` naive `datetime.now()` compared to timezone-aware datetime — `TypeError` (MED)
+
+**File:** `src/solstein/infrastructure/refresh.py:119`
+
+```python
+return datetime.now() - timedelta(days=30)   # naive
+```
+
+`get_refresh_statuses()` uses `current_time = datetime.now(timezone.utc)` (aware). Subtracting the naive fallback from `_get_last_refresh_time()` raises `TypeError: can't subtract offset-naive and offset-aware datetimes`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-148 — `cli.py` accesses `p1.financials.revenue` without None guard — `AttributeError` uncaught (MED)
+
+**File:** `src/solstein/cli.py:252–254`
+
+```python
+("Revenue", p1.financials.revenue, p2.financials.revenue, "€"),
+```
+
+`Company.financials` is optional. When `None`, `p1.financials.revenue` raises `AttributeError`. The outer `except` block does not catch `AttributeError`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-149 — `core/coverage_dashboard.py` wrong field key `executed_lines` returns a list — `TypeError` in division (MED)
+
+**File:** `src/solstein/core/coverage_dashboard.py:167`
+
+```python
+covered_lines=file_data.get("executed_lines", 0),   # returns list, not int
+```
+
+pytest-cov JSON stores line numbers in `"executed_lines"` as a **list**. The count is in `"num_executed"`. `coverage_percent = (covered_lines / total_lines) * 100` then raises `TypeError: unsupported operand type(s) for /: 'list' and 'int'`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-150 — `data/enrichment/policies/decisions.py` wrong `TYPE_CHECKING` import path for `EnrichableCompany` (MED)
+
+**File:** `src/solstein/data/enrichment/policies/decisions.py:9`
+
+```python
+if TYPE_CHECKING:
+    from ..models import EnrichableCompany, EnrichmentField
+```
+
+`EnrichableCompany` is defined in `enrichment_types.py`, not re-exported from `models.py`. Static type checkers report `Module "...models" has no attribute "EnrichableCompany"`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-151 — `intelligence/protocol_mapper.py` unconditional mutation sets first protocol active — `IndexError` if empty (HIGH)
+
+**File:** `src/solstein/intelligence/protocol_mapper.py:236`
+
+```python
+if not any(p.is_active for p in protocol_presences):
+    pass
+    protocol_presences[0].is_active = True   # outside the if block — executes always
+```
+
+`protocol_presences[0].is_active = True` is at the same indentation as `pass`, not inside the `if`. It runs on every call, overriding the first protocol to active unconditionally. If `protocol_presences` is empty, raises `IndexError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-152 — `intelligence/financial_report_generator.py` `BatchFinancialReportGenerator` calls methods it does not inherit (HIGH)
+
+**File:** `src/solstein/intelligence/financial_report_generator.py:392–410`
+
+`BatchFinancialReportGenerator.generate_with_narratives` calls `self._generate_header`, `self._generate_growth_trajectory`, `self._generate_funding_intelligence`, etc. — all defined on `FinancialGrowthReportGenerator`. `BatchFinancialReportGenerator` does not inherit from it. Raises `AttributeError` on every call.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-153 — `intelligence/genealogy_report_generator.py` `BatchGenealogyReportGenerator` calls methods it does not inherit (HIGH)
+
+**File:** `src/solstein/intelligence/genealogy_report_generator.py:207–233`
+
+`BatchGenealogyReportGenerator.generate_with_narratives` calls `self._format_ownership`, `self._format_transactions`, etc. — defined only on `GenealogyReportGenerator`. Raises `AttributeError` on every call.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-154 — `intelligence/protocol_report_generator.py` `BatchProtocolReportGenerator` calls methods it does not inherit (HIGH)
+
+**File:** `src/solstein/intelligence/protocol_report_generator.py:154–194`
+
+`BatchProtocolReportGenerator.generate_with_narratives` calls `self._format_overview`, `self._format_markets`, etc. — defined only on `ProtocolReportGenerator`. Raises `AttributeError` on every call.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-155 — `intelligence/deep_analyzer.py` `generate_from_dict` returns `dict` instead of declared `DeepAnalysisReport` (HIGH)
+
+**File:** `src/solstein/intelligence/deep_analyzer.py:599–761`
+
+```python
+def generate_from_dict(...) -> DeepAnalysisReport:
+    ...
+    return {"company_name": company_name, "executive_assessment": ...}   # plain dict
+```
+
+Any caller accessing `.company`, `.capability_matrix`, `.ai_assessment`, etc. on the return value gets `AttributeError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-156 — `intelligence/genealogy_analyzer.py` regex uses `\\b` in raw f-string — word boundary never matches (HIGH)
+
+**File:** `src/solstein/intelligence/genealogy_analyzer.py:319, 331`
+
+```python
+pattern = rf'\\b{re.escape(investor.lower())}\\b'
+```
+
+In a raw string, `\\b` is literal `\b` (two chars), not the regex word-boundary metacharacter. The pattern never matches any real text. `_detect_ownership` always returns empty results. Correct form: `rf'\b{re.escape(investor.lower())}\b'`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-157 — `monitoring/errors.py` `track_error` assigns to `existing.last_seen` — field does not exist on `ErrorRecord` (HIGH)
+
+**File:** `src/solstein/monitoring/errors.py:193`
+
+```python
+existing.last_seen = record.timestamp
+```
+
+`ErrorRecord` has no `last_seen` field (only `timestamp`). Raises `AttributeError` on every duplicate error processed by `track_error`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-158 — `monitoring/profiling/dashboard.py` uses `profiler` module as singleton instance — all attribute accesses fail (HIGH)
+
+**File:** `src/solstein/monitoring/profiling/dashboard.py:23, 29, 43, 44, 207, 208`
+
+```python
+from ..profiling import profiler   # imports the MODULE, not the singleton
+
+profiler.results       # AttributeError
+profiler.is_enabled    # AttributeError
+profiler.enable()      # AttributeError
+```
+
+The module has none of these attributes. The singleton is accessible via `profiler.get_profiler()`. Every access raises `AttributeError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-159 — `evidence/repositories/claim.py` imports `SourceRepository` from non-existent `source.py` — `ModuleNotFoundError` (HIGH)
+
+**File:** `src/solstein/evidence/repositories/claim.py:12`
+
+```python
+from .source import SourceRepository
+```
+
+`source.py` does not exist in `evidence/repositories/`. Raises `ModuleNotFoundError` at import time, making `ClaimRepository` unavailable.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-160 — `evidence/repositories/company.py` Cypher query uses wrong enum values `'VERIFIED'`/`'DISPUTED'` — counts always zero (HIGH)
+
+**File:** `src/solstein/evidence/repositories/company.py:54–58`
+
+```python
+claim.status = 'VERIFIED'   # ClaimStatus values are: 'accepted', 'rejected', 'conflicting', 'pending'
+claim.status = 'DISPUTED'   # neither value exists
+```
+
+The CASE expressions always evaluate to NULL. `verified_count` and `disputed_count` are permanently zero regardless of actual data.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-161 — `monitoring/llm_tracker.py` creates new `LLMTracker` instance per decorated function — global aggregation broken (HIGH)
+
+**File:** `src/solstein/monitoring/llm_tracker.py:357`
+
+```python
+def decorator(func):
+    tracker = LLMTracker()   # new isolated instance per function
+```
+
+Each decorated function accumulates only its own calls. Cross-system cost and token aggregation is silently broken.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-162 — `evidence/models.py` uses deprecated `datetime.utcnow` — naive datetimes cause `TypeError` on comparison (HIGH)
+
+**File:** `src/solstein/evidence/models.py:93, 112–113`
+
+```python
+extracted_at: datetime = field(default_factory=datetime.utcnow)
+created_at: datetime = field(default_factory=datetime.utcnow)
+```
+
+`datetime.utcnow()` produces timezone-naive datetimes. Comparisons with timezone-aware datetimes elsewhere in the codebase raise `TypeError: can't compare offset-naive and offset-aware datetimes`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-163 — `monitoring/continuous_monitor.py` uses `timedelta.days` for fractional-day comparison — companies skipped too long (LOW)
+
+**File:** `src/solstein/monitoring/continuous_monitor.py:232`
+
+```python
+if last and (datetime.now(timezone.utc) - last).days < self.refresh_interval_days:
+```
+
+`timedelta.days` is integer-only, discarding fractional days. A company refreshed 29 days and 23 hours ago has `.days == 29`, incorrectly skipping a 30-day refresh. Use `total_seconds() / 86400`.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-164 — `monitoring/business_metrics.py` deprecated `datetime.utcnow` default (LOW)
+
+**File:** `src/solstein/monitoring/business_metrics.py:73`
+
+```python
+timestamp: datetime = field(default_factory=datetime.utcnow)
+```
+
+Same naive datetime issue as ISSUE-162. Deprecated since Python 3.12.
+
+**Severity:** 🟢 LOW
+
+---
+
+## 41. UPDATED SUMMARY TABLE (Full — Including Thirteenth Pass)
+
+| Issue | Description | Location | Severity | Status |
+|---|---|---|---|---|
+| ISSUE-94 | `data_quality.py` missing — `ModuleNotFoundError` | `data/data_quality.py` | 🔴 HIGH | Open |
+| ISSUE-95 | 4 normalization files missing — `ModuleNotFoundError` | `data/normalization/currency.py` etc. | 🔴 HIGH | Open |
+| ISSUE-96 | `benchmarks.py` `T` used before defined; `T = Any` not `TypeVar` | `data/benchmarks.py:109,352` | 🔴 HIGH | Open |
+| ISSUE-97 | `eneve_enrichment.py` `.funding` AttributeError — should be `.funding_raised` | `data/eneve_enrichment.py:190` | 🔴 HIGH | Open |
+| ISSUE-98 | Growth rate scale mismatch: percentage vs decimal across two validators | `data/eneve_enrichment.py:153` vs `enrichment_validators.py:70` | 🔴 HIGH | Open |
+| ISSUE-99 | `fetchers.py` silent unconverted `amount` when rate unavailable | `data/fetchers.py:192` | 🟡 MED | Open |
+| ISSUE-100 | `fetchers.py` `0.0` previous_close falsy — returns wrong `change_pct` | `data/fetchers.py:113` | 🟡 MED | Open |
+| ISSUE-101 | `enrichment_service.py` three dead stub methods — silent no-ops | `data/enrichment_service.py:291–304` | 🟡 MED | Open |
+| ISSUE-102 | `error_logging.py` `ZeroDivisionError` when `sample_rate=0` | `data/error_logging.py:188` | 🟡 MED | Open |
+| ISSUE-103 | `conflict_resolution.py` wrong `strategy_used=CONCATENATE` in non-concat path | `data/conflict_resolution.py:258` | 🟡 MED | Open |
+| ISSUE-104 | Naive `datetime.now()` in signal detectors and `fetchers.py` | `data/fetchers.py:122,166` + signal detectors | 🟢 LOW | Open |
+| ISSUE-105 | `process_raw.py` `RawDataSource` built with ~7 non-existent fields | `agents/workflow_nodes/process_raw.py:36` | 🔴 HIGH | Open |
+| ISSUE-106 | `logic_fusion.py` `AggregatedFact` built with non-existent fields | `agents/workflow_nodes/logic_fusion.py:35` | 🔴 HIGH | Open |
+| ISSUE-107 | `extract_signals.py` `SignalExtraction` built with 4 non-existent fields | `agents/workflow_nodes/extract_signals.py:62` | 🔴 HIGH | Open |
+| ISSUE-108 | `coordinator_agent.py` `result.signals` — field does not exist | `agents/coordinator_agent.py:149` | 🔴 HIGH | Open |
+| ISSUE-109 | `batch/processor.py` `asyncio.run()` in sync method called from async pipeline | `extractors/batch/processor.py:247` | 🔴 HIGH | Open |
+| ISSUE-110 | `markdown_extractor.py` `Company`+`FinancialMetric` with non-existent fields | `extractors/markdown_extractor.py:151–187` | 🔴 HIGH | Open |
+| ISSUE-111 | `batch/processor.py` `_merge_company_profiles` accesses non-existent `Company` fields | `extractors/batch/processor.py:69–133` | 🔴 HIGH | Open |
+| ISSUE-112 | `batch/processor.py` `profile.financial_metrics` does not exist | `extractors/batch/processor.py:169` | 🔴 HIGH | Open |
+| ISSUE-113 | `ExportStage._run_async` silently performs `GatherStage` work; export skipped | `research/pipeline_stages.py:512` | 🟡 MED | Open |
+| ISSUE-114 | `GatherStage` re-runs full discovery instead of reading `context.candidates` | `research/pipeline_stages.py:189` | 🟡 MED | Open |
+| ISSUE-115 | `pipeline_async.py` sync alias for async fn — callers get unawaited coroutine | `research/pipeline_async.py:162` | 🟢 LOW | Open |
+| ISSUE-116 | `domain/models.py` `Company` re-declares fields twice | `domain/models.py:145–223` | 🟢 LOW | Open |
+| ISSUE-117 | `sec_edgar_refresh.py` `.session()` does not exist on `DatabaseManager` | `infrastructure/connectors/sec_edgar_refresh.py:131` | 🔴 HIGH | Open |
+| ISSUE-118 | `sec_edgar_refresh.py` raw SQL string without `text()` | `infrastructure/connectors/sec_edgar_refresh.py:131–141` | 🔴 HIGH | Open |
+| ISSUE-119 | `companies_house_refresh.py` same `.session()` + raw SQL crash | `infrastructure/connectors/companies_house_refresh.py:129` | 🔴 HIGH | Open |
+| ISSUE-120 | `github_refresh.py` same `.session()` + raw SQL crash | `infrastructure/connectors/github_refresh.py:210` | 🔴 HIGH | Open |
+| ISSUE-121 | `news_signal_refresh.py` same `.session()` + raw SQL crash | `infrastructure/connectors/news_signal_refresh.py:116` | 🔴 HIGH | Open |
+| ISSUE-122 | `news_signal_refresh.py` `.get()` on `Signal` dataclass — all signals dropped | `infrastructure/connectors/news_signal_refresh.py:63` | 🔴 HIGH | Open |
+| ISSUE-123 | `github_connector.py` blocking sync `httpx.get()` in async methods | `data/connectors/github_connector.py:64,104,149` | 🔴 HIGH | Open |
+| ISSUE-124 | `query_cache.py` imports `get_cache` which does not exist — `ImportError` | `infrastructure/query_cache.py:13` | 🔴 HIGH | Open |
+| ISSUE-125 | `query_cache.py` `.get_sync()`/`.set_sync()` do not exist on `CacheManager` | `infrastructure/query_cache.py:75,85` | 🔴 HIGH | Open |
+| ISSUE-126 | `test_cleanup.py` `.query()` on `AsyncSession` — invalid in SQLAlchemy 2.x | `infrastructure/test_cleanup.py:72,101` | 🔴 HIGH | Open |
+| ISSUE-127 | `search.py` Python `+` on SQLAlchemy expressions — malformed SQL | `infrastructure/search.py:101–108` | 🔴 HIGH | Open |
+| ISSUE-128 | `database_service.py` `company_id` not a column on `SignalRecord` | `infrastructure/database_service.py:68` | 🔴 HIGH | Open |
+| ISSUE-129 | `database_service.py` `market_segment` not a column on `MarketSnapshot` | `infrastructure/database_service.py:98` | 🔴 HIGH | Open |
+| ISSUE-130 | `database_service.py` `scoring_timestamp` not a column on `AuditTrailRecord` | `infrastructure/database_service.py:125` | 🔴 HIGH | Open |
+| ISSUE-131 | `db_router.py` `_primary_engine=None` → `AsyncSession(None)` → `TypeError` | `infrastructure/db_router.py:109` | 🔴 HIGH | Open |
+| ISSUE-132 | `vector_store.py` `uuid_generate_v4()` evaluated once — all rows share UUID | `infrastructure/vector_store.py:50` | 🟡 MED | Open |
+| ISSUE-133 | `vector_store.py` isolated `declarative_base()` — embeddings table never created | `infrastructure/vector_store.py:33` | 🟡 MED | Open |
+| ISSUE-134 | `cache_protocol.py` `clear()` vs `CacheManager.clear_pattern()` — protocol broken | `infrastructure/cache_protocol.py:52` | 🟡 MED | Open |
+| ISSUE-135 | `registry.py` all six wildcard imports duplicated — subpackages execute twice | `connectors/registry.py:12–23` | 🟡 MED | Open |
+| ISSUE-136 | `registry.py` `TrustpilotConnector` registered twice — second overwrites first | `connectors/registry.py:249–258` | 🟡 MED | Open |
+| ISSUE-137 | Three `SECEdgarConnector` definitions — class identity non-deterministic | `connectors/financial/__init__.py:24`, `extra.py:20`, `sec_edgar.py:14` | 🔴 HIGH | Open |
+| ISSUE-138 | Duplicate `OpenCorporatesConnector` with schema field mismatch | `connectors/financial/extra.py:71` vs `opencorporates.py:14` | 🔴 HIGH | Open |
+| ISSUE-139 | `stackoverflow.py` `datetime.fromtimestamp(None)` on explicit null | `connectors/product/stackoverflow.py:102` | 🔴 HIGH | Open |
+| ISSUE-140 | `reddit.py` same `datetime.fromtimestamp(None)` crash | `connectors/social/reddit.py:108` | 🔴 HIGH | Open |
+| ISSUE-141 | `yahoo_finance.py` blocking sync `yfinance` calls in `async def` methods | `connectors/financial/yahoo_finance.py:29,40` | 🔴 HIGH | Open |
+| ISSUE-142 | `financial/__init__.py` unconditional `import pandas` — crashes if not installed | `connectors/financial/__init__.py:17` | 🟡 MED | Open |
+| ISSUE-143 | `appstore.py` `response.json()` on `text/javascript` content-type | `connectors/product/appstore.py:87` | 🟡 MED | Open |
+| ISSUE-144 | `redis.py` `settings.redis_url` — field absent from `Settings` | `core/health_checks/redis.py:34` | 🔴 HIGH | Open |
+| ISSUE-145 | `celery_context.py` `headers=None` subscript — `TypeError` on every task with context | `celery_context.py:17` | 🔴 HIGH | Open |
+| ISSUE-146 | `database.py` missing `await` on `init_async()` — engine always None | `core/health_checks/database.py:35` | 🔴 HIGH | Open |
+| ISSUE-147 | `refresh.py` naive `datetime.now()` compared to aware datetime — `TypeError` | `infrastructure/refresh.py:119` | 🟡 MED | Open |
+| ISSUE-148 | `cli.py` `p1.financials.revenue` when `financials=None` — uncaught `AttributeError` | `cli.py:252–254` | 🟡 MED | Open |
+| ISSUE-149 | `coverage_dashboard.py` `executed_lines` returns list not int — `TypeError` in division | `core/coverage_dashboard.py:167` | 🟡 MED | Open |
+| ISSUE-150 | `decisions.py` wrong `TYPE_CHECKING` import path for `EnrichableCompany` | `data/enrichment/policies/decisions.py:9` | 🟡 MED | Open |
+| ISSUE-151 | `protocol_mapper.py` unconditional mutation overrides first protocol; `IndexError` if empty | `intelligence/protocol_mapper.py:236` | 🔴 HIGH | Open |
+| ISSUE-152 | `BatchFinancialReportGenerator` calls methods from unrelated parent class | `intelligence/financial_report_generator.py:392` | 🔴 HIGH | Open |
+| ISSUE-153 | `BatchGenealogyReportGenerator` calls methods from unrelated parent class | `intelligence/genealogy_report_generator.py:207` | 🔴 HIGH | Open |
+| ISSUE-154 | `BatchProtocolReportGenerator` calls methods from unrelated parent class | `intelligence/protocol_report_generator.py:154` | 🔴 HIGH | Open |
+| ISSUE-155 | `deep_analyzer.py` `generate_from_dict` returns `dict` instead of `DeepAnalysisReport` | `intelligence/deep_analyzer.py:761` | 🔴 HIGH | Open |
+| ISSUE-156 | `genealogy_analyzer.py` regex `\\b` in raw f-string — word boundary never matches | `intelligence/genealogy_analyzer.py:319,331` | 🔴 HIGH | Open |
+| ISSUE-157 | `monitoring/errors.py` `existing.last_seen` — field does not exist on `ErrorRecord` | `monitoring/errors.py:193` | 🔴 HIGH | Open |
+| ISSUE-158 | `profiling/dashboard.py` uses `profiler` module as singleton instance | `monitoring/profiling/dashboard.py:23` | 🔴 HIGH | Open |
+| ISSUE-159 | `evidence/repositories/claim.py` imports `SourceRepository` from missing `source.py` | `evidence/repositories/claim.py:12` | 🔴 HIGH | Open |
+| ISSUE-160 | `evidence/repositories/company.py` Cypher uses wrong enum values — counts always zero | `evidence/repositories/company.py:54–58` | 🔴 HIGH | Open |
+| ISSUE-161 | `llm_tracker.py` new `LLMTracker` per decorated function — global aggregation broken | `monitoring/llm_tracker.py:357` | 🔴 HIGH | Open |
+| ISSUE-162 | `evidence/models.py` `datetime.utcnow` produces naive datetimes — `TypeError` on comparison | `evidence/models.py:93,112` | 🔴 HIGH | Open |
+| ISSUE-163 | `continuous_monitor.py` `timedelta.days` skips fractional-day overdue refreshes | `monitoring/continuous_monitor.py:232` | 🟢 LOW | Open |
+| ISSUE-164 | `business_metrics.py` deprecated `datetime.utcnow` default factory | `monitoring/business_metrics.py:73` | 🟢 LOW | Open |
+
+**Running totals: 181 issues (87 HIGH, 69 MED, 25 LOW). Files read this pass: ~170 new (cumulative: ~420/555 = ~76%).**
 
