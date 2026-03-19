@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import logging
+
 from .client import GitHubClient
+
+logger = logging.getLogger(__name__)
 
 
 class GitHubOrgSearcher:
@@ -39,10 +43,9 @@ class GitHubOrgSearcher:
                 if items:
                     return items[0].get("login")
             elif resp.status_code == 403:
-                # Rate limited
-                pass
-        except Exception:
-            pass
+                logger.warning(f"GitHub org search rate-limited for query '{query}'")
+        except Exception as error:
+            logger.warning(f"GitHub org search failed for query '{query}': {error}")
 
         return None
 
@@ -59,7 +62,8 @@ class GitHubOrgSearcher:
             resp = self.client.get(url, params=params, timeout=15)
             if resp.status_code == 200:
                 return resp.json()
-        except Exception:
-            pass
+            logger.warning(f"GitHub repo fetch failed for org '{org_name}' (status={resp.status_code})")
+        except Exception as error:
+            logger.warning(f"GitHub repo fetch error for org '{org_name}': {error}")
 
         return []

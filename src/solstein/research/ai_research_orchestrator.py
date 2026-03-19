@@ -451,8 +451,8 @@ class ContentExtractorAgent:
             visible = soup.get_text(" ", strip=True)
             if visible:
                 return len(visible)
-        except Exception:
-            pass
+        except Exception as error:
+            logger.debug(f"Visible-text parse failed, using fallback length: {error}")
         return len(" ".join(text.split()))
 
     def _is_usable_content(self, text: str, content_type: str) -> bool:

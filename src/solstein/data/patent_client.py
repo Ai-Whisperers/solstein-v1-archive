@@ -160,7 +160,8 @@ async def _search_google_patents(company_name: str) -> PatentResult:
 
                 if title:
                     results.append({"title": title, "date": "", "url": ""})
-            except Exception:
+            except Exception as error:
+                logger.debug(f"Skipping malformed Google Patents result item: {error}")
                 continue
 
         if results:

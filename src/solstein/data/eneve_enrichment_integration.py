@@ -109,8 +109,8 @@ class EnrichmentCache:
             try:
                 cache_file.unlink()
                 count += 1
-            except Exception:
-                pass
+            except OSError as error:
+                logger.warning(f"Failed to remove cache file {cache_file}: {error}")
         return count
 
     def get_stats(self) -> dict[str, Any]:
@@ -127,8 +127,8 @@ class EnrichmentCache:
                 cached_time = datetime.fromisoformat(cached["timestamp"])
                 if datetime.now() - cached_time > self.ttl:
                     expired_count += 1
-            except Exception:
-                pass
+            except (OSError, ValueError, KeyError, TypeError) as error:
+                logger.debug(f"Skipping cache stats for unreadable file {cache_file}: {error}")
 
         return {
             "total_entries": len(cache_files),

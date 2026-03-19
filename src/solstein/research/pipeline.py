@@ -260,6 +260,12 @@ def run_market_intelligence(
         context.artifact_hashes["run_summary"] = sha256_canonical_json(run_summary)
         return run_summary
     except Exception as exc:
+        logger.exception(
+            "Market intelligence pipeline failed for market='{}', seed_company='{}', batch_id='{}'",
+            market,
+            seed_company,
+            batch_id,
+        )
         track_research_run_state_transition(RunState.RUNNING.value, RunState.FAILED.value)
         run_state.transition_to(RunState.FAILED, reason=str(exc))
         _write_checkpoint(context, run_state)

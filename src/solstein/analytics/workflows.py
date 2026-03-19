@@ -1,9 +1,13 @@
+import logging
 import importlib
 from typing import Any
 
+logger = logging.getLogger(__name__)
+
 try:
     workflow = importlib.import_module("temporalio.workflow")
-except Exception:
+except Exception as error:
+    logger.warning("Temporal workflow import failed; using local stub: %s", error)
 
     class _WorkflowStub:
         class RetryPolicy:
