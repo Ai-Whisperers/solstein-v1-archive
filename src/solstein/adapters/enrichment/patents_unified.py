@@ -102,9 +102,8 @@ class PatentsUnifiedAdapter(BaseRefreshConnector):
         return RawDataSource(
             source_name=f"patents_unified ({result.source})",
             source_type=actual_source_type,
-            company_id=company_id,
-            fetch_timestamp=datetime.now(timezone.utc),
-            data={
+            retrieval_timestamp=datetime.now(timezone.utc),
+            raw_content={
                 "total_patents": result.total_patents,
                 "recent_patents": result.recent_patents,
                 "ai_related_patents": result.ai_related_patents,

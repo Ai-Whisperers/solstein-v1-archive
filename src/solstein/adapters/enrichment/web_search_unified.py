@@ -146,9 +146,8 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
             raw_data = RawDataSource(
                 source_name=self.source_name,
                 source_type=self.source_type,
-                company_id=company_id,
-                fetch_timestamp=datetime.now(),
-                data={
+                retrieval_timestamp=datetime.now(),
+                raw_content={
                     "news": news,
                     "general_info": info,
                     "funding_info": funding_info,
@@ -170,9 +169,8 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
             return RawDataSource(
                 source_name=self.source_name,
                 source_type=self.source_type,
-                company_id=company_id,
-                fetch_timestamp=datetime.now(),
-                data={},
+                retrieval_timestamp=datetime.now(),
+                raw_content={},
                 metadata={"error": str(e)},
             )
 

@@ -191,9 +191,8 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
         return RawDataSource(
             source_name=self.source_name,
             source_type=self.source_type,
-            company_id=company_id,
-            fetch_timestamp=datetime.now(),
-            data={
+            retrieval_timestamp=datetime.now(),
+            raw_content={
                 "articles": articles,
                 "total_articles": total,
                 "positive_count": positive,

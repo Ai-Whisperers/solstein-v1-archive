@@ -25,8 +25,10 @@ from typing import Any
 
 from loguru import logger
 
+import uuid
+
 from solstein.adapters.registry import SourceRegistry
-from solstein.domain.models import AggregatedDataRecord, RawDataRecord, RawDataSource
+from solstein.domain.models import AggregatedDataRecord, AggregatedFact, RawDataRecord, RawDataSource
 
 
 class EnrichmentPipeline:
@@ -74,8 +76,8 @@ class EnrichmentPipeline:
         if not sources:
             logger.warning("No enrichment sources registered, returning empty record")
             return AggregatedDataRecord(
-                entity_id=company_id,
-                entity_name=company_name,
+                company_id=company_id,
+                gathering_batch_id=str(uuid.uuid4()),
                 facts=[],
             )
 
@@ -165,18 +167,21 @@ class EnrichmentPipeline:
         sources: list[RawDataSource],
     ) -> AggregatedDataRecord:
         """Merge multiple RawDataSource results into a single AggregatedDataRecord."""
-        all_records: list[RawDataRecord] = []
+        facts: list[AggregatedFact] = []
         for src in sources:
-            if hasattr(src, "records") and src.records:
-                all_records.extend(src.records)
-            elif hasattr(src, "data") and src.data:
-                # Adapt raw dict data into a minimal RawDataRecord if needed
-                pass
+            source_id = src.url or src.source_name
+            fact = AggregatedFact(
+                fact_type=src.source_type.value if hasattr(src.source_type, "value") else str(src.source_type),
+                value=src.raw_content,
+                confidence=src.confidence,
+                sources_used=[source_id] if source_id else [src.source_name],
+            )
+            facts.append(fact)
 
         record = AggregatedDataRecord(
-            entity_id=company_id,
-            entity_name=company_name,
-            facts=all_records,
+            company_id=company_id,
+            gathering_batch_id=str(uuid.uuid4()),
+            facts=facts,
         )
         record.update_quality_metrics()
         return record

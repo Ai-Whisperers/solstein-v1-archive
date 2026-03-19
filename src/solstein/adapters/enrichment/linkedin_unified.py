@@ -106,9 +106,8 @@ class LinkedInUnifiedAdapter(BaseRefreshConnector):
         return RawDataSource(
             source_name=self.source_name,
             source_type=self.source_type,
-            company_id=company_id,
-            fetch_timestamp=datetime.now(),
-            data=signals,
+            retrieval_timestamp=datetime.now(),
+            raw_content=signals,
             metadata={
                 "data_source": "news_proxy",
                 "has_hiring_signals": signals["hiring_mentions"] > 0,
