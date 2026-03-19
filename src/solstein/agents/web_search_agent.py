@@ -143,28 +143,6 @@ class WebSearchAgent(BaseDataGatheringAgent):
             self.log_error(f"Error calling search API: {e}")
 
         return []
-        if not self.google_api_key or not self.search_engine_id:
-            return []
-
-        try:
-            params = {
-                "q": query,
-                "key": self.google_api_key,
-                "cx": self.search_engine_id,
-                "num": 10,
-                "sort": "date",
-            }
-
-            resp = requests.get(self.search_base, params=params, timeout=15)
-            if resp.status_code == 200:
-                data = resp.json()
-                return data.get("items", [])
-            else:
-                self.log_warning(f"Search API error {resp.status_code}")
-        except Exception as e:
-            self.log_error(f"Error calling search API: {e}")
-
-        return []
 
     def _extract_facts_from_sources(self, raw_sources: list, company_name: str) -> list:
         """Extract facts from web search sources."""

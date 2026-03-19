@@ -181,6 +181,7 @@ class WebSearchAgent:
     def __init__(self) -> None:
         self.ddgs = _ddgs_class() if _duckduckgo_available and _ddgs_class is not None else None
         self.cache: dict[str, list[SearchResult]] = {}
+        self._cache_max_size: int = 256  # prevent unbounded memory growth
 
     async def search(self, query: str, intent: str, max_results: int = 10) -> list[SearchResult]:
         """Execute search and return ranked results."""
@@ -213,6 +214,10 @@ class WebSearchAgent:
             logger.warning(f"All search backends returned 0 results for '{query}'")
 
         ranked = self._rank_by_relevance(results, intent)
+        if len(self.cache) >= self._cache_max_size:
+            # Evict oldest entry (first key inserted) to keep memory bounded
+            oldest_key = next(iter(self.cache))
+            del self.cache[oldest_key]
         self.cache[cache_key] = ranked
         return ranked
 

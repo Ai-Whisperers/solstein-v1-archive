@@ -190,26 +190,6 @@ class CompanyRepository:
             .limit(limit)
         )
         return list(result.scalars().all())
-        """Search companies by a specific field using case-insensitive matching.
-
-        Args:
-            query: Search query string.
-            field: Field to search in (default: "name").
-                Supported fields: name, industry, headquarters, description.
-
-        Returns:
-            List of matching CompanyRecord objects.
-
-        Raises:
-            ValueError: If field is not supported.
-        """
-        supported_fields = {"name", "industry", "headquarters", "description"}
-        if field not in supported_fields:
-            raise ValueError(f"Field '{field}' not supported. Choose from: {supported_fields}")
-
-        search_field = getattr(CompanyRecord, field)
-        result = await self.session.execute(select(CompanyRecord).where(search_field.ilike(f"%{query}%")))
-        return list(result.scalars().all())
 
     async def filter_by(self, skip: int = 0, limit: int = 100, **filters) -> list[CompanyRecord]:
         """Filter companies by multiple criteria.
@@ -241,29 +221,6 @@ class CompanyRepository:
             .offset(skip)
             .limit(limit)
         )
-        return list(result.scalars().all())
-        """Filter companies by multiple criteria.
-
-        Args:
-            **filters: Arbitrary keyword arguments for filtering.
-                Supported filters: tier, classification, ai_maturity, industry, etc.
-
-        Returns:
-            List of CompanyRecord objects matching all filter criteria.
-
-        Raises:
-            ValueError: If no valid filters are provided.
-        """
-        if not filters:
-            raise ValueError("At least one filter criterion must be provided")
-
-        conditions = []
-        for key, value in filters.items():
-            if not hasattr(CompanyRecord, key):
-                raise ValueError(f"CompanyRecord has no attribute '{key}'")
-            conditions.append(getattr(CompanyRecord, key) == value)
-
-        result = await self.session.execute(select(CompanyRecord).where(and_(*conditions)))
         return list(result.scalars().all())
 
     async def get_all_filtered(

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import httpx
+from loguru import logger
 
 from ..resilience import GITHUB_RETRY_CONFIG, CircuitBreaker, call_with_retry
 
@@ -77,5 +78,6 @@ class GitHubClient:
             raw = base64.b64decode(content.encode("utf-8"))
             return raw.decode("utf-8", errors="replace")
 
-        except Exception:
+        except Exception as e:
+            logger.warning(f"[GitHubClient] fetch_file {org}/{repo}/{path} failed: {e}")
             return None
