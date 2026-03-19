@@ -6,6 +6,7 @@ Provides Celery tasks for enriching company data from external sources.
 
 from __future__ import annotations
 
+import traceback
 from datetime import datetime, timezone
 
 from celery import Task
@@ -21,12 +22,16 @@ class EnrichmentTask(Task):
     """Base task class for enrichment operations with result tracking."""
 
     def on_success(self, result, task_id, args, kwargs):
-        """Called on task success - update result tracking."""
-        pass
+        """Called on task success - log completion."""
+        company_id = args[0] if args else kwargs.get("company_id", "unknown")
+        logger.info(f"[EnrichmentTask] Task {task_id} succeeded for company {company_id}")
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
-        """Called on task failure - update result tracking."""
-        pass
+        """Called on task failure - log with full traceback."""
+        company_id = args[0] if args else kwargs.get("company_id", "unknown")
+        logger.error(
+            f"[EnrichmentTask] Task {task_id} failed for company {company_id}: {exc}\n{einfo}"
+        )
 
 
 @celery_app.task(base=EnrichmentTask, bind=True, max_retries=3)
@@ -96,8 +101,9 @@ def enrich_company_async(
         try:
             self.retry(exc=exc, countdown=countdown)
         except MaxRetriesExceededError:
+            tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
             dead_letter_queue.record_failure(
-                "enrich_company_async", self.request.id, str(exc), self.request.retries + 1
+                "enrich_company_async", self.request.id, f"{exc}\n{tb}", self.request.retries + 1
             )
             return {
                 "task_id": self.request.id,

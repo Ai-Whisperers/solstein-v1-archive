@@ -50,20 +50,32 @@ class GitHubOrgSearcher:
         return None
 
     def fetch_repos(self, org_name: str, max_repos: int = 100) -> list[dict]:
-        """Fetch repos from GitHub org."""
+        """Fetch repos from GitHub org, paginating until max_repos is reached."""
         url = f"{self.client.api_base}/orgs/{org_name}/repos"
-        params = {
-            "per_page": min(max_repos, 100),
-            "sort": "stars",
-            "direction": "desc",
-        }
+        all_repos: list[dict] = []
+        page = 1
 
-        try:
-            resp = self.client.get(url, params=params, timeout=15)
-            if resp.status_code == 200:
-                return resp.json()
-            logger.warning(f"GitHub repo fetch failed for org '{org_name}' (status={resp.status_code})")
-        except Exception as error:
-            logger.warning(f"GitHub repo fetch error for org '{org_name}': {error}")
+        while len(all_repos) < max_repos:
+            per_page = min(100, max_repos - len(all_repos))
+            params = {
+                "per_page": per_page,
+                "page": page,
+                "sort": "stars",
+                "direction": "desc",
+            }
 
-        return []
+            try:
+                resp = self.client.get(url, params=params, timeout=15)
+                if resp.status_code != 200:
+                    logger.warning(f"GitHub repo fetch failed for org '{org_name}' (status={resp.status_code})")
+                    break
+                batch = resp.json()
+                if not batch:
+                    break
+                all_repos.extend(batch)
+                page += 1
+            except Exception as error:
+                logger.warning(f"GitHub repo fetch error for org '{org_name}': {error}")
+                break
+
+        return all_repos[:max_repos]

@@ -15,6 +15,7 @@ Usage:
         pass
 """
 
+import asyncio
 import time
 from collections.abc import Callable
 from functools import wraps
@@ -354,8 +355,6 @@ def record_http_request(method: str, endpoint: str, status_code: int, duration: 
 # ============================================================================
 # FastAPI Middleware
 # ============================================================================
-
-import asyncio
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp

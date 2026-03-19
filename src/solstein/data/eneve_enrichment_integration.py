@@ -310,7 +310,13 @@ class EneveEnricher:
         company_data = dict(company_data)  # shallow copy — do not mutate caller's dict
         # Update enrichment metrics
         company_data["enrichment_source_count"] = len(raw_sources)
-        company_data["data_quality_score"] = min(0.95, 0.5 + (len(raw_sources) * 0.15))
+        # Quality score: average confidence across sources, or 0.0 if no sources
+        if raw_sources:
+            confidences = [getattr(s, "confidence", None) for s in raw_sources]
+            valid_confidences = [c for c in confidences if isinstance(c, (int, float)) and 0.0 <= c <= 1.0]
+            company_data["data_quality_score"] = round(sum(valid_confidences) / len(valid_confidences), 3) if valid_confidences else 0.0
+        else:
+            company_data["data_quality_score"] = 0.0
 
         # Calculate quality metrics
         quality_metrics = self._calculate_quality_metrics(raw_sources)

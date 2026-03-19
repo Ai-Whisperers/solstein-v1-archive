@@ -41,13 +41,31 @@ async def store_facts(db_manager, facts: list[dict], source: str) -> int:
     async with db_manager.get_session() as session:
         for fact in facts:
             try:
-                # Update company record with new data
                 company_id = fact.get("company_id")
                 if not company_id:
                     continue
 
-                # Get existing company or create new record logic
-                # For now, we just count successful facts
+                result = await session.execute(
+                    select(CompanyRecord).where(CompanyRecord.company_id == company_id)
+                )
+                record = result.scalar_one_or_none()
+
+                if record is None:
+                    logger.debug(f"[store_facts] No company record found for {company_id}, skipping fact from {source}")
+                    continue
+
+                # Write source-specific fields into the record
+                fact_type = fact.get("fact_type") or fact.get("type")
+                fact_value = fact.get("value")
+
+                if fact_type and fact_value is not None:
+                    if not record.raw_data:
+                        record.raw_data = {}
+                    if source not in record.raw_data:
+                        record.raw_data[source] = {}
+                    record.raw_data[source][fact_type] = fact_value
+
+                record.last_updated = datetime.now(timezone.utc)
                 stored_count += 1
 
             except Exception as e:
