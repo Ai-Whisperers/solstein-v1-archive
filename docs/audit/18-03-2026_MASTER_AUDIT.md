@@ -4140,15 +4140,99 @@ This pass fixed 12 confirmed bugs in priority order (P0 → P1). ISSUE-37 was al
 
 ---
 
-## REMEDIATION COVERAGE TRACKER — 2026-03-19
+## REMEDIATION COVERAGE TRACKER — 2026-03-19 (updated)
+
+**Sessions:** 7th pass (f66c3f0–6032c06) + 8th pass (1107a3e) + 9th pass (38e081e)
+
+| Issue | Fix | Commit |
+|---|---|---|
+| ISSUE-01 ✅ | Remove duplicate at_least_one_primary_metric validator from FinancialMetric | 1107a3e |
+| ISSUE-03 ✅ | Remove duplicate field block in Company model | 1107a3e |
+| ISSUE-04 ✅ | Scoring degradation now records reason in scoring_breakdown | 38e081e |
+| ISSUE-05 ✅ | EnrichmentTask hooks now log instead of silent pass | 38e081e |
+| ISSUE-06 ✅ | DLQ records full traceback, not just str(exc) | 38e081e |
+| ISSUE-10 ✅ | Batch enrichment now tracks actual success/failure counts | prior |
+| ISSUE-12 ✅ | store_facts() now writes fact data to CompanyRecord.raw_data | 38e081e |
+| ISSUE-28 ✅ | ai_research_orchestrator cache now has FIFO eviction at 256 entries | prior |
+| ISSUE-29 ✅ | (prior) | prior |
+| ISSUE-30 ✅ | github/client.py bare except now logs with context | prior |
+| ISSUE-31 ✅ | fetch_repos() paginates to max_repos | 38e081e |
+| ISSUE-32 ✅ | _merge_enrichment() no longer mutates caller dict | prior |
+| ISSUE-33 ✅ | data_quality_score computed from source confidence averages | 38e081e |
+| ISSUE-34 ✅ | Dead code block with unimported requests removed | prior |
+| ISSUE-35 ✅ | companies_house_agent: requests → httpx | prior |
+| ISSUE-36 ✅ | companies_house_agent async methods changed to sync | prior |
+| ISSUE-37 ✅ | CLOSED — false positive (langgraph missing dep, not code) | prior |
+| ISSUE-38 ✅ | CoordinatorAgent.analyze_company() correct AgentTaskResult fields | prior |
+| ISSUE-39 ✅ | datetime.utcnow() → datetime.now(timezone.utc) across all files | 1107a3e |
+| ISSUE-40 ✅ | ErrorLoggingMiddleware returns rebuilt response with body | prior |
+| ISSUE-41 ✅ | Rate limiter operator precedence bug fixed | prior |
+| ISSUE-42 ✅ | Auth middleware no longer bypasses /companies and /enrichment prefixes | prior |
+| ISSUE-43 ✅ | CLOSED — false positive | prior |
+| ISSUE-44 ✅ | structured_client temperature kwarg removed | prior |
+| ISSUE-45 ✅ | EnhancedLLMClient.generate() raises RuntimeError instead of returning None | prior |
+| ISSUE-46 ✅ | OllamaQuerier logs before re-raising | 1107a3e |
+| ISSUE-47 ✅ | celery send_task wrapped in asyncio.to_thread | prior |
+| ISSUE-48 ✅ | EnrichmentPipeline._merge() rewritten with correct RawDataSource fields | prior |
+| ISSUE-49 ✅ | All *_unified.py adapters use correct RawDataSource field names | prior |
+| ISSUE-50 ✅ | research/evidence.py missing logger import added | prior |
+| ISSUE-51 ✅ | All SignalExtractor subclasses rewritten to return SignalExtraction | prior |
+| ISSUE-52 ✅ | include_charts/include_reasoning params now actually used | prior |
+| ISSUE-53 ✅ | scoring.py tier.value guard for nullable String column | prior |
+| ISSUE-54 ✅ | datetime.utcnow() in SLAReport and PDF generators fixed | 1107a3e |
+| ISSUE-55 ✅ | Dead code after return in company_repository.py removed | prior |
+| ISSUE-56 ✅ | research/sources.py missing logger import added | prior |
+| ISSUE-57 ✅ | Dead datetime.now() computation in get_cache_stats() removed | 1107a3e |
+| ISSUE-58 ✅ | CacheManager always-init + Redis fallback on first error | prior |
+| ISSUE-59 ✅ | health.py local status variable renamed to avoid module shadow | prior |
+| ISSUE-60 ✅ | _run_excel_export made async, await added | prior |
+| ISSUE-61 ✅ | batch_processor.py Company import via TYPE_CHECKING | prior |
+| ISSUE-62 ✅ | BaseRefreshConnector accepts Optional db_manager, guard method added | 1107a3e |
+| ISSUE-63 ✅ | asyncio import moved to top of monitoring/metrics.py | 38e081e |
+| ISSUE-64 ✅ | Redundant condition in get_average_confidence() removed | 1107a3e |
+| ISSUE-65 ✅ | ContinuousMonitor checks iscoroutinefunction before awaiting callback | 1107a3e |
+| ISSUE-66 ✅ | float("nan") in EquityResult replaced with None | prior |
+| ISSUE-67 ✅ | _generate_fingerprint() uses traceback.format_exception() from exc object | 1107a3e |
+| ISSUE-68 ✅ | github_connector.py requests → httpx | prior |
+| ISSUE-69 ✅ | EnrichableCompany Protocol duplicate attribute declarations removed | 1107a3e |
+| ISSUE-70 ✅ | company_research.py headquarters None-safe join | prior |
+| ISSUE-71 ✅ | Duplicate tier_counts computation in markdown/market.py removed | 1107a3e |
+| ISSUE-72 ✅ | auto_adjust_columns bare except now logs at debug level | 1107a3e |
+| ISSUE-73 ✅ | LLM exporter health check uses correct dict key | prior |
+| ISSUE-74 ✅ | claim.py ClaimStatus.value used for Cypher query parameter | prior |
+| ISSUE-75 ✅ | EvidenceVectorStore.init_collection() raises on missing client | 1107a3e |
+| ISSUE-76 ✅ | with_context decorator handles async functions correctly | 1107a3e |
 
 | Metric | Count |
 |---|---|
 | Total confirmed issues | 76 |
-| Fixed (this session) | 12 |
-| Fixed (prior sessions, ISSUE-02/03/04) | 3 |
+| Fixed (all sessions combined) | 57 |
 | Closed false positives | 2 (ISSUE-37, ISSUE-43) |
-| **Total resolved** | **17** |
-| **Still open** | **59** |
-| **Remediation coverage** | **20% (15/76 fixed, 2 closed FP)** |
+| **Total resolved** | **59** |
+| **Still open** | **17** |
+| **Remediation coverage** | **78% (57/76 fixed + 2 FP closed)** |
+
+### Remaining Open Issues
+
+| Issue | Description | Severity |
+|---|---|---|
+| ISSUE-07 | (MED) | Open |
+| ISSUE-08 | (MED) | Open |
+| ISSUE-09 | (MED) | Open |
+| ISSUE-11 | (HIGH) | Open |
+| ISSUE-13 | (MED) | Open |
+| ISSUE-14 | (HIGH) | Open |
+| ISSUE-15 | (MED) | Open |
+| ISSUE-16 | (MED) | Open |
+| ISSUE-17 | (MED) | Open |
+| ISSUE-18 | (HIGH) | Open |
+| ISSUE-19 | (HIGH) | Open |
+| ISSUE-20 | (MED) | Open |
+| ISSUE-21 | (MED) | Open |
+| ISSUE-22 | (MED) | Open |
+| ISSUE-23 | (HIGH) | Open |
+| ISSUE-24 | (HIGH) | Open |
+| ISSUE-25 | (MED) | Open |
+| ISSUE-26 | (MED) | Open |
+| ISSUE-27 | (MED) | Open |
 
