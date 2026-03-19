@@ -4094,3 +4094,46 @@ These are the issues that cause immediate crashes or total data loss:
 | P1 | ISSUE-73 | LLM report availability check | Always reports unavailable |
 
 *Audit completed 2026-03-19. Nineteen passes, source-corroborated only.*
+
+---
+
+## REMEDIATION PASS — 2026-03-19
+
+**Commits:** f66c3f0, 3c02e80, 6032c06
+
+This pass fixed 12 confirmed bugs in priority order (P0 → P1). ISSUE-37 was also re-verified and closed as a false positive.
+
+### ISSUE-37 — CLOSED (False Positive)
+`workflow_nodes` **does exist** as a package at `src/solstein/agents/workflow_nodes/` with a complete `__init__.py` exporting all four symbols (`GatherSourcesNode`, `ProcessRawNode`, `LogicFusionNode`, `ExtractSignalsNode`). The import fails at runtime only because `langgraph` is not installed in this environment — a missing dependency, not a missing module.
+
+### Fixed Issues
+
+| Issue | File | Fix Applied |
+|---|---|---|
+| ISSUE-59 ✅ | `api/routers/health.py:30` | Renamed local `status` → `overall_status` to stop shadowing FastAPI `status` module |
+| ISSUE-60 ✅ | `api/routers/export.py:22` | `_run_excel_export` made `async def`; added `await` to `repo.get_all()` call |
+| ISSUE-53 ✅ | `api/routers/scoring.py:269` | `company.tier.value` guarded with `hasattr(raw_tier, "value")` to handle nullable String ORM column |
+| ISSUE-61 ✅ | `infrastructure/batch_processor.py:1` | Added `from __future__ import annotations` + `TYPE_CHECKING` guard for `Company` import |
+| ISSUE-35 ✅ | `agents/companies_house_agent.py:138,182,224` | `requests.get(` → `httpx.get(` (httpx already imported) |
+| ISSUE-68 ✅ | `data/connectors/github_connector.py:64,104,149` | `requests.get(` → `httpx.get(` (httpx already imported) |
+| ISSUE-44 ✅ | `llm/structured_client.py:113` | Removed `temperature=temperature` kwarg not accepted by `generate()` |
+| ISSUE-40 ✅ | `api/middleware/logging.py:184` | `_log_error_response` now returns a reconstructed `Response` with body bytes after consuming the iterator; `dispatch` uses the returned response |
+| ISSUE-73 ✅ | `exporters/llm.py:79` | Fixed wrong dict key: `health.get("available", [])` → iterate `health["providers"].values()` checking `.get("available")` |
+| ISSUE-74 ✅ | `evidence/repositories/claim.py:135` | Added `status_value = status.value if hasattr(status, "value") else status` before Cypher query |
+| ISSUE-48 ✅ | `application/enrichment_pipeline.py:161-182` | `_merge()` rewritten: now converts each `RawDataSource` to `AggregatedFact`; uses correct `AggregatedDataRecord` field names (`company_id`, `gathering_batch_id`) |
+| ISSUE-49 ✅ | `adapters/enrichment/*_unified.py` (6 files) | `company_id=` removed (not a `RawDataSource` field), `fetch_timestamp=` → `retrieval_timestamp=`, `data=` → `raw_content=` |
+
+### Remaining Open HIGH Issues (15 of 27 still open)
+
+| Issue | Description | Status |
+|---|---|---|
+| ISSUE-01 | `Company` default construction validation error | Open |
+| ISSUE-10 | Batch enrichment always reports 100% success | Open |
+| ISSUE-12 | All refresh worker tasks are stubs (DB never written) | Open |
+| ISSUE-36 | `CompaniesHouseAgent` async methods return coroutines via `asyncio.to_thread` | Open |
+| ISSUE-38 | `CoordinatorAgent.analyze_company()` missing required `AgentTaskResult` fields | Open |
+| ISSUE-45 | `EnhancedLLMClient.generate()` returns `None` after all providers fail (unchecked by callers) | Open |
+| ISSUE-47 | `celery_app.send_task()` called synchronously in async handlers | Open |
+| ISSUE-51 | All `SignalExtractor` subclasses use 5 nonexistent `Signal` fields; layer entirely unwired | Open |
+| ISSUE-66 | `float("nan")` in `EquityResult` causes JSON `ValueError` | Open |
+
