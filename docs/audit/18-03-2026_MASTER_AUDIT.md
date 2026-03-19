@@ -13,16 +13,16 @@
 | Metric | Value |
 |---|---|
 | **Total `.py` files in `src/solstein/`** | 555 |
-| **Files directly read** | ~121 |
-| **Coverage** | ~22% |
-| **Total issues found** | 56 (1 false positive closed) |
+| **Files directly read** | ~138 |
+| **Coverage** | ~25% |
+| **Total issues found** | 60 (1 false positive closed) |
 | **Open 🔴 HIGH** | 22 |
-| **Open 🟡 MED** | 28 |
-| **Open 🟢 LOW** | 6 |
+| **Open 🟡 MED** | 31 |
+| **Open 🟢 LOW** | 7 |
 | **Closed (false positive)** | 1 (ISSUE-43) |
 | **Confirmed fixes** | 3 |
-| **Last pass** | Eighth-pass — Signals layer, scoring stats, export stubs, monitoring (2026-03-19) |
-| **Last commit** | `1d30588` — pushed to `origin/master` 2026-03-18 |
+| **Last pass** | Ninth-pass — Infrastructure repositories, research remaining, application layer (2026-03-19) |
+| **Last commit** | `de47049` — pushed to `origin/master` 2026-03-19 |
 
 ### Directories with meaningful coverage
 | Directory | Files read / est. total | Notes |
@@ -40,20 +40,37 @@
 | `application/` | 1 / ~10 | enrichment_pipeline |
 | `llm/` | 5 / ~17 | enhanced_client, structured_client, query/ollama, query/cloud, provider_strategies |
 
-### Directories with zero coverage (priority for next passes)
+### Directories with meaningful coverage (updated after ninth pass)
+| Directory | Files read / est. total | Notes |
+|---|---|---|
+| `domain/` | 2 / ~5 | models.py, unified/company.py |
+| `analytics/` | 10 / ~35 | scoring, completeness, workflows, activities, 3 scorers, signals base/extractors/models |
+| `worker/` | 2 / ~5 | enrichment_tasks, base |
+| `data/` | 9 / ~30 | unified/enrichment, report_release_gate, report_readiness, gap_analyzer, metric_contract, patent_client, eneve_enrichment_integration, provenance, repositories |
+| `api/` | 12 / ~25 | main, 5 routers (enrichment_batch, enrichment_single, async_jobs, enrichment_audit, export, scoring partial, market partial, dashboard), 3 middleware |
+| `adapters/` | 8 / ~20 | instrumented, discovery/web_search, 6 enrichment adapters |
+| `agents/` | 7 / ~15 | web_search, companies_house, coordinator, base, resilience, github/client, github/search |
+| `research/` | 7 / ~15 | pipeline, ai_research_orchestrator, gather, discovery, aggregate, signals, reconcile, sources |
+| `core/` | 1 / ~5 | production_hardening |
+| `infrastructure/` | 8 / ~20 | company_repository, eager_repositories, enrichment_repositories, cache, conflict_resolution (partial), cache_warming, models/company, database_models |
+| `application/` | 1 / ~10 | enrichment_pipeline |
+| `llm/` | 5 / ~17 | enhanced_client, structured_client, query/ollama, query/cloud, provider_strategies |
+| `extractors/` | 2 / ~8 | batch/processor, llm_financial_extractor |
+| `monitoring/` | 1 / ~10 | sla.py |
+| `exporters/` | 4 / ~8 | excel_compat, pdf (partial), markdown/generator (partial), excel_improved |
+
+### Directories with zero or minimal coverage (priority for next passes)
 | Directory | Est. files | Risk |
 |---|---|---|
-| `application/` | ~10 | Unknown — likely orchestration layer |
-| `llm/` | ~10 | LLM client bugs could affect all AI features |
-| `exporters/` | ~3 remaining | excel.py, audit_report.py unread |
-| `extractors/` | ~3 remaining | parsers/ subpackage unread |
-| `monitoring/` | ~7 remaining | metrics, alerts, business_metrics, database_optimizer unread |
-| `analytics/signals/definitions/` | ~5 | Signal definitions unread |
-| `analytics/simulation/`, `valuation/` | ~5 | Financial modeling |
-| `api/routers/` (remaining) | ~7 | companies, metrics, search, health routers unread |
-| `adapters/` (remaining) | ~15 | Discovery (competitor_json, static_catalog), aggregation, remaining enrichment |
-| `research/` (remaining) | ~10 | discovery, aggregate, signals, reconcile still unread |
-| `infrastructure/` (remaining) | ~18 | DB, cache, refresh, repositories |
+| `infrastructure/` (remaining) | ~12 | session management, refresh, migrations, full models subpackage |
+| `analytics/signals/definitions/` | ~5 | Signal definitions (may reveal more ISSUE-51 blast radius) |
+| `analytics/simulation/`, `valuation/` | ~5 | Financial modeling correctness |
+| `api/routers/` (remaining) | ~6 | companies, metrics, search, health routers unread |
+| `adapters/` (remaining) | ~12 | aggregation, competitor adapters |
+| `application/` (remaining) | ~9 | all orchestration files except enrichment_pipeline |
+| `extractors/parsers/` | ~4 | Markdown parsing correctness |
+| `monitoring/` (remaining) | ~9 | metrics, alerts, business_metrics, database_optimizer |
+| `exporters/` (remaining) | ~4 | excel.py, audit_report.py |
 
 ---
 
@@ -2214,6 +2231,208 @@ end = datetime.utcnow()
 | ISSUE-53 | `GET /scoring/stats` crashes with `AttributeError` on every call; `company.tier.value` on nullable `String(50)` ORM column — strings have no `.value` | `api/routers/scoring.py:269` + `infrastructure/models/company.py:40` | 🔴 HIGH | Open — NEW |
 | ISSUE-54 | `datetime.utcnow()` used in `SLAReport` default factory and multiple report generators (deprecated Python 3.12+) | `monitoring/sla.py:54,161,237`; `exporters/pdf.py:90,165` | 🟢 LOW | Open — NEW |
 
+---
+
+## 22. NINTH-PASS FINDINGS — Infrastructure repositories, research remaining, cache layer (2026-03-19)
+
+**Directories newly covered:** `infrastructure/company_repository.py`, `infrastructure/eager_repositories.py`, `infrastructure/enrichment_repositories.py`, `infrastructure/cache.py`, `infrastructure/models/company.py`, `infrastructure/database_models.py`, `research/discovery.py`, `research/aggregate.py`, `research/reconcile.py`, `research/signals.py`, `research/sources.py`.
+
+**Method:** Direct file reads of every file listed above. Each finding is corroborated from the source with exact line references.
+
+---
+
+### ISSUE-55 — Dead code blocks after `return` in `CompanyRepository.search()` and `CompanyRepository.filter_by()` — merge artifact leaves second, incompatible implementation unreachable
+
+**Severity:** 🟡 MED
+**File:** `src/solstein/infrastructure/company_repository.py:192-212, 244-267`
+
+Both `search()` and `filter_by()` have full docstring + implementation blocks that are unreachable because they appear **after** a `return` statement in the same method body. Python parses the dead docstrings as standalone string expressions and the following code as unreachable statements; no `SyntaxError` is raised.
+
+```python
+# company_repository.py:186-212 — search()
+        result = await self.session.execute(
+            select(CompanyRecord)
+            .where(search_field.ilike(f"%{query}%"))
+            .offset(skip)
+            .limit(limit)
+        )
+        return list(result.scalars().all())   # ← execution ends here
+        """Search companies by a specific field...    ← DEAD: never reached
+        ...
+        """
+        supported_fields = {"name", "industry", "headquarters", "description"}
+        if field not in supported_fields:
+            raise ValueError(...)
+        search_field = getattr(CompanyRecord, field)
+        result = await self.session.execute(
+            select(CompanyRecord).where(search_field.ilike(f"%{query}%"))  # ← no .offset() or .limit()
+        )
+        return list(result.scalars().all())
+```
+
+```python
+# company_repository.py:244-267 — filter_by()
+        return list(result.scalars().all())   # ← execution ends here
+        """Filter companies by multiple criteria.   ← DEAD: never reached
+        ...
+        """
+        if not filters:
+            raise ValueError(...)
+        ...
+        result = await self.session.execute(
+            select(CompanyRecord).where(and_(*conditions))  # ← no .offset() or .limit()
+        )
+        return list(result.scalars().all())
+```
+
+**Impact:** The dead `search()` block omits `.offset(skip).limit(limit)` from the query; if it were reachable, pagination would be silently ignored. The dead `filter_by()` block also drops `.offset(skip).limit(limit)`. These are merge artifacts — two versions of the same method were concatenated rather than one replacing the other. The live implementations are correct; the dead blocks are pure code bloat that create confusion and maintenance risk.
+
+---
+
+### ISSUE-56 — `research/sources.py:canonicalize_url()` uses `logger` that is never imported; `NameError` when URL parse exception fires
+
+**Severity:** 🟡 MED
+**File:** `src/solstein/research/sources.py:1-5, 26-27`
+
+```python
+# sources.py:1-5 — complete module-level imports
+from __future__ import annotations
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+```
+
+No logging import exists anywhere in the module. Line 27:
+
+```python
+# sources.py:24-28
+    try:
+        parsed = urlparse(raw)
+    except Exception as e:
+        logger.debug(f"Failed to parse URL: {e}", url=raw)   # ← NameError: 'logger' not defined
+        return raw
+```
+
+**Impact:** `urlparse()` rarely raises for malformed strings (returns empty components instead), but any caller passing a non-string (`None`, integers, bytes) triggers `TypeError` inside `urlparse`. The `except` clause then raises `NameError: name 'logger' is not defined`, masking the original `TypeError` entirely and crashing `canonicalize_url()` for any non-string input.
+
+Note: `evidence.py` imports `canonicalize_url` from `sources.py` (via `from .sources import canonicalize_url`). The same NameError pattern occurs in both files (see also ISSUE-50).
+
+---
+
+### ISSUE-57 — `EnrichmentCacheRepository.get_cache_stats()` discards the result of `datetime.now(timezone.utc)` — dead computation
+
+**Severity:** 🟢 LOW
+**File:** `src/solstein/infrastructure/enrichment_repositories.py:158`
+
+```python
+# enrichment_repositories.py:152-167
+async def get_cache_stats(self) -> dict:
+    query = select(EnrichmentCacheRecord)
+    result = await self.session.execute(query)
+    records = result.scalars().all()
+
+    datetime.now(timezone.utc)   # ← result discarded; no assignment, no side-effect
+
+    valid_cache = [r for r in records if not r.is_expired()]
+    ...
+```
+
+**Impact:** The expression `datetime.now(timezone.utc)` is computed and immediately discarded. This was likely a `now = datetime.now(timezone.utc)` timestamp comparison that was refactored away but the call site was not removed. No functional impact; pure dead code.
+
+---
+
+### ISSUE-58 — `CacheManager.__init__()` sets `self.available = True` before any connectivity check; Redis server failures are not detected at construction time; in-memory fallback is never activated for server-down scenarios
+
+**Severity:** 🟡 MED
+**File:** `src/solstein/infrastructure/cache.py:41-50`
+
+```python
+# cache.py:41-50
+try:
+    self.redis: AsyncRedis | None = AsyncRedis.from_url(redis_url, decode_responses=True)
+    self.available = True           # ← set unconditionally when redis package is installed
+    logger.info("Redis cache configured")
+except Exception as e:
+    logger.warning(f"Redis unavailable: {e}, using in-memory cache")
+    self.redis = None
+    self.available = False
+    self._memory_cache: dict[str, tuple[Any, float | None]] = {}
+```
+
+`AsyncRedis.from_url()` creates a connection pool configuration object — it does **not** attempt a network connection. It never raises for an unreachable Redis server. Therefore:
+
+1. `self.available = True` and `self._memory_cache` is **never initialized** for the Redis-installed-but-server-down scenario.
+2. `get()` / `set()` calls with `self.available = True` try `await self.redis.get(key)`, get a `ConnectionError` from the Redis client, log it, and return `None` — they do not fall back to in-memory storage.
+3. If any code path ever sets `self.available = False` after construction (not seen in the read code), `get()` at line 69 tries `self._memory_cache` — which was never initialized — raising `AttributeError: 'CacheManager' object has no attribute '_memory_cache'`.
+
+**Impact:** The in-memory fallback logic is dead in practice. When Redis is installed but the server is unreachable, the cache silently returns `None` for all reads and discards all writes — without falling back to the in-memory dictionary that the design intended as a safety net. Every `get()` against an offline Redis server returns `None` regardless of any prior `set()` calls in the same process.
+
+---
+
+## 23. UPDATED SUMMARY TABLE (Full — Including Ninth-Pass)
+
+| ID | Description | File | Severity | Status |
+|---|---|---|---|---|
+| FIX-01 | Converter consolidation (EPIC-058) | `scripts/run_eneve_199.py:21` | — | ✅ Fixed |
+| FIX-02 | Export/gate decoupling in ENEVE script (EPIC-060) | `scripts/run_eneve_199.py:113-163` | — | ✅ Fixed |
+| FIX-03 | Instrumented adapters re-raise exceptions | `adapters/instrumented.py:94,145` | — | ✅ Fixed |
+| ISSUE-01 | `FinancialMetric(allow_empty_primary=True)` always raises; `Company` default construction always fails; Celery enrichment always crashes | `domain/models.py:107-134, 213` + `worker/enrichment_tasks.py:58` | 🔴 HIGH | Open |
+| ISSUE-02 | FinancialMetric duplicate field declarations | `domain/models.py:97-103` | 🟡 MED | Open |
+| ISSUE-03 | Company duplicate field blocks (defined twice) | `domain/models.py:143-153 vs 195-201` | 🟡 MED | Open |
+| ISSUE-04 | Scoring degrades silently to base_score on exception | `analytics/scoring.py:161-180` | 🔴 HIGH | Open |
+| ISSUE-05 | Celery EnrichmentTask hooks are empty stubs | `worker/enrichment_tasks.py:23-29` | 🟡 MED | Open |
+| ISSUE-06 | DLQ loses traceback, no alerting | `worker/enrichment_tasks.py:99-109` | 🔴 HIGH | Open |
+| ISSUE-07 | Enrichment loop breaks without re-raising | `data/unified/enrichment.py:72-85` | 🟡 MED | Open |
+| ISSUE-08 | `ensure_release_ready()` throwing path still used in CLI | `data/report_release_gate.py:297-315` | 🟡 MED | Open |
+| ISSUE-09 | Enrichment errors silently accumulate in list | `data/unified/enrichment.py:129+` | 🟡 MED | Open |
+| ISSUE-10 | Batch API hardcodes `failed_count=0`, `success_rate=100.0` | `api/routers/enrichment_batch.py:50-70` | 🔴 HIGH | Open |
+| ISSUE-11 | `enrich_batch()` silently substitutes original on failure | `data/unified/enrichment.py:189-191` | 🔴 HIGH | Open |
+| ISSUE-12 | `store_facts()` is an unimplemented stub; DB never written | `worker/base.py:34-59` | 🔴 HIGH | Open |
+| ISSUE-13 | Gap analyzer treats `revenue=0.0` as missing; blocks pre-revenue companies | `data/gap_analyzer.py:80-85` | 🟡 MED | Open |
+| ISSUE-14 | Provenance check requires HTTP/HTTPS/URN; JSON-loaded data always fails | `data/gap_analyzer.py:36-46` | 🔴 HIGH | Open |
+| ISSUE-15 | Completeness calculator counts enum defaults and empty lists as filled | `analytics/completeness.py:98-104` | 🟡 MED | Open |
+| ISSUE-16 | `normalize_percent()` heuristic silently misclassifies values near ±1 | `data/metric_contract.py:34-37` | 🟡 MED | Open |
+| ISSUE-17 | Scorers inconsistent None-handling: GrowthMomentum skips, FinancialHealth penalizes | `analytics/scorers/growth_momentum.py:75-77` | 🟡 MED | Open |
+| ISSUE-18 | DLQ in-memory only (lost on restart), logs at INFO not ERROR | `worker/base.py:67-88` | 🔴 HIGH | Open |
+| ISSUE-19 | 3 of 7 CLI report commands hard-block via `assert_client_report_ready` | `data/report_readiness.py:74-112` | 🔴 HIGH | Open |
+| ISSUE-20 | `saas_maturity` None fallback in CompetitivePositionScorer is dead code | `analytics/scorers/competitive_position.py:41` | 🟢 LOW | Open |
+| ISSUE-21 | Two `ConfidenceLevel` enums with same name in different modules | `domain/models.py:30` vs `data/provenance.py:27` | 🟡 MED | Open |
+| ISSUE-22 | Deprecated Pydantic v2 `.dict()` in API cache path | `api/routers/enrichment_single.py:108` | 🟢 LOW | Open |
+| ISSUE-23 | `search_company_patents()` calls async sub-functions without `await`; always crashes | `data/patent_client.py:33-54` | 🔴 HIGH | Open |
+| ISSUE-24 | `PatentsUnifiedAdapter` entirely non-functional (depends on ISSUE-23) | `adapters/enrichment/patents_unified.py:66,97,134` | 🔴 HIGH | Open |
+| ISSUE-25 | `_search_duckduckgo()` does not check HTTP status before parsing | `data/patent_client.py:202-203` | 🟡 MED | Open |
+| ISSUE-26 | `BatchScoreMarketWorkflow` missing `@workflow.defn` / `@workflow.run` decorators | `analytics/workflows.py:30-41` | 🟡 MED | Open |
+| ISSUE-27 | `ContentExtractorAgent.http` (httpx.AsyncClient) never closed; leaks connections | `research/ai_research_orchestrator.py:371` | 🟡 MED | Open |
+| ISSUE-28 | `WebSearchAgent.cache` is unbounded in-memory dict with no eviction | `research/ai_research_orchestrator.py:183,216` | 🟡 MED | Open |
+| ISSUE-29 | `DataValidatorAgent` bounds are unit-agnostic; per-employee check assumes millions | `research/ai_research_orchestrator.py:553-616` | 🟡 MED | Open |
+| ISSUE-30 | `GitHubClient.fetch_file()` silently swallows all exceptions with no logging | `agents/github/client.py:80-81` | 🟡 MED | Open |
+| ISSUE-31 | `fetch_repos()` truncates at 100 regardless of `max_repos`; no pagination | `agents/github/search.py:56` | 🟢 LOW | Open |
+| ISSUE-32 | `_merge_enrichment()` mutates caller's input dict in-place | `data/eneve_enrichment_integration.py:299-328` | 🟡 MED | Open |
+| ISSUE-33 | `data_quality_score` is fabricated from source count | `data/eneve_enrichment_integration.py:310` | 🟡 MED | Open |
+| ISSUE-34 | `WebSearchAgent._api_search_news()` contains unreachable dead code | `agents/web_search_agent.py:145-167` | 🟡 MED | Open |
+| ISSUE-35 | `CompaniesHouseAgent` uses `requests.get()` without importing `requests` | `agents/companies_house_agent.py:138,182,224` | 🔴 HIGH | Open |
+| ISSUE-36 | `CompaniesHouseAgent` async methods via `asyncio.to_thread` return coroutines | `agents/companies_house_agent.py:114-121` | 🔴 HIGH | Open |
+| ISSUE-37 | `coordinator_agent.py` imports non-existent `workflow_nodes`; `ModuleNotFoundError` at package load | `agents/coordinator_agent.py:23-28` | 🔴 HIGH | Open |
+| ISSUE-38 | `CoordinatorAgent.analyze_company()` constructs `AgentTaskResult` with missing required fields | `agents/coordinator_agent.py:135-148` | 🔴 HIGH | Open — masked by ISSUE-37 |
+| ISSUE-39 | `ResponseCache` uses deprecated `datetime.utcnow()`; breaks on Python 3.13 | `core/production_hardening.py:111,125` | 🟡 MED | Open |
+| ISSUE-40 | `ErrorLoggingMiddleware` exhausts `response.body_iterator`; all 4xx/5xx deliver empty body | `api/middleware/logging.py:168-186` | 🔴 HIGH | Open |
+| ISSUE-41 | `get_rate_limit_for_path()` operator precedence bug neutralizes trailing-slash guard | `api/middleware/rate_limit.py:50` | 🟡 MED | Open |
+| ISSUE-42 | `AuthenticationMiddleware` bypasses auth for any URL starting with `/companies` or `/enrichment` | `api/middleware/security.py:61-62` | 🟡 MED | Open |
+| ISSUE-43 | ~~`EnrichmentPipeline` isolation guarantee violated~~ | `application/enrichment_pipeline.py:99` | — | ❌ CLOSED — false positive |
+| ISSUE-44 | `StructuredLLMClient.extract()` passes `temperature` kwarg not in `generate()` signature; TypeError every call | `llm/structured_client.py:113` | 🔴 HIGH | Open |
+| ISSUE-45 | `EnhancedLLMClient.generate()` returns `None` silently after all providers fail | `llm/enhanced_client.py:114-115` | 🟡 MED | Open |
+| ISSUE-46 | `OllamaQuerier` bare `except Exception: raise` with no logging | `llm/query/ollama.py:67-68` | 🟢 LOW | Open |
+| ISSUE-47 | `celery_app.send_task()` called synchronously in async handlers | `api/routers/async_jobs.py:130,173` | 🟡 MED | Open |
+| ISSUE-48 | `EnrichmentPipeline._merge()` checks `.records`/`.data` — old schema; both branches unreachable; always returns empty aggregate | `application/enrichment_pipeline.py:170-174` | 🔴 HIGH | Open |
+| ISSUE-49 | All `BaseRefreshConnector` unified adapters construct `RawDataSource` with wrong field names; `ValidationError` on every `enrich()` call | `adapters/enrichment/website_unified.py:151` etc. | 🔴 HIGH | Open |
+| ISSUE-50 | `research/evidence.py` calls `logger.debug()` but `logger` is never imported; NameError masks real exception | `research/evidence.py:23` | 🟡 MED | Open |
+| ISSUE-51 | All `SignalExtractor` subclasses instantiate `Signal` with 5 nonexistent fields; Pydantic ValidationError on every `extract()` call | `analytics/signals/extractors.py:44-83+` | 🔴 HIGH | Open |
+| ISSUE-52 | `GET /export/excel` `include_charts` and `GET /export/llm-search` `include_reasoning` silently ignored (stub `pass`) | `api/routers/export.py:57-58, 161-162` | 🟡 MED | Open |
+| ISSUE-53 | `GET /scoring/stats` crashes with `AttributeError` on every call; `company.tier.value` on nullable `String(50)` ORM column | `api/routers/scoring.py:269` | 🔴 HIGH | Open |
+| ISSUE-54 | `datetime.utcnow()` in `SLAReport` default factory and PDF generators (deprecated Python 3.12+) | `monitoring/sla.py:54,161,237`; `exporters/pdf.py:90,165` | 🟢 LOW | Open |
+| ISSUE-55 | Dead code blocks after `return` in `search()` and `filter_by()` in `CompanyRepository` — incomplete implementations left by merge | `infrastructure/company_repository.py:192-212, 244-267` | 🟡 MED | Open — NEW |
+| ISSUE-56 | `research/sources.py:canonicalize_url()` uses `logger` that is never imported; NameError when URL parse exception fires | `research/sources.py:27` | 🟡 MED | Open — NEW |
+| ISSUE-57 | `EnrichmentCacheRepository.get_cache_stats()` discards `datetime.now(timezone.utc)` result — dead computation | `infrastructure/enrichment_repositories.py:158` | 🟢 LOW | Open — NEW |
+| ISSUE-58 | `CacheManager.__init__()` sets `self.available = True` before connectivity check; `AsyncRedis.from_url()` never raises for offline Redis; in-memory fallback never activates for server-down scenario | `infrastructure/cache.py:41-50` | 🟡 MED | Open — NEW |
+
 **Critical path (🔴 HIGH — 22 issues):** ISSUE-01, 04, 06, 10, 11, 12, 14, 18, 19, 23, 24, 35, 36, 37, 38, 40, 44, 48, 49, 51, 53.
 
 **Most consequential new finding (ISSUE-51):** The entire signals extraction layer is structurally broken. `Signal` model and all extractor subclasses were written to incompatible interfaces — the model defines `weight`, `data_sources`, `validation_rules` while the extractors pass `value`, `text`, `source`, `confidence`, `evidence`. Every call to any `*SignalExtractor.extract()` raises `Pydantic ValidationError` unconditionally. No signal data is ever produced from GitHub, financial, web-search, or Companies House agents.
@@ -2222,4 +2441,4 @@ end = datetime.utcnow()
 
 ---
 
-*Audit performed 2026-03-18. Seventh pass (schema mismatch root cause, adapter blast radius) completed 2026-03-18. All file:line references correspond to the state of the repository at this date.*
+*Audit started 2026-03-18. Ninth pass (infrastructure repositories, research remaining, cache layer) completed 2026-03-19. All file:line references correspond to the state of the repository at commit `de47049`.*
