@@ -110,7 +110,6 @@ class StructuredLLMClient:
                 raw = await self._inner.generate(
                     prompt=prompt,
                     system_prompt=system_prompt,
-                    temperature=temperature,
                 )
                 model_instance = self._parse_and_validate(raw, schema)
                 elapsed = time.monotonic() - start

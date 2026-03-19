@@ -76,9 +76,10 @@ class LLMReportEnhancer:
 
         try:
             health = asyncio.get_event_loop().run_until_complete(self._client.check_all_providers())
-            return len(health.get("available", [])) > 0
+            providers = health.get("providers", {})
+            return any(p.get("available") for p in providers.values())
         except Exception:
-            # Fallback to settings check
+            # Fallback to settings check (also handles RuntimeError in running event loops)
             return bool(self.settings.openai_api_key or self.settings.groq_api_key or self.settings.fireworks_api_key)
 
     def _get_preferred_provider(self) -> str | None:

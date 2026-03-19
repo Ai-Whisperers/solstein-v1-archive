@@ -131,12 +131,13 @@ class ClaimRepository(EvidenceGraphRepository):
         ORDER BY claim.overall_confidence DESC
         """
 
+        status_value = status.value if hasattr(status, "value") else status
         with self._get_session() as session:
             result = session.run(
                 query,
                 entity_id=entity_id,
                 field=field,
-                status=status,
+                status=status_value,
                 min_confidence=min_confidence,
             )
             return [dict(record["claim"]) for record in result]

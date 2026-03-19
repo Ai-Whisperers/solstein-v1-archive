@@ -171,19 +171,31 @@ class ErrorLoggingMiddleware(BaseHTTPMiddleware):
 
         # Log errors
         if response.status_code >= 400:
-            await self._log_error_response(request, response)
+            response = await self._log_error_response(request, response)
 
         return response
 
-    async def _log_error_response(self, request: Request, response: Response) -> None:
-        """Log error response details. All failures are logged, never silent."""
+    async def _log_error_response(self, request: Request, response: Response) -> Response:
+        """Log error response details. All failures are logged, never silent.
+
+        Returns a new Response with the body restored so the client receives it.
+        """
+        from starlette.responses import Response as StarletteResponse
+
         request_id = getattr(request.state, "request_id", "unknown")
 
         try:
-            # Attempt to read error details from response
+            # Consume body iterator and immediately restore it so the client receives the body
             body = b""
             async for chunk in response.body_iterator:
                 body += chunk
+            # Rebuild response with consumed body
+            response = StarletteResponse(
+                content=body,
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                media_type=response.media_type,
+            )
 
             error_data = None
             error_message = "Unknown error"
@@ -226,6 +238,8 @@ class ErrorLoggingMiddleware(BaseHTTPMiddleware):
                 error_type=type(e).__name__,
                 error=str(e),
             )
+
+        return response
 
 
 def setup_logging_middleware(app) -> None:
