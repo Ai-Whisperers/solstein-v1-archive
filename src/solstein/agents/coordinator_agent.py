@@ -55,7 +55,7 @@ class CoordinatorAgent(BaseDataGatheringAgent):
             website_agent: Website scraping agent
             db_manager: Database manager
         """
-        super().__init__("Coordinator")
+        super().__init__("Coordinator", DataSourceType.WEB_SEARCH)
 
         # Store agent references
         self._github_agent = github_agent
@@ -132,13 +132,14 @@ class CoordinatorAgent(BaseDataGatheringAgent):
         final_state = await self._graph.ainvoke(initial_state)
 
         # Create result
+        errors = final_state.get("errors", [])
         result = AgentTaskResult(
             agent_name="Coordinator",
-            company_name=company_name,
+            source_type=DataSourceType.WEB_SEARCH,  # coordinator aggregates all sources
+            success=len(errors) == 0,
             raw_sources=final_state.get("raw_data_records", []),
             extracted_facts=final_state.get("aggregated_facts", []),
-            signals=final_state.get("extracted_signals", []),
-            errors=final_state.get("errors", []),
+            error_message="; ".join(str(e) for e in errors) if errors else None,
         )
 
         logger.info(

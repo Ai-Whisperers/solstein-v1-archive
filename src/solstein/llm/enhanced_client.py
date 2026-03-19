@@ -100,8 +100,12 @@ class EnhancedLLMClient:
         system_prompt: str | None = None,
         max_retries: int = 2,
         preferred_provider: str | None = None,
-    ) -> str | None:
-        """Generate text using available LLM with automatic failover."""
+    ) -> str:
+        """Generate text using available LLM with automatic failover.
+
+        Raises:
+            RuntimeError: If all providers fail and no response can be generated.
+        """
         await self.health_checker.check_all_providers()
 
         providers = self._get_provider_order(preferred_provider)
@@ -112,7 +116,7 @@ class EnhancedLLMClient:
                 return attempts[-1].get("result")
 
         logger.error(f"All LLM providers failed after {len(attempts)} attempts")
-        return None
+        raise RuntimeError(f"All LLM providers exhausted ({len(attempts)} attempts); no response generated")
 
     def _get_provider_order(self, preferred: str | None) -> list[str]:
         """Determine provider order based on preference."""

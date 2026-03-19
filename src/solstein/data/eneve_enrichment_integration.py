@@ -299,12 +299,15 @@ class EneveEnricher:
     def _merge_enrichment(self, company_data: dict[str, Any], raw_sources: list[RawDataSource]) -> dict[str, Any]:
         """Merge enrichment results into company data.
 
+        Returns a shallow copy with merged fields; does not mutate the caller's dict.
+
         Updates:
         - enrichment_source_count: Number of sources used
         - data_quality_score: Calculated from source count
         - source_links: List of data sources
         - enrichment_quality_metrics: Detailed quality metrics
         """
+        company_data = dict(company_data)  # shallow copy — do not mutate caller's dict
         # Update enrichment metrics
         company_data["enrichment_source_count"] = len(raw_sources)
         company_data["data_quality_score"] = min(0.95, 0.5 + (len(raw_sources) * 0.15))

@@ -31,15 +31,17 @@ class CacheManager:
         Args:
             redis_url: Redis connection URL
         """
+        # Always initialize in-memory fallback so it's available if Redis fails at runtime
+        self._memory_cache: dict[str, tuple[Any, float | None]] = {}
+
         if not REDIS_AVAILABLE:
             logger.warning("Redis not installed, using in-memory cache")
             self.redis = None
             self.available = False
-            self._memory_cache: dict[str, tuple[Any, float | None]] = {}
             return
 
         try:
-            # Try async Redis client first
+            # from_url() only creates the client; actual connection failure surfaces on first I/O
             self.redis: AsyncRedis | None = AsyncRedis.from_url(redis_url, decode_responses=True)
             self.available = True
             logger.info("Redis cache configured")
@@ -47,7 +49,6 @@ class CacheManager:
             logger.warning(f"Redis unavailable: {e}, using in-memory cache")
             self.redis = None
             self.available = False
-            self._memory_cache: dict[str, tuple[Any, float | None]] = {}
 
     async def get(self, key: str) -> Any | None:
         """
@@ -59,19 +60,20 @@ class CacheManager:
         Returns:
             Cached value or None
         """
-        try:
-            if self.available and self.redis:
+        if self.available and self.redis:
+            try:
                 value = await self.redis.get(key)
                 if value:
                     return json.loads(value)
-            else:
-                # In-memory fallback
-                if key in self._memory_cache:
-                    value, _ = self._memory_cache[key]
-                    return value
-        except Exception as e:
-            logger.error(f"Cache get error: {e}")
+                return None
+            except Exception as e:
+                logger.warning(f"Redis get error, falling back to memory: {e}")
+                self.available = False
 
+        # In-memory fallback
+        if key in self._memory_cache:
+            value, _ = self._memory_cache[key]
+            return value
         return None
 
     async def set(
@@ -93,17 +95,21 @@ class CacheManager:
         """
         try:
             serialized = json.dumps(value, default=str)
-
-            if self.available and self.redis:
-                await self.redis.setex(key, ttl, serialized)
-            else:
-                # In-memory fallback (no TTL enforcement)
-                self._memory_cache[key] = (value, None)
-
-            return True
         except Exception as e:
-            logger.error(f"Cache set error: {e}")
+            logger.error(f"Cache serialization error: {e}")
             return False
+
+        if self.available and self.redis:
+            try:
+                await self.redis.setex(key, ttl, serialized)
+                return True
+            except Exception as e:
+                logger.warning(f"Redis set error, falling back to memory: {e}")
+                self.available = False
+
+        # In-memory fallback (no TTL enforcement)
+        self._memory_cache[key] = (value, None)
+        return True
 
     async def delete(self, key: str) -> bool:
         """Delete from cache."""
