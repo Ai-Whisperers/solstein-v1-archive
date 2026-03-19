@@ -22,6 +22,7 @@
 | **Closed (false positive)** | 1 (ISSUE-43) |
 | **Confirmed fixes** | 3 |
 | **Last pass** | Seventh-pass — Schema mismatch root cause + adapter blast radius (2026-03-18) |
+| **Last commit** | `9566e52` — pushed to `origin/master` 2026-03-18 |
 
 ### Directories with meaningful coverage
 | Directory | Files read / est. total | Notes |
