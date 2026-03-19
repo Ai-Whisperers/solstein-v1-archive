@@ -61,7 +61,7 @@ class GitHubConnector:
             url = f"{self.api_base}/users/{username}/repos"
             params = {"per_page": per_page, "sort": "updated"}
 
-            response = requests.get(url, headers=self.headers, params=params, timeout=GITHUB_REQUEST_TIMEOUT_S)
+            response = httpx.get(url, headers=self.headers, params=params, timeout=GITHUB_REQUEST_TIMEOUT_S)
 
             if response.status_code == HTTP_STATUS_OK:
                 repos = response.json()
@@ -101,7 +101,7 @@ class GitHubConnector:
             url = f"{self.api_base}/users/{username}/events/public"
             params = {"per_page": per_page}
 
-            response = requests.get(url, headers=self.headers, params=params, timeout=GITHUB_REQUEST_TIMEOUT_S)
+            response = httpx.get(url, headers=self.headers, params=params, timeout=GITHUB_REQUEST_TIMEOUT_S)
 
             if response.status_code == HTTP_STATUS_OK:
                 events = response.json()
@@ -146,7 +146,7 @@ class GitHubConnector:
             url = f"{self.api_base}/users/{username}/events/public"
             params = {"per_page": per_page}
 
-            response = requests.get(url, headers=self.headers, params=params, timeout=GITHUB_REQUEST_TIMEOUT_S)
+            response = httpx.get(url, headers=self.headers, params=params, timeout=GITHUB_REQUEST_TIMEOUT_S)
 
             if response.status_code == HTTP_STATUS_OK:
                 events = response.json()

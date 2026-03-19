@@ -266,7 +266,8 @@ def _calculate_distributions(companies: list[Any]) -> tuple[dict[str, int], dict
     class_counts: dict[str, int] = {}
 
     for company in companies:
-        tier = company.tier.value
+        raw_tier = company.tier
+        tier = raw_tier.value if hasattr(raw_tier, "value") else (raw_tier or "unknown")
         tier_counts[tier] = tier_counts.get(tier, 0) + 1
 
         cls_val = company.classification or "Salt"

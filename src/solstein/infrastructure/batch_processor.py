@@ -4,11 +4,16 @@ Provides efficient batch processing for large datasets with progress tracking
 and error isolation.
 """
 
+from __future__ import annotations
+
 import asyncio
 from dataclasses import dataclass
-from typing import Any, Callable, Coroutine, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Coroutine, Generic, TypeVar
 
 from loguru import logger
+
+if TYPE_CHECKING:
+    from ..domain.models import Company
 
 T = TypeVar("T")
 R = TypeVar("R")

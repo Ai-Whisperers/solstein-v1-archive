@@ -27,14 +27,14 @@ async def health_check() -> dict:
     503 if unhealthy (for load balancer compatibility).
     """
     await health_monitor.run_all_checks()
-    status = health_monitor.get_overall_status()
+    overall_status = health_monitor.get_overall_status()
 
     response = {
-        "status": status.value,
+        "status": overall_status.value,
         "timestamp": datetime.utcnow().isoformat(),
     }
 
-    if status.value == "unhealthy":
+    if overall_status.value == "unhealthy":
         raise APIError(
             code="SERVICE_UNAVAILABLE",
             message="Service is unhealthy",

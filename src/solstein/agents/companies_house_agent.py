@@ -135,7 +135,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 "items_per_page": 10,
             }
 
-            resp = requests.get(
+            resp = httpx.get(
                 url,
                 headers=self.headers,
                 params=params,
@@ -179,7 +179,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
         try:
             url = f"{self.api_base}/company/{company_num}"
 
-            resp = requests.get(
+            resp = httpx.get(
                 url,
                 headers=self.headers,
                 timeout=10,
@@ -221,7 +221,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 "items_per_page": 5,
             }
 
-            resp = requests.get(
+            resp = httpx.get(
                 url,
                 headers=self.headers,
                 params=params,
