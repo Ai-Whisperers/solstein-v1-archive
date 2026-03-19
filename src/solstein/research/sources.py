@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
+from loguru import logger
+
 _DROP_QUERY_KEYS_PREFIX = ("utm_",)
 
 _DROP_QUERY_KEYS_EXACT = {

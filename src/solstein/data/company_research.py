@@ -187,7 +187,7 @@ class CompanyResearcher:
             exchange=info.get("exchange", "Unknown"),
             description=info.get("longBusinessSummary"),
             founded=info.get("foundedDate"),
-            headquarters=info.get("city") + ", " + info.get("country") if info.get("city") else None,
+            headquarters=", ".join(filter(None, [info.get("city"), info.get("country")])) or None,
             website=info.get("website"),
             employees=info.get("fullTimeEmployees"),
             market_cap=info.get("marketCap"),

@@ -6,6 +6,7 @@ Note: This router requires Celery and Redis to be installed and configured.
 If Celery is not available, this router will not be functional.
 """
 
+import asyncio
 import logging
 import uuid
 
@@ -126,8 +127,10 @@ async def enrich_single_async(request_data: AsyncEnrichmentRequest, request: Req
     if not is_valid:
         raise HTTPException(status_code=400, detail=error)
 
-    # Submit async task
-    task = celery_app.send_task(
+    # Submit async task (send_task blocks on broker I/O; run in thread pool)
+    task_id = str(uuid.uuid4())
+    task = await asyncio.to_thread(
+        celery_app.send_task,
         "solstein.worker_tasks.enrich_company_async",
         args=[
             request_data.company_id,
@@ -135,7 +138,7 @@ async def enrich_single_async(request_data: AsyncEnrichmentRequest, request: Req
             request_data.sources,
             None,  # user_id
         ],
-        task_id=str(uuid.uuid4()),
+        task_id=task_id,
     )
 
     logger.info(f"📨 Submitted async enrichment job {task.id} for {request_data.company_id}")
@@ -169,8 +172,10 @@ async def enrich_batch_async(request_data: AsyncBatchEnrichmentRequest, request:
     if len(request_data.companies) > 1000:
         raise HTTPException(status_code=400, detail="Batch size limited to 1000 companies")
 
-    # Submit async task
-    task = celery_app.send_task(
+    # Submit async task (send_task blocks on broker I/O; run in thread pool)
+    batch_task_id = str(uuid.uuid4())
+    task = await asyncio.to_thread(
+        celery_app.send_task,
         "solstein.worker_tasks.enrich_companies_batch_async",
         args=[
             request_data.companies,
@@ -178,7 +183,7 @@ async def enrich_batch_async(request_data: AsyncBatchEnrichmentRequest, request:
             request_data.batch_size,
             None,  # user_id
         ],
-        task_id=str(uuid.uuid4()),
+        task_id=batch_task_id,
     )
 
     logger.info(f"📨 Submitted async batch enrichment job {task.id} for {len(request_data.companies)} companies")

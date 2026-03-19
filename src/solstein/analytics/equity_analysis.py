@@ -60,8 +60,8 @@ class EquityResult:
         deal_verdict: Qualitative assessment (``'Attractive'``, ``'Moderate'``, ``'Cautious'``).
     """
 
-    entry_ev_revenue_multiple: float
-    entry_ev_ebitda_multiple: float
+    entry_ev_revenue_multiple: float | None
+    entry_ev_ebitda_multiple: float | None
     exit_ev_eur_m: float
     exit_equity_value_eur_m: float
     invested_equity_eur_m: float
@@ -99,9 +99,9 @@ class EquityAnalyzer:
         moic = round(exit_stake_value / invested_equity, 2) if invested_equity > 0 else 0.0
         irr = self._irr(invested_equity, exit_stake_value, params.hold_period_years)
 
-        entry_ev_rev = round(params.entry_ev_eur_m / revenue_eur_m, 2) if revenue_eur_m > 0 else float("nan")
+        entry_ev_rev = round(params.entry_ev_eur_m / revenue_eur_m, 2) if revenue_eur_m > 0 else None
         ebitda_eur_m = revenue_eur_m * ebitda_margin / 100.0
-        entry_ev_ebitda = round(params.entry_ev_eur_m / ebitda_eur_m, 2) if ebitda_eur_m > 0 else float("nan")
+        entry_ev_ebitda = round(params.entry_ev_eur_m / ebitda_eur_m, 2) if ebitda_eur_m > 0 else None
 
         verdict = self._verdict(irr, moic, entry_ev_rev)
 
@@ -123,7 +123,7 @@ class EquityAnalyzer:
         return (math.pow(returned / invested, 1.0 / years) - 1) * 100
 
     @staticmethod
-    def _verdict(irr: float, moic: float, entry_ev_rev: float) -> str:
+    def _verdict(irr: float, moic: float, entry_ev_rev: float | None) -> str:
         if irr >= 25 and moic >= 3.0:
             return "Attractive"
         elif irr >= 15 and moic >= 2.0:

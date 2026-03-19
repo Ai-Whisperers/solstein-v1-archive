@@ -1,5 +1,6 @@
 from urllib.parse import urlparse
 
+from loguru import logger
 from solstein.domain.models import Company
 
 from .sources import canonicalize_url
