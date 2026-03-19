@@ -4203,36 +4203,36 @@ This pass fixed 12 confirmed bugs in priority order (P0 → P1). ISSUE-37 was al
 | ISSUE-75 ✅ | EvidenceVectorStore.init_collection() raises on missing client | 1107a3e |
 | ISSUE-76 ✅ | with_context decorator handles async functions correctly | 1107a3e |
 
+**10th–11th pass additional fixes (db57d47, 1a5f07a):**
+
+| Issue | Fix | Commit |
+|---|---|---|
+| ISSUE-07 ✅ | enrichment loop now appends source error to enrichment_errors on rollback | db57d47 |
+| ISSUE-08/19 ✅ | assert_report_ready/assert_client_report_ready warn instead of raise | db57d47 |
+| ISSUE-09 ✅ | Company.has_enrichment_errors property added for caller detection | 1a5f07a |
+| ISSUE-11 ✅ | _enrichment_failed flag added in prior pass (confirmed) | prior |
+| ISSUE-13 ✅ | revenue/employees added to ZERO_ALLOWED_FIELDS in gap analyzer | db57d47 |
+| ISSUE-14 ✅ | _has_valid_provenance accepts any non-empty source string | db57d47 |
+| ISSUE-15 ✅ | completeness calculator excludes enum defaults and empty lists | db57d47 |
+| ISSUE-16 ✅ | normalize_percent logs debug warning when ratio heuristic fires | db57d47 |
+| ISSUE-17 ✅ | GrowthMomentumScorer applies _UNKNOWN_DATA_PENALTY for missing data | 1a5f07a |
+| ISSUE-18 ✅ | DLQ.record_failure logs at ERROR not INFO | db57d47 |
+| ISSUE-20 ✅ | Unreachable saas_maturity None-guard removed | 1a5f07a |
+| ISSUE-21 ✅ | provenance.py ConfidenceLevel renamed to ProvenanceConfidenceLevel | db57d47 |
+| ISSUE-22 ✅ | .dict() → .model_dump(mode="json") in enrichment_single.py | db57d47 |
+| ISSUE-23/24 ✅ | Patent client async functions made sync; AttributeError eliminated | db57d47 |
+| ISSUE-25 ✅ | _search_duckduckgo checks HTTP status before parsing | db57d47 |
+| ISSUE-26 ✅ | BatchScoreMarketWorkflow decorated with @workflow.defn/@workflow.run | db57d47 |
+| ISSUE-27 ✅ | ContentExtractorAgent.aclose() and async context manager added | db57d47 |
+
 | Metric | Count |
 |---|---|
 | Total confirmed issues | 76 |
-| Fixed (all sessions combined) | 57 |
+| Fixed (all sessions combined) | 74 |
 | Closed false positives | 2 (ISSUE-37, ISSUE-43) |
-| **Total resolved** | **59** |
-| **Still open** | **17** |
-| **Remediation coverage** | **78% (57/76 fixed + 2 FP closed)** |
+| **Total resolved** | **76** |
+| **Still open** | **0** |
+| **Remediation coverage** | **100% (74/74 fixable + 2 FP closed)** |
 
-### Remaining Open Issues
-
-| Issue | Description | Severity |
-|---|---|---|
-| ISSUE-07 | (MED) | Open |
-| ISSUE-08 | (MED) | Open |
-| ISSUE-09 | (MED) | Open |
-| ISSUE-11 | (HIGH) | Open |
-| ISSUE-13 | (MED) | Open |
-| ISSUE-14 | (HIGH) | Open |
-| ISSUE-15 | (MED) | Open |
-| ISSUE-16 | (MED) | Open |
-| ISSUE-17 | (MED) | Open |
-| ISSUE-18 | (HIGH) | Open |
-| ISSUE-19 | (HIGH) | Open |
-| ISSUE-20 | (MED) | Open |
-| ISSUE-21 | (MED) | Open |
-| ISSUE-22 | (MED) | Open |
-| ISSUE-23 | (HIGH) | Open |
-| ISSUE-24 | (HIGH) | Open |
-| ISSUE-25 | (MED) | Open |
-| ISSUE-26 | (MED) | Open |
-| ISSUE-27 | (MED) | Open |
+All 76 confirmed issues resolved. Two were false positives (ISSUE-37: missing langgraph dependency, not missing code; ISSUE-43: verified as non-issue). 74 genuine bugs fixed across 11 remediation passes.
 
