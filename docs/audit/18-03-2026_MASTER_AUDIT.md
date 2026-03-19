@@ -13,15 +13,15 @@
 | Metric | Value |
 |---|---|
 | **Total `.py` files in `src/solstein/`** | 555 |
-| **Files directly read** | ~420 |
-| **Coverage** | ~76% |
-| **Total issues found** | 181 (1 false positive closed) |
-| **Open 🔴 HIGH** | 87 |
-| **Open 🟡 MED** | 69 |
-| **Open 🟢 LOW** | 25 |
+| **Files directly read** | ~490 |
+| **Coverage** | ~88% |
+| **Total issues found** | 243 (1 false positive closed, 1 issue corrected) |
+| **Open 🔴 HIGH** | 116 |
+| **Open 🟡 MED** | 91 |
+| **Open 🟢 LOW** | 36 |
 | **Closed (false positive)** | 1 (ISSUE-43) |
 | **Confirmed fixes** | 3 |
-| **Last pass** | Thirteenth-pass — full sweep of data/, research/, agents/, extractors/, domain/, infrastructure/connectors/, connectors/ (all subpackages), intelligence/, monitoring/, evidence/, core/, remaining infrastructure, data/enrichment/, root files (2026-03-19) |
+| **Last pass** | Fourteenth-pass — deep dives ISSUE-105–116 / ISSUE-151–162 (blast radius + field-level verification), all infrastructure refresh connectors, analytics/, validation/, presentation/, data_sources/, utils/, remaining llm/, remaining api/, data/connectors/ (2026-03-19) |
 | **Last commit** | `4328341` — pushed to `origin/master` 2026-03-19 |
 
 ### Directories with meaningful coverage
@@ -5809,4 +5809,1014 @@ Same naive datetime issue as ISSUE-162. Deprecated since Python 3.12.
 | ISSUE-164 | `business_metrics.py` deprecated `datetime.utcnow` default factory | `monitoring/business_metrics.py:73` | 🟢 LOW | Open |
 
 **Running totals: 181 issues (87 HIGH, 69 MED, 25 LOW). Files read this pass: ~170 new (cumulative: ~420/555 = ~76%).**
+
+
+---
+
+## 42. FOURTEENTH PASS — Deep Dives + Remaining Files (2026-03-19)
+
+**Scope:** (1) Deep-dive blast-radius verification of ISSUE-105–116 and ISSUE-151–162. (2) All unread infrastructure refresh connectors. (3) `analytics/`, `validation/`, `presentation/`, `data_sources/`, `utils/`, remaining `llm/`, remaining `api/`, `data/connectors/`. ~70 new files; cumulative ~490/555 = ~88%.
+
+---
+
+### CORRECTIONS TO PRIOR ISSUES
+
+**ISSUE-159 CORRECTION:** `evidence/repositories/source.py` **exists**. The file was present; the prior report was wrong. ISSUE-159 is closed as a false positive. The **real bug** in `evidence/repositories/claim.py` is a missing `_extract_domain` method — logged as ISSUE-226 below.
+
+---
+
+### DEEP-DIVE ADDENDA
+
+#### ISSUE-105–108 blast radius
+
+`CoordinatorAgent.__init__` at line 58 passes `DataSourceType.WEB_SEARCH` to `super().__init__()`. `DataSourceType` (domain/models.py) has no `WEB_SEARCH` member. **`CoordinatorAgent` crashes on instantiation before any workflow node is reached** — logged as ISSUE-224. Once fixed, the workflow node schema mismatches (ISSUE-105–107) would then crash every node execution.
+
+Full mismatch map verified against `domain/models.py`:
+
+| Workflow Node | Object Constructed | Missing/Wrong Fields |
+|---|---|---|
+| `process_raw.py` | `RawDataSource` | `company_name`, `source_url`→`url`, `source_title`→`source_name`, `source_date`→`retrieval_timestamp`, `content_hash`, `word_count`, `language` |
+| `logic_fusion.py` | `AggregatedFact` | `company_name`, `field`→`fact_type`, `sources`→`sources_used`, `unit`, `extraction_method` |
+| `extract_signals.py` | `SignalExtraction` | `company_name`, `signal_name`←`fact.field`(missing), `signal_category`, `confidence`→`signal_confidence`, `evidence_sources`→`source_facts`; `calculation_method` required but not passed |
+
+Every caller of `CoordinatorAgent.analyze_company()` and `CoordinatorAgent.gather()` is broken end-to-end.
+
+#### ISSUE-110–111 blast radius
+
+`BatchExtractor._merge_company_profiles()` and `ProvenanceValidator.validate()` both access `profile.financial_metrics` and `profile.data_sources` which do not exist on `Company`. `MarkdownExtractor.to_company_profile()` constructs both `FinancialMetric` and `Company` with entirely wrong field sets. `BatchExtractor.extract_directory()` and `seed_markdown_agent.py` (which calls `MarkdownExtractor`) are both broken end-to-end.
+
+#### ISSUE-155 addendum
+
+`deep_analyzer.py` does not import `Company` anywhere in lines 1–18 yet references it at line 42 (`company: Company`). The module raises `NameError: name 'Company' is not defined` at **class definition time** — the entire module fails to load. Additionally, `generate_from_dict()` returns a plain `dict` while annotated `-> DeepAnalysisReport` (logged as ISSUE-225 addendum).
+
+#### ISSUE-159 replacement
+
+`claim.py` is not broken by a missing `source.py`. The real bug: `ClaimRepository.create()` at lines 37–43 calls `self._extract_domain(claim.source_url)` to populate `SourceDocument.domain`. `_extract_domain` is not defined on `ClaimRepository` or its base `EvidenceGraphRepository`. Raises `AttributeError` on every `create()` call → logged as ISSUE-226.
+
+---
+
+### ISSUE-165 — `presentation/adaptive_templates.py` `:.0f` format on `None` `revenue_per_employee_eur_k` — `TypeError` (HIGH)
+
+**File:** `src/solstein/presentation/adaptive_templates.py:175`
+
+```python
+f"{company.revenue_per_employee_eur_k:.0f}K per employee shows operational efficiency"
+```
+
+`revenue_per_employee_eur_k: float | None = None` on `Company`. The `if company.financials.revenue:` guard at line 172 does not protect this independent field. When `None`, `:.0f` raises `TypeError: unsupported format character`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-166 — `validation/financial_rules.py` `growth_rate_max: 10.0` flags all growth > 10% as unrealistic (HIGH)
+
+**File:** `src/solstein/validation/financial_rules.py:10, 51`
+
+```python
+"growth_rate_max": 10.0,
+...
+if abs(growth_rate) > rules["growth_rate_max"]:
+    return "UNREALISTIC_GROWTH"
+```
+
+`financial_sanity.py` uses `GROWTH_IMPOSSIBLE_HIGH = 500.0` (clearly percentage-scale). If callers pass growth as a percentage (e.g., `25` for 25%), this threshold of `10.0` marks every healthy company as unrealistic. Unit-assumption mismatch between the two validators causes false-positive failures.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-167 — `presentation/data_quality_indicators.py` unguarded `company.financials.revenue` chain when `financials=None` (MED)
+
+**File:** `src/solstein/presentation/data_quality_indicators.py:92–99, 132–135, 193–201`
+
+```python
+("Revenue", company.financials.revenue, company.financials.revenue_confidence),
+```
+
+`Company.financials` is optional. When `None`, chained attribute access raises `AttributeError`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-168 — `presentation/data_quality_indicators.py` `IndexError` when `metric_sources[key]` is empty list (MED)
+
+**File:** `src/solstein/presentation/data_quality_indicators.py:116`
+
+```python
+source = company.metric_sources.get(metric_name.lower().replace(" ", "_"), ["Unknown"])[0]
+```
+
+`company.metric_sources` may store `[]` for a key. `[0]` on an empty list raises `IndexError`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-169 — `analytics/tier_classification.py` wrong sub-tier code `"Tier 4E"` instead of `"4E"` (MED)
+
+**File:** `src/solstein/analytics/tier_classification.py:128`
+
+```python
+return f"{tier.value}E", "< €1M", "Early Stage"
+```
+
+`CompanyTier.TIER_4.value` is `"Tier 4"`, producing `"Tier 4E"` instead of the expected `"4E"`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-170 — `worker/refresh_tasks.py` `asyncio.run()` inside Celery task crashes with eventlet/gevent or async test harness (MED)
+
+**File:** `src/solstein/worker/refresh_tasks.py:87`
+
+```python
+return asyncio.run(_refresh())
+```
+
+If Celery uses `gevent` or `eventlet` pool, or tests run in an async harness, `asyncio.run()` raises `RuntimeError: This event loop is already running`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-171 — `analytics/data_quality.py` zero numeric values reported as missing (LOW)
+
+**File:** `src/solstein/analytics/data_quality.py:91–92`
+
+```python
+if isinstance(value, (int, float)) and value == 0:
+    return field in ["growth_rate", "profit_margin"]
+```
+
+`revenue = 0.0` is reported as missing data. `employees = 0` is also considered absent. This is a design-level false-negative for companies with genuinely zero values.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-172 — `analytics/tier_classification.py` negative "revenue needed" display for near-threshold companies (LOW)
+
+**File:** `src/solstein/analytics/tier_classification.py:160–163`
+
+```python
+CompanyTier.TIER_4: f"Reach €{10 - revenue:.1f}M more revenue for Tier 3",
+```
+
+When `revenue ≈ 10M`, this renders `"Reach €0.0M more revenue"` or negative values — confusing and misleading output.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-173 — `utils/async_json.py` `json.dumps` with `default=str` passed as misplaced positional arg via `run_in_executor` (HIGH)
+
+**File:** `src/solstein/utils/async_json.py:54–59`
+
+```python
+json_str = await loop.run_in_executor(
+    _json_executor,
+    json.dumps,
+    obj,
+    default=str,      # keyword arg after positional args to run_in_executor
+)
+```
+
+`run_in_executor` signature is `(executor, fn, *args)`. Keyword args beyond `fn` are not forwarded; `default=str` is passed as a keyword to `run_in_executor` itself (which does not accept it), raising `TypeError`. The working calls at lines 26–34 use a `lambda` to close over `default=str` correctly.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-174 — `utils/memory.py` `async def stream()` annotated as `Generator` instead of `AsyncGenerator` (MED)
+
+**File:** `src/solstein/utils/memory.py:76`
+
+```python
+async def stream(self) -> Generator[str, None, None]:
+```
+
+Wrong return type annotation for an async generator. Sync callers using `for chunk in stream()` receive the coroutine object directly, not chunks.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-175 — `utils/tracing.py` `success` variable unbound if `asyncio.CancelledError` raised — `UnboundLocalError` in `finally` (MED)
+
+**File:** `src/solstein/utils/tracing.py:67–73`
+
+```python
+try:
+    yield span_metadata
+    success = True
+except Exception as e:
+    success = False
+    raise
+finally:
+    call = DependencyCall(..., success=success, ...)  # UnboundLocalError if CancelledError
+```
+
+`asyncio.CancelledError` is a `BaseException` (not `Exception`) in Python ≥ 3.8. It bypasses the `except Exception` block, leaving `success` unbound.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-176 — `llm/health_checker.py` `report_success`/`report_error` reset counters to 1 instead of incrementing (LOW)
+
+**File:** `src/solstein/llm/health_checker.py:28–30`
+
+```python
+health.total_successes = 1   # always resets to 1
+```
+
+Counters are never accumulated. `total_successes` and `total_failures` will always be 0 or 1; trend analysis is meaningless.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-177 — `llm/optimizations.py` uses deprecated `asyncio.get_event_loop()` inside async context (LOW)
+
+**File:** `src/solstein/llm/optimizations.py:44`
+
+```python
+future = asyncio.get_event_loop().create_future()
+```
+
+Deprecated since Python 3.10; raises `DeprecationWarning` or error in 3.12+. Correct: `asyncio.get_running_loop()`.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-178 — `data/connectors/sec_edgar_connector.py` second `list(filings)` on exhausted iterator — fallback filing search never works (HIGH)
+
+**File:** `src/solstein/data/connectors/sec_edgar_connector.py:206, 212`
+
+```python
+for filing in list(filings):          # exhausts the iterable
+    if filing.report_date.year == year:
+        candidates.append(filing)
+if not candidates:
+    for filing in list(filings):      # already exhausted — always []
+        if filing.filing_date.year == year:
+```
+
+The second `list(filings)` on an already-consumed `Iterable` always yields `[]`. Any company where `report_date.year` doesn't match but `filing_date.year` does will always return `None` from `_select_filing_for_year()`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-179 — `lookup_strategies/opencorporates.py` blocking `requests.get` inside `async def` — blocks event loop (HIGH)
+
+**File:** `src/solstein/data/connectors/lookup_strategies/opencorporates.py:48`
+
+```python
+async def lookup(self, company_name: str) -> dict[str, Any]:
+    response = requests.get("https://api.opencorporates.com/...", timeout=15)
+```
+
+Synchronous blocking HTTP call inside an async method. Blocks the entire event loop for up to 15 seconds.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-180 — `lookup_strategies/openfigi.py` blocking `requests.post` inside `async def` — blocks event loop (HIGH)
+
+**File:** `src/solstein/data/connectors/lookup_strategies/openfigi.py:49`
+
+```python
+async def lookup(self, company_name: str) -> dict[str, Any]:
+    response = requests.post("https://api.openfigi.com/...", timeout=15)
+```
+
+Same class of bug as ISSUE-179.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-181 — `lookup_strategies/duckduckgo.py` sync DDG I/O called from `async def lookup` — blocks event loop (HIGH)
+
+**File:** `src/solstein/data/connectors/lookup_strategies/duckduckgo.py:43–53`
+
+```python
+def _search_text(self, query: str) -> str:   # sync, blocking DDG I/O
+    with self._ddg_client() as ddgs:
+        results = list(ddgs.text(query, ...))
+```
+
+`_search_text` is called from `async def lookup`. Blocks event loop.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-182 — `data/connectors/news_signal_detector.py` naive `datetime.now()` for rate-limit reset (LOW)
+
+**File:** `src/solstein/data/connectors/news_signal_detector.py:91`
+
+```python
+self._last_reset = datetime.now()   # naive, no timezone
+```
+
+Timezone-inconsistent comparison may cause the daily counter to never reset or reset twice in DST transitions.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-183 — `api/services/drill_down_service.py` factory calls `DrillDownService()` with no `session` argument — `TypeError` (HIGH)
+
+**File:** `src/solstein/api/services/drill_down_service.py:177`
+
+```python
+def get_drill_down_service() -> DrillDownService:
+    return DrillDownService()   # missing required positional arg: session
+```
+
+`DrillDownService.__init__(self, session: AsyncSession, ...)` requires `session`. Every caller of `get_drill_down_service()` crashes immediately.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-184 — `api/middleware/logging.py` dead `log_level` variable computed but never used (LOW)
+
+**File:** `src/solstein/api/middleware/logging.py:127`
+
+```python
+log_level = "info" if response.status_code < 400 else "warning"  # never referenced
+```
+
+Computed variable is unused. Refactoring regression.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-185 — `sec_edgar_refresh.py` quarter-iteration loop always breaks on first iteration — dead code (LOW)
+
+**File:** `src/solstein/infrastructure/connectors/sec_edgar_refresh.py:57–63`
+
+```python
+for quarter in range(current_quarter, 0, -1):
+    result = self.sec_connector.fetch_filing(ticker, current_year, "10-Q")
+    ...
+    break   # fires unconditionally on first iteration
+```
+
+The quarter loop is never used — `fetch_filing` is called with `current_year` regardless of `quarter`. The loop logic is dead code.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-186 — `companies_house_refresh.py` `_filter_delta` `else` clause always fires — delta filter is a no-op (MED)
+
+**File:** `src/solstein/infrastructure/connectors/companies_house_refresh.py:109–122`
+
+```python
+for date_str in date_fields:
+    if date_str:
+        try:
+            fact_date = datetime.fromisoformat(date_str)
+            if fact_date > since:
+                filtered_facts.append(fact)
+                break
+        except Exception:
+            filtered_facts.append(fact)
+            break
+else:
+    filtered_facts.append(fact)   # always fires if no break occurred
+```
+
+If the first parseable date is old (`fact_date <= since`), the loop does not break, falls to `else`, and appends anyway. The delta filter passes all facts regardless of age.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-187 — `github_refresh.py` duplicate `created_at` in `date_fields` list (LOW)
+
+**File:** `src/solstein/infrastructure/connectors/github_refresh.py:188`
+
+```python
+date_fields = [
+    value.get("created_at"),
+    ...
+    value.get("created_at"),  # duplicate — copy-paste error
+]
+```
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-188 — `funding_refresh.py` `get_funding_data()` is a sync call inside `async def fetch_facts` — blocks event loop (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/funding_refresh.py:64`
+
+```python
+async def fetch_facts(self, ...):
+    funding = self.client.get_funding_data(company_name)
+```
+
+Synchronous blocking call in async context.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-189 — `funding_refresh.py` calls `.get()` on `latest_round` which may be a dataclass — `AttributeError` (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/funding_refresh.py:99–101`
+
+```python
+"round_type": funding.latest_round.get("type", "unknown"),
+"amount": funding.latest_round.get("amount"),
+```
+
+`AdditionalDataSources` likely returns dataclass objects, not dicts. Dataclasses have no `.get()` method. Raises `AttributeError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-190 — `funding_refresh.py` missing `_filter_delta` and `_fact_exists` implementations (MED)
+
+**File:** `src/solstein/infrastructure/connectors/funding_refresh.py`
+
+`FundingRefreshConnector` inherits from `BaseRefreshConnector` but does not implement `_filter_delta` or `_fact_exists`. If declared abstract, instantiation crashes.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-191 — `linkedin_refresh.py` sync `get_linkedin_data()` blocks event loop (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/linkedin_refresh.py:60`
+
+```python
+async def fetch_facts(self, ...):
+    data = self.client.get_linkedin_data(company_name)
+```
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-192 — `linkedin_refresh.py` no None guard on `data` before attribute access — `AttributeError` (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/linkedin_refresh.py:67–68`
+
+```python
+"ai_related_positions": data.ai_related_positions,
+"has_hiring_activity": data.ai_related_positions > 0,
+```
+
+No `if data:` guard. If `get_linkedin_data` returns `None`, raises `AttributeError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-193 — `linkedin_refresh.py` missing `_filter_delta` and `_fact_exists` (MED)
+
+**File:** `src/solstein/infrastructure/connectors/linkedin_refresh.py`
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-194 — `global_market_refresh.py` sync `get_stock_data()` blocks event loop (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/global_market_refresh.py:60`
+
+```python
+async def fetch_facts(self, ...):
+    stock_data = self.loader.get_stock_data(ticker)
+```
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-195 — `global_market_refresh.py` `.value` on `source_currency` which may be `None` (MED)
+
+**File:** `src/solstein/infrastructure/connectors/global_market_refresh.py:82`
+
+```python
+"source_currency": stock_data.source_currency.value,
+```
+
+`source_currency` may be `None` when exchange data is unavailable. Raises `AttributeError`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-196 — `global_market_refresh.py` missing `_filter_delta` and `_fact_exists` (MED)
+
+**File:** `src/solstein/infrastructure/connectors/global_market_refresh.py`
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-197 — `patents_refresh.py` sync `search_company_patents()` blocks event loop (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/patents_refresh.py:58`
+
+```python
+async def fetch_facts(self, ...):
+    result = search_company_patents(company_name)
+```
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-198 — `patents_refresh.py` missing `_filter_delta` and `_fact_exists` (MED)
+
+**File:** `src/solstein/infrastructure/connectors/patents_refresh.py`
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-199 — `news_refresh.py` sync `get_news()` blocks event loop (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/news_refresh.py:68`
+
+```python
+async def fetch_facts(self, ...):
+    coverage = self.client.get_news(company_name, days_back=days_back)
+```
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-200 — `news_refresh.py` no None guard on `coverage` before attribute access (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/news_refresh.py:78–80`
+
+```python
+"total_articles": coverage.total_articles,
+"sentiment_score": coverage.sentiment_score,
+```
+
+If `get_news()` returns `None`, raises `AttributeError`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-201 — `news_refresh.py` missing `_filter_delta` and `_fact_exists` (MED)
+
+**File:** `src/solstein/infrastructure/connectors/news_refresh.py`
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-202 — `web_search_refresh.py` runtime `import` inside loop (LOW)
+
+**File:** `src/solstein/infrastructure/connectors/web_search_refresh.py:65`
+
+```python
+for company_name in company_ids:
+    from solstein.data.web_search_client import search_company_info
+```
+
+Import inside tight loop. Python caches imports but adds dict lookup overhead per iteration. Antipattern.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-203 — `web_search_refresh.py` missing `_filter_delta` and `_fact_exists` (MED)
+
+**File:** `src/solstein/infrastructure/connectors/web_search_refresh.py`
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-204 — `website_refresh.py` `fetch_facts()` unconditionally skips every company — always returns `[]` (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/website_refresh.py:58–67`
+
+```python
+async def fetch_facts(self, company_ids, ...):
+    for company_name in company_ids:
+        try:
+            logger.debug(f"Skipping {company_name} - website URL required")
+            continue
+        ...
+    return facts
+```
+
+Every company is skipped unconditionally. The connector is silently broken in the standard refresh pipeline. The actual logic lives in `fetch_facts_with_websites()` which has a different signature.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-205 — `website_refresh.py` sync `scrape_company_website()` blocks event loop (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/website_refresh.py:92`
+
+```python
+info = self.client.scrape_company_website(company_name, website)
+```
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-206 — `website_refresh.py` missing `_filter_delta` and `_fact_exists` (MED)
+
+**File:** `src/solstein/infrastructure/connectors/website_refresh.py`
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-207 — `yahoo_finance_refresh.py` sync `researcher.research()` blocks event loop (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/yahoo_finance_refresh.py:59`
+
+```python
+async def fetch_facts(self, ...):
+    profile = self.researcher.research(ticker)
+```
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-208 — `yahoo_finance_refresh.py` no None guard on `profile` before attribute access (MED)
+
+**File:** `src/solstein/infrastructure/connectors/yahoo_finance_refresh.py:77–110`
+
+All `profile.market_cap`, `profile.revenue`, etc. accessed without checking `if profile:`. If `research()` returns `None` for unknown ticker, raises `AttributeError`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-209 — `infrastructure/query_cache.py` uses MD5 as cache key (LOW)
+
+**File:** `src/solstein/infrastructure/query_cache.py:47`
+
+```python
+cache_key = hashlib.md5(f"{func_name}:{str(args)}:{str(kwargs)}".encode()).hexdigest()
+```
+
+MD5 is cryptographically broken. For cache keys the collision risk is low, but it is flagged by security scanners. Prefer `hashlib.sha256` or `hashlib.blake2b`.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-210 — `infrastructure/db_router.py` `get_write_session` has no rollback on exception (MED)
+
+**File:** `src/solstein/infrastructure/db_router.py:141–151`
+
+```python
+@asynccontextmanager
+async def get_write_session(self) -> AsyncGenerator[AsyncSession, None]:
+    session = AsyncSession(engine, expire_on_commit=False)
+    try:
+        yield session
+    finally:
+        await session.close()
+```
+
+No `rollback()` on exception. Any error leaves the transaction in limbo until connection recycling.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-211 — `infrastructure/vector_store.py` `ARRAY(Float)` column used with pgvector `<=>` operator — query fails (HIGH)
+
+**File:** `src/solstein/infrastructure/vector_store.py:53`
+
+```python
+embedding = Column(ARRAY(Float), nullable=False)
+```
+
+The `<=>` cosine distance operator at line 133 is pgvector-specific and only works with the pgvector `vector` type, not PostgreSQL's native `ARRAY(Float)`. Raises `operator does not exist: double precision[] <=> double precision[]` at query time.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-212 — `infrastructure/vector_store.py` IVFFlat index with `vector_cosine_ops` on `ARRAY(Float)` — DDL failure (HIGH)
+
+**File:** `src/solstein/infrastructure/vector_store.py:58–64`
+
+```python
+Index(
+    "ix_embeddings_cosine",
+    "embedding",
+    postgresql_using="ivfflat",
+    postgresql_ops={"embedding": "vector_cosine_ops"},
+),
+```
+
+`vector_cosine_ops` is a pgvector operator class that only works with the pgvector `vector` type. `CREATE INDEX` will fail at startup with a type mismatch error.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-213 — `infrastructure/circuit_breaker.py` shared global instances not thread-safe (MED)
+
+**File:** `src/solstein/infrastructure/circuit_breaker.py:174–190`
+
+Module-level singletons `linkedin_breaker`, `crunchbase_breaker`, `news_breaker` share mutable state (`_state`, `_failure_count`, `_half_open_calls`) without locks. Concurrent async tasks can corrupt circuit state.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-214 — `infrastructure/conflict_resolution.py` `datetime > str` comparison raises `TypeError` (HIGH)
+
+**File:** `src/solstein/infrastructure/conflict_resolution.py:239–241`
+
+```python
+elif strategy == ConflictStrategy.NEWER_TIMESTAMP:
+    existing_time = existing.get("extracted_at")
+    new_time = new.get("extracted_at")
+    if existing_time and new_time:
+        return new if new_time > existing_time else existing
+```
+
+If facts were loaded from JSON, `extracted_at` is a string. Comparing `str > datetime` raises `TypeError: '>' not supported between instances of 'str' and 'datetime'`. No type normalization before comparison.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-215 — `infrastructure/db_monitor.py` `**details` may conflict with loguru reserved parameter names (LOW)
+
+**File:** `src/solstein/infrastructure/db_monitor.py:276`
+
+```python
+log_func(f"DB Alert [{level}]: {message}", **(details or {}))
+```
+
+If `details` contains keys like `message`, `level`, or `exception`, they conflict with loguru's reserved parameters and cause silent overwrites or `TypeError`.
+
+**Severity:** 🟢 LOW
+
+---
+
+### ISSUE-216 — `infrastructure/query_logger.py` DBAPI events not fired on `AsyncEngine` — logger produces zero output in async context (HIGH)
+
+**File:** `src/solstein/infrastructure/query_logger.py:26–27`
+
+```python
+def attach_to_engine(self, engine: Engine) -> None:
+    event.listen(engine, "before_cursor_execute", self._before_execute)
+    event.listen(engine, "after_cursor_execute", self._after_execute)
+```
+
+`before_cursor_execute` and `after_cursor_execute` are synchronous DBAPI-level events. For `AsyncEngine`, these events are never fired. The logger silently receives no events — all queries go unlogged in async contexts.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-217 — `infrastructure/query_optimizer.py` `table.insert()` not valid on ORM model class (HIGH)
+
+**File:** `src/solstein/infrastructure/query_optimizer.py:99`
+
+```python
+await session.execute(table.insert(), batch)
+```
+
+`table` is an ORM model class (e.g., `CompanyRecord`). ORM classes have no `.insert()` method. Raises `AttributeError: type object 'CompanyRecord' has no attribute 'insert'`. Correct: `insert(table)` or `table.__table__.insert()`.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-218 — `infrastructure/query_optimizer.py` raw SQL string interpolation with unescaped column names — SQL injection risk (HIGH)
+
+**File:** `src/solstein/infrastructure/query_optimizer.py:330`
+
+```python
+return f"""
+    INSERT INTO {table.__tablename__} ({col_str})
+    VALUES {values_str}
+    ON CONFLICT ({conflict_str})
+    DO UPDATE SET {update_str}
+"""
+```
+
+Column names and table name are interpolated directly into SQL without sanitization. If column names are user-influenced or `__tablename__` is wrong, this is an injection vector.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-219 — `infrastructure/reconcile_runs.py` possible UUID vs int FK type mismatch for `run_id` (MED)
+
+**File:** `src/solstein/infrastructure/reconcile_runs.py:138`
+
+```python
+ResearchArtifactRecord.run_id == run_record.id
+```
+
+If `ResearchRunRecord.id` is UUID but `ResearchArtifactRecord.run_id` is Integer (or vice versa), the comparison returns no rows or raises a database type error. This is a continuation of the schema drift root cause identified in prior passes.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-220 — `infrastructure/research_dual_write.py` `session.commit()` called inside savepoint block — corrupts transaction state (HIGH)
+
+**File:** `src/solstein/infrastructure/research_dual_write.py:83–133`
+
+```python
+transaction = session.begin_nested() if session.in_transaction() else session.begin()
+with transaction:
+    ...
+    session.commit()   # commits OUTER transaction, not just the savepoint
+```
+
+Inside `with transaction:` (a savepoint when `in_transaction()` is True), `session.commit()` commits the outer transaction. The `with transaction:` context manager then fails on exit because the transaction was already committed. This corrupts the session state.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-221 — `infrastructure/research_dual_write.py` `session.rollback()` after `OperationalError` may itself fail — shadows original error (MED)
+
+**File:** `src/solstein/infrastructure/research_dual_write.py:307–309`
+
+```python
+except OperationalError as e:
+    session.rollback()          # may raise if connection is dead
+    raise RuntimeError(...)
+```
+
+After a connection-level `OperationalError`, calling `rollback()` on the dead connection may itself raise, shadowing the original error.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-222 — `infrastructure/research_outbox_helpers.py` `SQLAlchemyError` and `OSError` classified as terminal instead of retryable (MED)
+
+**File:** `src/solstein/infrastructure/research_outbox_helpers.py:88`
+
+```python
+classification = retry_policy.classify_failure(retryable=isinstance(exc, OperationalError))
+```
+
+Only `OperationalError` is retryable. Transient `SQLAlchemyError` and `OSError` (e.g., network hiccups) are immediately marked terminal, causing research runs to fail permanently on transient errors.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-223 — `infrastructure/research_persistence.py` legacy `session.query()` mixed with `session.execute(select(...))` (MED)
+
+**File:** `src/solstein/infrastructure/research_persistence.py:59–64`
+
+```python
+session.query(ResearchStageRecord).filter(...).delete()
+session.query(ResearchArtifactRecord).filter(...).delete()
+```
+
+Legacy sync ORM API mixed with the modern pattern used elsewhere in the same file. If called with an `AsyncSession`, these lines raise `InvalidRequestError`.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-224 — `agents/coordinator_agent.py` uses `DataSourceType.WEB_SEARCH` which does not exist — `ValueError` on instantiation (HIGH)
+
+**File:** `src/solstein/agents/coordinator_agent.py:58, 138`
+
+```python
+super().__init__("Coordinator", DataSourceType.WEB_SEARCH)
+```
+
+`DataSourceType` (domain/models.py:641–659) defines: `GITHUB`, `COMPANY_FILINGS`, `NEWS`, `CRUNCHBASE`, `LINKEDIN`, `PATENTS`, `WEBSITE`, `PRESS_RELEASE`, `YAHOO_FINANCE`, `EXA_SEARCH`, `GOOGLE_SEARCH`, `USPTO`, `GOOGLE_PATENTS`, `NEWSAPI`, `COMPETITOR_JSON`, `STATIC_CATALOG`. No `WEB_SEARCH` member. `CoordinatorAgent` crashes on instantiation — every caller of the agent orchestration pipeline fails before any node runs.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-225 — `intelligence/deep_analyzer.py` missing `Company` import — `NameError` at class definition time (HIGH)
+
+**File:** `src/solstein/intelligence/deep_analyzer.py:42`
+
+```python
+company: Company   # line 42, inside DeepAnalysisReport.__init__
+```
+
+`Company` is never imported in `deep_analyzer.py` (lines 1–18 confirmed). The class definition raises `NameError: name 'Company' is not defined` at module load time. The entire `deep_analyzer` module fails to import.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-226 — `evidence/repositories/claim.py` `_extract_domain` method missing — `AttributeError` on every `create()` call (HIGH)
+
+**File:** `src/solstein/evidence/repositories/claim.py:37–43`
+
+```python
+domain=self._extract_domain(claim.source_url)
+```
+
+`_extract_domain` is not defined on `ClaimRepository` or its base `EvidenceGraphRepository`. Every call to `ClaimRepository.create()` raises `AttributeError: 'ClaimRepository' object has no attribute '_extract_domain'`.
+
+**Note:** This replaces ISSUE-159 which incorrectly reported `source.py` as missing. `source.py` exists and is clean.
+
+**Severity:** 🔴 HIGH
+
+---
+
+## 43. UPDATED SUMMARY TABLE (Full — Including Fourteenth Pass)
+
+| Issue | Description | Location | Severity | Status |
+|---|---|---|---|---|
+| ISSUE-165 | `:.0f` on `None` `revenue_per_employee_eur_k` — `TypeError` | `presentation/adaptive_templates.py:175` | 🔴 HIGH | Open |
+| ISSUE-166 | `growth_rate_max: 10.0` flags all >10% growth as unrealistic (unit mismatch) | `validation/financial_rules.py:10,51` | 🔴 HIGH | Open |
+| ISSUE-167 | Unguarded `company.financials.revenue` chain when `financials=None` | `presentation/data_quality_indicators.py:92` | 🟡 MED | Open |
+| ISSUE-168 | `IndexError` when `metric_sources[key]` is empty list | `presentation/data_quality_indicators.py:116` | 🟡 MED | Open |
+| ISSUE-169 | Sub-tier code `"Tier 4E"` instead of `"4E"` due to `tier.value` | `analytics/tier_classification.py:128` | 🟡 MED | Open |
+| ISSUE-170 | `asyncio.run()` inside Celery task crashes with eventlet/gevent/async harness | `worker/refresh_tasks.py:87` | 🟡 MED | Open |
+| ISSUE-171 | Zero numeric values incorrectly reported as missing data | `analytics/data_quality.py:91` | 🟢 LOW | Open |
+| ISSUE-172 | Negative "revenue needed" display for near-threshold companies | `analytics/tier_classification.py:160` | 🟢 LOW | Open |
+| ISSUE-173 | `json.dumps` `default=str` as misplaced positional arg via `run_in_executor` — `TypeError` | `utils/async_json.py:54` | 🔴 HIGH | Open |
+| ISSUE-174 | `async def stream()` annotated `Generator` not `AsyncGenerator` | `utils/memory.py:76` | 🟡 MED | Open |
+| ISSUE-175 | `success` unbound if `asyncio.CancelledError` raised — `UnboundLocalError` in `finally` | `utils/tracing.py:67` | 🟡 MED | Open |
+| ISSUE-176 | `report_success`/`report_error` reset counters to 1 instead of incrementing | `llm/health_checker.py:28` | 🟢 LOW | Open |
+| ISSUE-177 | Deprecated `asyncio.get_event_loop()` inside async context | `llm/optimizations.py:44` | 🟢 LOW | Open |
+| ISSUE-178 | Second `list(filings)` on exhausted iterator — fallback filing search always returns `None` | `data/connectors/sec_edgar_connector.py:206,212` | 🔴 HIGH | Open |
+| ISSUE-179 | Blocking `requests.get` inside `async def` — blocks event loop 15s | `data/connectors/lookup_strategies/opencorporates.py:48` | 🔴 HIGH | Open |
+| ISSUE-180 | Blocking `requests.post` inside `async def` — blocks event loop 15s | `data/connectors/lookup_strategies/openfigi.py:49` | 🔴 HIGH | Open |
+| ISSUE-181 | Sync DDG I/O called from `async def lookup` — blocks event loop | `data/connectors/lookup_strategies/duckduckgo.py:43` | 🔴 HIGH | Open |
+| ISSUE-182 | Naive `datetime.now()` for rate-limit reset — timezone-inconsistent | `data/connectors/news_signal_detector.py:91` | 🟢 LOW | Open |
+| ISSUE-183 | `get_drill_down_service()` calls `DrillDownService()` missing required `session` arg | `api/services/drill_down_service.py:177` | 🔴 HIGH | Open |
+| ISSUE-184 | Dead `log_level` variable computed but never used | `api/middleware/logging.py:127` | 🟢 LOW | Open |
+| ISSUE-185 | Quarter-iteration loop always breaks on first iteration — dead code | `infrastructure/connectors/sec_edgar_refresh.py:57` | 🟢 LOW | Open |
+| ISSUE-186 | `_filter_delta` `else` clause always fires — delta filter is a no-op | `infrastructure/connectors/companies_house_refresh.py:109` | 🟡 MED | Open |
+| ISSUE-187 | Duplicate `created_at` in `date_fields` list — copy-paste error | `infrastructure/connectors/github_refresh.py:188` | 🟢 LOW | Open |
+| ISSUE-188 | Sync `get_funding_data()` blocks event loop in `async def fetch_facts` | `infrastructure/connectors/funding_refresh.py:64` | 🔴 HIGH | Open |
+| ISSUE-189 | `.get()` on `latest_round` which may be a dataclass — `AttributeError` | `infrastructure/connectors/funding_refresh.py:99` | 🔴 HIGH | Open |
+| ISSUE-190 | `FundingRefreshConnector` missing `_filter_delta`/`_fact_exists` | `infrastructure/connectors/funding_refresh.py` | 🟡 MED | Open |
+| ISSUE-191 | Sync `get_linkedin_data()` blocks event loop | `infrastructure/connectors/linkedin_refresh.py:60` | 🔴 HIGH | Open |
+| ISSUE-192 | No None guard on `data` before attribute access — `AttributeError` | `infrastructure/connectors/linkedin_refresh.py:67` | 🔴 HIGH | Open |
+| ISSUE-193 | `LinkedInRefreshConnector` missing `_filter_delta`/`_fact_exists` | `infrastructure/connectors/linkedin_refresh.py` | 🟡 MED | Open |
+| ISSUE-194 | Sync `get_stock_data()` blocks event loop | `infrastructure/connectors/global_market_refresh.py:60` | 🔴 HIGH | Open |
+| ISSUE-195 | `.value` on `source_currency` which may be `None` — `AttributeError` | `infrastructure/connectors/global_market_refresh.py:82` | 🟡 MED | Open |
+| ISSUE-196 | `GlobalMarketRefreshConnector` missing `_filter_delta`/`_fact_exists` | `infrastructure/connectors/global_market_refresh.py` | 🟡 MED | Open |
+| ISSUE-197 | Sync `search_company_patents()` blocks event loop | `infrastructure/connectors/patents_refresh.py:58` | 🔴 HIGH | Open |
+| ISSUE-198 | `PatentsRefreshConnector` missing `_filter_delta`/`_fact_exists` | `infrastructure/connectors/patents_refresh.py` | 🟡 MED | Open |
+| ISSUE-199 | Sync `get_news()` blocks event loop | `infrastructure/connectors/news_refresh.py:68` | 🔴 HIGH | Open |
+| ISSUE-200 | No None guard on `coverage` before attribute access — `AttributeError` | `infrastructure/connectors/news_refresh.py:78` | 🔴 HIGH | Open |
+| ISSUE-201 | `NewsRefreshConnector` missing `_filter_delta`/`_fact_exists` | `infrastructure/connectors/news_refresh.py` | 🟡 MED | Open |
+| ISSUE-202 | Runtime `import` inside loop — antipattern | `infrastructure/connectors/web_search_refresh.py:65` | 🟢 LOW | Open |
+| ISSUE-203 | `WebSearchRefreshConnector` missing `_filter_delta`/`_fact_exists` | `infrastructure/connectors/web_search_refresh.py` | 🟡 MED | Open |
+| ISSUE-204 | `fetch_facts()` unconditionally skips every company — always returns `[]` | `infrastructure/connectors/website_refresh.py:58` | 🔴 HIGH | Open |
+| ISSUE-205 | Sync `scrape_company_website()` blocks event loop | `infrastructure/connectors/website_refresh.py:92` | 🔴 HIGH | Open |
+| ISSUE-206 | `WebsiteRefreshConnector` missing `_filter_delta`/`_fact_exists` | `infrastructure/connectors/website_refresh.py` | 🟡 MED | Open |
+| ISSUE-207 | Sync `researcher.research()` blocks event loop | `infrastructure/connectors/yahoo_finance_refresh.py:59` | 🔴 HIGH | Open |
+| ISSUE-208 | No None guard on `profile` before attribute access | `infrastructure/connectors/yahoo_finance_refresh.py:77` | 🟡 MED | Open |
+| ISSUE-209 | MD5 used as cache key — security scanner flag | `infrastructure/query_cache.py:47` | 🟢 LOW | Open |
+| ISSUE-210 | `get_write_session` has no rollback on exception | `infrastructure/db_router.py:141` | 🟡 MED | Open |
+| ISSUE-211 | `ARRAY(Float)` column used with pgvector `<=>` operator — query fails | `infrastructure/vector_store.py:53` | 🔴 HIGH | Open |
+| ISSUE-212 | IVFFlat index with `vector_cosine_ops` on `ARRAY(Float)` — DDL failure at startup | `infrastructure/vector_store.py:58` | 🔴 HIGH | Open |
+| ISSUE-213 | Global circuit breaker instances not thread-safe — state corruption under concurrency | `infrastructure/circuit_breaker.py:174` | 🟡 MED | Open |
+| ISSUE-214 | `datetime > str` comparison raises `TypeError` in `NEWER_TIMESTAMP` resolver | `infrastructure/conflict_resolution.py:239` | 🔴 HIGH | Open |
+| ISSUE-215 | Loguru `**details` may conflict with reserved parameter names | `infrastructure/db_monitor.py:276` | 🟢 LOW | Open |
+| ISSUE-216 | DBAPI events not fired on `AsyncEngine` — query logger produces zero output async | `infrastructure/query_logger.py:26` | 🔴 HIGH | Open |
+| ISSUE-217 | `table.insert()` not valid on ORM model class — `AttributeError` | `infrastructure/query_optimizer.py:99` | 🔴 HIGH | Open |
+| ISSUE-218 | Raw SQL string interpolation with unescaped column/table names — injection risk | `infrastructure/query_optimizer.py:330` | 🔴 HIGH | Open |
+| ISSUE-219 | Possible UUID vs int FK type mismatch for `run_id` | `infrastructure/reconcile_runs.py:138` | 🟡 MED | Open |
+| ISSUE-220 | `session.commit()` inside savepoint block corrupts transaction state | `infrastructure/research_dual_write.py:83` | 🔴 HIGH | Open |
+| ISSUE-221 | `session.rollback()` after `OperationalError` may itself raise — shadows original | `infrastructure/research_dual_write.py:307` | 🟡 MED | Open |
+| ISSUE-222 | `SQLAlchemyError`/`OSError` classified terminal instead of retryable | `infrastructure/research_outbox_helpers.py:88` | 🟡 MED | Open |
+| ISSUE-223 | Legacy `session.query()` mixed with modern `session.execute(select())` | `infrastructure/research_persistence.py:59` | 🟡 MED | Open |
+| ISSUE-224 | `DataSourceType.WEB_SEARCH` does not exist — `CoordinatorAgent` crashes on instantiation | `agents/coordinator_agent.py:58` | 🔴 HIGH | Open |
+| ISSUE-225 | Missing `Company` import in `deep_analyzer.py` — `NameError` at module load | `intelligence/deep_analyzer.py:42` | 🔴 HIGH | Open |
+| ISSUE-226 | `_extract_domain` method missing on `ClaimRepository` — `AttributeError` on every `create()` | `evidence/repositories/claim.py:37` | 🔴 HIGH | Open |
+
+**Running totals: 243 issues (116 HIGH, 91 MED, 36 LOW). 1 prior issue corrected (ISSUE-159 → source.py exists; real bug now ISSUE-226). Files read this pass: ~70 new (cumulative: ~490/555 = ~88%).**
 
