@@ -4448,3 +4448,229 @@ Both strategies declare `async def lookup()` (matching the base class abstract m
 
 **Running totals: 83 issues (32 HIGH, 38 MED, 13 LOW). Actual file coverage: ~16% (89/555 files). ~466 non-init source files remain unread.**
 
+---
+
+## 39. TWENTY-SECOND PASS — data/, infrastructure/, analytics/, intelligence/, monitoring/, security/, tenant/ (2026-03-19)
+
+Eight parallel audit agents read ~160 previously-unread files across all major subsystems. Findings below are source-corroborated; all false positives explicitly noted.
+
+**False positives discarded this pass:**
+- `exporters/pdf.py:69` — `logger.warning(..., output=str(txt_path))` — loguru ignores extra kwargs not present in the format string; no TypeError
+- `capability_overlap.py:355` — `Dict[str, any]` — with `from __future__ import annotations`, type annotations are strings; no NameError at runtime (code-quality issue only)
+- `security/jwt_handler.py` — `timezone` claimed missing — imports `from datetime import datetime, timedelta, timezone` at line 6; not a bug
+- `data/unified/company.py:16-17` — `dict = {}` and `list = []` class defaults — `UnifiedCompany` extends `Company` (a Pydantic model); Pydantic v2 creates independent default instances per model instance; not a shared-mutable-default bug
+- `llm/provider_strategies.py:322` — `ProviderClientFactory.initialize()` — correctly 0-indented at module level; no indentation error
+
+---
+
+### ISSUE-84 — `RevenueInterpolator` divides by zero when timeline contains duplicate years; `ZeroDivisionError` on interpolation (HIGH)
+
+**File:** `src/solstein/data/interpolation.py:88–98`
+
+```python
+gap = next_year - current_year
+if gap > self.config.revenue_max_gap_years:
+    continue
+
+# Interpolate using configured method
+if self.config.revenue_interpolation_method == "geometric":
+    interpolated = (current_revenue_val * next_revenue_val) ** (1 / gap)   # line 95
+else:
+    interpolated = current_revenue_val + (next_revenue_val - current_revenue_val) / gap  # line 98
+```
+
+**Root cause:** The code only guards against `gap > max_gap_years` (skip large gaps) but has no guard for `gap <= 0`. If two timeline entries share the same year (duplicate data from different sources, or a mis-parsed date), `gap == 0` and both line 95 (`1 / gap`) and line 98 (`/ gap`) raise `ZeroDivisionError`. The comparison `gap > max_gap_years` is `0 > 3` → `False`, so the loop does not `continue` and falls through to the division.
+
+**Impact:** Any company whose revenue timeline contains a repeated year (possible from conflicting enrichment sources) causes the entire interpolation to crash with an unhandled exception.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-85 — `fill_identifiers_from_lookup()` and `attach_news_signals()` call `asyncio.run()` from within running async event loop; `RuntimeError` on every enrichment API call (HIGH)
+
+**File:** `src/solstein/data/unified/enrichment.py:110, 373`
+
+```python
+# fill_identifiers_from_lookup (sync function):
+response = asyncio.run(service.resolve_identifiers_enveloped(...))   # line 110
+
+# attach_news_signals (sync function):
+response = asyncio.run(detector.detect_signals_enveloped(...))        # line 373
+```
+
+Both functions are synchronous (`def`, not `async def`). They are called by `enrich_from_connectors()` (also sync), which is called directly from:
+
+- `api/routers/enrichment_single.py:87` — inside `async def enrich_single_company()`
+- `api/services/enrichment_service.py:79` — inside `async def enrich_company()`
+
+`asyncio.run()` cannot be called from a running event loop. Any FastAPI request that triggers single-company enrichment raises `RuntimeError: This event loop is already running` at lines 110 or 373.
+
+**Impact:** Every `POST /enrichment/single` and every service call to `enrich_company()` crashes with RuntimeError during the identifier lookup or news signal phases whenever those connectors are configured.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-86 — `security/auth.py` `create_refresh_token()` uses `timezone.utc` without importing `timezone`; `NameError` on every refresh token creation (HIGH)
+
+**File:** `src/solstein/security/auth.py:430–434`
+
+```python
+# create_access_token() method at line 403 — imports timezone:
+from datetime import datetime, timedelta, timezone   # line 403
+
+# create_refresh_token() method at line 430 — does NOT import timezone:
+from datetime import datetime, timedelta   # line 430
+expires = datetime.now(timezone.utc) + timedelta(days=7)   # line 434 → NameError
+```
+
+The two methods are separate and each has a local import block. `create_access_token()` correctly imports `timezone`; `create_refresh_token()` omits it but references `timezone.utc` on the next line.
+
+**Impact:** Every call to `create_refresh_token()` raises `NameError: name 'timezone' is not defined`. Refresh token issuance is entirely broken.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-87 — `sec_edgar_refresh.py` `fetch_facts()` dereferences `end_date.year` and `start_date.year` which are typed `Optional[datetime]`; `AttributeError` when called without date parameters (HIGH)
+
+**File:** `src/solstein/infrastructure/connectors/sec_edgar_refresh.py:26–39`
+
+```python
+async def fetch_facts(
+    self,
+    company_ids: list[str],
+    start_date: datetime | None = None,   # explicitly optional
+    end_date: datetime | None = None,     # explicitly optional
+) -> list[dict[str, Any]]:
+    ...
+    for year in range(end_date.year, start_date.year - 1, -1):  # line 39
+```
+
+`end_date.year` and `start_date.year` are accessed unconditionally on line 39, but both parameters default to `None`. Calling `fetch_facts(company_ids=[...])` raises `AttributeError: 'NoneType' object has no attribute 'year'`.
+
+**Impact:** Any caller invoking `fetch_facts()` without explicit dates crashes immediately. The method is entirely unusable via its own default interface.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-88 — `tenant/services.py` awaits `session.delete()` which is synchronous; `TypeError` on company deletion (HIGH)
+
+**File:** `src/solstein/tenant/services.py:94`
+
+```python
+await self.session.delete(company)   # line 94
+```
+
+SQLAlchemy's `AsyncSession.delete(instance)` is a **synchronous** method — it marks the instance for deletion in the unit-of-work but returns `None` immediately without executing any SQL. Awaiting `None` raises `TypeError: object NoneType can't be used in 'await' expression`.
+
+**Impact:** Any tenant-scoped company deletion raises `TypeError` before the DELETE is committed.
+
+**Severity:** 🔴 HIGH
+
+---
+
+### ISSUE-89 — `sla.py` `generate_monthly_report()` calls `asyncio.run()` from sync wrapper that is called from async context; `RuntimeError` (MED)
+
+**File:** `src/solstein/monitoring/sla.py:196–216`
+
+```python
+def generate_monthly_report(self, year: int, month: int) -> SLAReport:
+    ...
+    return asyncio.run(self.generate_report(start, end))   # line 216
+```
+
+`generate_monthly_report()` is a sync convenience wrapper around `async def generate_report()`. If called from any async context (monitoring endpoints, background tasks), `asyncio.run()` raises `RuntimeError: This event loop is already running`.
+
+**Impact:** SLA monthly reporting fails in any async call context.
+
+**Severity:** 🟡 MED — crash only when called from async context; works fine if called from a pure sync context
+
+---
+
+### ISSUE-90 — `infrastructure/repositories.py` `ReleaseGateAuditRepository` contains three copy-pasted `FactRepository` methods; wrong class, wrong semantics (MED)
+
+**File:** `src/solstein/infrastructure/repositories.py:274–375`
+
+`ReleaseGateAuditRepository` (line 249) contains `add_source()` (274), `get_batch()` (323), and `update_batch_status()` (343) — methods whose docstrings, parameters, and return types deal with `FactSource` and `GatheringBatch` objects, not `ReleaseGateAuditLog`. These are verbatim copies of the same methods in `FactRepository` (lines 185–246).
+
+**Impact:** Callers using `ReleaseGateAuditRepository` for fact operations get unexpected behavior; changes to `FactRepository` methods aren't reflected here; API confusion between the two repos.
+
+**Severity:** 🟡 MED — no crash, but API surface is incorrect and methods are orphaned from their intended class
+
+---
+
+### ISSUE-91 — `intelligence/projection_engine.py` uses falsy check on `growth_rate`; zero-percent growth treated as missing data (MED)
+
+**File:** `src/solstein/intelligence/projection_engine.py:249`
+
+```python
+rate = (growth_rate / 100) if growth_rate else self.default_growth_rate
+```
+
+`if growth_rate` evaluates to `False` when `growth_rate == 0`. A company with genuinely 0% growth (stagnant but not missing data) is silently substituted with `self.default_growth_rate` instead of projecting 0% growth. The correct check is `if growth_rate is not None`.
+
+**Impact:** Zero-growth companies receive inflated projection figures equal to the default rate (typically a positive number), producing systematically incorrect projections for stagnant companies.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-92 — `analytics/classification.py` boundary certainty zones check wrong score ranges; actual Lead/Salt boundary at 4.5 not covered (MED)
+
+**File:** `src/solstein/analytics/classification.py:71`
+
+```python
+if 5.4 <= composite_score <= 5.6 or 6.9 <= composite_score <= 7.1:  # Near Lead/Salt or Phoenix boundary
+    score_certainty = 0.7
+```
+
+From `analytics/constants.py`:
+- `SALT_SCORE_THRESHOLD = 4.5` (Lead/Salt boundary)
+- `PHOENIX_SCORE_THRESHOLD = 7.0` (Salt/Phoenix boundary)
+
+The comment says "Near Lead/Salt or Phoenix boundary" but the first range `5.4–5.6` is well above the actual Lead/Salt boundary of `4.5`. The boundary zone should be `~4.4–4.6`. Scores genuinely on the Lead/Salt knife-edge (e.g., 4.50) receive full certainty (`1.0`) while scores far from any boundary (5.5) incorrectly receive reduced certainty (`0.7`).
+
+**Impact:** Classification confidence scores are incorrect for all companies near the Lead/Salt boundary.
+
+**Severity:** 🟡 MED
+
+---
+
+### ISSUE-93 — `data/unified/error_tracking.py` `categorize_error()` converts error to lowercase but discards the result; `error` parameter is effectively unused (LOW)
+
+**File:** `src/solstein/data/unified/error_tracking.py:49`
+
+```python
+def categorize_error(error_type: str, error: Exception | str) -> str:
+    str(error).lower()   # line 49 — result discarded
+    if error_type.upper() == "API":
+        return "API_ERROR"
+    ...
+```
+
+The function signature accepts an `error` object, presumably to categorize based on its content. Line 49 converts it to a lowercase string but assigns the result to nothing — it is immediately garbage collected. The categorization below uses only `error_type`, making the `error` parameter entirely dead. If the intent was to match error message content, the logic is missing.
+
+**Severity:** 🟢 LOW — no crash; incorrect function design
+
+---
+
+## 39. UPDATED SUMMARY TABLE (Full — Including Twenty-Second Pass)
+
+| Issue | Description | Location | Severity | Status |
+|---|---|---|---|---|
+| ISSUE-84 | `RevenueInterpolator` divides by zero on duplicate timeline years | `data/interpolation.py:88–98` | 🔴 HIGH | Open |
+| ISSUE-85 | `fill_identifiers_from_lookup()` / `attach_news_signals()` call `asyncio.run()` from async FastAPI route; `RuntimeError` | `data/unified/enrichment.py:110,373` | 🔴 HIGH | Open |
+| ISSUE-86 | `create_refresh_token()` uses `timezone.utc` without importing `timezone`; `NameError` | `security/auth.py:430–434` | 🔴 HIGH | Open |
+| ISSUE-87 | `sec_edgar_refresh.fetch_facts()` dereferences `None.year` when dates not provided | `infrastructure/connectors/sec_edgar_refresh.py:39` | 🔴 HIGH | Open |
+| ISSUE-88 | `await session.delete()` on synchronous method; `TypeError` | `tenant/services.py:94` | 🔴 HIGH | Open |
+| ISSUE-89 | `generate_monthly_report()` calls `asyncio.run()` from sync; `RuntimeError` in async context | `monitoring/sla.py:216` | 🟡 MED | Open |
+| ISSUE-90 | `ReleaseGateAuditRepository` contains copy-pasted `FactRepository` methods | `infrastructure/repositories.py:274–375` | 🟡 MED | Open |
+| ISSUE-91 | `projection_engine.py` falsy check treats `growth_rate=0` as missing data | `intelligence/projection_engine.py:249` | 🟡 MED | Open |
+| ISSUE-92 | Classification certainty boundary zones check 5.4–5.6 instead of actual Lead/Salt boundary at 4.5 | `analytics/classification.py:71` | 🟡 MED | Open |
+| ISSUE-93 | `categorize_error()` discards `str(error).lower()` result; `error` param unused | `data/unified/error_tracking.py:49` | 🟢 LOW | Open |
+
+**Running totals: 93 issues (37 HIGH, 43 MED, 13 LOW). Files read this pass: ~160 (cumulative referenced: ~249/555 = ~45%).**
+
