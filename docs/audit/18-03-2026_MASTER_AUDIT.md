@@ -13,16 +13,16 @@
 | Metric | Value |
 |---|---|
 | **Total `.py` files in `src/solstein/`** | 555 |
-| **Files directly read** | ~107 |
-| **Coverage** | ~19% |
-| **Total issues found** | 50 (1 false positive closed) |
-| **Open 🔴 HIGH** | 20 |
-| **Open 🟡 MED** | 25 |
-| **Open 🟢 LOW** | 5 |
+| **Files directly read** | ~121 |
+| **Coverage** | ~22% |
+| **Total issues found** | 56 (1 false positive closed) |
+| **Open 🔴 HIGH** | 22 |
+| **Open 🟡 MED** | 28 |
+| **Open 🟢 LOW** | 6 |
 | **Closed (false positive)** | 1 (ISSUE-43) |
 | **Confirmed fixes** | 3 |
-| **Last pass** | Seventh-pass — Schema mismatch root cause + adapter blast radius (2026-03-18) |
-| **Last commit** | `9566e52` — pushed to `origin/master` 2026-03-18 |
+| **Last pass** | Eighth-pass — Signals layer, scoring stats, export stubs, monitoring (2026-03-19) |
+| **Last commit** | `1d30588` — pushed to `origin/master` 2026-03-18 |
 
 ### Directories with meaningful coverage
 | Directory | Files read / est. total | Notes |
@@ -45,15 +45,14 @@
 |---|---|---|
 | `application/` | ~10 | Unknown — likely orchestration layer |
 | `llm/` | ~10 | LLM client bugs could affect all AI features |
-| `exporters/` | ~5 | Excel/PDF export correctness |
-| `extractors/` | ~5 | Markdown extraction |
-| `monitoring/` | ~10 | Profiling dashboard imported at app startup |
-| `analytics/signals/` | ~10 | Signal definitions and extractors |
+| `exporters/` | ~3 remaining | excel.py, audit_report.py unread |
+| `extractors/` | ~3 remaining | parsers/ subpackage unread |
+| `monitoring/` | ~7 remaining | metrics, alerts, business_metrics, database_optimizer unread |
+| `analytics/signals/definitions/` | ~5 | Signal definitions unread |
 | `analytics/simulation/`, `valuation/` | ~5 | Financial modeling |
-| `api/middleware/` | ~6 | Security, rate limiting, tenant isolation |
-| `api/routers/` (remaining) | ~10 | Most API endpoints unread |
-| `adapters/` (remaining) | ~17 | Discovery, aggregation, most enrichment adapters |
-| `research/` (remaining) | ~11 | discovery, aggregate, signals, reconcile, evidence |
+| `api/routers/` (remaining) | ~7 | companies, metrics, search, health routers unread |
+| `adapters/` (remaining) | ~15 | Discovery (competitor_json, static_catalog), aggregation, remaining enrichment |
+| `research/` (remaining) | ~10 | discovery, aggregate, signals, reconcile still unread |
 | `infrastructure/` (remaining) | ~18 | DB, cache, refresh, repositories |
 
 ---
@@ -1999,6 +1998,227 @@ In Starlette/FastAPI, middleware added first wraps all subsequent middleware and
 **Critical path (🔴 HIGH — 20 issues):** ISSUE-01, 04, 06, 10, 11, 12, 14, 18, 19, 23, 24, 35, 36, 37, 38, 40, 44, 48, 49.
 
 **Most consequential finding this pass (ISSUE-48+49 interaction):** The unified adapter layer and `EnrichmentPipeline._merge()` are broken at the schema level due to an uncoordinated refactoring of `RawDataSource` (old fields: `data`, `company_id`, `fetch_timestamp` → new fields: `raw_content`, `retrieval_timestamp`). No unified adapter enrichment data is ever aggregated. Every `EnrichmentPipeline.enrich()` call returns an empty `AggregatedDataRecord` regardless of adapter success. The single correctly-implemented adapter (`yahoo_finance.py`) is also silently dropped by `_merge()` because it checks for `.records`/`.data` instead of `.raw_content`. **The `EnrichmentPipeline` is structurally non-functional end-to-end.**
+
+---
+
+## 20. EIGHTH-PASS FINDINGS — Signals layer, scoring stats, export stubs, monitoring (2026-03-19)
+
+**Directories newly covered:** `analytics/signals/` (base, extractors, models), `api/routers/export.py`, `api/routers/scoring.py` (partial), `api/routers/market.py` (partial), `api/routers/dashboard.py`, `adapters/discovery/web_search.py`, `research/evidence.py`, `exporters/excel_compat.py`, `exporters/pdf.py` (partial), `exporters/markdown/generator.py` (partial), `monitoring/sla.py`, `extractors/batch/processor.py`.
+
+**Method:** Direct file reads + AST import analysis for import-related bugs. Each finding below is source-corroborated.
+
+---
+
+### ISSUE-50 — `research/evidence.py` uses `logger` that is never imported; exception handler raises `NameError`
+
+**Severity:** 🟡 MED
+**File:** `src/solstein/research/evidence.py:1-5, 22-23`
+
+The module's only imports are:
+
+```python
+from urllib.parse import urlparse
+from solstein.domain.models import Company
+from .sources import canonicalize_url
+```
+
+`logger` is not imported, not assigned anywhere in the module. Line 23 calls it inside an exception handler:
+
+```python
+# evidence.py:22-23
+except Exception as e:
+    logger.debug(f"Failed to parse URL: {e}", link=link)  # NameError: name 'logger' is not defined
+```
+
+**Impact:** `urlparse()` does not typically raise on malformed strings (it returns empty fields instead), so this branch is not triggered in the common case. However, any future caller that passes a non-string value (e.g. `None`, an integer) will cause `urlparse()` to raise `TypeError`, at which point the exception handler itself raises `NameError: name 'logger' is not defined` — masking the original error entirely. The bug propagates `NameError` instead of the actual cause.
+
+---
+
+### ISSUE-51 — `GitHubSignalExtractor` (and all `SignalExtractor` subclasses) instantiate `Signal` with nonexistent fields; `Pydantic ValidationError` on every `extract()` call
+
+**Severity:** 🔴 HIGH
+**File:** `src/solstein/analytics/signals/extractors.py:44-54, 58-68, 73-83` (and further)
+
+The `Signal` model (defined in `analytics/signals/base.py:26-34`) has exactly these fields:
+
+```python
+class Signal(BaseModel):
+    name: str
+    category: SignalCategory
+    description: str
+    weight: float = 1.0
+    data_sources: list[str] = []
+    validation_rules: dict[str, Any] = {}
+```
+
+All three `Signal(...)` constructor calls in `GitHubSignalExtractor.extract()` pass five additional keyword arguments that do not exist in the model: `value`, `text`, `source`, `confidence`, `evidence`:
+
+```python
+# extractors.py:43-53 — first Signal construction
+signals.append(
+    Signal(
+        name="Open Source Contribution",
+        category=SignalCategory.TECHNICAL,
+        description="GitHub stars, forks, contributions",
+        value=float(min(total_stars / 100, 10.0)),   # ← not in Signal
+        text=f"{total_stars} total GitHub stars",     # ← not in Signal
+        source="GitHub",                              # ← not in Signal
+        confidence=0.8,                               # ← not in Signal
+        evidence={"repo_count": len(repos), ...},     # ← not in Signal
+    )
+)
+```
+
+Pydantic v2 raises `ValidationError: Extra inputs are not permitted` by default for extra fields unless `model_config = ConfigDict(extra="allow")`. `Signal` has no such config override.
+
+**Impact:** Every call to `GitHubSignalExtractor.extract()`, `FinancialSignalExtractor.extract()`, `WebSearchSignalExtractor.extract()`, and `CompaniesHouseSignalExtractor.extract()` raises `Pydantic ValidationError` unconditionally. The signals layer produces no output regardless of input quality. Any pipeline stage that calls these extractors fails at the extraction step.
+
+**Note:** The same pattern (`value`, `text`, `source`, `confidence`, `evidence`) is used in all extractor subclasses throughout the file. The `Signal` model and the extractor implementations were evidently written to a different interface specification and never reconciled.
+
+---
+
+### ISSUE-52 — `GET /export/excel` and `GET /export/llm-search` silently ignore their advertised query parameters (`include_charts`, `include_reasoning`)
+
+**Severity:** 🟡 MED
+**File:** `src/solstein/api/routers/export.py:51, 57-58, 152, 161-162`
+
+Both API endpoints accept named query parameters that the OpenAPI schema advertises as functional, but the implementation is a stub `pass`:
+
+```python
+# export.py:51, 57-58 — /export/excel
+include_charts: bool = Query(True, description="Include charts in Excel"),
+...
+if include_charts:
+    pass   # ← stub; chart inclusion never implemented
+```
+
+```python
+# export.py:152, 161-162 — /export/llm-search
+include_reasoning: bool = Query(True, description="Include LLM reasoning in response"),
+...
+if include_reasoning:
+    pass   # ← stub; reasoning inclusion never implemented
+```
+
+**Impact:** Clients that pass `include_charts=false` or `include_reasoning=false` receive identical output regardless. The parameter is accepted without error and silently has no effect. Any UI or integration relying on these flags to suppress verbose output will silently receive the wrong behavior. The undocumented gap also inflates the apparent feature surface of the API.
+
+---
+
+### ISSUE-53 — `GET /scoring/stats` crashes with `AttributeError` for every company; `company.tier.value` called on a nullable `String` ORM column
+
+**Severity:** 🔴 HIGH
+**File:** `src/solstein/api/routers/scoring.py:269` + `src/solstein/infrastructure/models/company.py:40`
+
+`_calculate_distributions()` is called from the `/scoring/stats` endpoint (line 153) with the full list of `CompanyRecord` ORM objects from `repo.get_all()`.
+
+```python
+# scoring.py:268-270
+for company in companies:
+    tier = company.tier.value   # ← AttributeError
+```
+
+`CompanyRecord.tier` is declared as:
+
+```python
+# infrastructure/models/company.py:40
+tier = Column(String(50), nullable=True)
+```
+
+It is a plain Python `str` (or `None`) at runtime — NOT an enum. Python `str` objects have no `.value` attribute. The expression `company.tier.value` raises `AttributeError: 'str' object has no attribute 'value'` for any company that has a tier set, and `AttributeError: 'NoneType' object has no attribute 'value'` for any company where tier is `None`.
+
+**Impact:** `GET /scoring/stats` raises `AttributeError` on the first company in the result set. The exception is caught by the router's `except Exception as e` block (line 163) and re-raised as HTTP 500. The endpoint is entirely non-functional and returns 500 for all calls regardless of database state.
+
+---
+
+### ISSUE-54 — `datetime.utcnow()` used in production data structures and monitoring reports (deprecated since Python 3.12)
+
+**Severity:** 🟢 LOW
+**Files:**
+- `src/solstein/monitoring/sla.py:54` — `SLAReport` dataclass default factory
+- `src/solstein/monitoring/sla.py:161, 237` — `SLAMonitor` report generation
+- `src/solstein/exporters/pdf.py:90, 165` — PDF report generation timestamps
+
+```python
+# sla.py:54
+generated_at: datetime = field(default_factory=datetime.utcnow)
+
+# sla.py:161
+end = datetime.utcnow()
+```
+
+`datetime.utcnow()` was deprecated in Python 3.12 (`DeprecationWarning`) and returns a naive datetime without timezone info. The correct replacement is `datetime.now(timezone.utc)`.
+
+**Impact:** Deprecation warnings in Python 3.12+; will stop working in a future Python version. The naive datetime also has potential comparison bugs if code elsewhere expects timezone-aware datetimes (matches the pattern already flagged in ISSUE-39 for `core/production_hardening.py`).
+
+---
+
+## 21. UPDATED SUMMARY TABLE (Full — Including Eighth-Pass)
+
+| ID | Description | File | Severity | Status |
+|---|---|---|---|---|
+| FIX-01 | Converter consolidation (EPIC-058) | `scripts/run_eneve_199.py:21` | — | ✅ Fixed |
+| FIX-02 | Export/gate decoupling in ENEVE script (EPIC-060) | `scripts/run_eneve_199.py:113-163` | — | ✅ Fixed |
+| FIX-03 | Instrumented adapters re-raise exceptions | `adapters/instrumented.py:94,145` | — | ✅ Fixed |
+| ISSUE-01 | `FinancialMetric(allow_empty_primary=True)` always raises; `Company` default construction always fails; Celery enrichment always crashes | `domain/models.py:107-134, 213` + `worker/enrichment_tasks.py:58` | 🔴 HIGH | Open — DEEPENED |
+| ISSUE-02 | FinancialMetric duplicate field declarations | `domain/models.py:97-103` | 🟡 MED | Open |
+| ISSUE-03 | Company duplicate field blocks (defined twice) | `domain/models.py:143-153 vs 195-201` | 🟡 MED | Open |
+| ISSUE-04 | Scoring degrades silently to base_score on exception | `analytics/scoring.py:161-180` | 🔴 HIGH | Open |
+| ISSUE-05 | Celery EnrichmentTask hooks are empty stubs | `worker/enrichment_tasks.py:23-29` | 🟡 MED | Open |
+| ISSUE-06 | DLQ loses traceback, no alerting | `worker/enrichment_tasks.py:99-109` | 🔴 HIGH | Open |
+| ISSUE-07 | Enrichment loop breaks without re-raising | `data/unified/enrichment.py:72-85` | 🟡 MED | Open |
+| ISSUE-08 | `ensure_release_ready()` throwing path still used in CLI | `data/report_release_gate.py:297-315` | 🟡 MED | Open |
+| ISSUE-09 | Enrichment errors silently accumulate in list | `data/unified/enrichment.py:129+` | 🟡 MED | Open |
+| ISSUE-10 | Batch API hardcodes `failed_count=0`, `success_rate=100.0` | `api/routers/enrichment_batch.py:50-70` | 🔴 HIGH | Open |
+| ISSUE-11 | `enrich_batch()` silently substitutes original on failure | `data/unified/enrichment.py:189-191` | 🔴 HIGH | Open |
+| ISSUE-12 | `store_facts()` is an unimplemented stub; DB never written | `worker/base.py:34-59` | 🔴 HIGH | Open |
+| ISSUE-13 | Gap analyzer treats `revenue=0.0` as missing; blocks pre-revenue companies | `data/gap_analyzer.py:80-85` | 🟡 MED | Open |
+| ISSUE-14 | Provenance check requires HTTP/HTTPS/URN; JSON-loaded data always fails | `data/gap_analyzer.py:36-46` | 🔴 HIGH | Open |
+| ISSUE-15 | Completeness calculator counts enum defaults and empty lists as filled | `analytics/completeness.py:98-104` | 🟡 MED | Open |
+| ISSUE-16 | `normalize_percent()` heuristic silently misclassifies values near ±1 | `data/metric_contract.py:34-37` | 🟡 MED | Open |
+| ISSUE-17 | Scorers inconsistent None-handling: GrowthMomentum skips, FinancialHealth penalizes | `analytics/scorers/growth_momentum.py:75-77` | 🟡 MED | Open |
+| ISSUE-18 | DLQ in-memory only (lost on restart), logs at INFO not ERROR | `worker/base.py:67-88` | 🔴 HIGH | Open |
+| ISSUE-19 | 3 of 7 CLI report commands hard-block via `assert_client_report_ready` | `data/report_readiness.py:74-112` | 🔴 HIGH | Open |
+| ISSUE-20 | `saas_maturity` None fallback in CompetitivePositionScorer is dead code | `analytics/scorers/competitive_position.py:41` | 🟢 LOW | Open |
+| ISSUE-21 | Two `ConfidenceLevel` enums with same name in different modules | `domain/models.py:30` vs `data/provenance.py:27` | 🟡 MED | Open |
+| ISSUE-22 | Deprecated Pydantic v2 `.dict()` in API cache path | `api/routers/enrichment_single.py:108` | 🟢 LOW | Open |
+| ISSUE-23 | `search_company_patents()` calls async sub-functions without `await`; always crashes | `data/patent_client.py:33-54` | 🔴 HIGH | Open |
+| ISSUE-24 | `PatentsUnifiedAdapter` entirely non-functional (depends on ISSUE-23) | `adapters/enrichment/patents_unified.py:66,97,134` | 🔴 HIGH | Open |
+| ISSUE-25 | `_search_duckduckgo()` does not check HTTP status before parsing | `data/patent_client.py:202-203` | 🟡 MED | Open |
+| ISSUE-26 | `BatchScoreMarketWorkflow` missing `@workflow.defn` / `@workflow.run` decorators | `analytics/workflows.py:30-41` | 🟡 MED | Open |
+| ISSUE-27 | `ContentExtractorAgent.http` (httpx.AsyncClient) never closed; leaks connections | `research/ai_research_orchestrator.py:371` | 🟡 MED | Open |
+| ISSUE-28 | `WebSearchAgent.cache` is unbounded in-memory dict with no eviction | `research/ai_research_orchestrator.py:183,216` | 🟡 MED | Open |
+| ISSUE-29 | `DataValidatorAgent` bounds are unit-agnostic; per-employee check assumes millions | `research/ai_research_orchestrator.py:553-616` | 🟡 MED | Open |
+| ISSUE-30 | `GitHubClient.fetch_file()` silently swallows all exceptions with no logging | `agents/github/client.py:80-81` | 🟡 MED | Open |
+| ISSUE-31 | `fetch_repos()` truncates at 100 regardless of `max_repos`; no pagination | `agents/github/search.py:56` | 🟢 LOW | Open |
+| ISSUE-32 | `_merge_enrichment()` mutates caller's input dict in-place | `data/eneve_enrichment_integration.py:299-328` | 🟡 MED | Open |
+| ISSUE-33 | `data_quality_score` is fabricated from source count | `data/eneve_enrichment_integration.py:310` | 🟡 MED | Open |
+| ISSUE-34 | `WebSearchAgent._api_search_news()` contains unreachable dead code | `agents/web_search_agent.py:145-167` | 🟡 MED | Open |
+| ISSUE-35 | `CompaniesHouseAgent` uses `requests.get()` without importing `requests` | `agents/companies_house_agent.py:138,182,224` | 🔴 HIGH | Open |
+| ISSUE-36 | `CompaniesHouseAgent` async methods via `asyncio.to_thread` return coroutines | `agents/companies_house_agent.py:114-121` | 🔴 HIGH | Open — DEEPENED |
+| ISSUE-37 | `coordinator_agent.py` imports non-existent `workflow_nodes`; `ModuleNotFoundError` at package load | `agents/coordinator_agent.py:23-28`, `agents/__init__.py:9` | 🔴 HIGH | Open — DEEPENED |
+| ISSUE-38 | `CoordinatorAgent.analyze_company()` constructs `AgentTaskResult` with missing required fields | `agents/coordinator_agent.py:135-148` | 🔴 HIGH | Open — masked by ISSUE-37 |
+| ISSUE-39 | `ResponseCache` uses deprecated `datetime.utcnow()`; breaks on Python 3.13 | `core/production_hardening.py:111,125` | 🟡 MED | Open |
+| ISSUE-40 | `ErrorLoggingMiddleware` exhausts `response.body_iterator`; all 4xx/5xx responses deliver empty body | `api/middleware/logging.py:168-186` | 🔴 HIGH | Open — ADDENDUM |
+| ISSUE-41 | `get_rate_limit_for_path()` operator precedence bug neutralizes trailing-slash guard | `api/middleware/rate_limit.py:50` | 🟡 MED | Open |
+| ISSUE-42 | `AuthenticationMiddleware` bypasses auth for any URL starting with `/companies` or `/enrichment` | `api/middleware/security.py:61-62` | 🟡 MED | Open |
+| ISSUE-43 | ~~`EnrichmentPipeline` isolation guarantee violated~~ | `application/enrichment_pipeline.py:99` | — | ❌ CLOSED — false positive |
+| ISSUE-44 | `StructuredLLMClient.extract()` passes `temperature` kwarg not in `generate()` signature; TypeError every call | `llm/structured_client.py:113` | 🔴 HIGH | Open |
+| ISSUE-45 | `EnhancedLLMClient.generate()` returns `None` silently after all providers fail | `llm/enhanced_client.py:114-115` | 🟡 MED | Open |
+| ISSUE-46 | `OllamaQuerier` bare `except Exception: raise` with no logging; zombie code | `llm/query/ollama.py:67-68` | 🟢 LOW | Open |
+| ISSUE-47 | `celery_app.send_task()` called synchronously in async handlers | `api/routers/async_jobs.py:130,173` | 🟡 MED | Open |
+| ISSUE-48 | `EnrichmentPipeline._merge()` checks `.records`/`.data` — old schema; both branches unreachable; always returns empty aggregate | `application/enrichment_pipeline.py:170-174` | 🔴 HIGH | Open — DEEPENED |
+| ISSUE-49 | All `BaseRefreshConnector` unified adapters construct `RawDataSource` with wrong field names; `ValidationError` on every `enrich()` call | `adapters/enrichment/website_unified.py:151` etc. | 🔴 HIGH | Open — NEW |
+| ISSUE-50 | `research/evidence.py` calls `logger.debug()` but `logger` is never imported; NameError masks real exception | `research/evidence.py:23` | 🟡 MED | Open — NEW |
+| ISSUE-51 | All `SignalExtractor` subclasses instantiate `Signal` with 5 nonexistent fields (`value`, `text`, `source`, `confidence`, `evidence`); Pydantic ValidationError on every `extract()` call | `analytics/signals/extractors.py:44-83+` | 🔴 HIGH | Open — NEW |
+| ISSUE-52 | `GET /export/excel` `include_charts` param silently ignored (stub `pass`); `GET /export/llm-search` `include_reasoning` param silently ignored | `api/routers/export.py:57-58, 161-162` | 🟡 MED | Open — NEW |
+| ISSUE-53 | `GET /scoring/stats` crashes with `AttributeError` on every call; `company.tier.value` on nullable `String(50)` ORM column — strings have no `.value` | `api/routers/scoring.py:269` + `infrastructure/models/company.py:40` | 🔴 HIGH | Open — NEW |
+| ISSUE-54 | `datetime.utcnow()` used in `SLAReport` default factory and multiple report generators (deprecated Python 3.12+) | `monitoring/sla.py:54,161,237`; `exporters/pdf.py:90,165` | 🟢 LOW | Open — NEW |
+
+**Critical path (🔴 HIGH — 22 issues):** ISSUE-01, 04, 06, 10, 11, 12, 14, 18, 19, 23, 24, 35, 36, 37, 38, 40, 44, 48, 49, 51, 53.
+
+**Most consequential new finding (ISSUE-51):** The entire signals extraction layer is structurally broken. `Signal` model and all extractor subclasses were written to incompatible interfaces — the model defines `weight`, `data_sources`, `validation_rules` while the extractors pass `value`, `text`, `source`, `confidence`, `evidence`. Every call to any `*SignalExtractor.extract()` raises `Pydantic ValidationError` unconditionally. No signal data is ever produced from GitHub, financial, web-search, or Companies House agents.
+
+**ISSUE-53 compound effect:** `GET /scoring/stats` is 100% broken (`AttributeError: 'str' object has no attribute 'value'`) due to treating a `String` ORM column as an enum. This is a distinct class of error from the enrichment pipeline issues — the API tier has independent breakage beyond what was already documented.
 
 ---
 
