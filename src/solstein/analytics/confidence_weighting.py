@@ -48,7 +48,7 @@ def get_average_confidence(company: Company) -> float:
     Returns:
         Average confidence weight (0.0-1.0)
     """
-    if not company.signal_confidences or not company.signal_confidences:
+    if not company.signal_confidences:
         return 0.3  # Default to unknown
 
     weights = list(company.signal_confidences.values())

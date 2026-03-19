@@ -9,7 +9,7 @@ Provides Kubernetes-compatible health checks:
 - /metrics/data-quality - Data quality metrics
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, status
 
@@ -31,7 +31,7 @@ async def health_check() -> dict:
 
     response = {
         "status": overall_status.value,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
     if overall_status.value == "unhealthy":
@@ -64,7 +64,7 @@ async def readiness_check() -> dict:
 
     response = {
         "ready": is_ready,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
     if not is_ready:
@@ -86,7 +86,7 @@ async def liveness_check() -> dict:
     """
     return {
         "alive": health_monitor.is_alive(),
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -149,7 +149,7 @@ async def worker_health() -> dict:
     from ...celery_config import celery_app
 
     result: dict = {
-        "timestamp": _dt.datetime.utcnow().isoformat(),
+        "timestamp": _dt.datetime.now(timezone.utc).isoformat(),
         "workers": [],
         "status": "degraded",
     }

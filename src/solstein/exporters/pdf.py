@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import textwrap
 from collections.abc import Sequence
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from loguru import logger
@@ -87,7 +87,7 @@ class PDFExporter:
         pdf.cell(
             0,
             10,
-            f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}  |  Companies: {len(companies)}",
+            f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}  |  Companies: {len(companies)}",
             ln=True,
             align="C",
         )
@@ -162,7 +162,7 @@ class PDFExporter:
         lines += [
             sep,
             title.upper().center(80),
-            f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}".center(80),
+            f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}".center(80),
             f"Companies: {len(companies)}".center(80),
             sep,
             "",

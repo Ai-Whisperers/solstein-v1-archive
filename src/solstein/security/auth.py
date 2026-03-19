@@ -400,11 +400,11 @@ class SessionManager:
         Returns:
             JWT token.
         """
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
 
         from solstein.security.jwt import create_token
 
-        expires = datetime.utcnow() + timedelta(minutes=self.token_ttl_minutes)
+        expires = datetime.now(timezone.utc) + timedelta(minutes=self.token_ttl_minutes)
 
         return create_token(
             data={
@@ -431,7 +431,7 @@ class SessionManager:
 
         from solstein.security.jwt import create_token
 
-        expires = datetime.utcnow() + timedelta(days=7)
+        expires = datetime.now(timezone.utc) + timedelta(days=7)
 
         return create_token(
             data={

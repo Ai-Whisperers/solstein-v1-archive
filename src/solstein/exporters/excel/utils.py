@@ -5,6 +5,7 @@ EPIC-022: Extracted from ImprovedExcelExporter for modularity.
 
 from typing import Any
 
+from loguru import logger
 from openpyxl.utils import get_column_letter
 
 from ...domain.models import Company
@@ -127,8 +128,8 @@ def auto_adjust_columns(ws: Any) -> None:
                     cell_length = len(str(cell.value))
                     if cell_length > max_length:
                         max_length = cell_length
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Could not measure cell width: {e}")
 
         # Set width with bounds
         adjusted_width = min(

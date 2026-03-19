@@ -4,6 +4,7 @@ This module provides request-scoped context variables for tracking
 request_id, correlation_id, tenant_id, and user_id across async boundaries.
 """
 
+import asyncio
 import contextvars
 from typing import Any
 from functools import wraps
@@ -102,17 +103,29 @@ def with_context(operation: str | None = None):
     """Decorator to set operation context for a function."""
 
     def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            tokens = []
-            if operation:
-                tokens = set_context(operation=operation)
-            try:
-                return func(*args, **kwargs)
-            finally:
-                if tokens:
-                    reset_context(tokens)
-
-        return wrapper
+        if asyncio.iscoroutinefunction(func):
+            @wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                tokens = []
+                if operation:
+                    tokens = set_context(operation=operation)
+                try:
+                    return await func(*args, **kwargs)
+                finally:
+                    if tokens:
+                        reset_context(tokens)
+            return async_wrapper
+        else:
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                tokens = []
+                if operation:
+                    tokens = set_context(operation=operation)
+                try:
+                    return func(*args, **kwargs)
+                finally:
+                    if tokens:
+                        reset_context(tokens)
+            return wrapper
 
     return decorator

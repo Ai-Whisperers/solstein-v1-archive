@@ -1,7 +1,7 @@
 """OpenCorporates connector for company registries."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -59,7 +59,7 @@ class OpenCorporatesConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=company_data.get("opencorporates_url"),
                             raw_content=company_data,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "company_number": company_data.get("company_number"),
                                 "jurisdiction": company_data.get("jurisdiction_code"),
@@ -94,7 +94,7 @@ class OpenCorporatesConnector(BaseConnector):
                         source_name=self.config.name,
                         source_url=company.get("opencorporates_url"),
                         raw_content=company,
-                        extracted_at=datetime.utcnow(),
+                        extracted_at=datetime.now(timezone.utc),
                         metadata={
                             "company_number": company.get("company_number"),
                             "jurisdiction": company.get("jurisdiction_code"),

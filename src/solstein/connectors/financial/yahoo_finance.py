@@ -1,7 +1,7 @@
 """Yahoo Finance connector for stock data."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig
@@ -46,7 +46,7 @@ class YahooFinanceConnector(BaseConnector):
                 source_name=self.config.name,
                 source_url=f"https://finance.yahoo.com/quote/{query}",
                 raw_content=info,
-                extracted_at=datetime.utcnow(),
+                extracted_at=datetime.now(timezone.utc),
                 metadata={"ticker": query, "source_type": "stock_info"},
             )
 

@@ -1,7 +1,7 @@
 """PatentsView connector for USPTO patent data."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import aiohttp
@@ -59,7 +59,7 @@ class PatentsViewConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=f"https://patents.uspto.gov/patent/{patent.get('patent_number')}",
                             raw_content=patent,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "patent_number": patent.get("patent_number"),
                                 "patent_date": patent.get("patent_date"),
@@ -92,7 +92,7 @@ class PatentsViewConnector(BaseConnector):
                         source_name=self.config.name,
                         source_url=f"https://patents.uspto.gov/patent/{entity_id}",
                         raw_content=patents[0],
-                        extracted_at=datetime.utcnow(),
+                        extracted_at=datetime.now(timezone.utc),
                         metadata={
                             "patent_number": entity_id,
                             "source_type": "patent",

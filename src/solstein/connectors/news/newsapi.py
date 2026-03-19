@@ -1,7 +1,7 @@
 """NewsAPI connector for news articles."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -76,7 +76,7 @@ class NewsAPIConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=article.get("url"),
                             raw_content=article,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "source": article.get("source", {}).get("name"),
                                 "author": article.get("author"),

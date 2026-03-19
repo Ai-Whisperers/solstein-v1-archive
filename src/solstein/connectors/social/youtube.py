@@ -1,7 +1,7 @@
 """YouTube connector for video content."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig
@@ -68,7 +68,7 @@ class YouTubeConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=f"https://youtube.com/watch?v={video_id}",
                             raw_content=item,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "video_id": video_id,
                                 "channel_id": snippet.get("channelId"),

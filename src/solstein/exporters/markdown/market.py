@@ -45,12 +45,6 @@ class MarketReportGenerator(BaseReportGenerator):
             tier = getattr(c, "tier", None)
             tier_str = tier.value if hasattr(tier, "value") else str(tier) if tier else "Unknown"
             tier_counts[tier_str] = tier_counts.get(tier_str, 0) + 1
-        # Tier distribution
-        tier_counts = {}
-        for c in companies:
-            tier = getattr(c, "tier", None)
-            tier_str = tier.value if hasattr(tier, "value") else str(tier) if tier else "Unknown"
-            tier_counts[tier_str] = tier_counts.get(tier_str, 0) + 1
 
         # Classification distribution
         classification_counts = {}

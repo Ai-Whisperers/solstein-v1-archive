@@ -12,7 +12,7 @@ Provides:
 import asyncio
 import logging
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any
 
@@ -108,7 +108,7 @@ class ResponseCache:
             return None
 
         value, expiry = self.cache[key]
-        if datetime.utcnow() > expiry:
+        if datetime.now(timezone.utc) > expiry:
             del self.cache[key]
             return None
 
@@ -122,7 +122,7 @@ class ResponseCache:
             value: Value to cache
             ttl_seconds: Time to live in seconds
         """
-        expiry = datetime.utcnow() + timedelta(seconds=ttl_seconds)
+        expiry = datetime.now(timezone.utc) + timedelta(seconds=ttl_seconds)
         self.cache[key] = (value, expiry)
 
     def clear(self) -> None:

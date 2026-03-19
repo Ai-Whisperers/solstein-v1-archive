@@ -39,13 +39,19 @@ class BaseRefreshConnector(ABC):
         self,
         source_name: str,
         source_type: str,
-        db_manager: DatabaseManager,
+        db_manager: DatabaseManager | None,
         confidence: float = 0.5,
     ):
         self.source_name: str = source_name
         self.source_type: str = source_type
-        self.db_manager: DatabaseManager = db_manager
+        self.db_manager: DatabaseManager | None = db_manager
         self.confidence: float = confidence
+
+    def _require_db_manager(self) -> DatabaseManager:
+        """Assert db_manager is set; raise if not."""
+        if self.db_manager is None:
+            raise RuntimeError(f"{type(self).__name__} requires a db_manager but none was provided.")
+        return self.db_manager
 
     @abstractmethod
     async def fetch_facts(
@@ -95,7 +101,7 @@ class BaseRefreshConnector(ABC):
 
     async def _get_last_refresh_time(self) -> datetime:
         """Get last successful refresh time from metadata."""
-        async with self.db_manager.get_session() as session:
+        async with self._require_db_manager().get_session() as session:
             result = await session.execute(
                 text(
                     """
@@ -140,7 +146,7 @@ class BaseRefreshConnector(ABC):
 
     async def _fact_changed(self, company_id: str, fact_type: str, new_hash: str) -> bool:
         """Check if a fact has changed compared to stored version."""
-        async with self.db_manager.get_session() as session:
+        async with self._require_db_manager().get_session() as session:
             result = await session.execute(
                 text(
                     """
@@ -189,7 +195,7 @@ class BaseRefreshConnector(ABC):
 
         refresh_time = datetime.now()
 
-        async with self.db_manager.get_session() as session:
+        async with self._require_db_manager().get_session() as session:
             for fact_data in facts:
                 try:
                     # Compute hash if not already present
@@ -227,7 +233,7 @@ class BaseRefreshConnector(ABC):
         return batch
 
     async def _update_refresh_metadata(self, refresh_time: datetime) -> None:
-        async with self.db_manager.get_session() as session:
+        async with self._require_db_manager().get_session() as session:
             await session.execute(
                 text(
                     """

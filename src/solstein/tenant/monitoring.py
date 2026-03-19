@@ -11,7 +11,7 @@ Usage:
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from loguru import logger
@@ -63,7 +63,7 @@ class TenantMonitor:
             duration_ms: Request duration.
             status_code: HTTP status code.
         """
-        today = datetime.utcnow().strftime("%Y-%m-%d")
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         # Increment request counter
         key = f"metrics:{tenant_id}:api_requests:{today}"
@@ -89,7 +89,7 @@ class TenantMonitor:
             tenant_id: Tenant identifier.
             format: Report format.
         """
-        month = datetime.utcnow().strftime("%Y-%m")
+        month = datetime.now(timezone.utc).strftime("%Y-%m")
         key = f"metrics:{tenant_id}:reports:{month}"
         await self.cache.incr(key, 1)
         await self.cache.expire(key, 86400 * 60)  # 60 days
@@ -105,7 +105,7 @@ class TenantMonitor:
             Usage dictionary.
         """
         if date is None:
-            date = datetime.utcnow().strftime("%Y-%m-%d")
+            date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         api_requests = await self.cache.get(f"metrics:{tenant_id}:api_requests:{date}") or 0
         api_errors = await self.cache.get(f"metrics:{tenant_id}:api_errors:{date}") or 0
@@ -128,7 +128,7 @@ class TenantMonitor:
             Usage dictionary.
         """
         if month is None:
-            month = datetime.utcnow().strftime("%Y-%m")
+            month = datetime.now(timezone.utc).strftime("%Y-%m")
 
         reports = await self.cache.get(f"metrics:{tenant_id}:reports:{month}") or 0
 
@@ -155,8 +155,8 @@ class TenantMonitor:
             Health status.
         """
         # Get last 24 hours of metrics
-        yesterday = (datetime.utcnow() - timedelta(days=1)).strftime("%Y-%m-%d")
-        today = datetime.utcnow().strftime("%Y-%m-%d")
+        yesterday = (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d")
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         api_requests = 0
         api_errors = 0
@@ -185,7 +185,7 @@ class TenantMonitor:
             api_error_rate=error_rate,
             avg_latency_ms=0.0,  # Would calculate from stored latencies
             quota_usage_pct=0.0,  # Would calculate from quotas
-            last_activity=datetime.utcnow(),
+            last_activity=datetime.now(timezone.utc),
             alerts=alerts,
         )
 

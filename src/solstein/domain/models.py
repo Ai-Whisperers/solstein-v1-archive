@@ -98,8 +98,6 @@ class FinancialMetric(BaseModel):
     ebitda_margin: float | None = None
     recurring_revenue_pct: float | None = None
     funding_raised: float | None = None
-    margin_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
-    funding_raised: float | None = None
     funding_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
     valuation: float | None = None
     valuation_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
@@ -127,11 +125,6 @@ class FinancialMetric(BaseModel):
             raise ValueError("Employees cannot be negative")
         return v
 
-    @model_validator(mode="after")
-    def at_least_one_primary_metric(self) -> "FinancialMetric":
-        if self.revenue is None and self.employees is None:
-            raise ValueError("At least one of revenue or employees must be provided")
-        return self
 
 
 class Company(BaseModel):
@@ -191,14 +184,6 @@ class Company(BaseModel):
         suffix = str(uuid.uuid4())[:8]
 
         return f"{prefix}-{clean}-{suffix}"
-
-    name: str
-    company_name: str | None = None
-    industry: str = "Energy Software"
-    description: str | None = None
-    website: str | None = None
-    headquarters: str | None = None
-    founded_year: int | None = None
 
     # Positioning
     tier: CompanyTier = CompanyTier.TIER_3

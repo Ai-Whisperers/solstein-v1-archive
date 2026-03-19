@@ -15,7 +15,7 @@ Usage:
 
 import os
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Protocol
 
 from loguru import logger
@@ -208,14 +208,14 @@ class SecretsManager:
         # Check cache
         if use_cache and path in self._cache:
             value, cached_at = self._cache[path]
-            if datetime.utcnow() - cached_at < self._cache_ttl:
+            if datetime.now(timezone.utc) - cached_at < self._cache_ttl:
                 return value
 
         # Fetch from backend
         value = await self.backend.get(path)
 
         if value and use_cache:
-            self._cache[path] = (value, datetime.utcnow())
+            self._cache[path] = (value, datetime.now(timezone.utc))
 
         return value
 
@@ -232,7 +232,7 @@ class SecretsManager:
         success = await self.backend.put(path, value)
         if success:
             # Update cache
-            self._cache[path] = (value, datetime.utcnow())
+            self._cache[path] = (value, datetime.now(timezone.utc))
         return success
 
     async def rotate(self, path: str, generator: callable) -> bool:

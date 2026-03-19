@@ -1,7 +1,7 @@
 """Trustpilot connector for business reviews."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -61,7 +61,7 @@ class TrustpilotConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=business.get("url"),
                             raw_content=business,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "business_id": business.get("id"),
                                 "rating": business.get("score", {}).get("trustScore"),

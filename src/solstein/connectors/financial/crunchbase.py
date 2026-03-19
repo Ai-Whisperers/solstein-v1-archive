@@ -1,7 +1,7 @@
 """Crunchbase connector for startup and funding data."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -67,7 +67,7 @@ class CrunchbaseConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=f"https://crunchbase.com/organization/{props.get('identifier', {}).get('value', '')}",
                             raw_content=entity,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "entity_id": entity.get("uuid"),
                                 "entity_type": "organization",

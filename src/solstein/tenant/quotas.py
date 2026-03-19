@@ -11,7 +11,7 @@ Usage:
 """
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from loguru import logger
@@ -48,14 +48,14 @@ class QuotaManager:
         Returns:
             Quota status.
         """
-        today = datetime.utcnow().strftime("%Y-%m-%d")
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         key = f"quota:{tenant_id}:api_calls:{today}"
 
         used = await self.cache.get(key) or 0
         remaining = max(0, limit - used)
 
         # Reset at midnight UTC
-        tomorrow = datetime.utcnow() + timedelta(days=1)
+        tomorrow = datetime.now(timezone.utc) + timedelta(days=1)
         reset_at = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
 
         return QuotaStatus(
@@ -72,13 +72,13 @@ class QuotaManager:
         Returns:
             New total count.
         """
-        today = datetime.utcnow().strftime("%Y-%m-%d")
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         key = f"quota:{tenant_id}:api_calls:{today}"
 
         new_count = await self.cache.incr(key, count)
 
         # Set expiry to end of day
-        ttl = int((datetime.utcnow().replace(hour=23, minute=59, second=59) - datetime.utcnow()).total_seconds())
+        ttl = int((datetime.now(timezone.utc).replace(hour=23, minute=59, second=59) - datetime.now(timezone.utc)).total_seconds())
         await self.cache.expire(key, ttl)
 
         return new_count
@@ -93,14 +93,14 @@ class QuotaManager:
         Returns:
             Quota status.
         """
-        month = datetime.utcnow().strftime("%Y-%m")
+        month = datetime.now(timezone.utc).strftime("%Y-%m")
         key = f"quota:{tenant_id}:reports:{month}"
 
         used = await self.cache.get(key) or 0
         remaining = max(0, limit - used)
 
         # Reset at end of month
-        next_month = (datetime.utcnow().replace(day=1) + timedelta(days=32)).replace(day=1)
+        next_month = (datetime.now(timezone.utc).replace(day=1) + timedelta(days=32)).replace(day=1)
         reset_at = next_month.replace(hour=0, minute=0, second=0, microsecond=0)
 
         return QuotaStatus(
@@ -116,14 +116,14 @@ class QuotaManager:
         Returns:
             New total count.
         """
-        month = datetime.utcnow().strftime("%Y-%m")
+        month = datetime.now(timezone.utc).strftime("%Y-%m")
         key = f"quota:{tenant_id}:reports:{month}"
 
         new_count = await self.cache.incr(key, 1)
 
         # Set expiry to end of month
-        next_month = (datetime.utcnow().replace(day=1) + timedelta(days=32)).replace(day=1)
-        ttl = int((next_month - datetime.utcnow()).total_seconds())
+        next_month = (datetime.now(timezone.utc).replace(day=1) + timedelta(days=32)).replace(day=1)
+        ttl = int((next_month - datetime.now(timezone.utc)).total_seconds())
         await self.cache.expire(key, ttl)
 
         return new_count

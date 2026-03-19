@@ -11,7 +11,7 @@ Usage:
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
@@ -84,7 +84,7 @@ class GDPRManager:
 
         return DataExport(
             user_id=user_id,
-            export_date=datetime.utcnow(),
+            export_date=datetime.now(timezone.utc),
             data=data,
         )
 
@@ -142,7 +142,7 @@ class GDPRManager:
             user_id=user_id,
             basis=basis.value,
             categories=data_categories,
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
         )
 
     def validate_processing_basis(

@@ -16,7 +16,7 @@ Usage:
 
 import shutil
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -331,7 +331,7 @@ class HealthChecker:
 
         return HealthStatus(
             status=overall,
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             checks=checks,
         )
 
@@ -381,6 +381,6 @@ class LivenessChecker:
         """
         return {
             "alive": True,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "pid": __import__("os").getpid(),
         }

@@ -155,7 +155,6 @@ class EnrichmentCacheRepository:
         result = await self.session.execute(query)
         records = result.scalars().all()
 
-        datetime.now(timezone.utc)
         valid_cache = [r for r in records if not r.is_expired()]
 
         total_hits = sum(r.hits for r in valid_cache)

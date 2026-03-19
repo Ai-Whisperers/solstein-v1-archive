@@ -68,7 +68,10 @@ class ContinuousMonitor:
             if signals:
                 self.logger.warning(f"Critical signals detected for {company.name}: {signals}")
                 if self.on_signal_callback:
-                    await self.on_signal_callback(company, signals)
+                    if asyncio.iscoroutinefunction(self.on_signal_callback):
+                        await self.on_signal_callback(company, signals)
+                    else:
+                        self.on_signal_callback(company, signals)
 
             self.last_checks[company.id] = datetime.now(timezone.utc)
 

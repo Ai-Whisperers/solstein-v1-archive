@@ -42,22 +42,30 @@ async def enrich_batch(request_data: BatchEnrichmentRequest, request: Request) -
         total_duration_ms = int((time.time() - start_time) * 1000)
 
         results = []
+        failed_count = 0
+        per_company_ms = total_duration_ms // len(enriched_companies) if enriched_companies else 0
         for enriched in enriched_companies:
+            failed = getattr(enriched, "_enrichment_failed", False)
+            if failed:
+                failed_count += 1
             results.append(
                 BatchEnrichmentResult(
                     company_id=enriched.id,
-                    status="success",
-                    duration_ms=total_duration_ms // len(enriched_companies),
+                    status="failed" if failed else "success",
+                    duration_ms=per_company_ms,
                     source="batch_enrichment",
                 )
             )
 
+        enriched_count = len(results) - failed_count
+        success_rate = (enriched_count / len(results) * 100.0) if results else 0.0
+
         return BatchEnrichmentResponse(
-            status="success",
+            status="partial_failure" if failed_count else "success",
             batch_id=f"batch_{datetime.now().timestamp()}",
             total_companies=len(request_data.company_ids),
-            enriched_count=len(results),
-            failed_count=0,
+            enriched_count=enriched_count,
+            failed_count=failed_count,
             results=results,
             metrics={
                 "total_duration_ms": total_duration_ms,
@@ -66,7 +74,7 @@ async def enrich_batch(request_data: BatchEnrichmentRequest, request: Request) -
                 else 0,
                 "cache_hits": 0,
                 "cache_misses": len(request_data.company_ids),
-                "success_rate": 100.0,
+                "success_rate": round(success_rate, 1),
             },
         )
 

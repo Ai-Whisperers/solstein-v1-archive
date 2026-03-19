@@ -9,7 +9,7 @@ EPIC-026 Story 2: Collects business metrics for dashboard display including:
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from sqlalchemy import func, select
@@ -147,7 +147,7 @@ class BusinessMetricsCollector:
         avg_quality = result.scalar() or 0.0
 
         # Companies processed in last hour (enrichment_updated_at)
-        one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+        one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
         result = await self.session.execute(
             select(func.count()).select_from(CompanyRecord).where(CompanyRecord.enrichment_updated_at >= one_hour_ago)
         )
@@ -169,7 +169,7 @@ class BusinessMetricsCollector:
             ResearchMetrics with pipeline statistics.
         """
         # Runs per day (last 24 hours)
-        one_day_ago = datetime.utcnow() - timedelta(days=1)
+        one_day_ago = datetime.now(timezone.utc) - timedelta(days=1)
         result = await self.session.execute(
             select(func.count()).select_from(ResearchRunRecord).where(ResearchRunRecord.started_at >= one_day_ago)
         )

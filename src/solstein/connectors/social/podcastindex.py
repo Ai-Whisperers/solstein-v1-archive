@@ -1,7 +1,7 @@
 """Podcast Index connector for podcast data."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -55,7 +55,7 @@ class PodcastIndexConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=feed.get("link"),
                             raw_content=feed,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "feed_id": feed.get("id"),
                                 "title": feed.get("title"),

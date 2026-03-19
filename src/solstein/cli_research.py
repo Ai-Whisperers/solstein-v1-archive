@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import click
@@ -61,7 +61,7 @@ def research_companies(company_names: tuple[str, ...], output: Path, min_confide
             "competitors": companies,
             "metadata": {
                 "data_source": "web_research",
-                "collection_date": datetime.utcnow().isoformat(),
+                "collection_date": datetime.now(timezone.utc).isoformat(),
                 "is_synthetic": False,
                 "real_data_percentage": "100%",
                 "companies_researched": len(company_names),

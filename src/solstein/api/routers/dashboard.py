@@ -172,8 +172,9 @@ async def get_trends(
     stored (EPIC-023+), this endpoint will query the snapshot table.
     """
     import datetime as _dt
+    from datetime import timezone
 
-    now = _dt.datetime.utcnow()
+    now = _dt.datetime.now(timezone.utc)
     labels = []
     for i in range(periods, 0, -1):
         month = now.replace(day=1) - _dt.timedelta(days=30 * (i - 1))

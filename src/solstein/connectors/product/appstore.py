@@ -1,7 +1,7 @@
 """App Store connector for iOS apps."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig
@@ -58,7 +58,7 @@ class AppStoreConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=app.get("trackViewUrl"),
                             raw_content=app,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "app_id": app.get("trackId"),
                                 "bundle_id": app.get("bundleId"),
@@ -94,7 +94,7 @@ class AppStoreConnector(BaseConnector):
                         source_name=self.config.name,
                         source_url=results[0].get("trackViewUrl"),
                         raw_content=results[0],
-                        extracted_at=datetime.utcnow(),
+                        extracted_at=datetime.now(timezone.utc),
                         metadata={
                             "app_id": entity_id,
                             "bundle_id": results[0].get("bundleId"),

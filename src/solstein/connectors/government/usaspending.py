@@ -1,7 +1,7 @@
 """USAspending connector for government contract data."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import aiohttp
@@ -48,7 +48,7 @@ class USAspendingConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=f"https://usaspending.gov/award/{award.get('generated_internal_id')}",
                             raw_content=award,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "award_id": award.get("generated_internal_id"),
                                 "recipient": award.get("recipient_name"),

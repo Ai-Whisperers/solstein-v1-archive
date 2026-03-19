@@ -1,7 +1,7 @@
 """Reddit connector for discussions and communities."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -68,7 +68,7 @@ class RedditConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=f"https://reddit.com{post_data.get('permalink')}",
                             raw_content=post_data,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "post_id": post_data.get("id"),
                                 "subreddit": post_data.get("subreddit"),

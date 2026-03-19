@@ -1,7 +1,7 @@
 """Maven Central connector for Java packages."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import aiohttp
@@ -53,7 +53,7 @@ class MavenCentralConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=f"https://search.maven.org/artifact/{doc.get('g')}/{doc.get('a')}",
                             raw_content=doc,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "group_id": doc.get("g"),
                                 "artifact_id": doc.get("a"),
@@ -96,7 +96,7 @@ class MavenCentralConnector(BaseConnector):
                         source_name=self.config.name,
                         source_url=f"https://search.maven.org/artifact/{parts[0]}/{parts[1]}",
                         raw_content=docs[0],
-                        extracted_at=datetime.utcnow(),
+                        extracted_at=datetime.now(timezone.utc),
                         metadata={
                             "group_id": parts[0],
                             "artifact_id": parts[1],

@@ -10,7 +10,7 @@ FREE sources:
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -87,7 +87,7 @@ class SemanticScholarConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=f"https://www.semanticscholar.org/paper/{paper.get('paperId', '')}",
                             raw_content=paper,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "paper_id": paper.get("paperId"),
                                 "source_type": "academic_paper",
@@ -132,7 +132,7 @@ class SemanticScholarConnector(BaseConnector):
                         source_name=self.config.name,
                         source_url=f"https://www.semanticscholar.org/paper/{entity_id}",
                         raw_content=paper,
-                        extracted_at=datetime.utcnow(),
+                        extracted_at=datetime.now(timezone.utc),
                         metadata={
                             "paper_id": entity_id,
                             "source_type": "academic_paper",
@@ -247,7 +247,7 @@ class ArXivConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=paper_data["id"],
                             raw_content=paper_data,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "paper_id": paper_data["id"].split("/")[-1]
                                 if "/" in paper_data["id"]

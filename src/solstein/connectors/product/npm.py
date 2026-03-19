@@ -1,7 +1,7 @@
 """npm registry connector for JavaScript packages."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import aiohttp
@@ -50,7 +50,7 @@ class NPMConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=f"https://npmjs.com/package/{package.get('name')}",
                             raw_content=package,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "package_name": package.get("name"),
                                 "version": package.get("version"),
@@ -80,7 +80,7 @@ class NPMConnector(BaseConnector):
                         source_name=self.config.name,
                         source_url=f"https://npmjs.com/package/{entity_id}",
                         raw_content=data,
-                        extracted_at=datetime.utcnow(),
+                        extracted_at=datetime.now(timezone.utc),
                         metadata={
                             "package_name": entity_id,
                             "version": data.get("dist-tags", {}).get("latest"),

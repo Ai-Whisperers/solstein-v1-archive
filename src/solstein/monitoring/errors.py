@@ -149,8 +149,9 @@ class ErrorTracker:
         Returns:
             Fingerprint hash.
         """
-        # Use error type and first line of stack trace
-        tb = traceback.format_exc().split("\n")[:3]
+        # Use error type and first line of stack trace from the exception itself
+        tb_lines = traceback.format_exception(type(error), error, error.__traceback__)
+        tb = "".join(tb_lines).split("\n")[:3]
         content = f"{type(error).__name__}:{str(error)[:100]}:{':'.join(tb)}"
         return hashlib.md5(content.encode()).hexdigest()[:16]
 
@@ -172,7 +173,7 @@ class ErrorTracker:
 
         category = self.classifier.classify(error)
         fingerprint = self._generate_fingerprint(error)
-        tb = traceback.format_exc()
+        tb = "".join(traceback.format_exception(type(error), error, error.__traceback__))
 
         record = ErrorRecord(
             category=category,

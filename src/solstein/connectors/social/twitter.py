@@ -1,7 +1,7 @@
 """Twitter/X connector for social data."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -75,7 +75,7 @@ class TwitterConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=f"https://twitter.com/i/web/status/{tweet.get('id')}",
                             raw_content=tweet,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "tweet_id": tweet.get("id"),
                                 "author_id": tweet.get("author_id"),

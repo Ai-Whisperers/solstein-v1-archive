@@ -1,7 +1,7 @@
 """arXiv connector for academic papers."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -48,7 +48,7 @@ class ArxivConnector(BaseConnector):
                     source_name=self.config.name,
                     source_url=entry.get("link"),
                     raw_content=entry,
-                    extracted_at=datetime.utcnow(),
+                    extracted_at=datetime.now(timezone.utc),
                     metadata={
                         "paper_id": entry.get("id"),
                         "published": entry.get("published"),
@@ -77,7 +77,7 @@ class ArxivConnector(BaseConnector):
                 source_name=self.config.name,
                 source_url=feed.entries[0].get("link"),
                 raw_content=feed.entries[0],
-                extracted_at=datetime.utcnow(),
+                extracted_at=datetime.now(timezone.utc),
                 metadata={"paper_id": entity_id, "source_type": "academic_paper"},
             )
 

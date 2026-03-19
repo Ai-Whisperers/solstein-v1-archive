@@ -10,7 +10,7 @@ FREE sources:
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -131,7 +131,7 @@ class YahooFinanceConnector(BaseConnector):
                 source_name=self.config.name,
                 source_url=f"https://finance.yahoo.com/quote/{query}",
                 raw_content=info,
-                extracted_at=datetime.utcnow(),
+                extracted_at=datetime.now(timezone.utc),
                 metadata={
                     "ticker": query,
                     "source_type": "stock_info",
@@ -243,7 +243,7 @@ class AlphaVantageConnector(BaseConnector):
                         source_name=self.config.name,
                         source_url=f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={query}",
                         raw_content=data,
-                        extracted_at=datetime.utcnow(),
+                        extracted_at=datetime.now(timezone.utc),
                         metadata={
                             "ticker": query,
                             "source_type": "company_overview",

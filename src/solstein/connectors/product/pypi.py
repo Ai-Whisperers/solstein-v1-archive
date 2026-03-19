@@ -1,7 +1,7 @@
 """PyPI connector for Python packages."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import aiohttp
@@ -52,7 +52,7 @@ class PyPIConnector(BaseConnector):
                         source_name=self.config.name,
                         source_url=f"https://pypi.org/project/{entity_id}",
                         raw_content=data,
-                        extracted_at=datetime.utcnow(),
+                        extracted_at=datetime.now(timezone.utc),
                         metadata={
                             "package_name": entity_id,
                             "version": info.get("version"),

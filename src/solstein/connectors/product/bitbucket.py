@@ -1,7 +1,7 @@
 """Bitbucket connector for repositories."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -58,7 +58,7 @@ class BitbucketConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=repo.get("links", {}).get("html", {}).get("href"),
                             raw_content=repo,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "repo_uuid": repo.get("uuid"),
                                 "full_name": repo.get("full_name"),

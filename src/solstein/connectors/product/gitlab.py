@@ -1,7 +1,7 @@
 """GitLab connector for repositories."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -63,7 +63,7 @@ class GitLabConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=project.get("web_url"),
                             raw_content=project,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "project_id": project.get("id"),
                                 "namespace": project.get("namespace", {}).get("name"),
@@ -95,7 +95,7 @@ class GitLabConnector(BaseConnector):
                         source_name=self.config.name,
                         source_url=project.get("web_url"),
                         raw_content=project,
-                        extracted_at=datetime.utcnow(),
+                        extracted_at=datetime.now(timezone.utc),
                         metadata={
                             "project_id": project.get("id"),
                             "namespace": project.get("namespace", {}).get("name"),

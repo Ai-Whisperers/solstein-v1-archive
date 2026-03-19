@@ -4137,3 +4137,18 @@ This pass fixed 12 confirmed bugs in priority order (P0 → P1). ISSUE-37 was al
 | ISSUE-51 | All `SignalExtractor` subclasses use 5 nonexistent `Signal` fields; layer entirely unwired | Open |
 | ISSUE-66 | `float("nan")` in `EquityResult` causes JSON `ValueError` | Open |
 
+
+---
+
+## REMEDIATION COVERAGE TRACKER — 2026-03-19
+
+| Metric | Count |
+|---|---|
+| Total confirmed issues | 76 |
+| Fixed (this session) | 12 |
+| Fixed (prior sessions, ISSUE-02/03/04) | 3 |
+| Closed false positives | 2 (ISSUE-37, ISSUE-43) |
+| **Total resolved** | **17** |
+| **Still open** | **59** |
+| **Remediation coverage** | **20% (15/76 fixed, 2 closed FP)** |
+

@@ -1,7 +1,7 @@
 """RSS Feed connector for generic feeds."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import feedparser
@@ -49,7 +49,7 @@ class RSSFeedConnector(BaseConnector):
                         source_name=self.config.name,
                         source_url=entry.get("link"),
                         raw_content=entry,
-                        extracted_at=datetime.utcnow(),
+                        extracted_at=datetime.now(timezone.utc),
                         metadata={
                             "published": entry.get("published"),
                             "author": entry.get("author"),

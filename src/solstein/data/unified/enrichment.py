@@ -188,6 +188,7 @@ def enrich_batch(loader, companies: list[UnifiedCompany], batch_size: int = 10) 
 
             except (ValueError, RuntimeError, TypeError, AttributeError) as e:
                 logger.warning(f"Batch enrichment failed for {company.name}: {e}")
+                company._enrichment_failed = True  # flag for callers to detect failure
                 enriched_companies.append(company)  # Use original if enrichment fails
                 loader.metrics.record_enrichment(0, False)
 

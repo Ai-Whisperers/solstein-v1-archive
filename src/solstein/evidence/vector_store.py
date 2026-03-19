@@ -58,6 +58,8 @@ class EvidenceVectorStore:
 
     def init_collection(self) -> None:
         """Initialize the evidence claims collection."""
+        if self.client is None:
+            raise RuntimeError("Not connected to Qdrant. Call connect() first.")
         # Check if collection exists
         collections = self.client.get_collections()
         collection_names = [c.name for c in collections.collections]

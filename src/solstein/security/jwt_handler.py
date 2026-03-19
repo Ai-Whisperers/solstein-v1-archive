@@ -3,7 +3,7 @@
 Phase 1, Item 1.2: JWT Authentication Implementation
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import jwt
 from pydantic import BaseModel
@@ -68,9 +68,9 @@ class JWTHandler:
         to_encode = data.copy()
 
         if expires_delta:
-            expire = datetime.utcnow() + expires_delta
+            expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(minutes=self.token_expire_minutes)
+            expire = datetime.now(timezone.utc) + timedelta(minutes=self.token_expire_minutes)
 
         to_encode.update({"exp": expire})
 

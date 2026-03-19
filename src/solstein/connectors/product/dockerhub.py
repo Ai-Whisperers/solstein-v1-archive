@@ -1,7 +1,7 @@
 """Docker Hub connector for container images."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import aiohttp
@@ -51,7 +51,7 @@ class DockerHubConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=f"https://hub.docker.com/r/{repo.get('repo_name')}",
                             raw_content=repo,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "repo_name": repo.get("repo_name"),
                                 "namespace": repo.get("namespace"),
@@ -81,7 +81,7 @@ class DockerHubConnector(BaseConnector):
                         source_name=self.config.name,
                         source_url=f"https://hub.docker.com/r/{entity_id}",
                         raw_content=data,
-                        extracted_at=datetime.utcnow(),
+                        extracted_at=datetime.now(timezone.utc),
                         metadata={
                             "repo_name": data.get("name"),
                             "namespace": data.get("namespace"),

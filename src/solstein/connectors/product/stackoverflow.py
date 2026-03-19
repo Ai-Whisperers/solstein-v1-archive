@@ -1,7 +1,7 @@
 """Stack Overflow connector for developer activity."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -64,7 +64,7 @@ class StackOverflowConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=item.get("link"),
                             raw_content=item,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "question_id": item.get("question_id"),
                                 "tags": item.get("tags", []),

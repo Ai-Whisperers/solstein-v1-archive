@@ -20,7 +20,7 @@ Usage:
 import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
@@ -122,7 +122,7 @@ class RestartWorkerAction(RemediationAction):
             {
                 "action": "restart_worker",
                 "worker_id": worker_id,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "status": "completed",
             }
         )
@@ -148,7 +148,7 @@ class ScaleUpAction(RemediationAction):
                 "action": "scale_up",
                 "service": service,
                 "replicas": replicas,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "status": "completed",
             }
         )
@@ -173,7 +173,7 @@ class SwitchProviderAction(RemediationAction):
                 "action": "switch_provider",
                 "from": from_provider,
                 "to": to_provider,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "status": "completed",
             }
         )
@@ -233,7 +233,7 @@ class IncidentManager:
             severity=severity,
             message=message,
             status=IncidentStatus.DETECTED,
-            detected_at=datetime.utcnow(),
+            detected_at=datetime.now(timezone.utc),
             context=context or {},
         )
 
@@ -297,7 +297,7 @@ class IncidentManager:
                         {
                             "action": rule.name,
                             "error": str(e),
-                            "timestamp": datetime.utcnow().isoformat(),
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
                             "status": "failed",
                         }
                     )
@@ -348,7 +348,7 @@ class IncidentManager:
         if incident_id in self.incidents:
             incident = self.incidents[incident_id]
             incident.status = IncidentStatus.RESOLVED
-            incident.resolved_at = datetime.utcnow()
+            incident.resolved_at = datetime.now(timezone.utc)
             logger.info(f"Incident resolved: {incident_id}")
 
     def get_active_incidents(self) -> list[Incident]:

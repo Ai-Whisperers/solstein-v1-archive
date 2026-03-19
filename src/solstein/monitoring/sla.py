@@ -14,7 +14,7 @@ Usage:
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -158,7 +158,7 @@ class SLAMonitor:
             SLAReport with compliance status.
         """
         if end is None:
-            end = datetime.utcnow()
+            end = datetime.now(timezone.utc)
         if start is None:
             start = end - timedelta(days=30)
 
@@ -234,7 +234,7 @@ class SLAAlertManager:
             List of SLA breach alerts.
         """
         # Check last 24 hours
-        end = datetime.utcnow()
+        end = datetime.now(timezone.utc)
         start = end - timedelta(hours=24)
 
         report = await self.sla_monitor.generate_report(start, end)

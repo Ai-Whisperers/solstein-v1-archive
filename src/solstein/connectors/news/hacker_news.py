@@ -1,7 +1,7 @@
 """Hacker News connector for tech news."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -54,7 +54,7 @@ class HackerNewsConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=hit.get("url") or f"https://news.ycombinator.com/item?id={hit.get('objectID')}",
                             raw_content=hit,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "story_id": hit.get("objectID"),
                                 "author": hit.get("author"),
@@ -85,7 +85,7 @@ class HackerNewsConnector(BaseConnector):
                         source_name=self.config.name,
                         source_url=f"https://news.ycombinator.com/item?id={entity_id}",
                         raw_content=data,
-                        extracted_at=datetime.utcnow(),
+                        extracted_at=datetime.now(timezone.utc),
                         metadata={"story_id": entity_id, "source_type": "news"},
                     )
 

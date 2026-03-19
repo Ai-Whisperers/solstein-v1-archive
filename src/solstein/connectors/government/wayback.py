@@ -1,7 +1,7 @@
 """Wayback Machine connector for archived web pages."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 import aiohttp
@@ -64,7 +64,7 @@ class WaybackMachineConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=f"{self.config.base_url}/{timestamp}if_/https://{snapshot_dict.get('original')}",
                             raw_content=snapshot_dict,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "timestamp": timestamp,
                                 "urlkey": urlkey,

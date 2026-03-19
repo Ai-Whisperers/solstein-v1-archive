@@ -1,7 +1,7 @@
 """DNS connector for domain records."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig
@@ -53,7 +53,7 @@ class DNSConnector(BaseConnector):
                             source_name=self.config.name,
                             source_url=f"dns://{query}",
                             raw_content=answer,
-                            extracted_at=datetime.utcnow(),
+                            extracted_at=datetime.now(timezone.utc),
                             metadata={
                                 "domain": query,
                                 "record_type": answer.get("type"),
