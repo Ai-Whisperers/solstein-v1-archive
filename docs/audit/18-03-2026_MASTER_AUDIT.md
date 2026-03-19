@@ -3700,3 +3700,181 @@ There is no top-level `"available"` key. `health.get("available", [])` always re
 **Totals: 73 issues (27 HIGH, 35 MED, 11 LOW), 3 closed/fixed.**
 
 *Seventeenth pass completed 2026-03-19. Commit pending.*
+
+---
+
+## 35. EIGHTEENTH PASS — security/, validation/, connectors/, evidence/, intelligence/ (2026-03-19)
+
+### Files Read This Pass
+- All `src/solstein/security/` files (auth.py, encryption.py, gdpr.py, headers.py, jwt_handler.py, rate_limiter.py, secrets.py, validation.py)
+- All `src/solstein/validation/` files (company_validator.py, data_remediation.py, financial_rules.py, financial_sanity.py)
+- `src/solstein/connectors/` — all subdirectories (academic/, financial/, government/, news/, product/, social/) + base.py, registry.py
+- `src/solstein/evidence/` — crawler.py, graph.py, models.py, service.py, vector_store.py, repositories/ (all)
+- `src/solstein/intelligence/` — all 17 files
+- `src/solstein/cli_ai_research.py`, `cli_research.py`, `worker_tasks.py`
+
+**False positives discarded this pass:**
+- ISSUE-75 proposed (cli_ai_research.py:259 KeyError): `basic['employees']` in except block is only reached when `basic.get("employees")` is truthy at line 255, meaning the key exists — no KeyError possible
+- ISSUE-77 proposed (financial_analyzer.py:191 `.value` on None): `FinancialIntelligence.growth_trajectory` has `TrajectoryDirection.UNKNOWN` as default; never `None` at runtime — no AttributeError
+
+---
+
+### ISSUE-74: `EvidenceService.get_claims()` passes `ClaimStatus` enum to method expecting `str` — silent zero results (MED)
+
+**File**: `src/solstein/evidence/service.py:201-211` → calls `src/solstein/evidence/graph.py:102-110` → calls `src/solstein/evidence/repositories/claim.py:90-139`  
+**Severity**: 🟡 MED  
+
+**Exact code — caller (`service.py:201-211`)**:
+```python
+def get_claims(
+    self,
+    company_id: str,
+    field: Optional[str] = None,
+    status: Optional[ClaimStatus] = None,   # accepts enum
+) -> list[dict]:
+    """Get claims for a company."""
+    if not self._initialized:
+        self.initialize()
+    return self.graph.get_claims_for_entity(company_id, field, status)  # passes enum directly
+```
+
+**Exact code — graph method (`graph.py:102-110`)**:
+```python
+def get_claims_for_entity(
+    self,
+    entity_id: str,
+    field: str | None = None,
+    status: str | None = None,    # expects string
+    min_confidence: float = 0.0,
+) -> list[dict[str, Any]]:
+    return self.claims.get_for_entity(entity_id, field, status, min_confidence)
+```
+
+**Exact code — repository (`claim.py:115-116, 139`)**:
+```python
+if status:
+    query += " AND claim.status = $status"   # Cypher string comparison
+...
+session.run(query, ..., status=status, ...)   # passes enum object as Cypher param
+```
+
+**Root cause**: Claims are stored in Neo4j with their string value (confirmed at `claim.py:85`: `status=claim.status.value`). When filtering, `get_claims_for_entity()` expects `status: str | None`. But `EvidenceService.get_claims()` passes the raw `ClaimStatus` enum object. Neo4j will compare the stored string `"verified"` against the Python enum representation (e.g., `<ClaimStatus.VERIFIED: 'verified'>`), which never matches. Contrast with `update_claim_status()` in `graph.py:128` which correctly uses `status.value` — the fix was applied in write paths but missed in the read path.
+
+**Impact**: Any call to `EvidenceService.get_claims(company_id, status=ClaimStatus.VERIFIED)` silently returns an empty list instead of the matching claims. Status-based filtering is entirely broken. No exception is raised — callers receive `[]` and assume no matching claims exist.
+
+---
+
+### ISSUE-75: `EvidenceVectorStore.init_collection()` calls `self.client` before null-check — `AttributeError` if `connect()` not called (LOW)
+
+**File**: `src/solstein/evidence/vector_store.py:59-75`  
+**Severity**: 🟢 LOW  
+
+**Exact code**:
+```python
+def __init__(self, ...):
+    ...
+    self.client: Optional[QdrantClient] = None   # line 50 — starts as None
+
+def connect(self) -> None:
+    """Connect to Qdrant."""
+    self.client = QdrantClient(host=self.host, port=self.port)   # line 56
+
+def init_collection(self) -> None:
+    """Initialize the evidence claims collection."""
+    # Check if collection exists
+    collections = self.client.get_collections()   # line 62 — NO null check
+    collection_names = [c.name for c in collections.collections]
+```
+
+**Root cause**: `self.client` is initialized to `None` in `__init__()` and only set in `connect()`. `init_collection()` at line 62 calls `self.client.get_collections()` with no null guard. If `init_collection()` is called before `connect()`, Python raises `AttributeError: 'NoneType' object has no attribute 'get_collections'`.
+
+**Impact**: Caller sequencing error produces a confusing traceback at the `self.client.get_collections()` line rather than a clear "not connected" message. Other methods (search, upsert) share the same pattern — `self.client.upsert()`, `self.client.search()` — all will fail the same way. Error message does not indicate the root cause (missing `connect()` call).
+
+---
+
+## 35. UPDATED SUMMARY TABLE (Full — Including Eighteenth Pass)
+
+| ID | Description | File | Severity | Status |
+|---|---|---|---|---|
+| FIX-01 | Converter consolidation | `scripts/run_eneve_199.py:21` | — | ✅ Fixed |
+| FIX-02 | Export/gate decoupling | `scripts/run_eneve_199.py:113-163` | — | ✅ Fixed |
+| FIX-03 | Instrumented adapters re-raise exceptions | `adapters/instrumented.py:94,145` | — | ✅ Fixed |
+| ISSUE-01 | `FinancialMetric(allow_empty_primary=True)` always raises | `domain/models.py:107-134` | 🔴 HIGH | Open |
+| ISSUE-02 | FinancialMetric duplicate field declarations | `domain/models.py:97-103` | 🟡 MED | Open |
+| ISSUE-03 | Company duplicate field blocks | `domain/models.py:143-153 vs 195-201` | 🟡 MED | Open |
+| ISSUE-04 | Scoring degrades silently to base_score on exception | `analytics/scoring.py:161-180` | 🔴 HIGH | Open |
+| ISSUE-05 | Celery EnrichmentTask hooks are empty stubs | `worker/enrichment_tasks.py:23-29` | 🟡 MED | Open |
+| ISSUE-06 | DLQ loses traceback, no alerting | `worker/enrichment_tasks.py:99-109` | 🔴 HIGH | Open |
+| ISSUE-07 | Enrichment loop breaks without re-raising | `data/unified/enrichment.py:72-85` | 🟡 MED | Open |
+| ISSUE-08 | `ensure_release_ready()` throwing path still used in CLI | `data/report_release_gate.py:297-315` | 🟡 MED | Open |
+| ISSUE-09 | Enrichment errors silently accumulate in list | `data/unified/enrichment.py:129+` | 🟡 MED | Open |
+| ISSUE-10 | Batch API hardcodes `failed_count=0`, `success_rate=100.0` | `api/routers/enrichment_batch.py:50-70` | 🔴 HIGH | Open |
+| ISSUE-11 | `enrich_batch()` silently substitutes original on failure | `data/unified/enrichment.py:189-191` | 🔴 HIGH | Open |
+| ISSUE-12 | `store_facts()` is an unimplemented stub; DB never written | `worker/base.py:34-59` | 🔴 HIGH | Open |
+| ISSUE-13 | Gap analyzer treats `revenue=0.0` as missing | `data/gap_analyzer.py:80-85` | 🟡 MED | Open |
+| ISSUE-14 | Provenance check requires HTTP/HTTPS/URN; JSON-loaded data always fails | `data/gap_analyzer.py:36-46` | 🔴 HIGH | Open |
+| ISSUE-15 | Completeness calculator counts enum defaults as filled | `analytics/completeness.py:98-104` | 🟡 MED | Open |
+| ISSUE-16 | `normalize_percent()` silently misclassifies values near ±1 | `data/metric_contract.py:34-37` | 🟡 MED | Open |
+| ISSUE-17 | Scorers inconsistent None-handling | `analytics/scorers/growth_momentum.py:75-77` | 🟡 MED | Open |
+| ISSUE-18 | DLQ in-memory only (lost on restart), logs at INFO | `worker/base.py:67-88` | 🔴 HIGH | Open |
+| ISSUE-19 | 3 of 7 CLI report commands hard-block via `assert_client_report_ready` | `data/report_readiness.py:74-112` | 🔴 HIGH | Open |
+| ISSUE-20 | `saas_maturity` None fallback is dead code | `analytics/scorers/competitive_position.py:41` | 🟢 LOW | Open |
+| ISSUE-21 | Two `ConfidenceLevel` enums in different modules | `domain/models.py:30` vs `data/provenance.py:27` | 🟡 MED | Open |
+| ISSUE-22 | Deprecated Pydantic v2 `.dict()` in API cache path | `api/routers/enrichment_single.py:108` | 🟢 LOW | Open |
+| ISSUE-23 | `search_company_patents()` calls async sub-functions without `await` | `data/patent_client.py:33-54` | 🔴 HIGH | Open |
+| ISSUE-24 | `PatentsUnifiedAdapter` entirely non-functional | `adapters/enrichment/patents_unified.py:66,97,134` | 🔴 HIGH | Open |
+| ISSUE-25 | `_search_duckduckgo()` does not check HTTP status before parsing | `data/patent_client.py:202-203` | 🟡 MED | Open |
+| ISSUE-26 | `BatchScoreMarketWorkflow` missing Temporal decorators | `analytics/workflows.py:30-41` | 🟡 MED | Open |
+| ISSUE-27 | `ContentExtractorAgent.http` never closed; leaks connections | `research/ai_research_orchestrator.py:371` | 🟡 MED | Open |
+| ISSUE-28 | `WebSearchAgent.cache` unbounded with no eviction | `research/ai_research_orchestrator.py:183,216` | 🟡 MED | Open |
+| ISSUE-29 | `DataValidatorAgent` per-employee bounds assume millions | `research/ai_research_orchestrator.py:553-616` | 🟡 MED | Open |
+| ISSUE-30 | `GitHubClient.fetch_file()` swallows all exceptions silently | `agents/github/client.py:80-81` | 🟡 MED | Open |
+| ISSUE-31 | `fetch_repos()` truncates at 100, no pagination | `agents/github/search.py:56` | 🟢 LOW | Open |
+| ISSUE-32 | `_merge_enrichment()` mutates caller's input dict in-place | `data/eneve_enrichment_integration.py:299-328` | 🟡 MED | Open |
+| ISSUE-33 | `data_quality_score` fabricated from source count | `data/eneve_enrichment_integration.py:310` | 🟡 MED | Open |
+| ISSUE-34 | `WebSearchAgent._api_search_news()` unreachable dead code | `agents/web_search_agent.py:145-167` | 🟡 MED | Open |
+| ISSUE-35 | `CompaniesHouseAgent` uses `requests.get()` without importing `requests` | `agents/companies_house_agent.py:138,182,224` | 🔴 HIGH | Open |
+| ISSUE-36 | `CompaniesHouseAgent` async methods return coroutines via `asyncio.to_thread` | `agents/companies_house_agent.py:114-121` | 🔴 HIGH | Open |
+| ISSUE-37 | `coordinator_agent.py` imports non-existent `workflow_nodes`; entire agents package fails | `agents/coordinator_agent.py:23-28` | 🔴 HIGH | Open |
+| ISSUE-38 | `CoordinatorAgent.analyze_company()` missing required fields in `AgentTaskResult` | `agents/coordinator_agent.py:135-148` | 🔴 HIGH | Open |
+| ISSUE-39 | `ResponseCache` uses deprecated `datetime.utcnow()` | `core/production_hardening.py:111,125` | 🟡 MED | Open |
+| ISSUE-40 | `ErrorLoggingMiddleware` exhausts `response.body_iterator`; all 4xx/5xx deliver empty body | `api/middleware/logging.py:168-186` | 🔴 HIGH | Open |
+| ISSUE-41 | `get_rate_limit_for_path()` operator precedence bug | `api/middleware/rate_limit.py:50` | 🟡 MED | Open |
+| ISSUE-42 | `AuthenticationMiddleware` bypasses auth for `/companies` and `/enrichment` prefixes | `api/middleware/security.py:61-62` | 🟡 MED | Open |
+| ISSUE-43 | ~~EnrichmentPipeline isolation guarantee violated~~ | — | — | ❌ CLOSED false positive |
+| ISSUE-44 | `StructuredLLMClient.extract()` passes `temperature` kwarg not in `generate()` signature | `llm/structured_client.py:113` | 🔴 HIGH | Open |
+| ISSUE-45 | `EnhancedLLMClient.generate()` returns `None` after all providers fail | `llm/enhanced_client.py:114-115` | 🟡 MED | Open |
+| ISSUE-46 | `OllamaQuerier` bare `except Exception: raise` with no logging | `llm/query/ollama.py:67-68` | 🟢 LOW | Open |
+| ISSUE-47 | `celery_app.send_task()` called synchronously in async handlers | `api/routers/async_jobs.py:130,173` | 🟡 MED | Open |
+| ISSUE-48 | `EnrichmentPipeline._merge()` old schema; always returns empty aggregate | `application/enrichment_pipeline.py:170-174` | 🔴 HIGH | Open |
+| ISSUE-49 | All five `*_unified.py` adapters use wrong `RawDataSource` fields | multiple adapters | 🔴 HIGH | Open |
+| ISSUE-50 | `research/evidence.py` uses `logger` without importing it | `research/evidence.py:23` | 🟡 MED | Open |
+| ISSUE-51 | All `SignalExtractor` subclasses use 5 nonexistent `Signal` fields; layer entirely unwired | `analytics/signals/extractors.py:44-83+` | 🔴 HIGH | Open |
+| ISSUE-52 | `include_charts` and `include_reasoning` query params silently ignored | `api/routers/export.py:57-58, 161-162` | 🟡 MED | Open |
+| ISSUE-53 | `GET /scoring/stats` crashes; `company.tier.value` on nullable String ORM column | `api/routers/scoring.py:269` | 🔴 HIGH | Open |
+| ISSUE-54 | `datetime.utcnow()` deprecated in SLAReport and PDF generators | `monitoring/sla.py`; `exporters/pdf.py` | 🟢 LOW | Open |
+| ISSUE-55 | Dead code after `return` in `search()` and `filter_by()` | `infrastructure/company_repository.py:192-212, 244-267` | 🟡 MED | Open |
+| ISSUE-56 | `research/sources.py` uses `logger` without importing it | `research/sources.py:27` | 🟡 MED | Open |
+| ISSUE-57 | Dead `datetime.now(timezone.utc)` computation in `get_cache_stats()` | `infrastructure/enrichment_repositories.py:158` | 🟢 LOW | Open |
+| ISSUE-58 | `CacheManager` always sets `self.available=True`; in-memory fallback never activates | `infrastructure/cache.py:41-50` | 🟡 MED | Open |
+| ISSUE-59 | `GET /health` crashes: `status` variable shadows FastAPI `status` module | `api/routers/health.py:30,33,37,41` | 🔴 HIGH | Open |
+| ISSUE-60 | `_run_excel_export()` sync task calls `async repo.get_all()` without `await` | `api/routers/export.py:22-30` | 🔴 HIGH | Open |
+| ISSUE-61 | `batch_processor.py` uses `Company` in annotations without importing it; `NameError` at module load | `infrastructure/batch_processor.py:147-148` | 🔴 HIGH | Open |
+| ISSUE-62 | `LinkedInUnifiedAdapter.__init__()` accepts `db_manager=None`; `AttributeError` at first session use | `adapters/enrichment/linkedin_unified.py:31-37` | 🟡 MED | Open |
+| ISSUE-63 | `asyncio` imported at line 358, used at line 279; not a runtime crash for normal callers | `monitoring/metrics.py:279, 358` | 🟢 LOW | Open |
+| ISSUE-64 | Redundant condition in `get_average_confidence()` | `analytics/confidence_weighting.py:51` | 🟢 LOW | Open |
+| ISSUE-65 | `ContinuousMonitor` unconditionally `await`s callback; `TypeError` with sync callables | `monitoring/continuous_monitor.py:71` | 🟡 MED | Open |
+| ISSUE-66 | `float("nan")` in `EquityResult` causes JSON `ValueError`; NaN comparisons misclassify deals | `analytics/equity_analysis.py:102-104` | 🟡 MED | Open |
+| ISSUE-67 | `traceback.format_exc()` captures wrong exception context; fingerprints collide | `monitoring/errors.py:153` | 🟢 LOW | Open |
+| ISSUE-68 | `GitHubConnector` uses `requests.get()` at 3 call sites; `requests` never imported | `data/connectors/github_connector.py:64,104,149` | 🔴 HIGH | Open |
+| ISSUE-69 | `EnrichableCompany` Protocol has 3 duplicate attribute declarations | `data/enrichment_types.py:14-20` | 🟡 MED | Open |
+| ISSUE-70 | `company_research.py` concatenates `None` country with string city → `TypeError` | `data/company_research.py:190` | 🟡 MED | Open |
+| ISSUE-71 | Duplicate `tier_counts` computation in `market.py`; first result discarded | `exporters/markdown/market.py:42-53` | 🟢 LOW | Open |
+| ISSUE-72 | Silent `except Exception: pass` in `auto_adjust_columns()` | `exporters/excel/utils.py:130-131` | 🟢 LOW | Open |
+| ISSUE-73 | `LLMReportEnhancer.is_available()` uses wrong dict key (always `False`) + crashes inside async event loop | `exporters/llm.py:77-82` | 🔴 HIGH | Open |
+| ISSUE-74 | `EvidenceService.get_claims()` passes `ClaimStatus` enum where `str` expected; status filter silently returns empty list | `evidence/service.py:211` → `evidence/graph.py:106` → `evidence/repositories/claim.py:116` | 🟡 MED | Open |
+| ISSUE-75 | `EvidenceVectorStore.init_collection()` calls `self.client` without null-check; `AttributeError` if `connect()` not called first | `evidence/vector_store.py:62` | 🟢 LOW | Open |
+
+**Totals: 75 issues (27 HIGH, 36 MED, 12 LOW), 3 closed/fixed.**
+
+*Eighteenth pass completed 2026-03-19. Commit pending.*
