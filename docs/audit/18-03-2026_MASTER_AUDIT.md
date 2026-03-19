@@ -2979,3 +2979,178 @@ import asyncio
 ---
 
 *Audit started 2026-03-18. Twelfth pass (blast-radius analysis + new file coverage) completed 2026-03-19. All file:line references correspond to the state of the repository at commit `4328341`.*
+
+---
+
+## 30. THIRTEENTH PASS — monitoring/, analytics/, data/, exporters/ (2026-03-19)
+
+### Files Read This Pass
+- `src/solstein/analytics/confidence_weighting.py` (full)
+- `src/solstein/monitoring/continuous_monitor.py` (full)
+- `src/solstein/analytics/equity_analysis.py` (full)
+- `src/solstein/monitoring/errors.py` (full)
+- `src/solstein/monitoring/logging.py` (full)
+- Also reviewed: `analytics/ai_readiness.py`, `analytics/classification.py`, `analytics/competitive_mapping.py`, `analytics/data_quality.py`, `analytics/energy_sector.py`, `analytics/tam_analysis.py`, `analytics/tier_classification.py`, `monitoring/business_metrics.py`, `monitoring/database_optimizer.py`, `monitoring/incidents.py`, `monitoring/llm_tracker.py`, `monitoring/health.py`
+
+---
+
+### ISSUE-64: Redundant condition in `get_average_confidence()` — dead branch (LOW)
+
+**File**: `src/solstein/analytics/confidence_weighting.py:51`  
+**Severity**: 🟢 LOW  
+
+**Exact code**:
+```python
+def get_average_confidence(company: Company) -> float:
+    if not company.signal_confidences or not company.signal_confidences:  # line 51 — identical conditions
+        return 0.3
+```
+
+**Root cause**: The condition `not company.signal_confidences or not company.signal_confidences` checks the same expression twice. Both sides are identical — the `or` is dead.
+
+**Impact**: No functional bug (the guard works correctly due to the first operand), but the duplicate condition is misleading and suggests a copy-paste error. Possibly the second condition was intended to check something else (e.g., `not company.signal_confidences.values()`).
+
+---
+
+### ISSUE-65: `ContinuousMonitor` always `await`s callback — `TypeError` with sync callables (MED)
+
+**File**: `src/solstein/monitoring/continuous_monitor.py:20,71`  
+**Severity**: 🟡 MED  
+
+**Exact code**:
+```python
+def __init__(self, on_signal_callback: Callable | None = None):
+    ...
+    self.on_signal_callback = on_signal_callback  # line 29 — accepts any Callable
+
+async def _check_company(self, company: Company, check_interval_hours: int) -> None:
+    ...
+    if self.on_signal_callback:
+        await self.on_signal_callback(company, signals)  # line 71 — always awaited
+```
+
+**Root cause**: The type hint `Callable | None` permits both sync and async callables. However, `_check_company()` unconditionally `await`s the callback at line 71. If a synchronous callback is passed, Python raises `TypeError: object is not awaitable` at runtime.
+
+**Impact**: Any caller that registers a synchronous callback will crash `ContinuousMonitor._check_company()` with `TypeError`. The monitor silently catches this in the outer `except Exception` block (line 75-76) and continues — so the callback is silently skipped rather than executed.
+
+---
+
+### ISSUE-66: `float("nan")` in `EquityResult` — JSON serialization failure (MED)
+
+**File**: `src/solstein/analytics/equity_analysis.py:102-104`  
+**Severity**: 🟡 MED  
+
+**Exact code**:
+```python
+entry_ev_rev = round(params.entry_ev_eur_m / revenue_eur_m, 2) if revenue_eur_m > 0 else float("nan")
+ebitda_eur_m = revenue_eur_m * ebitda_margin / 100.0
+entry_ev_ebitda = round(params.entry_ev_eur_m / ebitda_eur_m, 2) if ebitda_eur_m > 0 else float("nan")
+```
+
+**Root cause**: `float("nan")` is returned when revenue or EBITDA is zero. Python's `json` module rejects `NaN` values — `json.dumps(float('nan'))` raises `ValueError: Out of range float values are not JSON compliant`. When `EquityResult` is serialized by FastAPI/`jsonable_encoder`, the endpoint returns a 500 error for any company with no revenue or EBITDA data.
+
+**Secondary impact**: `_verdict(irr, moic, entry_ev_rev)` at line 106 receives `NaN` for `entry_ev_rev`. Python comparison operators (`>`, `<`) with NaN always return `False`, silently misclassifying deals as "Attractive" when revenue data is missing.
+
+**Fix**: Use `None` instead of `float("nan")` and update `EquityResult` fields to `float | None`.
+
+---
+
+### ISSUE-67: `traceback.format_exc()` produces stale/empty traceback for error fingerprinting (LOW)
+
+**File**: `src/solstein/monitoring/errors.py:143-155`  
+**Severity**: 🟢 LOW  
+
+**Exact code**:
+```python
+def _generate_fingerprint(self, error: Exception) -> str:
+    tb = traceback.format_exc().split("\n")[:3]  # line 153 — captures *current* exception context, not `error`
+    content = f"{type(error).__name__}:{str(error)[:100]}:{':'.join(tb)}"
+    return hashlib.md5(content.encode()).hexdigest()[:16]
+```
+
+**Root cause**: `traceback.format_exc()` returns the traceback of the **currently active exception** (i.e., the exception being handled in the nearest enclosing `except` clause). `_generate_fingerprint()` receives `error` as a parameter — if called after the exception has been stored or re-raised, the active context may differ or be `None`, producing `"NoneType: None\n"` as the traceback string. All fingerprints for post-context errors will collide to the same prefix.
+
+**Impact**: Error deduplication via fingerprint becomes unreliable. Different errors stored after the exception context exits will receive identical `"NoneType: None"` traceback fragments, causing different errors to merge into the same fingerprint bucket.
+
+**Fix**: Use `traceback.format_exception(type(error), error, error.__traceback__)` to extract the traceback directly from the exception object.
+
+---
+
+## 30. UPDATED SUMMARY TABLE (Full — Including Thirteenth Pass)
+
+| ID | Description | File | Severity | Status |
+|---|---|---|---|---|
+| FIX-01 | Converter consolidation | `scripts/run_eneve_199.py:21` | — | ✅ Fixed |
+| FIX-02 | Export/gate decoupling | `scripts/run_eneve_199.py:113-163` | — | ✅ Fixed |
+| FIX-03 | Instrumented adapters re-raise exceptions | `adapters/instrumented.py:94,145` | — | ✅ Fixed |
+| ISSUE-01 | `FinancialMetric(allow_empty_primary=True)` always raises; Company default construction fails | `domain/models.py:107-134` | 🔴 HIGH | Open |
+| ISSUE-02 | FinancialMetric duplicate field declarations | `domain/models.py:97-103` | 🟡 MED | Open |
+| ISSUE-03 | Company duplicate field blocks | `domain/models.py:143-153 vs 195-201` | 🟡 MED | Open |
+| ISSUE-04 | Scoring degrades silently to base_score on exception | `analytics/scoring.py:161-180` | 🔴 HIGH | Open |
+| ISSUE-05 | Celery EnrichmentTask hooks are empty stubs | `worker/enrichment_tasks.py:23-29` | 🟡 MED | Open |
+| ISSUE-06 | DLQ loses traceback, no alerting | `worker/enrichment_tasks.py:99-109` | 🔴 HIGH | Open |
+| ISSUE-07 | Enrichment loop breaks without re-raising | `data/unified/enrichment.py:72-85` | 🟡 MED | Open |
+| ISSUE-08 | `ensure_release_ready()` throwing path still used in CLI | `data/report_release_gate.py:297-315` | 🟡 MED | Open |
+| ISSUE-09 | Enrichment errors silently accumulate in list | `data/unified/enrichment.py:129+` | 🟡 MED | Open |
+| ISSUE-10 | Batch API hardcodes `failed_count=0`, `success_rate=100.0` | `api/routers/enrichment_batch.py:50-70` | 🔴 HIGH | Open |
+| ISSUE-11 | `enrich_batch()` silently substitutes original on failure | `data/unified/enrichment.py:189-191` | 🔴 HIGH | Open |
+| ISSUE-12 | `store_facts()` is an unimplemented stub; DB never written | `worker/base.py:34-59` | 🔴 HIGH | Open |
+| ISSUE-13 | Gap analyzer treats `revenue=0.0` as missing | `data/gap_analyzer.py:80-85` | 🟡 MED | Open |
+| ISSUE-14 | Provenance check requires HTTP/HTTPS/URN; JSON-loaded data always fails | `data/gap_analyzer.py:36-46` | 🔴 HIGH | Open |
+| ISSUE-15 | Completeness calculator counts enum defaults as filled | `analytics/completeness.py:98-104` | 🟡 MED | Open |
+| ISSUE-16 | `normalize_percent()` silently misclassifies values near ±1 | `data/metric_contract.py:34-37` | 🟡 MED | Open |
+| ISSUE-17 | Scorers inconsistent None-handling | `analytics/scorers/growth_momentum.py:75-77` | 🟡 MED | Open |
+| ISSUE-18 | DLQ in-memory only (lost on restart), logs at INFO | `worker/base.py:67-88` | 🔴 HIGH | Open |
+| ISSUE-19 | 3 of 7 CLI report commands hard-block via `assert_client_report_ready` | `data/report_readiness.py:74-112` | 🔴 HIGH | Open |
+| ISSUE-20 | `saas_maturity` None fallback is dead code | `analytics/scorers/competitive_position.py:41` | 🟢 LOW | Open |
+| ISSUE-21 | Two `ConfidenceLevel` enums in different modules | `domain/models.py:30` vs `data/provenance.py:27` | 🟡 MED | Open |
+| ISSUE-22 | Deprecated Pydantic v2 `.dict()` in API cache path | `api/routers/enrichment_single.py:108` | 🟢 LOW | Open |
+| ISSUE-23 | `search_company_patents()` calls async sub-functions without `await` | `data/patent_client.py:33-54` | 🔴 HIGH | Open |
+| ISSUE-24 | `PatentsUnifiedAdapter` entirely non-functional | `adapters/enrichment/patents_unified.py:66,97,134` | 🔴 HIGH | Open |
+| ISSUE-25 | `_search_duckduckgo()` does not check HTTP status before parsing | `data/patent_client.py:202-203` | 🟡 MED | Open |
+| ISSUE-26 | `BatchScoreMarketWorkflow` missing Temporal decorators | `analytics/workflows.py:30-41` | 🟡 MED | Open |
+| ISSUE-27 | `ContentExtractorAgent.http` never closed; leaks connections | `research/ai_research_orchestrator.py:371` | 🟡 MED | Open |
+| ISSUE-28 | `WebSearchAgent.cache` unbounded with no eviction | `research/ai_research_orchestrator.py:183,216` | 🟡 MED | Open |
+| ISSUE-29 | `DataValidatorAgent` per-employee bounds assume millions | `research/ai_research_orchestrator.py:553-616` | 🟡 MED | Open |
+| ISSUE-30 | `GitHubClient.fetch_file()` swallows all exceptions silently | `agents/github/client.py:80-81` | 🟡 MED | Open |
+| ISSUE-31 | `fetch_repos()` truncates at 100, no pagination | `agents/github/search.py:56` | 🟢 LOW | Open |
+| ISSUE-32 | `_merge_enrichment()` mutates caller's input dict in-place | `data/eneve_enrichment_integration.py:299-328` | 🟡 MED | Open |
+| ISSUE-33 | `data_quality_score` fabricated from source count | `data/eneve_enrichment_integration.py:310` | 🟡 MED | Open |
+| ISSUE-34 | `WebSearchAgent._api_search_news()` unreachable dead code | `agents/web_search_agent.py:145-167` | 🟡 MED | Open |
+| ISSUE-35 | `CompaniesHouseAgent` uses `requests.get()` without importing `requests` | `agents/companies_house_agent.py:138,182,224` | 🔴 HIGH | Open |
+| ISSUE-36 | `CompaniesHouseAgent` async methods return coroutines via `asyncio.to_thread` | `agents/companies_house_agent.py:114-121` | 🔴 HIGH | Open |
+| ISSUE-37 | `coordinator_agent.py` imports non-existent `workflow_nodes`; entire agents package fails; secondary victim: `continuous_monitor.py` | `agents/coordinator_agent.py:23-28` | 🔴 HIGH | Open |
+| ISSUE-38 | `CoordinatorAgent.analyze_company()` missing required fields in `AgentTaskResult` | `agents/coordinator_agent.py:135-148` | 🔴 HIGH | Open |
+| ISSUE-39 | `ResponseCache` uses deprecated `datetime.utcnow()` | `core/production_hardening.py:111,125` | 🟡 MED | Open |
+| ISSUE-40 | `ErrorLoggingMiddleware` exhausts `response.body_iterator`; all 4xx/5xx deliver empty body | `api/middleware/logging.py:168-186` | 🔴 HIGH | Open |
+| ISSUE-41 | `get_rate_limit_for_path()` operator precedence bug | `api/middleware/rate_limit.py:50` | 🟡 MED | Open |
+| ISSUE-42 | `AuthenticationMiddleware` bypasses auth for `/companies` and `/enrichment` prefixes | `api/middleware/security.py:61-62` | 🟡 MED | Open |
+| ISSUE-43 | ~~EnrichmentPipeline isolation guarantee violated~~ | — | — | ❌ CLOSED false positive |
+| ISSUE-44 | `StructuredLLMClient.extract()` passes `temperature` kwarg not in `generate()` signature | `llm/structured_client.py:113` | 🔴 HIGH | Open |
+| ISSUE-45 | `EnhancedLLMClient.generate()` returns `None` after all providers fail | `llm/enhanced_client.py:114-115` | 🟡 MED | Open |
+| ISSUE-46 | `OllamaQuerier` bare `except Exception: raise` with no logging | `llm/query/ollama.py:67-68` | 🟢 LOW | Open |
+| ISSUE-47 | `celery_app.send_task()` called synchronously in async handlers | `api/routers/async_jobs.py:130,173` | 🟡 MED | Open |
+| ISSUE-48 | `EnrichmentPipeline._merge()` old schema; always returns empty aggregate | `application/enrichment_pipeline.py:170-174` | 🔴 HIGH | Open |
+| ISSUE-49 | All five `*_unified.py` adapters use wrong `RawDataSource` fields; ValidationError on every `enrich()` | `website_unified`, `news_unified`, `funding_unified`, `web_search_unified`, `linkedin_unified` | 🔴 HIGH | Open |
+| ISSUE-50 | `research/evidence.py` uses `logger` without importing it | `research/evidence.py:23` | 🟡 MED | Open |
+| ISSUE-51 | All `SignalExtractor` subclasses use 5 nonexistent `Signal` fields; layer entirely unwired | `analytics/signals/extractors.py:44-83+` | 🔴 HIGH | Open |
+| ISSUE-52 | `include_charts` and `include_reasoning` query params silently ignored | `api/routers/export.py:57-58, 161-162` | 🟡 MED | Open |
+| ISSUE-53 | `GET /scoring/stats` crashes; `company.tier.value` on nullable String ORM column | `api/routers/scoring.py:269` | 🔴 HIGH | Open |
+| ISSUE-54 | `datetime.utcnow()` deprecated in `SLAReport` and PDF generators | `monitoring/sla.py:54,161,237`; `exporters/pdf.py:90,165` | 🟢 LOW | Open |
+| ISSUE-55 | Dead code after `return` in `search()` and `filter_by()` | `infrastructure/company_repository.py:192-212, 244-267` | 🟡 MED | Open |
+| ISSUE-56 | `research/sources.py` uses `logger` without importing it | `research/sources.py:27` | 🟡 MED | Open |
+| ISSUE-57 | Dead `datetime.now(timezone.utc)` computation in `get_cache_stats()` | `infrastructure/enrichment_repositories.py:158` | 🟢 LOW | Open |
+| ISSUE-58 | `CacheManager` always sets `self.available=True`; in-memory fallback never activates | `infrastructure/cache.py:41-50` | 🟡 MED | Open |
+| ISSUE-59 | `GET /health` crashes: `status` variable shadows FastAPI `status` module | `api/routers/health.py:30,33,37,41` | 🔴 HIGH | Open |
+| ISSUE-60 | `_run_excel_export()` sync task calls `async repo.get_all()` without `await` | `api/routers/export.py:22-30` | 🔴 HIGH | Open |
+| ISSUE-61 | `batch_processor.py` uses `Company` in annotations without importing it; `NameError` at module load | `infrastructure/batch_processor.py:147-148` | 🔴 HIGH | Open |
+| ISSUE-62 | `LinkedInUnifiedAdapter.__init__()` accepts `db_manager=None`; `AttributeError` at first session use | `adapters/enrichment/linkedin_unified.py:31-37` | 🟡 MED | Open |
+| ISSUE-63 | `asyncio` imported at line 358 in `monitoring/metrics.py`, used inside function body at line 279; not a runtime crash for normal callers | `monitoring/metrics.py:279, 358` | 🟢 LOW | Open |
+| ISSUE-64 | Redundant condition in `get_average_confidence()` — same expression checked twice | `analytics/confidence_weighting.py:51` | 🟢 LOW | Open |
+| ISSUE-65 | `ContinuousMonitor` unconditionally `await`s callback; `TypeError` with sync callables, silently swallowed | `monitoring/continuous_monitor.py:71` | 🟡 MED | Open |
+| ISSUE-66 | `float("nan")` in `EquityResult` causes JSON `ValueError` on API response; NaN comparisons misclassify deals | `analytics/equity_analysis.py:102-104` | 🟡 MED | Open |
+| ISSUE-67 | `traceback.format_exc()` in `_generate_fingerprint()` captures wrong exception context; fingerprints collide | `monitoring/errors.py:153` | 🟢 LOW | Open |
+
+**Totals: 67 issues (25 HIGH, 33 MED, 9 LOW), 3 closed/fixed.**
+
+*Thirteenth pass completed 2026-03-19. Commit pending.*
