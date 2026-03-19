@@ -13,16 +13,16 @@
 | Metric | Value |
 |---|---|
 | **Total `.py` files in `src/solstein/`** | 555 |
-| **Files directly read** | ~138 |
-| **Coverage** | ~25% |
-| **Total issues found** | 60 (1 false positive closed) |
-| **Open 🔴 HIGH** | 22 |
+| **Files directly read** | ~165 |
+| **Coverage** | ~30% |
+| **Total issues found** | 62 (1 false positive closed) |
+| **Open 🔴 HIGH** | 24 |
 | **Open 🟡 MED** | 31 |
 | **Open 🟢 LOW** | 7 |
 | **Closed (false positive)** | 1 (ISSUE-43) |
 | **Confirmed fixes** | 3 |
-| **Last pass** | Ninth-pass — Infrastructure repositories, research remaining, application layer (2026-03-19) |
-| **Last commit** | `de47049` — pushed to `origin/master` 2026-03-19 |
+| **Last pass** | Tenth-pass — application layer, signal definitions, remaining API routers (2026-03-19) |
+| **Last commit** | `51e7671` — pushed to `origin/master` 2026-03-19 |
 
 ### Directories with meaningful coverage
 | Directory | Files read / est. total | Notes |
@@ -62,15 +62,17 @@
 ### Directories with zero or minimal coverage (priority for next passes)
 | Directory | Est. files | Risk |
 |---|---|---|
-| `infrastructure/` (remaining) | ~12 | session management, refresh, migrations, full models subpackage |
-| `analytics/signals/definitions/` | ~5 | Signal definitions (may reveal more ISSUE-51 blast radius) |
+| `infrastructure/` (remaining) | ~10 | session management, refresh, migrations |
 | `analytics/simulation/`, `valuation/` | ~5 | Financial modeling correctness |
-| `api/routers/` (remaining) | ~6 | companies, metrics, search, health routers unread |
 | `adapters/` (remaining) | ~12 | aggregation, competitor adapters |
-| `application/` (remaining) | ~9 | all orchestration files except enrichment_pipeline |
 | `extractors/parsers/` | ~4 | Markdown parsing correctness |
 | `monitoring/` (remaining) | ~9 | metrics, alerts, business_metrics, database_optimizer |
 | `exporters/` (remaining) | ~4 | excel.py, audit_report.py |
+
+### Confirmed clean areas (tenth pass)
+- `analytics/signals/definitions/` — all 8 files use correct `Signal(name, category, description)` interface; ISSUE-51 blast radius confirmed limited to `extractors.py` only
+- `application/` — mostly thin re-export wrappers over `solstein.agents`; no logic bugs
+- `api/routers/` (companies, metrics, search, auth, drill_down, enrichment_base, enrichment_health, enrichment_metrics, jobs, simulation) — clean
 
 ---
 
@@ -2441,4 +2443,178 @@ except Exception as e:
 
 ---
 
-*Audit started 2026-03-18. Ninth pass (infrastructure repositories, research remaining, cache layer) completed 2026-03-19. All file:line references correspond to the state of the repository at commit `de47049`.*
+## 24. TENTH-PASS FINDINGS — Application layer, signal definitions, remaining API routers (2026-03-19)
+
+**Directories newly covered:** `application/` (all files — confirmed thin re-export wrappers), `analytics/signals/definitions/` (all 8 definition files), `api/routers/` (companies, metrics, search, auth, drill_down, health, enrichment_base, enrichment_health, enrichment_metrics, jobs, simulation — all remaining unread routers).
+
+**Method:** Direct file reads. Every finding below is corroborated from source with exact line citations. Three candidate findings from the subagent were verified; one (unused `metrics_router`) was confirmed FALSE POSITIVE — `main.py:160` includes it.
+
+---
+
+### ISSUE-59 — `GET /health` crashes on every call: `status` local variable shadows the FastAPI `status` module; `AttributeError: 'str' object has no attribute 'value'`
+
+**Severity:** 🔴 HIGH
+**File:** `src/solstein/api/routers/health.py:14, 30, 33, 37, 41`
+
+Line 14 imports the FastAPI `status` module:
+
+```python
+# health.py:14
+from fastapi import APIRouter, status
+```
+
+Line 30 creates a local variable with the same name, silently shadowing the module for the rest of the function:
+
+```python
+# health.py:29-43
+async def health_check() -> dict:
+    await health_monitor.run_all_checks()
+    status = health_monitor.get_overall_status()   # ← overwrites fastapi.status module
+
+    response = {
+        "status": status.value,                    # ← AttributeError: 'str' has no .value
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+
+    if status.value == "unhealthy":                # ← AttributeError (never reached)
+        raise APIError(
+            code="SERVICE_UNAVAILABLE",
+            message="Service is unhealthy",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,  # ← also broken: str not module
+            ...
+        )
+```
+
+`health_monitor.get_overall_status()` returns a plain Python `str` (`"healthy"`, `"degraded"`, or `"unhealthy"`). Python `str` objects have no `.value` attribute. The expression `status.value` on line 33 raises `AttributeError` unconditionally before the rest of the function can execute.
+
+**Compound effect:** Line 41's `status.HTTP_503_SERVICE_UNAVAILABLE` would also fail for the same reason — `status` is now a string, not the FastAPI status module — but line 41 is never reached because the crash occurs at line 33 first.
+
+**Impact:** `GET /health` raises `AttributeError` on every single invocation. The endpoint is entirely non-functional. Any load balancer, Kubernetes liveness probe, or monitoring system using this endpoint as a health signal will receive an error response. The endpoint is also registered as the primary health indicator in `main.py`.
+
+---
+
+### ISSUE-60 — `_run_excel_export()` background task calls `async repo.get_all()` without `await` in a sync function; always yields coroutine object instead of data; export always silently fails
+
+**Severity:** 🔴 HIGH
+**File:** `src/solstein/api/routers/export.py:22-30`
+
+```python
+# export.py:22-30
+def _run_excel_export(repo: Any, filters: dict[str, Any], filename: str) -> None:
+    """Background task to generate excel report."""
+    company_filter = CompanyFilter(**filters) if filters else None
+    companies = cast(list[Any], repo.get_all(filters=company_filter) or [])
+    #                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    #   repo.get_all() is async def get_all(self, skip=0, limit=100)
+    #   called here without await → returns coroutine object, never executes
+    #   cast() does not evaluate the expression; it's a no-op type hint
+    #   coroutine objects are truthy → `or []` never fires
+    #   companies = <coroutine object CompanyRepository.get_all>
+
+    if companies:                # ← True (coroutine is truthy)
+        for company in companies:  # ← TypeError: 'coroutine' object is not iterable
+```
+
+`CompanyRepository.get_all` is defined as `async def get_all(self, skip: int = 0, limit: int = 100)` (`company_repository.py:31`). Calling it without `await` in a synchronous function returns a coroutine object. `cast()` is a type-checker-only no-op that does not evaluate or await the expression. The coroutine object is truthy, so `or []` never triggers and `companies` holds the unawaited coroutine. On line 30, `for company in companies` raises `TypeError: 'coroutine' object is not iterable`.
+
+**Secondary issue:** `repo.get_all()` is called with `filters=company_filter` but its signature is `get_all(self, skip, limit)` — no `filters` parameter. This would raise `TypeError: get_all() got an unexpected keyword argument 'filters'` even if the await issue were fixed.
+
+**Impact:** The `GET /export/excel` endpoint schedules `_run_excel_export` as a BackgroundTask, returns HTTP 202, then the background task crashes with `TypeError`. The client receives a 202 (Accepted) and no file is ever generated. The failure is completely silent from the client's perspective — no error response, no notification. FastAPI silently discards background task exceptions.
+
+---
+
+### ADDENDUM: ISSUE-51 blast radius confirmed limited to `extractors.py`
+
+**File:** `src/solstein/analytics/signals/definitions/` (all 8 files read: financial, growth, hiring, market, operational, product, strategic, technical)
+
+All definition files instantiate `Signal` with only the three correct fields (`name`, `category`, `description`). Example from `financial.py:9-12`:
+
+```python
+Signal(
+    name="Total Funding Raised",
+    category=SignalCategory.FINANCIAL,
+    description="Cumulative capital raised from all sources",
+)
+```
+
+The broken interface (`value`, `text`, `source`, `confidence`, `evidence`) is exclusive to `extractors.py`. The definitions themselves are not the source of the ISSUE-51 breakage — only the extractor runtime logic is affected.
+
+---
+
+## 25. UPDATED SUMMARY TABLE (Full — Including Tenth-Pass)
+
+| ID | Description | File | Severity | Status |
+|---|---|---|---|---|
+| FIX-01 | Converter consolidation (EPIC-058) | `scripts/run_eneve_199.py:21` | — | ✅ Fixed |
+| FIX-02 | Export/gate decoupling in ENEVE script (EPIC-060) | `scripts/run_eneve_199.py:113-163` | — | ✅ Fixed |
+| FIX-03 | Instrumented adapters re-raise exceptions | `adapters/instrumented.py:94,145` | — | ✅ Fixed |
+| ISSUE-01 | `FinancialMetric(allow_empty_primary=True)` always raises; `Company` default construction always fails; Celery enrichment always crashes | `domain/models.py:107-134, 213` | 🔴 HIGH | Open |
+| ISSUE-02 | FinancialMetric duplicate field declarations | `domain/models.py:97-103` | 🟡 MED | Open |
+| ISSUE-03 | Company duplicate field blocks (defined twice) | `domain/models.py:143-153 vs 195-201` | 🟡 MED | Open |
+| ISSUE-04 | Scoring degrades silently to base_score on exception | `analytics/scoring.py:161-180` | 🔴 HIGH | Open |
+| ISSUE-05 | Celery EnrichmentTask hooks are empty stubs | `worker/enrichment_tasks.py:23-29` | 🟡 MED | Open |
+| ISSUE-06 | DLQ loses traceback, no alerting | `worker/enrichment_tasks.py:99-109` | 🔴 HIGH | Open |
+| ISSUE-07 | Enrichment loop breaks without re-raising | `data/unified/enrichment.py:72-85` | 🟡 MED | Open |
+| ISSUE-08 | `ensure_release_ready()` throwing path still used in CLI | `data/report_release_gate.py:297-315` | 🟡 MED | Open |
+| ISSUE-09 | Enrichment errors silently accumulate in list | `data/unified/enrichment.py:129+` | 🟡 MED | Open |
+| ISSUE-10 | Batch API hardcodes `failed_count=0`, `success_rate=100.0` | `api/routers/enrichment_batch.py:50-70` | 🔴 HIGH | Open |
+| ISSUE-11 | `enrich_batch()` silently substitutes original on failure | `data/unified/enrichment.py:189-191` | 🔴 HIGH | Open |
+| ISSUE-12 | `store_facts()` is an unimplemented stub; DB never written | `worker/base.py:34-59` | 🔴 HIGH | Open |
+| ISSUE-13 | Gap analyzer treats `revenue=0.0` as missing; blocks pre-revenue companies | `data/gap_analyzer.py:80-85` | 🟡 MED | Open |
+| ISSUE-14 | Provenance check requires HTTP/HTTPS/URN; JSON-loaded data always fails | `data/gap_analyzer.py:36-46` | 🔴 HIGH | Open |
+| ISSUE-15 | Completeness calculator counts enum defaults and empty lists as filled | `analytics/completeness.py:98-104` | 🟡 MED | Open |
+| ISSUE-16 | `normalize_percent()` heuristic silently misclassifies values near ±1 | `data/metric_contract.py:34-37` | 🟡 MED | Open |
+| ISSUE-17 | Scorers inconsistent None-handling: GrowthMomentum skips, FinancialHealth penalizes | `analytics/scorers/growth_momentum.py:75-77` | 🟡 MED | Open |
+| ISSUE-18 | DLQ in-memory only (lost on restart), logs at INFO not ERROR | `worker/base.py:67-88` | 🔴 HIGH | Open |
+| ISSUE-19 | 3 of 7 CLI report commands hard-block via `assert_client_report_ready` | `data/report_readiness.py:74-112` | 🔴 HIGH | Open |
+| ISSUE-20 | `saas_maturity` None fallback in CompetitivePositionScorer is dead code | `analytics/scorers/competitive_position.py:41` | 🟢 LOW | Open |
+| ISSUE-21 | Two `ConfidenceLevel` enums with same name in different modules | `domain/models.py:30` vs `data/provenance.py:27` | 🟡 MED | Open |
+| ISSUE-22 | Deprecated Pydantic v2 `.dict()` in API cache path | `api/routers/enrichment_single.py:108` | 🟢 LOW | Open |
+| ISSUE-23 | `search_company_patents()` calls async sub-functions without `await`; always crashes | `data/patent_client.py:33-54` | 🔴 HIGH | Open |
+| ISSUE-24 | `PatentsUnifiedAdapter` entirely non-functional (depends on ISSUE-23) | `adapters/enrichment/patents_unified.py:66,97,134` | 🔴 HIGH | Open |
+| ISSUE-25 | `_search_duckduckgo()` does not check HTTP status before parsing | `data/patent_client.py:202-203` | 🟡 MED | Open |
+| ISSUE-26 | `BatchScoreMarketWorkflow` missing `@workflow.defn` / `@workflow.run` decorators | `analytics/workflows.py:30-41` | 🟡 MED | Open |
+| ISSUE-27 | `ContentExtractorAgent.http` (httpx.AsyncClient) never closed; leaks connections | `research/ai_research_orchestrator.py:371` | 🟡 MED | Open |
+| ISSUE-28 | `WebSearchAgent.cache` is unbounded in-memory dict with no eviction | `research/ai_research_orchestrator.py:183,216` | 🟡 MED | Open |
+| ISSUE-29 | `DataValidatorAgent` bounds are unit-agnostic; per-employee check assumes millions | `research/ai_research_orchestrator.py:553-616` | 🟡 MED | Open |
+| ISSUE-30 | `GitHubClient.fetch_file()` silently swallows all exceptions with no logging | `agents/github/client.py:80-81` | 🟡 MED | Open |
+| ISSUE-31 | `fetch_repos()` truncates at 100 regardless of `max_repos`; no pagination | `agents/github/search.py:56` | 🟢 LOW | Open |
+| ISSUE-32 | `_merge_enrichment()` mutates caller's input dict in-place | `data/eneve_enrichment_integration.py:299-328` | 🟡 MED | Open |
+| ISSUE-33 | `data_quality_score` is fabricated from source count | `data/eneve_enrichment_integration.py:310` | 🟡 MED | Open |
+| ISSUE-34 | `WebSearchAgent._api_search_news()` contains unreachable dead code | `agents/web_search_agent.py:145-167` | 🟡 MED | Open |
+| ISSUE-35 | `CompaniesHouseAgent` uses `requests.get()` without importing `requests` | `agents/companies_house_agent.py:138,182,224` | 🔴 HIGH | Open |
+| ISSUE-36 | `CompaniesHouseAgent` async methods via `asyncio.to_thread` return coroutines | `agents/companies_house_agent.py:114-121` | 🔴 HIGH | Open |
+| ISSUE-37 | `coordinator_agent.py` imports non-existent `workflow_nodes`; `ModuleNotFoundError` at package load | `agents/coordinator_agent.py:23-28` | 🔴 HIGH | Open |
+| ISSUE-38 | `CoordinatorAgent.analyze_company()` constructs `AgentTaskResult` with missing required fields | `agents/coordinator_agent.py:135-148` | 🔴 HIGH | Open — masked by ISSUE-37 |
+| ISSUE-39 | `ResponseCache` uses deprecated `datetime.utcnow()`; breaks on Python 3.13 | `core/production_hardening.py:111,125` | 🟡 MED | Open |
+| ISSUE-40 | `ErrorLoggingMiddleware` exhausts `response.body_iterator`; all 4xx/5xx deliver empty body | `api/middleware/logging.py:168-186` | 🔴 HIGH | Open |
+| ISSUE-41 | `get_rate_limit_for_path()` operator precedence bug neutralizes trailing-slash guard | `api/middleware/rate_limit.py:50` | 🟡 MED | Open |
+| ISSUE-42 | `AuthenticationMiddleware` bypasses auth for any URL starting with `/companies` or `/enrichment` | `api/middleware/security.py:61-62` | 🟡 MED | Open |
+| ISSUE-43 | ~~`EnrichmentPipeline` isolation guarantee violated~~ | `application/enrichment_pipeline.py:99` | — | ❌ CLOSED — false positive |
+| ISSUE-44 | `StructuredLLMClient.extract()` passes `temperature` kwarg not in `generate()` signature; TypeError every call | `llm/structured_client.py:113` | 🔴 HIGH | Open |
+| ISSUE-45 | `EnhancedLLMClient.generate()` returns `None` silently after all providers fail | `llm/enhanced_client.py:114-115` | 🟡 MED | Open |
+| ISSUE-46 | `OllamaQuerier` bare `except Exception: raise` with no logging | `llm/query/ollama.py:67-68` | 🟢 LOW | Open |
+| ISSUE-47 | `celery_app.send_task()` called synchronously in async handlers | `api/routers/async_jobs.py:130,173` | 🟡 MED | Open |
+| ISSUE-48 | `EnrichmentPipeline._merge()` checks `.records`/`.data` — old schema; both branches unreachable; always returns empty aggregate | `application/enrichment_pipeline.py:170-174` | 🔴 HIGH | Open |
+| ISSUE-49 | All `BaseRefreshConnector` unified adapters construct `RawDataSource` with wrong field names; `ValidationError` on every `enrich()` call | `adapters/enrichment/website_unified.py:151` etc. | 🔴 HIGH | Open |
+| ISSUE-50 | `research/evidence.py` calls `logger.debug()` but `logger` is never imported | `research/evidence.py:23` | 🟡 MED | Open |
+| ISSUE-51 | All `SignalExtractor` subclasses instantiate `Signal` with 5 nonexistent fields; Pydantic ValidationError on every `extract()` call | `analytics/signals/extractors.py:44-83+` | 🔴 HIGH | Open |
+| ISSUE-52 | `GET /export/excel` `include_charts` and `GET /export/llm-search` `include_reasoning` silently ignored (stub `pass`) | `api/routers/export.py:57-58, 161-162` | 🟡 MED | Open |
+| ISSUE-53 | `GET /scoring/stats` crashes with `AttributeError`; `company.tier.value` on nullable `String(50)` ORM column | `api/routers/scoring.py:269` | 🔴 HIGH | Open |
+| ISSUE-54 | `datetime.utcnow()` in `SLAReport` default factory and PDF generators (deprecated Python 3.12+) | `monitoring/sla.py:54,161,237`; `exporters/pdf.py:90,165` | 🟢 LOW | Open |
+| ISSUE-55 | Dead code blocks after `return` in `search()` and `filter_by()` in `CompanyRepository` — merge artifact | `infrastructure/company_repository.py:192-212, 244-267` | 🟡 MED | Open |
+| ISSUE-56 | `research/sources.py:canonicalize_url()` uses `logger` that is never imported | `research/sources.py:27` | 🟡 MED | Open |
+| ISSUE-57 | `EnrichmentCacheRepository.get_cache_stats()` discards `datetime.now(timezone.utc)` result — dead computation | `infrastructure/enrichment_repositories.py:158` | 🟢 LOW | Open |
+| ISSUE-58 | `CacheManager.__init__()` sets `self.available = True` before connectivity check; in-memory fallback never activates | `infrastructure/cache.py:41-50` | 🟡 MED | Open |
+| ISSUE-59 | `GET /health` crashes on every call: `status` local variable shadows FastAPI `status` module; `status.value` on plain string → `AttributeError` | `api/routers/health.py:30, 33, 37, 41` | 🔴 HIGH | Open — NEW |
+| ISSUE-60 | `_run_excel_export()` sync background task calls `async repo.get_all()` without `await`; coroutine returned instead of data; `TypeError` on iteration; export always silently fails | `api/routers/export.py:22-30` | 🔴 HIGH | Open — NEW |
+
+**Critical path (🔴 HIGH — 24 issues):** ISSUE-01, 04, 06, 10, 11, 12, 14, 18, 19, 23, 24, 35, 36, 37, 38, 40, 44, 48, 49, 51, 53, 59, 60.
+
+**Pattern emerging — name-shadowing crashes (ISSUE-53, ISSUE-59):** Two separate endpoints crash because a local variable (`tier`, `status`) shadows an imported name (`tier` as enum vs ORM string; `status` module vs string). Both result in unconditional `AttributeError` on every call. This suggests insufficient testing of any endpoint that touches these code paths.
+
+**Pattern emerging — sync/async boundary violations (ISSUE-23, ISSUE-36, ISSUE-47, ISSUE-60):** Four separate locations call async functions from sync contexts or pass coroutines where real values are expected. None of these are caught by Python's type system without explicit linting. The `cast()` in ISSUE-60 actively suppresses the type error that would otherwise flag the problem.
+
+---
+
+*Audit started 2026-03-18. Tenth pass (application layer, signal definitions, remaining API routers) completed 2026-03-19. All file:line references correspond to the state of the repository at commit `51e7671`.*
