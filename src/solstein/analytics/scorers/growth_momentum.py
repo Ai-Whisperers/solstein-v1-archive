@@ -73,8 +73,8 @@ class GrowthMomentumScorer:
     ) -> float:
         """Score revenue growth rate component."""
         if financials.growth_rate is None:
-            logger.warning("[EPIC-059] Skipping growth component: growth_rate is None")
-            return score
+            logger.warning("[EPIC-059] Growth rate missing — applying unknown-data penalty")
+            return score + _UNKNOWN_DATA_PENALTY
 
         growth_rate = financials.growth_rate
         growth_factor = min(
@@ -211,7 +211,8 @@ class GrowthMomentumScorer:
     ) -> float:
         """Score profitability profile component."""
         if financials.profit_margin is None:
-            return score
+            logger.warning("[EPIC-059] Profit margin missing — applying unknown-data penalty")
+            return score + _UNKNOWN_DATA_PENALTY
 
         adj = 0.0
         if financials.profit_margin > cfg.margin_high_threshold:

@@ -527,6 +527,11 @@ class Company(BaseModel):
         return v
 
     @property
+    def has_enrichment_errors(self) -> bool:
+        """True if any enrichment errors were recorded during data collection."""
+        return bool(self.enrichment_errors)
+
+    @property
     def is_large_cap(self) -> bool:
         """Domain logic: Check if company is large cap (valuation > €100M)."""
         if self.financials is None:

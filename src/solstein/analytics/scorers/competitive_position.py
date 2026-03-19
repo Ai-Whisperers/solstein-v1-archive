@@ -38,7 +38,7 @@ class CompetitivePositionScorer:
             )
         )
 
-        saas_maturity = profile.saas_maturity if profile.saas_maturity is not None else 5.0
+        saas_maturity = profile.saas_maturity
         saas_adj = (saas_maturity - 1) / 9 * 2.0
         score += saas_adj
         explanation.components.append(
