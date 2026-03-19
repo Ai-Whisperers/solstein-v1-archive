@@ -4236,3 +4236,215 @@ This pass fixed 12 confirmed bugs in priority order (P0 → P1). ISSUE-37 was al
 
 All 76 confirmed issues resolved. Two were false positives (ISSUE-37: missing langgraph dependency, not missing code; ISSUE-43: verified as non-issue). 74 genuine bugs fixed across 11 remediation passes.
 
+---
+
+## COVERAGE RE-ASSESSMENT — 2026-03-19 (Twentieth Pass)
+
+### Actual File Coverage
+
+The audit document previously claimed "~90%+ of 555 source files across 19 passes." Direct measurement disproves this.
+
+```
+Total .py files in src/solstein/:  555
+Files explicitly referenced in audit: 89 (16%)
+Files with substantive read in pass notes: 57 (10%)
+```
+
+The following entire subsystems were **never read**:
+- `intelligence/` — 19 files, 7,189 lines (avg 379 lines/file) — zero coverage
+- `adapters/` — 22 non-init files — zero coverage
+- `data/connectors/` — most files unread
+- `api/routers/` — most routers unread (only `health.py`, `export.py`, `scoring.py`, `async_jobs.py`, `enrichment_single.py`, `enrichment_batch.py` read)
+- `core/` — most files unread
+- `infrastructure/connectors/` — all unread
+
+**Corrected coverage: ~16% of source files.** Issues ISSUE-77 onward document findings from the uncovered subsystems.
+
+---
+
+## 37. TWENTIETH PASS — intelligence/ subsystem (2026-03-19)
+
+### Files Read This Pass
+- `src/solstein/intelligence/protocol_mapper.py` (full)
+- `src/solstein/intelligence/genealogy_analyzer.py` (full)
+- `src/solstein/intelligence/financial_report_generator.py` (full)
+- `src/solstein/intelligence/genealogy_report_generator.py` (full)
+- `src/solstein/intelligence/protocol_report_generator.py` (full)
+- `src/solstein/intelligence/deep_analyzer.py` (full)
+
+---
+
+### ISSUE-77 — `protocol_mapper.py` fabricates protocol presence when none detected; `pass` before assignment is dead code (HIGH)
+
+**File:** `src/solstein/intelligence/protocol_mapper.py:233–236`
+
+```python
+if not any(p.is_active for p in protocol_presences):
+    # Don't fabricate protocol usage - be honest about lack of evidence
+    pass
+    protocol_presences[0].is_active = True
+```
+
+**Root cause:** Line 236 is indented inside the `if` block (same 12-space indent as `pass`). The comment says "Don't fabricate protocol usage — be honest about lack of evidence", then `pass` (no-op), then unconditionally forces `protocol_presences[0].is_active = True`. The `pass` is completely dead; the fabrication executes every time the condition is true (i.e. when no protocol was genuinely detected).
+
+**Impact:** Every company that has no detectable protocol usage in its description still gets the first protocol in the list silently marked as active. Protocol mapping reports are systematically falsified for companies with unclear or absent protocol evidence. The comment documents developer intent to NOT fabricate, making this clearly an implementation error (leftover assignment after a partial refactor).
+
+**Severity:** 🔴 HIGH — produces false intelligence data; protocol mapping output is unreliable.
+
+---
+
+### ISSUE-78 — `genealogy_analyzer.py` regex word-boundary anchors broken by double-backslash in raw f-string; all ownership detection silently returns empty (HIGH)
+
+**File:** `src/solstein/intelligence/genealogy_analyzer.py:319, 331`
+
+```python
+pattern = rf'\\b{re.escape(investor.lower())}\\b'   # line 319
+pattern = rf'\\b{re.escape(utility.lower())}\\b'    # line 331
+```
+
+**Root cause:** In a raw f-string, `\\b` is the two-character sequence `\b` passed literally to the regex engine. The regex engine interprets `\\b` (escaped backslash + `b`) as a literal backslash followed by the letter `b` — **not** as the `\b` word-boundary metacharacter. The correct pattern for word-boundary in a raw string is `rf'\b{...}\b'` (single backslash in raw string → regex word boundary).
+
+**Impact:** `re.search(pattern, text_lower)` never matches any investor or utility name because the pattern looks for literal `\b` characters (ASCII 0x08 backspace) surrounding the name, which never appear in plain text. Both `_extract_strategic_stakes()` and `_extract_utility_stakes()` silently return empty lists for every company. Corporate genealogy analysis loses all ownership detection.
+
+**Severity:** 🔴 HIGH — entire ownership stake detection layer is silently non-functional.
+
+---
+
+### ISSUE-79 — `BatchFinancialReportGenerator.generate_with_narratives()` calls private methods that only exist on `FinancialGrowthReportGenerator`; `AttributeError` on every call (HIGH)
+
+**File:** `src/solstein/intelligence/financial_report_generator.py:392–410`
+
+`generate_with_narratives()` and `generate_narratives()` (lines 375 and 392) are defined on `BatchFinancialReportGenerator` (which starts at line 297 and has `self.generator = FinancialGrowthReportGenerator()`). `generate_with_narratives` calls:
+
+```python
+self._generate_header(company_name)          # line 399
+self._generate_growth_trajectory(...)        # line 401
+self._generate_funding_intelligence(...)     # line 402
+self._generate_growth_vectors(...)           # line 403
+self._generate_projection(...)               # line 404
+self._generate_health_assessment(...)        # line 407
+self._generate_footer()                      # line 408
+```
+
+None of these methods exist on `BatchFinancialReportGenerator`. They are all defined on `FinancialGrowthReportGenerator` (`self.generator`). The correct calls would be `self.generator._generate_header(...)` etc.
+
+**Impact:** `BatchFinancialReportGenerator.generate_with_narratives()` raises `AttributeError: 'BatchFinancialReportGenerator' object has no attribute '_generate_header'` on every invocation.
+
+**Severity:** 🔴 HIGH — method is entirely non-functional.
+
+---
+
+### ISSUE-80 — `BatchGenealogyReportGenerator.generate_with_narratives()` calls private methods that only exist on `GenealogyReportGenerator`; `AttributeError` on every call (HIGH)
+
+**File:** `src/solstein/intelligence/genealogy_report_generator.py:222–232`
+
+`BatchGenealogyReportGenerator` (starts line 168, `self.generator = GenealogyReportGenerator()`) defines `generate_with_narratives()` which calls:
+
+```python
+self._format_ownership(genealogy)    # line 222
+self._format_transactions(genealogy) # line 224
+```
+
+These methods are defined only on `GenealogyReportGenerator`, not on the batch wrapper.
+
+**Impact:** `AttributeError` on every call to `BatchGenealogyReportGenerator.generate_with_narratives()`.
+
+**Severity:** 🔴 HIGH — method is entirely non-functional.
+
+---
+
+### ISSUE-81 — `BatchProtocolReportGenerator.generate_with_narratives()` calls private methods that only exist on `ProtocolReportGenerator`; `AttributeError` on every call (HIGH)
+
+**File:** `src/solstein/intelligence/protocol_report_generator.py:185–190`
+
+`BatchProtocolReportGenerator` (starts line 131, `self.generator = ProtocolReportGenerator()`) defines `generate_with_narratives()` which calls:
+
+```python
+self._format_overview(protocol_map)  # line 185
+self._format_markets(protocol_map)   # line 187
+self._format_strategy(protocol_map)  # line 189
+```
+
+These methods are defined only on `ProtocolReportGenerator`.
+
+**Impact:** `AttributeError` on every call to `BatchProtocolReportGenerator.generate_with_narratives()`.
+
+**Severity:** 🔴 HIGH — method is entirely non-functional.
+
+---
+
+## 38. TWENTY-FIRST PASS — adapters/, data/connectors/ (2026-03-19)
+
+### Files Read This Pass
+- `src/solstein/adapters/discovery/web_search.py` (full)
+- `src/solstein/data/connectors/lookup_strategies/opencorporates.py` (full)
+- `src/solstein/data/connectors/lookup_strategies/openfigi.py` (full)
+- `src/solstein/data/connectors/lookup_service.py` (lines 174–230)
+- `src/solstein/api/routers/jobs.py` (full)
+- `src/solstein/api/routers/auth.py` (lines 61–90, 178–190)
+
+---
+
+### ISSUE-82 — `OpenCorporatesStrategy` and `OpenFIGIStrategy` return source-prefixed confidence keys; `_merge_results()` reads field-prefixed keys; confidence scoring silently falls back to 0.5 for both strategies (MED)
+
+**File:** `src/solstein/data/connectors/lookup_strategies/opencorporates.py:76–77` and `openfigi.py:84–85`
+
+`OpenCorporatesStrategy.lookup()` returns:
+```python
+{
+    "company_number": company_number,
+    "opencorporates_confidence": 0.9,   # ← source-prefixed
+    "opencorporates_source": "opencorporates",
+}
+```
+
+`OpenFIGIStrategy.lookup()` returns:
+```python
+{
+    "ticker": ticker,
+    "isin": ...,
+    "openfigi_confidence": 0.92,   # ← source-prefixed
+    "openfigi_source": "openfigi",
+}
+```
+
+`_merge_results()` in `lookup_service.py:211–212` reads:
+```python
+confidence = result.get(f"{field}_confidence", 0.5)   # e.g. "company_number_confidence"
+source = result.get(f"{field}_source", "unknown")      # e.g. "company_number_source"
+```
+
+Neither `"company_number_confidence"` nor `"ticker_confidence"` appear in the strategy results, so `confidence` always defaults to `0.5` and `source` to `"unknown"`. The `source_priority` dict assigns `"unknown"` a score of 0 (same as heuristic), defeating the intended priority logic for both high-confidence strategies (OpenCorporates: 0.9, OpenFIGI: 0.92).
+
+**Impact:** All three strategies are effectively equal-priority despite OpenFIGI and OpenCorporates having substantially higher intended confidence. Field-level confidence tracking in the merged result is also wrong. The identifier values themselves are still merged (the field key is correct), but source quality is not used for tie-breaking.
+
+**Severity:** 🟡 MED — no crash, but identifier merge logic produces incorrect priority ordering; lower-quality results may win over higher-quality ones.
+
+---
+
+### ISSUE-83 — `OpenCorporatesStrategy.lookup()` and `OpenFIGIStrategy.lookup()` are `async def` but call `requests.get/post` synchronously; blocks the event loop on every lookup (MED)
+
+**File:** `src/solstein/data/connectors/lookup_strategies/opencorporates.py:29, 48` and `openfigi.py:30, 49`
+
+Both strategies declare `async def lookup()` (matching the base class abstract method) but issue synchronous `requests.get()` / `requests.post()` HTTP calls inside the coroutine body. The `requests` library is not async-aware and will block the entire event loop for the duration of the network call (up to 15 seconds per timeout setting).
+
+**Impact:** Any await of `OpenCorporatesStrategy.lookup()` or `OpenFIGIStrategy.lookup()` blocks the asyncio event loop, preventing all other coroutines from running during the HTTP call. Under concurrent load this causes starvation and latency spikes across the entire API.
+
+**Severity:** 🟡 MED — no crash, but correctness of async contract is violated; degrades performance under any concurrent usage.
+
+---
+
+## 38. UPDATED SUMMARY TABLE (Full — Including Twentieth/Twenty-First Pass)
+
+| Issue | Description | Location | Severity | Status |
+|---|---|---|---|---|
+| ISSUE-77 | `protocol_mapper.py` fabricates protocol presence via `pass` + assignment inside contradiction block | `intelligence/protocol_mapper.py:233–236` | 🔴 HIGH | Open |
+| ISSUE-78 | `genealogy_analyzer.py` double-backslash in raw f-string breaks word-boundary regex; ownership detection silent-fails | `intelligence/genealogy_analyzer.py:319,331` | 🔴 HIGH | Open |
+| ISSUE-79 | `BatchFinancialReportGenerator.generate_with_narratives()` calls `self._generate_header()` etc. — only on sibling class; `AttributeError` | `intelligence/financial_report_generator.py:392–410` | 🔴 HIGH | Open |
+| ISSUE-80 | `BatchGenealogyReportGenerator.generate_with_narratives()` calls `self._format_ownership()` etc. — only on sibling class; `AttributeError` | `intelligence/genealogy_report_generator.py:222` | 🔴 HIGH | Open |
+| ISSUE-81 | `BatchProtocolReportGenerator.generate_with_narratives()` calls `self._format_overview()` etc. — only on sibling class; `AttributeError` | `intelligence/protocol_report_generator.py:185` | 🔴 HIGH | Open |
+| ISSUE-82 | `OpenCorporatesStrategy` and `OpenFIGIStrategy` return source-prefixed confidence keys; `_merge_results()` reads field-prefixed keys; confidence silently falls to 0.5 | `data/connectors/lookup_strategies/opencorporates.py:76–77`, `openfigi.py:84–85` | 🟡 MED | Open |
+| ISSUE-83 | `OpenCorporatesStrategy.lookup()` and `OpenFIGIStrategy.lookup()` are `async def` but call `requests.get/post` synchronously; blocks event loop | `data/connectors/lookup_strategies/opencorporates.py:29,48`, `openfigi.py:30,49` | 🟡 MED | Open |
+
+**Running totals: 83 issues (32 HIGH, 38 MED, 13 LOW). Actual file coverage: ~16% (89/555 files). ~466 non-init source files remain unread.**
+
