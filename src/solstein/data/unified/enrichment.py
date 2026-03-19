@@ -80,6 +80,10 @@ def enrich_from_connectors(loader, company: UnifiedCompany) -> UnifiedCompany:
         except (ValueError, RuntimeError, TypeError, AttributeError) as e:
             logger.error(f"Enrichment from {source} failed for {enriched.name}: {e}")
             enriched = orchestrator.rollback_on_error(company, enriched, str(e))
+            # Ensure callers can detect partial enrichment failure via enrichment_errors
+            error_msg = f"[{source}] {e}"
+            if error_msg not in enriched.enrichment_errors:
+                enriched.enrichment_errors.append(error_msg)
             break
 
     return enriched

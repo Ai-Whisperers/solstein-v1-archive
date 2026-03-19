@@ -22,6 +22,8 @@ REQUIRED_FINANCIAL_FIELDS = (
 ZERO_ALLOWED_FIELDS = {
     "growth_rate",
     "profit_margin",
+    "revenue",   # pre-revenue companies legitimately have revenue=0.0
+    "employees",  # 0 employees is technically valid (solo founder, etc.)
 }
 
 
@@ -34,16 +36,15 @@ class FieldGap:
 
 
 def _has_valid_provenance(company: Any, field_name: str) -> bool:
+    """A field has valid provenance if it has any non-empty source entry.
+
+    Previously required HTTP/HTTPS/URN URIs, which always failed for JSON-loaded
+    companies. Now accepts any non-empty string source identifier (API names,
+    file identifiers, URL-based sources all qualify).
+    """
     metric_sources = getattr(company, "metric_sources", {}) or {}
     sources = metric_sources.get(field_name, [])
-    if not sources:
-        return False
-    for source in sources:
-        if isinstance(source, str) and (
-            source.startswith("http://") or source.startswith("https://") or source.startswith("urn:")
-        ):
-            return True
-    return False
+    return any(isinstance(s, str) and s.strip() for s in sources)
 
 
 def _extract_confidence(company: Any, field_name: str) -> float | None:

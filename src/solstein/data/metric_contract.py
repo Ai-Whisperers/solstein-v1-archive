@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Any
 
+from loguru import logger
+
 
 @dataclass(frozen=True)
 class MetricNormalizationResult:
@@ -33,6 +35,10 @@ def normalize_percent(value: Any) -> MetricNormalizationResult:
 
     numeric_value = float(value)
     if -1 <= numeric_value <= 1:
+        logger.debug(
+            f"normalize_percent: treating {numeric_value} as ratio (× 100 → {numeric_value * 100:.2f}%). "
+            "Values in [-1,1] are ambiguous — if this is a percentage not a ratio, store it as e.g. 5.0 not 0.05."
+        )
         return MetricNormalizationResult(value=numeric_value * 100, assumed_unit="ratio")
     return MetricNormalizationResult(value=numeric_value, assumed_unit="percent")
 

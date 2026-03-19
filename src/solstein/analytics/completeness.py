@@ -97,11 +97,28 @@ class CompletenessCalculator:
         """
         non_null_count = 0
 
+        # Fields whose default value does not represent actual data
+        ENUM_DEFAULT_FIELDS = {
+            "ai_maturity": "NONE",        # AIMaturity.NONE is the default
+            "threat_level": "MEDIUM",     # ThreatLevel.MEDIUM is the default
+            "tier": "TIER_3",             # CompanyTier.TIER_3 is the default
+        }
+
         # Check each tracked field
         for field in self.TRACKED_FIELDS:
             value = self._get_field_value(company, field)
-            if value is not None:
-                non_null_count += 1
+            if value is None:
+                continue
+            # Empty lists do not represent actual data
+            if isinstance(value, list) and len(value) == 0:
+                continue
+            # Enum default sentinel values do not represent actual enriched data
+            default_sentinel = ENUM_DEFAULT_FIELDS.get(field)
+            if default_sentinel is not None:
+                value_str = value.value if hasattr(value, "value") else str(value)
+                if value_str == default_sentinel:
+                    continue
+            non_null_count += 1
 
         # Calculate percentage
         score = (non_null_count / self.total_tracked_fields) * 100

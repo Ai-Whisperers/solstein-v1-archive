@@ -90,7 +90,7 @@ class DeadLetterQueue:
 
     def record_failure(self, task_name: str, task_id: str, error: str, attempt: int):
         """Record a permanently failed job."""
-        logger.info(f"[RETRY-FAILED] {task_name} (task_id={task_id}): {error} after {attempt} attempts")
+        logger.error(f"[RETRY-FAILED] {task_name} (task_id={task_id}) permanently failed after {attempt} attempts: {error}")
         self.failed_jobs.append(
             {
                 "task_name": task_name,

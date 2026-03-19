@@ -54,7 +54,7 @@ def search_company_patents(company_name: str) -> PatentResult:
     return PatentResult(source="none")
 
 
-async def _search_uspto_peds(company_name: str) -> PatentResult:
+def _search_uspto_peds(company_name: str) -> PatentResult:
     """
     Search USPTO Patent Examination Data System (PEDS).
 
@@ -132,7 +132,7 @@ async def _search_uspto_peds(company_name: str) -> PatentResult:
         return PatentResult()
 
 
-async def _search_google_patents(company_name: str) -> PatentResult:
+def _search_google_patents(company_name: str) -> PatentResult:
     """
     Search Google Patents via scraping.
     """
@@ -186,7 +186,7 @@ async def _search_google_patents(company_name: str) -> PatentResult:
     return PatentResult()
 
 
-async def _search_duckduckgo(company_name: str) -> PatentResult:
+def _search_duckduckgo(company_name: str) -> PatentResult:
     """
     Fallback: Use DuckDuckGo for patent-related information.
     """
@@ -200,6 +200,9 @@ async def _search_duckduckgo(company_name: str) -> PatentResult:
 
     try:
         response = requests.get(url, headers=headers, timeout=15)
+        if response.status_code != 200:
+            logger.debug(f"DuckDuckGo patent search returned {response.status_code} for {company_name}")
+            return PatentResult()
         soup = BeautifulSoup(response.text, "html.parser")
 
         results = []

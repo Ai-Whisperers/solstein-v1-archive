@@ -375,6 +375,16 @@ class ContentExtractorAgent:
         self.llm = llm_client or EnhancedLLMClient()
         self.http = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
 
+    async def aclose(self) -> None:
+        """Close the underlying HTTP client and release connection pool."""
+        await self.http.aclose()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        await self.aclose()
+
     async def extract(self, url: str, company_name: str) -> ExtractedData:
         """Extract structured data from a single URL."""
         try:

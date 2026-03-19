@@ -24,7 +24,7 @@ class SourceReliability(Enum):
     UNVERIFIED = 0.2
 
 
-class ConfidenceLevel(Enum):
+class ProvenanceConfidenceLevel(Enum):
     """Confidence levels for data points.
 
     H3: Deterministic confidence level mapping.
@@ -41,7 +41,7 @@ class ConfidenceLevel(Enum):
         self.label = label
 
     @classmethod
-    def from_score(cls, score: float) -> ConfidenceLevel:
+    def from_score(cls, score: float) -> "ProvenanceConfidenceLevel":
         """Convert numeric score to confidence level.
 
         H3: Deterministic confidence level mapping.
@@ -369,7 +369,7 @@ class ProvenanceValidator:
             )
 
 
-def calculate_overall_confidence(provenance: DataProvenance) -> tuple[float, ConfidenceLevel]:
+def calculate_overall_confidence(provenance: DataProvenance) -> tuple[float, ProvenanceConfidenceLevel]:
     """Calculate overall confidence from field provenances.
 
     H3: Aggregates confidence across all fields.
@@ -381,13 +381,13 @@ def calculate_overall_confidence(provenance: DataProvenance) -> tuple[float, Con
         Tuple of (confidence_score, confidence_level)
     """
     if not provenance.fields:
-        return 0.0, ConfidenceLevel.UNCERTAIN
+        return 0.0, ProvenanceConfidenceLevel.UNCERTAIN
 
     # Weight by field importance (simplified - all equal)
     total_confidence = sum(f.confidence for f in provenance.fields.values())
     avg_confidence = total_confidence / len(provenance.fields)
 
-    level = ConfidenceLevel.from_score(avg_confidence)
+    level = ProvenanceConfidenceLevel.from_score(avg_confidence)
     return avg_confidence, level
 
 

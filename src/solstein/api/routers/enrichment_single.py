@@ -105,7 +105,7 @@ async def enrich_single_company(
             try:
                 await cache_repo.cache_enrichment(
                     company_id=company_id,
-                    enriched_data=enriched.dict(),
+                    enriched_data=enriched.model_dump(mode="json"),
                     sources_used=request_data.sources,
                     fields_enriched=fields_enriched,
                     ttl_seconds=86400,

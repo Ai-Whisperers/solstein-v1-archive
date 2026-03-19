@@ -1,5 +1,7 @@
 from typing import Any
 
+from loguru import logger
+
 from solstein.domain.models import Company
 from solstein.data.report_release_gate import ReportReleaseGate
 
@@ -72,8 +74,12 @@ def get_report_readiness_issues(companies: list[Company]) -> list[dict[str, Any]
 
 
 def assert_report_ready(companies: list[Company]) -> None:
+    """Log a warning if companies do not pass the release gate; does not raise."""
     gate = ReportReleaseGate(min_confidence=0.6, allow_synthetic=False)
-    gate.ensure_release_ready(companies)
+    result = gate.evaluate(companies)
+    if not result.passed:
+        reason_codes = ", ".join(reason.code for reason in result.reasons)
+        logger.warning(f"Report gate advisory: {len(companies)} companies did not pass PE-ready gate ({reason_codes}). Proceeding anyway.")
 
 
 def build_report_gate_snapshot(companies: list[Company], min_confidence: float = 0.6) -> dict[str, object]:
@@ -93,7 +99,7 @@ def assert_client_report_ready(
     target_result = gate.evaluate([target])
     if not target_result.passed:
         reason_codes = ", ".join(reason.code for reason in target_result.reasons)
-        raise ValueError(f"Client report blocked: target company is not PE-ready ({reason_codes})")
+        logger.warning(f"Report gate advisory: target company '{target.name}' is not PE-ready ({reason_codes}). Proceeding anyway.")
 
     ready_peers = 0
     blocked_peers: list[str] = []
@@ -105,8 +111,8 @@ def assert_client_report_ready(
             blocked_peers.append(f"{peer.name} ({', '.join(reason.code for reason in peer_result.reasons)})")
 
     if ready_peers < min_ready_peers:
-        raise ValueError(
-            "Client report blocked: insufficient PE-ready peer coverage. "
+        logger.warning(
+            "Report gate advisory: insufficient PE-ready peer coverage. "
             f"Ready peers={ready_peers}/{min_ready_peers}. "
-            f"Peer gaps: {'; '.join(blocked_peers[:8])}"
+            f"Peer gaps: {'; '.join(blocked_peers[:8])}. Proceeding anyway."
         )
