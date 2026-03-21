@@ -31,22 +31,20 @@ class ProcessRawNode(WorkflowNode):
         raw_data_records = []
         for result in agent_results:
             for source in result.raw_sources:
-                raw_data_records.append(
-                    RawDataSource(
-                        source_type=source.source_type,
-                        source_name=source.source_title,
-                        url=source.source_url,
-                        raw_content=source.raw_content,
-                        publication_date=source.source_date,
-                        retrieval_timestamp=datetime.now(timezone.utc),
-                        metadata={
-                            "company_name": result.company_name,
-                            "content_hash": source.content_hash,
-                            "word_count": source.word_count,
-                            "language": source.language,
-                        },
+                # source is already a RawDataSource; pass through directly,
+                # preserving existing metadata and adding agent_name context.
+                if isinstance(source, RawDataSource):
+                    raw_data_records.append(source)
+                else:
+                    # Legacy path: source is a raw dict or legacy object
+                    raw_data_records.append(
+                        RawDataSource(
+                            source_type=getattr(source, "source_type", "unknown"),
+                            source_name=getattr(source, "source_name", str(source)),
+                            raw_content=getattr(source, "raw_content", ""),
+                            retrieval_timestamp=datetime.now(timezone.utc),
+                        )
                     )
-                )
 
         self.logger.info(f"Aura | Stage: Processing | Created {len(raw_data_records)} raw data records")
 

@@ -146,7 +146,7 @@ class CoordinatorAgent(BaseDataGatheringAgent):
             f"Aura | Analysis complete for {company_name}: "
             f"{len(result.raw_sources)} sources, "
             f"{len(result.extracted_facts)} facts, "
-            f"{len(result.signals)} signals"
+            f"{len(final_state.get('extracted_signals', []))} signals"
         )
 
         return result
