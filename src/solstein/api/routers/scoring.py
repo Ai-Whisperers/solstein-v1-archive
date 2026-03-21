@@ -240,7 +240,7 @@ def _build_score_response(
 
 
 def _calculate_revenue_stats(companies: list[Any]) -> dict[str, Any]:
-    revenues = [c.financials.revenue for c in companies if c.financials.revenue]
+    revenues = [c.financials.revenue for c in companies if c.financials and c.financials.revenue]
     total_revenue = sum(revenues) if revenues else 0
     avg_revenue = total_revenue / len(revenues) if revenues else 0
 
@@ -252,7 +252,7 @@ def _calculate_revenue_stats(companies: list[Any]) -> dict[str, Any]:
 
 
 def _calculate_growth_stats(companies: list[Any]) -> dict[str, Any]:
-    growth_rates = [c.financials.growth_rate for c in companies if c.financials.growth_rate]
+    growth_rates = [c.financials.growth_rate for c in companies if c.financials and c.financials.growth_rate]
     avg_growth = sum(growth_rates) / len(growth_rates) if growth_rates else 0
 
     return {

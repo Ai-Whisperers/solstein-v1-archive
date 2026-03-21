@@ -84,7 +84,7 @@ async def get_competitive_overlap(
         overlaps = []
         peer_count = 0
         for peer in peers:
-            if peer.company_id == target.company_id:
+            if peer.id == target.id:
                 continue
 
             if peer_count >= limit:
@@ -95,8 +95,8 @@ async def get_competitive_overlap(
 
             overlaps.append(
                 CompetitiveOverlap(
-                    company_a_id=target.company_id,
-                    company_b_id=peer.company_id,
+                    company_a_id=target.id,
+                    company_b_id=peer.id,
                     overlap_score=score,
                     overlap_areas=[target.industry]
                     if target.industry and peer.industry and target.industry.lower() == peer.industry.lower()

@@ -106,9 +106,9 @@ class DrillDownService:
             return None
 
         for source in audit_trail.raw_data.sources:
-            if source.id == source_id:
+            if (source.url or source.source_name) == source_id:
                 return {
-                    "source_id": source.id,
+                    "source_id": (source.url or source.source_name),
                     "source_name": source.source_name,
                     "source_type": source.source_type.value,
                     "url": source.url,

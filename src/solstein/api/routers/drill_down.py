@@ -66,7 +66,7 @@ async def list_sources(
         "fact_type_filter": fact_type,
         "sources": [
             {
-                "source_id": s.id,
+                "source_id": s.url or s.source_name,
                 "source_name": s.source_name,
                 "source_type": s.source_type.value,
                 "url": s.url,

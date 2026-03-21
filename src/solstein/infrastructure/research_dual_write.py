@@ -130,7 +130,6 @@ def transition_contradiction_status(
             contradiction.ignored_at = now
         contradiction.updated_at = now
 
-        session.commit()
     return contradiction
 
 

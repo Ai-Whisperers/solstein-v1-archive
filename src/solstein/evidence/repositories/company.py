@@ -51,8 +51,8 @@ class CompanyRepository(EvidenceGraphRepository):
             company_id: c.id,
             company_name: c.name,
             total_claims: count(DISTINCT claim),
-            verified_claims: count(DISTINCT CASE WHEN claim.status = 'VERIFIED' THEN claim END),
-            disputed_claims: count(DISTINCT CASE WHEN claim.status = 'DISPUTED' THEN claim END),
+            verified_claims: count(DISTINCT CASE WHEN claim.status = 'accepted' THEN claim END),
+            disputed_claims: count(DISTINCT CASE WHEN claim.status = 'conflicting' THEN claim END),
             contradictions: count(DISTINCT contradiction),
             avg_confidence: avg(claim.overall_confidence)
         } as summary
