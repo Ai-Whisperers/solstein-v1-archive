@@ -61,7 +61,7 @@ async def enrich_batch(request_data: BatchEnrichmentRequest, request: Request) -
         success_rate = (enriched_count / len(results) * 100.0) if results else 0.0
 
         return BatchEnrichmentResponse(
-            status="partial_failure" if failed_count else "success",
+            status="partial" if failed_count else "success",
             batch_id=f"batch_{datetime.now().timestamp()}",
             total_companies=len(request_data.company_ids),
             enriched_count=enriched_count,

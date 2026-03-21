@@ -294,7 +294,7 @@ financial growth potential. Confidence levels reflect data availability and cons
 **Data Sources**: Crunchbase, Companies House, LinkedIn, news signals, and company disclosures."""
 
 
-class BatchFinancialReportGenerator:
+class BatchFinancialReportGenerator(FinancialGrowthReportGenerator):
     """Generate financial reports for multiple companies."""
 
     def __init__(self):

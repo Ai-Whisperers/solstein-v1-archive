@@ -143,13 +143,13 @@ class BusinessMetricsCollector:
         by_tier = {row[0] or "unknown": row[1] for row in result.fetchall()}
 
         # Average data quality score
-        result = await self.session.execute(select(func.avg(CompanyRecord.ai_data_quality_score)))
+        result = await self.session.execute(select(func.avg(CompanyRecord.ai_score)))
         avg_quality = result.scalar() or 0.0
 
         # Companies processed in last hour (enrichment_updated_at)
         one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
         result = await self.session.execute(
-            select(func.count()).select_from(CompanyRecord).where(CompanyRecord.enrichment_updated_at >= one_hour_ago)
+            select(func.count()).select_from(CompanyRecord).where(CompanyRecord.last_updated >= one_hour_ago)
         )
         processed_last_hour = result.scalar() or 0
 

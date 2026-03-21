@@ -33,13 +33,10 @@ class LogicFusionNode(WorkflowNode):
             for fact in result.extracted_facts:
                 aggregated_facts.append(
                     AggregatedFact(
-                        company_name=result.company_name,
-                        field=fact.field,
+                        fact_type=fact.field,
                         value=fact.value,
-                        unit=fact.unit,
                         confidence=fact.confidence,
-                        sources=fact.sources,
-                        extraction_method=fact.extraction_method,
+                        sources_used=fact.sources,
                         extracted_at=datetime.now(timezone.utc),
                     )
                 )

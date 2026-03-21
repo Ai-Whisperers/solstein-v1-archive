@@ -89,7 +89,7 @@ def merge_financials(
 ) -> FinancialMetric:
     """Merge financial metrics with Markdown priority."""
     # Start with JSON
-    merged = FinancialMetric(**json_fin.model_dump())
+    merged = FinancialMetric(**json_fin.model_dump(), allow_empty_primary=True)
 
     # Apply Markdown values with priority
     if markdown_fin.revenue is not None and markdown_fin.revenue != json_fin.revenue:
@@ -145,7 +145,10 @@ def merge_financials(
 
 def convert_to_unified(company: Company, source: str) -> UnifiedCompany:
     """Convert a Company to UnifiedCompany with source tracking."""
-    unified = UnifiedCompany(**company.model_dump())
+    data = company.model_dump()
+    if data.get("financials") is not None:
+        data["financials"]["allow_empty_primary"] = True
+    unified = UnifiedCompany(**data)
 
     # Track all fields as coming from single source
     unified.data_source_per_field = {

@@ -10,7 +10,11 @@ from typing import Any, Callable, Optional, TypeVar
 
 from loguru import logger
 
-from solstein.infrastructure.cache import get_cache
+from solstein.infrastructure.cache import cache_manager as _cache_manager
+
+
+def get_cache() -> object:
+    return _cache_manager
 
 T = TypeVar("T")
 

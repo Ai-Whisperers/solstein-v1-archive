@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -29,6 +29,10 @@ class SECEDGARRefreshConnector(BaseRefreshConnector):
         """Fetch financial facts from SEC EDGAR for companies."""
         logger.info(f"Fetching SEC EDGAR facts for {len(company_ids)} companies")
         facts = []
+
+        if end_date is None or start_date is None:
+            end_date = datetime.now(timezone.utc)
+            start_date = end_date.replace(year=end_date.year - 3)
 
         for company_id in company_ids:
             try:

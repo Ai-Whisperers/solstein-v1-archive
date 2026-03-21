@@ -128,7 +128,7 @@ class ProtocolReportGenerator:
         ]
 
 
-class BatchProtocolReportGenerator:
+class BatchProtocolReportGenerator(ProtocolReportGenerator):
     def __init__(self):
         self.generator = ProtocolReportGenerator()
 

@@ -652,6 +652,7 @@ class DataSourceType(StrEnum):
     YAHOO_FINANCE = "yahoo_finance"
     EXA_SEARCH = "exa_search"
     GOOGLE_SEARCH = "google_search"
+    WEB_SEARCH = "web_search"
     USPTO = "uspto"
     GOOGLE_PATENTS = "google_patents"
     NEWSAPI = "newsapi"

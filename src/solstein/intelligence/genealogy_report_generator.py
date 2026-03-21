@@ -165,7 +165,7 @@ class GenealogyReportGenerator:
         ]
 
 
-class BatchGenealogyReportGenerator:
+class BatchGenealogyReportGenerator(GenealogyReportGenerator):
     def __init__(self):
         self.generator = GenealogyReportGenerator()
 

@@ -12,7 +12,7 @@ from typing import Any
 import requests
 from loguru import logger
 
-from solstein.domain.models import RawDataSource
+from solstein.domain.models import DataSourceType, RawDataSource
 from solstein.infrastructure.database import DatabaseManager, db_manager as default_db_manager
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
@@ -32,7 +32,7 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
     def __init__(self, db_manager: DatabaseManager | None = None, crunchbase_api_key: str | None = None):
         super().__init__(
             source_name="funding_unified",
-            source_type="funding",
+            source_type=DataSourceType.CRUNCHBASE,
             db_manager=db_manager or default_db_manager,
             confidence=0.65,
         )

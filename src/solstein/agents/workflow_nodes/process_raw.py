@@ -33,16 +33,18 @@ class ProcessRawNode(WorkflowNode):
             for source in result.raw_sources:
                 raw_data_records.append(
                     RawDataSource(
-                        company_name=result.company_name,
                         source_type=source.source_type,
-                        source_url=source.source_url,
-                        source_title=source.source_title,
-                        source_date=source.source_date,
+                        source_name=source.source_title,
+                        url=source.source_url,
                         raw_content=source.raw_content,
-                        content_hash=source.content_hash,
-                        word_count=source.word_count,
-                        language=source.language,
-                        extracted_at=datetime.now(timezone.utc),
+                        publication_date=source.source_date,
+                        retrieval_timestamp=datetime.now(timezone.utc),
+                        metadata={
+                            "company_name": result.company_name,
+                            "content_hash": source.content_hash,
+                            "word_count": source.word_count,
+                            "language": source.language,
+                        },
                     )
                 )
 

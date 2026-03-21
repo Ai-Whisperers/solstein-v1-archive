@@ -19,7 +19,7 @@ from solstein.data.web_search_client import (
     search_company_info,
     search_company_news,
 )
-from solstein.domain.models import RawDataSource
+from solstein.domain.models import DataSourceType, RawDataSource
 from solstein.infrastructure.database import DatabaseManager, db_manager as default_db_manager
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
@@ -39,7 +39,7 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
     def __init__(self, db_manager: DatabaseManager | None = None):
         super().__init__(
             source_name="web_search",
-            source_type="web_search",
+            source_type=DataSourceType.EXA_SEARCH,
             db_manager=db_manager or default_db_manager,
             confidence=0.70,
         )

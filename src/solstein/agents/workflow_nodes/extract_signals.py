@@ -59,14 +59,14 @@ class ExtractSignalsNode(WorkflowNode):
             "saas_maturity": SignalCategory.TECHNICAL,
         }
 
-        category = category_map.get(fact.field, SignalCategory.OPERATIONAL)
+        category = category_map.get(fact.fact_type, SignalCategory.OPERATIONAL)
 
         return SignalExtraction(
-            company_name=fact.company_name,
-            signal_name=fact.field,
-            signal_category=category,
+            signal_name=fact.fact_type,
             signal_value=str(fact.value),
-            confidence=fact.confidence,
-            evidence_sources=fact.sources,
+            signal_confidence=fact.confidence,
+            source_facts=fact.sources_used,
+            calculation_method="direct_extraction",
+            reasoning=f"Extracted from {len(fact.sources_used)} source(s) via {category.value} analysis.",
             extracted_at=datetime.now(timezone.utc),
         )
