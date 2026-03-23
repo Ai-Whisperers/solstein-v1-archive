@@ -22,7 +22,7 @@ class ConfigurationError(Exception):
 class DatabaseConfig(BaseModel):
     """Database configuration."""
 
-    url: str = Field(default="sqlite:///./solstein.db")
+    url: str = Field(..., description="Database connection URL (required)")
     pool_size: int = Field(default=20, ge=1, le=100)
     echo: bool = Field(default=False)
 
@@ -32,7 +32,6 @@ class DatabaseConfig(BaseModel):
         """Validate database URL."""
         if not v:
             raise ValueError("Database URL cannot be empty")
-        # Check for placeholder/insecure default
         if "postgres:postgres@" in v or "password" in v.lower():
             logger.warning("Database URL may contain default credentials - ensure this is for development only")
         return v
@@ -104,7 +103,7 @@ class SecurityConfig(BaseModel):
     """Security configuration."""
 
     secret_key: str = Field(
-        default="", description="JWT signing secret. Set SECURITY__SECRET_KEY env var to a strong value."
+        ..., description="JWT signing secret. Set SECURITY__SECRET_KEY env var to a strong value (required)."
     )
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30, ge=1)
@@ -116,9 +115,9 @@ class SecurityConfig(BaseModel):
     @field_validator("secret_key")
     @classmethod
     def validate_secret_key(cls, v: str) -> str:
-        """Validate secret key."""
+        """Validate secret key - must be provided."""
         if not v:
-            logger.warning("SECURITY__SECRET_KEY is not set — set it to a strong secret before production use.")
+            raise ValueError("SECURITY__SECRET_KEY is required - set it to a strong secret before starting.")
         return v
 
 
@@ -291,10 +290,18 @@ class Settings(BaseSettings):
         """
         self._validate_runtime_safety()
 
-        # Security key
+        # Required: Database URL
+        if not self.database.url:
+            raise ConfigurationError(
+                "DATABASE__URL environment variable is required. "
+                "Set DATABASE__URL before starting the application."
+            )
+
+        # Required: Security/JWT secret (checked via Pydantic validation, but double-check here)
         if not self.security.secret_key:
-            logger.warning(
-                "SECURITY__SECRET_KEY is not set. Set this env var to a strong secret before production use."
+            raise ConfigurationError(
+                "SECURITY__SECRET_KEY environment variable is required. "
+                "Set a strong secret (32+ characters) before starting."
             )
 
         # Required: GitHub token
