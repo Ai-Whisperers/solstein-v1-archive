@@ -46,6 +46,7 @@ These bugs were discovered during the audit and fixed. Agent Zero should be equi
 | BUG-01 | logic_fusion.py reads `.field` instead of `.fact_type` on AggregatedFact | Grep for `\.field` on AggregatedFact instances | ✅ Fixed in audit |
 | BUG-02 | GrowthMomentumScorer penalty always clamped to 0 (architecture flaw) | Check scorer with base_score=0 + penalty application, verify effect | ✅ Fixed in audit |
 | BUG-03 | Property `has_enrichment_errors` exists but never used | Grep for property definition, verify callers exist | ✅ Fixed in audit |
+| BUG-04 | AgentTaskResult missing `extracted_signals` field | Signals extracted in workflow but not returned to caller | ✅ Fixed in audit |
 
 ---
 
@@ -54,6 +55,12 @@ These bugs were discovered during the audit and fixed. Agent Zero should be equi
 These are known issues that were identified but not fully resolved. Agent Zero should track these for autonomous resolution:
 
 | ID | Issue | Root Cause | Task # | Status |
+|----|-------|------------|--------|--------|
+| PEND-01 | conftest.py crashes at import without DATABASE_URL | STORY-007 removed sqlite default, no compensating fixture | Task #1 | ⚠️ OPEN |
+| PEND-02 | Extracted signals discarded from AgentTaskResult | `extract_signals` written to `final_state` but caller only reads `raw_sources` | Task #6 | ✅ FIXED — 2026-03-23 |
+| PEND-03 | Legacy path in process_raw uses invalid DataSourceType fallback | `getattr(source, "source_type", "unknown")` — "unknown" not in enum | Task #7 | ⚠️ OPEN |
+| PEND-04 | check_configuration() dead code | Pydantic already validates before function runs | Task #8 | ⚠️ OPEN |
+| PEND-05 | Hardcoded classification values not in single source | ai_readiness.py, competitive_mapping.py use values not from constants | Task #9 | ⚠️ OPEN |
 |----|-------|------------|--------|--------|
 | PEND-01 | conftest.py crashes at import without DATABASE_URL | STORY-007 removed sqlite default, no compensating fixture | Task #1 | ⚠️ OPEN |
 | PEND-02 | Extracted signals discarded from AgentTaskResult | `extract_signals` written to `final_state` but caller only reads `raw_sources` | Task #6 | ⚠️ OPEN |

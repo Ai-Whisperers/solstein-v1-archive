@@ -17,7 +17,7 @@ from typing import Any
 from langgraph.graph import END, StateGraph
 from loguru import logger
 
-from ..domain.models import DataSourceType
+from ..domain.models import DataSourceType, SignalExtractionRecord
 from ..infrastructure.database import DatabaseManager
 from .base_agent import AgentTaskResult, BaseDataGatheringAgent
 from .workflow_nodes import (
@@ -133,12 +133,24 @@ class CoordinatorAgent(BaseDataGatheringAgent):
 
         # Create result
         errors = final_state.get("errors", [])
+        extracted_signals_list = final_state.get("extracted_signals", [])
+
+        # Convert signals list to SignalExtractionRecord if any signals exist
+        signals_record = None
+        if extracted_signals_list:
+            signals_record = SignalExtractionRecord(
+                company_id=company_name,
+                gathering_batch_id=f"batch_{company_name.lower().replace(' ', '_')}",
+                signals=extracted_signals_list,
+            )
+
         result = AgentTaskResult(
             agent_name="Coordinator",
             source_type=DataSourceType.WEB_SEARCH,  # coordinator aggregates all sources
             success=len(errors) == 0,
             raw_sources=final_state.get("raw_data_records", []),
             extracted_facts=final_state.get("aggregated_facts", []),
+            extracted_signals=signals_record,
             error_message="; ".join(str(e) for e in errors) if errors else None,
         )
 
