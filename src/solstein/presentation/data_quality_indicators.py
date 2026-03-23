@@ -88,15 +88,16 @@ class DataQualityIndicators:
         rows = []
 
         # Financial metrics
+        fin = company.financials
         metrics = [
-            ("Revenue", company.financials.revenue, company.financials.revenue_confidence),
-            ("Employees", company.financials.employees, company.financials.employees_confidence),
-            ("Growth Rate", company.financials.growth_rate, company.financials.growth_confidence),
+            ("Revenue", fin.revenue if fin else None, fin.revenue_confidence if fin else None),
+            ("Employees", fin.employees if fin else None, fin.employees_confidence if fin else None),
+            ("Growth Rate", fin.growth_rate if fin else None, fin.growth_confidence if fin else None),
             ("Profit Margin", company.profit_margin, None),
             ("EBITDA Margin", company.ebitda_margin, None),
             ("Recurring Revenue %", company.recurring_revenue_pct, None),
-            ("Funding Raised", company.financials.funding_raised, company.financials.funding_confidence),
-            ("Valuation", company.financials.valuation, company.financials.valuation_confidence),
+            ("Funding Raised", fin.funding_raised if fin else None, fin.funding_confidence if fin else None),
+            ("Valuation", fin.valuation if fin else None, fin.valuation_confidence if fin else None),
         ]
 
         # AI/Tech metrics
@@ -129,10 +130,10 @@ class DataQualityIndicators:
             flags.append("⚠️ **Sparse Data**: This company has limited data. Treat analysis as preliminary.")
 
         # Missing critical fields
-        if company.financials.revenue is None:
+        if not company.financials or company.financials.revenue is None:
             flags.append("⚠️ **No Revenue Data**: Revenue information is unavailable.")
 
-        if company.financials.employees is None:
+        if not company.financials or company.financials.employees is None:
             flags.append("⚠️ **No Employee Count**: Employee data is unavailable.")
 
         # Contradictions
@@ -145,11 +146,15 @@ class DataQualityIndicators:
         # Estimated data warning
         estimated_count = sum(
             1
-            for conf in [
-                company.financials.revenue_confidence,
-                company.financials.employees_confidence,
-                company.financials.growth_confidence,
-            ]
+            for conf in (
+                [
+                    company.financials.revenue_confidence,
+                    company.financials.employees_confidence,
+                    company.financials.growth_confidence,
+                ]
+                if company.financials
+                else []
+            )
             if conf == ConfidenceLevel.ESTIMATED
         )
         if estimated_count >= 2:
@@ -190,16 +195,17 @@ class DataQualityIndicators:
         summary = {}
 
         # Financial metrics
-        summary["Revenue"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(company.financials.revenue_confidence, "?")
+        fin = company.financials
+        summary["Revenue"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(fin.revenue_confidence if fin else None, "?")
         summary["Employees"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(
-            company.financials.employees_confidence, "?"
+            fin.employees_confidence if fin else None, "?"
         )
         summary["Growth Rate"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(
-            company.financials.growth_confidence, "?"
+            fin.growth_confidence if fin else None, "?"
         )
-        summary["Funding"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(company.financials.funding_confidence, "?")
+        summary["Funding"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(fin.funding_confidence if fin else None, "?")
         summary["Valuation"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(
-            company.financials.valuation_confidence, "?"
+            fin.valuation_confidence if fin else None, "?"
         )
 
         # Derived metrics (always estimated if present)

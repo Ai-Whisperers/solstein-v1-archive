@@ -41,7 +41,7 @@ class SimulationEngine:
         # 1. Base Metrics
         base_scores = self.scorer.calculate_scores(company)
         base_growth_score = base_scores.growth_score or 0.0
-        base_valuation = company.financials.valuation or 0.0
+        base_valuation = (company.financials.valuation if company.financials else None) or 0.0
 
         # 2. Apply Conditions
         simulated_growth_score = base_growth_score

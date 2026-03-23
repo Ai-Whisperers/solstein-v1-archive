@@ -237,10 +237,10 @@ class MarketAnalyzer:
         logger.info(f"Analyzing market with {len(profiles)} companies")
 
         # Calculate base metrics needed for return
-        revenues = [p.financials.revenue for p in profiles if p.financials.revenue]
+        revenues = [p.financials.revenue for p in profiles if p.financials and p.financials.revenue]
         market_size = sum(revenues) if revenues else 0.0
 
-        growth_rates = [p.financials.growth_rate for p in profiles if p.financials.growth_rate is not None]
+        growth_rates = [p.financials.growth_rate for p in profiles if p.financials and p.financials.growth_rate is not None]
         avg_growth = sum(growth_rates) / len(growth_rates) if growth_rates else 0.0
 
         # Calculate CR4
@@ -307,7 +307,7 @@ class MarketAnalyzer:
 
     def _calculate_growth_metrics(self, profiles: list[Company]) -> dict[str, float]:
         """Calculate market growth metrics."""
-        growth_rates = [p.financials.growth_rate for p in profiles if p.financials.growth_rate is not None]
+        growth_rates = [p.financials.growth_rate for p in profiles if p.financials and p.financials.growth_rate is not None]
 
         if not growth_rates:
             return {"average": 0.0, "median": 0.0, "high_growth_count": 0}
@@ -324,8 +324,8 @@ class MarketAnalyzer:
 
     def _calculate_financial_metrics(self, profiles: list[Company]) -> dict[str, Any]:
         """Calculate market financial metrics."""
-        revenues = [p.financials.revenue for p in profiles if p.financials.revenue]
-        profits = [p.financials.profit_margin for p in profiles if p.financials.profit_margin is not None]
+        revenues = [p.financials.revenue for p in profiles if p.financials and p.financials.revenue]
+        profits = [p.financials.profit_margin for p in profiles if p.financials and p.financials.profit_margin is not None]
 
         metrics = {
             "total_revenue": sum(revenues) if revenues else 0,
