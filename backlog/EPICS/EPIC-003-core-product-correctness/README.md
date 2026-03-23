@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | Priority | **P0 — Ship Blocker** |
-| Status | 🔶 Partial — STORY-009, STORY-012 Complete |
+| Status | ✅ Complete |
 | Stories | 3 |
 | Created | 2026-02-28 |
 | Depends On | [EPIC-001: Security Restoration](../EPIC-001-security-restoration/README.md) |
