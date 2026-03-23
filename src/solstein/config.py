@@ -318,6 +318,7 @@ class Settings(BaseSettings):
             "EXA_API_KEY": self.exa_api_key,
             "CRUNCHBASE_API_KEY": self.crunchbase_api_key,
             "NEWS_API_KEY": self.news_api_key,
+            "SEC_USER_AGENT": self.sec_user_agent,
         }
         for name, value in optional_data.items():
             if not value:
@@ -338,6 +339,7 @@ class Settings(BaseSettings):
             "ALIBABA_API_KEY": self.alibaba_api_key,
             "NVIDIA_NIM_API_KEY": self.nvidia_nim_api_key,
             "PERPLEXITY_API_KEY": self.perplexity_api_key,
+            "OLLAMA_URL": self.ollama_url if self.llm_provider == "ollama" else None,
         }
         configured = [name for name, val in llm_providers.items() if val]
         missing = [name for name, val in llm_providers.items() if not val]
@@ -346,15 +348,18 @@ class Settings(BaseSettings):
             logger.warning(
                 "No LLM provider API keys configured. "
                 "AI features (report generation, analysis) will be unavailable. "
-                f"Set any of: {', '.join(llm_providers)}"
+                f"Set any of: {', '.join(llm_providers.keys())}"
             )
 
-        status_lines = [f"  \u2713 {n}" for n in configured] + [f"  - {n} (not set)" for n in missing[:5]]
-        if len(missing) > 5:
-            status_lines.append(f"  - ... and {len(missing) - 5} more not configured")
+        configured_lines = [f"  ✓ {n}" for n in sorted(configured)]
+        missing_lines = [f"  - {n} (optional)" for n in sorted(missing)]
 
         logger.info(
-            "Configuration validation passed.\n\u2500\u2500 LLM Providers \u2500\u2500\n" + "\n".join(status_lines)
+            "Configuration validation passed.\n"
+            "───────────────────────────────────────────────\n"
+            "Startup Summary\n"
+            "───────────────────────────────────────────────\n"
+            + "\n".join(configured_lines + missing_lines)
         )
 
     @field_validator("environment", mode="before")
