@@ -127,8 +127,8 @@ def track_error_with_timestamp(company, error_msg: str, field: str | None = None
     # Increment error count
     company.enrichment_error_count += 1
 
-    # Limit error accumulation to 50 most recent
-    if len(company.enrichment_errors) > 50:
+    # Limit error accumulation to 50 most recent (using has_enrichment_errors property)
+    if company.has_enrichment_errors and len(company.enrichment_errors) > 50:
         company.enrichment_errors = company.enrichment_errors[-50:]
         company.enrichment_error_timestamps = dict(list(company.enrichment_error_timestamps.items())[-50:])
 
