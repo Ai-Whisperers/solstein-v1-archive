@@ -44,4 +44,5 @@ This epic is the root of the critical path. EPIC-001 (Security Restoration) cann
 
 ## Ordering Rationale
 
+## Ordering Rationale
 STORY-006 must complete before STORY-007 and STORY-008. Removing hardcoded credentials from a file with duplicate class bodies risks applying the removal to the wrong (discarded) definition. Fix the structural defect first, then fix the values within the corrected structure.
