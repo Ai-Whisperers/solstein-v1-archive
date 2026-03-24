@@ -55,11 +55,11 @@ These are known issues that were identified but not fully resolved. Agent Zero s
 
 | ID | Issue | Root Cause | Task # | Status |
 |----|-------|------------|--------|--------|
-| PEND-01 | conftest.py crashes at import without DATABASE_URL | STORY-007 removed sqlite default, no compensating fixture | Task #1 | ⚠️ OPEN |
-| PEND-02 | Extracted signals discarded from AgentTaskResult | `extract_signals` written to `final_state` but caller only reads `raw_sources` | Task #6 | ⚠️ OPEN |
-| PEND-03 | Legacy path in process_raw uses invalid DataSourceType fallback | `getattr(source, "source_type", "unknown")` — "unknown" not in enum | Task #7 | ⚠️ OPEN |
-| PEND-04 | check_configuration() dead code | Pydantic already validates before function runs | Task #8 | ⚠️ OPEN |
-| PEND-05 | Hardcoded classification values not in single source | ai_readiness.py, competitive_mapping.py use values not from constants | Task #9 | ⚠️ OPEN |
+| PEND-01 | conftest.py crashes at import without DATABASE_URL | get_test_database_url() has proper fallback in database_config.py | Task #1 | ✅ FIXED |
+| PEND-02 | Extracted signals discarded from AgentTaskResult | Dead CoordinatorAgent code removed entirely (1df9c1d) | Task #6 | ✅ FIXED |
+| PEND-03 | Legacy path in process_raw uses invalid DataSourceType fallback | DataSourceType.UNKNOWN is now a valid enum member | Task #7 | ✅ FIXED |
+| PEND-04 | check_configuration() dead code | Not dead — actively called in main.py lifespan hook | Task #8 | ✅ NOT A BUG |
+| PEND-05 | Hardcoded classification values not in single source | ai_readiness.py now uses CompanyClassification enum; competitive_mapping.py clean | Task #9 | ✅ FIXED |
 
 ---
 

@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from solstein.domain.models import Company
+from solstein.domain.models import Company, CompanyClassification
 
 # Weights for each dimension
 _WEIGHTS = {
@@ -156,13 +156,13 @@ class AIReadinessScorer:
         elif funding > 1_000_000:  # > 1M EUR
             score += 0.5
 
-        # Phoenix tier companies have the resources and motivation
-        tier = getattr(c, "tier", None)
-        if tier is not None:
-            tier_str = tier.value.lower() if hasattr(tier, "value") else str(tier).lower()
-            if tier_str == "phoenix":
+        # Phoenix/Salt classified companies have the resources and motivation
+        classification = getattr(c, "classification", None)
+        if classification is not None:
+            cls_str = classification.lower() if isinstance(classification, str) else str(classification).lower()
+            if cls_str == CompanyClassification.PHOENIX.value.lower():
                 score += 2.0
-            elif tier_str == "salt":
+            elif cls_str == CompanyClassification.SALT.value.lower():
                 score += 1.0
 
         return min(10.0, max(0.0, score))
