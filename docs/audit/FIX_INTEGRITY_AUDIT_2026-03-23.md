@@ -123,19 +123,6 @@ The original fix guarded 2 lines in `api/routers/scoring.py`. This audit extende
 
 ### OPEN ISSUES (not crashes, documented as tasks)
 
-**OPEN-01 — Extracted signals discarded from AgentTaskResult (Task #6) — ✅ FIXED — 2026-03-23**
-`extract_signals` node writes to `final_state['extracted_signals']` but `AgentTaskResult` had no field for it.
-
-**Fix applied:**
-1. `base_agent.py`: Added `extracted_signals: SignalExtractionRecord | None` to `AgentTaskResult` model
-2. `coordinator_agent.py`: Now converts `final_state['extracted_signals']` list to `SignalExtractionRecord` and includes it in the result
-
-**OPEN-02 — Legacy path in process_raw uses invalid DataSourceType fallback (Task #7)**
-`getattr(source, "source_type", "unknown")` — `"unknown"` is not a `DataSourceType` member. Unreachable in practice (Pydantic enforces type on `AgentTaskResult.raw_sources`), but broken if ever reached.
-
-**OPEN-03 — Smoke test still inert (Task #1)**
-`test_pipeline_smoke.py` design is correct but `conftest.py` crashes at import without `DATABASE_URL`. Regression gate is non-functional.
-
 **OPEN-01 — Extracted signals discarded from AgentTaskResult (Task #6)**
 `extract_signals` node writes to `final_state['extracted_signals']` but `CoordinatorAgent.analyze_company()` only returns `raw_sources` and `extracted_facts`. Signals are silently dropped. Caller cannot access pipeline-computed signals.
 

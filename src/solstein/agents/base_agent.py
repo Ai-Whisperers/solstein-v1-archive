@@ -10,7 +10,7 @@ from typing import Any
 from loguru import logger
 from pydantic import BaseModel, Field
 
-from ..domain.models import AggregatedFact, DataSourceType, RawDataSource, SignalExtractionRecord
+from ..domain.models import AggregatedFact, DataSourceType, RawDataSource
 
 
 class AgentTaskResult(BaseModel):
@@ -21,7 +21,6 @@ class AgentTaskResult(BaseModel):
     success: bool
     raw_sources: list[RawDataSource] = Field(default_factory=list)
     extracted_facts: list[AggregatedFact] = Field(default_factory=list)
-    extracted_signals: SignalExtractionRecord | None = None  # Signals from extract_signals node
     execution_time_seconds: float = 0.0
     error_message: str | None = None
     coverage_gaps: list[str] = Field(default_factory=list)
