@@ -190,8 +190,9 @@ def enrich_companies_batch_async(
         try:
             self.retry(exc=exc, countdown=countdown)
         except MaxRetriesExceededError:
+            tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
             dead_letter_queue.record_failure(
-                "enrich_companies_batch_async", self.request.id, str(exc), self.request.retries + 1
+                "enrich_companies_batch_async", self.request.id, f"{exc}\n{tb}", self.request.retries + 1
             )
             return {
                 "task_id": self.request.id,

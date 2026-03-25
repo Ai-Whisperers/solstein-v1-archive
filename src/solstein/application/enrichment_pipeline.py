@@ -166,7 +166,14 @@ class EnrichmentPipeline:
         company_name: str,
         sources: list[RawDataSource],
     ) -> AggregatedDataRecord:
-        """Merge multiple RawDataSource results into a single AggregatedDataRecord."""
+        """Merge multiple RawDataSource results into a single AggregatedDataRecord.
+
+        Each RawDataSource is converted to an AggregatedFact with source
+        attribution and metadata preserved.  Quality metrics (total_facts,
+        verified_facts, average_confidence, data_completeness_percentage) are
+        computed after all facts are assembled.
+        """
+        total_registered = len(self._registry.all_enrichment_sources)
         facts: list[AggregatedFact] = []
         for src in sources:
             source_id = src.url or src.source_name
@@ -184,4 +191,8 @@ class EnrichmentPipeline:
             facts=facts,
         )
         record.update_quality_metrics()
+        # Compute data completeness as the fraction of registered sources that
+        # returned usable data.
+        if total_registered > 0:
+            record.data_completeness_percentage = (len(sources) / total_registered) * 100.0
         return record

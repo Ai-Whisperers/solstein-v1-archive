@@ -99,7 +99,9 @@ class StackOverflowConnector(BaseConnector):
             "view_count": content.get("view_count"),
             "tags": content.get("tags", []),
             "is_answered": content.get("is_answered"),
-            "creation_date": datetime.fromtimestamp(content.get("creation_date", 0)),
+            "creation_date": datetime.fromtimestamp(content["creation_date"], tz=timezone.utc)
+            if content.get("creation_date") is not None
+            else None,
             "owner": content.get("owner", {}).get("display_name"),
             "raw_data": content,
         }

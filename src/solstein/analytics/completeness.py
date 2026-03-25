@@ -154,12 +154,27 @@ class CompletenessCalculator:
         score = self.calculate_completeness_score(company)
         tier = self.assign_tier(score)
 
+        # Fields whose default value does not represent actual data
+        ENUM_DEFAULT_FIELDS = {
+            "ai_maturity": "NONE",
+            "threat_level": "MEDIUM",
+            "tier": "TIER_3",
+        }
+
         # Get field-level details
         field_details = {}
         for field in self.TRACKED_FIELDS:
             value = self._get_field_value(company, field)
+            filled = value is not None
+            if filled and isinstance(value, list) and len(value) == 0:
+                filled = False
+            default_sentinel = ENUM_DEFAULT_FIELDS.get(field)
+            if filled and default_sentinel is not None:
+                value_str = value.value if hasattr(value, "value") else str(value)
+                if value_str == default_sentinel:
+                    filled = False
             field_details[field] = {
-                "present": value is not None,
+                "present": filled,
                 "value": value,
             }
 

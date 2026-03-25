@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any
 
 from loguru import logger
+from sqlalchemy import text
 
 from solstein.data.connectors.companies_house_connector import CompaniesHouseConnector
 from solstein.infrastructure.database import DatabaseManager
@@ -125,15 +126,15 @@ class CompaniesHouseRefreshConnector(BaseRefreshConnector):
 
     async def _fact_exists(self, company_id: str, fact_type: str) -> bool:
         """Check if a company profile fact already exists for company_id."""
-        async with self.db_manager.session() as session:
+        async with self.db_manager.get_session() as session:
             result = await session.execute(
-                """
-                SELECT COUNT(*) 
-                FROM facts 
-                WHERE company_id = :cid 
-                AND fact_type = :ft 
+                text("""
+                SELECT COUNT(*)
+                FROM facts
+                WHERE company_id = :cid
+                AND fact_type = :ft
                 AND source = 'companies_house'
-                """,
+                """),
                 {"cid": company_id, "ft": fact_type},
             )
             return result.fetchone()[0] > 0

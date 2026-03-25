@@ -45,7 +45,12 @@ async def enrich_batch(request_data: BatchEnrichmentRequest, request: Request) -
         failed_count = 0
         per_company_ms = total_duration_ms // len(enriched_companies) if enriched_companies else 0
         for enriched in enriched_companies:
+            # Detect failure via explicit flag OR non-empty enrichment_errors
             failed = getattr(enriched, "_enrichment_failed", False)
+            if not failed:
+                enrichment_errors = getattr(enriched, "enrichment_errors", [])
+                if enrichment_errors:
+                    failed = True
             if failed:
                 failed_count += 1
             results.append(

@@ -341,6 +341,15 @@ class LLMTracker:
         return alerts
 
 
+# Module-level singleton for global aggregation
+_global_llm_tracker = LLMTracker()
+
+
+def get_llm_tracker() -> LLMTracker:
+    """Get the global LLM tracker singleton."""
+    return _global_llm_tracker
+
+
 def track_llm(provider: str, model: str, tenant_id: str | None = None):
     """Decorator to track LLM calls.
 
@@ -354,7 +363,7 @@ def track_llm(provider: str, model: str, tenant_id: str | None = None):
     """
 
     def decorator(func: Callable) -> Callable:
-        tracker = LLMTracker()
+        tracker = _global_llm_tracker
 
         @wraps(func)
         async def async_wrapper(*args, **kwargs):

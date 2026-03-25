@@ -8,7 +8,7 @@ from typing import Any
 
 from loguru import logger
 
-from ...domain.models import Company, FinancialMetric
+from ...domain.models import Company
 
 
 class ProfileMerger:
@@ -50,6 +50,9 @@ class ProfileMerger:
     def _merge_company_profiles(self, profiles: list[Company]) -> Company:
         """Merge multiple profiles of the same company.
 
+        Uses model_dump/model construction to merge, preferring non-None values
+        from later profiles over earlier ones.
+
         Args:
             profiles: List of profiles for the same company
 
@@ -62,76 +65,34 @@ class ProfileMerger:
         if len(profiles) == 1:
             return profiles[0]
 
-        # Start with the first profile
-        base = profiles[0]
+        # Start with the first profile's data
+        merged_data = profiles[0].model_dump()
 
-        # Merge financial metrics
-        merged_metrics: dict[str, FinancialMetric] = {}
-        for profile in profiles:
-            for metric_name, metric in profile.financial_metrics.items():
-                if metric_name not in merged_metrics:
-                    merged_metrics[metric_name] = metric
-                elif metric.confidence.value > merged_metrics[metric_name].confidence.value:
-                    # Keep higher confidence metric
-                    merged_metrics[metric_name] = metric
+        # Merge: prefer non-None values from later profiles
+        for profile in profiles[1:]:
+            profile_data = profile.model_dump()
+            for key, value in profile_data.items():
+                if value is not None and merged_data.get(key) is None:
+                    merged_data[key] = value
 
-        # Merge data sources
+        # Merge source_links from all profiles
         all_sources: set[str] = set()
         for profile in profiles:
-            all_sources.update(profile.data_sources)
+            if profile.source_links:
+                all_sources.update(profile.source_links)
+        merged_data["source_links"] = list(all_sources)
 
-        # Create merged profile
-        merged = Company(
-            id=base.id,
-            name=base.name,
-            industry=base.industry or next((p.industry for p in profiles if p.industry), None),
-            description=base.description or next((p.description for p in profiles if p.description), None),
-            website=base.website or next((p.website for p in profiles if p.website), None),
-            headquarters=base.headquarters or next((p.headquarters for p in profiles if p.headquarters), None),
-            founded_year=base.founded_year or next((p.founded_year for p in profiles if p.founded_year), None),
-            tier=base.tier,
-            threat_level=base.threat_level,
-            classification=base.classification,
-            ai_maturity=base.ai_maturity,
-            saas_maturity=base.saas_maturity,
-            ai_score=base.ai_score,
-            ai_signal_level=base.ai_signal_level,
-            ai_key_capabilities=base.ai_key_capabilities or [],
-            ai_in_production=base.ai_in_production,
-            revenue_eur_m=base.revenue_eur_m,
-            revenue_confidence=base.revenue_confidence,
-            growth_rate_pct=base.growth_rate_pct,
-            growth_confidence=base.growth_confidence,
-            profit_margin_pct=base.profit_margin_pct,
-            ebitda_margin_pct=base.ebitda_margin_pct,
-            recurring_revenue_pct=base.recurring_revenue_pct,
-            revenue_per_employee_eur_k=base.revenue_per_employee_eur_k,
-            revenue_timeline=base.revenue_timeline or [],
-            revenue_cagr_3yr=base.revenue_cagr_3yr,
-            revenue_cagr_5yr=base.revenue_cagr_5yr,
-            funding_rounds=base.funding_rounds or [],
-            total_funding_raised_eur=base.total_funding_raised_eur,
-            latest_valuation_eur=base.latest_valuation_eur,
-            lead_investors=base.lead_investors or [],
-            funding_war_chest=base.funding_war_chest,
-            employee_count=base.employee_count,
-            employee_cagr_3yr=base.employee_cagr_3yr,
-            open_positions=base.open_positions,
-            profitability_raw_metrics=base.profitability_raw_metrics or {},
-            data_availability=base.data_availability or {},
-            data_source=base.data_source,
-            growth_score=base.growth_score,
-            financial_health_score=base.financial_health_score,
-            competitive_position_score=base.competitive_position_score,
-            composite_score=base.composite_score,
-            scoring_breakdown=base.scoring_breakdown or {},
-            financial_metrics=merged_metrics,
-            data_sources=list(all_sources),
-            last_updated=base.last_updated,
-            created_at=base.created_at,
-        )
+        # Merge metric_sources from all profiles
+        all_metric_sources: dict[str, list[str]] = {}
+        for profile in profiles:
+            if profile.metric_sources:
+                for key, sources in profile.metric_sources.items():
+                    if key not in all_metric_sources:
+                        all_metric_sources[key] = []
+                    all_metric_sources[key].extend(sources)
+        merged_data["metric_sources"] = all_metric_sources
 
-        return merged
+        return Company(**merged_data)
 
 
 class ProvenanceValidator:
@@ -164,23 +125,22 @@ class ProvenanceValidator:
         if not profile.industry:
             issues.append("Missing industry")
 
-        # Check required metrics
-        for metric in self.REQUIRED_METRICS:
-            if metric not in profile.financial_metrics:
-                issues.append(f"Missing required metric: {metric}")
+        # Check required metrics using actual Company fields
+        metric_field_map = {
+            "revenue": profile.revenue,
+            "growth_rate": profile.growth_rate,
+            "employees": profile.employees,
+            "profit_margin": profile.profit_margin,
+            "funding": profile.funding,
+            "valuation": profile.valuation,
+        }
+        for metric_name, value in metric_field_map.items():
+            if value is None:
+                issues.append(f"Missing required metric: {metric_name}")
 
         # Check data sources
-        if not profile.data_sources:
+        if not profile.source_links:
             issues.append("No data sources")
-
-        # Check confidence levels
-        low_confidence_metrics = [
-            name
-            for name, metric in profile.financial_metrics.items()
-            if metric.confidence.value < 2  # Less than MEDIUM
-        ]
-        if low_confidence_metrics:
-            issues.append(f"Low confidence metrics: {', '.join(low_confidence_metrics)}")
 
         return issues
 
@@ -240,11 +200,22 @@ class BatchExtractor:
         if not files:
             return []
 
-        # Process files
+        # Process files - handle both sync and async contexts
         profiles: list[Company] = []
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
         for file_path in files:
             try:
-                result = asyncio.run(self._process_file(file_path))
+                if loop and loop.is_running():
+                    # Already in async context — run coroutine in a new thread
+                    import concurrent.futures
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                        result = pool.submit(asyncio.run, self._process_file(file_path)).result()
+                else:
+                    result = asyncio.run(self._process_file(file_path))
                 if result:
                     profiles.append(result)
             except Exception as e:

@@ -22,6 +22,17 @@ class ClaimRepository(EvidenceGraphRepository):
         self._company_repo = CompanyRepository(self.uri, self.user, self.password)
         self._source_repo = SourceRepository(self.uri, self.user, self.password)
 
+    @staticmethod
+    def _extract_domain(url: str) -> str:
+        """Extract domain from URL."""
+        from urllib.parse import urlparse
+
+        try:
+            parsed = urlparse(url)
+            return parsed.netloc or url
+        except Exception:
+            return url
+
     def create(self, claim: Claim) -> None:
         """Create a claim and link it to company and source.
 

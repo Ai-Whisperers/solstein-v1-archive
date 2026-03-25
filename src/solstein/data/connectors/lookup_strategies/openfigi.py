@@ -3,6 +3,7 @@
 EPIC-022: Extracted from IdentifierLookupService for modularity.
 """
 
+import asyncio
 import os
 import re
 from typing import Any
@@ -39,6 +40,10 @@ class OpenFIGIStrategy(LookupStrategy):
         if not self.is_available:
             return {}
 
+        return await asyncio.to_thread(self._lookup_sync, company_name)
+
+    def _lookup_sync(self, company_name: str) -> dict[str, Any]:
+        """Sync implementation of OpenFIGI lookup (run via to_thread)."""
         headers = {
             "Content-Type": "application/json",
             "X-OPENFIGI-APIKEY": str(self._api_key),

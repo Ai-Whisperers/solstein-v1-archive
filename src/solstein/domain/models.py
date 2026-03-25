@@ -212,15 +212,6 @@ class Company(BaseModel):
     subsidiaries: list[str] = Field(default_factory=list)
     acquisitions: list[dict[str, Any]] = Field(default_factory=list)
 
-    # Metadata
-    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    data_source: str | None = None
-    notes: str | None = None
-    source_links: list[str] = Field(default_factory=list)
-    metric_sources: dict[str, list[str]] = Field(default_factory=dict)
-    metric_justifications: dict[str, str] = Field(default_factory=dict)
-    metric_observations: dict[str, list[dict[str, Any]]] = Field(default_factory=dict)
-    signal_confidences: dict[str, float] = Field(default_factory=dict)
     confidence_scores: dict[str, float] = Field(default_factory=dict)
     enrichment_source_count: int = 0
     data_quality_tier: str = "unknown"

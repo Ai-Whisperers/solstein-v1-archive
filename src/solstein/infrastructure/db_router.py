@@ -10,13 +10,10 @@ Note: This is a foundation implementation. Actual replica setup requires:
 """
 
 import random
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING
 
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
-
-if TYPE_CHECKING:
-    from collections.abc import AsyncGenerator
 
 
 class DatabaseRouter:
@@ -131,6 +128,8 @@ class DatabaseRouter:
             AsyncSession connected to a read replica.
         """
         engine = self._get_replica_engine()
+        if engine is None:
+            raise RuntimeError("DatabaseRouter not initialized — call initialize() first")
         session = AsyncSession(engine, expire_on_commit=False)
         try:
             yield session
@@ -144,6 +143,8 @@ class DatabaseRouter:
         Yields:
             AsyncSession connected to primary database.
         """
+        if self._primary_engine is None:
+            raise RuntimeError("DatabaseRouter not initialized — call initialize() first")
         session = AsyncSession(self._primary_engine, expire_on_commit=False)
         try:
             yield session

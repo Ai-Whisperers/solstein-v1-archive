@@ -79,8 +79,8 @@ class EnrichmentCache:
                 source_dict = {
                     "source_name": source.source_name,
                     "source_type": str(source.source_type),
-                    "entity_id": source.entity_id,
-                    "entity_name": source.entity_name,
+                    "entity_id": source.metadata.get("entity_id", ""),
+                    "entity_name": source.metadata.get("entity_name", ""),
                     "raw_content": source.raw_content
                     if isinstance(source.raw_content, dict)
                     else str(source.raw_content),
@@ -221,9 +221,11 @@ class EneveEnricher:
                     RawDataSource(
                         source_name=s["source_name"],
                         source_type=s["source_type"],
-                        entity_id=s["entity_id"],
-                        entity_name=s["entity_name"],
                         raw_content=s["raw_content"],
+                        metadata={
+                            "entity_id": s.get("entity_id", ""),
+                            "entity_name": s.get("entity_name", ""),
+                        },
                     )
                     for s in cached
                 ]
@@ -238,8 +240,22 @@ class EneveEnricher:
 
             )
 
-            if result and result.sources:
-                sources = result.sources
+            if result and result.facts:
+                # Convert AggregatedFact objects back to RawDataSource for interface compatibility
+                sources = [
+                    RawDataSource(
+                        source_name=fact.sources_used[0] if fact.sources_used else "enrichment_pipeline",
+                        source_type="competitor_json",
+                        raw_content=fact.value if isinstance(fact.value, (str, dict)) else {fact.fact_type: fact.value},
+                        confidence=fact.confidence,
+                        metadata={
+                            "entity_id": company_name.lower().replace(" ", "-"),
+                            "entity_name": company_name,
+                            "fact_type": fact.fact_type,
+                        },
+                    )
+                    for fact in result.facts
+                ]
                 logger.info(f"✅ Pipeline enrichment successful for {company_name}: {len(sources)} sources")
 
                 # Cache the results
@@ -288,9 +304,11 @@ class EneveEnricher:
                 RawDataSource(
                     source_name="Input Data",
                     source_type="competitor_json",
-                    entity_id=company_name,
-                    entity_name=company_name,
                     raw_content=company_data,
+                    metadata={
+                        "entity_id": company_name,
+                        "entity_name": company_name,
+                    },
                 )
             )
 

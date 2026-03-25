@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any
 
 from loguru import logger
+from sqlalchemy import text
 
 from solstein.data.connectors.news_signal_detector import NewsSignalDetector
 from solstein.infrastructure.database import DatabaseManager
@@ -56,33 +57,35 @@ class NewsSignalRefreshConnector(BaseRefreshConnector):
 
         return facts
 
-    def _convert_signal_to_fact(self, signal: dict[str, Any]) -> dict[str, Any]:
-        """Convert news signal to fact dictionary."""
-        # Extract signal metrics
+    def _convert_signal_to_fact(self, signal: Any) -> dict[str, Any]:
+        """Convert news signal (Signal dataclass) to fact dictionary."""
+        raw = getattr(signal, "raw_data", {}) or {}
+        # Extract signal metrics using attribute access for Signal dataclass fields,
+        # falling back to raw_data for fields not on the dataclass
         signal_metrics = {
-            "signal_type": signal.get("signal_type"),
-            "title": signal.get("title"),
-            "description": signal.get("description"),
-            "source": signal.get("source"),
-            "url": signal.get("url"),
-            "published_at": signal.get("published_at"),
-            "signal_date": signal.get("signal_date"),
+            "signal_type": signal.signal_type,
+            "title": raw.get("title"),
+            "description": signal.description,
+            "source": signal.source,
+            "url": raw.get("url"),
+            "published_at": raw.get("published_at"),
+            "signal_date": raw.get("signal_date"),
         }
 
         # Create fact data
         fact_data = {
-            "company_id": signal.get("company_name"),
+            "company_id": signal.company_name,
             "fact_type": "market_signal",
             "value": signal_metrics,
-            "confidence": signal.get("confidence", 0.72),
+            "confidence": getattr(signal, "confidence", 0.72),
             "extracted_at": datetime.now(),
             "source": "news_signal",
             "metadata": {
-                "signal_type": signal.get("signal_type"),
-                "source": signal.get("source"),
-                "url": signal.get("url"),
-                "published_at": signal.get("published_at"),
-                "signal_date": signal.get("signal_date"),
+                "signal_type": signal.signal_type,
+                "source": signal.source,
+                "url": raw.get("url"),
+                "published_at": raw.get("published_at"),
+                "signal_date": raw.get("signal_date"),
             },
         }
 
@@ -113,15 +116,15 @@ class NewsSignalRefreshConnector(BaseRefreshConnector):
 
     async def _fact_exists(self, company_id: str, fact_type: str) -> bool:
         """Check if a market signal fact already exists for company_id."""
-        async with self.db_manager.session() as session:
+        async with self.db_manager.get_session() as session:
             result = await session.execute(
-                """
-                SELECT COUNT(*) 
-                FROM facts 
-                WHERE company_id = :cid 
-                AND fact_type = :ft 
+                text("""
+                SELECT COUNT(*)
+                FROM facts
+                WHERE company_id = :cid
+                AND fact_type = :ft
                 AND source = 'news_signal'
-                """,
+                """),
                 {"cid": company_id, "ft": fact_type},
             )
             return result.fetchone()[0] > 0

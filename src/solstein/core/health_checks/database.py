@@ -32,10 +32,11 @@ class DatabaseHealthCheck(HealthCheckStrategy):
 
             settings = Settings.load()
             db_manager = DatabaseManager(settings)
+            # init_async is synchronous (creates async engine config only)
             db_manager.init_async()
 
             if db_manager.engine is None:
-                raise RuntimeError("Database engine not initialized")
+                raise RuntimeError("Database engine not initialized after init_async()")
 
             async with db_manager.engine.connect() as conn:
                 await conn.execute(text("SELECT 1"))

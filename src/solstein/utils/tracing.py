@@ -50,6 +50,7 @@ class DependencyTracer:
         """
         start = time.perf_counter()
         span_metadata = dict(metadata)
+        success = False
         error = None
 
         # Get correlation context

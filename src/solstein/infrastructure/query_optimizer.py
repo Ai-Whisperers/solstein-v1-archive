@@ -96,7 +96,9 @@ class QueryOptimizer:
 
         for i in range(0, len(records), batch_size):
             batch = records[i : i + batch_size]
-            await session.execute(table.insert(), batch)
+            # Use insert() from sqlalchemy for both Table and ORM model classes
+            target_table = table.__table__ if hasattr(table, "__table__") else table
+            await session.execute(target_table.insert(), batch)
             total_inserted += len(batch)
 
         return total_inserted
@@ -310,9 +312,14 @@ class BatchQueryBuilder:
         if not records:
             return ""
 
+        def _quote_ident(name: str) -> str:
+            """Quote a SQL identifier to prevent injection."""
+            # Double any existing quotes and wrap in quotes
+            return '"' + name.replace('"', '""') + '"'
+
         # Build column list
         columns = list(records[0].keys())
-        col_str = ", ".join(columns)
+        col_str = ", ".join(_quote_ident(c) for c in columns)
 
         # Build values placeholders
         placeholders = []
@@ -323,12 +330,14 @@ class BatchQueryBuilder:
         values_str = ", ".join(placeholders)
 
         # Build conflict and update clauses
-        conflict_str = ", ".join(conflict_columns)
-        updates = [f"{col} = EXCLUDED.{col}" for col in update_columns]
+        conflict_str = ", ".join(_quote_ident(c) for c in conflict_columns)
+        updates = [f"{_quote_ident(col)} = EXCLUDED.{_quote_ident(col)}" for col in update_columns]
         update_str = ", ".join(updates)
 
+        table_name = _quote_ident(table.__tablename__)
+
         return f"""
-            INSERT INTO {table.__tablename__} ({col_str})
+            INSERT INTO {table_name} ({col_str})
             VALUES {values_str}
             ON CONFLICT ({conflict_str})
             DO UPDATE SET {update_str}

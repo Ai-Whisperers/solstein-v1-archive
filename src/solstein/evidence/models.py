@@ -12,7 +12,7 @@ FREE tools used:
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum, auto
 from typing import Any, Optional
 from uuid import UUID, uuid4
@@ -90,7 +90,7 @@ class Claim(BaseModel):
     page_section: Optional[str] = None  # e.g., "About Us", "Investor Relations"
 
     # Extraction metadata
-    extracted_at: datetime = Field(default_factory=datetime.utcnow)
+    extracted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     extraction_method: str  # e.g., "regex", "llm", "structured_data"
     extractor_version: str = "1.0"
 
@@ -109,8 +109,8 @@ class Claim(BaseModel):
     supported_by_claims: list[UUID] = Field(default_factory=list)
 
     # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     class Config:
         json_encoders = {
@@ -149,7 +149,7 @@ class SourceDocument(BaseModel):
     # Metadata
     domain: str
     published_date: Optional[datetime] = None
-    scraped_at: datetime = Field(default_factory=datetime.utcnow)
+    scraped_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     content_hash: Optional[str] = None  # For change detection
 
     # Quality signals
@@ -188,7 +188,7 @@ class Contradiction(BaseModel):
     resolved_claim_id: Optional[UUID] = None  # Which claim was accepted
 
     # Metadata
-    detected_at: datetime = Field(default_factory=datetime.utcnow)
+    detected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     resolved_at: Optional[datetime] = None
 
     class Config:
@@ -224,7 +224,7 @@ class EvidenceReadiness(BaseModel):
     missing_critical_fields: list[str] = Field(default_factory=list)
     recommended_sources: list[str] = Field(default_factory=list)
 
-    calculated_at: datetime = Field(default_factory=datetime.utcnow)
+    calculated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     class Config:
         json_encoders = {

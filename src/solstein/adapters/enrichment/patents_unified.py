@@ -17,7 +17,7 @@ from solstein.data.patent_client import search_company_patents
 from solstein.domain.models import DataSourceType, RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
-from solstein.research.discovery import DiscoveryCandidate
+from solstein.research.discovery import DiscoveryCandidate, _slugify
 
 
 class PatentsUnifiedAdapter(BaseRefreshConnector):
@@ -68,17 +68,21 @@ class PatentsUnifiedAdapter(BaseRefreshConnector):
         candidates = []
         if result.total_patents > 0:
             # Create candidate from patent search
+            candidate_name = f"{market} patent holder"
             candidate = DiscoveryCandidate(
-                name=f"{market} patent holder",
-                source_url="",
-                source_type="patents",
-                confidence=0.60,
-                discovery_metadata={
-                    "market": market,
-                    "total_patents": result.total_patents,
-                    "recent_patents": result.recent_patents,
-                    "ai_related": result.ai_related_patents,
-                },
+                company_id=_slugify(candidate_name),
+                name=candidate_name,
+                market=market,
+                ticker=None,
+                industry="Unknown",
+                region="Unknown",
+                tags=["patents", market.lower()],
+                seed_relevance=0.60,
+                discovery_reason=(
+                    f"patent activity: {result.total_patents} patents, "
+                    f"{result.ai_related_patents} AI-related"
+                ),
+                source_links=[],
             )
             candidates.append(candidate)
 
@@ -145,7 +149,7 @@ class PatentsUnifiedAdapter(BaseRefreshConnector):
                             "source_backend": result.source,
                         },
                         "confidence": confidence,
-                        "extracted_at": datetime.now(),
+                        "extracted_at": datetime.now(timezone.utc),
                         "source": self.source_name,
                         "metadata": {
                             "backend": result.source,
@@ -167,7 +171,7 @@ class PatentsUnifiedAdapter(BaseRefreshConnector):
                                 ),
                             },
                             "confidence": confidence,
-                            "extracted_at": datetime.now(),
+                            "extracted_at": datetime.now(timezone.utc),
                             "source": self.source_name,
                         }
                     )

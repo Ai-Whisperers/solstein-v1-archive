@@ -12,6 +12,8 @@ from .utils.context import set_context, reset_context, get_current_context
 @before_task_publish.connect
 def add_context_to_task_headers(headers=None, body=None, **kwargs):
     """Add current context to task headers before publishing."""
+    if headers is None:
+        return
     context = get_current_context()
     if context:
         headers["_context"] = context

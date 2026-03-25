@@ -4,6 +4,7 @@ Uses news-derived hiring signals (no direct LinkedIn API access).
 Implements incremental refresh with hiring signal detection.
 """
 
+import asyncio
 from datetime import datetime
 from typing import Any
 
@@ -57,15 +58,20 @@ class LinkedInRefreshConnector(BaseRefreshConnector):
 
         for company_name in company_ids:
             try:
-                data = self.client.get_linkedin_data(company_name)
+                data = await asyncio.to_thread(self.client.get_linkedin_data, company_name)
+
+                if data is None:
+                    logger.debug(f"No LinkedIn data for {company_name}")
+                    continue
+                ai_related_positions = data.ai_related_positions or 0
 
                 facts.append(
                     {
                         "company_id": company_name,
                         "fact_type": "hiring_signals",
                         "value": {
-                            "ai_related_positions": data.ai_related_positions,
-                            "has_hiring_activity": data.ai_related_positions > 0,
+                            "ai_related_positions": ai_related_positions,
+                            "has_hiring_activity": ai_related_positions > 0,
                         },
                         "confidence": 0.3,  # Lower confidence for news-derived data
                         "extracted_at": datetime.now(),
@@ -78,14 +84,14 @@ class LinkedInRefreshConnector(BaseRefreshConnector):
                 )
 
                 # Add AI hiring fact separately if positive
-                if data.ai_related_positions and data.ai_related_positions > 0:
+                if ai_related_positions > 0:
                     facts.append(
                         {
                             "company_id": company_name,
                             "fact_type": "ai_hiring",
                             "value": {
-                                "positions": data.ai_related_positions,
-                                "signal_strength": min(data.ai_related_positions / 10, 1.0),
+                                "positions": ai_related_positions,
+                                "signal_strength": min(ai_related_positions / 10, 1.0),
                             },
                             "confidence": 0.3,
                             "extracted_at": datetime.now(),

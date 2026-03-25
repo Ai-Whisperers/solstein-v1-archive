@@ -237,6 +237,11 @@ class ConflictResolutionEngine:
             new_time = new.get("extracted_at")
 
             if existing_time and new_time:
+                # Normalize to datetime for safe comparison
+                if isinstance(existing_time, str):
+                    existing_time = datetime.fromisoformat(existing_time)
+                if isinstance(new_time, str):
+                    new_time = datetime.fromisoformat(new_time)
                 return new if new_time > existing_time else existing
             return new if new_time else existing
 

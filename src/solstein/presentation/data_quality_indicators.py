@@ -114,7 +114,8 @@ class DataQualityIndicators:
         for metric_name, value, confidence in metrics + tech_metrics:
             if value is not None:
                 indicator = DataQualityIndicators.CONFIDENCE_INDICATORS.get(confidence or ConfidenceLevel.UNKNOWN, "?")
-                source = company.metric_sources.get(metric_name.lower().replace(" ", "_"), ["Unknown"])[0]
+                sources_list = company.metric_sources.get(metric_name.lower().replace(" ", "_"), ["Unknown"])
+                source = sources_list[0] if sources_list else "Unknown"
                 rows.append(f"| {metric_name} | {value} | {indicator} | {source} |")
 
         return "\n".join(rows)

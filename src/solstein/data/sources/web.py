@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+
 import requests
 from loguru import logger
 
@@ -17,6 +19,10 @@ class WebSource:
 
         Note: Be respectful of robots.txt and rate limits.
         """
+        return await asyncio.to_thread(self._scrape_sync, company_name, website)
+
+    def _scrape_sync(self, company_name: str, website: str) -> ProductInfo:
+        """Sync implementation of website scraping (run via to_thread)."""
         try:
             response = requests.get(
                 website,

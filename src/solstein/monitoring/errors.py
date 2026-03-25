@@ -189,7 +189,7 @@ class ErrorTracker:
         existing = self._find_by_fingerprint(fingerprint)
         if existing:
             existing.count += 1
-            existing.last_seen = record.timestamp
+            existing.timestamp = record.timestamp
             record = existing
         else:
             self.errors.append(record)

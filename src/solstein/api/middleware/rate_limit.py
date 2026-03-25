@@ -47,7 +47,7 @@ def get_rate_limit_for_path(path: str) -> int:
 
     # Check for prefix matches
     for route_pattern, limit in ROUTE_LIMITS.items():
-        if route_pattern.endswith("/") and path.startswith(route_pattern):
+        if (route_pattern.endswith("/")) and (path.startswith(route_pattern)):
             return limit
 
     # Default: 60 requests per minute

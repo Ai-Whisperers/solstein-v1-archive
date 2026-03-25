@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import re
 from datetime import datetime, timezone
 
@@ -26,7 +27,9 @@ class WebsiteAgent(BaseDataGatheringAgent):
             return result
 
         try:
-            resp = requests.get(str(url), timeout=20, headers={"User-Agent": "Solstein-AI"})
+            resp = await asyncio.to_thread(
+                requests.get, str(url), timeout=20, headers={"User-Agent": "Solstein-AI"}
+            )
             text = resp.text or ""
             excerpt = text[:5000]
 

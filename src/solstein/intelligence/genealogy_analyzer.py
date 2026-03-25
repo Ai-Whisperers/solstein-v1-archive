@@ -316,7 +316,7 @@ class GenealogyAnalyzer:
         for investor in self.strategic_investors:
             # Use word boundary matching to avoid false positives
             # e.g., 'ge' should not match inside 'management' or 'energy'
-            pattern = rf'\\b{re.escape(investor.lower())}\\b'
+            pattern = rf'\b{re.escape(investor.lower())}\b'
             if re.search(pattern, text_lower):
                 percentage = self._extract_ownership_percentage(text, investor)
                 stakes.append(
@@ -328,7 +328,7 @@ class GenealogyAnalyzer:
                 )
 
         for utility in self.energy_utilities:
-            pattern = rf'\\b{re.escape(utility.lower())}\\b'
+            pattern = rf'\b{re.escape(utility.lower())}\b'
             if re.search(pattern, text_lower) and utility not in [s.owner_name.lower() for s in stakes]:
                 percentage = self._extract_ownership_percentage(text, utility)
                 stakes.append(

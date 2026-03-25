@@ -188,7 +188,7 @@ class ErrorLoggingMiddleware(BaseHTTPMiddleware):
             # Consume body iterator and immediately restore it so the client receives the body
             body = b""
             async for chunk in response.body_iterator:
-                body += chunk
+                body += chunk if isinstance(chunk, bytes) else chunk.encode("utf-8")
             # Rebuild response with consumed body
             response = StarletteResponse(
                 content=body,

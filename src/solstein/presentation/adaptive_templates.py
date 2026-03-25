@@ -170,10 +170,16 @@ class AdaptiveTemplates:
         # Financial health - detailed
         if company.financials:
             if company.financials.revenue:
-                strengths.append(
-                    f"- **Revenue Scale**: €{company.financials.revenue:.1f}M revenue with "
-                    f"{company.revenue_per_employee_eur_k:.0f}K per employee shows operational efficiency"
-                )
+                rev_per_emp = getattr(company, "revenue_per_employee_eur_k", None)
+                if rev_per_emp is not None:
+                    strengths.append(
+                        f"- **Revenue Scale**: €{company.financials.revenue:.1f}M revenue with "
+                        f"{rev_per_emp:.0f}K per employee shows operational efficiency"
+                    )
+                else:
+                    strengths.append(
+                        f"- **Revenue Scale**: €{company.financials.revenue:.1f}M revenue"
+                    )
 
             if company.ebitda_margin:
                 if company.ebitda_margin > 30:

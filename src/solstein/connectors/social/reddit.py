@@ -105,7 +105,9 @@ class RedditConnector(BaseConnector):
             "upvotes": content.get("ups"),
             "downvotes": content.get("downs"),
             "num_comments": content.get("num_comments"),
-            "created_at": datetime.fromtimestamp(content.get("created_utc", 0)),
+            "created_at": datetime.fromtimestamp(content["created_utc"], tz=timezone.utc)
+            if content.get("created_utc") is not None
+            else None,
             "is_self": content.get("is_self"),
             "selftext": content.get("selftext"),
             "raw_data": content,

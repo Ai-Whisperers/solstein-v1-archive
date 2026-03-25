@@ -67,10 +67,10 @@ async def cleanup_company_data(session: AsyncSession, company_id: str) -> None:
     """
     try:
         # Delete fact sources for this company's facts
+        from sqlalchemy import select
+        company_fact_ids = select(Fact.fact_id).where(Fact.company_id == company_id)
         await session.execute(
-            delete(FactSource).where(
-                FactSource.fact_id.in_(session.query(Fact.fact_id).filter(Fact.company_id == company_id))
-            )
+            delete(FactSource).where(FactSource.fact_id.in_(company_fact_ids))
         )
         # Delete facts for this company
         await session.execute(delete(Fact).where(Fact.company_id == company_id))
@@ -96,10 +96,10 @@ async def cleanup_batch_data(session: AsyncSession, batch_id: str) -> None:
     """
     try:
         # Delete fact sources for this batch's facts
+        from sqlalchemy import select
+        batch_fact_ids = select(Fact.fact_id).where(Fact.batch_id == batch_id)
         await session.execute(
-            delete(FactSource).where(
-                FactSource.fact_id.in_(session.query(Fact.fact_id).filter(Fact.batch_id == batch_id))
-            )
+            delete(FactSource).where(FactSource.fact_id.in_(batch_fact_ids))
         )
         # Delete facts for this batch
         await session.execute(delete(Fact).where(Fact.batch_id == batch_id))

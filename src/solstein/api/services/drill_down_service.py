@@ -18,11 +18,11 @@ _shared_audit_trails: dict[str, CompanyAnalysisAuditTrail] = {}
 class DrillDownService:
     """Service for managing and retrieving audit trails for transparency."""
 
-    def __init__(self, session: AsyncSession, db_service: DatabaseService | None = None):
-        """Initialize drill-down service with async session and optional database service."""
+    def __init__(self, session: AsyncSession | None = None, db_service: DatabaseService | None = None):
+        """Initialize drill-down service with optional async session and database service."""
         self.session = session
         self.db_service = db_service
-        self.company_repo = CompanyRepository(session)
+        self.company_repo = CompanyRepository(session) if session else None
         self._audit_trails = _shared_audit_trails
 
     async def store_audit_trail(self, audit_trail: CompanyAnalysisAuditTrail) -> None:

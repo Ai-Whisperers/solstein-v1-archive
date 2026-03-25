@@ -427,7 +427,7 @@ class SessionManager:
         Returns:
             Refresh token.
         """
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
 
         from solstein.security.jwt import create_token
 

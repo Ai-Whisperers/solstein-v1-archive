@@ -86,7 +86,7 @@ class InterpolationEngine:
                 continue
 
             gap = next_year - current_year
-            if gap > self.config.revenue_max_gap_years:
+            if gap <= 0 or gap > self.config.revenue_max_gap_years:
                 continue
 
             # Interpolate using configured method

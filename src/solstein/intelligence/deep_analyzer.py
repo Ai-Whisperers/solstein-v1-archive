@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
+from solstein.domain.models import Company
 from solstein.intelligence.capability_overlap import (
     CapabilityOverlapMatrix,
     OverlapAnalyzer,
@@ -608,7 +609,7 @@ Provide 2-3 specific reasons with explanations."""
             company_data: Dictionary with company info (basic_info, financials, etc.)
 
         Returns:
-            DeepAnalysisReport with all sections
+            DeepAnalysisReport with generated analysis sections.
         """
         basic = company_data.get("basic_info", {})
         description = basic.get("description", "")
@@ -649,6 +650,13 @@ Provide 2-3 specific reasons with explanations."""
             "evidence": detected_signals[:5],
             "evidence_count": len(detected_signals),
         }
+
+        employees = basic.get("employees")
+        if not isinstance(employees, int):
+            employees = None
+        founded_year = basic.get("founded_year")
+        if not isinstance(founded_year, int):
+            founded_year = None
         
         # Generate sections using templates (no LLM required)
         context = {
@@ -656,9 +664,9 @@ Provide 2-3 specific reasons with explanations."""
                 "name": company_name,
                 "description": description or "Energy software company",
                 "headquarters": basic.get("headquarters", "Unknown"),
-                "employee_count": basic.get("employees", "Unknown"),
+                "employee_count": employees if employees is not None else "Unknown",
                 "website": basic.get("website", ""),
-                "founded_year": basic.get("founded_year"),
+                "founded_year": founded_year,
             },
             "eneve": ENEVÉ_CONTEXT,
             "capability_overlap": {
@@ -753,21 +761,38 @@ Provide 2-3 specific reasons with explanations."""
         blindspot_analysis += "3. **Category positioning:** Markets itself outside traditional ETRM/energy software categories\n"
         
         # Key insights
-        key_insights = f"## Key Takeaways\n\n"
-        key_insights += f"- **Capability Overlap:** {capability_matrix.matching_capabilities}/8 Eneve capabilities\n"
-        key_insights += f"- **AI Readiness:** {ai_assessment['score']}/10 ({ai_assessment['signal_level']})\n"
-        key_insights += f"- **Direct Competition:** {'Yes' if capability_matrix.high_overlap_capabilities >= 5 else 'Partial' if capability_matrix.high_overlap_capabilities >= 3 else 'Limited'}\n"
-        
-        return {
-            "company_name": company_name,
-            "executive_assessment": executive_assessment,
-            "capability_matrix": capability_matrix,
-            "ai_assessment": ai_assessment,
-            "product_offering": product_offering,
-            "strategic_implications": strategic_implications,
-            "blindspot_analysis": blindspot_analysis,
-            "key_insights": key_insights,
-            "data_sources": [{"url": s} for s in source_texts[:5]],
-        }
+        key_insights = [
+            f"Capability Overlap: {capability_matrix.matching_capabilities}/8 Eneve capabilities",
+            f"AI Readiness: {ai_assessment['score']}/10 ({ai_assessment['signal_level']})",
+            "Direct Competition: "
+            + (
+                "Yes"
+                if capability_matrix.high_overlap_capabilities >= 5
+                else "Partial" if capability_matrix.high_overlap_capabilities >= 3 else "Limited"
+            ),
+        ]
 
+        company = Company(
+            id=company_name.lower().replace(" ", "_"),
+            name=company_name,
+            company_name=company_name,
+            description=description or "Energy software company",
+            website=basic.get("website"),
+            headquarters=basic.get("headquarters"),
+            founded_year=founded_year,
+            employees=employees,
+            source_links=[s for s in source_texts[:5] if isinstance(s, str)],
+        )
 
+        report = DeepAnalysisReport(
+            company=company,
+            capability_matrix=capability_matrix,
+            ai_assessment=ai_assessment,
+        )
+        report.executive_assessment = executive_assessment
+        report.product_offering = product_offering
+        report.strategic_implications = strategic_implications
+        report.blindspot_analysis = blindspot_analysis
+        report.key_insights = key_insights
+
+        return report

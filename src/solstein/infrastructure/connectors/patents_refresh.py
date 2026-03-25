@@ -4,6 +4,7 @@ Uses USPTO PEDS, Google Patents, and DuckDuckGo to fetch patent data.
 Implements incremental refresh with patent count-based delta detection.
 """
 
+import asyncio
 from datetime import datetime
 from typing import Any
 
@@ -55,7 +56,7 @@ class PatentsRefreshConnector(BaseRefreshConnector):
 
         for company_name in company_ids:
             try:
-                result = search_company_patents(company_name)
+                result = await asyncio.to_thread(search_company_patents, company_name)
 
                 # Calculate confidence based on data source
                 confidence = 0.7 if result.source == "uspto_peds" else 0.4

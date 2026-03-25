@@ -172,9 +172,42 @@ class CacheManager:
             logger.error(f"Cache ttl error: {e}")
             return -2
 
+    def get_sync(self, key: str) -> Any | None:
+        """Synchronous get from in-memory cache (no Redis I/O).
+
+        Args:
+            key: Cache key
+
+        Returns:
+            Cached value or None
+        """
+        if key in self._memory_cache:
+            value, _ = self._memory_cache[key]
+            return value
+        return None
+
+    def set_sync(self, key: str, value: Any, ttl: int = 3600) -> bool:
+        """Synchronous set into in-memory cache (no Redis I/O).
+
+        Args:
+            key: Cache key
+            value: Value to cache
+            ttl: Time-to-live (not enforced for in-memory fallback)
+
+        Returns:
+            True if successful
+        """
+        self._memory_cache[key] = (value, None)
+        return True
+
 
 # Global cache manager instance
 cache_manager = CacheManager()
+
+
+def get_cache() -> CacheManager:
+    """Return the global cache manager instance."""
+    return cache_manager
 
 
 def cached(

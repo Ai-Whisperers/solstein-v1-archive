@@ -29,8 +29,39 @@ from sqlalchemy import Column, Float, Index, String, Text, func, select, text
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import declarative_base
+from sqlalchemy.types import UserDefinedType
 
 Base = declarative_base()
+
+
+class PgVector(UserDefinedType):
+    """SQLAlchemy type for pgvector's vector column type."""
+
+    cache_ok = True
+
+    def __init__(self, dimensions: int = 1536):
+        self.dimensions = dimensions
+
+    def get_col_spec(self) -> str:
+        return f"vector({self.dimensions})"
+
+    def bind_processor(self, dialect):
+        def process(value):
+            if value is None:
+                return None
+            if isinstance(value, list):
+                return str(value)
+            return value
+        return process
+
+    def result_processor(self, dialect, coltype):
+        def process(value):
+            if value is None:
+                return None
+            if isinstance(value, str):
+                return [float(x) for x in value.strip("[]").split(",")]
+            return value
+        return process
 
 
 class EmbeddingRecord(Base):
@@ -50,7 +81,7 @@ class EmbeddingRecord(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=func.uuid_generate_v4())
     entity_id = Column(String(100), index=True, nullable=False)
     entity_type = Column(String(50), index=True, default="company")
-    embedding = Column(ARRAY(Float), nullable=False)
+    embedding = Column(PgVector(1536), nullable=False)
     model = Column(String(100), index=True)
     text_preview = Column(Text)
 

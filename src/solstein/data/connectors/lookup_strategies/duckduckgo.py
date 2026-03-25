@@ -3,6 +3,7 @@
 EPIC-022: Extracted from IdentifierLookupService for modularity.
 """
 
+import asyncio
 import importlib
 import re
 from typing import Any, Optional
@@ -64,6 +65,10 @@ class DuckDuckGoStrategy(LookupStrategy):
         if not self.is_available:
             return {}
 
+        return await asyncio.to_thread(self._lookup_sync, company_name)
+
+    def _lookup_sync(self, company_name: str) -> dict[str, Any]:
+        """Sync implementation of DuckDuckGo lookup (run via to_thread)."""
         result: dict[str, Any] = {}
 
         # Lookup ticker

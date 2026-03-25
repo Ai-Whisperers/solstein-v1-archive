@@ -46,10 +46,27 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
 
     EXCLUDED_PATHS = {"/health", "/ready", "/docs", "/openapi.json", "/redoc", "/metrics"}
 
+    # Path prefixes that require authentication.
+    # Checked with a trailing-slash or exact-match guard so that e.g.
+    # "/companies-secret" does NOT match the "/companies" prefix.
+    PROTECTED_PREFIXES = ("/api", "/admin", "/companies", "/enrichment")
+
     def __init__(self, app, token_validator=None):
         """Initialize with optional token validator."""
         super().__init__(app)
         self.token_validator = token_validator
+
+    def _is_protected_path(self, path: str) -> bool:
+        """Check whether *path* falls under a protected prefix.
+
+        A prefix matches only when the path equals it exactly or continues
+        with a ``/`` separator, preventing ``/companies-secret`` from being
+        treated as ``/companies``.
+        """
+        for prefix in self.PROTECTED_PREFIXES:
+            if path == prefix or path.startswith(prefix + "/"):
+                return True
+        return False
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Validate authentication on protected endpoints."""
@@ -59,7 +76,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
 
         # For any other path, let it through to get a proper 404 from FastAPI
         # instead of blocking with 401
-        if not request.url.path.startswith(("/api", "/admin")):
+        if not self._is_protected_path(request.url.path):
             return await call_next(request)
 
         # Get authorization header

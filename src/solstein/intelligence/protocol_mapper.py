@@ -233,7 +233,6 @@ class ProtocolMapper:
         if not any(p.is_active for p in protocol_presences):
             # Don't fabricate protocol usage - be honest about lack of evidence
             pass
-            protocol_presences[0].is_active = True
 
         market = MarketPresence(
             country_code=country_code,

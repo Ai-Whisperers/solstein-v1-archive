@@ -46,13 +46,18 @@ def categorize_error(error_type: str, error: Exception | str) -> str:
     Returns:
         Error category string
     """
-    str(error).lower()
+    error_lower = str(error).lower()
 
+    # Use error message content to refine category when type is ambiguous
     if error_type.upper() == "API":
         return "API_ERROR"
     elif error_type.upper() == "DATA":
         return "DATA_ERROR"
     elif error_type.upper() == "VALIDATION":
+        return "VALIDATION_ERROR"
+    elif "timeout" in error_lower or "connection" in error_lower:
+        return "API_ERROR"
+    elif "validation" in error_lower or "invalid" in error_lower:
         return "VALIDATION_ERROR"
     else:
         return "UNKNOWN"

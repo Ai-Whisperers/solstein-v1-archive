@@ -68,8 +68,8 @@ class SECEdgarConnector(BaseConnector):
         }
 
 
-class OpenCorporatesConnector(BaseConnector):
-    """Connector for OpenCorporates company registry data (FREE tier)."""
+class OpenCorporatesConnectorLegacy(BaseConnector):
+    """Legacy OpenCorporates connector — use connectors.financial.opencorporates instead."""
 
     BASE_URL = "https://api.opencorporates.com/v0.4"
 

@@ -156,6 +156,7 @@ class GrowthMomentumScorer:
     ) -> float:
         """Score employee efficiency component."""
         if not financials.employees or not financials.revenue:
+            logger.warning("[EPIC-059] Employee/revenue data missing — skipping efficiency component")
             return score
 
         revenue_eur = financials.revenue * 1_000_000
@@ -189,6 +190,7 @@ class GrowthMomentumScorer:
     ) -> float:
         """Score funding momentum component."""
         if not financials.funding_raised:
+            logger.warning("[EPIC-059] Funding data missing — skipping funding momentum component")
             return score
 
         bonus = 0.0

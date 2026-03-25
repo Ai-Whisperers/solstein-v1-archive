@@ -53,9 +53,7 @@ class AsyncJSONEncoder:
         loop = asyncio.get_event_loop()
         json_str = await loop.run_in_executor(
             _json_executor,
-            json.dumps,
-            obj,
-            default=str,
+            lambda: json.dumps(obj, default=str),
         )
         return json_str.encode("utf-8")
 

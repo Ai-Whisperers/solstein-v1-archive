@@ -37,6 +37,23 @@ from solstein.infrastructure.connectors.yahoo_finance_refresh import (
 from .base import dead_letter_queue, get_db_manager, get_tracked_company_ids, store_facts
 
 
+def _run_in_dedicated_loop(coro):
+    """Run a coroutine in a short-lived event loop owned by this task."""
+    import asyncio
+
+    loop = asyncio.new_event_loop()
+    try:
+        asyncio.set_event_loop(loop)
+        return loop.run_until_complete(coro)
+    finally:
+        try:
+            loop.run_until_complete(loop.shutdown_asyncgens())
+        except Exception:
+            pass
+        asyncio.set_event_loop(None)
+        loop.close()
+
+
 def create_refresh_task(
     task_name: str,
     connector_class: type,
@@ -61,8 +78,6 @@ def create_refresh_task(
         logger.info(f"Starting {source_name} refresh task")
 
         try:
-            import asyncio
-
             async def _refresh():
                 db_manager = get_db_manager()
                 company_ids = await get_tracked_company_ids(db_manager)
@@ -84,7 +99,7 @@ def create_refresh_task(
                 logger.info(f"{source_name} refresh completed: {stored} facts stored")
                 return {"status": "completed", "source": source_name.lower().replace(" ", "_"), "facts_fetched": stored}
 
-            return asyncio.run(_refresh())
+            return _run_in_dedicated_loop(_refresh())
 
         except Exception as exc:
             logger.error(f"{source_name} refresh failed: {exc}")

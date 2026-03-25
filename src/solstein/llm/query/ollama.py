@@ -66,7 +66,14 @@ class OllamaQuerier:
             logger.error(f"Ollama request timed out for model {self.settings.ollama_model}")
             raise Exception("Ollama request timeout") from e
         except Exception as e:
-            logger.error(f"Ollama query failed: {e}")
+            logger.error(
+                f"[OllamaQuerier] query failed: {e}",
+                extra={
+                    "model": self.settings.ollama_model,
+                    "url": f"{self.settings.ollama_url}/api/chat",
+                    "error_type": type(e).__name__,
+                },
+            )
             raise
 
     def _parse_schema_response(self, content: str, schema: type[BaseModel]) -> BaseModel | None:

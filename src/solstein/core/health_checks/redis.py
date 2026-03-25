@@ -31,7 +31,9 @@ class RedisHealthCheck(HealthCheckStrategy):
 
             settings = Settings.load()
 
-            if not settings.redis_url:
+            # Settings may expose redis_url directly or via celery_broker_url
+            redis_url = getattr(settings, "redis_url", None) or settings.celery_broker_url
+            if not redis_url:
                 return HealthCheck(
                     name="redis",
                     status=HealthStatus.HEALTHY,
@@ -40,7 +42,7 @@ class RedisHealthCheck(HealthCheckStrategy):
                     details={"configured": False},
                 )
 
-            r = redis.from_url(settings.redis_url)
+            r = redis.from_url(redis_url)
             await r.ping()
             await r.close()
 
@@ -49,7 +51,7 @@ class RedisHealthCheck(HealthCheckStrategy):
                 status=HealthStatus.HEALTHY,
                 message="Redis connection successful",
                 duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                details={"configured": True, "url": settings.redis_url},
+                details={"configured": True, "url": redis_url},
             )
         except Exception as e:
             # Redis is optional, so degraded status

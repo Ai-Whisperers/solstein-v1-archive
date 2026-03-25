@@ -116,7 +116,10 @@ class EnhancedLLMClient:
                 return attempts[-1].get("result")
 
         logger.error(f"All LLM providers failed after {len(attempts)} attempts")
-        raise RuntimeError(f"All LLM providers exhausted ({len(attempts)} attempts); no response generated")
+        raise LLMGenerationError(
+            f"All LLM providers exhausted ({len(attempts)} attempts); no response generated",
+            attempts=attempts,
+        )
 
     def _get_provider_order(self, preferred: str | None) -> list[str]:
         """Determine provider order based on preference."""

@@ -75,7 +75,6 @@ class StructuredLLMClient:
         prompt: str,
         schema: type[T],
         context: str = "",
-        temperature: float = 0.1,
     ) -> T:
         """Extract a Pydantic model from an LLM response.
 
@@ -83,7 +82,6 @@ class StructuredLLMClient:
             prompt: The user-facing instruction.
             schema: Pydantic model class that defines the expected JSON shape.
             context: Optional background text injected into the system prompt.
-            temperature: Sampling temperature (low values = more deterministic).
 
         Returns:
             A validated *schema* instance.

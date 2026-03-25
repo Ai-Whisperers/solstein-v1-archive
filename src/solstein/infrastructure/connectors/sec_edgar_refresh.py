@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
+from sqlalchemy import text
 
 from solstein.data.connectors.sec_edgar_connector import SECEdgarConnector as SECConnector
 from solstein.infrastructure.database import DatabaseManager
@@ -30,8 +31,9 @@ class SECEDGARRefreshConnector(BaseRefreshConnector):
         logger.info(f"Fetching SEC EDGAR facts for {len(company_ids)} companies")
         facts = []
 
-        if end_date is None or start_date is None:
+        if end_date is None:
             end_date = datetime.now(timezone.utc)
+        if start_date is None:
             start_date = end_date.replace(year=end_date.year - 3)
 
         for company_id in company_ids:
@@ -131,15 +133,15 @@ class SECEDGARRefreshConnector(BaseRefreshConnector):
     async def _fact_exists(self, company_id: str, fact_type: str) -> bool:
         """Check if a financial fact already exists for company_id."""
         # For SEC EDGAR, we check by company_id and fact_type
-        async with self.db_manager.session() as session:
+        async with self.db_manager.get_session() as session:
             result = await session.execute(
-                """
-                SELECT COUNT(*) 
-                FROM facts 
-                WHERE company_id = :cid 
-                AND fact_type = :ft 
+                text("""
+                SELECT COUNT(*)
+                FROM facts
+                WHERE company_id = :cid
+                AND fact_type = :ft
                 AND source = 'sec_edgar'
-                """,
+                """),
                 {"cid": company_id, "ft": fact_type},
             )
             return result.fetchone()[0] > 0

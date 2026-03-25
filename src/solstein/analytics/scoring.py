@@ -161,7 +161,7 @@ class GrowthScorer:
         try:
             growth_score, growth_expl = self.growth_momentum_scorer.score(profile.financials)
         except Exception as exc:
-            logger.warning(f"[EPIC-059] Growth scoring degraded for {profile.name}: {exc}")
+            logger.error(f"[EPIC-059] Growth scoring degraded for {profile.name}: {exc}")
             growth_score = growth_base
             growth_expl = ScoringExplanation(base_score=growth_base, final_score=growth_base)
             profile.scoring_breakdown["growth_degraded"] = str(exc)
@@ -169,7 +169,7 @@ class GrowthScorer:
         try:
             financial_health_score, fin_expl = self.financial_health_scorer.score(profile.financials)
         except Exception as exc:
-            logger.warning(f"[EPIC-059] Financial scoring degraded for {profile.name}: {exc}")
+            logger.error(f"[EPIC-059] Financial scoring degraded for {profile.name}: {exc}")
             financial_health_score = financial_base
             fin_expl = ScoringExplanation(base_score=financial_base, final_score=financial_base)
             profile.scoring_breakdown["financial_degraded"] = str(exc)
@@ -177,7 +177,7 @@ class GrowthScorer:
         try:
             competitive_position_score, comp_expl = self.competitive_position_scorer.score(profile)
         except Exception as exc:
-            logger.warning(f"[EPIC-059] Competitive scoring degraded for {profile.name}: {exc}")
+            logger.error(f"[EPIC-059] Competitive scoring degraded for {profile.name}: {exc}")
             competitive_position_score = competitive_base
             comp_expl = ScoringExplanation(base_score=competitive_base, final_score=competitive_base)
             profile.scoring_breakdown["competitive_degraded"] = str(exc)

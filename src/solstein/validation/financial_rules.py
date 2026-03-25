@@ -7,7 +7,7 @@ FINANCIAL_VALIDATION_RULES = {
     "revenue": {
         "min": 0.0,
         "max": 1e15,
-        "growth_rate_max": 10.0,
+        "growth_rate_max": 1000.0,  # Percentage: 1000% YoY max
         "required_fields": ["amount", "currency", "date"],
     },
     "valuation": {

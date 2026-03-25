@@ -1,5 +1,6 @@
 """Yahoo Finance connector for stock data."""
 
+import asyncio
 import logging
 from datetime import datetime, timezone
 from typing import Any, Optional
@@ -25,8 +26,11 @@ class YahooFinanceConnector(BaseConnector):
         try:
             import yfinance as yf
 
-            ticker = yf.Ticker("AAPL")
-            info = ticker.info
+            def _probe() -> dict:
+                ticker = yf.Ticker("AAPL")
+                return ticker.info
+
+            info = await asyncio.to_thread(_probe)
             return "symbol" in info
         except Exception as e:
             logger.error(f"Failed to connect to Yahoo Finance: {e}")
@@ -36,8 +40,11 @@ class YahooFinanceConnector(BaseConnector):
         try:
             import yfinance as yf
 
-            ticker = yf.Ticker(query)
-            info = ticker.info
+            def _fetch(symbol: str) -> dict:
+                ticker = yf.Ticker(symbol)
+                return ticker.info
+
+            info = await asyncio.to_thread(_fetch, query)
 
             if not info or "symbol" not in info:
                 return ConnectorResult(success=True, data=[], total_found=0)

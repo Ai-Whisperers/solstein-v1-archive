@@ -185,7 +185,9 @@ class ErrorSampler:
         # Log first error, then sample
         if self.error_count == 1:
             return True
-        return (self.error_count % int(1 / self.sample_rate)) == 0
+        if self.sample_rate <= 0:
+            return False
+        return (self.error_count % max(1, int(1 / self.sample_rate))) == 0
 
 
 class ErrorCorrelationTracker:

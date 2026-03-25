@@ -91,7 +91,7 @@ class TenantCompanyService:
         """
         company = await self.get_company(company_id)
         if company:
-            await self.session.delete(company)
+            self.session.delete(company)
             logger.info(f"Deleted company {company_id} for tenant {self.tenant_id[:8]}...")
             return True
         return False

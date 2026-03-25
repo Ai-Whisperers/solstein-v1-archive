@@ -21,70 +21,6 @@ from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig
 logger = logging.getLogger(__name__)
 
 
-class SECEdgarConnector(BaseConnector):
-    """Connector for SEC EDGAR filings."""
-
-    BASE_URL = "https://www.sec.gov/Archives/edgar"
-
-    def __init__(self, config: Optional[SourceConfig] = None):
-        if config is None:
-            config = SourceConfig(
-                name="sec_edgar",
-                base_url=self.BASE_URL,
-                rate_limit=10,  # SEC requires max 10 requests/second
-            )
-        super().__init__(config)
-        self._headers = {"User-Agent": "Solstein Research solstein@example.com"}
-
-    async def connect(self) -> bool:
-        """Test connection to SEC EDGAR."""
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self.config.base_url}/daily-index/form-idx", headers=self._headers
-                ) as response:
-                    return response.status == 200
-        except Exception as e:
-            logger.error(f"Failed to connect to SEC EDGAR: {e}")
-            return False
-
-    async def search(self, query: str, **kwargs) -> ConnectorResult:
-        """Search for company filings by CIK or ticker."""
-        # Implementation would use edgartools or direct API
-        # For now, return mock structure
-        logger.info(f"Searching SEC EDGAR for: {query}")
-
-        # TODO: Implement actual SEC search using edgartools
-        return ConnectorResult(
-            success=True,
-            data=[],
-            total_found=0,
-        )
-
-    async def get_by_id(self, entity_id: str) -> ConnectorResult:
-        """Get filings by CIK."""
-        logger.info(f"Getting SEC filings for CIK: {entity_id}")
-
-        # TODO: Implement actual retrieval
-        return ConnectorResult(
-            success=True,
-            data=[],
-            total_found=0,
-        )
-
-    def normalize(self, raw_data: RawData) -> dict[str, Any]:
-        """Normalize SEC filing to common format."""
-        return {
-            "source": "sec_edgar",
-            "entity_type": "filing",
-            "filing_type": raw_data.metadata.get("form_type"),
-            "filing_date": raw_data.metadata.get("filing_date"),
-            "company_name": raw_data.metadata.get("company_name"),
-            "cik": raw_data.metadata.get("cik"),
-            "raw_content": raw_data.raw_content,
-        }
-
-
 class YahooFinanceConnector(BaseConnector):
     """Connector for Yahoo Finance data (via yfinance)."""
 
@@ -102,9 +38,11 @@ class YahooFinanceConnector(BaseConnector):
         try:
             import yfinance as yf
 
-            # Test with a well-known ticker
-            ticker = yf.Ticker("AAPL")
-            info = ticker.info
+            def _probe() -> dict:
+                ticker = yf.Ticker("AAPL")
+                return ticker.info
+
+            info = await asyncio.to_thread(_probe)
             return "symbol" in info
         except Exception as e:
             logger.error(f"Failed to connect to Yahoo Finance: {e}")
@@ -117,8 +55,11 @@ class YahooFinanceConnector(BaseConnector):
         try:
             import yfinance as yf
 
-            ticker = yf.Ticker(query)
-            info = ticker.info
+            def _fetch(symbol: str) -> dict:
+                ticker = yf.Ticker(symbol)
+                return ticker.info
+
+            info = await asyncio.to_thread(_fetch, query)
 
             if not info or "symbol" not in info:
                 return ConnectorResult(

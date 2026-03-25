@@ -100,7 +100,7 @@ def analyze_company_gaps(company: Any, min_confidence: float = 0.5) -> dict[str,
                     field=field_name,
                     status=GapStatus.MISSING,
                     confidence=confidence,
-                    reason="field is null or zero (zero allowed only for growth_rate/profit_margin)",
+                    reason=f"field is null or zero (zero allowed for: {', '.join(sorted(ZERO_ALLOWED_FIELDS))})",
                 ).__dict__
             )
             continue

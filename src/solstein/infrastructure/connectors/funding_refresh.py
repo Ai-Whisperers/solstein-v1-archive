@@ -4,6 +4,7 @@ Uses Crunchbase API or news-based detection to fetch funding data.
 Implements incremental refresh with funding round detection.
 """
 
+import asyncio
 from datetime import datetime
 from typing import Any
 
@@ -61,7 +62,8 @@ class FundingRefreshConnector(BaseRefreshConnector):
 
         for company_name in company_ids:
             try:
-                funding = self.client.get_funding_data(company_name)
+                funding = await self.client.get_funding_data(company_name)
+                total_raised = funding.total_raised or 0
 
                 # Calculate confidence based on data source
                 confidence = 0.7 if self.crunchbase_key else 0.3
@@ -74,9 +76,7 @@ class FundingRefreshConnector(BaseRefreshConnector):
                         "value": {
                             "total_raised": funding.total_raised,
                             "num_rounds": funding.num_rounds,
-                            "average_round_size": (
-                                funding.total_raised / funding.num_rounds if funding.num_rounds > 0 else 0
-                            ),
+                            "average_round_size": (total_raised / funding.num_rounds if funding.num_rounds > 0 else 0),
                         },
                         "confidence": confidence,
                         "extracted_at": datetime.now(),
@@ -91,14 +91,17 @@ class FundingRefreshConnector(BaseRefreshConnector):
 
                 # Add individual round facts if available
                 if hasattr(funding, "latest_round") and funding.latest_round:
+                    lr = funding.latest_round
+                    # Handle both dict and dataclass/object
+                    lr_get = lr.get if isinstance(lr, dict) else lambda k, d=None: getattr(lr, k, d)
                     facts.append(
                         {
                             "company_id": company_name,
                             "fact_type": "latest_funding_round",
                             "value": {
-                                "round_type": funding.latest_round.get("type", "unknown"),
-                                "amount": funding.latest_round.get("amount"),
-                                "date": funding.latest_round.get("date"),
+                                "round_type": lr_get("type", "unknown"),
+                                "amount": lr_get("amount"),
+                                "date": lr_get("date"),
                             },
                             "confidence": confidence,
                             "extracted_at": datetime.now(),

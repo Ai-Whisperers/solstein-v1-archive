@@ -202,14 +202,15 @@ class SECEdgarConnector:
         return min(sleep_s, self.DEFAULT_MAX_SLEEP_S)
 
     def _select_filing_for_year(self, filings: Iterable[FilingProtocol], year: int) -> FilingProtocol | None:
+        filings_list = list(filings)
         candidates: list[FilingProtocol] = []
-        for filing in list(filings):
+        for filing in filings_list:
             report_date = filing.report_date
             if report_date is not None and report_date.year == year:
                 candidates.append(filing)
 
         if not candidates:
-            for filing in list(filings):
+            for filing in filings_list:
                 filing_date = filing.filing_date
                 if filing_date is not None and filing_date.year == year:
                     candidates.append(filing)

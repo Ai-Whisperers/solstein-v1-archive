@@ -23,9 +23,15 @@ class QueryLogger:
         self.query_stats: dict[str, dict[str, Any]] = {}
 
     def attach_to_engine(self, engine: Engine) -> None:
-        """Attach event listeners to engine."""
-        event.listen(engine, "before_cursor_execute", self._before_execute)
-        event.listen(engine, "after_cursor_execute", self._after_execute)
+        """Attach event listeners to engine.
+
+        For AsyncEngine, attaches to the underlying sync engine
+        since DBAPI cursor events are only fired on the sync side.
+        """
+        # AsyncEngine wraps a sync Engine; DBAPI events fire on the sync engine
+        target = engine.sync_engine if hasattr(engine, "sync_engine") else engine
+        event.listen(target, "before_cursor_execute", self._before_execute)
+        event.listen(target, "after_cursor_execute", self._after_execute)
 
     def _before_execute(
         self,

@@ -46,7 +46,7 @@ class CompanyRepository(EvidenceGraphRepository):
         query = """
         MATCH (c:Company {id: $entity_id})
         OPTIONAL MATCH (c)-[:HAS_CLAIM]->(claim:Claim)
-        OPTIONAL MATCH (claim)-[:CONTRADICTS]-(contradiction:Contradiction)
+        OPTIONAL MATCH (claim)<-[:INVOLVES]-(contradiction:Contradiction)
         RETURN {
             company_id: c.id,
             company_name: c.name,

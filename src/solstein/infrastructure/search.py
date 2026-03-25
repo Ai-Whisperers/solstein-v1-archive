@@ -100,11 +100,13 @@ class CompanySearchService:
         tsquery = func.plainto_tsquery(_TS_CONFIG, query)
         tsvector = func.to_tsvector(
             _TS_CONFIG,
-            func.coalesce(CompanyRecord.name, "")
-            + " "
-            + func.coalesce(CompanyRecord.description, "")
-            + " "
-            + func.coalesce(CompanyRecord.industry, ""),
+            func.concat(
+                func.coalesce(CompanyRecord.name, ""),
+                " ",
+                func.coalesce(CompanyRecord.description, ""),
+                " ",
+                func.coalesce(CompanyRecord.industry, ""),
+            ),
         )
         rank = func.ts_rank(tsvector, tsquery).label("rank")
         stmt = (
@@ -121,11 +123,13 @@ class CompanySearchService:
         tsquery = _func.plainto_tsquery(_TS_CONFIG, query)
         tsvector = _func.to_tsvector(
             _TS_CONFIG,
-            _func.coalesce(CompanyRecord.name, "")
-            + " "
-            + _func.coalesce(CompanyRecord.description, "")
-            + " "
-            + _func.coalesce(CompanyRecord.industry, ""),
+            _func.concat(
+                _func.coalesce(CompanyRecord.name, ""),
+                " ",
+                _func.coalesce(CompanyRecord.description, ""),
+                " ",
+                _func.coalesce(CompanyRecord.industry, ""),
+            ),
         )
         return select(_func.count()).select_from(CompanyRecord).where(tsvector.op("@@")(tsquery))
 

@@ -54,19 +54,30 @@ class WebsiteRefreshConnector(BaseRefreshConnector):
         logger.info(f"Fetching website data for {len(company_ids)} companies")
         facts = []
 
-        for company_name in company_ids:
-            try:
-                # Note: This requires a website URL
-                # In practice, you'd need a mapping from company_id to website
-                # For now, we skip if no website is available
-                logger.debug(f"Skipping {company_name} - website URL required")
-                continue
+        # Look up website URLs from company records in the database
+        company_website_map: dict[str, str] = {}
+        try:
+            from sqlalchemy import select
+            from solstein.infrastructure.database_models import CompanyRecord
 
-            except Exception as e:
-                logger.warning(f"Failed to fetch website data for {company_name}: {e}")
-                continue
+            async with self.db_manager.get_session() as session:
+                result = await session.execute(
+                    select(CompanyRecord.company_id, CompanyRecord.website).where(
+                        CompanyRecord.company_id.in_(company_ids),
+                        CompanyRecord.website.isnot(None),
+                    )
+                )
+                for row in result.fetchall():
+                    if row[1]:
+                        company_website_map[row[0]] = row[1]
+        except Exception as e:
+            logger.warning(f"Failed to look up company websites from DB: {e}")
 
-        return facts
+        if not company_website_map:
+            logger.info("No website URLs found for requested companies, skipping website refresh")
+            return facts
+
+        return await self.fetch_facts_with_websites(company_website_map, start_date, end_date)
 
     async def fetch_facts_with_websites(
         self,
@@ -89,7 +100,7 @@ class WebsiteRefreshConnector(BaseRefreshConnector):
 
         for company_name, website in company_website_map.items():
             try:
-                info = self.client.scrape_company_website(company_name, website)
+                info = await self.client.scrape_company_website(company_name, website)
 
                 facts.append(
                     {

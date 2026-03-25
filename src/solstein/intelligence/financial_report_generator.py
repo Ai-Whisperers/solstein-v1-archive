@@ -294,7 +294,7 @@ financial growth potential. Confidence levels reflect data availability and cons
 **Data Sources**: Crunchbase, Companies House, LinkedIn, news signals, and company disclosures."""
 
 
-class BatchFinancialReportGenerator(FinancialGrowthReportGenerator):
+class BatchFinancialReportGenerator:
     """Generate financial reports for multiple companies."""
 
     def __init__(self):
@@ -396,15 +396,15 @@ class BatchFinancialReportGenerator(FinancialGrowthReportGenerator):
         narratives: dict[str, str],
     ) -> str:
         sections = [
-            self._generate_header(company_name),
+            self.generator._generate_header(company_name),
             narratives.get("investment_thesis", ""),
-            self._generate_growth_trajectory(financial_intelligence),
-            self._generate_funding_intelligence(financial_intelligence),
-            self._generate_growth_vectors(financial_intelligence),
-            self._generate_projection(financial_intelligence),
+            self.generator._generate_growth_trajectory(financial_intelligence),
+            self.generator._generate_funding_intelligence(financial_intelligence),
+            self.generator._generate_growth_vectors(financial_intelligence),
+            self.generator._generate_projection(financial_intelligence),
             narratives.get("strategic_recommendations", ""),
             narratives.get("competitive_context", ""),
-            self._generate_health_assessment(financial_intelligence),
-            self._generate_footer(),
+            self.generator._generate_health_assessment(financial_intelligence),
+            self.generator._generate_footer(),
         ]
         return "\n\n".join(sections)

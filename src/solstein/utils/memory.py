@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import gc
 import sys
-from collections.abc import Generator, Iterator
+from collections.abc import AsyncGenerator, Generator, Iterator
 from contextlib import contextmanager
 from typing import Any, TypeVar
 
@@ -73,7 +73,7 @@ class StreamingJSONResponse:
         self.data = data
         self.chunk_size = chunk_size
 
-    async def stream(self) -> Generator[str, None, None]:
+    async def stream(self) -> AsyncGenerator[str, None]:
         """Stream JSON data in chunks."""
         import json
 

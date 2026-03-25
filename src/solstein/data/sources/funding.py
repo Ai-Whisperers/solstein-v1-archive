@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+
 import requests
 from loguru import logger
 
@@ -24,9 +26,13 @@ class FundingSource:
         """
         if not self.api_key:
             # Try using public sources
-            return self._get_public_funding_data(company_name)
+            return await asyncio.to_thread(self._get_public_funding_data, company_name)
 
         # If API key provided, use Crunchbase API
+        return await asyncio.to_thread(self._fetch_crunchbase, company_name)
+
+    def _fetch_crunchbase(self, company_name: str) -> FundingData:
+        """Fetch funding data from Crunchbase API (sync, run via to_thread)."""
         url = f"https://api.crunchbase.com/v4/organizations/{company_name}"
         headers = {"Authorization": f"Bearer {self.api_key}"}
 

@@ -9,9 +9,11 @@ from __future__ import annotations
 import time
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
 
 from loguru import logger
+
+T = TypeVar("T")
 
 
 @dataclass
@@ -348,5 +350,3 @@ class LoaderPerformanceMonitor:
         logger.info("Loader performance summary", **summary)
 
 
-# Type variable for generic return type
-T = Any

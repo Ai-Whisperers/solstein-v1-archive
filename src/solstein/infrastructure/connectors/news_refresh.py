@@ -4,6 +4,7 @@ Uses NewsAPI or Google web search to fetch company news.
 Implements incremental refresh with date-based delta detection.
 """
 
+import asyncio
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -65,7 +66,11 @@ class NewsRefreshConnector(BaseRefreshConnector):
 
         for company_name in company_ids:
             try:
-                coverage = self.client.get_news(company_name, days_back=days_back)
+                coverage = await asyncio.to_thread(self.client.get_news, company_name, days_back)
+
+                if coverage is None:
+                    logger.debug(f"No news coverage for {company_name}")
+                    continue
 
                 # Calculate confidence based on data source
                 confidence = 0.6 if self.news_api_key else 0.4

@@ -128,7 +128,7 @@ class ProtocolReportGenerator:
         ]
 
 
-class BatchProtocolReportGenerator(ProtocolReportGenerator):
+class BatchProtocolReportGenerator:
     def __init__(self):
         self.generator = ProtocolReportGenerator()
 
@@ -182,13 +182,13 @@ class BatchProtocolReportGenerator(ProtocolReportGenerator):
             "## Market Presence Overview",
             "",
         ]
-        lines.extend(self._format_overview(protocol_map))
+        lines.extend(self.generator._format_overview(protocol_map))
         lines.append("")
-        lines.extend(self._format_markets(protocol_map))
+        lines.extend(self.generator._format_markets(protocol_map))
         lines.append("")
-        lines.extend(self._format_strategy(protocol_map))
+        lines.extend(self.generator._format_strategy(protocol_map))
         lines.append("")
         lines.append(narratives.get("expansion_analysis", ""))
         lines.append("")
-        lines.extend(self._format_footer())
+        lines.extend(self.generator._format_footer())
         return "\n".join(lines)

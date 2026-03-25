@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 
 import requests
@@ -25,6 +26,10 @@ class PatentSource:
         API Docs: https://search.patentsview.org/docs/
         Rate limit: 45 requests/minute
         """
+        return await asyncio.to_thread(self._get_patent_data_sync, company_name)
+
+    def _get_patent_data_sync(self, company_name: str) -> PatentData:
+        """Sync implementation of patent data fetching (run via to_thread)."""
         if not self.api_key:
             logger.warning("PatentsView API key not configured")
             return self._empty_patent_data(company_name)

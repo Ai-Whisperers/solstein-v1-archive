@@ -6,12 +6,14 @@ Provides database helpers and dead letter queue for failed jobs.
 
 from __future__ import annotations
 
+import uuid
 from datetime import datetime, timezone
 
 from loguru import logger
 from sqlalchemy import select
 
 from solstein.config import get_settings
+from solstein.domain.facts import Fact, GatheringBatch
 from solstein.infrastructure.database import DatabaseManager
 from solstein.infrastructure.database_models import CompanyRecord
 
@@ -32,19 +34,58 @@ async def get_tracked_company_ids(db_manager) -> list[str]:
 
 
 async def store_facts(db_manager, facts: list[dict], source: str) -> int:
-    """Store fetched facts in database.
+    """Store fetched facts in database using the Fact repository pattern.
+
+    Creates a GatheringBatch, then persists each fact as a proper Fact ORM
+    record in the ``facts`` table.  Also updates the legacy
+    ``CompanyRecord.raw_data`` blob so downstream code that reads from it
+    continues to work.
+
+    Args:
+        db_manager: Initialised DatabaseManager.
+        facts: List of fact dicts.  Each dict must contain at least
+            ``company_id``; ``fact_type``/``type`` and ``value`` are used
+            when present.
+        source: Name of the data source (e.g. ``"sec_edgar"``).
 
     Returns:
-        Number of facts stored
+        Number of facts successfully stored.
     """
+    if not facts:
+        return 0
+
     stored_count = 0
+    batch_id = str(uuid.uuid4())
+
     async with db_manager.get_session() as session:
-        for fact in facts:
+        # Determine the company_id for the batch (use first fact's company)
+        first_company_id = next(
+            (f.get("company_id") for f in facts if f.get("company_id")),
+            None,
+        )
+        if first_company_id is None:
+            logger.warning(f"[store_facts] No company_id found in any fact from {source}, nothing to store")
+            return 0
+
+        # Create a GatheringBatch to group these facts
+        batch = GatheringBatch(
+            batch_id=batch_id,
+            company_id=first_company_id,
+            status="in_progress",
+        )
+        session.add(batch)
+        await session.flush()  # ensure batch_id is available for FK
+
+        for fact_dict in facts:
             try:
-                company_id = fact.get("company_id")
+                company_id = fact_dict.get("company_id")
                 if not company_id:
                     continue
 
+                fact_type = fact_dict.get("fact_type") or fact_dict.get("type")
+                fact_value = fact_dict.get("value")
+
+                # Verify the company exists before writing
                 result = await session.execute(
                     select(CompanyRecord).where(CompanyRecord.company_id == company_id)
                 )
@@ -54,10 +95,27 @@ async def store_facts(db_manager, facts: list[dict], source: str) -> int:
                     logger.debug(f"[store_facts] No company record found for {company_id}, skipping fact from {source}")
                     continue
 
-                # Write source-specific fields into the record
-                fact_type = fact.get("fact_type") or fact.get("type")
-                fact_value = fact.get("value")
+                # --- Persist as a proper Fact record ---
+                if fact_type:
+                    numeric_value = None
+                    value_str = None
+                    if isinstance(fact_value, (int, float)):
+                        numeric_value = float(fact_value)
+                    elif fact_value is not None:
+                        value_str = str(fact_value)
 
+                    fact_record = Fact(
+                        company_id=company_id,
+                        batch_id=batch_id,
+                        fact_type=fact_type,
+                        value=numeric_value,
+                        value_str=value_str,
+                        confidence=float(fact_dict.get("confidence", 0.5)),
+                        extracted_at=datetime.now(timezone.utc),
+                    )
+                    session.add(fact_record)
+
+                # --- Also update legacy raw_data on CompanyRecord ---
                 if fact_type and fact_value is not None:
                     if not record.raw_data:
                         record.raw_data = {}
@@ -69,11 +127,14 @@ async def store_facts(db_manager, facts: list[dict], source: str) -> int:
                 stored_count += 1
 
             except Exception as e:
-                logger.warning(f"Failed to store fact from {source}: {e}")
+                logger.warning(f"[store_facts] Failed to store fact from {source} for company {fact_dict.get('company_id', '?')}: {e}")
                 continue
 
+        # Mark batch as completed (or failed if nothing stored)
+        batch.status = "completed" if stored_count > 0 else "failed"
         await session.commit()
 
+    logger.info(f"[store_facts] Stored {stored_count}/{len(facts)} facts from {source} in batch {batch_id}")
     return stored_count
 
 
@@ -83,7 +144,14 @@ async def store_facts(db_manager, facts: list[dict], source: str) -> int:
 
 
 class DeadLetterQueue:
-    """Track permanently failed jobs after max retries exceeded."""
+    """Track permanently failed jobs after max retries exceeded.
+
+    WARNING: This implementation stores failed jobs in-memory only.
+    All recorded failures are lost on process restart.  In production
+    this should be backed by persistent storage (e.g. a database table
+    or a durable message queue) so that permanently-failed jobs can be
+    reviewed and retried after a worker restart.
+    """
 
     def __init__(self):
         self.failed_jobs = []

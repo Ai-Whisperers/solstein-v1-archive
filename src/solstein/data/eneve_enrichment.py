@@ -151,14 +151,14 @@ class EnveEnrichmentService:
                 return False, f"Employees cannot be negative: {company.financials.employees}"
 
             if company.financials.growth_rate is not None and (
-                company.financials.growth_rate < -100 or company.financials.growth_rate > 1000
+                company.financials.growth_rate < -0.5 or company.financials.growth_rate > 2.0
             ):
-                return False, f"Growth rate out of reasonable range: {company.financials.growth_rate}%"
+                return False, f"Growth rate out of reasonable range: {company.financials.growth_rate * 100:.1f}% (must be between -50% and 200%)"
 
             if company.financials.profit_margin is not None and (
-                company.financials.profit_margin < -100 or company.financials.profit_margin > 100
+                company.financials.profit_margin < -1.0 or company.financials.profit_margin > 0.95
             ):
-                return False, f"Profit margin out of range: {company.financials.profit_margin}%"
+                return False, f"Profit margin out of range: {company.financials.profit_margin * 100:.1f}% (must be between -100% and 95%)"
 
         return True, None
 
@@ -187,8 +187,8 @@ class EnveEnrichmentService:
             if primary.financials.profit_margin is None and secondary.financials.profit_margin is not None:
                 primary.financials.profit_margin = secondary.financials.profit_margin
 
-            if primary.financials.funding is None and secondary.financials.funding is not None:
-                primary.financials.funding = secondary.financials.funding
+            if primary.financials.funding_raised is None and secondary.financials.funding_raised is not None:
+                primary.financials.funding_raised = secondary.financials.funding_raised
 
             if primary.financials.valuation is None and secondary.financials.valuation is not None:
                 primary.financials.valuation = secondary.financials.valuation

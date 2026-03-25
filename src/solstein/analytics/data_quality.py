@@ -88,8 +88,8 @@ class DataQualityCalculator:
         if isinstance(value, str) and value.strip() == "":
             return False
         if isinstance(value, (int, float)) and value == 0:
-            # Zero might be valid for some fields
-            return field in ["growth_rate", "profit_margin"]
+            # Zero is valid for most numeric financial fields (pre-revenue, zero growth, etc.)
+            return True
         return True
 
     def generate_market_report(self, companies: list[dict[str, Any]]) -> dict[str, Any]:

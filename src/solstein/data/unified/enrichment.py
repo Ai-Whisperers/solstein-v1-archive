@@ -107,7 +107,20 @@ def fill_identifiers_from_lookup(loader, company: UnifiedCompany) -> UnifiedComp
         if not hasattr(service, "resolve_identifiers_enveloped"):
             return company
 
-        response = asyncio.run(service.resolve_identifiers_enveloped(company.name, headquarters=company.headquarters))
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop and loop.is_running():
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                response = pool.submit(
+                    asyncio.run,
+                    service.resolve_identifiers_enveloped(company.name, headquarters=company.headquarters),
+                ).result()
+        else:
+            response = asyncio.run(service.resolve_identifiers_enveloped(company.name, headquarters=company.headquarters))
         company.metric_justifications["identifier_lookup_status"] = str(response.status)
         company.metric_justifications["identifier_lookup_attempts"] = str(response.metadata.get("attempts"))
 
@@ -191,9 +204,17 @@ def enrich_batch(loader, companies: list[UnifiedCompany], batch_size: int = 10) 
                 loader.metrics.record_enrichment(0, True)
 
             except (ValueError, RuntimeError, TypeError, AttributeError) as e:
-                logger.warning(f"Batch enrichment failed for {company.name}: {e}")
+                logger.warning(
+                    f"Batch enrichment failed for {company.name} (id={company.id}): {e}. "
+                    f"Returning original company data as fallback."
+                )
                 company._enrichment_failed = True  # flag for callers to detect failure
-                enriched_companies.append(company)  # Use original if enrichment fails
+                error_msg = f"[batch_enrichment] {e}"
+                if not hasattr(company, "enrichment_errors"):
+                    company.enrichment_errors = []
+                if error_msg not in company.enrichment_errors:
+                    company.enrichment_errors.append(error_msg)
+                enriched_companies.append(company)
                 loader.metrics.record_enrichment(0, False)
 
         batch_duration = (time.time() - batch_start) * 1000  # Convert to ms
@@ -370,7 +391,20 @@ def attach_news_signals(loader, company: UnifiedCompany) -> UnifiedCompany:
             logger.debug(f"[CONNECTOR-NEWS-SKIP] Enveloped detector method unavailable for {company.name}")
             return company
 
-        response = asyncio.run(detector.detect_signals_enveloped(company.name))
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop and loop.is_running():
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                response = pool.submit(
+                    asyncio.run,
+                    detector.detect_signals_enveloped(company.name),
+                ).result()
+        else:
+            response = asyncio.run(detector.detect_signals_enveloped(company.name))
         company.metric_justifications["news_signal_status"] = str(response.status)
         company.metric_justifications["news_signal_attempts"] = str(response.metadata.get("attempts"))
 

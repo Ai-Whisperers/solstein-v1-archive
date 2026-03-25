@@ -165,7 +165,7 @@ class GenealogyReportGenerator:
         ]
 
 
-class BatchGenealogyReportGenerator(GenealogyReportGenerator):
+class BatchGenealogyReportGenerator:
     def __init__(self):
         self.generator = GenealogyReportGenerator()
 
@@ -219,15 +219,15 @@ class BatchGenealogyReportGenerator(GenealogyReportGenerator):
             "## Ownership Structure",
             "",
         ]
-        lines.extend(self._format_ownership(genealogy))
+        lines.extend(self.generator._format_ownership(genealogy))
         lines.append("")
-        lines.extend(self._format_transactions(genealogy))
+        lines.extend(self.generator._format_transactions(genealogy))
         lines.append("")
         lines.append(narratives.get("ma_narrative", ""))
         lines.append("")
-        lines.extend(self._format_subsidiaries(genealogy))
+        lines.extend(self.generator._format_subsidiaries(genealogy))
         lines.append("")
-        lines.extend(self._format_strategic_analysis(genealogy))
+        lines.extend(self.generator._format_strategic_analysis(genealogy))
         lines.append("")
-        lines.extend(self._format_footer())
+        lines.extend(self.generator._format_footer())
         return "\n".join(lines)

@@ -3,6 +3,7 @@
 EPIC-022: Extracted from IdentifierLookupService for modularity.
 """
 
+import asyncio
 import os
 from typing import Any
 
@@ -38,6 +39,10 @@ class OpenCorporatesStrategy(LookupStrategy):
         if not self.is_available:
             return {}
 
+        return await asyncio.to_thread(self._lookup_sync, company_name)
+
+    def _lookup_sync(self, company_name: str) -> dict[str, Any]:
+        """Sync implementation of OpenCorporates lookup (run via to_thread)."""
         params = {
             "q": company_name,
             "api_token": self._api_key,

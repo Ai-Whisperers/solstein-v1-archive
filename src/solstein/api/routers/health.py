@@ -30,11 +30,11 @@ async def health_check() -> dict:
     overall_status = health_monitor.get_overall_status()
 
     response = {
-        "status": overall_status.value,
+        "status": overall_status,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
-    if overall_status.value == "unhealthy":
+    if overall_status == "unhealthy":
         raise APIError(
             code="SERVICE_UNAVAILABLE",
             message="Service is unhealthy",

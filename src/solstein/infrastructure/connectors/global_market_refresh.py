@@ -4,6 +4,7 @@ Uses GlobalMarketLoader with currency normalization to USD.
 Implements incremental refresh for global stock data.
 """
 
+import asyncio
 from datetime import datetime
 from typing import Any
 
@@ -57,11 +58,12 @@ class GlobalMarketRefreshConnector(BaseRefreshConnector):
 
         for ticker in company_ids:
             try:
-                stock_data = self.loader.get_stock_data(ticker)
+                stock_data = await asyncio.to_thread(self.loader.get_stock_data, ticker)
 
                 if stock_data is None:
                     logger.warning(f"No market data available for ticker {ticker}")
                     continue
+                source_currency = stock_data.source_currency.value if stock_data.source_currency else None
 
                 facts.append(
                     {
@@ -79,7 +81,7 @@ class GlobalMarketRefreshConnector(BaseRefreshConnector):
                         "metadata": {
                             "ticker": stock_data.ticker,
                             "exchange": stock_data.exchange,
-                            "source_currency": stock_data.source_currency.value,
+                            "source_currency": source_currency,
                             "price_date": str(stock_data.price_date),
                         },
                     }
@@ -91,8 +93,8 @@ class GlobalMarketRefreshConnector(BaseRefreshConnector):
                         "company_id": ticker,
                         "fact_type": "currency_info",
                         "value": {
-                            "source_currency": stock_data.source_currency.value,
-                            "normalized_to_usd": True,
+                            "source_currency": source_currency,
+                            "normalized_to_usd": source_currency != "USD",
                         },
                         "confidence": self.confidence,
                         "extracted_at": datetime.now(),

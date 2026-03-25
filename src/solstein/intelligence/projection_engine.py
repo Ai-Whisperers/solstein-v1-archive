@@ -246,20 +246,20 @@ class FinancialProjectionEngine:
         Returns:
             Simplified projection
         """
-        rate = (growth_rate / 100) if growth_rate else self.default_growth_rate
+        rate = (growth_rate / 100) if growth_rate is not None else self.default_growth_rate
 
         base_revenue = current_revenue * (1 + rate)
         optimistic = current_revenue * (1 + rate * 1.3)
         pessimistic = current_revenue * (1 + rate * 0.6)
 
-        conf = confidence or (ConfidenceLevel.HIGH if growth_rate else ConfidenceLevel.LOW)
+        conf = confidence or (ConfidenceLevel.HIGH if growth_rate is not None else ConfidenceLevel.LOW)
 
         return ProjectionResult(
             projected_revenue_12mo=round(base_revenue, 1),
             confidence=conf,
             rationale=(
                 f"Quick projection based on {rate:.1%} growth rate. "
-                f"{'Historical data available.' if growth_rate else 'Limited data - rough estimate.'}"
+                f"{'Historical data available.' if growth_rate is not None else 'Limited data - rough estimate.'}"
             ),
             scenarios={
                 "optimistic": round(optimistic, 1),

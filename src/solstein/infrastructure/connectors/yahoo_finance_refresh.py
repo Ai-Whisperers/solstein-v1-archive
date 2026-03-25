@@ -4,6 +4,7 @@ Uses yfinance to fetch real-time market data and financial metrics.
 Implements incremental refresh with ticker-based delta detection.
 """
 
+import asyncio
 from datetime import datetime
 from typing import Any
 
@@ -56,7 +57,7 @@ class YahooFinanceRefreshConnector(BaseRefreshConnector):
 
         for ticker in company_ids:
             try:
-                profile = self.researcher.research(ticker)
+                profile = await asyncio.to_thread(self.researcher.research, ticker)
 
                 # Create facts for different metric categories
                 facts.extend(self._convert_profile_to_facts(ticker, profile))
@@ -71,16 +72,19 @@ class YahooFinanceRefreshConnector(BaseRefreshConnector):
         """Convert CompanyProfile to list of fact dictionaries."""
         facts = []
         timestamp = datetime.now()
+        financials = getattr(profile, "financials", None)
+        technology = getattr(profile, "technology", None)
+        growth = getattr(profile, "growth", None)
 
         # Market data fact
         market_data = {
             "market_cap": profile.market_cap,
-            "enterprise_value": profile.enterprise_value,
+            "enterprise_value": getattr(profile, "enterprise_value", None),
             "pe_ratio": profile.pe_ratio,
-            "forward_pe": profile.forward_pe,
-            "peg_ratio": profile.peg_ratio,
-            "price_to_book": profile.price_to_book,
-            "price_to_sales": profile.price_to_sales,
+            "forward_pe": getattr(profile, "forward_pe", None),
+            "peg_ratio": getattr(profile, "peg_ratio", None),
+            "price_to_book": getattr(profile, "price_to_book", None),
+            "price_to_sales": getattr(profile, "price_to_sales", None),
         }
 
         facts.append(
@@ -101,13 +105,13 @@ class YahooFinanceRefreshConnector(BaseRefreshConnector):
 
         # Financial performance fact
         financial_data = {
-            "revenue": profile.revenue,
-            "revenue_growth": profile.revenue_growth,
-            "profit_margin": profile.profit_margin,
-            "operating_margin": profile.operating_margin,
-            "ebitda": profile.ebitda,
-            "net_income": profile.net_income,
-            "eps": profile.eps,
+            "revenue": getattr(financials, "revenue", None),
+            "revenue_growth": getattr(financials, "revenue_growth_yoy", None),
+            "profit_margin": getattr(financials, "profit_margin", None),
+            "operating_margin": getattr(profile, "operating_margin", None),
+            "ebitda": getattr(financials, "ebitda", None),
+            "net_income": getattr(financials, "net_income", None),
+            "eps": getattr(profile, "eps", None),
         }
 
         facts.append(
@@ -120,17 +124,17 @@ class YahooFinanceRefreshConnector(BaseRefreshConnector):
                 "source": self.source_name,
                 "metadata": {
                     "ticker": ticker,
-                    "fiscal_year": profile.fiscal_year,
+                    "fiscal_year": getattr(profile, "fiscal_year", None),
                 },
             }
         )
 
         # Growth metrics fact
         growth_data = {
-            "earnings_growth": profile.earnings_growth,
-            "revenue_growth": profile.revenue_growth,
-            "earnings_quarterly_growth": profile.earnings_quarterly_growth,
-            "revenue_quarterly_growth": profile.revenue_quarterly_growth,
+            "employee_growth": getattr(growth, "employee_growth", None),
+            "job_postings_growth": getattr(growth, "job_postings_growth", None),
+            "ai_related_jobs": getattr(growth, "ai_related_jobs", None),
+            "revenue_growth": getattr(financials, "revenue_growth_yoy", None),
         }
 
         facts.append(
@@ -148,11 +152,12 @@ class YahooFinanceRefreshConnector(BaseRefreshConnector):
         # Company profile fact
         profile_data = {
             "name": profile.name,
-            "industry": profile.industry,
-            "sector": profile.sector,
+            "industry": getattr(technology, "industry", None),
+            "sector": getattr(technology, "sector", None),
             "employees": profile.employees,
             "website": str(profile.website) if profile.website else None,
-            "country": profile.country,
+            "country": None,
+            "headquarters": getattr(profile, "headquarters", None),
         }
 
         facts.append(

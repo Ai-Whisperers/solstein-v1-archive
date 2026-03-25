@@ -71,16 +71,25 @@ class LLMReportEnhancer:
         }
 
     def is_available(self) -> bool:
-        """Check if any LLM backend is available."""
-        import asyncio
+        """Check if any LLM backend is available.
 
-        try:
-            health = asyncio.get_event_loop().run_until_complete(self._client.check_all_providers())
-            providers = health.get("providers", {})
-            return any(p.get("available") for p in providers.values())
-        except Exception:
-            # Fallback to settings check (also handles RuntimeError in running event loops)
-            return bool(self.settings.openai_api_key or self.settings.groq_api_key or self.settings.fireworks_api_key)
+        Avoids calling asyncio.get_event_loop().run_until_complete() which
+        crashes with RuntimeError when an event loop is already running
+        (e.g. inside FastAPI / any async framework).  Instead, perform a
+        cheap synchronous check against the configured API keys for all
+        providers that are actually in the priority rotation.
+        """
+        # Check all providers that are in the current priority list
+        key_checks = {
+            "deepinfra": self.settings.deepinfra_api_key,
+            "mistral": self.settings.mistral_api_key,
+            "nvidia": self.settings.nvidia_nim_api_key,
+            "openai": self.settings.openai_api_key,
+            "groq": self.settings.groq_api_key,
+            "fireworks": self.settings.fireworks_api_key,
+        }
+        active_providers = getattr(self._client, "PROVIDER_PRIORITY", list(key_checks.keys()))
+        return any(bool(key_checks.get(p)) for p in active_providers if p in key_checks)
 
     def _get_preferred_provider(self) -> str | None:
         """Get preferred provider from settings."""

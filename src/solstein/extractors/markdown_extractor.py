@@ -14,7 +14,6 @@ from loguru import logger
 from ..domain.models import (
     Company,
     CompanyTier,
-    FinancialMetric,
 )
 from .batch import BatchExtractor
 from .parsers import (
@@ -144,28 +143,7 @@ class MarkdownExtractor:
         revenue_confidence = self._converter.parse_confidence(confidence_levels.get("revenue"))
         growth_confidence = self._converter.parse_confidence(confidence_levels.get("growth_rate"))
 
-        # Create financial metrics
-        financial_metrics: dict[str, FinancialMetric] = {}
-
-        if revenue:
-            financial_metrics["revenue"] = FinancialMetric(
-                value=revenue,
-                unit="EUR",
-                confidence=revenue_confidence,
-                sources=extracted_data.get("metric_sources", {}).get("revenue", []),
-                justification=extracted_data.get("metric_justifications", {}).get("revenue"),
-            )
-
-        if growth_rate is not None:
-            financial_metrics["growth_rate"] = FinancialMetric(
-                value=growth_rate,
-                unit="percentage",
-                confidence=growth_confidence,
-                sources=extracted_data.get("metric_sources", {}).get("growth_rate", []),
-                justification=extracted_data.get("metric_justifications", {}).get("growth_rate"),
-            )
-
-        # Create company profile
+        # Create company profile using actual Company field names
         return Company(
             id=name.lower().replace(" ", "_"),
             name=name,
@@ -176,14 +154,13 @@ class MarkdownExtractor:
             tier=tier,
             threat_level=threat_level,
             ai_maturity=ai_maturity,
-            revenue_eur_m=revenue / 1_000_000 if revenue else None,
-            revenue_confidence=revenue_confidence,
-            growth_rate_pct=growth_rate * 100 if growth_rate else None,
-            growth_confidence=growth_confidence,
-            employee_count=int(employees) if employees else None,
-            profit_margin_pct=profit_margin * 100 if profit_margin else None,
-            data_sources=extracted_data.get("source_links", []),
-            financial_metrics=financial_metrics,
+            revenue=revenue,
+            growth_rate=growth_rate,
+            employees=int(employees) if employees else None,
+            profit_margin=profit_margin,
+            source_links=extracted_data.get("source_links", []),
+            metric_sources=extracted_data.get("metric_sources", {}),
+            metric_justifications=extracted_data.get("metric_justifications", {}),
         )
 
 
