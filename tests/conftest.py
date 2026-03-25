@@ -24,12 +24,17 @@ except ModuleNotFoundError as exc:
         ) from exc
     raise
 
-
-from solstein.api.dependencies import get_company_repository, get_current_tenant, get_current_user
-from solstein.api.main import app
 from solstein.config import get_settings
 from solstein.domain.models import AIMaturity
 from solstein.database_config import get_test_database_url, convert_to_async_url
+
+
+def _load_api_test_dependencies():
+    """Lazily import API app and dependency objects only for tests that need them."""
+    from solstein.api.dependencies import get_company_repository, get_current_tenant, get_current_user
+    from solstein.api.main import app
+
+    return app, get_company_repository, get_current_tenant, get_current_user
 
 
 @pytest.fixture
@@ -61,6 +66,7 @@ def mock_repo(mock_company):
 @pytest.fixture
 def client(mock_repo):
     """Provides an authenticated TestClient with dependency overrides."""
+    app, get_company_repository, get_current_tenant, get_current_user = _load_api_test_dependencies()
     settings = get_settings()
     previous_require_api_key = settings.api.require_api_key
     settings.api.require_api_key = False
@@ -93,6 +99,7 @@ def unauthenticated_client():
     receive an 'anonymous' user rather than a 401. This fixture exists
     to explicitly test this design behaviour.
     """
+    app, _, _, _ = _load_api_test_dependencies()
     with TestClient(app) as test_client:
         yield test_client
 

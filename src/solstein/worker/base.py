@@ -8,14 +8,36 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
+from typing import Any
 
 from loguru import logger
+from pydantic import BaseModel, Field, ValidationError, model_validator
 from sqlalchemy import select
 
 from solstein.config import get_settings
 from solstein.domain.facts import Fact, GatheringBatch
 from solstein.infrastructure.database import DatabaseManager
 from solstein.infrastructure.database_models import CompanyRecord
+
+
+class FactIngestionPayload(BaseModel):
+    """Validated boundary schema for fact ingestion into worker persistence."""
+
+    company_id: str = Field(min_length=1)
+    fact_type: str = Field(min_length=1)
+    value: Any = None
+    confidence: float = Field(default=0.5, ge=0.0, le=1.0)
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_fact_type_alias(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        if not data.get("fact_type") and data.get("type"):
+            normalized = dict(data)
+            normalized["fact_type"] = data["type"]
+            return normalized
+        return data
 
 
 def get_db_manager():
@@ -78,12 +100,15 @@ async def store_facts(db_manager, facts: list[dict], source: str) -> int:
 
         for fact_dict in facts:
             try:
-                company_id = fact_dict.get("company_id")
-                if not company_id:
+                try:
+                    payload = FactIngestionPayload.model_validate(fact_dict)
+                except ValidationError as e:
+                    logger.warning(f"[store_facts] Invalid fact payload from {source}: {e}")
                     continue
 
-                fact_type = fact_dict.get("fact_type") or fact_dict.get("type")
-                fact_value = fact_dict.get("value")
+                company_id = payload.company_id
+                fact_type = payload.fact_type
+                fact_value = payload.value
 
                 # Verify the company exists before writing
                 result = await session.execute(
@@ -110,7 +135,7 @@ async def store_facts(db_manager, facts: list[dict], source: str) -> int:
                         fact_type=fact_type,
                         value=numeric_value,
                         value_str=value_str,
-                        confidence=float(fact_dict.get("confidence", 0.5)),
+                        confidence=payload.confidence,
                         extracted_at=datetime.now(timezone.utc),
                     )
                     session.add(fact_record)

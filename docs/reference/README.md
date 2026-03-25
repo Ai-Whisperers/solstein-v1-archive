@@ -6,6 +6,8 @@ Stable reference material: glossary, schema, quick reference, and repo structure
 - `API_DOCUMENTATION.md`
 - `DATABASE_SCHEMA.md`
 - `GLOSSARY.md`
+- `PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`
 - `QUICK-REFERENCE.md`
 - `REPOSITORY_PATTERN.md`
+- `SCHEMA_INVENTORY_AND_VALIDATION_NOTES.md`
 - `STRUCTURE.md`

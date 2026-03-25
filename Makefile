@@ -1,11 +1,14 @@
 # Solstein Command Center
 
-.PHONY: install run dashboard test lint format docs-serve check-all mcp-check clean
+.PHONY: install run dashboard test lint format docs-serve check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical gate-critical
 
 # Variables
 PYTHON = python3
 VENV = .venv
 BIN = $(VENV)/bin
+TEST_DATABASE_URL ?= postgresql://test:test@localhost:5432/testdb
+TEST_SECRET_KEY ?= abcdefghijklmnopqrstuvwxyz123456
+TEST_GITHUB_TOKEN ?= test-github-token-12345
 
 # Default target
 all: install
@@ -169,6 +172,28 @@ dev-test:
 # Run fast tests only (no slow tests)
 test-fast:
 	$(BIN)/pytest -m "not slow" -x
+
+# Critical pipeline-node regression gates
+test-critical:
+	DATABASE__URL=$(TEST_DATABASE_URL) SECURITY__SECRET_KEY=$(TEST_SECRET_KEY) GITHUB_TOKEN=$(TEST_GITHUB_TOKEN) \
+	$(BIN)/pytest tests/unit/test_audit_regressions_march_2026.py tests/unit/test_worker_tasks_isolated.py -x
+
+test-contracts:
+	DATABASE__URL=$(TEST_DATABASE_URL) SECURITY__SECRET_KEY=$(TEST_SECRET_KEY) GITHUB_TOKEN=$(TEST_GITHUB_TOKEN) \
+	$(BIN)/pytest tests/unit/data/ -x
+
+test-golden:
+	DATABASE__URL=$(TEST_DATABASE_URL) SECURITY__SECRET_KEY=$(TEST_SECRET_KEY) GITHUB_TOKEN=$(TEST_GITHUB_TOKEN) \
+	$(BIN)/pytest tests/data_quality/ -x
+
+lint-critical:
+	$(BIN)/ruff check src/solstein/infrastructure/connectors src/solstein/adapters/enrichment src/solstein/data/unified src/solstein/worker tests
+
+type-critical:
+	$(BIN)/mypy src/solstein/infrastructure/connectors src/solstein/adapters/enrichment src/solstein/data/unified src/solstein/worker
+
+gate-critical: lint-critical type-critical test-critical test-contracts
+	@echo "Critical pipeline quality gates passed."
 
 # Reset development database
 dev-reset-db:
