@@ -8,6 +8,7 @@ Uses USPTO PEDS (primary), Google Patents, or DuckDuckGo (fallback).
 No API key required.
 """
 
+import asyncio
 from datetime import datetime, timezone
 from typing import Any
 
@@ -134,7 +135,7 @@ class PatentsUnifiedAdapter(BaseRefreshConnector):
 
         for company_name in company_ids:
             try:
-                result = search_company_patents(company_name)
+                result = await asyncio.to_thread(search_company_patents, company_name)
                 confidence = 0.8 if result.source == "uspto_peds" else 0.4
 
                 facts.append(

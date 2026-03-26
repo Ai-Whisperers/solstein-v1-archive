@@ -4,6 +4,7 @@ Uses Exa search to fetch general company information.
 Implements incremental refresh for discovery data.
 """
 
+import asyncio
 from datetime import datetime
 from typing import Any
 
@@ -64,7 +65,7 @@ class WebSearchRefreshConnector(BaseRefreshConnector):
             try:
                 from solstein.data.web_search_client import search_company_info
 
-                results = search_company_info(company_name, query_type="general")
+                results = await asyncio.to_thread(search_company_info, company_name, query_type="general")
 
                 if results:
                     facts.append(

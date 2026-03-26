@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from typing import Any
 
@@ -38,9 +39,11 @@ class NewsSignalRefreshConnector(BaseRefreshConnector):
 
                 try:
                     # Detect all signal types
-                    funding_signals = self.news_detector.detect_funding_signal(company_name)
-                    partnership_signals = self.news_detector.detect_partnership_signal(company_name)
-                    key_hire_signals = self.news_detector.detect_key_hire_signal(company_name)
+                    funding_signals, partnership_signals, key_hire_signals = await asyncio.gather(
+                        self.news_detector.detect_funding_signal(company_name),
+                        self.news_detector.detect_partnership_signal(company_name),
+                        self.news_detector.detect_key_hire_signal(company_name),
+                    )
 
                     # Convert all signals to facts
                     for signal in funding_signals + partnership_signals + key_hire_signals:

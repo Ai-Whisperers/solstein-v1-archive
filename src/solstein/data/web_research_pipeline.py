@@ -151,18 +151,22 @@ class WebResearcher:
         cache_path = self._get_cache_path(result.company_name)
         cache_path.write_text(json.dumps(result.__dict__, default=str, indent=2))
 
+    def _search_web_sync(self, query: str) -> list[dict[str, str]]:
+        """Run synchronous DuckDuckGo search off the event loop."""
+        from duckduckgo_search import DDGS
+
+        with DDGS() as ddgs:
+            results = list(ddgs.text(query, max_results=10))
+            return [
+                {"title": r.get("title", ""), "href": r.get("href", ""), "body": r.get("body", "")} for r in results
+            ]
+
     async def search_web(self, query: str) -> list[dict[str, str]]:
         """Search the web for information."""
         # Use Brave Search API or similar
         try:
-            # Try DuckDuckGo first (no API key needed)
-            from duckduckgo_search import DDGS
-
-            with DDGS() as ddgs:
-                results = list(ddgs.text(query, max_results=10))
-                return [
-                    {"title": r.get("title", ""), "href": r.get("href", ""), "body": r.get("body", "")} for r in results
-                ]
+            # DuckDuckGo search is synchronous; keep it off the event loop.
+            return await asyncio.to_thread(self._search_web_sync, query)
         except Exception as e:
             logger.warning(f"Web search failed: {e}")
             return []
