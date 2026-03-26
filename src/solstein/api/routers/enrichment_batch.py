@@ -56,7 +56,7 @@ async def enrich_batch(request_data: BatchEnrichmentRequest, request: Request) -
             results.append(
                 BatchEnrichmentResult(
                     company_id=enriched.id,
-                    status="failed" if failed else "success",
+                    status="failure" if failed else "success",
                     duration_ms=per_company_ms,
                     source="batch_enrichment",
                 )

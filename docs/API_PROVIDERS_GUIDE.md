@@ -2,6 +2,13 @@
 
 > **For Junior Developers** - Complete guide to obtaining and configuring all external API keys for the Solstein competitive intelligence platform.
 
+See also:
+
+- [External Integrations Index](./reference/external-integrations/README.md)
+- [External Integration Audit 2026-03-25](./reference/external-integrations/AUDIT_2026-03-25.md)
+
+This guide is primarily for setup and credential acquisition. Contract patterns, discoverability notes, MCP availability, and provider-specific caveats now live under `docs/reference/external-integrations/`.
+
 ---
 
 ## Table of Contents
