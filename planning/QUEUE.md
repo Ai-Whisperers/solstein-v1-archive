@@ -34,15 +34,15 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 1 | STORY-006 | Fix Duplicate Class Body Definitions in config.py | VERIFY | Reconciliation says partial, README says complete |
-| 2 | STORY-007 | Remove All Hardcoded Credentials | VERIFY | Check if defaults still exist |
-| 3 | STORY-008 | Mandatory Startup Validation for All API Keys | VERIFY | Check startup validation coverage |
+| 1 | STORY-006 | Fix Duplicate Class Body Definitions in config.py | DONE | Verified 2026-03-26: AST scan confirms no duplicate fields in any class |
+| 2 | STORY-007 | Remove All Hardcoded Credentials | DONE | Verified 2026-03-26: No postgres:postgres or change-me-in-production defaults found |
+| 3 | STORY-008 | Mandatory Startup Validation for All API Keys | DONE | Verified 2026-03-26: check_configuration() covers DB, JWT, GitHub, optional keys, LLM summary |
 
 ### EPIC-036: Configuration Consolidation (P2)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 4 | STORY-137 | Centralize All Environment Variables in config.py | READY | |
+| 4 | STORY-137 | Centralize All Environment Variables in config.py | DONE | PR #80 open |
 | 5 | STORY-138 | Replace Hardcoded Paths with Config-Driven Paths | READY | |
 | 6 | STORY-139 | Centralize Timeouts and Magic Numbers | READY | |
 | 7 | STORY-140 | Fix .env.example with All Required Variables | READY | |
