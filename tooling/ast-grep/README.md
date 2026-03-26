@@ -18,6 +18,7 @@ npm run ast-grep:test
 ## Current rules
 
 - `no-silent-score-fallback`: prevents `*_score or 0.0` masking in scoring code paths.
+- `no-batch-enrichment-fallback-company`: prevents batch enrichment from appending the original company directly on failure.
 
 ## Rule discipline
 

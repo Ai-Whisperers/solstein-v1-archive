@@ -1,0 +1,10 @@
+id: no-batch-enrichment-fallback-company
+snapshots:
+  ? |
+    except Exception as exc:
+        enriched_companies.append(company)
+  : labels:
+    - source: enriched_companies.append(company)
+      style: primary
+      start: 29
+      end: 63

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 # Import all public APIs from modularized loaders package
 from .unified import (
+    BatchEnrichmentOutcome,
     UnifiedCompany,
     UnifiedCompanyLoader,
     # Error tracking
@@ -41,6 +42,7 @@ unified_loader = UnifiedCompanyLoader()
 
 __all__ = [
     # Main classes
+    "BatchEnrichmentOutcome",
     "UnifiedCompany",
     "UnifiedCompanyLoader",
     # Error tracking

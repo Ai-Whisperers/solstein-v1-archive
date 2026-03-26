@@ -281,8 +281,16 @@ async def test_batch_enrichment_partial_status_uses_schema_valid_partial(monkeyp
         "unified_loader",
         SimpleNamespace(
             enrich_batch=lambda companies, batch_size: [
-                SimpleNamespace(id="acme", enrichment_errors=[]),
-                SimpleNamespace(id="beta", enrichment_errors=["timeout"]),
+                SimpleNamespace(
+                    company=SimpleNamespace(id="acme"),
+                    status="success",
+                    from_cache=False,
+                ),
+                SimpleNamespace(
+                    company=SimpleNamespace(id="beta"),
+                    status="failure",
+                    from_cache=False,
+                ),
             ]
         ),
     )

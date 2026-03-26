@@ -9,12 +9,14 @@ from __future__ import annotations
 import time
 import asyncio
 from datetime import datetime, timezone
+from typing import Mapping, Protocol
 
 from loguru import logger
 
 from solstein.domain.models import ConfidenceLevel
 from solstein.data.enrichment_orchestrator import EnrichmentConfig, EnrichmentOrchestrator, EnrichmentSource
 
+from .batch_outcomes import BatchEnrichmentOutcome, BatchEnrichmentStatus
 from .company import UnifiedCompany
 from .error_tracking import format_enrichment_error, build_error_context
 from .sec_edgar_helpers import (
@@ -37,6 +39,24 @@ def is_valid_number(val):
     if val == float("inf") or val == float("-inf"):
         return False
     return True
+
+
+class _EnrichmentCache(Protocol):
+    def get(self, key: str) -> dict[str, object] | None: ...
+    def set(self, key: str, value: dict[str, object]) -> None: ...
+
+
+class _EnrichmentMetrics(Protocol):
+    def record_enrichment(self, duration_ms: int, success: bool) -> None: ...
+    def get_summary(self) -> Mapping[str, float | int]: ...
+
+
+class BatchEnrichmentLoader(Protocol):
+    @property
+    def cache(self) -> _EnrichmentCache: ...
+
+    @property
+    def metrics(self) -> _EnrichmentMetrics: ...
 
 
 def enrich_from_connectors(loader, company: UnifiedCompany) -> UnifiedCompany:
@@ -161,7 +181,24 @@ def fill_identifiers_from_lookup(loader, company: UnifiedCompany) -> UnifiedComp
         return company
 
 
-def enrich_batch(loader, companies: list[UnifiedCompany], batch_size: int = 10) -> list[UnifiedCompany]:
+def _build_batch_outcome(
+    company: UnifiedCompany,
+    *,
+    status: BatchEnrichmentStatus,
+    errors: list[str] | None = None,
+    from_cache: bool = False,
+) -> BatchEnrichmentOutcome:
+    return BatchEnrichmentOutcome(
+        company=company,
+        status=status,
+        errors=errors or list(getattr(company, "enrichment_errors", [])),
+        from_cache=from_cache,
+    )
+
+
+def enrich_batch(
+    loader: BatchEnrichmentLoader, companies: list[UnifiedCompany], batch_size: int = 10
+) -> list[BatchEnrichmentOutcome]:
     """Batch enrich companies with caching and performance tracking (Phase B).
 
     Args:
@@ -170,9 +207,9 @@ def enrich_batch(loader, companies: list[UnifiedCompany], batch_size: int = 10) 
         batch_size: Number of companies to process per batch (default: 10)
 
     Returns:
-        List of enriched companies
+        List of explicit per-company enrichment outcomes
     """
-    enriched_companies = []
+    enriched_companies: list[BatchEnrichmentOutcome] = []
     total_batches = (len(companies) + batch_size - 1) // batch_size
 
     logger.info(f"✅ Starting batch enrichment: {len(companies)} companies in {total_batches} batches of {batch_size}")
@@ -190,31 +227,42 @@ def enrich_batch(loader, companies: list[UnifiedCompany], batch_size: int = 10) 
                 cached_result = loader.cache.get(cache_key)
 
                 if cached_result:
+                    cached_company = UnifiedCompany.model_validate(cached_result)
                     logger.debug(f"Cache hit for {company.name}")
-                    enriched_companies.append(cached_result)
+                    enriched_companies.append(
+                        _build_batch_outcome(cached_company, status="success", from_cache=True)
+                    )
                     loader.metrics.record_enrichment(0, True)  # 0ms for cache
                     continue
 
                 # Enrich company
                 enriched = enrich_from_connectors(loader, company)
-                enriched_companies.append(enriched)
+                errors = list(getattr(enriched, "enrichment_errors", []))
+                failed = bool(getattr(enriched, "_enrichment_failed", False))
+                status: BatchEnrichmentStatus = "partial" if (failed or errors) else "success"
+                enriched_companies.append(_build_batch_outcome(enriched, status=status, errors=errors))
 
                 # Cache result
-                loader.cache.set(cache_key, enriched)
+                loader.cache.set(cache_key, enriched.model_dump(mode="python"))
                 loader.metrics.record_enrichment(0, True)
 
             except (ValueError, RuntimeError, TypeError, AttributeError) as e:
                 logger.warning(
                     f"Batch enrichment failed for {company.name} (id={company.id}): {e}. "
-                    f"Returning original company data as fallback."
+                    f"Returning explicit failure outcome."
                 )
-                company._enrichment_failed = True  # flag for callers to detect failure
                 error_msg = f"[batch_enrichment] {e}"
-                if not hasattr(company, "enrichment_errors"):
-                    company.enrichment_errors = []
-                if error_msg not in company.enrichment_errors:
-                    company.enrichment_errors.append(error_msg)
-                enriched_companies.append(company)
+                failed_company = company.model_copy(deep=True)
+                failed_company._enrichment_failed = True  # explicit legacy failure signal on the returned copy
+                if error_msg not in failed_company.enrichment_errors:
+                    failed_company.enrichment_errors.append(error_msg)
+                enriched_companies.append(
+                    _build_batch_outcome(
+                        failed_company,
+                        status="failure",
+                        errors=list(failed_company.enrichment_errors),
+                    )
+                )
                 loader.metrics.record_enrichment(0, False)
 
         batch_duration = (time.time() - batch_start) * 1000  # Convert to ms

@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ast-grep/ast-grep/main/schemas/rule.json
+
+id: no-batch-enrichment-fallback-company
+message: Batch enrichment failures must return explicit outcome contracts, not append the original company directly.
+severity: error
+language: Python
+rule:
+  pattern: enriched_companies.append(company)

@@ -10,6 +10,7 @@ import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import cast
 
 from loguru import logger
 
@@ -20,6 +21,7 @@ from solstein.extractors.markdown_extractor import MarkdownExtractor
 
 from ..enrichment_config import UnifiedCompanyLoaderConfig, get_config
 from ..enrichment_service import CacheService, ConnectorFactory, MetricsService
+from .batch_outcomes import BatchEnrichmentOutcome
 from .company import UnifiedCompany
 from .enrichment import enrich_batch as _enrich_batch
 from .enrichment import enrich_from_connectors
@@ -154,13 +156,19 @@ class UnifiedCompanyLoader:
         enriched_companies = []
 
         for company in unified_companies:
+            company = cast(UnifiedCompany, company)
             try:
                 enriched = enrich_from_connectors(self, company)
                 enriched_companies.append(enriched)
 
             except (ValueError, RuntimeError, TypeError, AttributeError) as e:
                 logger.warning(f"Enrichment failed for {company.name}: {e}")
-                enriched_companies.append(company)  # Use original if enrichment fails
+                failed_company = company.model_copy(deep=True)
+                failed_company._enrichment_failed = True
+                error_msg = f"[connector_enrichment] {e}"
+                if error_msg not in failed_company.enrichment_errors:
+                    failed_company.enrichment_errors.append(error_msg)
+                enriched_companies.append(failed_company)
 
         logger.info(
             f"Enrichment complete. {len([c for c in enriched_companies if c.enrichment_sources])} companies enriched"
@@ -193,7 +201,7 @@ class UnifiedCompanyLoader:
 
         return companies
 
-    def enrich_batch(self, companies: list[UnifiedCompany], batch_size: int = 10) -> list[UnifiedCompany]:
+    def enrich_batch(self, companies: list[UnifiedCompany], batch_size: int = 10) -> list[BatchEnrichmentOutcome]:
         """Batch enrich companies with caching and performance tracking."""
         return _enrich_batch(self, companies, batch_size)
 

@@ -1,0 +1,17 @@
+id: no-batch-enrichment-fallback-company
+valid:
+  - |
+    except Exception as exc:
+        outcomes.append(
+            BatchEnrichmentOutcome(
+                company=failed_company,
+                status="failure",
+                errors=[str(exc)],
+            )
+        )
+  - |
+    enriched_companies.append(enriched)
+invalid:
+  - |
+    except Exception as exc:
+        enriched_companies.append(company)

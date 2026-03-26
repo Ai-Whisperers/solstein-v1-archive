@@ -3,6 +3,7 @@
 EPIC-021: Modularized data loading with specialized loaders.
 """
 
+from .batch_outcomes import BatchEnrichmentOutcome, BatchEnrichmentStatus
 from .company import UnifiedCompany
 from .unified import UnifiedCompanyLoader
 from .error_tracking import (
@@ -32,6 +33,8 @@ from .enrichment import (
 
 __all__ = [
     # Main classes
+    "BatchEnrichmentOutcome",
+    "BatchEnrichmentStatus",
     "UnifiedCompany",
     "UnifiedCompanyLoader",
     # Error tracking

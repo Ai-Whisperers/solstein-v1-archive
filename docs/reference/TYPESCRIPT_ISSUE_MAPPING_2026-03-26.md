@@ -444,6 +444,15 @@ When implementing `ISSUE-11`, do all of the following together:
 
 That gives one issue fix four durable guardrails instead of one temporary patch.
 
+### Status Update
+
+`ISSUE-11` has now been implemented following that exact pattern:
+
+1. Python batch enrichment emits explicit per-company outcomes
+2. TypeScript has a matching `batch-enrichment` contract schema
+3. AST rule `no-batch-enrichment-fallback-company` blocks the old fallback pattern
+4. A dedicated audit record documents the nested cache-contract issue found during implementation
+
 ---
 
 ## Primary References
