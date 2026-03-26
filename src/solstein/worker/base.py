@@ -6,8 +6,11 @@ Provides database helpers and dead letter queue for failed jobs.
 
 from __future__ import annotations
 
+import json
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
 
 from loguru import logger
 from pydantic import ValidationError
@@ -18,6 +21,7 @@ from solstein.domain.facts import Fact, GatheringBatch
 from solstein.infrastructure.database import DatabaseManager
 from solstein.infrastructure.database_models import CompanyRecord
 from solstein.infrastructure.fact_payloads import ConnectorFactPayload
+from solstein.monitoring.errors import global_error_tracker
 
 
 class FactIngestionPayload(ConnectorFactPayload):
@@ -155,28 +159,70 @@ async def store_facts(db_manager, facts: list[dict], source: str) -> int:
 class DeadLetterQueue:
     """Track permanently failed jobs after max retries exceeded.
 
-    WARNING: This implementation stores failed jobs in-memory only.
-    All recorded failures are lost on process restart.  In production
-    this should be backed by persistent storage (e.g. a database table
-    or a durable message queue) so that permanently-failed jobs can be
-    reviewed and retried after a worker restart.
+    Persists structured failure records to an append-only JSONL audit
+    trail while preserving the in-memory list for backward compatibility.
     """
 
-    def __init__(self):
-        self.failed_jobs = []
+    def __init__(self, audit_path: Path | None = None):
+        self.failed_jobs: list[dict[str, Any]] = []
+        self.audit_path = audit_path or Path("data/output/dead_letter_queue.jsonl")
 
-    def record_failure(self, task_name: str, task_id: str, error: str, attempt: int):
-        """Record a permanently failed job."""
-        logger.error(f"[RETRY-FAILED] {task_name} (task_id={task_id}) permanently failed after {attempt} attempts: {error}")
-        self.failed_jobs.append(
-            {
-                "task_name": task_name,
-                "task_id": task_id,
-                "error": error,
-                "final_attempt": attempt,
-                "timestamp": datetime.now(timezone.utc),
-            }
+    def record_failure(
+        self,
+        task_name: str,
+        task_id: str,
+        error: Exception | str,
+        attempt: int,
+        *,
+        traceback_text: str | None = None,
+        context: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Record a permanently failed job with durable structured metadata."""
+        timestamp = datetime.now(timezone.utc)
+        error_message = str(error)
+        error_type = type(error).__name__ if isinstance(error, Exception) else "TaskFailure"
+        record = {
+            "task_name": task_name,
+            "task_id": task_id,
+            "error": error_message,
+            "error_type": error_type,
+            "traceback": traceback_text,
+            "final_attempt": attempt,
+            "timestamp": timestamp,
+            "context": context or {},
+        }
+
+        logger.error(
+            f"[RETRY-FAILED] {task_name} (task_id={task_id}) permanently failed after {attempt} attempts: {error_type}: {error_message}"
         )
+        self.failed_jobs.append(record)
+        self._persist_record(record)
+        self._track_record(error, record)
+        return record
+
+    def _persist_record(self, record: dict[str, Any]) -> None:
+        self.audit_path.parent.mkdir(parents=True, exist_ok=True)
+        serializable = dict(record)
+        timestamp = serializable.get("timestamp")
+        if isinstance(timestamp, datetime):
+            serializable["timestamp"] = timestamp.isoformat()
+        try:
+            with self.audit_path.open("a", encoding="utf-8") as handle:
+                _ = handle.write(json.dumps(serializable, default=str) + "\n")
+        except Exception as exc:
+            logger.error(f"[RETRY-FAILED] Failed to persist DLQ record to {self.audit_path}: {exc}")
+
+    def _track_record(self, error: Exception | str, record: dict[str, Any]) -> None:
+        context = {
+            "task_name": record["task_name"],
+            "task_id": record["task_id"],
+            "final_attempt": record["final_attempt"],
+            **(record.get("context") or {}),
+        }
+        if isinstance(error, Exception):
+            global_error_tracker.track_error(error, context=context)
+            return
+        global_error_tracker.track_error(RuntimeError(str(error)), context=context)
 
 
 # Global Dead Letter Queue instance

@@ -18,6 +18,32 @@ from solstein.celery_config import celery_app
 from .base import dead_letter_queue
 
 
+def _build_failure_result(
+    task_id: str | None,
+    *,
+    status: str,
+    error: Exception,
+    timestamp: str,
+    company_id: str | None = None,
+    company_name: str | None = None,
+    traceback_text: str | None = None,
+) -> dict[str, str | None]:
+    """Build a structured terminal task failure payload."""
+    payload: dict[str, str | None] = {
+        "task_id": task_id,
+        "status": status,
+        "error": str(error),
+        "error_type": type(error).__name__,
+        "error_traceback": traceback_text,
+        "timestamp": timestamp,
+    }
+    if company_id is not None:
+        payload["company_id"] = company_id
+    if company_name is not None:
+        payload["company_name"] = company_name
+    return payload
+
+
 class EnrichmentTask(Task):
     """Base task class for enrichment operations with result tracking."""
 
@@ -103,16 +129,22 @@ def enrich_company_async(
         except MaxRetriesExceededError:
             tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
             dead_letter_queue.record_failure(
-                "enrich_company_async", self.request.id, f"{exc}\n{tb}", self.request.retries + 1
+                "enrich_company_async",
+                self.request.id,
+                exc,
+                self.request.retries + 1,
+                traceback_text=tb,
+                context={"company_id": company_id, "company_name": company_name, "user_id": user_id},
             )
-            return {
-                "task_id": self.request.id,
-                "company_id": company_id,
-                "company_name": company_name,
-                "status": "FAILED",
-                "error": str(exc),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            }
+            return _build_failure_result(
+                self.request.id,
+                company_id=company_id,
+                company_name=company_name,
+                status="FAILED",
+                error=exc,
+                traceback_text=tb,
+                timestamp=datetime.now(timezone.utc).isoformat(),
+            )
 
 
 @celery_app.task(bind=True, max_retries=3)
@@ -192,11 +224,21 @@ def enrich_companies_batch_async(
         except MaxRetriesExceededError:
             tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
             dead_letter_queue.record_failure(
-                "enrich_companies_batch_async", self.request.id, f"{exc}\n{tb}", self.request.retries + 1
+                "enrich_companies_batch_async",
+                self.request.id,
+                exc,
+                self.request.retries + 1,
+                traceback_text=tb,
+                context={
+                    "company_count": len(companies),
+                    "batch_size": batch_size,
+                    "user_id": user_id,
+                },
             )
-            return {
-                "task_id": self.request.id,
-                "status": "FAILED",
-                "error": str(exc),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            }
+            return _build_failure_result(
+                self.request.id,
+                status="FAILED",
+                error=exc,
+                traceback_text=tb,
+                timestamp=datetime.now(timezone.utc).isoformat(),
+            )

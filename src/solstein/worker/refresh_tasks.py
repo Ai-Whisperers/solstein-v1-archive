@@ -6,6 +6,7 @@ Provides Celery tasks for refreshing data from 12 sources.
 
 from __future__ import annotations
 
+import traceback
 from datetime import datetime, timedelta
 from typing import Callable
 
@@ -110,8 +111,14 @@ def create_refresh_task(
             try:
                 raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
             except MaxRetriesExceededError:
+                tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
                 dead_letter_queue.record_failure(
-                    task_name.split(".")[-1], self.request.id, str(exc), self.request.retries + 1
+                    task_name.split(".")[-1],
+                    self.request.id,
+                    exc,
+                    self.request.retries + 1,
+                    traceback_text=tb,
+                    context={"source_name": source_name},
                 )
                 raise
 
