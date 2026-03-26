@@ -1,0 +1,36 @@
+{
+  "generated_on": "2026-03-26",
+  "rules": [
+    {
+      "blocking": true,
+      "language": "Python",
+      "message": "Batch enrichment failures must return explicit outcome contracts, not append the original company directly.",
+      "rationale_doc": "docs/audit/ISSUE_11_BATCH_ENRICHMENT_OUTCOME_AUDIT_2026-03-26.md",
+      "related_issues": [
+        "ISSUE-11"
+      ],
+      "rule_file": "tooling/ast-grep/rules/no-batch-enrichment-fallback-company.yml",
+      "rule_id": "no-batch-enrichment-fallback-company",
+      "severity": "error",
+      "test_files": [
+        "tooling/ast-grep/rule-tests/no-batch-enrichment-fallback-company-test.yml"
+      ]
+    },
+    {
+      "blocking": true,
+      "language": "Python",
+      "message": "Do not mask failed score computation with `or 0.0`; preserve failure state or raise explicitly.",
+      "rationale_doc": "docs/audit/SCORING_FAILURE_MODE_AUDIT_2026-03-26.md",
+      "related_issues": [
+        "ISSUE-04"
+      ],
+      "rule_file": "tooling/ast-grep/rules/no-silent-score-fallback.yml",
+      "rule_id": "no-silent-score-fallback",
+      "severity": "error",
+      "test_files": [
+        "tooling/ast-grep/rule-tests/no-silent-score-fallback-test.yml"
+      ]
+    }
+  ],
+  "source_dir": "tooling/ast-grep/rules"
+}

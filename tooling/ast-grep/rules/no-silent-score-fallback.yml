@@ -1,4 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/ast-grep/ast-grep/main/schemas/rule.json
+# related-issues: ISSUE-04
+# rationale-doc: docs/audit/SCORING_FAILURE_MODE_AUDIT_2026-03-26.md
+# blocking: yes
 
 id: no-silent-score-fallback
 message: Do not mask failed score computation with `or 0.0`; preserve failure state or raise explicitly.

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+echo "[solstein hooks] verifying generated docs freshness"
+if command -v uv >/dev/null 2>&1; then
+  uv run python scripts/docs/check_generated_docs.py
+else
+  python3 scripts/docs/check_generated_docs.py
+fi

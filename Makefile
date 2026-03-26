@@ -1,6 +1,6 @@
 # Solstein Command Center
 
-.PHONY: install run dashboard test lint format docs-serve docs-strict check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical type-strict lint-ast ast-test gate-critical gate-engineering lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries
+.PHONY: install run dashboard test lint format docs-serve docs-strict docs-generate docs-generated-check hooks-install check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical type-strict lint-ast ast-test gate-critical gate-engineering lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries
 
 # Variables
 PYTHON = python3
@@ -48,6 +48,16 @@ docs-serve:
 
 docs-strict:
 	$(BIN)/mkdocs build --strict -f mkdocs.strict.yml
+
+docs-generate:
+	$(BIN)/python scripts/docs/generate_all.py
+
+docs-generated-check:
+	$(BIN)/python scripts/docs/check_generated_docs.py
+
+hooks-install:
+	git config core.hooksPath .githooks
+	chmod +x .githooks/pre-commit .githooks/pre-push
 
 # Unified Quality Pipeline (The Craft Layer)
 check-all: lint test
@@ -221,7 +231,7 @@ type-critical:
 type-strict:
 	$(BIN)/basedpyright --warnings
 
-gate-engineering: lint-ast ast-test type-strict docs-strict
+gate-engineering: lint-ast ast-test type-strict docs-strict docs-generated-check
 	@echo "Engineering guardrails passed."
 
 gate-critical: lint-critical lint-ast lint-async-boundaries type-critical type-strict test-critical test-contracts test-schema-boundaries

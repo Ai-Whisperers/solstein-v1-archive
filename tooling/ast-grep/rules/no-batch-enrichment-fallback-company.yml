@@ -1,4 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/ast-grep/ast-grep/main/schemas/rule.json
+# related-issues: ISSUE-11
+# rationale-doc: docs/audit/ISSUE_11_BATCH_ENRICHMENT_OUTCOME_AUDIT_2026-03-26.md
+# blocking: yes
 
 id: no-batch-enrichment-fallback-company
 message: Batch enrichment failures must return explicit outcome contracts, not append the original company directly.

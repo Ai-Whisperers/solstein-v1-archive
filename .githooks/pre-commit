@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+echo "[solstein hooks] refreshing generated docs"
+if command -v uv >/dev/null 2>&1; then
+  uv run python scripts/docs/generate_all.py
+else
+  python3 scripts/docs/generate_all.py
+fi
+
+git add docs/reference/generated docs/audit/generated
