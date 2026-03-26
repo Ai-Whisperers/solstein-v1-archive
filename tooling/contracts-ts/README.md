@@ -13,5 +13,13 @@ Current scope:
 - normalized search results
 - LinkedIn heuristic output
 - external evidence envelope
+- patent search and patent fact payloads
+- news-signal payloads and market-signal fact values
+
+Recommended use:
+
+- validate serialized connector outputs before frontend/tooling consumption
+- keep heuristic and authoritative acquisition methods explicit in the schema
+- reject payload drift before it becomes another Python-only runtime surprise
 
 This package is intentionally isolated because the repo does not yet have a general TypeScript workspace.

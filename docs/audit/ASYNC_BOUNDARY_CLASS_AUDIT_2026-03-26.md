@@ -83,6 +83,44 @@ Added coverage for:
 - web research DuckDuckGo path offloads sync search to `asyncio.to_thread`
 - news signal refresh path awaits async detector methods
 
+## Static Enforcement Added
+
+**File:** `scripts/ci/check_async_boundaries.py`
+
+The bug class is now guarded by a narrow AST-based static check that fails when:
+
+- `search_company_patents(...)` is called directly inside `async def`
+- `search_company_info(...)` is called directly inside `async def`
+- `search_company_news(...)` is called directly inside `async def`
+- `DDGS()` is instantiated directly inside `async def`
+- `requests.get(...)` is called directly inside `async def`
+- `detect_funding_signal(...)`, `detect_partnership_signal(...)`, or `detect_key_hire_signal(...)` are called without an await boundary
+
+Workflow integration:
+
+- `make lint-async-boundaries`
+- `make test-async-boundaries`
+- `make gate-async-boundaries`
+- `make gate-critical` now includes the async-boundary lint gate
+
+The gate is intentionally narrow so it catches this specific bug class without flagging normal dict `.get(...)` access or unrelated async code.
+
+## TypeScript Contracts Extended
+
+**Files:**
+
+- `tooling/contracts-ts/src/external/patents.ts`
+- `tooling/contracts-ts/src/external/news-signals.ts`
+
+The isolated TypeScript contracts package now also covers:
+
+- patent search results
+- patent portfolio fact payloads
+- news signal payloads
+- market signal fact values
+
+This gives a typed serialized contract for two connector families that were directly affected by the async-boundary cleanup.
+
 ---
 
 ## Verification
@@ -106,11 +144,30 @@ uv run pytest \
   tests/unit/test_async_boundary_regressions.py \
   tests/unit/test_web_search_refresh.py \
   tests/unit/test_news_signal_refresh.py -q
+
+uv run python scripts/ci/check_async_boundaries.py src/solstein
+
+DATABASE__URL=postgresql+asyncpg://user:pass@localhost/test \
+SECURITY__SECRET_KEY=test-secret \
+GITHUB_TOKEN=test-token \
+COMPANIES_HOUSE_API_KEY=test-key \
+NEWSAPI_KEY=test-news \
+uv run pytest \
+  tests/unit/test_async_boundary_gate.py \
+  tests/unit/test_async_boundary_regressions.py \
+  tests/unit/test_web_search_refresh.py \
+  tests/unit/test_news_signal_refresh.py -q
+
+cd tooling/contracts-ts && npm install
+cd tooling/contracts-ts && npm run check
 ```
 
 Result:
 
 - `12 passed`
+- async-boundary static gate: `passed`
+- gate regression suite: `16 passed`
+- TypeScript contract check: `passed`
 
 ---
 
