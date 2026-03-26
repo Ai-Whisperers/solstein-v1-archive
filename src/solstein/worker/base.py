@@ -8,36 +8,20 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from typing import Any
 
 from loguru import logger
-from pydantic import BaseModel, Field, ValidationError, model_validator
+from pydantic import ValidationError
 from sqlalchemy import select
 
 from solstein.config import get_settings
 from solstein.domain.facts import Fact, GatheringBatch
 from solstein.infrastructure.database import DatabaseManager
 from solstein.infrastructure.database_models import CompanyRecord
+from solstein.infrastructure.fact_payloads import ConnectorFactPayload
 
 
-class FactIngestionPayload(BaseModel):
+class FactIngestionPayload(ConnectorFactPayload):
     """Validated boundary schema for fact ingestion into worker persistence."""
-
-    company_id: str = Field(min_length=1)
-    fact_type: str = Field(min_length=1)
-    value: Any = None
-    confidence: float = Field(default=0.5, ge=0.0, le=1.0)
-
-    @model_validator(mode="before")
-    @classmethod
-    def normalize_fact_type_alias(cls, data: Any) -> Any:
-        if not isinstance(data, dict):
-            return data
-        if not data.get("fact_type") and data.get("type"):
-            normalized = dict(data)
-            normalized["fact_type"] = data["type"]
-            return normalized
-        return data
 
 
 def get_db_manager():
@@ -124,7 +108,7 @@ async def store_facts(db_manager, facts: list[dict], source: str) -> int:
                 if fact_type:
                     numeric_value = None
                     value_str = None
-                    if isinstance(fact_value, (int, float)):
+                    if isinstance(fact_value, (int, float)) and not isinstance(fact_value, bool):
                         numeric_value = float(fact_value)
                     elif fact_value is not None:
                         value_str = str(fact_value)

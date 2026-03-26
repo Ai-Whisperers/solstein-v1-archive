@@ -189,12 +189,25 @@ This file currently fails on unrelated protocol and enum drift:
 
 These failures are not evidence that the async-boundary bug class remains. They are separate test debt and should be reconciled independently.
 
+### 3. The static gate is intentionally narrow
+
+The first AST pass was too broad and incorrectly treated ordinary dict-style `.get(...)` access as suspicious async misuse.
+
+The shipped rule was narrowed on purpose:
+
+- it only flags explicitly known blocking helpers used directly inside `async def`
+- it only flags explicitly known coroutine-returning detector methods when they are used without an await boundary
+
+This keeps the gate actionable and stable, but it also means it is not a general async linter. Broader semantic drift still needs separate contract and schema gates.
+
 ---
 
 ## Next Enforcement Step
 
-If we want this class to stay dead, the next step should be a lint-style static gate that rejects:
+The async-boundary class is now covered by:
 
-1. direct use of known blocking helpers inside `async def`
-2. direct use of sync search/scrape clients in refresh/adapter async paths
-3. un-awaited async detector calls in connectors
+1. focused runtime regressions
+2. a narrow AST lint gate
+3. explicit dated audit documentation
+
+The next structural enforcement step is connector-fact schema validation at the refresh and worker boundaries, because stale integration suites alone are not enough to prevent loose dict drift.

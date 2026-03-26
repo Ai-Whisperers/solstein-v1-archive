@@ -15,6 +15,7 @@ Current scope:
 - external evidence envelope
 - patent search and patent fact payloads
 - news-signal payloads and market-signal fact values
+- canonical connector fact envelopes used at refresh and worker boundaries
 
 Recommended use:
 

@@ -1,6 +1,6 @@
 # Solstein Command Center
 
-.PHONY: install run dashboard test lint format docs-serve check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical gate-critical lint-async-boundaries test-async-boundaries gate-async-boundaries
+.PHONY: install run dashboard test lint format docs-serve check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical gate-critical lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries
 
 # Variables
 PYTHON = python3
@@ -199,10 +199,17 @@ test-async-boundaries:
 gate-async-boundaries: lint-async-boundaries test-async-boundaries
 	@echo "Async boundary quality gates passed."
 
+test-schema-boundaries:
+	DATABASE__URL=$(TEST_DATABASE_URL) SECURITY__SECRET_KEY=$(TEST_SECRET_KEY) GITHUB_TOKEN=$(TEST_GITHUB_TOKEN) \
+	$(BIN)/pytest tests/unit/test_connector_fact_schema_gate.py -x
+
+gate-schema-boundaries: test-schema-boundaries
+	@echo "Connector fact schema boundary gates passed."
+
 type-critical:
 	$(BIN)/mypy src/solstein/infrastructure/connectors src/solstein/adapters/enrichment src/solstein/data/unified src/solstein/worker
 
-gate-critical: lint-critical lint-async-boundaries type-critical test-critical test-contracts
+gate-critical: lint-critical lint-async-boundaries type-critical test-critical test-contracts test-schema-boundaries
 	@echo "Critical pipeline quality gates passed."
 
 # Reset development database

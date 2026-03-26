@@ -224,10 +224,12 @@ Current state:
 Now added:
 
 - `FactIngestionPayload` in `src/solstein/worker/base.py`
+- `ConnectorFactPayload` in `src/solstein/infrastructure/fact_payloads.py`
+- validation in `src/solstein/infrastructure/refresh.py` before delta filtering and before persistence
 
 Next step:
 
-- expand it to cover metadata, timestamps, source attribution, and fact value kinds explicitly
+- expand it from envelope validation into per-fact-family `value` schemas and source attribution contracts explicitly
 
 ### Boundary 2: External API Response -> Source Models
 

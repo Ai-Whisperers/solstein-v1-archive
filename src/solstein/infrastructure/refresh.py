@@ -12,6 +12,7 @@ from sqlalchemy import text
 
 from solstein.domain.facts import Fact, GatheringBatch
 from solstein.infrastructure.database import DatabaseManager
+from solstein.infrastructure.fact_payloads import validate_connector_fact_payloads
 
 
 @dataclass(frozen=True)
@@ -90,7 +91,7 @@ class BaseRefreshConnector(ABC):
             since = await self._get_last_refresh_time()
 
         # Fetch all facts from source
-        all_facts = await self.fetch_facts(company_ids)
+        all_facts = self._validate_facts(await self.fetch_facts(company_ids))
 
         # Filter to only changed facts
         changed_facts = await self._filter_delta(all_facts, since)
@@ -98,6 +99,14 @@ class BaseRefreshConnector(ABC):
         logger.info(f"{self.source_name}: {len(changed_facts)}/{len(all_facts)} facts changed since {since}")
 
         return changed_facts
+
+    def _validate_facts(self, facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Reject malformed connector payloads before downstream processing."""
+        return validate_connector_fact_payloads(
+            facts,
+            source_name=self.source_name,
+            default_confidence=self.confidence,
+        )
 
     async def _get_last_refresh_time(self) -> datetime:
         """Get last successful refresh time from metadata."""
@@ -184,46 +193,65 @@ class BaseRefreshConnector(ABC):
         Returns:
             GatheringBatch with storage results
         """
+        facts = self._validate_facts(facts)
+
         if batch_id is None:
             batch_id = str(uuid.uuid4())
 
+        first_company_id = next((fact["company_id"] for fact in facts if fact.get("company_id")), None)
+        if first_company_id is None:
+            logger.warning(f"{self.source_name}: no valid company_id found in fact batch, nothing stored")
+            return GatheringBatch(
+                batch_id=batch_id,
+                company_id="invalid-batch",
+                status="failed",
+            )
+
         batch = GatheringBatch(
             batch_id=batch_id,
-            source=self.source_name,
-            facts=[],
+            company_id=first_company_id,
+            status="in_progress",
         )
 
         refresh_time = datetime.now()
+        stored_count = 0
 
         async with self._require_db_manager().get_session() as session:
+            session.add(batch)
+            await session.flush()
+
             for fact_data in facts:
                 try:
-                    # Compute hash if not already present
-                    value_hash = fact_data.get("_hash") or compute_fact_hash(
-                        fact_data["company_id"],
-                        fact_data["fact_type"],
-                        fact_data["value"],
-                    )
+                    numeric_value = None
+                    value_str = None
+                    value_date = None
+                    fact_value = fact_data["value"]
+
+                    if isinstance(fact_value, (int, float)) and not isinstance(fact_value, bool):
+                        numeric_value = float(fact_value)
+                    elif isinstance(fact_value, datetime):
+                        value_date = fact_value
+                    elif fact_value is not None:
+                        value_str = str(fact_value)
 
                     fact = Fact(
                         company_id=fact_data["company_id"],
                         fact_type=fact_data["fact_type"],
-                        value=fact_data["value"],
+                        value=numeric_value,
+                        value_str=value_str,
+                        value_date=value_date,
                         confidence=fact_data.get("confidence", self.confidence),
                         extracted_at=fact_data.get("extracted_at", refresh_time),
-                        source=self.source_name,
-                        source_type=self.source_type,
                         batch_id=batch_id,
-                        metadata=fact_data.get("metadata", {}),
-                        value_hash=value_hash,
                     )
 
                     session.add(fact)
-                    batch.facts.append(fact)
+                    stored_count += 1
 
                 except Exception as e:
-                    logger.error(f"Failed to store fact: {e}")
-                    batch.errors.append(str(e))
+                    logger.error(f"Failed to store fact for {self.source_name}: {e}")
+
+            batch.status = "completed" if stored_count > 0 else "failed"
 
             await session.commit()
 

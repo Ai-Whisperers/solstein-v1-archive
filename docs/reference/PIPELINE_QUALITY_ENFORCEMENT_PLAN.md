@@ -76,6 +76,8 @@ Recommended implementation:
 Initial enforcement started:
 
 - `FactIngestionPayload` now validates the worker fact ingestion boundary in `src/solstein/worker/base.py`
+ - `ConnectorFactPayload` now validates the shared connector fact envelope in `src/solstein/infrastructure/fact_payloads.py`
+ - `BaseRefreshConnector` now validates fact envelopes before delta filtering and before persistence
 
 ### 3. Regression and Golden Dataset Gates
 
@@ -189,7 +191,7 @@ Enforce:
 
 ### Phase 2: Make Contracts Explicit
 
-1. Introduce typed schemas for connector outputs and persistence inputs.
+1. Expand the new connector fact envelope gate into per-family fact value schemas.
 2. Validate them at the edges.
 3. Fail on malformed payloads instead of silently normalizing bad shapes.
 
