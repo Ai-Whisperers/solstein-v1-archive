@@ -10,7 +10,7 @@ import json
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from loguru import logger
 from pydantic import ValidationError
@@ -43,7 +43,7 @@ async def get_tracked_company_ids(db_manager) -> list[str]:
         return [row[0] for row in result.fetchall()]
 
 
-async def store_facts(db_manager, facts: list[dict], source: str) -> int:
+async def store_facts(db_manager: DatabaseManager, facts: list[dict[str, Any]], source: str) -> int:
     """Store fetched facts in database using the Fact repository pattern.
 
     Creates a GatheringBatch, then persists each fact as a proper Fact ORM
@@ -129,14 +129,14 @@ async def store_facts(db_manager, facts: list[dict], source: str) -> int:
                     session.add(fact_record)
 
                 # --- Also update legacy raw_data on CompanyRecord ---
+                legacy_record = cast(Any, record)
                 if fact_type and fact_value is not None:
-                    if not record.raw_data:
-                        record.raw_data = {}
-                    if source not in record.raw_data:
-                        record.raw_data[source] = {}
-                    record.raw_data[source][fact_type] = fact_value
+                    raw_data = cast(dict[str, Any], legacy_record.raw_data or {})
+                    source_bucket = cast(dict[str, Any], raw_data.setdefault(source, {}))
+                    source_bucket[fact_type] = fact_value
+                    legacy_record.raw_data = raw_data
 
-                record.last_updated = datetime.now(timezone.utc)
+                legacy_record.last_updated = datetime.now(timezone.utc)
                 stored_count += 1
 
             except Exception as e:

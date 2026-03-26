@@ -1,0 +1,13 @@
+id: no-silent-score-fallback
+valid:
+  - |
+    if growth_score is None:
+        raise ScoringError("sub-scorer failed")
+    composite = growth_score
+  - |
+    retry_timeout = request_timeout or 0.0
+invalid:
+  - |
+    composite = growth_score or 0.0
+  - |
+    company.financial_health_score = financial_health_score or 0.0

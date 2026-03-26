@@ -133,6 +133,7 @@ venv.bak/
 
 # mkdocs documentation
 /site
+/node_modules/
 /dashboard/node_modules
 /tooling/contracts-ts/node_modules/
 /dashboard/.next

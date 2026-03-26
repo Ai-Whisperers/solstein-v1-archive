@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ast-grep/ast-grep/main/schemas/rule.json
+
+id: no-silent-score-fallback
+message: Do not mask failed score computation with `or 0.0`; preserve failure state or raise explicitly.
+severity: error
+language: Python
+rule:
+  pattern: $SCORE or 0.0
+constraints:
+  SCORE:
+    regex: "^(growth_score|financial_health_score|competitive_position_score)$"

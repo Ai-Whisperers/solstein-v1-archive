@@ -1,0 +1,50 @@
+site_name: "Solstein Engineering Reference"
+site_description: "Strict, maintained documentation slice for commercial pipeline guardrails."
+site_author: "AI Whisperers"
+docs_dir: docs
+exclude_docs: |
+  *
+  !reference/
+  !reference/ENGINEERING_GUARDRAILS.md
+  !reference/PYTHON_API_REFERENCE.md
+  !reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md
+theme:
+  name: material
+
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths:
+            - src
+          options:
+            docstring_style: google
+            docstring_section_style: list
+            heading_level: 2
+            members_order: source
+            merge_init_into_class: true
+            separate_signature: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_source: false
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+
+validation:
+  nav:
+    omitted_files: ignore
+  links:
+    not_found: warn
+    absolute_links: relative_to_docs
+
+nav:
+  - Engineering Guardrails: reference/ENGINEERING_GUARDRAILS.md
+  - Python API Reference: reference/PYTHON_API_REFERENCE.md
+  - TypeScript Issue Mapping: reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md

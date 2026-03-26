@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import traceback
 from datetime import datetime, timezone
+from typing import Any, NoReturn, cast
 
 from celery import Task
 from celery.exceptions import MaxRetriesExceededError
@@ -44,15 +45,27 @@ def _build_failure_result(
     return payload
 
 
+def _retry_task(task: Task, *, exc: Exception, countdown: int) -> NoReturn:
+    """Invoke Celery retry through a typed boundary."""
+    raise cast(Any, task).retry(exc=exc, countdown=countdown)
+
+
 class EnrichmentTask(Task):
     """Base task class for enrichment operations with result tracking."""
 
-    def on_success(self, result, task_id, args, kwargs):
+    def on_success(self, result: Any, task_id: str, args: tuple[Any, ...], kwargs: dict[str, Any]) -> None:
         """Called on task success - log completion."""
         company_id = args[0] if args else kwargs.get("company_id", "unknown")
         logger.info(f"[EnrichmentTask] Task {task_id} succeeded for company {company_id}")
 
-    def on_failure(self, exc, task_id, args, kwargs, einfo):
+    def on_failure(
+        self,
+        exc: Exception,
+        task_id: str,
+        args: tuple[Any, ...],
+        kwargs: dict[str, Any],
+        einfo: Any,
+    ) -> None:
         """Called on task failure - log with full traceback."""
         company_id = args[0] if args else kwargs.get("company_id", "unknown")
         logger.error(
@@ -62,8 +75,12 @@ class EnrichmentTask(Task):
 
 @celery_app.task(base=EnrichmentTask, bind=True, max_retries=3)
 def enrich_company_async(
-    self, company_id: str, company_name: str | None = None, sources: list[str] | None = None, user_id: str | None = None
-):
+    self: Task,
+    company_id: str,
+    company_name: str | None = None,
+    sources: list[str] | None = None,
+    user_id: str | None = None,
+) -> dict[str, Any]:
     """Asynchronously enrich a single company (Phase 12).
 
     Phase 13.4: Implements exponential backoff retry logic
@@ -92,7 +109,7 @@ def enrich_company_async(
         duration_ms = (time.time() - start_time) * 1000
 
         # Track enriched fields
-        fields_enriched = []
+        fields_enriched: list[str] = []
         if enriched.financials and enriched.financials.revenue:
             fields_enriched.append("revenue")
         if enriched.financials and enriched.financials.employees:
@@ -119,25 +136,27 @@ def enrich_company_async(
 
     except Exception as exc:
         # Phase 13.4: Exponential backoff retry
-        countdown = 5 * (2**self.request.retries)
+        request = cast(Any, self).request
+        retries = int(request.retries)
+        countdown = 5 * (2**retries)
         logger.info(
-            f"[RETRY-ATTEMPT-{self.request.retries + 1}] Enrichment for {company_id} will retry in {countdown}s"
+            f"[RETRY-ATTEMPT-{retries + 1}] Enrichment for {company_id} will retry in {countdown}s"
         )
 
         try:
-            self.retry(exc=exc, countdown=countdown)
+            _retry_task(self, exc=exc, countdown=countdown)
         except MaxRetriesExceededError:
             tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
             dead_letter_queue.record_failure(
                 "enrich_company_async",
-                self.request.id,
+                request.id,
                 exc,
-                self.request.retries + 1,
+                retries + 1,
                 traceback_text=tb,
                 context={"company_id": company_id, "company_name": company_name, "user_id": user_id},
             )
             return _build_failure_result(
-                self.request.id,
+                request.id,
                 company_id=company_id,
                 company_name=company_name,
                 status="FAILED",
@@ -149,8 +168,12 @@ def enrich_company_async(
 
 @celery_app.task(bind=True, max_retries=3)
 def enrich_companies_batch_async(
-    self, companies: list[dict], sources: list[str] | None = None, batch_size: int = 10, user_id: str | None = None
-):
+    self: Task,
+    companies: list[dict[str, Any]],
+    sources: list[str] | None = None,
+    batch_size: int = 10,
+    user_id: str | None = None,
+) -> dict[str, Any]:
     """Asynchronously enrich multiple companies in batches (Phase 12).
 
     Phase 13.4: Implements exponential backoff retry logic
@@ -171,7 +194,7 @@ def enrich_companies_batch_async(
 
         sources = sources or ["SEC_EDGAR"]
         start_time = time.time()
-        batch_results = []
+        batch_results: list[dict[str, Any]] = []
         failed_count = 0
 
         # Process companies
@@ -216,18 +239,20 @@ def enrich_companies_batch_async(
 
     except Exception as exc:
         # Phase 13.4: Exponential backoff retry
-        countdown = 5 * (2**self.request.retries)
-        logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] Batch enrichment will retry in {countdown}s")
+        request = cast(Any, self).request
+        retries = int(request.retries)
+        countdown = 5 * (2**retries)
+        logger.info(f"[RETRY-ATTEMPT-{retries + 1}] Batch enrichment will retry in {countdown}s")
 
         try:
-            self.retry(exc=exc, countdown=countdown)
+            _retry_task(self, exc=exc, countdown=countdown)
         except MaxRetriesExceededError:
             tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
             dead_letter_queue.record_failure(
                 "enrich_companies_batch_async",
-                self.request.id,
+                request.id,
                 exc,
-                self.request.retries + 1,
+                retries + 1,
                 traceback_text=tb,
                 context={
                     "company_count": len(companies),
@@ -236,7 +261,7 @@ def enrich_companies_batch_async(
                 },
             )
             return _build_failure_result(
-                self.request.id,
+                request.id,
                 status="FAILED",
                 error=exc,
                 traceback_text=tb,

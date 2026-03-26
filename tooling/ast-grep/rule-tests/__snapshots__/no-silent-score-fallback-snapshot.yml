@@ -1,0 +1,16 @@
+id: no-silent-score-fallback
+snapshots:
+  ? |
+    company.financial_health_score = financial_health_score or 0.0
+  : labels:
+    - source: financial_health_score or 0.0
+      style: primary
+      start: 33
+      end: 62
+  ? |
+    composite = growth_score or 0.0
+  : labels:
+    - source: growth_score or 0.0
+      style: primary
+      start: 12
+      end: 31

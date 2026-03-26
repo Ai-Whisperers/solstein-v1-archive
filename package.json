@@ -1,0 +1,12 @@
+{
+  "name": "solstein-devtools",
+  "private": true,
+  "description": "Repository-level AST and engineering guardrail tooling for Solstein",
+  "scripts": {
+    "ast-grep": "ast-grep scan --config sgconfig.yml",
+    "ast-grep:test": "ast-grep test --config sgconfig.yml"
+  },
+  "devDependencies": {
+    "@ast-grep/cli": "^0.39.6"
+  }
+}

@@ -6,6 +6,7 @@ from loguru import logger
 
 from ...domain.models import Company
 from ...domain.simulation import MarketConditionType, Scenario, SimulationResult
+from ...exceptions import ScoringError
 from ..scoring import GrowthScorer
 
 
@@ -40,7 +41,9 @@ class SimulationEngine:
 
         # 1. Base Metrics
         base_scores = self.scorer.calculate_scores(company)
-        base_growth_score = base_scores.growth_score or 0.0
+        base_growth_score = base_scores.growth_score
+        if base_growth_score is None:
+            raise ScoringError(f"Simulation requires a concrete growth score for {company.name}")
         base_valuation = (company.financials.valuation if company.financials else None) or 0.0
 
         # 2. Apply Conditions

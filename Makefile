@@ -1,6 +1,6 @@
 # Solstein Command Center
 
-.PHONY: install run dashboard test lint format docs-serve check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical gate-critical lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries
+.PHONY: install run dashboard test lint format docs-serve docs-strict check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical type-strict lint-ast ast-test gate-critical gate-engineering lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries
 
 # Variables
 PYTHON = python3
@@ -45,6 +45,9 @@ format:
 # Serve Documentation (Ancient Grimoire Style)
 docs-serve:
 	$(BIN)/mkdocs serve
+
+docs-strict:
+	$(BIN)/mkdocs build --strict -f mkdocs.strict.yml
 
 # Unified Quality Pipeline (The Craft Layer)
 check-all: lint test
@@ -189,6 +192,12 @@ test-golden:
 lint-critical:
 	$(BIN)/ruff check src/solstein/infrastructure/connectors src/solstein/adapters/enrichment src/solstein/data/unified src/solstein/worker tests
 
+lint-ast:
+	npm run ast-grep -- --error --report-style=short src/solstein
+
+ast-test:
+	npm run ast-grep:test
+
 lint-async-boundaries:
 	$(BIN)/python scripts/ci/check_async_boundaries.py src/solstein
 
@@ -209,7 +218,13 @@ gate-schema-boundaries: test-schema-boundaries
 type-critical:
 	$(BIN)/mypy src/solstein/infrastructure/connectors src/solstein/adapters/enrichment src/solstein/data/unified src/solstein/worker
 
-gate-critical: lint-critical lint-async-boundaries type-critical test-critical test-contracts test-schema-boundaries
+type-strict:
+	$(BIN)/basedpyright --warnings
+
+gate-engineering: lint-ast ast-test type-strict docs-strict
+	@echo "Engineering guardrails passed."
+
+gate-critical: lint-critical lint-ast lint-async-boundaries type-critical type-strict test-critical test-contracts test-schema-boundaries
 	@echo "Critical pipeline quality gates passed."
 
 # Reset development database

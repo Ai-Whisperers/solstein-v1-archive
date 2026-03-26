@@ -37,6 +37,26 @@ extra_css:
 extra_javascript:
   - assets/javascripts/scroll.js
 
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths:
+            - src
+          options:
+            docstring_style: google
+            docstring_section_style: list
+            heading_level: 2
+            members_order: source
+            merge_init_into_class: true
+            separate_signature: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_source: false
+
 markdown_extensions:
   - admonition
   - pymdownx.details
@@ -83,6 +103,8 @@ nav:
     - "Architecture Modules": "architecture/modules.md"
     - "Layer Boundaries": "architecture/layer-boundaries.md"
     - "JSON to Database Roadmap": "architecture/json-to-database-roadmap.md"
+    - "Engineering Guardrails": "reference/ENGINEERING_GUARDRAILS.md"
+    - "Python API Reference": "reference/PYTHON_API_REFERENCE.md"
 
 
 extra:
