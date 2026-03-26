@@ -2,19 +2,26 @@
 Description=Solstein Autonomous Agent Cycles (24/7 Improvement Loop)
 After=network-online.target
 Wants=network-online.target
-Documentation=file:///home/ai-whisperers/solstein/docs/agent-cycles/
+# Documentation path is set at install time by scripts/install-service.sh
+Documentation=https://github.com/Ai-Whisperers/solstein/tree/develop/docs
 
 [Service]
 Type=simple
-WorkingDirectory=/home/ai-whisperers/solstein
+# NOTE: This file is a fallback/reference only.
+# For installation, run: scripts/install-service.sh
+# That script generates a concrete service file from bin/solstein-agents.service.template
+# by substituting PROJECT_ROOT and PYTHON_EXECUTABLE at install time.
+#
+# The systemd %h specifier expands to the user's home directory at runtime,
+# but PROJECT_ROOT may differ from $HOME. Use the install script for production.
+WorkingDirectory=%h
 
 # Environment setup
 Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 Environment="PYTHONUNBUFFERED=1"
-Environment="PYTHONPATH=/home/ai-whisperers/solstein"
 
-# Run orchestrator
-ExecStart=/usr/bin/python3 /home/ai-whisperers/solstein/bin/orchestrate_agents.py --continuous
+# Discover and run the orchestrator; Path(__file__) inside the script resolves PROJECT_ROOT
+ExecStart=/usr/bin/env python3 bin/orchestrate_agents.py --continuous
 
 # Auto-restart on failure
 Restart=on-failure
