@@ -8,6 +8,7 @@ from click.testing import CliRunner
 
 import solstein.cli as cli_module
 from solstein.cli import cli
+from solstein.exceptions import ScoringError
 
 
 def test_cli_version():
@@ -135,6 +136,35 @@ def test_cli_score_accepts_wrapped_competitors_payload(tmp_path):
 
     assert result.exit_code == 0
     assert output_file.exists()
+
+
+def test_cli_score_aborts_on_scoring_failure(tmp_path, monkeypatch):
+    input_file = tmp_path / "input.json"
+    input_file.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "c01",
+                    "name": "TestCorp",
+                    "industry": "Tech",
+                    "financials": {"revenue": 100.0, "valuation": 1000.0},
+                }
+            ]
+        )
+    )
+
+    class DummyScorer:
+        def calculate_scores(self, company):
+            raise ScoringError("Scoring failed for company 'TestCorp'")
+
+    monkeypatch.setattr(cli_module, "GrowthScorer", DummyScorer)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["score", str(input_file)])
+
+    assert result.exit_code != 0
+    assert "Failed to calculate scores" in result.output
+    assert "0.0/10" not in result.output
 
 
 def test_cli_compare_rejects_unknown_object_payload(tmp_path):

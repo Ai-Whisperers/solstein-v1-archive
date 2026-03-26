@@ -1,5 +1,7 @@
 from unittest.mock import patch
 
+import pytest
+
 from solstein.analytics.scoring import (
     CompetitiveOverlapCalculator,
     GrowthScorer,
@@ -13,12 +15,13 @@ from solstein.domain.models import (
     FinancialMetric,
     ThreatLevel,
 )
+from solstein.exceptions import ScoringError
 
 
 def make_company(**kwargs):
     fin = FinancialMetric(allow_empty_primary=True)
     base = {
-        "id": "c1",
+        "id": "cmp-1",
         "name": "C1",
         "description": "desc",
         "industry": "Tech",
@@ -38,12 +41,18 @@ def test_classify_company_none():
     assert classify_company(None) == "Salt"
 
 
-def test_growth_scorer_fallback():
+def test_growth_scorer_raises_when_subscorer_fails():
     scorer = GrowthScorer()
     company = make_company()
-    with patch.object(scorer.financial_health_scorer, "score", return_value=(None, None)):
-        scorer.calculate_scores(company)
-        assert company.composite_score == company.growth_score
+    with patch.object(scorer.financial_health_scorer, "score", side_effect=RuntimeError("boom")):
+        with pytest.raises(ScoringError):
+            scorer.calculate_scores(company)
+
+    assert company.growth_score is None
+    assert company.financial_health_score is None
+    assert company.composite_score is None
+    assert company.scoring_breakdown["status"] == "failed"
+    assert "financial" in company.scoring_breakdown["errors"]
 
 
 def test_growth_scorer_growth_score_employee_efficiency():

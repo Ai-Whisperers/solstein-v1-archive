@@ -59,7 +59,13 @@ async def score_company(
 
         scored_company = growth_scorer.calculate_scores(target_company)
 
-        growth_score = scored_company.growth_score or 0.0
+        if scored_company.growth_score is None:
+            raise APIError(
+                code="SCORING_FAILED",
+                message="Growth scoring did not produce a score",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        growth_score = scored_company.growth_score
         classification, legacy_cls, canonical_cls = _determine_classification(growth_score, scored_company)
 
         await repo.save(scored_company)

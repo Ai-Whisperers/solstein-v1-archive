@@ -19,6 +19,7 @@ from ..domain.models import (
     ScoringExplanation,
     ThreatLevel,
 )
+from ..exceptions import ScoringError
 from .constants import (
     LEAD_SCORE_THRESHOLD,
     MAX_SCORE,
@@ -152,41 +153,68 @@ class GrowthScorer:
         """Calculate all scores for a company profile."""
         logger.debug(f"Calculating scores for {profile.name}")
 
+        profile.growth_score = None
+        profile.financial_health_score = None
+        profile.competitive_position_score = None
+        profile.composite_score = None
+        profile.classification = None
         profile.scoring_breakdown = {}
 
-        growth_base = self.config.growth.base_score or 0.0
-        financial_base = self.config.financial.base_score or 0.0
-        competitive_base = self.config.competitive.base_score or 0.0
+        scoring_errors: dict[str, str] = {}
 
         try:
             growth_score, growth_expl = self.growth_momentum_scorer.score(profile.financials)
         except Exception as exc:
-            logger.error(f"[EPIC-059] Growth scoring degraded for {profile.name}: {exc}")
-            growth_score = growth_base
-            growth_expl = ScoringExplanation(base_score=growth_base, final_score=growth_base)
-            profile.scoring_breakdown["growth_degraded"] = str(exc)
+            logger.error(f"[EPIC-059] Growth scoring failed for {profile.name}: {exc}")
+            scoring_errors["growth"] = str(exc)
+            growth_score = None
+            growth_expl = None
 
         try:
             financial_health_score, fin_expl = self.financial_health_scorer.score(profile.financials)
         except Exception as exc:
-            logger.error(f"[EPIC-059] Financial scoring degraded for {profile.name}: {exc}")
-            financial_health_score = financial_base
-            fin_expl = ScoringExplanation(base_score=financial_base, final_score=financial_base)
-            profile.scoring_breakdown["financial_degraded"] = str(exc)
+            logger.error(f"[EPIC-059] Financial scoring failed for {profile.name}: {exc}")
+            scoring_errors["financial"] = str(exc)
+            financial_health_score = None
+            fin_expl = None
 
         try:
             competitive_position_score, comp_expl = self.competitive_position_scorer.score(profile)
         except Exception as exc:
-            logger.error(f"[EPIC-059] Competitive scoring degraded for {profile.name}: {exc}")
-            competitive_position_score = competitive_base
-            comp_expl = ScoringExplanation(base_score=competitive_base, final_score=competitive_base)
-            profile.scoring_breakdown["competitive_degraded"] = str(exc)
+            logger.error(f"[EPIC-059] Competitive scoring failed for {profile.name}: {exc}")
+            scoring_errors["competitive"] = str(exc)
+            competitive_position_score = None
+            comp_expl = None
+
+        if scoring_errors:
+            profile.scoring_breakdown = {
+                "status": "failed",
+                "errors": scoring_errors,
+            }
+            raise ScoringError(
+                f"Scoring failed for company '{profile.name}'",
+                details={
+                    "company_id": profile.id,
+                    "company_name": profile.name,
+                    "components": scoring_errors,
+                },
+            )
 
         # Apply confidence weighting when signal confidences are available
         if profile.signal_confidences:
+            assert growth_expl is not None
+            assert fin_expl is not None
+            assert comp_expl is not None
             growth_score, growth_expl = _apply_confidence_weights(growth_expl, profile.signal_confidences)
             financial_health_score, fin_expl = _apply_confidence_weights(fin_expl, profile.signal_confidences)
             competitive_position_score, comp_expl = _apply_confidence_weights(comp_expl, profile.signal_confidences)
+
+        assert growth_score is not None
+        assert financial_health_score is not None
+        assert competitive_position_score is not None
+        assert growth_expl is not None
+        assert fin_expl is not None
+        assert comp_expl is not None
 
         profile.growth_score = growth_score
         profile.financial_health_score = financial_health_score

@@ -22,6 +22,7 @@ from solstein.domain.models import (
     CompanyTier,
     FinancialMetric,
 )
+from solstein.exceptions import ScoringError
 from tests.factories import make_company, make_lead_company, make_phoenix_company
 
 # ---------------------------------------------------------------------------
@@ -91,6 +92,27 @@ def test_calculate_scores_returns_same_company_object(scorer):
     result = scorer.calculate_scores(company)
     assert result is company
     assert company.growth_score is not None
+
+
+def test_calculate_scores_raises_on_subscorer_exception(monkeypatch, scorer):
+    """Sub-scorer failures must fail fast instead of degrading to base scores."""
+    company = make_company()
+
+    def boom(_financials):
+        raise RuntimeError("growth scorer exploded")
+
+    monkeypatch.setattr(scorer.growth_momentum_scorer, "score", boom)
+
+    with pytest.raises(ScoringError) as exc_info:
+        scorer.calculate_scores(company)
+
+    assert "Scoring failed for company" in str(exc_info.value)
+    assert company.growth_score is None
+    assert company.financial_health_score is None
+    assert company.composite_score is None
+    assert company.classification is None
+    assert company.scoring_breakdown["status"] == "failed"
+    assert company.scoring_breakdown["errors"]["growth"] == "growth scorer exploded"
 
 
 # ---------------------------------------------------------------------------

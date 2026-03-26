@@ -172,14 +172,16 @@ def score(input_file: Path, output: Path | None) -> None:
 
             # Show summary
             click.echo(f"  • {company.name}:")
-            # Handle None scores
-            growth = scored_company.growth_score or 0.0
-            health = scored_company.financial_health_score or 0.0
-            pos = scored_company.competitive_position_score or 0.0
+            if (
+                scored_company.growth_score is None
+                or scored_company.financial_health_score is None
+                or scored_company.competitive_position_score is None
+            ):
+                raise RuntimeError(f"Scoring completed without materialized scores for {company.name}")
 
-            click.echo(f"    Growth: {growth:.1f}/10")
-            click.echo(f"    Financial Health: {health:.1f}/10")
-            click.echo(f"    Competitive Position: {pos:.1f}/10")
+            click.echo(f"    Growth: {scored_company.growth_score:.1f}/10")
+            click.echo(f"    Financial Health: {scored_company.financial_health_score:.1f}/10")
+            click.echo(f"    Competitive Position: {scored_company.competitive_position_score:.1f}/10")
 
         if output:
             # Save scored profiles
