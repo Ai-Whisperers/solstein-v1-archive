@@ -4,7 +4,9 @@
 echo "⚙️ Starting Solstein Celery Workers with Debug Mode"
 echo "===================================================="
 
-export PYTHONPATH=/home/ai-whisperers/solstein/src:$PYTHONPATH
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+export PYTHONPATH="$PROJECT_ROOT/src:$PYTHONPATH"
 export ENVIRONMENT=development
 export DEBUG=true
 export LOG_LEVEL=DEBUG

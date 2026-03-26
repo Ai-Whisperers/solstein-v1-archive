@@ -9,20 +9,20 @@ No duplicate custom conversion logic.
 
 import argparse
 import json
-from pathlib import Path
-from datetime import datetime, timezone
-import time
-
-# Setup paths
 import sys
+import time
+import traceback
+from datetime import datetime, timezone
+from pathlib import Path
+from pathlib import Path as _Path
 
-sys.path.insert(0, "/home/ai-whisperers/solstein/src")
+sys.path.insert(0, str(_Path(__file__).resolve().parent.parent / "src"))
 
-from solstein.data.loaders import convert_to_domain_company
+from solstein.analytics.constants import PHOENIX_SCORE_THRESHOLD, SALT_SCORE_THRESHOLD
 from solstein.analytics.scoring import GrowthScorer
+from solstein.data.loaders import convert_to_domain_company
 from solstein.data.report_release_gate import ReportReleaseGate, build_export_metadata
 from solstein.exporters.excel import ExcelExporter
-from solstein.analytics.constants import PHOENIX_SCORE_THRESHOLD, SALT_SCORE_THRESHOLD
 
 
 def _parse_args() -> argparse.Namespace:
@@ -38,12 +38,8 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main():
-    args = _parse_args()
-    print("=" * 60)
-    print("ENEVE 199-Company Workflow")
-    print("=" * 60)
-    pipeline_start = time.time()
+def _stage_load() -> tuple[list, list]:
+    """Stage 1: Load raw JSON and convert to Company domain models."""
     print(f"\n{'=' * 60}")
     print(f"[STAGE 1/4 - LOAD] {datetime.now().strftime('%H:%M:%S')} Loading and converting company data...")
     print(f"{'=' * 60}")
@@ -61,50 +57,48 @@ def main():
     companies_raw = data["competitors"]
     print(f"\n📊 Loaded {len(companies_raw)} companies from {input_path}")
 
-    # Convert to Company models using unified converter from loaders module
     print("\n🔄 Converting to Company models (using unified converter)...")
-    companies = []
-    errors = []
+    companies: list = []
+    errors: list = []
     for i, raw in enumerate(companies_raw):
         try:
-            # EPIC-058: Use unified converter instead of custom inline logic
             company = convert_to_domain_company(raw, i)
             companies.append(company)
             if i < 3:
                 print(
                     f"  ✓ {company.name}: revenue={company.financials.revenue}M, growth={company.financials.growth_rate}%"
                 )
-        except Exception as e:
+        except (ValueError, KeyError, TypeError) as e:
             errors.append((raw.get("company_name", "Unknown"), str(e)))
             if len(errors) <= 5:
                 print(f"  ✗ Error converting {raw.get('company_name', 'Unknown')}: {e}")
 
     if errors:
         print(f"\n⚠️  {len(errors)} conversion errors (showing first 5)")
-
     print(f"\n✅ Successfully converted {len(companies)} companies")
+    return companies, errors
 
-    # Score companies
+
+def _stage_score(companies: list, args: argparse.Namespace) -> tuple[list, object]:
+    """Stage 2: Score companies and run release gate."""
     print(f"\n{'=' * 60}")
     print(f"[STAGE 2/4 - SCORE] {datetime.now().strftime('%H:%M:%S')} Scoring {len(companies)} companies...")
     print(f"{'=' * 60}")
     print("\n🎯 Scoring companies...")
     scorer = GrowthScorer()
-    scored = []
-    score_errors = []
+    scored: list = []
+    score_errors: list = []
 
     for company in companies:
         try:
-            scored_company = scorer.calculate_scores(company)
-            scored.append(scored_company)
-        except Exception as e:
+            scored.append(scorer.calculate_scores(company))
+        except (ValueError, AttributeError) as e:
             score_errors.append((company.name, str(e)))
 
     print(f"✅ Successfully scored {len(scored)} companies")
     if score_errors:
         print(f"⚠️  {len(score_errors)} scoring errors")
 
-    # Show sample results
     print("\n📈 Sample Results:")
     for company in scored[:5]:
         print(f"  {company.name}: composite={company.composite_score:.2f}, classification={company.classification}")
@@ -124,9 +118,11 @@ def main():
         reason_codes = ", ".join(sorted({reason.code for reason in gate_result.reasons}))
         print(f"⚠️  Release gate reported issues: {reason_codes}")
 
-    export_metadata = build_export_metadata(scored, gate_result)
+    return scored, gate_result
 
-    # Save scored output
+
+def _stage_export(scored: list, export_metadata: dict) -> None:
+    """Stage 3: Save JSON output and create Excel dashboard."""
     print(f"\n{'=' * 60}")
     print(f"[STAGE 3/4 - EXPORT] {datetime.now().strftime('%H:%M:%S')} Saving outputs and creating Excel dashboard...")
     print(f"{'=' * 60}")
@@ -147,7 +143,6 @@ def main():
         )
     print(f"\n💾 Saved scored data to {scored_path}")
 
-    # Create Excel dashboard
     print("\n📊 Creating Excel dashboard...")
     try:
         ExcelExporter().create_dashboard(
@@ -155,14 +150,14 @@ def main():
             output_dir / "eneve_full_199_dashboard.xlsx",
             metadata=export_metadata,
         )
-        print(f"✅ Created Excel dashboard")
-    except Exception as e:
+        print("✅ Created Excel dashboard")
+    except (OSError, RuntimeError) as e:
         print(f"✗ Error creating Excel dashboard: {e}")
-        import traceback
-
         traceback.print_exc()
 
-    # Summary statistics
+
+def _stage_summary(scored: list, pipeline_start: float) -> None:
+    """Stage 4: Print pipeline summary statistics."""
     print(f"\n{'=' * 60}")
     print(
         f"[STAGE 4/4 - SUMMARY] {datetime.now().strftime('%H:%M:%S')} Pipeline completed in {time.time() - pipeline_start:.1f}s"
@@ -175,7 +170,6 @@ def main():
     phoenix_count = sum(1 for c in scored if c.classification == "Phoenix")
     salt_count = sum(1 for c in scored if c.classification == "Salt")
     lead_count = sum(1 for c in scored if c.classification == "Lead")
-
     avg_score = sum(c.composite_score for c in scored) / len(scored) if scored else 0
 
     print(f"Total Companies: {len(scored)}")
@@ -184,6 +178,21 @@ def main():
     print(f"Salt ({SALT_SCORE_THRESHOLD}–{PHOENIX_SCORE_THRESHOLD}): {salt_count}")
     print(f"Lead (<{SALT_SCORE_THRESHOLD}): {lead_count}")
     print("=" * 60)
+
+
+def main() -> None:
+    """Orchestrate the four-stage ENEVE 199-company pipeline."""
+    args = _parse_args()
+    print("=" * 60)
+    print("ENEVE 199-Company Workflow")
+    print("=" * 60)
+    pipeline_start = time.time()
+
+    companies, _ = _stage_load()
+    scored, gate_result = _stage_score(companies, args)
+    export_metadata = build_export_metadata(scored, gate_result)
+    _stage_export(scored, export_metadata)
+    _stage_summary(scored, pipeline_start)
 
 
 if __name__ == "__main__":
