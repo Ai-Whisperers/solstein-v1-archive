@@ -7,9 +7,9 @@ It does not modify the source audit. If table metadata repeats across multiple p
 
 ## Source Snapshot
 
-- Source line count: `7548`
-- Declared total issues found: `284 (3 false positives closed, 1 issue corrected)`
-- Parsed distinct issue ids: `267`
+- Source line count: `7589`
+- Declared total issues found: `288 (3 false positives closed, 1 issue corrected)`
+- Parsed distinct issue ids: `271`
 - Parsed issue table rows: `1196`
 
 The declared audit tracker total is higher than the distinct issue-id count because the source audit also tracks false positives, corrected entries, and pass-level aggregate accounting.
@@ -285,3 +285,7 @@ The declared audit tracker total is higher than the distinct issue-id count beca
 | ISSUE-265 | 🔴 HIGH | Open | `src/solstein/monitoring/business_metrics.py:146` | 0 | `CompanyRecord.ai_data_quality_score` does not exist — column is `ai_score` |
 | ISSUE-266 | 🔴 HIGH | Open | `src/solstein/monitoring/business_metrics.py:152` | 0 | `CompanyRecord.enrichment_updated_at` does not exist — column is `last_updated` |
 | ISSUE-267 | 🔴 HIGH | Open | `src/solstein/api/routers/enrichment_batch.py:64` | 0 | `status="partial_failure"` rejected by `BatchEnrichmentResponse.validate_status` — correct value is `"partial"` |
+| ISSUE-268 | 🟡 MED | Open | `src/solstein/adapters/enrichment/patents_unified.py:19`, `src/solstein/research/discovery.py:10`, `src/solstein/adapters/registry.py:98` | 0 | Static import cycle between `patents_unified`, `research.discovery`, and `adapters.registry` breaks structural tooling assumptions |
+| ISSUE-269 | 🟡 MED | Open | `src/solstein/domain/value_objects.py:24,160,165` | 0 | Domain `value_objects` imports analytics scoring constants, coupling core domain rules to the analytics layer |
+| ISSUE-270 | 🟡 MED | Open | `src/solstein/infrastructure/research_dual_write.py:17`, `src/solstein/infrastructure/research_persistence.py:14` | 0 | Infrastructure persistence imports URL canonicalization from the higher `research` layer instead of a lower shared utility boundary |
+| ISSUE-271 | 🟡 MED | Open | `src/solstein/infrastructure/reconcile_runs.py:12` | 0 | Infrastructure reconciliation imports JSON hashing helper from the higher `research` layer |
