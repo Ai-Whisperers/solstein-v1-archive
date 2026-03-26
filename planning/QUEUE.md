@@ -43,7 +43,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 4 | STORY-137 | Centralize All Environment Variables in config.py | DONE | PR #80 open |
-| 5 | STORY-138 | Replace Hardcoded Paths with Config-Driven Paths | READY | |
+| 5 | STORY-138 | Replace Hardcoded Paths with Config-Driven Paths | DONE | PR #81 open |
 | 6 | STORY-139 | Centralize Timeouts and Magic Numbers | READY | |
 | 7 | STORY-140 | Fix .env.example with All Required Variables | READY | |
 
@@ -141,6 +141,16 @@ See `backlog/README.md` for the full milestone roadmap.
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-03-26] Worker Run — STORY-138 Complete
+- **Story implemented**: STORY-138 — Replace Hardcoded /home/ Paths with Config-Driven Resolution
+- **PR created**: #81 targeting develop
+- **Branch**: feature/STORY-138-config-driven-paths
+- **Techniques**: `Path(__file__).resolve()` in all Python scripts; `BASH_SOURCE[0]` in all shell scripts; systemd `.template` files + `install-service.sh`; `STATE_DIR` env var for temp/counter dirs
+- **New CI guard**: `scripts/ci/check_hardcoded_paths.py` — scans src/, bin/, scripts/ for /home/ paths; returns non-zero on violations
+- **Tests added**: 10 unit tests in `tests/unit/test_story138_paths.py` (regression guard runs real project scan)
+- **Incidental fixes**: bare excepts, lazy imports, split 138-line `validate_field_mapping` and 145-line `run_eneve_199.main`; removed circular import in `field_mapping_audit`
+- **Quality gates**: all pre-commit hooks pass
 
 ### [2026-03-26 19:39] Work Checker Run
 - **PRs merged**: 0 — worker lock active (worktrees in use: work/free-source-real-data-hardening, merge/free-source-real-data-hardening), skipped merge step
