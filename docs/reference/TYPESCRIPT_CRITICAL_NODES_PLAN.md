@@ -90,3 +90,17 @@ The first implementation starts in:
 - [tooling/contracts-ts/README.md](../../tooling/contracts-ts/README.md)
 
 This package is intentionally narrow and focused on external contract validation.
+
+## Issue-Oriented Follow-Up
+
+The next planning layer now exists in:
+
+- [TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md](./TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md)
+
+That document maps specific audit issues to:
+
+- Python-only fixes
+- TS-beneficial boundaries
+- combined Python + TS implementation opportunities
+
+The first combined target is `ISSUE-11`, where TypeScript should validate the serialized batch enrichment outcome contract, not replace the Python enrichment loop itself.
