@@ -1,24 +1,205 @@
-version: '3.8'
+# Solstein Production Docker Compose
+#
+# Service topology:
+#   api       - FastAPI application (uvicorn)
+#   worker    - Celery worker processing async tasks from 4 queues
+#   beat      - Celery Beat scheduler (singleton - NEVER scale beyond 1 replica)
+#   flower    - Celery monitoring UI (internal-only, behind auth)
+#   db        - PostgreSQL 15 (override with external DB via DATABASE__URL)
+#   redis     - Redis 7 broker/backend (override with external Redis via CELERY_BROKER_URL)
+#
+# All application services share the same image (built from Dockerfile).
+# Differentiation is via command override only - do NOT create separate Dockerfiles.
+#
+# Usage:
+#   docker compose up -d                     # Start core services
+#   docker compose --profile monitoring up   # Include Flower
+#   docker compose --profile background up   # Include legacy orchestrator/analytics
 
 services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL 15
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: solstein-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-solstein}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-solstein}"]
+      interval: 10s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Redis 7 - Celery broker and result backend
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: solstein-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # API Service - FastAPI application
+  # ---------------------------------------------------------------------------
   api:
     build: .
     container_name: solstein-api
-    ports:
-      - "8000:8000"
+    env_file:
+      - .env
     environment:
-      SOLSTEIN_SECRET_KEY: "${SOLSTEIN_SECRET_KEY:-solstein-dev-key}"
-      DATABASE_PATH: /app/data
+      PYTHONPATH: /app/src
+    ports:
+      - "${API_PORT:-8000}:8000"
     volumes:
       - solstein_data:/app/data
-      - ./scripts:/app/scripts:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
       interval: 30s
       timeout: 10s
+      start_period: 30s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
+  # ---------------------------------------------------------------------------
+  # Celery Worker - async task processing
+  #
+  # Queues: default, scoring, export, enrichment
+  # Must match queue routing in src/solstein/celery_config.py
+  # Scale horizontally: docker compose up --scale worker=N
+  # ---------------------------------------------------------------------------
+  worker:
+    build: .
+    container_name: solstein-worker
+    env_file:
+      - .env
+    environment:
+      PYTHONPATH: /app/src
+    command: >
+      celery -A solstein.celery_config worker
+      --loglevel=info
+      --concurrency=${WORKER_CONCURRENCY:-4}
+      --hostname=worker@%h
+      --queues=default,scoring,export,enrichment
+      --events
+    volumes:
+      - solstein_data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A solstein.celery_config inspect ping --timeout 10 2>/dev/null | grep -q 'pong'"]
+      interval: 30s
+      timeout: 15s
+      start_period: 30s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: ${WORKER_MEMORY_LIMIT:-2G}
+
+  # ---------------------------------------------------------------------------
+  # Celery Beat - periodic task scheduler (SINGLETON)
+  #
+  # WARNING: Exactly ONE beat instance must run per deployment.
+  # Running multiple beat instances causes duplicate task dispatches and
+  # duplicate data writes. This constraint is enforced via deploy.replicas: 1.
+  # Do NOT use --scale with the beat service.
+  # ---------------------------------------------------------------------------
+  beat:
+    build: .
+    container_name: solstein-beat
+    env_file:
+      - .env
+    environment:
+      PYTHONPATH: /app/src
+    command: >
+      celery -A solstein.celery_config beat
+      --loglevel=info
+      --schedule=/app/data/celerybeat-schedule
+      --pidfile=/app/data/celerybeat.pid
+    volumes:
+      - solstein_data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512M
+
+  # ---------------------------------------------------------------------------
+  # Flower - Celery monitoring UI
+  #
+  # Access: http://localhost:5555 (auth required)
+  # PRODUCTION: Must be behind VPN or API gateway - do NOT expose publicly.
+  # ---------------------------------------------------------------------------
+  flower:
+    image: mher/flower:2.0
+    container_name: solstein-flower
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      FLOWER_BASIC_AUTH: ${FLOWER_USER:-admin}:${FLOWER_PASSWORD:-changeme}
+      FLOWER_PORT: ${FLOWER_PORT:-5555}
+    command: >
+      celery
+      --broker=${CELERY_BROKER_URL:-redis://redis:6379/0}
+      flower
+      --port=${FLOWER_PORT:-5555}
+      --persistent=True
+      --db=/data/flower.db
+    volumes:
+      - flower_data:/data
+    ports:
+      - "${FLOWER_PORT:-5555}:${FLOWER_PORT:-5555}"
+    depends_on:
+      redis:
+        condition: service_healthy
+      worker:
+        condition: service_started
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # ---------------------------------------------------------------------------
+  # Legacy services (kept for backward compatibility, optional)
+  # ---------------------------------------------------------------------------
   orchestrator:
     build: .
     container_name: solstein-orchestrator
@@ -72,4 +253,10 @@ services:
 
 volumes:
   solstein_data:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  flower_data:
     driver: local
