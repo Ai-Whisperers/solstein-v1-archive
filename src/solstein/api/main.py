@@ -93,6 +93,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     logger.info("Production hardening components initialized")
 
+    # STORY-050: Initialize OpenTelemetry distributed tracing
+    try:
+        from solstein.observability.tracing import init_tracing, instrument_fastapi
+
+        tracing_enabled = init_tracing(
+            service_name="solstein",
+            otlp_endpoint=settings.otlp_endpoint,
+        )
+        if tracing_enabled:
+            instrument_fastapi(app)
+            logger.info("OpenTelemetry tracing active")
+    except Exception as _otel_exc:  # noqa: BLE001 — tracing is non-critical
+        logger.warning("OpenTelemetry init failed — tracing disabled", error=str(_otel_exc))
+
     # EPIC-023: Enable performance profiling if configured
     if settings.environment == "development":
         from solstein.monitoring.profiler import enable_profiling
