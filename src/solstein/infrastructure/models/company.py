@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import relationship
 
@@ -82,6 +83,11 @@ class CompanyRecord(Base):
     composite_score = Column(Float, nullable=True)
     scoring_breakdown = Column(JSON, nullable=True)
 
+    # Embedding (EPIC-023: pgvector semantic search)
+    profile_embedding = Column(Vector(1536), nullable=True)
+    embedding_model = Column(String(100), nullable=True)
+    embedding_updated_at = Column(DateTime, nullable=True)
+
     # Metadata
     last_updated = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
@@ -149,6 +155,11 @@ class CompanyRecord(Base):
             "competitive_position_score": self.competitive_position_score,
             "composite_score": self.composite_score,
             "scoring_breakdown": self.scoring_breakdown,
+            "has_embedding": self.profile_embedding is not None,
+            "embedding_model": self.embedding_model,
+            "embedding_updated_at": (
+                self.embedding_updated_at.isoformat() if self.embedding_updated_at is not None else None
+            ),
             "last_updated": (self.last_updated.isoformat() if self.last_updated is not None else None),
             "created_at": (self.created_at.isoformat() if self.created_at is not None else None),
         }

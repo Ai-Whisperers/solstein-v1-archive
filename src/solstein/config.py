@@ -1,8 +1,4 @@
-"""
-Configuration management for SolStein.
-
-Handles environment variables, configuration files, and settings.
-"""
+"""Configuration management for SolStein."""
 
 from functools import lru_cache
 from pathlib import Path
@@ -255,6 +251,11 @@ class Settings(BaseSettings):
     siliconflow_model: str = Field(default="Qwen/Qwen2.5-72B-Instruct")
     alibaba_api_key: str | None = Field(default=None)
     alibaba_model: str = Field(default="qwen-plus")
+
+    # Embedding (EPIC-023: pgvector semantic search)
+    embedding_model: str = Field(default="text-embedding-3-small")
+    embedding_dimensions: int = Field(default=1536)
+    embedding_batch_size: int = Field(default=50, ge=1, le=500)
 
     model_config = SettingsConfigDict(
         env_file=".env",
