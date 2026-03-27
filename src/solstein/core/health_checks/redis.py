@@ -53,14 +53,16 @@ class RedisHealthCheck(HealthCheckStrategy):
                 duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
                 details={"configured": True, "url": redis_url},
             )
-        except Exception as e:
-            # Redis is optional, so degraded status
+        except Exception as e:  # noqa: BLE001 — health probes must catch all failures (REQ-5)
+            # STORY-047: Report unhealthy when configured but unreachable.
+            # The overall health endpoint returns 200 for degraded components,
+            # so this won't block load balancers — but operators see the true state.
             check = HealthCheck(
                 name="redis",
-                status=HealthStatus.DEGRADED,
-                message=f"Redis connection failed (optional service): {str(e)}",
+                status=HealthStatus.UNHEALTHY,
+                message=f"Redis connection failed: {str(e)}",
                 duration_ms=(datetime.now(timezone.utc) - start).total_seconds() * 1000,
-                details={"error": str(e), "optional": True},
+                details={"error": str(e), "configured": True},
             )
-            logger.warning("Redis health check failed (optional service)", error=str(e))
+            logger.warning("Redis health check failed", error=str(e))
             return check

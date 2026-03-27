@@ -256,7 +256,7 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 72 | STORY-047 | Replace Fake Health Checks with Real Probes | READY | EPIC-025 now DONE |
+| 72 | STORY-047 | Replace Fake Health Checks with Real Probes | IN_PROGRESS | Worker started 2026-03-27 17:34 |
 | 73 | STORY-049 | Add Structured Logging with Correlation IDs | READY | EPIC-025 now DONE |
 | 74 | STORY-050 | Implement OpenTelemetry Distributed Tracing | BLOCKED | Depends on STORY-049 |
 | 75 | STORY-051 | Add Prometheus Metrics Endpoints | BLOCKED | Depends on STORY-047 |
