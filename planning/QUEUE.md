@@ -113,13 +113,16 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 26 | — | See EPIC-052 README for stories | READY | 4 stories |
+| 26 | — | See EPIC-052 README for stories | BLOCKED | No story files in STORIES/ dir — cannot implement without acceptance criteria |
 
 ### EPIC-058: Data Conversion Pipeline Consolidation (P0)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 27 | — | See EPIC-058 README for stories | READY | 4 stories |
+| 27a | STORY-202 | Replace convert_json_to_company() with unified extractor | DONE | Verified: run_eneve_199.py already imports convert_to_domain_company from loaders |
+| 27b | STORY-203 | Add format auto-detection for revenue/growth/profit fields | DONE | Verified: company_extractors.py has EPIC-058 flat/nested detection |
+| 27c | STORY-204 | Wire metric_lineage confidence into Company.signal_confidences | IN_PROGRESS | Code wired but sparse-company FinancialMetric crash blocks tests |
+| 27d | STORY-205 | Golden-dataset format verification test suite | IN_PROGRESS | Tests written; 8 failures due to sparse company crash (Moixa, OVO Energy) |
 
 ### EPIC-062: Scraping Resilience and Evidence Ledger (P0)
 
