@@ -273,6 +273,35 @@ class Settings(BaseSettings):
     embedding_dimensions: int = Field(default=1536)
     embedding_batch_size: int = Field(default=50, ge=1, le=500)
 
+    # STORY-079: LangGraph checkpointing and human-in-the-loop
+    graph_checkpoint_db_path: Path = Field(
+        default=Path("data/checkpoints/research_graph.db"),
+        description=(
+            "Path to SQLite database for LangGraph checkpoint store (STORY-079). "
+            "Must survive process restart. A crashed graph resumes from the last "
+            "successful node using this store."
+        ),
+    )
+    human_review_confidence_threshold: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence threshold below which research results require human review "
+            "(STORY-079). When any company's confidence score falls below this value, "
+            "the pipeline pauses at the human_review_gate node and creates a review "
+            "queue entry. Lower values = fewer reviews. Start at 0.5; calibrate with "
+            "analyst feedback to target ~10-15%% of results."
+        ),
+    )
+    review_queue_db_path: Path = Field(
+        default=Path("data/checkpoints/review_queue.db"),
+        description=(
+            "Path to SQLite database for the human review queue (STORY-079). "
+            "Stores pending, approved, and rejected review entries."
+        ),
+    )
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -440,76 +469,5 @@ def configure_logging(settings: Settings) -> None:
     )
 
 
-# Template for .env file
-ENV_TEMPLATE = """# SolStein Configuration
-# Copy this file to .env and update values
-
-# Environment
-ENVIRONMENT=development
-DEBUG=true
-
-# Database (legacy, kept for SQLAlchemy compatibility)
-DATABASE__URL=postgresql://<user>:<password>@localhost:5432/solstein
-DATABASE__POOL_SIZE=20
-DATABASE__ECHO=false
-
-# Supabase
-SUPABASE__URL=https://your-project.supabase.co
-SUPABASE__KEY=sb_secret_your_key
-SUPABASE__ANON_KEY=sb_publishable_your_key
-SUPABASE__DB_URL=postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres
-
-# Temporal
-TEMPORAL__HOST_URL=localhost:7233
-TEMPORAL__NAMESPACE=default
-TEMPORAL__API_KEY=
-
-# API
-API__HOST=0.0.0.0
-API__PORT=8000
-API__DEBUG=true
-API__CORS_ORIGINS=["http://localhost:3000"]
-API__API_PREFIX=/api/v1
-
-# Security
-SECURITY__SECRET_KEY=replace-with-a-strong-32-char-min-secret
-SECURITY__ALGORITHM=HS256
-SECURITY__ACCESS_TOKEN_EXPIRE_MINUTES=30
-
-# Logging
-LOGGING__LEVEL=INFO
-LOGGING__FORMAT=json
-LOGGING__FILE_PATH=data/output/logs/solstein.log
-LOGGING__ROTATION="500 MB"
-LOGGING__RETENTION="30 days"
-
-# Data
-DATA__DATA_DIR=data
-DATA__CACHE_DIR=.cache
-DATA__EXPORT_DIR=exports
-
-# External APIs (optional)
-# OPENAI_API_KEY=sk-...
-# GROQ_API_KEY=gsk_...
-# FIREWORKS_API_KEY=fw_...
-# PERPLEXITY_API_KEY=pplx-...  # (currently unused)
-
-# Feature flags (safe cutover controls)
-# FEATURE_NEW_CLASSIFIER=false
-# FEATURE_NEW_READINESS_GATE=false
-# FEATURE_NEW_UNIFIED_LOADER=false
-
-# LLM Runtime (optional)
-# LLM_PROVIDER=auto  # auto|ollama|fireworks|openai|groq|none
-# OLLAMA_URL=http://localhost:11434
-# OLLAMA_MODEL=llama3.2:latest
-# OPENAI_MODEL=gpt-4o-mini
-# GROQ_MODEL=llama-3.3-70b-versatile
-# FIREWORKS_MODEL=qwen2-72b-instruct
-"""
-
-
-def create_env_template(output_path: Path = Path(".env.example")) -> None:
-    """Create .env template file."""
-    output_path.write_text(ENV_TEMPLATE)
-    logger.info(f"Created environment template at {output_path}")
+# Re-exported from config_template for backward compatibility
+from solstein.config_template import ENV_TEMPLATE, create_env_template  # noqa: F401

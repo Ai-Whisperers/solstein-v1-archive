@@ -20,7 +20,11 @@ import uuid
 from collections.abc import Callable
 from typing import Any
 
+from langgraph.types import Command
 from loguru import logger
+
+from solstein.config import Settings
+from solstein.research.graph.checkpointer import build_checkpointer
 
 from .isolation import with_error_isolation
 from .state import ResearchState
@@ -95,6 +99,52 @@ class RequestCache:
 
 
 # ---------------------------------------------------------------------------
+# Internal helpers
+# ---------------------------------------------------------------------------
+
+
+def _resolve_threshold(confidence_threshold: float | None) -> float:
+    """Return effective confidence threshold, falling back to Settings default."""
+    if confidence_threshold is not None:
+        return confidence_threshold
+    try:
+        return Settings().human_review_confidence_threshold
+    except Exception as exc:
+        logger.warning("[GraphExecutor] Could not read Settings threshold (%s), using 0.5", exc)
+        return 0.5
+
+
+def _build_initial_state(
+    company_identifiers: list[str],
+    run_id: str,
+    merged_config: dict[str, Any],
+) -> ResearchState:
+    """Return a fully-initialised ResearchState dict for a new graph run."""
+    return {
+        "run_id": run_id,
+        "company_identifiers": company_identifiers,
+        "config": merged_config,
+        "raw_github_facts": [],
+        "raw_companies_house_facts": [],
+        "raw_news_facts": [],
+        "raw_sec_facts": [],
+        "raw_web_facts": [],
+        "data_collection_errors": [],
+        "conflict_flags": [],
+        "resolved_facts": {},
+        "confidence_scores": {},
+        "company_scores": {},
+        "market_analysis": {},
+        "export_path": "",
+        "export_status": "pending",
+        "export_errors": [],
+        "completed_nodes": [],
+        "pipeline_errors": [],
+        "human_review_required": False,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Graph executor
 # ---------------------------------------------------------------------------
 
@@ -117,10 +167,12 @@ class GraphExecutor:
         """Initialize the executor and compile the research graph.
 
         Args:
-            checkpointer: Optional LangGraph checkpointer (e.g. MemorySaver).
-                When provided, graph execution is resumable from the last
-                successful node after a crash (STORY-079).
+            checkpointer: Optional LangGraph checkpointer (e.g. MemorySaver or
+                SqliteSaver from ``build_checkpointer()``). When provided, graph
+                execution is resumable from the last successful node after a crash
+                (STORY-079). Enables human-in-the-loop interruption as well.
         """
+        self._checkpointer = checkpointer
         self._compiled_graph = compile_research_graph(checkpointer=checkpointer, isolate_errors=True)
         logger.info("[GraphExecutor] Research graph compiled successfully")
 
@@ -129,6 +181,7 @@ class GraphExecutor:
         company_identifiers: list[str],
         config: dict[str, Any] | None = None,
         run_id: str | None = None,
+        confidence_threshold: float | None = None,
     ) -> dict[str, Any]:
         """Execute the research pipeline for the given companies.
 
@@ -136,68 +189,83 @@ class GraphExecutor:
         The cache is passed via LangGraph's configurable config so nodes
         can access it via config["configurable"]["request_cache"].
 
+        When a checkpointer is configured, the thread_id (= run_id) is passed
+        in the LangGraph configurable so state is persisted after each node.
+        A crashed run can be resumed by calling this method again with the same
+        run_id — the graph will continue from the last successful checkpoint.
+
         Args:
             company_identifiers: List of company IDs to research.
             config: Optional runtime configuration (timeouts, max_retries).
             run_id: Optional run identifier. Auto-generated if not provided.
+                    Must be stable across retries to enable checkpoint resume.
+            confidence_threshold: Human-review confidence threshold (0.0–1.0).
+                Overrides the value from Settings if provided.
 
         Returns:
-            The final ResearchState dict after graph execution.
-
-        Raises:
-            RuntimeError: If the graph fails to complete (pipeline_errors present).
+            The final ResearchState dict after graph execution, OR the interrupt
+            payload dict when the graph pauses awaiting analyst approval.
         """
         resolved_run_id = run_id or str(uuid.uuid4())
         request_cache = RequestCache()
-
-        initial_state: ResearchState = {
-            "run_id": resolved_run_id,
-            "company_identifiers": company_identifiers,
-            "config": config or {},
-            "raw_github_facts": [],
-            "raw_companies_house_facts": [],
-            "raw_news_facts": [],
-            "raw_sec_facts": [],
-            "raw_web_facts": [],
-            "data_collection_errors": [],
-            "conflict_flags": [],
-            "resolved_facts": {},
-            "confidence_scores": {},
-            "company_scores": {},
-            "market_analysis": {},
-            "export_path": "",
-            "export_status": "pending",
-            "export_errors": [],
-            "completed_nodes": [],
-            "pipeline_errors": [],
-            "human_review_required": False,
+        effective_threshold = _resolve_threshold(confidence_threshold)
+        merged_config = {
+            **(config or {}),
+            "human_review_confidence_threshold": effective_threshold,
         }
-
-        # Pass request_cache via LangGraph configurable so nodes can access it
+        initial_state = _build_initial_state(company_identifiers, resolved_run_id, merged_config)
         lg_config: dict[str, Any] = {
             "configurable": {
                 "request_cache": request_cache,
                 "run_id": resolved_run_id,
+                "thread_id": resolved_run_id,
             }
         }
-
         logger.info(
-            "[GraphExecutor] Starting run run_id=%s companies=%d",
+            "[GraphExecutor] Starting run run_id=%s companies=%d threshold=%.2f",
             resolved_run_id,
             len(company_identifiers),
+            effective_threshold,
         )
         result = self._compiled_graph.invoke(initial_state, config=lg_config)
-
         cache_stats = request_cache.stats
         logger.info(
             "[GraphExecutor] Run complete run_id=%s cache_hits=%d cache_misses=%d errors=%d",
             resolved_run_id,
             cache_stats["hits"],
             cache_stats["misses"],
-            len(result.get("data_collection_errors", [])),
+            len(result.get("data_collection_errors", [])) if isinstance(result, dict) else 0,
         )
+        return result  # type: ignore[return-value]
 
-        return result
+    def resume_after_approval(self, run_id: str) -> dict[str, Any]:
+        """Resume a graph that was paused at the human_review_gate interrupt.
+
+        Called by the review API after an analyst approves a review entry.
+        The graph continues execution from after the ``interrupt()`` call in
+        ``_human_review_gate_node`` and proceeds to the analysis and export nodes.
+
+        Args:
+            run_id: The LangGraph thread_id (= research run identifier).
+
+        Returns:
+            The final ResearchState dict after graph completion.
+
+        Raises:
+            RuntimeError: If no checkpointer is configured — cannot resume
+                          without a checkpoint store.
+            ValueError:   If no checkpoint exists for the given run_id.
+        """
+        if self._checkpointer is None:
+            raise RuntimeError(
+                "[GraphExecutor] resume_after_approval requires a checkpointer. "
+                "Create GraphExecutor with a MemorySaver or SqliteSaver."
+            )
+        lg_config: dict[str, Any] = {"configurable": {"thread_id": run_id}}
+        logger.info("[GraphExecutor] Resuming run %s after human approval", run_id)
+        result = self._compiled_graph.invoke(Command(resume="approved"), config=lg_config)
+        logger.info("[GraphExecutor] Resumed run %s completed", run_id)
+        return result  # type: ignore[return-value]
 
 
 # ---------------------------------------------------------------------------
@@ -208,10 +276,29 @@ _DEFAULT_EXECUTOR: GraphExecutor | None = None
 
 
 def _get_default_executor() -> GraphExecutor:
-    """Return the singleton executor, creating it on first call."""
+    """Return the singleton executor, creating it on first call.
+
+    Initializes with a durable SqliteSaver checkpointer using the path from
+    Settings.graph_checkpoint_db_path so that crashed graphs are automatically
+    resumable. Falls back to no checkpointer if the sqlite package is missing.
+    """
     global _DEFAULT_EXECUTOR
     if _DEFAULT_EXECUTOR is None:
-        _DEFAULT_EXECUTOR = GraphExecutor()
+        checkpointer: Any = None
+        try:
+            settings = Settings()
+            checkpointer = build_checkpointer(settings.graph_checkpoint_db_path)
+            logger.info(
+                "[GraphExecutor] Singleton using SqliteSaver at %s",
+                settings.graph_checkpoint_db_path,
+            )
+        except Exception as exc:
+            logger.warning(
+                "[GraphExecutor] Could not build SqliteSaver checkpointer (%s) — "
+                "running without checkpoint resume support.",
+                exc,
+            )
+        _DEFAULT_EXECUTOR = GraphExecutor(checkpointer=checkpointer)
     return _DEFAULT_EXECUTOR
 
 

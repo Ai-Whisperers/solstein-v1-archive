@@ -52,6 +52,7 @@ from .routers import (
     jobs,
     market,
     research_jobs,
+    review,
     scoring,
     semantic_search,
     simulation,
@@ -191,6 +192,7 @@ app.include_router(simulation.router, prefix="/simulation")
 app.include_router(async_jobs.router)
 app.include_router(research_jobs.router, prefix="/jobs")
 app.include_router(semantic_search.router)
+app.include_router(review.router, prefix="/api/v1")
 
 # WebSocket realtime endpoints (EPIC-024)
 from .websocket.routes import router as ws_router

@@ -61,7 +61,10 @@ from collections.abc import Callable
 from typing import Any
 
 from langgraph.graph import END, START, StateGraph
+from langgraph.types import interrupt
 from loguru import logger
+
+from solstein.review_queue.store import get_review_store
 
 from .isolation import with_error_isolation
 from .nodes import (
@@ -199,30 +202,89 @@ def _scoring_node(state: ResearchState) -> dict[str, Any]:
 
 
 def _human_review_router(state: ResearchState) -> str:
-    """Conditional routing after scoring.
+    """Conditional routing after scoring — STORY-079.
 
-    Routes to 'analysis' directly when confidence is acceptable.
-    Routes to 'human_review_gate' when any company requires review.
+    Routes to 'analysis' directly when all confidence scores are above the
+    configured threshold. Routes to 'human_review_gate' when:
+    - ``human_review_required`` is already True in state (set by caller), OR
+    - any company's confidence score is below the configured threshold.
 
-    STORY-079 will wire a LangGraph interrupt into human_review_gate
-    so the pipeline pauses and waits for human approval before proceeding.
+    Threshold is read from ``state["config"]["human_review_confidence_threshold"]``
+    (injected by GraphExecutor.run() from Settings). Falls back to 0.5.
     """
     if state.get("human_review_required"):
         return "human_review_gate"
+
+    threshold: float = float(
+        state.get("config", {}).get("human_review_confidence_threshold", 0.5)
+    )
+    confidence_scores: dict[str, float] = state.get("confidence_scores") or {}
+    if confidence_scores and any(v < threshold for v in confidence_scores.values()):
+        return "human_review_gate"
+
     return "analysis"
 
 
 def _human_review_gate_node(state: ResearchState) -> dict[str, Any]:
-    """Human-in-the-loop gate node.
+    """Human-in-the-loop gate node — STORY-079.
 
-    This node is a placeholder for the STORY-079 interrupt mechanism.
-    When STORY-079 is implemented, LangGraph will pause execution here
-    and surface the low-confidence companies to the operator.
+    Pauses graph execution via LangGraph's ``interrupt()`` primitive so an
+    analyst can review and approve or reject low-confidence research results.
 
-    Reads: company_scores, conflict_flags, confidence_scores
+    Flow:
+    1. Creates (or retrieves existing) a ReviewQueueEntry for this run.
+    2. Calls ``interrupt()`` — LangGraph serialises graph state and raises
+       GraphInterrupt; the caller receives the interrupt payload.
+    3. When the review API approves the result it calls
+       ``graph.invoke(Command(resume="approved"), config={"configurable": {"thread_id": run_id}})``;
+       graph execution resumes after the ``interrupt()`` call.
+    4. For rejection, the API marks the entry REJECTED and does NOT resume
+       the graph — the export node never runs, so nothing is delivered.
+
+    Reads:  run_id, confidence_scores, company_scores, conflict_flags, config
     Writes: completed_nodes
     """
-    logger.info("[human_review_gate] Pausing for human review (STORY-079 will add interrupt here)")
+    run_id: str = state.get("run_id") or "unknown"
+    threshold: float = float(
+        state.get("config", {}).get("human_review_confidence_threshold", 0.5)
+    )
+
+    # Idempotent entry creation — node may be re-entered on first-resume pass
+    store = get_review_store()
+    existing = store.get_by_run_id(run_id)
+    if existing is None:
+        entry = store.create_entry(run_id=run_id, state=dict(state), threshold=threshold)
+        logger.info(
+            "[human_review_gate] Created review entry %s for run %s "
+            "(low-confidence companies: %s)",
+            entry.id,
+            run_id,
+            entry.low_confidence_companies,
+        )
+    else:
+        entry = existing
+        logger.info(
+            "[human_review_gate] Existing review entry %s (status=%s) for run %s",
+            entry.id,
+            entry.status.value,
+            run_id,
+        )
+
+    # Pause execution — GraphInterrupt is raised internally by LangGraph.
+    # The graph resumes when the review API issues:
+    #   graph.invoke(Command(resume="approved"), config={"configurable": {"thread_id": run_id}})
+    interrupt({
+        "review_id": entry.id,
+        "run_id": run_id,
+        "low_confidence_companies": entry.low_confidence_companies,
+        "action_required": (
+            "Call POST /api/v1/review/{review_id}/approve "
+            "or POST /api/v1/review/{review_id}/reject"
+        ),
+    })
+
+    # Execution resumes here after approval
+    logger.info("[human_review_gate] Resuming after human approval for run %s", run_id)
     return {"completed_nodes": ["human_review_gate"]}
 
 
