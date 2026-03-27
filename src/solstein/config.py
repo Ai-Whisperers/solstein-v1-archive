@@ -274,6 +274,9 @@ class Settings(BaseSettings):
     alibaba_api_key: str | None = Field(default=None)
     alibaba_model: str = Field(default="qwen-plus")
 
+    # OpenTelemetry (STORY-050): set to OTLP endpoint to enable tracing
+    otlp_endpoint: str | None = Field(default=None)
+
     # Langfuse observability (STORY-073)
     langfuse_public_key: str | None = Field(default=None, description="Langfuse public key for tracing")
     langfuse_secret_key: str | None = Field(default=None, description="Langfuse secret key for tracing")

@@ -41,6 +41,10 @@ dependencies = [
     "openai>=1.0",  # EPIC-021: OpenAI-compatible SDK for multi-provider support
     "instructor>=1.0",  # STORY-072: Pydantic schema validation for structured LLM outputs
     "langfuse>=2.0",  # STORY-073: LLM observability, cost tracking, prompt management
+    "opentelemetry-api>=1.20",  # STORY-050: Distributed tracing
+    "opentelemetry-sdk>=1.20",  # STORY-050: OTel SDK
+    "opentelemetry-exporter-otlp-proto-http>=1.20",  # STORY-050: OTLP HTTP exporter
+    "opentelemetry-instrumentation-fastapi>=0.40b0",  # STORY-050: FastAPI auto-instrumentation
 ]
 
 [project.license]

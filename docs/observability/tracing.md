@@ -288,6 +288,92 @@ curl -X POST -H "Authorization: Bearer $ADMIN_TOKEN" \
   http://api.solstein.com/metrics/dependencies/reset
 ```
 
+## OpenTelemetry Distributed Tracing (STORY-050)
+
+Solstein supports OpenTelemetry (OTel) distributed tracing for end-to-end visibility
+into research pipeline execution, LLM calls, and database queries.
+
+### Configuration
+
+Set the `OTLP_ENDPOINT` environment variable to enable tracing:
+
+```bash
+# .env
+OTLP_ENDPOINT=http://localhost:4318/v1/traces
+```
+
+When `OTLP_ENDPOINT` is unset, tracing is disabled with zero overhead — no errors,
+no performance impact. This is the default for local development.
+
+Compatible backends: Jaeger, Grafana Tempo, Datadog, any OTLP-compatible collector.
+
+### How It Works
+
+On startup, `init_tracing()` in `src/solstein/observability/tracing.py`:
+
+1. Checks for `OTLP_ENDPOINT` (env var or Settings field `otlp_endpoint`)
+2. If set, configures a `TracerProvider` with `OTLPSpanExporter` (HTTP/protobuf)
+3. Auto-instruments FastAPI via `opentelemetry-instrumentation-fastapi`
+4. If unset, falls back to a no-op tracer (all span calls are safe but do nothing)
+
+### Creating Spans
+
+For operations not auto-instrumented (LLM calls, pipeline stages, external agents):
+
+```python
+from solstein.observability.tracing import create_span, record_span_error, record_span_success
+
+span = create_span("llm.call", attributes={
+    "provider": "deepinfra",
+    "model": "llama-3.3-70b",
+    "company_id": "COMP-123",
+})
+try:
+    result = await llm_client.generate(prompt)
+    record_span_success(span)
+except Exception as e:
+    record_span_error(span, e)
+    raise
+finally:
+    span.end()
+```
+
+### Span Naming Conventions
+
+| Category | Pattern | Example |
+|----------|---------|---------|
+| HTTP requests | Auto-instrumented | `GET /health` |
+| LLM calls | `llm.{operation}` | `llm.call`, `llm.embed` |
+| Database | `db.{operation}` | `db.query`, `db.insert` |
+| Pipeline stages | `pipeline.{stage}` | `pipeline.discovery`, `pipeline.scoring` |
+| External agents | `agent.{source}` | `agent.github`, `agent.crunchbase` |
+
+### Standard Span Attributes
+
+Every span created via `create_span()` automatically includes:
+
+- `correlation_id` — from the request's `ContextVar` (set by `ContextMiddleware`)
+- `company_id` — from `SPAN_COMPANY_ID` context var, when set
+
+Custom attributes can be passed via the `attributes` dict.
+
+### Dependencies
+
+```
+opentelemetry-api>=1.20
+opentelemetry-sdk>=1.20
+opentelemetry-exporter-otlp-proto-http>=1.20
+opentelemetry-instrumentation-fastapi>=0.40b0
+```
+
+### Verifying Tracing
+
+1. Start Jaeger: `docker run -p 16686:16686 -p 4318:4318 jaegertracing/jaeger:latest`
+2. Set `OTLP_ENDPOINT=http://localhost:4318/v1/traces` in `.env`
+3. Start the API: `uvicorn solstein.api.main:app`
+4. Make a request: `curl http://localhost:8000/health`
+5. View traces: open `http://localhost:16686` and select service "solstein"
+
 ## Related Documentation
 
 - [Logging](./logging.md) - Structured logging
