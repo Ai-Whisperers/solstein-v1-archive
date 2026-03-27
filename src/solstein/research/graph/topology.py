@@ -52,11 +52,13 @@ They fan in to conflict_resolution which receives all raw_* facts.
 from __future__ import annotations
 
 import uuid
+from collections.abc import Callable
 from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 from loguru import logger
 
+from .isolation import with_error_isolation
 from .state import ResearchState
 
 
@@ -319,25 +321,37 @@ PARALLEL_COLLECTION_NODES: list[str] = [
 ]
 
 
-def build_research_graph() -> StateGraph:
+def build_research_graph(isolate_errors: bool = False) -> StateGraph:
     """Build the research pipeline StateGraph.
 
     Returns a StateGraph (not yet compiled) so callers can optionally
     attach a checkpointer before compilation (STORY-079).
 
+    Args:
+        isolate_errors: When True, wraps each data-collection node with
+            error isolation so a node failure logs the error and returns
+            an empty result instead of crashing the graph. The
+            GraphExecutor passes isolate_errors=True by default.
+
     Graph topology:
         START -> dispatch -> [5 parallel nodes] -> conflict_resolution
               -> scoring -> human_review_router -> analysis -> export -> END
     """
+    def _maybe_isolate(name: str, fn: Callable) -> Callable:
+        """Optionally wrap fn with error isolation."""
+        if not isolate_errors:
+            return fn
+        return with_error_isolation(name)(fn)
+
     graph = StateGraph(ResearchState)
 
-    # Register all nodes
+    # Register all nodes (data-collection nodes wrapped with error isolation if requested)
     graph.add_node(NODE_DISPATCH, _dispatch_node)
-    graph.add_node(NODE_GITHUB, _github_data_node)
-    graph.add_node(NODE_COMPANIES_HOUSE, _companies_house_node)
-    graph.add_node(NODE_NEWS, _news_search_node)
-    graph.add_node(NODE_SEC, _sec_filings_node)
-    graph.add_node(NODE_WEB, _web_profile_node)
+    graph.add_node(NODE_GITHUB, _maybe_isolate(NODE_GITHUB, _github_data_node))
+    graph.add_node(NODE_COMPANIES_HOUSE, _maybe_isolate(NODE_COMPANIES_HOUSE, _companies_house_node))
+    graph.add_node(NODE_NEWS, _maybe_isolate(NODE_NEWS, _news_search_node))
+    graph.add_node(NODE_SEC, _maybe_isolate(NODE_SEC, _sec_filings_node))
+    graph.add_node(NODE_WEB, _maybe_isolate(NODE_WEB, _web_profile_node))
     graph.add_node(NODE_CONFLICT, _conflict_resolution_node)
     graph.add_node(NODE_SCORING, _scoring_node)
     graph.add_node(NODE_HUMAN_REVIEW_GATE, _human_review_gate_node)
@@ -378,7 +392,7 @@ def build_research_graph() -> StateGraph:
     return graph
 
 
-def compile_research_graph(checkpointer: Any | None = None) -> Any:
+def compile_research_graph(checkpointer: Any | None = None, isolate_errors: bool = False) -> Any:
     """Compile the research graph into a runnable CompiledGraph.
 
     Args:
@@ -414,7 +428,7 @@ def compile_research_graph(checkpointer: Any | None = None) -> Any:
             "human_review_required": False,
         })
     """
-    graph = build_research_graph()
+    graph = build_research_graph(isolate_errors=isolate_errors)
     if checkpointer is not None:
         return graph.compile(checkpointer=checkpointer)
     return graph.compile()
