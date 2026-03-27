@@ -146,6 +146,12 @@ class Company(CompanyUtilityMixin, CompanyPropertyMixin, CompanySyncMixin):
     energy_infrastructure_tier: str | None = None
     energy_trading_breakdown: dict[str, Any] = Field(default_factory=dict)
 
+    # STORY-152: Grid Integration & Smart Infrastructure (EPIC-039)
+    energy_grid_score: float | None = None
+    energy_grid_readiness: str | None = None
+    energy_smart_infra_level: str | None = None
+    energy_grid_breakdown: dict[str, Any] = Field(default_factory=dict)
+
 
     # Aliases for backward compatibility
     @property

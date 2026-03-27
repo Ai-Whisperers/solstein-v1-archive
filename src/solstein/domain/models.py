@@ -300,6 +300,11 @@ class Company(BaseModel):
     energy_infrastructure_tier: str | None = None  # cloud_native / hybrid / legacy / unknown
     energy_trading_breakdown: dict[str, Any] = Field(default_factory=dict)
 
+    # STORY-152: Grid Integration & Smart Infrastructure (EPIC-039)
+    energy_grid_score: float | None = None  # 0-100 composite
+    energy_grid_readiness: str | None = None  # advanced / developing / basic / unknown
+    energy_smart_infra_level: str | None = None  # intelligent / connected / traditional / unknown
+    energy_grid_breakdown: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="before")
     @classmethod
