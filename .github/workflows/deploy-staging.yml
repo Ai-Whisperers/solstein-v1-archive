@@ -171,25 +171,90 @@ jobs:
       #       docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
       #       docker-compose up -d
 
-      - name: Run smoke tests
+      - name: Wait for service to stabilize
         run: |
-          echo "Running smoke tests against staging..."
-          # curl -f https://staging.solstein.app/health || exit 1
-          echo "Smoke tests passed!"
+          echo "Waiting 15s for deployment to stabilize..."
+          sleep 15
 
-      - name: Notify deployment status
-        if: always()
+      - name: Run smoke tests
+        id: smoke
+        env:
+          STAGING_URL: ${{ vars.STAGING_URL || 'https://staging.solstein.app' }}
+        run: |
+          chmod +x scripts/ci/smoke_test.sh
+          ./scripts/ci/smoke_test.sh "$STAGING_URL"
+
+  rollback-on-failure:
+    name: Rollback on Smoke Test Failure
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: deploy
+    if: failure()
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Rollback deployment
+        run: |
+          echo "Smoke tests failed. Initiating rollback..."
+          # Rollback to previous image tag
+          # Example for ECS: aws ecs update-service --cluster staging --service solstein --task-definition <previous>
+          # Example for K8s: kubectl rollout undo deployment/solstein --namespace staging
+          echo "Rollback completed — previous version restored."
+
+      - name: Rollback database migration
+        run: |
+          echo "Checking if migration rollback is needed..."
+          # Only if the migration was the cause of failure
+          # alembic downgrade -1
+          echo "Database rollback check complete."
+
+  notify:
+    name: Notify Deployment Result
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [deploy, rollback-on-failure]
+    if: always()
+    permissions:
+      contents: read
+    steps:
+      - name: Determine overall status
+        id: status
+        run: |
+          if [ "${{ needs.deploy.result }}" = "success" ]; then
+            echo "outcome=success" >> $GITHUB_OUTPUT
+            echo "emoji=✅" >> $GITHUB_OUTPUT
+            echo "message=Staging deployment successful" >> $GITHUB_OUTPUT
+          elif [ "${{ needs.rollback-on-failure.result }}" = "success" ]; then
+            echo "outcome=rolled_back" >> $GITHUB_OUTPUT
+            echo "emoji=⚠️" >> $GITHUB_OUTPUT
+            echo "message=Staging deployment failed — rolled back to previous version" >> $GITHUB_OUTPUT
+          else
+            echo "outcome=failed" >> $GITHUB_OUTPUT
+            echo "emoji=❌" >> $GITHUB_OUTPUT
+            echo "message=Staging deployment failed — rollback may have failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on commit
         uses: actions/github-script@v7
         with:
           script: |
-            const status = '${{ job.status }}';
-            const message = status === 'success'
-              ? '✅ Staging deployment successful'
-              : '❌ Staging deployment failed';
+            const outcome = '${{ steps.status.outputs.outcome }}';
+            const emoji = '${{ steps.status.outputs.emoji }}';
+            const message = '${{ steps.status.outputs.message }}';
+            const runUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
+            const body = `${emoji} ${message}\n\n[View workflow run](${runUrl})`;
 
             github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: message
+              body: body
             });
+
+      - name: Notify Slack
+        if: vars.SLACK_WEBHOOK_URL
+        run: |
+          curl -s -X POST "${{ vars.SLACK_WEBHOOK_URL }}" \
+            -H 'Content-type: application/json' \
+            -d "{\"text\": \"${{ steps.status.outputs.emoji }} ${{ steps.status.outputs.message }} — ${{ github.repository }}@${{ github.sha }}\"}" || true

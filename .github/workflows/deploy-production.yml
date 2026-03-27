@@ -57,12 +57,27 @@ jobs:
           fi
           echo "✅ Tag $VERSION verified"
 
-      - name: Check staging deployment
+      - name: Verify staging deployment succeeded
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Checking if version was deployed to staging first..."
-          # Verify the image exists in registry
-          # curl -f https://ghcr.io/v2/${{ github.repository }}/manifests/$VERSION || exit 1
-          echo "✅ Image exists in registry"
+          echo "Checking if this commit passed staging deployment..."
+          COMMIT_SHA=$(git rev-list -n 1 "$VERSION" 2>/dev/null || echo "${{ github.sha }}")
+
+          # Check that the staging deploy workflow succeeded for this commit
+          STAGING_STATUS=$(gh run list \
+            --workflow=deploy-staging.yml \
+            --commit="$COMMIT_SHA" \
+            --status=completed \
+            --json conclusion \
+            --jq '.[0].conclusion' 2>/dev/null || echo "unknown")
+
+          if [ "$STAGING_STATUS" != "success" ]; then
+            echo "❌ Staging deployment has not succeeded for commit $COMMIT_SHA (status: $STAGING_STATUS)"
+            echo "Production deploys require a successful staging deployment first."
+            exit 1
+          fi
+          echo "✅ Staging deployment verified for $COMMIT_SHA"
 
       - name: Run security scan
         run: |
@@ -142,10 +157,15 @@ jobs:
           # - Kubernetes: kubectl set image deployment/solstein solstein=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
           # - VM: ssh user@host 'docker pull ... && docker-compose up -d'
 
+      - name: Wait for service to stabilize
+        run: sleep 15
+
       - name: Run smoke tests
+        env:
+          PROD_URL: ${{ vars.PROD_URL || 'https://solstein.app' }}
         run: |
-          echo "Running production smoke tests..."
-          # curl -f https://solstein.app/health || exit 1
+          chmod +x scripts/ci/smoke_test.sh
+          ./scripts/ci/smoke_test.sh "$PROD_URL"
           # curl -f https://solstein.app/api/v1/companies || exit 1
           echo "✅ Smoke tests passed"
 
