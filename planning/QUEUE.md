@@ -259,7 +259,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 72 | STORY-047 | Replace Fake Health Checks with Real Probes | DONE | PR #139 |
 | 73 | STORY-049 | Add Structured Logging with Correlation IDs | DONE | PR #140 (already implemented, tests added) |
 | 74 | STORY-050 | Implement OpenTelemetry Distributed Tracing | DONE | PR #141 |
-| 75 | STORY-051 | Add Prometheus Metrics Endpoints | IN_PROGRESS | STORY-047 DONE |
+| 75 | STORY-051 | Add Prometheus Metrics Endpoints | IN_PROGRESS | PR #142 |
 | 76 | STORY-086 | Enforce Universal Audit Trail Across All Endpoints | READY | STORY-049 DONE |
 | 77 | STORY-087 | Implement Celery Dead Letter Queue | SKIP | Superseded by STORY-088 (EPIC-025) |
 

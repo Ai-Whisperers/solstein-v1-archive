@@ -45,6 +45,7 @@ dependencies = [
     "opentelemetry-sdk>=1.20",  # STORY-050: OTel SDK
     "opentelemetry-exporter-otlp-proto-http>=1.20",  # STORY-050: OTLP HTTP exporter
     "opentelemetry-instrumentation-fastapi>=0.40b0",  # STORY-050: FastAPI auto-instrumentation
+    "prometheus-client>=0.20",  # STORY-051: Prometheus metrics endpoint
 ]
 
 [project.license]
