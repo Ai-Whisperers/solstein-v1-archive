@@ -173,14 +173,14 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 40 | STORY-080 | Add pgvector Extension and Embedding Schema | DONE | PR #115 | |
 | 41 | STORY-081 | Generate Company Embeddings During Research Pipeline | DONE | PR #116 merged 2026-03-27 |
-| 42 | STORY-082 | Implement Semantic Similarity Search Endpoint | DONE | PR #117 |
+| 42 | STORY-082 | Implement Semantic Similarity Search Endpoint | DONE | PR #117 merged 2026-03-27 (rebased by checker) |
 
 ### EPIC-024: Supabase Realtime Job Status (P2)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 43 | STORY-083 | Define Research Job Status Table with Realtime | DONE | PR #118 |
-| 44 | STORY-084 | Replace Polling with Supabase Realtime Subscriptions | DONE | PR #119 |
+| 43 | STORY-083 | Define Research Job Status Table with Realtime | DONE | PR #118 merged 2026-03-27 |
+| 44 | STORY-084 | Replace Polling with Supabase Realtime Subscriptions | DONE | PR #119 merged 2026-03-27 |
 
 ### EPIC-030: Export Pipeline Modernization (P2)
 
@@ -484,3 +484,12 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: STORY-082 (semantic search endpoint) — STORY-080 + STORY-081 both merged
 - **Branch hygiene**: Stale lock removed (PID 4032004 dead). Deleted 3 remote feature branches. 2 remote branches remain (develop, master).
 - **Actions taken**: Removed stale lock, rebased PR#115, merged 3 PRs, updated STORY-081 DONE + STORY-014/013 notes in queue
+
+### [2026-03-27 23:43] Work Checker Run
+- **PRs merged**: 3 total — #117 (STORY-082 semantic search, after rebase), #118 (STORY-083 job status table), #119 (STORY-084 realtime subscriptions)
+- **PRs rebased**: 1 successful — #117 (STORY-082) conflict in main.py resolved (kept both research_jobs + websocket routes and added semantic_search)
+- **Open PRs**: 0 remaining
+- **Queue**: M1: 15/15 DONE. M2: all DONE. P0: all complete except EPIC-052 (BLOCKED). M3: EPIC-033 4/4, EPIC-023 3/3, EPIC-024 2/2 DONE. EPIC-030 5 stories BLOCKED on EPIC-025.
+- **Dependencies unblocked**: None — EPIC-030 blocked on EPIC-025 (Worker Reliability), not yet queued
+- **Branch hygiene**: Deleted 3 remote feature branches + 3 local merged branches. Pruned refs. 2 remote branches remain (develop, master).
+- **Actions taken**: Merged 2 MERGEABLE PRs, rebased + merged 1 CONFLICTING PR, branch cleanup, queue notes updated
