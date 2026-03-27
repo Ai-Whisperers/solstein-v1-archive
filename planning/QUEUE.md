@@ -298,8 +298,8 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 86 | STORY-177 | Fix `ai_score` Float Truncation in Company Loaders | DONE | Already implemented: ai_score typed float|None; loads 7.5 correctly; covered by test_unified_converter_story_202.py |
-| 87 | STORY-178 | Map `funding_raised` to `total_funding_raised_eur` in Company | IN_PROGRESS | top-level Company.total_funding_raised_eur not populated; funding_data["total_funding_eur"] exists |
-| 88 | STORY-179 | Expose `ebitda_margin_pct` and `recurring_revenue_pct` on Company | READY | Top-level Company.ebitda_margin and .recurring_revenue_pct not populated from profitability_data |
+| 87 | STORY-178 | Map `funding_raised` to `total_funding_raised_eur` in Company | DONE | PR #158 — total_funding_raised_eur, latest_valuation_eur, funding_rounds, lead_investors; 10 tests |
+| 88 | STORY-179 | Expose `ebitda_margin_pct` and `recurring_revenue_pct` on Company | IN_PROGRESS | Top-level Company.ebitda_margin and .recurring_revenue_pct not populated from profitability_data |
 | 89 | STORY-180 | Add Field Mapping Parity Test | READY | Depends on STORY-177/178/179 |
 
 ---
