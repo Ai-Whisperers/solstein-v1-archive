@@ -27,6 +27,7 @@ from solstein.infrastructure.models import (
     OutboxRecord,
     ReleaseGateAuditRecord,
     ResearchArtifactRecord,
+    ResearchJobRecord,
     ResearchRunRecord,
     ResearchStageRecord,
     ScoringRecord,
@@ -55,5 +56,6 @@ __all__ = [
     "EnrichmentCacheRecord",
     "EnrichmentJobRecord",
     "ReleaseGateAuditRecord",
+    "ResearchJobRecord",
     "TenantRecord",
 ]
