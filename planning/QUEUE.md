@@ -188,8 +188,8 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 45 | STORY-111 | Move Exports to Async Celery Tasks | DONE | PR #144, 53 tests |
 | 46 | STORY-112 | Streaming Excel Export for Large Datasets | DONE | PR #145, 38 tests |
-| 47 | STORY-113 | Export Status Tracking and Download Links | IN_PROGRESS | Worker run 2026-03-27 |
-| 48 | STORY-114 | Add PDF Export Format | READY | STORY-111 DONE |
+| 47 | STORY-113 | Export Status Tracking and Download Links | DONE | PR #147, 46 tests |
+| 48 | STORY-114 | Add PDF Export Format | IN_PROGRESS | Worker run 2026-03-27 |
 | 49 | STORY-115 | Store Exports in Supabase Storage | READY | STORY-111 DONE |
 
 ---
