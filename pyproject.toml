@@ -20,6 +20,7 @@ dependencies = [
     "fastapi>=0.104,<1.0",
     "uvicorn[standard]>=0.24",
     "sqlalchemy>=2.0,<3.0",
+    "pgvector>=0.4,<1.0",
     "alembic>=1.12",
     "psycopg[binary]>=3.1",
     "aiosqlite>=0.19",
