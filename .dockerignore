@@ -78,6 +78,21 @@ logs/
 # Scripts (not needed in container)
 scripts/
 
+# Backlog and planning (not needed at runtime)
+backlog/
+planning/
+*.md
+!LICENSE.md
+
+# Tooling
+tooling/
+.claude/
+
+# Docker files (prevent recursive context)
+Dockerfile.dev
+docker-compose.dev.yml
+docker-compose.prod.yml
+
 # Misc
 *.bak
 *.tmp
