@@ -24,11 +24,11 @@ This is not a security posture. This is an open warehouse with a "Security" sign
 
 | Story | Title | Severity |
 |-------|-------|----------|
-| [STORY-001](STORIES/STORY-001-real-password-hashing.md) | Implement Real Password Hashing | CRITICAL |
-| [STORY-002](STORIES/STORY-002-remove-auth-bypass.md) | Remove Authentication Bypass on Core Endpoints | CRITICAL |
-| [STORY-003](STORIES/STORY-003-jwt-secret-rotation.md) | Replace Default JWT Secret and Fix Token Refresh | CRITICAL |
-| [STORY-004](STORIES/STORY-004-sanitize-error-responses.md) | Remove Stack Traces from HTTP Error Responses | HIGH |
-| [STORY-005](STORIES/STORY-005-input-sanitization-propagation.md) | Propagate Input Sanitization to All Routers | HIGH |
+| [STORY-001](../../archive/superseded/STORY-001-real-password-hashing.md) | Implement Real Password Hashing | CRITICAL |
+| [STORY-002](../../archive/superseded/STORY-002-remove-auth-bypass.md) | Remove Authentication Bypass on Core Endpoints | CRITICAL |
+| [STORY-003](../../archive/superseded/STORY-003-jwt-secret-rotation.md) | Replace Default JWT Secret and Fix Token Refresh | CRITICAL |
+| [STORY-004](../../archive/superseded/STORY-004-sanitize-error-responses.md) | Remove Stack Traces from HTTP Error Responses | HIGH |
+| [STORY-005](../../archive/superseded/STORY-005-input-sanitization-propagation.md) | Propagate Input Sanitization to All Routers | HIGH |
 
 ## Definition of Done
 

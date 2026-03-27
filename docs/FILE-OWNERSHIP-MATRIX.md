@@ -1,8 +1,8 @@
 # File Ownership Matrix: Parallel Agent Work
 
-> **Purpose**: Define exclusive file ownership to prevent merge conflicts  
-> **Last Updated**: 2026-03-06  
-> **Applies To**: EPIC-020 through EPIC-030 + EPIC-XXX variants
+> **Purpose**: Define exclusive file ownership to prevent merge conflicts
+> **Last Updated**: 2026-03-06
+> **Applies To**: EPIC-020 through EPIC-030 and future epics
 
 ---
 
@@ -98,7 +98,7 @@
 | `infrastructure/database_models.py` | EPIC-030 | After EPIC-021 split, add tenant_id |
 | `api/middleware/tenant.py` | EPIC-030 | Enhance existing |
 | `api/dependencies.py` | EPIC-030 | Add tenant context |
-| `.github/workflows/*.yml` | EPIC-XXX | CI improvements |
+| `.github/workflows/*.yml` | future-ci-epic | CI improvements |
 
 ### Critical Coordination: Multi-Tenancy Schema
 
@@ -126,7 +126,7 @@
 | `docker-compose.dev.yml` | EPIC-028 | YAML |
 | `Dockerfile.dev` | EPIC-028 | Dockerfile |
 | `Makefile` | EPIC-028 | Makefile |
-| `.github/workflows/` | EPIC-XXX | YAML configs |
+| `.github/workflows/` | future-ci-epic | YAML configs |
 
 ### Read-Only Access (⛔)
 
@@ -324,20 +324,20 @@ grep -r "database_models\|repositories\|pipeline" \
 → **Stream A** (@code-refactorer)
 
 ### Need to optimize a database query?
-→ **Stream B** (@performance-optimizer)  
+→ **Stream B** (@performance-optimizer)
 → But FIRST check if Stream A is refactoring that file
 
 ### Need to add a database column?
-→ **Stream C** (@cloud-architect) for tenant_id  
-→ **Stream B** (@performance-optimizer) for indexes  
+→ **Stream C** (@cloud-architect) for tenant_id
+→ **Stream B** (@performance-optimizer) for indexes
 → Coordinate with both
 
 ### Need to document an API?
-→ **Stream D** (@documenter)  
+→ **Stream D** (@documenter)
 → But API must be stable (after Stream A refactoring)
 
 ### Need to fix CI/CD?
-→ **Stream D** (@documenter) for EPIC-XXX-CICD  
+→ **Stream D** (@documenter) for future-epic-cicd
 → Affects all streams - announce in #dev-parallel-work
 
 ---

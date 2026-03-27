@@ -346,7 +346,7 @@ make format
 - [FastAPI Docs](https://fastapi.tiangolo.com/)
 - [SQLAlchemy 2.0](https://docs.sqlalchemy.org/en/20/)
 - [Celery Docs](https://docs.celeryq.dev/)
-- [EPIC-028 Details](../epics/EPIC-028-DEVELOPER-EXPERIENCE.md)
+- [EPIC-028 Details](../../backlog/EPICS/EPIC-028-external-service-consolidation/README.md)
 
 ## Support
 

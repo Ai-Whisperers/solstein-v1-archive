@@ -223,7 +223,7 @@ The agent pre-commit hook enforces these rules automatically.
 
 ## References
 
-- [GitHub Actions Code Quality Workflow](../.github/workflows/code-quality-guardrails.yml)
-- [Pre-commit Configuration](../.pre-commit-config.yaml)
-- [Quality Check Script](../scripts/ci/quality_check.py)
-- [Code Smell Detector](../scripts/ci/code_smell_detector.py)
+- [GitHub Actions Code Quality Workflow](../../.github/workflows/code-quality-guardrails.yml)
+- [Pre-commit Configuration](../../.pre-commit-config.yaml)
+- [Quality Check Script](../../scripts/ci/quality_check.py)
+- [Code Smell Detector](../../scripts/ci/code_smell_detector.py)

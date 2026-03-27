@@ -364,7 +364,7 @@ test(golden-dataset): add regression for Phoenix threshold
 ### **CHANGELOG**
 Record of version history and notable changes. Updated per-release.
 
-**Location:** `[CHANGELOG.md](../../CHANGELOG.md)`
+**Location:** `[CHANGELOG.md](CHANGELOG.md)`
 
 ### **Pull Request / PR**
 GitHub feature for code review and merge. Includes:

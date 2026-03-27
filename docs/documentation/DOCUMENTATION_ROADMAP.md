@@ -418,7 +418,7 @@ Track these after implementation:
 - [DOCUMENTATION_AUDIT.md](DOCUMENTATION_AUDIT.md) — Detailed gap analysis
 - [Developer Guide](../guides/developer.md) — Current setup documentation
 - [Architecture Decisions](../architecture/decisions.md) — Design rationales
-- [Contributing Guidelines](../../CONTRIBUTING.md) — Development standards
+- [Contributing Guidelines](../reference/CONTRIBUTING.md) — Development standards
 
 ---
 
