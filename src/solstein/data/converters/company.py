@@ -350,5 +350,9 @@ def convert_to_domain_company(raw_data: dict[str, Any], index: int = 0) -> Compa
         latest_valuation_eur=funding_data.get("latest_valuation_eur"),
         funding_rounds=funding_data.get("funding_rounds", []),
         lead_investors=funding_data.get("lead_investors", []),
+        # STORY-179: top-level profitability fields (mirrors financials for direct access)
+        ebitda_margin=profitability_data.get("ebitda_margin"),
+        recurring_revenue_pct=profitability_data.get("recurring_revenue_pct"),
+        revenue_per_employee_eur_k=profitability_data.get("revenue_per_employee_eur_k"),
     )
     return populate_signal_confidences(company)
