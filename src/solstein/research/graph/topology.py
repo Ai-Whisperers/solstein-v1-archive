@@ -1,0 +1,420 @@
+"""LangGraph research pipeline topology definition.
+
+STORY-076: This file is the authoritative documentation of the research
+pipeline architecture. The execution order and parallelism model are
+readable directly from the graph definition below — no implicit sequencing.
+
+Graph Topology (read top-to-bottom):
+
+    START
+      │
+      ▼
+  [dispatch]              <- Validates input, sets run_id, prepares config
+      │
+      ├──────────────────────────────────────────────┐
+      │                                              │
+      ▼                                              ▼
+  [github_data]        ... (parallel)          [web_profile]
+  [companies_house]    ... (parallel)          [sec_filings]
+  [news_search]        ... (parallel)
+      │
+      └──────────────────────── fan-in ─────────────┘
+                                    │
+                                    ▼
+                          [conflict_resolution]      <- Merges all raw_* facts
+                                    │
+                                    ▼
+                              [scoring]              <- Scores + classifies
+                                    │
+                                    ▼
+                            [human_review]           <- Conditional: pause if low-confidence
+                                    │                  (STORY-079 adds interrupt here)
+                                    ▼
+                             [analysis]              <- Market-level aggregation
+                                    │
+                                    ▼
+                              [export]               <- Writes Excel/JSON artifact
+                                    │
+                                    ▼
+                                   END
+
+Parallel nodes (fan-out from dispatch):
+    - github_data:       GitHub repository signals (stars, language, topics)
+    - companies_house:   UK/EU company filings (directors, SIC, accounts)
+    - news_search:       News headlines and web-search snippets
+    - sec_filings:       SEC EDGAR financial filings (US companies)
+    - web_profile:       General website scraping (AI signals, tech stack)
+
+These five nodes are independent — they do not share state during execution.
+They fan in to conflict_resolution which receives all raw_* facts.
+"""
+
+from __future__ import annotations
+
+import uuid
+from typing import Any
+
+from langgraph.graph import END, START, StateGraph
+from loguru import logger
+
+from .state import ResearchState
+
+
+def _dispatch_node(state: ResearchState) -> dict[str, Any]:
+    """Dispatch node: validates input and initialises run metadata.
+
+    Reads: company_identifiers, config
+    Writes: run_id, completed_nodes
+    """
+    logger.info(f"[dispatch] Starting research run for {len(state['company_identifiers'])} companies")
+
+    return {
+        "run_id": state.get("run_id") or str(uuid.uuid4()),
+        "completed_nodes": ["dispatch"],
+    }
+
+
+def _github_data_node(state: ResearchState) -> dict[str, Any]:
+    """GitHub data collection node.
+
+    Reads: company_identifiers, config
+    Writes: raw_github_facts, data_collection_errors, completed_nodes
+
+    Collects: repository stars, forks, primary language, topics,
+              last commit timestamp, and repository URL per company.
+
+    Real implementation will call the GitHub API via the agent from
+    src/solstein/agents/github_agent.py (STORY-078).
+    """
+    logger.info("[github_data] Collecting GitHub signals")
+    return {
+        "raw_github_facts": [],
+        "data_collection_errors": [],
+        "completed_nodes": ["github_data"],
+    }
+
+
+def _companies_house_node(state: ResearchState) -> dict[str, Any]:
+    """Companies House filing collection node.
+
+    Reads: company_identifiers, config
+    Writes: raw_companies_house_facts, data_collection_errors, completed_nodes
+
+    Collects: registered company name, company number, filing date,
+              directors, SIC codes, and accounts-made-up date per company.
+
+    Real implementation will call the Companies House API via
+    src/solstein/agents/companies_house_agent.py (STORY-078).
+    """
+    logger.info("[companies_house] Collecting Companies House filings")
+    return {
+        "raw_companies_house_facts": [],
+        "data_collection_errors": [],
+        "completed_nodes": ["companies_house"],
+    }
+
+
+def _news_search_node(state: ResearchState) -> dict[str, Any]:
+    """News aggregation and web-search node.
+
+    Reads: company_identifiers, config
+    Writes: raw_news_facts, data_collection_errors, completed_nodes
+
+    Collects: news headlines, publication date, URL, sentiment,
+              and article snippets per company.
+
+    Real implementation will use the web search agent from
+    src/solstein/agents/web_search_agent.py (STORY-078).
+    """
+    logger.info("[news_search] Collecting news and web-search signals")
+    return {
+        "raw_news_facts": [],
+        "data_collection_errors": [],
+        "completed_nodes": ["news_search"],
+    }
+
+
+def _sec_filings_node(state: ResearchState) -> dict[str, Any]:
+    """SEC EDGAR filing collection node.
+
+    Reads: company_identifiers, config
+    Writes: raw_sec_facts, data_collection_errors, completed_nodes
+
+    Collects: form type, period of report, revenue, net income,
+              employee count, and filing URL per company.
+
+    Real implementation will query SEC EDGAR (STORY-078).
+    """
+    logger.info("[sec_filings] Collecting SEC EDGAR filings")
+    return {
+        "raw_sec_facts": [],
+        "data_collection_errors": [],
+        "completed_nodes": ["sec_filings"],
+    }
+
+
+def _web_profile_node(state: ResearchState) -> dict[str, Any]:
+    """General web-profile scraping node.
+
+    Reads: company_identifiers, config
+    Writes: raw_web_facts, data_collection_errors, completed_nodes
+
+    Collects: company website URL, title, meta-description, AI signals
+              in homepage content, and detected technology stack.
+
+    Real implementation will use the website agent from
+    src/solstein/agents/website_agent.py (STORY-078).
+    """
+    logger.info("[web_profile] Collecting web profile signals")
+    return {
+        "raw_web_facts": [],
+        "data_collection_errors": [],
+        "completed_nodes": ["web_profile"],
+    }
+
+
+def _conflict_resolution_node(state: ResearchState) -> dict[str, Any]:
+    """Conflict resolution node — fan-in sync point.
+
+    Reads: raw_github_facts, raw_companies_house_facts, raw_news_facts,
+           raw_sec_facts, raw_web_facts, data_collection_errors
+    Writes: conflict_flags, resolved_facts, completed_nodes
+
+    Receives all raw facts from the five parallel collection nodes and
+    resolves contradictions using the reconciliation logic from
+    src/solstein/research/reconcile.py. Each field gets a winner with
+    source attribution and confidence score.
+    """
+    logger.info(
+        "[conflict_resolution] Merging facts from %d github, %d companies_house, "
+        "%d news, %d sec, %d web records",
+        len(state.get("raw_github_facts") or []),
+        len(state.get("raw_companies_house_facts") or []),
+        len(state.get("raw_news_facts") or []),
+        len(state.get("raw_sec_facts") or []),
+        len(state.get("raw_web_facts") or []),
+    )
+    return {
+        "conflict_flags": [],
+        "resolved_facts": {},
+        "completed_nodes": ["conflict_resolution"],
+    }
+
+
+def _scoring_node(state: ResearchState) -> dict[str, Any]:
+    """Scoring and classification node.
+
+    Reads: resolved_facts, conflict_flags
+    Writes: confidence_scores, company_scores, human_review_required,
+            completed_nodes
+
+    Computes composite scores using src/solstein/analytics/scoring.py
+    and classifies each company into tier, threat level, and AI maturity.
+    Sets human_review_required=True when aggregate confidence < 0.5 or
+    when conflict_flags contain unresolved contradictions.
+
+    Preserves human_review_required=True if already set by caller —
+    real implementation (STORY-078) will derive this from resolved_facts.
+    """
+    logger.info("[scoring] Computing scores for %d companies", len(state.get("company_identifiers") or []))
+    prior_review_required = state.get("human_review_required", False)
+    return {
+        "confidence_scores": {},
+        "company_scores": {},
+        "human_review_required": prior_review_required,
+        "completed_nodes": ["scoring"],
+    }
+
+
+def _human_review_router(state: ResearchState) -> str:
+    """Conditional routing after scoring.
+
+    Routes to 'analysis' directly when confidence is acceptable.
+    Routes to 'human_review_gate' when any company requires review.
+
+    STORY-079 will wire a LangGraph interrupt into human_review_gate
+    so the pipeline pauses and waits for human approval before proceeding.
+    """
+    if state.get("human_review_required"):
+        return "human_review_gate"
+    return "analysis"
+
+
+def _human_review_gate_node(state: ResearchState) -> dict[str, Any]:
+    """Human-in-the-loop gate node.
+
+    This node is a placeholder for the STORY-079 interrupt mechanism.
+    When STORY-079 is implemented, LangGraph will pause execution here
+    and surface the low-confidence companies to the operator.
+
+    Reads: company_scores, conflict_flags, confidence_scores
+    Writes: completed_nodes
+    """
+    logger.info("[human_review_gate] Pausing for human review (STORY-079 will add interrupt here)")
+    return {"completed_nodes": ["human_review_gate"]}
+
+
+def _analysis_node(state: ResearchState) -> dict[str, Any]:
+    """Market analysis aggregation node.
+
+    Reads: company_scores, resolved_facts, confidence_scores
+    Writes: market_analysis, completed_nodes
+
+    Produces a market-level view: top companies by score, sector
+    breakdown, AI adoption index, and data quality summary.
+    """
+    logger.info("[analysis] Generating market analysis")
+    return {
+        "market_analysis": {
+            "top_companies": [],
+            "market_trends": [],
+            "competitive_landscape": {},
+            "ai_adoption_index": 0.0,
+            "sector_breakdown": {},
+            "data_quality_summary": {},
+        },
+        "completed_nodes": ["analysis"],
+    }
+
+
+def _export_node(state: ResearchState) -> dict[str, Any]:
+    """Export node.
+
+    Reads: market_analysis, company_scores, resolved_facts, run_id
+    Writes: export_path, export_status, export_errors, completed_nodes
+
+    Writes the research result to an Excel or JSON artifact. Uses the
+    ExcelExporter from src/solstein/exporters/excel.py (STORY-077/078).
+    Always writes an artifact — quality is tagged, never suppressed.
+    """
+    logger.info("[export] Exporting research results (run=%s)", state.get("run_id", "?"))
+    return {
+        "export_path": "",
+        "export_status": "pending",
+        "export_errors": [],
+        "completed_nodes": ["export"],
+    }
+
+
+# Node name constants — used in tests and the human_review router
+NODE_DISPATCH = "dispatch"
+NODE_GITHUB = "github_data"
+NODE_COMPANIES_HOUSE = "companies_house"
+NODE_NEWS = "news_search"
+NODE_SEC = "sec_filings"
+NODE_WEB = "web_profile"
+NODE_CONFLICT = "conflict_resolution"
+NODE_SCORING = "scoring"
+NODE_HUMAN_REVIEW_GATE = "human_review_gate"
+NODE_ANALYSIS = "analysis"
+NODE_EXPORT = "export"
+
+# The five parallel data-collection nodes that fan out from dispatch
+PARALLEL_COLLECTION_NODES: list[str] = [
+    NODE_GITHUB,
+    NODE_COMPANIES_HOUSE,
+    NODE_NEWS,
+    NODE_SEC,
+    NODE_WEB,
+]
+
+
+def build_research_graph() -> StateGraph:
+    """Build the research pipeline StateGraph.
+
+    Returns a StateGraph (not yet compiled) so callers can optionally
+    attach a checkpointer before compilation (STORY-079).
+
+    Graph topology:
+        START -> dispatch -> [5 parallel nodes] -> conflict_resolution
+              -> scoring -> human_review_router -> analysis -> export -> END
+    """
+    graph = StateGraph(ResearchState)
+
+    # Register all nodes
+    graph.add_node(NODE_DISPATCH, _dispatch_node)
+    graph.add_node(NODE_GITHUB, _github_data_node)
+    graph.add_node(NODE_COMPANIES_HOUSE, _companies_house_node)
+    graph.add_node(NODE_NEWS, _news_search_node)
+    graph.add_node(NODE_SEC, _sec_filings_node)
+    graph.add_node(NODE_WEB, _web_profile_node)
+    graph.add_node(NODE_CONFLICT, _conflict_resolution_node)
+    graph.add_node(NODE_SCORING, _scoring_node)
+    graph.add_node(NODE_HUMAN_REVIEW_GATE, _human_review_gate_node)
+    graph.add_node(NODE_ANALYSIS, _analysis_node)
+    graph.add_node(NODE_EXPORT, _export_node)
+
+    # Entry point
+    graph.add_edge(START, NODE_DISPATCH)
+
+    # Fan-out: dispatch -> all 5 parallel data-collection nodes
+    for node in PARALLEL_COLLECTION_NODES:
+        graph.add_edge(NODE_DISPATCH, node)
+
+    # Fan-in: all 5 parallel nodes -> conflict_resolution (sync point)
+    for node in PARALLEL_COLLECTION_NODES:
+        graph.add_edge(node, NODE_CONFLICT)
+
+    # Linear: conflict_resolution -> scoring
+    graph.add_edge(NODE_CONFLICT, NODE_SCORING)
+
+    # Conditional: scoring -> human_review_gate OR analysis
+    graph.add_conditional_edges(
+        NODE_SCORING,
+        _human_review_router,
+        {
+            "human_review_gate": NODE_HUMAN_REVIEW_GATE,
+            "analysis": NODE_ANALYSIS,
+        },
+    )
+
+    # human_review_gate -> analysis (after operator approval)
+    graph.add_edge(NODE_HUMAN_REVIEW_GATE, NODE_ANALYSIS)
+
+    # Linear tail: analysis -> export -> END
+    graph.add_edge(NODE_ANALYSIS, NODE_EXPORT)
+    graph.add_edge(NODE_EXPORT, END)
+
+    return graph
+
+
+def compile_research_graph(checkpointer: Any | None = None) -> Any:
+    """Compile the research graph into a runnable CompiledGraph.
+
+    Args:
+        checkpointer: Optional LangGraph checkpointer (e.g. MemorySaver,
+            SqliteSaver). When provided, graph execution is resumable
+            resumable from the last successful node (STORY-079).
+
+    Returns:
+        CompiledGraph ready for invocation via .invoke() or .stream().
+
+    Usage:
+        graph = compile_research_graph()
+        result = graph.invoke({
+            "run_id": "abc-123",
+            "company_identifiers": ["acme-corp"],
+            "config": {},
+            "raw_github_facts": [],
+            "raw_companies_house_facts": [],
+            "raw_news_facts": [],
+            "raw_sec_facts": [],
+            "raw_web_facts": [],
+            "data_collection_errors": [],
+            "conflict_flags": [],
+            "resolved_facts": {},
+            "confidence_scores": {},
+            "company_scores": {},
+            "market_analysis": {},
+            "export_path": "",
+            "export_status": "pending",
+            "export_errors": [],
+            "completed_nodes": [],
+            "pipeline_errors": [],
+            "human_review_required": False,
+        })
+    """
+    graph = build_research_graph()
+    if checkpointer is not None:
+        return graph.compile(checkpointer=checkpointer)
+    return graph.compile()
