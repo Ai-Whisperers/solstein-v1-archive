@@ -52,6 +52,10 @@ EXPORT_SCHEMA: list[FieldSpec] = [
     FieldSpec("key_customers", "Key Customers", "Executive Summary", "list"),
     FieldSpec("open_positions", "Open Positions", "Executive Summary", "integer"),
     FieldSpec("data_availability", "Data Availability", "Executive Summary", "string"),
+    # ── STORY-146: Transformation Readiness ──
+    FieldSpec("transformation_time_months", "Transform Time (mo)", "Executive Summary", "number"),
+    FieldSpec("transformation_cost_eur", "Transform Cost (EUR)", "Executive Summary", "number"),
+    FieldSpec("transformation_risk_level", "Transform Risk", "Executive Summary", "string"),
     # ── Market Rankings ──
     FieldSpec("rank", "Rank", "Market Rankings", "integer"),
     FieldSpec("name_rankings", "Company", "Market Rankings", "string"),
