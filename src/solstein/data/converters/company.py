@@ -58,26 +58,24 @@ def determine_tier(revenue: float | None) -> CompanyTier:
         return CompanyTier.TIER_4
 
 
+_FOLDER_KEYWORD_TO_HQ: list[tuple[tuple[str, ...], str]] = [
+    (("uk", "british"), "United Kingdom"),
+    (("german", "deutsch"), "Germany"),
+    (("french", "france"), "France"),
+    (("norway", "norwegian"), "Norway"),
+    (("spain", "spanish"), "Spain"),
+    (("poland", "polish"), "Poland"),
+    (("swiss", "switzerland"), "Switzerland"),
+]
+
+
 def estimate_headquarters(folder: str) -> str | None:
     """Estimate headquarters based on folder name."""
     folder_lower = folder.lower()
-
-    if "uk" in folder_lower or "british" in folder_lower:
-        return "United Kingdom"
-    elif "german" in folder_lower or "deutsch" in folder_lower:
-        return "Germany"
-    elif "french" in folder_lower or "france" in folder_lower:
-        return "France"
-    elif "norway" in folder_lower or "norwegian" in folder_lower:
-        return "Norway"
-    elif "spain" in folder_lower or "spanish" in folder_lower:
-        return "Spain"
-    elif "poland" in folder_lower or "polish" in folder_lower:
-        return "Poland"
-    elif "swiss" in folder_lower or "switzerland" in folder_lower:
-        return "Switzerland"
-    else:
-        return "Europe"
+    for keywords, country in _FOLDER_KEYWORD_TO_HQ:
+        if any(kw in folder_lower for kw in keywords):
+            return country
+    return "Europe"
 
 
 def _apply_signal_confidence_aliases(confidences: dict[str, float]) -> dict[str, float]:
@@ -156,41 +154,15 @@ def _validate_financial_conversion(financial_metric: FinancialMetric, raw_data: 
     return True
 
 
-def convert_to_domain_company(raw_data: dict[str, Any], index: int = 0) -> Company:
-    """Convert raw JSON data to Company domain entity.
-
-    EPIC-020: Refactored from 432-line monolithic function.
-    EPIC-058: Fixed to handle both flat and nested data formats.
-    Now uses specialized extractor functions for each data domain.
-    """
-    # Basic info
-    company_name = raw_data.get("company_name") or raw_data.get("name") or f"Company {index}"
-    folder = raw_data.get("folder", f"company-{index}")
-
-    # Extract data using specialized extractors
-    revenue_data = extract_revenue_data(raw_data)
-    profitability_data = extract_profitability_data(raw_data)
-    funding_data = extract_funding_data(raw_data)
-    employee_data = extract_employee_data(raw_data)
-    ai_data = extract_ai_data(raw_data)
-    scorecard_data = extract_scorecard_data(raw_data)
-
-    # Determine derived values
-    saas_score = scorecard_data["dimensions"].get("SaaS Maturity", {}).get("score", 5)
-
-    ai_maturity = determine_ai_maturity(
-        raw_data.get("ai_maturity", ""),
-        ai_data["ai_score"],
-        ai_data["ai_signal_level"],
-        ai_data["ai_capabilities"],
-        ai_data["ai_in_production"],
-        saas_score,
-    )
-
-    threat_level = determine_threat_level(scorecard_data["composite_score"])
-
-    # Normalize financials
-    normalized_financials = normalize_financial_payload(
+def _normalize_and_validate_financials(
+    company_name: str,
+    revenue_data: dict[str, Any],
+    profitability_data: dict[str, Any],
+    funding_data: dict[str, Any],
+    employee_data: dict[str, Any],
+) -> dict[str, Any]:
+    """Normalize raw financial payload and validate conversion loss."""
+    normalized = normalize_financial_payload(
         {
             "revenue": revenue_data["latest_revenue"],
             "growth_rate": revenue_data["latest_growth"],
@@ -199,7 +171,6 @@ def convert_to_domain_company(raw_data: dict[str, Any], index: int = 0) -> Compa
             "valuation": funding_data["latest_valuation_eur"],
         }
     )
-
     _validate_conversion_loss(
         company_name,
         {
@@ -211,17 +182,32 @@ def convert_to_domain_company(raw_data: dict[str, Any], index: int = 0) -> Compa
             "employees": employee_data["employee_count"],
         },
         {
-            "revenue": normalized_financials["revenue"],
-            "growth_rate": normalized_financials["growth_rate"],
-            "profit_margin": normalized_financials["profit_margin"],
-            "funding_raised": normalized_financials["funding_raised"],
-            "valuation": normalized_financials["valuation"],
+            "revenue": normalized["revenue"],
+            "growth_rate": normalized["growth_rate"],
+            "profit_margin": normalized["profit_margin"],
+            "funding_raised": normalized["funding_raised"],
+            "valuation": normalized["valuation"],
             "employees": employee_data["employee_count"],
         },
     )
+    return normalized
 
-    # Build financial metric
-    financial = FinancialMetric(
+
+def _build_financial_metric(
+    normalized_financials: dict[str, Any],
+    revenue_data: dict[str, Any],
+    profitability_data: dict[str, Any],
+    employee_data: dict[str, Any],
+) -> FinancialMetric:
+    """Build FinancialMetric, supporting sparse companies with no revenue or employees.
+
+    EPIC-058 / STORY-204: Sparse companies (e.g. Moixa, OVO Energy) may have neither
+    revenue nor employees in the source JSON.  FinancialMetric's model_validator
+    rejects that combination unless allow_empty_primary=True.
+    """
+    is_sparse = normalized_financials["revenue"] is None and employee_data["employee_count"] is None
+    return FinancialMetric(
+        allow_empty_primary=is_sparse,
         revenue=normalized_financials["revenue"],
         revenue_confidence=revenue_data["revenue_confidence"],
         growth_rate=normalized_financials["growth_rate"],
@@ -246,16 +232,13 @@ def convert_to_domain_company(raw_data: dict[str, Any], index: int = 0) -> Compa
         else ConfidenceLevel.UNKNOWN,
     )
 
-    # EPIC-059: Validate financial conversion didn't lose critical fields
-    if not _validate_financial_conversion(financial, raw_data):
-        logger.warning(
-            f"[EPIC-059] Financial conversion loss detected for {company_name} — proceeding with available data"
-        )
 
-    # Determine tier
-    tier = determine_tier(normalized_financials["revenue"])
-
-    # Derive AI score if missing
+def _derive_ai_score(
+    ai_data: dict[str, Any],
+    ai_maturity: AIMaturity,
+    raw_data: dict[str, Any],
+) -> float | None:
+    """Derive AI score from maturity level when a direct score is absent."""
     ai_score = ai_data["ai_score"]
     if ai_score is None and any(
         [
@@ -271,7 +254,56 @@ def convert_to_domain_company(raw_data: dict[str, Any], index: int = 0) -> Compa
             AIMaturity.LOW: 3.0,
             AIMaturity.NONE: 1.0,
         }
-        ai_score = ai_score_by_maturity.get(ai_maturity, 1.0)
+        return ai_score_by_maturity.get(ai_maturity, 1.0)
+    return ai_score
+
+
+def convert_to_domain_company(raw_data: dict[str, Any], index: int = 0) -> Company:
+    """Convert raw JSON data to Company domain entity.
+
+    EPIC-020: Refactored from 432-line monolithic function.
+    EPIC-058: Fixed to handle both flat and nested data formats.
+    Now uses specialized extractor functions for each data domain.
+    """
+    # Basic info
+    company_name = raw_data.get("company_name") or raw_data.get("name") or f"Company {index}"
+    folder = raw_data.get("folder", f"company-{index}")
+
+    # Extract data using specialized extractors
+    revenue_data = extract_revenue_data(raw_data)
+    profitability_data = extract_profitability_data(raw_data)
+    funding_data = extract_funding_data(raw_data)
+    employee_data = extract_employee_data(raw_data)
+    ai_data = extract_ai_data(raw_data)
+    scorecard_data = extract_scorecard_data(raw_data)
+
+    # Determine derived values
+    saas_score = scorecard_data["dimensions"].get("SaaS Maturity", {}).get("score", 5)
+    ai_maturity = determine_ai_maturity(
+        raw_data.get("ai_maturity", ""),
+        ai_data["ai_score"],
+        ai_data["ai_signal_level"],
+        ai_data["ai_capabilities"],
+        ai_data["ai_in_production"],
+        saas_score,
+    )
+    threat_level = determine_threat_level(scorecard_data["composite_score"])
+
+    # Normalize financials and build financial metric
+    normalized_financials = _normalize_and_validate_financials(
+        company_name, revenue_data, profitability_data, funding_data, employee_data
+    )
+    financial = _build_financial_metric(normalized_financials, revenue_data, profitability_data, employee_data)
+
+    # EPIC-059: Validate financial conversion didn't lose critical fields
+    if not _validate_financial_conversion(financial, raw_data):
+        logger.warning(
+            f"[EPIC-059] Financial conversion loss detected for {company_name} — proceeding with available data"
+        )
+
+    # Determine tier and derive AI score
+    tier = determine_tier(normalized_financials["revenue"])
+    ai_score = _derive_ai_score(ai_data, ai_maturity, raw_data)
 
     # Build metadata
     confidence_scores = _apply_signal_confidence_aliases(build_confidence_scores(raw_data))
