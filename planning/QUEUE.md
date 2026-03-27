@@ -179,7 +179,7 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 43 | STORY-083 | Define Research Job Status Table with Realtime | IN_PROGRESS | |
+| 43 | STORY-083 | Define Research Job Status Table with Realtime | DONE | PR #118 |
 | 44 | STORY-084 | Replace Polling with Supabase Realtime Subscriptions | READY | Depends on STORY-083 |
 
 ### EPIC-030: Export Pipeline Modernization (P2)
