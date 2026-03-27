@@ -273,8 +273,8 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 78 | STORY-145 | Portfolio Company AI-Readiness Scoring Model | IN_PROGRESS | Partial scaffold exists in analytics/ai_readiness.py — needs 4 sub-dimensions, new tiers, classification integration |
-| 79 | STORY-146 | AI Transformation Readiness Calculator | READY | Depends on STORY-145 |
+| 78 | STORY-145 | Portfolio Company AI-Readiness Scoring Model | DONE | PR #150 — 4 dimensions, 22 tests |
+| 79 | STORY-146 | AI Transformation Readiness Calculator | IN_PROGRESS | Depends on STORY-145 (DONE) |
 | 80 | STORY-147 | PE Due Diligence Integration Module | READY | Depends on STORY-145, STORY-146 |
 | 81 | STORY-148 | Transformation Roadmap Generator | READY | Depends on STORY-146 |
 
