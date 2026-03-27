@@ -85,7 +85,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 20 | STORY-063 | Define Tenant Model and Domain Object Scoping | DONE | PR #105 merged |
 | 21 | STORY-064 | Implement Supabase RLS for All Tables | DONE | PR #106 merged |
 | 22 | STORY-065 | Add Tenant-Scoped API Key Management | DONE | PR #107 merged |
-| 23 | STORY-066 | Enforce Tenant Isolation in Research Jobs | READY | |
+| 23 | STORY-066 | Enforce Tenant Isolation in Research Jobs | IN_PROGRESS | |
 
 ---
 
