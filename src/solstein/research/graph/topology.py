@@ -4,6 +4,11 @@ STORY-076: This file is the authoritative documentation of the research
 pipeline architecture. The execution order and parallelism model are
 readable directly from the graph definition below — no implicit sequencing.
 
+STORY-078: The five parallel data-collection nodes now call real external
+APIs via the agents in src/solstein/agents/. The stub implementations
+(additional_agents.py) have been deleted. Node implementations live in
+src/solstein/research/graph/nodes/.
+
 Graph Topology (read top-to-bottom):
 
     START
@@ -59,6 +64,13 @@ from langgraph.graph import END, START, StateGraph
 from loguru import logger
 
 from .isolation import with_error_isolation
+from .nodes import (
+    companies_house_node,
+    github_data_node,
+    news_search_node,
+    sec_filings_node,
+    web_profile_node,
+)
 from .state import ResearchState
 
 
@@ -76,103 +88,61 @@ def _dispatch_node(state: ResearchState) -> dict[str, Any]:
     }
 
 
+# ---------------------------------------------------------------------------
+# Data-collection node functions (STORY-078: real API implementations)
+# ---------------------------------------------------------------------------
+# These are thin wrappers that log entry and delegate to the real node
+# implementations in research/graph/nodes/. This keeps topology.py focused
+# on graph structure rather than API integration logic.
+
 def _github_data_node(state: ResearchState) -> dict[str, Any]:
-    """GitHub data collection node.
+    """GitHub data collection node — calls real GitHubAgent (STORY-078).
 
     Reads: company_identifiers, config
     Writes: raw_github_facts, data_collection_errors, completed_nodes
-
-    Collects: repository stars, forks, primary language, topics,
-              last commit timestamp, and repository URL per company.
-
-    Real implementation will call the GitHub API via the agent from
-    src/solstein/agents/github_agent.py (STORY-078).
     """
-    logger.info("[github_data] Collecting GitHub signals")
-    return {
-        "raw_github_facts": [],
-        "data_collection_errors": [],
-        "completed_nodes": ["github_data"],
-    }
+    logger.info("[github_data] Collecting GitHub signals for %d companies", len(state.get("company_identifiers") or []))
+    return github_data_node(state)
 
 
 def _companies_house_node(state: ResearchState) -> dict[str, Any]:
-    """Companies House filing collection node.
+    """Companies House filing collection node — calls real CompaniesHouseAgent (STORY-078).
 
     Reads: company_identifiers, config
     Writes: raw_companies_house_facts, data_collection_errors, completed_nodes
-
-    Collects: registered company name, company number, filing date,
-              directors, SIC codes, and accounts-made-up date per company.
-
-    Real implementation will call the Companies House API via
-    src/solstein/agents/companies_house_agent.py (STORY-078).
     """
-    logger.info("[companies_house] Collecting Companies House filings")
-    return {
-        "raw_companies_house_facts": [],
-        "data_collection_errors": [],
-        "completed_nodes": ["companies_house"],
-    }
+    logger.info("[companies_house] Collecting Companies House filings for %d companies", len(state.get("company_identifiers") or []))
+    return companies_house_node(state)
 
 
 def _news_search_node(state: ResearchState) -> dict[str, Any]:
-    """News aggregation and web-search node.
+    """News aggregation node — calls real WebSearchAgent (STORY-078).
 
     Reads: company_identifiers, config
     Writes: raw_news_facts, data_collection_errors, completed_nodes
-
-    Collects: news headlines, publication date, URL, sentiment,
-              and article snippets per company.
-
-    Real implementation will use the web search agent from
-    src/solstein/agents/web_search_agent.py (STORY-078).
     """
-    logger.info("[news_search] Collecting news and web-search signals")
-    return {
-        "raw_news_facts": [],
-        "data_collection_errors": [],
-        "completed_nodes": ["news_search"],
-    }
+    logger.info("[news_search] Collecting news signals for %d companies", len(state.get("company_identifiers") or []))
+    return news_search_node(state)
 
 
 def _sec_filings_node(state: ResearchState) -> dict[str, Any]:
-    """SEC EDGAR filing collection node.
+    """SEC EDGAR filing collection node — calls real SECEdgarConnector (STORY-078).
 
     Reads: company_identifiers, config
     Writes: raw_sec_facts, data_collection_errors, completed_nodes
-
-    Collects: form type, period of report, revenue, net income,
-              employee count, and filing URL per company.
-
-    Real implementation will query SEC EDGAR (STORY-078).
     """
-    logger.info("[sec_filings] Collecting SEC EDGAR filings")
-    return {
-        "raw_sec_facts": [],
-        "data_collection_errors": [],
-        "completed_nodes": ["sec_filings"],
-    }
+    logger.info("[sec_filings] Collecting SEC EDGAR filings for %d companies", len(state.get("company_identifiers") or []))
+    return sec_filings_node(state)
 
 
 def _web_profile_node(state: ResearchState) -> dict[str, Any]:
-    """General web-profile scraping node.
+    """General web-profile scraping node — calls real WebsiteAgent (STORY-078).
 
     Reads: company_identifiers, config
     Writes: raw_web_facts, data_collection_errors, completed_nodes
-
-    Collects: company website URL, title, meta-description, AI signals
-              in homepage content, and detected technology stack.
-
-    Real implementation will use the website agent from
-    src/solstein/agents/website_agent.py (STORY-078).
     """
-    logger.info("[web_profile] Collecting web profile signals")
-    return {
-        "raw_web_facts": [],
-        "data_collection_errors": [],
-        "completed_nodes": ["web_profile"],
-    }
+    logger.info("[web_profile] Collecting web profile signals for %d companies", len(state.get("company_identifiers") or []))
+    return web_profile_node(state)
 
 
 def _conflict_resolution_node(state: ResearchState) -> dict[str, Any]:

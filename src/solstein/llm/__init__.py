@@ -26,6 +26,15 @@ from .enhanced_client import (
     LLMGenerationError,
     get_enhanced_llm_client,
 )
+from .evaluation import (
+    EvalCase,
+    EvalDataset,
+    EvalResult,
+    evaluate_business_analysis,
+    evaluate_company_extraction,
+    evaluate_research_plan,
+    run_evaluation,
+)
 from .health_checker import (
     ProviderError,
     ProviderErrorType,
@@ -37,15 +46,6 @@ from .health_checker import (
 )
 from .instructor_client import InstructorClient
 from .prompts import PromptManager, get_prompt, get_prompt_manager
-from .evaluation import (
-    EvalCase,
-    EvalDataset,
-    EvalResult,
-    evaluate_business_analysis,
-    evaluate_company_extraction,
-    evaluate_research_plan,
-    run_evaluation,
-)
 from .tracing import LLMTracer, TraceRecord, get_tracer, reset_tracer
 
 __all__ = [

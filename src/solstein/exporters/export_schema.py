@@ -195,7 +195,7 @@ def generate_schema_docs() -> str:
         "# Excel Export Schema",
         "",
         f"**Schema Version**: {EXPORT_SCHEMA_VERSION}",
-        f"**Auto-generated from**: `src/solstein/exporters/export_schema.py`",
+        "**Auto-generated from**: `src/solstein/exporters/export_schema.py`",
         "",
         "---",
         "",
