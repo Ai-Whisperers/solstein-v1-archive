@@ -103,25 +103,21 @@ class APIConfig(BaseModel):
 
 
 class SecurityConfig(BaseModel):
-    """Security configuration."""
+    """Security configuration.
+
+    STORY-067: JWT signing and user management are now delegated to Supabase Auth.
+    The secret_key is retained for backward compatibility with middleware that
+    may still reference it, but Supabase manages JWT secrets externally.
+    admin_email and admin_password_hash have been removed -- Supabase Auth
+    manages user credentials.
+    """
 
     secret_key: str = Field(
-        ..., description="JWT signing secret. Set SECURITY__SECRET_KEY env var to a strong value (required)."
+        default="supabase-managed",
+        description="Legacy JWT secret. Supabase Auth manages JWT signing externally.",
     )
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30, ge=1)
-    admin_email: str | None = Field(default=None, description="Admin login email (set ADMIN_EMAIL env var)")
-    admin_password_hash: str | None = Field(
-        default=None, description="SHA-256 hex hash of admin password (set ADMIN_PASSWORD_HASH env var)"
-    )
-
-    @field_validator("secret_key")
-    @classmethod
-    def validate_secret_key(cls, v: str) -> str:
-        """Validate secret key - must be provided."""
-        if not v:
-            raise ValueError("SECURITY__SECRET_KEY is required - set it to a strong secret before starting.")
-        return v
 
 
 class LoggingConfig(BaseModel):
@@ -304,11 +300,12 @@ class Settings(BaseSettings):
                 "Set DATABASE__URL before starting the application."
             )
 
-        # Required: Security/JWT secret (checked via Pydantic validation, but double-check here)
-        if not self.security.secret_key:
-            raise ConfigurationError(
-                "SECURITY__SECRET_KEY environment variable is required. "
-                "Set a strong secret (32+ characters) before starting."
+        # STORY-067: Supabase Auth manages JWT signing externally.
+        # Validate Supabase URL and key if configured.
+        if self.supabase.url and not self.supabase.key:
+            logger.warning(
+                "SUPABASE__URL is set but SUPABASE__KEY is missing. "
+                "Supabase Auth will not function without a valid key."
             )
 
         # Required: GitHub token
@@ -381,11 +378,13 @@ class Settings(BaseSettings):
         if self.environment != "production":
             return
 
-        if not self.security.secret_key.strip():
-            raise ConfigurationError("SECURITY__SECRET_KEY must be set to a strong non-default value in production.")
-
-        if len(self.security.secret_key) < 32:
-            raise ConfigurationError("SECURITY__SECRET_KEY must be at least 32 characters in production.")
+        # STORY-067: Supabase Auth manages JWT secrets externally.
+        # Validate Supabase config instead of local secret_key.
+        if not self.supabase.url or not self.supabase.key:
+            raise ConfigurationError(
+                "SUPABASE__URL and SUPABASE__KEY must be configured in production. "
+                "Supabase Auth manages authentication and JWT signing."
+            )
 
         if self.debug:
             raise ConfigurationError("DEBUG must be false in production.")
