@@ -234,6 +234,15 @@ class Settings(BaseSettings):
         default="auto",
         description="LLM provider selection: auto|ollama|openai|groq|fireworks|mistral|deepinfra|gemini|nvidia|cerebras|kimi|anthropic|siliconflow|alibaba|none",
     )
+    # STORY-075: Configurable provider fallback order
+    llm_provider_order: list[str] = Field(
+        default=["deepinfra", "mistral", "nvidia"],
+        description="Ordered list of LLM providers for fallback chain. First available is used.",
+    )
+    llm_circuit_breaker_enabled: bool = Field(
+        default=True,
+        description="Enable circuit breaker for LLM provider failover (STORY-075)",
+    )
     ollama_url: str = Field(default="http://localhost:11434")
     ollama_model: str = Field(default="llama3.2:latest")
     openai_model: str = Field(default="gpt-4o-mini")
