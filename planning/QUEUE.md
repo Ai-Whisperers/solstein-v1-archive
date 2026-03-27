@@ -51,7 +51,7 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 8 | STORY-141 | Delete Disconnected Refresh Router | READY | |
+| 8 | STORY-141 | Delete Disconnected Refresh Router | IN_PROGRESS | |
 | 9 | STORY-142 | Delete Orphaned worker_tasks_v2.py | READY | |
 | 10 | STORY-143 | Audit and Delete Orphaned Data Layer Files | READY | |
 | 11 | STORY-144 | Create Dead Code Detection CI Job | READY | |
