@@ -188,6 +188,13 @@ from solstein.monitoring.profiling.dashboard import router as profiling_router
 
 app.include_router(profiling_router, prefix="/admin")
 
+# STORY-051: Prometheus metrics collection middleware
+from solstein.monitoring.metrics import PrometheusMiddleware  # noqa: E402, F811
+from solstein.monitoring.metrics import set_app_info  # noqa: E402, F811
+
+app.add_middleware(PrometheusMiddleware, app_name="solstein")
+set_app_info(version="1.0.0", environment=settings.environment)
+
 # STORY-086: Data access audit trail (must be added BEFORE TenantMiddleware
 # so it executes AFTER tenant_id is set on request.state)
 from .middleware.audit import AuditMiddleware  # noqa: E402
