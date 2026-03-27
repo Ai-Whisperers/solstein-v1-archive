@@ -248,9 +248,9 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 68 | STORY-097 | Automate Alembic Migrations Pre-Deploy | DONE | PR #135 |
-| 69 | STORY-098 | Add migrate, seed, deploy Makefile Targets | READY | STORY-097 DONE |
-| 70 | STORY-099 | Add Staging Deploy + Post-Deploy Smoke Test Workflow | READY | STORY-097 DONE |
-| 71 | STORY-100 | Delete Root Bypass Scripts | BLOCKED | Depends on STORY-098 |
+| 69 | STORY-098 | Add migrate, seed, deploy Makefile Targets | DONE | PR #136 |
+| 70 | STORY-099 | Add Staging Deploy + Post-Deploy Smoke Test Workflow | IN_PROGRESS | Starting |
+| 71 | STORY-100 | Delete Root Bypass Scripts | READY | STORY-098 DONE |
 
 ### EPIC-014: Observability & Telemetry (P2)
 
