@@ -188,9 +188,9 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 45 | STORY-111 | Move Exports to Async Celery Tasks | DONE | PR #144, 53 tests |
 | 46 | STORY-112 | Streaming Excel Export for Large Datasets | DONE | PR #145, 38 tests |
-| 47 | STORY-113 | Export Status Tracking and Download Links | BLOCKED | Depends on STORY-111 |
-| 48 | STORY-114 | Add PDF Export Format | BLOCKED | Depends on STORY-111 |
-| 49 | STORY-115 | Store Exports in Supabase Storage | BLOCKED | Depends on STORY-111 |
+| 47 | STORY-113 | Export Status Tracking and Download Links | READY | STORY-111 DONE |
+| 48 | STORY-114 | Add PDF Export Format | READY | STORY-111 DONE |
+| 49 | STORY-115 | Store Exports in Supabase Storage | READY | STORY-111 DONE |
 
 ---
 
@@ -717,3 +717,12 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: STORY-051 (Prometheus) unblocked by STORY-047 merge. Stale lock removed (PID 763048).
 - **Branch hygiene**: Deleted 7 remote feature branches. 2 remote branches remain (develop, master).
 - **Actions taken**: Merged 7 PRs, updated STORY-047 DONE, unblocked STORY-051, branch cleanup.
+
+### [2026-03-28 07:50] Work Checker Run
+- **PRs merged**: 6 total — #140 (STORY-049), #141 (STORY-050), #142 (STORY-051), #143 (STORY-086), #144 (STORY-111), #145 (STORY-112)
+- **PRs rebased**: 5 successful, 0 failed — all had QUEUE.md/pyproject.toml/models/__init__.py conflicts resolved
+- **Open PRs**: 0 remaining
+- **Queue**: EPIC-014 5/5 DONE (complete). EPIC-030 2/5 DONE, 3 READY (STORY-113/114/115 unblocked).
+- **Dependencies unblocked**: STORY-113/114/115 (READY) — STORY-111 merged. Stale lock removed (PID 962891).
+- **Branch hygiene**: Deleted 5 remote + 13 local feature branches. 2 remote branches remain (develop, master).
+- **Actions taken**: Fixed 3 PR base branches (master->develop), rebased 5 conflicting PRs, merged 6 PRs, branch cleanup.
