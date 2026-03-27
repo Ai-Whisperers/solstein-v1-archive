@@ -841,3 +841,90 @@ class CompanyAnalysisAuditTrail(BaseModel):
     # Errors/warnings
     errors: list[str] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# EPIC-019: API Key Management (STORY-065)
+# ---------------------------------------------------------------------------
+
+
+class ApiKeyScope(StrEnum):
+    """Scope levels for API keys.
+
+    Controls what operations an API key can perform.
+    """
+
+    READ_ONLY = "read_only"
+    READ_WRITE = "read_write"
+    ADMIN = "admin"
+
+
+class ApiKey(BaseModel):
+    """Domain entity for tenant-scoped API keys.
+
+    STORY-065: API keys provide programmatic access for system-to-system
+    integration. The full key value is shown only once at creation time;
+    only the hash is stored.
+    """
+
+    model_config = ConfigDict(validate_assignment=True)
+
+    id: str = Field(default="", description="Unique identifier for the key")
+    tenant_id: str = Field(
+        ...,
+        description="Owning tenant identifier",
+    )
+    name: str = Field(
+        ...,
+        min_length=1,
+        max_length=255,
+        description="Human-readable label for the key",
+    )
+    key_prefix: str = Field(
+        default="",
+        description="First 8 chars of the key for identification (e.g. sk_live_Ab)",
+    )
+    key_hash: str = Field(
+        default="",
+        description="SHA-256 hash of the full API key (stored, never the plaintext)",
+    )
+    scope: ApiKeyScope = Field(
+        default=ApiKeyScope.READ_ONLY,
+        description="Permission scope for this key",
+    )
+    is_active: bool = Field(
+        default=True,
+        description="Whether the key is currently active",
+    )
+    last_used_at: datetime | None = Field(
+        default=None,
+        description="Timestamp of last successful authentication with this key",
+    )
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="When the key was created",
+    )
+    expires_at: datetime | None = Field(
+        default=None,
+        description="Optional expiry time for the key",
+    )
+    revoked_at: datetime | None = Field(
+        default=None,
+        description="When the key was revoked (None if active)",
+    )
+
+    @field_validator("tenant_id")
+    @classmethod
+    def validate_api_key_tenant_id(cls, v: str) -> str:
+        """Ensure tenant_id is not empty."""
+        if not v or not v.strip():
+            raise ValueError("API key must be associated with a tenant")
+        return v.strip()
+
+    @field_validator("name")
+    @classmethod
+    def validate_api_key_name(cls, v: str) -> str:
+        """Ensure name is not empty."""
+        if not v or not v.strip():
+            raise ValueError("API key name is required")
+        return v.strip()

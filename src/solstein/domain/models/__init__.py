@@ -65,6 +65,8 @@ SignalExtraction = _models_module.SignalExtraction
 SignalExtractionRecord = _models_module.SignalExtractionRecord
 GatheringBatch = _models_module.GatheringBatch
 CompanyAnalysisAuditTrail = _models_module.CompanyAnalysisAuditTrail
+ApiKeyScope = _models_module.ApiKeyScope  # EPIC-019 STORY-065
+ApiKey = _models_module.ApiKey  # EPIC-019 STORY-065
 
 __all__ = [
     # Enums
@@ -96,4 +98,7 @@ __all__ = [
     "SignalExtractionRecord",
     "GatheringBatch",
     "CompanyAnalysisAuditTrail",
+    # API Key Management (EPIC-019)
+    "ApiKeyScope",
+    "ApiKey",
 ]

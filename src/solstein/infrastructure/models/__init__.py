@@ -31,7 +31,7 @@ from .enrichment import (
 )
 
 # Infrastructure models
-from .infrastructure import OutboxRecord, TenantRecord
+from .infrastructure import ApiKeyRecord, ApiKeyUsageRecord, OutboxRecord, TenantRecord
 
 # Research models
 from .research import (
@@ -75,4 +75,7 @@ __all__ = [
     "ReleaseGateAuditRecord",
     # Tenant
     "TenantRecord",
+    # API Keys (EPIC-019)
+    "ApiKeyRecord",
+    "ApiKeyUsageRecord",
 ]
