@@ -5,6 +5,10 @@ into a Celery task on the ``export`` queue. The API endpoint creates an
 ExportJobRecord with status='queued' and dispatches this task. The task
 updates the record through processing -> completed | failed.
 
+STORY-115: Exports are uploaded to Supabase Storage (signed URLs) via
+the storage backend abstraction. Local disk is only used as a temporary
+staging area during generation; the temp file is cleaned up after upload.
+
 Task guarantees (inherited from EPIC-025):
 - STORY-088: On permanent failure the job is persisted to DLQ.
 - STORY-090: Idempotent — re-triggering the same export_job_id is a no-op
@@ -18,8 +22,10 @@ Time limits:
 from __future__ import annotations
 
 import asyncio
+import tempfile
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from celery import shared_task
@@ -176,9 +182,9 @@ async def _execute_export(
         """Synchronous progress callback for non-async exporters."""
         _run_in_dedicated_loop(_update_progress(pct))
 
-    # Generate the export file
+    # STORY-115: Generate file and upload to storage backend
     file_url = await _generate_file(
-        tenant_id, export_format, filters, _sync_progress,
+        tenant_id, export_job_id, export_format, filters, _sync_progress,
     )
 
     # Mark as completed with expiry (STORY-113)
@@ -216,65 +222,106 @@ def _get_file_size(file_url: str) -> int | None:
 
 async def _generate_file(
     tenant_id: str,
+    export_job_id: str,
     export_format: str,
     filters: dict[str, Any],
     progress_callback: Any | None = None,
 ) -> str:
-    """Dispatch to the appropriate exporter and return the file URL.
+    """Generate an export file and upload it via the storage backend.
 
-    This is the integration point with existing exporters. Each format
-    generates a file and returns a URL (local path or signed URL).
+    STORY-115: Files are generated to a temp directory, uploaded to the
+    configured storage backend (Supabase Storage or local fallback),
+    and the temp file is cleaned up. Returns the download URL.
 
     STORY-112: Added progress_callback parameter for streaming exports.
     """
-
-    from solstein.config import get_settings
-
-    settings = get_settings()
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    export_dir = settings.data.export_dir
-    export_dir.mkdir(parents=True, exist_ok=True)
-
     industry = filters.get("industry", "")
     prefix = industry.lower().replace(" ", "_") if industry else "all"
 
-    if export_format == "excel":
-        filename = f"export_{prefix}_{timestamp}.xlsx"
-        output_path = export_dir / filename
-        await _generate_excel(output_path, filters, progress_callback)
-        return str(output_path)
+    filename = _build_filename(export_format, prefix, timestamp)
 
-    if export_format == "csv":
-        filename = f"export_{prefix}_{timestamp}.csv"
-        output_path = export_dir / filename
-        await _generate_csv(output_path, filters)
-        return str(output_path)
+    # Generate to a temp file, upload, then clean up
+    with tempfile.TemporaryDirectory(prefix="solstein_export_") as tmp_dir:
+        tmp_path = Path(tmp_dir) / filename
+        await _dispatch_exporter(
+            export_format, tmp_path, filters, progress_callback,
+        )
 
-    if export_format == "json":
-        filename = f"export_{prefix}_{timestamp}.json"
-        output_path = export_dir / filename
-        await _generate_json(output_path, filters)
-        return str(output_path)
+        if not tmp_path.exists():
+            raise RuntimeError(
+                f"Exporter did not produce output file: {filename}"
+            )
 
-    if export_format == "pdf":
-        filename = f"export_{prefix}_{timestamp}.pdf"
-        output_path = export_dir / filename
-        await _generate_pdf(output_path, filters, progress_callback)
-        return str(output_path)
+        file_bytes = tmp_path.read_bytes()
 
-    if export_format == "markdown":
-        filename = f"export_{prefix}_{timestamp}.md"
-        output_path = export_dir / filename
-        await _generate_markdown(output_path, filters)
-        return str(output_path)
+    # Upload via storage backend (retry up to 3 times)
+    from solstein.exporters.storage import get_storage_backend
 
+    backend = get_storage_backend()
+    last_exc: Exception | None = None
+    for attempt in range(1, 4):
+        try:
+            url = await backend.upload(
+                data=file_bytes,
+                tenant_id=tenant_id,
+                job_id=export_job_id,
+                filename=filename,
+            )
+            return url
+        except Exception as exc:
+            last_exc = exc
+            logger.warning(
+                "[Export] Upload attempt %d/3 failed: %s",
+                attempt,
+                str(exc)[:200],
+            )
+
+    raise RuntimeError(
+        f"Export upload failed after 3 attempts: {last_exc}"
+    )
+
+
+def _build_filename(
+    export_format: str, prefix: str, timestamp: str,
+) -> str:
+    """Build the export filename from format, prefix, and timestamp."""
+    ext_map: dict[str, str] = {
+        "excel": "xlsx",
+        "csv": "csv",
+        "json": "json",
+        "markdown": "md",
+        "pdf": "pdf",
+    }
     if export_format in _LLM_FORMATS:
-        filename = f"export_llm_{prefix}_{timestamp}.md"
-        output_path = export_dir / filename
-        await _generate_llm_report(output_path, filters)
-        return str(output_path)
+        return f"export_llm_{prefix}_{timestamp}.md"
+    ext = ext_map.get(export_format)
+    if ext is None:
+        raise ValueError(f"Unsupported export format: {export_format}")
+    return f"export_{prefix}_{timestamp}.{ext}"
 
-    raise ValueError(f"Unsupported export format: {export_format}")
+
+async def _dispatch_exporter(
+    export_format: str,
+    output_path: Path,
+    filters: dict[str, Any],
+    progress_callback: Any | None = None,
+) -> None:
+    """Dispatch to the appropriate exporter to write a file."""
+    if export_format == "excel":
+        await _generate_excel(output_path, filters, progress_callback)
+    elif export_format == "csv":
+        await _generate_csv(output_path, filters)
+    elif export_format == "json":
+        await _generate_json(output_path, filters)
+    elif export_format == "markdown":
+        await _generate_markdown(output_path, filters)
+    elif export_format == "pdf":
+        await _generate_pdf(output_path, filters, progress_callback)
+    elif export_format in _LLM_FORMATS:
+        await _generate_llm_report(output_path, filters)
+    else:
+        raise ValueError(f"Unsupported export format: {export_format}")
 
 
 async def _generate_excel(
@@ -371,6 +418,29 @@ async def _generate_llm_report(
     if companies:
         report = enhancer.generate_full_report(companies)
         output_path.write_text(report)
+
+
+async def _generate_pdf(
+    output_path: Any,
+    filters: dict[str, Any],
+    progress_callback: Any | None = None,
+) -> None:
+    """Generate PDF export.
+
+    STORY-114: Uses PDFExporter with optional page format and progress.
+    """
+    from solstein.exporters.pdf import PDFExporter
+
+    exporter = PDFExporter()
+    companies = await _fetch_companies(filters)
+    if companies:
+        page_format = filters.get("page_format", "a4")
+        exporter.export(
+            companies,
+            output_path=output_path,
+            page_format=page_format,
+            progress_callback=progress_callback,
+        )
 
 
 async def _fetch_companies(

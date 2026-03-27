@@ -13,15 +13,25 @@ from .markdown.generator import (
     LLMEnhancedReportGenerator,
     generate_enhanced_report,
 )
+from .storage import (
+    ExportStorageBackend,
+    LocalStorageBackend,
+    SupabaseStorageBackend,
+    get_storage_backend,
+)
 
 __all__ = [
     "ExcelExporter",
+    "ExportStorageBackend",
     "ImprovedExcelExporter",
+    "LocalStorageBackend",
     "StreamingExcelExporter",
+    "SupabaseStorageBackend",
     "LLMReportEnhancer",
     "PDFExporter",
     "PipelineAuditReportGenerator",
     "ClientReportGenerator",
     "LLMEnhancedReportGenerator",
     "generate_enhanced_report",
+    "get_storage_backend",
 ]
