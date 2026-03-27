@@ -96,8 +96,9 @@ def test_cli_compare_not_found(tmp_path):
 
     runner = CliRunner()
     result = runner.invoke(cli, ["compare", "c1", "c2", str(input_file)])
-    assert result.exit_code == 0
-    assert "Profile not found: c1" in result.output
+    # STORY-172: unknown company now raises UsageError (non-zero exit) with clear message
+    assert result.exit_code != 0
+    assert "not found" in result.output
 
 
 def test_cli_verbose(tmp_path):
@@ -106,8 +107,9 @@ def test_cli_verbose(tmp_path):
 
     runner = CliRunner()
     result = runner.invoke(cli, ["-v", "analyze-market", str(input_file)])
+    # STORY-172: malformed JSON is now caught by validate_input_file before the try block
     assert result.exit_code != 0
-    assert "Failed to analyze market" in result.output
+    assert "Invalid JSON" in result.output or "Failed to analyze market" in result.output
 
 
 def test_cli_score_accepts_wrapped_competitors_payload(tmp_path):
@@ -175,7 +177,8 @@ def test_cli_compare_rejects_unknown_object_payload(tmp_path):
     result = runner.invoke(cli, ["compare", "c1", "c2", str(input_file)])
 
     assert result.exit_code != 0
-    assert "Unsupported input format" in result.output
+    # STORY-172: validate_input_file now raises "Unsupported JSON structure" instead
+    assert "Unsupported" in result.output
 
 
 def test_cli_analyze_market_accepts_wrapped_companies_payload(tmp_path):
@@ -209,7 +212,8 @@ def test_cli_export_excel_rejects_unknown_object_payload(tmp_path):
     result = runner.invoke(cli, ["export-excel", str(input_file), str(output_file)])
 
     assert result.exit_code != 0
-    assert "Unsupported input format" in result.output
+    # STORY-172: validate_input_file now raises "Unsupported JSON structure" instead
+    assert "Unsupported" in result.output
 
 
 def test_generate_report_default_output_dir_not_company_nested(monkeypatch):

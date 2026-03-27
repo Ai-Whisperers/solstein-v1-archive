@@ -13,6 +13,7 @@ from pydantic import ValidationError
 
 from . import __version__
 from .analytics.scoring import GrowthScorer
+from .cli_validators import validate_company_exists, validate_input_file, validate_output_dir
 from .config import get_settings
 from .data.converters import convert_to_domain_company
 from .data.report_readiness import assert_client_report_ready, assert_report_ready
@@ -195,6 +196,8 @@ def export_excel(input_file: Path, output_file: Path, template: Path | None) -> 
     """Export data to Excel dashboard."""
     click.echo(f"📊 Exporting to Excel: {output_file}")
 
+    validate_input_file(input_file)
+
     try:
         domain_companies = _load_companies_from_json(input_file)
 
@@ -214,6 +217,8 @@ def export_excel(input_file: Path, output_file: Path, template: Path | None) -> 
 def score(input_file: Path, output: Path | None) -> None:
     """Calculate growth and competitive scores."""
     click.echo("📈 Calculating scores...")
+
+    validate_input_file(input_file)
 
     try:
         domain_companies = _load_companies_from_json(input_file)
@@ -257,6 +262,8 @@ def analyze_market(input_file: Path, market_name: str) -> None:
     """Create market-level analysis."""
     click.echo(f"🌍 Analyzing market: {market_name}")
 
+    validate_input_file(input_file)
+
     try:
         domain_companies = _load_companies_from_json(input_file)
 
@@ -287,19 +294,13 @@ def compare(profile1: str, profile2: str, input_file: Path) -> None:
     """Compare two companies."""
     click.echo(f"⚖️ Comparing {profile1} vs {profile2}")
 
+    validate_input_file(input_file)
+
     try:
         domain_companies = _load_companies_from_json(input_file)
-        profiles = {profile.id: profile for profile in domain_companies}
 
-        if profile1 not in profiles:
-            click.echo(f"❌ Profile not found: {profile1}", err=True)
-            return
-        if profile2 not in profiles:
-            click.echo(f"❌ Profile not found: {profile2}", err=True)
-            return
-
-        p1 = profiles[profile1]
-        p2 = profiles[profile2]
+        p1 = validate_company_exists(domain_companies, profile1)
+        p2 = validate_company_exists(domain_companies, profile2)
 
         # Show comparison
         click.echo(f"\n{p1.name} vs {p2.name}:")
@@ -352,23 +353,14 @@ def generate_report(company_name: str, input: Path | None, output: Path | None) 
             scored_companies.append(scored)
 
         # Find target company
-        target: Company | None = None
-        for c in scored_companies:
-            if company_name.lower() in c.name.lower():
-                target = c
-                break
-
-        if not target:
-            click.echo(f"❌ Company not found: {company_name}", err=True)
-            click.echo(f"Available companies: {', '.join([c.name for c in scored_companies[:10]])}...")
-            return
+        target = validate_company_exists(scored_companies, company_name)
 
         # Get competitors (all other companies)
         competitors: list[Company] = [c for c in scored_companies if c.id != target.id]
         assert_client_report_ready(target, competitors)
 
         # Generate reports
-        output_dir = output or Path("data/output/reports")
+        output_dir = validate_output_dir(output or Path("data/output/reports"))
         generator = ClientReportGenerator(output_dir=output_dir)
 
         generator.generate_client_report(target, competitors)
@@ -407,21 +399,12 @@ def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) ->
             scored = scorer.calculate_scores(company)
             scored_companies.append(scored)
 
-        target: Company | None = None
-        for c in scored_companies:
-            if company_name.lower() in c.name.lower():
-                target = c
-                break
-
-        if not target:
-            click.echo(f"❌ Company not found: {company_name}", err=True)
-            click.echo(f"Available: {', '.join([c.name for c in scored_companies[:10]])}...")
-            return
+        target = validate_company_exists(scored_companies, company_name)
 
         competitors: list[Company] = [c for c in scored_companies if c.id != target.id]
         assert_client_report_ready(target, competitors)
 
-        output_dir = output or Path("data/output/reports/llm")
+        output_dir = validate_output_dir(output or Path("data/output/reports/llm"))
 
         if no_llm:
             generator = ClientReportGenerator(output_dir=output_dir)
@@ -461,7 +444,7 @@ def generate_all_reports(output: Path | None) -> None:
 
         assert_report_ready(scored_companies)
 
-        output_dir = output or Path("data/output/reports/all_companies")
+        output_dir = validate_output_dir(output or Path("data/output/reports/all_companies"))
         generator = ClientReportGenerator(output_dir=output_dir)
 
         generated = generator.generate_all_reports(scored_companies)
