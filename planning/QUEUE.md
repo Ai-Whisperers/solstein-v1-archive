@@ -274,8 +274,8 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 78 | STORY-145 | Portfolio Company AI-Readiness Scoring Model | DONE | PR #150 — 4 dimensions, 22 tests |
-| 79 | STORY-146 | AI Transformation Readiness Calculator | IN_PROGRESS | Depends on STORY-145 (DONE) |
-| 80 | STORY-147 | PE Due Diligence Integration Module | READY | Depends on STORY-145, STORY-146 |
+| 79 | STORY-146 | AI Transformation Readiness Calculator | DONE | PR #151 — TransformationCalculator, 31 tests |
+| 80 | STORY-147 | PE Due Diligence Integration Module | IN_PROGRESS | Depends on STORY-145, STORY-146 (both DONE) |
 | 81 | STORY-148 | Transformation Roadmap Generator | READY | Depends on STORY-146 |
 
 ### EPIC-039: Energy Sector Domain Specialization (P1)
