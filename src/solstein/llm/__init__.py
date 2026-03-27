@@ -14,6 +14,13 @@ Usage:
     result = await client.generate("Your prompt here")
 """
 
+from .embeddings import (
+    batch_generate_embeddings,
+    company_to_profile_text,
+    generate_company_embedding,
+    generate_embedding,
+    get_embedding_metadata,
+)
 from .enhanced_client import (
     EnhancedLLMClient,
     LLMGenerationError,
@@ -27,13 +34,6 @@ from .health_checker import (
     ProviderStatus,
     get_health_checker,
     reset_health_checker,
-)
-from .embeddings import (
-    batch_generate_embeddings,
-    company_to_profile_text,
-    generate_company_embedding,
-    generate_embedding,
-    get_embedding_metadata,
 )
 from .usage_tracker import UsageTracker, get_usage_tracker
 
