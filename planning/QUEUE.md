@@ -238,7 +238,7 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 64 | STORY-093 | Add Celery Worker Service to docker-compose | READY | EPIC-025 now DONE |
+| 64 | STORY-093 | Add Celery Worker Service to docker-compose | IN_PROGRESS | EPIC-025 now DONE |
 | 65 | STORY-094 | Add Celery Beat Service to docker-compose | READY | EPIC-025 now DONE |
 | 66 | STORY-095 | Add Flower Monitoring Service to docker-compose | READY | EPIC-025 now DONE |
 | 67 | STORY-096 | Multi-Stage Dockerfile for Production | READY | EPIC-025 now DONE |
