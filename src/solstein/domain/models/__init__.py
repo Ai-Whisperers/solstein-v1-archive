@@ -44,6 +44,7 @@ sys.modules["_models_module"] = _models_module
 _spec.loader.exec_module(_models_module)
 
 # Re-export all models from the original location for backward compatibility
+DEFAULT_TENANT_ID = _models_module.DEFAULT_TENANT_ID  # EPIC-019
 ConfidenceLevel = _models_module.ConfidenceLevel
 AIMaturity = _models_module.AIMaturity
 ThreatLevel = _models_module.ThreatLevel
@@ -67,6 +68,8 @@ GatheringBatch = _models_module.GatheringBatch
 CompanyAnalysisAuditTrail = _models_module.CompanyAnalysisAuditTrail
 
 __all__ = [
+    # EPIC-019 Tenant
+    "DEFAULT_TENANT_ID",
     # Enums
     "ConfidenceLevel",
     "AIMaturity",
