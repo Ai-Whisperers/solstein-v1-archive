@@ -45,7 +45,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 4 | STORY-137 | Centralize All Environment Variables in config.py | DONE | PR #80 merged (content in develop) |
 | 5 | STORY-138 | Replace Hardcoded Paths with Config-Driven Paths | DONE | PR #81 merged |
 | 6 | STORY-139 | Centralize Timeouts and Magic Numbers | DONE | Committed d385899 to develop. 17 files, 19 tests pass. |
-| 7 | STORY-140 | Fix .env.example with All Required Variables | READY | |
+| 7 | STORY-140 | Fix .env.example with All Required Variables | DONE | PR #82 |
 
 ### EPIC-037: Dead Code Elimination Phase 2 (P2)
 
@@ -184,3 +184,12 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: None — M1 still incomplete; EPIC-020 and EPIC-019 remain BLOCKED
 - **Branch hygiene**: Pruned 2 stale worktrees; deleted remote `work/free-source-real-data-hardening` (already in develop); deleted 3 local branches; `git fetch --prune` — 2 remote branches remain (develop, master)
 - **Actions taken**: Removed stale lock, pruned worktrees, cleaned 1 remote + 3 local branches, marked STORY-139 IN_PROGRESS
+
+### [2026-03-26 22:00] Worker Run — STORY-140 Complete
+- **Story**: STORY-140 — Fix .env.example with All Required Variables
+- **Epic**: EPIC-036 (Configuration Consolidation)
+- **Branch**: feature/STORY-140-fix-env-example
+- **PR**: #82
+- **Duration**: ~15m
+- **Quality**: ruff clean; pre-commit hooks pass; 13/13 new unit tests pass; pre-existing collection errors unchanged
+- **Notes**: .env.example rewritten from scratch to cover all 59 Settings fields. Added validate_env_example.py CI guard. Removed duplicate content (two merged drafts were concatenated in prior state). All LLM provider keys, connector resilience settings, feature flags, timeout sub-model fields now documented.
