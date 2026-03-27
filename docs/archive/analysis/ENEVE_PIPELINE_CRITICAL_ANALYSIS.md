@@ -1,8 +1,8 @@
 # ENEVE Pipeline: Critical Analysis & Epic Mapping
 
-**Date**: 2026-03-10  
-**Analysis Type**: Full Pipeline Flow Critique  
-**Severity**: 🔴 CRITICAL (Real data cannot be processed end-to-end)  
+**Date**: 2026-03-10
+**Analysis Type**: Full Pipeline Flow Critique
+**Severity**: 🔴 CRITICAL (Real data cannot be processed end-to-end)
 **Status**: 10 Issues Identified, 3 New Epics Created, 4 Existing Epics Updated
 
 ---
@@ -138,7 +138,7 @@ Real data only has: 8 fields, no enrichment, ~40% complete → **BLOCKED**
 ### ISSUE #7: Export Coupled to Release Gate
 **Severity**: 🔴 CRITICAL | **Impact**: Export never happens if gate fails
 
-**What**: 
+**What**:
 ```python
 assert_report_ready(scored)  # Throws exception
 ExcelExporter().create_dashboard(...)  # Never reaches here
@@ -205,8 +205,8 @@ Classification becomes meaningless because thresholds are:
 **Root Cause**: Scores based on incomplete data are artificially low.
 
 **Addressed By**: **EPIC-046** (Existing) - Scoring Engine Correctness
-- STORY-173: Derive threat_level from composite score ✓ 
-- STORY-175: Remove dead scoring methods ✓ 
+- STORY-173: Derive threat_level from composite score ✓
+- STORY-175: Remove dead scoring methods ✓
 
 **Also Addressed By**: **EPIC-059 (NEW)** - Input Validation & Graceful Degradation
 - STORY-206-210: Validation and graceful degradation ensure complete data before scoring
