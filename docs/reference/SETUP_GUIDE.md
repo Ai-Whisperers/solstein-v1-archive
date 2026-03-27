@@ -1,9 +1,13 @@
+> **Moved**: This guide has been consolidated into [`docs/guides/setup.md`](../guides/setup.md).
+> **Security Note**: This file previously contained API key examples that have since been rotated.
+> Please update your bookmarks.
+
 # Solstein Project - Complete Setup Guide
 
-> **Date**: 2026-03-01  
-> **Version**: 3.0  
-> **Last Updated**: 2026-03-01 00:50 UTC  
-> **Author**: Ivan Weiss van der Pol  
+> **Date**: 2026-03-01
+> **Version**: 3.0
+> **Last Updated**: 2026-03-01 00:50 UTC
+> **Author**: Ivan Weiss van der Pol
 
 ---
 
