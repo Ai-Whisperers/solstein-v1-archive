@@ -1,24 +1,44 @@
-"""Celery tasks for data refresh operations.
+"""Canonical Celery task registry for all data refresh and enrichment operations.
 
-EPIC-021: Refactored from monolithic 902-line file to modular structure.
-This module now serves as the orchestration layer, delegating to specialized modules.
+STORY-092 (capstone of EPIC-025): This module is the single authoritative import
+surface for all Celery tasks. worker_tasks_v2.py has been removed; all task
+definitions live in solstein.worker submodules re-exported here.
 
-Provides scheduled tasks for refreshing data from all 12 sources:
-- SEC EDGAR (financial filings)
-- Companies House (UK/EU company data)
-- News Signals (funding, partnerships, key hires)
-- GitHub (repository metrics)
-- Yahoo Finance (market data)
-- Patents (patent filings)
-- News (general news)
-- Website (company website data)
-- LinkedIn (professional profiles)
-- Funding (funding rounds)
-- Global Market (market trends)
-- Web Search (search results)
+All 12 Beat-scheduled refresh tasks
+------------------------------------
+Task name                                       Queue     Schedule
+----------------------------------------------------------------------
+solstein.worker_tasks.refresh_sec_edgar         default   Daily   09:00
+solstein.worker_tasks.refresh_companies_house   default   Daily   09:30
+solstein.worker_tasks.refresh_news_signals      default   Hourly  :00
+solstein.worker_tasks.refresh_github            default   Every 6h
+solstein.worker_tasks.refresh_yahoo_finance     default   Every 6h  (+15m)
+solstein.worker_tasks.refresh_patents           default   Daily   10:00
+solstein.worker_tasks.refresh_news              default   Every 2h  (+30m)
+solstein.worker_tasks.refresh_website           default   Daily   11:00
+solstein.worker_tasks.refresh_linkedin          default   Every 12h
+solstein.worker_tasks.refresh_funding           default   Every 6h  (+45m)
+solstein.worker_tasks.refresh_global_market     default   Every 6h  (+30m)
+solstein.worker_tasks.refresh_web_search        default   Every 6h  :00
+solstein.worker_tasks.refresh_all_sources       default   Weekly  Sun 02:00
 
-Phase 13.4: Async Job Retry Logic
-- Exponential backoff: 5s, 10s, 20s for retries 1, 2, 3
+(Schedules are authoritative in celery_config.py beat_schedule; this table
+is a human-readable summary for onboarding and code-review purposes.)
+
+Reliability guarantees per task (EPIC-025)
+------------------------------------------
+- STORY-088: On MaxRetriesExceededError the failure is persisted to PostgreSQL
+  DLQ via solstein.worker.dlq.persist_failed_task (not lost in memory).
+- STORY-089: task_acks_late=True + task_reject_on_worker_lost=True in
+  celery_config.py — tasks are re-queued on worker crash (at-least-once).
+- STORY-090: Each task is wrapped with a Redis dedup lock keyed to the full
+  task name + 1-hour period bucket.  Duplicate invocations within the same
+  period are skipped with a WARNING log (not an error). Fail-open on Redis
+  unavailability.
+
+Retry strategy (Phase 13.4)
+----------------------------
+- Exponential backoff: 5 s, 10 s, 20 s for retries 1, 2, 3
 - Dead Letter Queue tracking for permanently failed jobs
 - Logging with [RETRY-ATTEMPT-N] and [RETRY-FAILED] prefixes
 """

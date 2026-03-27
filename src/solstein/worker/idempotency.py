@@ -73,7 +73,7 @@ def _get_redis_client():
             return None
 
         return redis_lib.from_url(redis_url, decode_responses=True, socket_timeout=2)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("[Idempotency] Cannot connect to Redis for lock: %s", exc)
         return None
 
@@ -100,6 +100,7 @@ def deduplicate(
     ttl: int = _DEFAULT_TTL,
     key_fn: Callable[..., str] | None = None,
     granularity: int = 3600,
+    task_name_override: str | None = None,
 ) -> Callable:
     """Decorator that prevents concurrent duplicate Celery task execution.
 
@@ -116,6 +117,10 @@ def deduplicate(
                 the idempotency key. Defaults to time-bucketed period key.
         granularity: Period bucket size in seconds (default 3600 = 1 hour).
                      Used only when key_fn is None.
+        task_name_override: Explicit task name for the lock key. Required when
+                            applying to factory-generated closures where
+                            ``func.__name__`` is generic (e.g. "refresh_task").
+                            Uses ``func.__name__`` if not provided.
 
     Returns:
         Decorator that wraps the task function with deduplication logic.
@@ -124,7 +129,7 @@ def deduplicate(
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            task_name = func.__name__
+            task_name = task_name_override or func.__name__
             if key_fn is not None:
                 idempotency_key = key_fn(task_name, *args, **kwargs)
             else:
@@ -144,7 +149,7 @@ def deduplicate(
             try:
                 lock = client.lock(lock_key, timeout=ttl, blocking_timeout=0)
                 acquired = lock.acquire(blocking=False)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning(
                     "[Idempotency] Lock acquire error for %s — executing without lock "
                     "(fail-open): %s",
@@ -176,7 +181,7 @@ def _safe_release(lock: Any, task_name: str, lock_key: str) -> None:
     """Release a Redis lock, logging on error but never raising."""
     try:
         lock.release()
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning(
             "[Idempotency] Failed to release lock for %s (key=%s): %s",
             task_name,
