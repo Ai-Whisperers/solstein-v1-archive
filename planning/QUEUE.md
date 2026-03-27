@@ -214,7 +214,7 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 55 | STORY-076 | Define LangGraph Architecture and State Schema | DONE | PR #125 |
 | 56 | STORY-077 | Migrate Coordinator to LangGraph | DONE | PR #126 (stacked on #125) |
-| 57 | STORY-078 | Implement Real Agent Nodes | READY | Dep: STORY-077 (DONE - PR #126) |
+| 57 | STORY-078 | Implement Real Agent Nodes | IN_PROGRESS | |
 | 58 | STORY-079 | Add Checkpointing and Human-in-the-Loop | BLOCKED | Dep: STORY-078 |
 
 ---
