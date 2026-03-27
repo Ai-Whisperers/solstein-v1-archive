@@ -189,8 +189,8 @@ The first worker run MUST do a verification pass before starting implementation 
 | 45 | STORY-111 | Move Exports to Async Celery Tasks | DONE | PR #144, 53 tests |
 | 46 | STORY-112 | Streaming Excel Export for Large Datasets | DONE | PR #145, 38 tests |
 | 47 | STORY-113 | Export Status Tracking and Download Links | DONE | PR #147, 46 tests |
-| 48 | STORY-114 | Add PDF Export Format | IN_PROGRESS | Worker run 2026-03-27 |
-| 49 | STORY-115 | Store Exports in Supabase Storage | READY | STORY-111 DONE |
+| 48 | STORY-114 | Add PDF Export Format | DONE | PR #148, 35 tests |
+| 49 | STORY-115 | Store Exports in Supabase Storage | DONE | PR #149, 31 tests |
 
 ---
 
@@ -284,6 +284,13 @@ Worker and checker append timestamped entries here:
 - **Duration**: ~15m (discovery, verification, supplemental implementation)
 - **Quality**: 32/32 STORY-051 tests pass, ruff clean
 - **Notes**: Both stories were implemented by a prior worker run. This run verified completeness, wired the PrometheusMiddleware that was missing, added the metrics catalogue documentation, and updated QUEUE.md to mark both stories DONE.
+
+### [2026-03-27] Worker Run — EPIC-030 Complete (STORY-114, 115)
+- **Epic**: EPIC-030 — Export Pipeline Modernization (ALL 5 STORIES DONE)
+- **Stories completed this run**: STORY-114 (PR #148, 35 tests), STORY-115 (PR #149, 31 tests)
+- **Key deliverables**: PDF export with fpdf2 (cover page, executive summary, financial overview, company profiles, source citations, scoring methodology), Supabase Storage backend with signed URLs and local fallback, upload retry logic, temp file cleanup
+- **Quality**: All pre-commit hooks pass, ruff clean, 122 export-related tests pass, all files under 500-line limit
+- **Epic totals**: 5 PRs (#144–149), 203 tests across all stories
 
 ### [2026-03-27] Worker Run — EPIC-030 Progress (STORY-111, 112)
 - **Epic**: EPIC-030 — Export Pipeline
