@@ -97,8 +97,8 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 24 | STORY-169 | Fix JSON parsing in score/analyze-market/compare/export-excel | DONE | PR #90 |
 | 24b | STORY-170 | Restore generate-llm-report exporter import | DONE | PR #91 |
-| 24c | STORY-171 | Migrate all CLI commands from deprecated CompetitorDataLoader | IN_PROGRESS | |
-| 24d | STORY-172 | Add structured input validation with actionable error messages | READY | |
+| 24c | STORY-171 | Migrate all CLI commands from deprecated CompetitorDataLoader | DONE | PR #92 |
+| 24d | STORY-172 | Add structured input validation with actionable error messages | IN_PROGRESS | |
 
 ### EPIC-046: Scoring Engine Correctness (P0)
 
@@ -225,3 +225,11 @@ Worker and checker append timestamped entries here:
 **Queue state after run**: M1 = 15/15 DONE. M2 (EPIC-020, EPIC-019) remains BLOCKED pending external dependency resolution. P0 new epics (EPIC-045, 046, 052, 058, 062, 064) all READY.
 
 **Quality gates**: All pre-commit hooks passed on all commits. No regressions in existing tests.
+
+### [2026-03-26] Worker Run — STORY-171 Complete
+- **Story implemented**: STORY-171 — Migrate all CLI commands from deprecated CompetitorDataLoader
+- **PR created**: #92 targeting develop
+- **Branch**: feature/STORY-171-migrate-competitor-data-loader
+- **Changes**: New `_load_companies_for_report()` helper in cli.py replaces CompetitorDataLoader; updated `generate-report`, `generate-llm-report`, `generate-all-reports`; added TODO annotation to competitor_loader.py
+- **Tests**: 19 passing (14 test_cli.py + 5 test_loader_parity.py new); no DeprecationWarning emitted
+- **Queue**: EPIC-045: STORY-169 DONE, STORY-170 DONE, STORY-171 DONE, STORY-172 IN_PROGRESS
