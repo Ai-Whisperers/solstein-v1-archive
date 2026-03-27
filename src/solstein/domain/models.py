@@ -81,6 +81,11 @@ class ErrorSeverity(StrEnum):
     INFO = "INFO"
 
 
+# EPIC-019: Default tenant for backward compatibility during migration.
+# All existing data is backfilled to this tenant. New code MUST pass an explicit tenant_id.
+DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000000"
+
+
 class FinancialMetric(BaseModel):
     """Financial metrics domain entity."""
 
@@ -133,6 +138,10 @@ class Company(BaseModel):
     model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
 
     id: str = Field(..., description="Unique company identifier")
+    tenant_id: str = Field(
+        default=DEFAULT_TENANT_ID,
+        description="Owning tenant identifier (EPIC-019). Defaults to migration tenant.",
+    )
     name: str
     company_name: str | None = None
     industry: str = "Energy Software"
@@ -161,6 +170,17 @@ class Company(BaseModel):
             raise ValueError("Company ID must be at least 3 characters")
         if " " in v:
             raise ValueError("Company ID cannot contain spaces")
+        return v.strip()
+
+    @field_validator("tenant_id")
+    @classmethod
+    def validate_tenant_id(cls, v: str) -> str:
+        """Validate tenant_id is present (EPIC-019).
+
+        Every business entity must belong to a tenant.
+        """
+        if not v or not v.strip():
+            raise ValueError("tenant_id is required — no business entity may exist without a tenant owner")
         return v.strip()
 
     @classmethod

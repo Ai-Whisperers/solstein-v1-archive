@@ -10,15 +10,11 @@ Contains ORM models for:
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, JSON, String
+from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base import Base
-
-if TYPE_CHECKING:
-    pass
 
 
 class CompanyRecord(Base):
@@ -165,6 +161,7 @@ class ScoringRecord(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(String(255), index=True, nullable=False)
+    tenant_id = Column(String(255), index=True, nullable=True)  # EPIC-019
     company_name = Column(String(500), nullable=False)
 
     growth_score = Column(Float, nullable=False)
@@ -183,12 +180,14 @@ class ScoringRecord(Base):
         Index("ix_company_scored_at", "company_id", "scored_at"),
         Index("ix_overall_score", "overall_score"),
         Index("ix_classification", "classification"),
+        Index("ix_scoring_tenant", "tenant_id"),  # EPIC-019
     )
 
     def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "company_id": self.company_id,
+            "tenant_id": self.tenant_id,
             "company_name": self.company_name,
             "growth_score": self.growth_score,
             "financial_health_score": self.financial_health_score,
@@ -245,6 +244,7 @@ class MarketSnapshot(Base):
     __tablename__ = "market_snapshots"
 
     id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(String(255), index=True, nullable=True)  # EPIC-019
     snapshot_date = Column(DateTime, nullable=False, index=True, default=lambda: datetime.now(timezone.utc))
 
     total_companies_scored = Column(Integer, nullable=False)
@@ -258,11 +258,15 @@ class MarketSnapshot(Base):
 
     market_metadata = Column(JSON, nullable=True)
 
-    __table_args__ = (Index("ix_snapshot_date", "snapshot_date"),)
+    __table_args__ = (
+        Index("ix_snapshot_date", "snapshot_date"),
+        Index("ix_market_snapshot_tenant", "tenant_id"),  # EPIC-019
+    )
 
     def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
+            "tenant_id": self.tenant_id,
             "snapshot_date": (self.snapshot_date.isoformat() if self.snapshot_date is not None else None),
             "total_companies_scored": self.total_companies_scored,
             "average_growth_score": self.average_growth_score,
@@ -281,6 +285,7 @@ class AuditTrailRecord(Base):
     __tablename__ = "audit_trails"
 
     id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(String(255), index=True, nullable=True)  # EPIC-019
     company_id = Column(String(255), index=True, nullable=False)
     gathering_batch_id = Column(String(255), index=True, nullable=False)
     company_name = Column(String(500), nullable=False)

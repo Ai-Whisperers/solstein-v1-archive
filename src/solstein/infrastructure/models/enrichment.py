@@ -10,14 +10,11 @@ Contains ORM models for:
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional, cast
+from typing import cast
 
-from sqlalchemy import Column, DateTime, Float, Index, Integer, JSON, String, Text
+from sqlalchemy import JSON, Column, DateTime, Float, Index, Integer, String, Text
 
 from .base import Base
-
-if TYPE_CHECKING:
-    pass
 
 
 class EnrichmentAuditRecord(Base):
@@ -29,6 +26,7 @@ class EnrichmentAuditRecord(Base):
     __tablename__ = "enrichment_audit_trail"
 
     id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(String(255), index=True, nullable=True)  # EPIC-019
     company_id = Column(String(255), index=True, nullable=False)
     company_name = Column(String(500), nullable=True)
 
@@ -85,6 +83,7 @@ class EnrichmentCacheRecord(Base):
     __tablename__ = "enrichment_cache"
 
     id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(String(255), index=True, nullable=True)  # EPIC-019
     company_id = Column(String(255), unique=True, index=True, nullable=False)
 
     # Cached enrichment data
@@ -105,7 +104,7 @@ class EnrichmentCacheRecord(Base):
 
     def is_expired(self) -> bool:
         """Check if cache entry has expired."""
-        expires_at = cast(Optional[datetime], cast(object, self.expires_at))
+        expires_at = cast(datetime | None, cast(object, self.expires_at))
         if expires_at is None:
             return False
         comparison = datetime.now(timezone.utc) > expires_at
@@ -136,6 +135,7 @@ class EnrichmentJobRecord(Base):
     __tablename__ = "enrichment_jobs"
 
     id = Column(String(255), primary_key=True, index=True)  # Celery task_id
+    tenant_id = Column(String(255), index=True, nullable=True)  # EPIC-019
 
     # Job details
     company_id = Column(String(255), index=True, nullable=False)
