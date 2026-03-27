@@ -36,7 +36,8 @@ from .health_checker import (
     reset_health_checker,
 )
 from .instructor_client import InstructorClient
-from .usage_tracker import UsageTracker, get_usage_tracker
+from .prompts import PromptManager, get_prompt, get_prompt_manager
+from .tracing import LLMTracer, TraceRecord, get_tracer, reset_tracer
 
 __all__ = [
     # Enhanced client
@@ -45,6 +46,15 @@ __all__ = [
     "get_enhanced_llm_client",
     # Instructor client (STORY-072)
     "InstructorClient",
+    # Tracing (STORY-073)
+    "LLMTracer",
+    "TraceRecord",
+    "get_tracer",
+    "reset_tracer",
+    # Prompts (STORY-073)
+    "PromptManager",
+    "get_prompt",
+    "get_prompt_manager",
     # Health checking
     "ProviderHealthChecker",
     "ProviderHealth",
@@ -53,8 +63,6 @@ __all__ = [
     "ProviderErrorType",
     "get_health_checker",
     "reset_health_checker",
-    "UsageTracker",
-    "get_usage_tracker",
     # Embeddings (EPIC-023)
     "generate_embedding",
     "generate_company_embedding",

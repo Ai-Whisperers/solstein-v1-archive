@@ -252,6 +252,13 @@ class Settings(BaseSettings):
     alibaba_api_key: str | None = Field(default=None)
     alibaba_model: str = Field(default="qwen-plus")
 
+    # Langfuse observability (STORY-073)
+    langfuse_public_key: str | None = Field(default=None, description="Langfuse public key for tracing")
+    langfuse_secret_key: str | None = Field(default=None, description="Langfuse secret key for tracing")
+    langfuse_host: str = Field(
+        default="https://cloud.langfuse.com", description="Langfuse API host"
+    )
+
     # Embedding (EPIC-023: pgvector semantic search)
     embedding_model: str = Field(default="text-embedding-3-small")
     embedding_dimensions: int = Field(default=1536)
