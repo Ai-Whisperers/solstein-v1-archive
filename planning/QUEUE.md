@@ -213,8 +213,8 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 55 | STORY-076 | Define LangGraph Architecture and State Schema | DONE | PR #125 |
-| 56 | STORY-077 | Migrate Coordinator to LangGraph | IN_PROGRESS | Dep: STORY-076 (DONE - PR #125) |
-| 57 | STORY-078 | Implement Real Agent Nodes | BLOCKED | Dep: STORY-077 |
+| 56 | STORY-077 | Migrate Coordinator to LangGraph | DONE | PR #126 (stacked on #125) |
+| 57 | STORY-078 | Implement Real Agent Nodes | READY | Dep: STORY-077 (DONE - PR #126) |
 | 58 | STORY-079 | Add Checkpointing and Human-in-the-Loop | BLOCKED | Dep: STORY-078 |
 
 ---
@@ -547,3 +547,13 @@ Worker and checker append timestamped entries here:
 - **Deliverables**: ResearchState TypedDict (state.py), StateGraph topology with 11 nodes and fan-out/fan-in pattern (topology.py), Mermaid architecture diagram (docs/architecture/research-graph.md)
 - **Dependencies unblocked**: STORY-077 (Migrate Coordinator to LangGraph) marked READY
 - **Notes**: `instructor` package was missing from venv — installed via pip3 to unblock import chain. Pre-existing test failures in scoring/analytics modules are unrelated to this story.
+
+### [2026-03-27] Worker Run — STORY-077 Complete (EPIC-022 executor layer)
+- **Epic**: EPIC-022 — LangGraph Agent Orchestration
+- **Stories completed**: STORY-077 (Migrate Coordinator Agent to LangGraph State Machine)
+- **PRs created**: #126 (stacked on #125 — base: feature/STORY-076-langgraph-architecture)
+- **Duration**: ~45m (implementation + circular-import refactor + quality gates)
+- **Quality**: ruff clean; pre-commit Agent Code Quality Checks passed; 26 new tests + 23 STORY-076 regression = 49/49 pass
+- **Deliverables**: `isolation.py` (with_error_isolation decorator, extracted to break circular import), `executor.py` (RequestCache, GraphExecutor, run_graph_research), updated topology/init exports
+- **Dependencies unblocked**: STORY-078 (Implement Real Agent Nodes) marked READY
+- **Notes**: Circular import between topology.py and executor.py resolved by extracting `with_error_isolation` into `isolation.py`. Pre-commit hook `GITHUB_TOKEN` env var was conflicting with keyring auth for gh CLI — worked around with `unset GITHUB_TOKEN`.
