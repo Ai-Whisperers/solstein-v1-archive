@@ -82,9 +82,9 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 20 | STORY-063 | Define Tenant Model and Domain Object Scoping | DONE | PR #105 |
-| 21 | STORY-064 | Implement Supabase RLS for All Tables | DONE | PR #106 |
-| 22 | STORY-065 | Add Tenant-Scoped API Key Management | DONE | PR #107 |
+| 20 | STORY-063 | Define Tenant Model and Domain Object Scoping | DONE | PR #105 merged |
+| 21 | STORY-064 | Implement Supabase RLS for All Tables | DONE | PR #106 merged |
+| 22 | STORY-065 | Add Tenant-Scoped API Key Management | DONE | PR #107 merged |
 | 23 | STORY-066 | Enforce Tenant Isolation in Research Jobs | READY | |
 
 ---
@@ -337,3 +337,12 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: None this run
 - **Branch hygiene**: Removed stale lock (PID 3364061 dead). Deleted 1 local merged branch (story-066-tenant-isolation-research-jobs). Pruned refs. 3 remote feature branches remain (tied to open PRs).
 - **Actions taken**: Removed stale lock, pruned refs, deleted 1 local branch. PRs need CI fixes before merge.
+
+### [2026-03-27 17:37] Work Checker Run
+- **PRs merged**: 3 total — #105 (STORY-063), #106 (STORY-064), #107 (STORY-065) — all EPIC-019 multi-tenancy
+- **PRs rebased**: 0 — all were cleanly MERGEABLE
+- **Open PRs**: 0 remaining
+- **Queue**: M1: 15/15 DONE. EPIC-020: 4/4 DONE. EPIC-019: 3/4 DONE (STORY-066 READY). P0: all complete except EPIC-052 (BLOCKED, no story files).
+- **Dependencies unblocked**: None this run — STORY-066 already READY
+- **Branch hygiene**: Removed stale lock (PID 3475525 dead). Deleted 3 remote feature branches. Deleted 3 local merged branches. Pruned refs. 2 remote branches remain (develop, master).
+- **Actions taken**: Stale lock cleanup, merged 3 PRs in dependency order (063→064→065), branch cleanup, queue notes updated
