@@ -244,3 +244,6 @@ class CompanyRepository:
         query = query.offset(skip).limit(limit)
         result = await self.session.execute(query)
         return list(result.scalars().all())
+
+    # Embedding methods delegated to EmbeddingRepository (EPIC-023)
+    # See: src/solstein/infrastructure/embedding_repository.py
