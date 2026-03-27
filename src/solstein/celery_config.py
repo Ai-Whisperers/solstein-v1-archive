@@ -57,9 +57,29 @@ celery_app.conf.update(
     #   CELERY_TIMING__RESULT_EXPIRES=86400  (nested config)
     # Pollers must read results within this window or accept expiry.
     result_expires=_result_expires,
-    # worker_prefetch_multiplier=1 is required for at-least-once delivery
-    # (see STORY-089: task_acks_late). Setting prefetch to 1 ensures a worker
-    # receives exactly one task at a time, so a crash drops at most one task.
+    # STORY-089: At-least-once delivery semantics.
+    #
+    # task_acks_late=True — tasks are acknowledged to the broker AFTER execution
+    # completes, not on receipt. If a worker is killed between receipt and
+    # completion (OOM, SIGKILL, pod eviction), the broker re-queues the task
+    # automatically. Without this, a worker crash silently drops the task.
+    #
+    # task_reject_on_worker_lost=True — when the worker connection is lost (not
+    # just an application-level exception), the task is rejected back to the
+    # broker (nack'd) rather than acked. This completes the acks_late guarantee:
+    # even a hard connection loss triggers re-queue.
+    #
+    # IMPORTANT: acks_late creates at-least-once semantics. Tasks MAY execute
+    # more than once (e.g. on Beat scheduler restart or worker eviction mid-task).
+    # All 12 Beat-scheduled tasks are guarded by the Redis deduplication lock in
+    # solstein.worker.idempotency — see STORY-090. Deploy these two stories together.
+    #
+    # worker_prefetch_multiplier=1 is required for acks_late correctness. With
+    # higher prefetch a worker holds multiple unacked tasks in memory; a crash
+    # then requeues all prefetched tasks, increasing duplicate risk. With prefetch=1
+    # only one task is in-flight per worker process at a time.
+    task_acks_late=True,
+    task_reject_on_worker_lost=True,
     worker_prefetch_multiplier=1,
     worker_max_tasks_per_child=100,
 )
