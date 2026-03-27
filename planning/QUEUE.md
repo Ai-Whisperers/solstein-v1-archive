@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-03-26 | Updated By | Initial setup |
+| Last Updated | 2026-03-27 | Updated By | Autonomous worker (STORY-066) |
 
 ## Status Key
 
@@ -85,7 +85,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 20 | STORY-063 | Define Tenant Model and Domain Object Scoping | DONE | PR #105 merged |
 | 21 | STORY-064 | Implement Supabase RLS for All Tables | DONE | PR #106 merged |
 | 22 | STORY-065 | Add Tenant-Scoped API Key Management | DONE | PR #107 merged |
-| 23 | STORY-066 | Enforce Tenant Isolation in Research Jobs | IN_PROGRESS | |
+| 23 | STORY-066 | Enforce Tenant Isolation in Research Jobs | DONE | PR #108 |
 
 ---
 
@@ -346,3 +346,11 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: None this run — STORY-066 already READY
 - **Branch hygiene**: Removed stale lock (PID 3475525 dead). Deleted 3 remote feature branches. Deleted 3 local merged branches. Pruned refs. 2 remote branches remain (develop, master).
 - **Actions taken**: Stale lock cleanup, merged 3 PRs in dependency order (063→064→065), branch cleanup, queue notes updated
+
+### [2026-03-27 05:25] Worker Run — STORY-066
+- **Story completed**: STORY-066 — Enforce Tenant Isolation in Research Jobs
+- **PR created**: #108 targeting develop
+- **Changes**: New `worker/tenant_isolation.py` module; all 12 refresh tasks + enrichment tasks + orchestration require explicit `tenant_id`; base utilities filter queries/writes by tenant; async_jobs router extracts tenant from request context
+- **Tests**: 14 new + 5 updated unit tests (19 total, all passing)
+- **Code quality**: Fixed pre-existing bare excepts, reduced parameter counts, removed stale duplicate file
+- **Queue**: EPIC-019 now 4/4 DONE (STORY-063, 064, 065, 066 all complete)
