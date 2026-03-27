@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-03-27 | Updated By | Autonomous worker (STORY-066) |
+| Last Updated | 2026-03-27 | Updated By | Autonomous worker (EPIC-004) |
 
 ## Status Key
 
@@ -86,6 +86,18 @@ The first worker run MUST do a verification pass before starting implementation 
 | 21 | STORY-064 | Implement Supabase RLS for All Tables | DONE | PR #106 merged |
 | 22 | STORY-065 | Add Tenant-Scoped API Key Management | DONE | PR #107 merged |
 | 23 | STORY-066 | Enforce Tenant Isolation in Research Jobs | IN_PROGRESS | PR #108 open — CI failing (lint, type check, tests, security, pre-commit) |
+
+---
+
+## Critical Path P0s (Original)
+
+### EPIC-004: Data Integrity & Atomicity (P0) — STORY-012 Complete, 2 remaining
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 33 | STORY-012 | Fix Dual-Write Atomicity in Research Pipeline | DONE | Completed in prior work |
+| 34 | STORY-014 | Remove Hardcoded Date Path from Data Loader | IN_PROGRESS | dutch_market still hardcoded in fallback path |
+| 35 | STORY-013 | Fix Conflict Resolution Logic | READY | No recency/reliability in resolution; MANUAL_REVIEW is a no-op |
 
 ---
 
