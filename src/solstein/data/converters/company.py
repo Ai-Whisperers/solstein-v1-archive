@@ -313,6 +313,7 @@ def convert_to_domain_company(raw_data: dict[str, Any], index: int = 0) -> Compa
     data_quality_tier = determine_data_quality_tier(raw_data)
 
     # EPIC-058: Directly build Company object instead of calling non-existent build_company_entity()
+    # STORY-178: Populate top-level funding fields from funding_data (raw EUR, not normalized millions)
     company = Company(
         id=f"{company_name.lower().replace(' ', '-')}-{index}",
         name=company_name,
@@ -344,5 +345,10 @@ def convert_to_domain_company(raw_data: dict[str, Any], index: int = 0) -> Compa
         ai_score=ai_score,
         metric_sources=metric_sources,
         source_links=source_links,
+        # STORY-178: top-level funding fields (raw EUR, not normalized to millions)
+        total_funding_raised_eur=funding_data.get("total_funding_eur"),
+        latest_valuation_eur=funding_data.get("latest_valuation_eur"),
+        funding_rounds=funding_data.get("funding_rounds", []),
+        lead_investors=funding_data.get("lead_investors", []),
     )
     return populate_signal_confidences(company)
