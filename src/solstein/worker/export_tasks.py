@@ -181,7 +181,7 @@ async def _execute_export(
         tenant_id, export_format, filters, _sync_progress,
     )
 
-    # Mark as completed
+    # Mark as completed with expiry (STORY-113)
     async with AsyncSession(engine, expire_on_commit=False) as session:
         result = await session.execute(
             select(ExportJobRecord).where(
@@ -190,9 +190,8 @@ async def _execute_export(
         )
         job = result.scalar_one_or_none()
         if job is not None:
-            job.status = "completed"
-            job.file_url = file_url
-            job.completed_at = datetime.now(timezone.utc)
+            file_size = _get_file_size(file_url)
+            job.mark_completed(file_url, file_size_bytes=file_size)
             await session.commit()
 
     logger.info(
@@ -200,6 +199,19 @@ async def _execute_export(
         export_job_id,
         file_url,
     )
+
+
+def _get_file_size(file_url: str) -> int | None:
+    """Get file size in bytes from a local path or return None."""
+    import pathlib
+
+    try:
+        path = pathlib.Path(file_url)
+        if path.exists():
+            return path.stat().st_size
+    except (OSError, TypeError, ValueError):
+        pass
+    return None
 
 
 async def _generate_file(
