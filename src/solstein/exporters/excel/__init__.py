@@ -15,6 +15,10 @@ from .sheets import (
     add_title_banner,
     write_headers,
 )
+from .sheets_extended import (
+    add_advanced_data,
+    add_revenue_history,
+)
 from .styles import ColorPalette, ExcelStyles, LayoutConstants
 from .utils import (
     auto_adjust_columns,
@@ -54,5 +58,7 @@ __all__ = [
     "add_executive_summary",
     "add_market_rankings",
     "add_financial_intelligence",
+    "add_revenue_history",
+    "add_advanced_data",
     "ExcelExporter",
 ]
