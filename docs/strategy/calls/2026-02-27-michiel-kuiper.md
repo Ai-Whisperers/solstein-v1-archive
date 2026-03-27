@@ -1,9 +1,9 @@
 # Call Summary: John van der Pol & Michiel Kuiper
 
-**Date:** February 27, 2026, 09:37  
-**Duration:** ~1h 36m  
-**Participants:** John van der Pol, Michiel Kuiper  
-**Type:** Brainstorm / Strategic Alignment / Long Play Explanation  
+**Date:** February 27, 2026, 09:37
+**Duration:** ~1h 36m
+**Participants:** John van der Pol, Michiel Kuiper
+**Type:** Brainstorm / Strategic Alignment / Long Play Explanation
 **Source:** Auto-transcribed (Dutch/English mixed; reconstructed from context)
 
 ---
@@ -137,19 +137,19 @@ John walked Michiel through the concrete capabilities being developed:
 
 ## Key Quotes (Reconstructed from Clear Segments)
 
-> "The release management is partially done manually still -- that one can go also a lot more automatically."  
+> "The release management is partially done manually still -- that one can go also a lot more automatically."
 > -- John, on current state of Energy 21 automation
 
-> "If you know how many discussions we had on [Open Telemetry] -- 3-4 discussions with four people. That should have been rolled out everywhere already."  
+> "If you know how many discussions we had on [Open Telemetry] -- 3-4 discussions with four people. That should have been rolled out everywhere already."
 > -- John, on the cost of indecision
 
-> "There's a lot of repetitive coding happening because it's always done under time pressure. They don't know what is standard. They don't have time to extract the standard."  
+> "There's a lot of repetitive coding happening because it's always done under time pressure. They don't know what is standard. They don't have time to extract the standard."
 > -- John, on the Portugal team's consultant productivity problem
 
-> "It's not just making things easier and faster, but it's also to consolidate things -- consolidate code. Standard libraries for standard things."  
+> "It's not just making things easier and faster, but it's also to consolidate things -- consolidate code. Standard libraries for standard things."
 > -- John, on the standardization approach
 
-> "A consultant can make something, it can be converted, and the customer's like: why are we still doing that in scripting? That is like night and day difference in quality."  
+> "A consultant can make something, it can be converted, and the customer's like: why are we still doing that in scripting? That is like night and day difference in quality."
 > -- John, on the transformation potential of Python + AI quality enforcement
 
 ---
