@@ -37,6 +37,15 @@ from .health_checker import (
 )
 from .instructor_client import InstructorClient
 from .prompts import PromptManager, get_prompt, get_prompt_manager
+from .evaluation import (
+    EvalCase,
+    EvalDataset,
+    EvalResult,
+    evaluate_business_analysis,
+    evaluate_company_extraction,
+    evaluate_research_plan,
+    run_evaluation,
+)
 from .tracing import LLMTracer, TraceRecord, get_tracer, reset_tracer
 
 __all__ = [
@@ -51,6 +60,14 @@ __all__ = [
     "TraceRecord",
     "get_tracer",
     "reset_tracer",
+    # Evaluation (STORY-074)
+    "EvalCase",
+    "EvalDataset",
+    "EvalResult",
+    "evaluate_research_plan",
+    "evaluate_company_extraction",
+    "evaluate_business_analysis",
+    "run_evaluation",
     # Prompts (STORY-073)
     "PromptManager",
     "get_prompt",
