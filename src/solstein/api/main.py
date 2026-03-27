@@ -214,6 +214,11 @@ app.include_router(research_jobs.router, prefix="/jobs")
 app.include_router(semantic_search.router)
 app.include_router(review.router, prefix="/api/v1")
 
+# STORY-111: Async export endpoints
+from .routers.exports import router as exports_router
+
+app.include_router(exports_router)
+
 # STORY-088: Admin DLQ endpoint — list, inspect, resolve, re-queue failed tasks
 from .routers.admin_dlq import router as admin_dlq_router  # noqa: E402
 

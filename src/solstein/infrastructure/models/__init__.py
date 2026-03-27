@@ -15,6 +15,9 @@ All models are re-exported from this package for convenience.
 from .audit import DataAccessAuditRecord
 from .base import Base
 
+# Export models (STORY-111)
+from .export import ExportJobRecord
+
 # Company and scoring models
 from .company import (
     AuditTrailRecord,
@@ -85,4 +88,6 @@ __all__ = [
     "ApiKeyUsageRecord",
     # Data Access Audit (STORY-086)
     "DataAccessAuditRecord",
+    # Export Jobs (STORY-111)
+    "ExportJobRecord",
 ]
