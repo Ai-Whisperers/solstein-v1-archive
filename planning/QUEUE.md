@@ -276,13 +276,13 @@ The first worker run MUST do a verification pass before starting implementation 
 | 78 | STORY-145 | Portfolio Company AI-Readiness Scoring Model | DONE | PR #150 — 4 dimensions, 22 tests |
 | 79 | STORY-146 | AI Transformation Readiness Calculator | DONE | PR #151 — TransformationCalculator, 31 tests |
 | 80 | STORY-147 | PE Due Diligence Integration Module | DONE | PR #152 — DD engine, red flags, checklist, memo, 26 tests |
-| 81 | STORY-148 | Transformation Roadmap Generator | IN_PROGRESS | Depends on STORY-146 (DONE) |
+| 81 | STORY-148 | Transformation Roadmap Generator | DONE | PR #153 — 4 phases, industry patterns, 20 tests |
 
 ### EPIC-039: Energy Sector Domain Specialization (P1)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 82 | STORY-149 | Energy Compliance & Regulatory Scoring Module | READY | |
+| 82 | STORY-149 | Energy Compliance & Regulatory Scoring Module | IN_PROGRESS | EPIC-038 complete, starting EPIC-039 |
 | 83 | STORY-150 | Energy Market Forecasting & Demand Scoring | READY | Depends on STORY-149 |
 | 84 | STORY-151 | Trading Platform & Digital Infrastructure Assessment | READY | Depends on STORY-149 |
 | 85 | STORY-152 | Grid Integration & Smart Infrastructure Scoring | READY | Depends on STORY-149 |
