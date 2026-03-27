@@ -13,7 +13,8 @@ from pydantic import ValidationError
 
 from . import __version__
 from .analytics.scoring import GrowthScorer
-from .data.loaders import CompetitorDataLoader
+from .config import get_settings
+from .data.converters import convert_to_domain_company
 from .data.report_readiness import assert_client_report_ready, assert_report_ready
 from .domain.models import Company, MarketAnalysis
 from .exporters.excel import ExcelExporter
@@ -65,6 +66,61 @@ def _coerce_companies_payload(payload: Any, source: Path) -> list[Company]:
 def _load_companies_from_json(input_file: Path) -> list[Company]:
     payload = json.loads(input_file.read_text())
     return _coerce_companies_payload(payload, input_file)
+
+
+def _load_companies_for_report(input_path: Path | None = None) -> list[Company]:
+    """Load companies for report commands using convert_to_domain_company.
+
+    STORY-171: Replaces CompetitorDataLoader to avoid DeprecationWarning and
+    ensure consistent field mapping (company_name -> name, id generation).
+
+    Args:
+        input_path: Optional explicit JSON file path. If None, uses the default
+                    competitor_data.json in the configured data directory.
+
+    Returns:
+        List of Company domain entities.
+
+    Raises:
+        click.UsageError: If the default data file does not exist.
+    """
+    if input_path is not None:
+        return _load_companies_from_json(input_path)
+
+    settings = get_settings()
+    default_path = settings.data.data_dir / "competitor_data.json"
+
+    if not default_path.exists():
+        raise click.UsageError(
+            f"Default data file not found: {default_path}. "
+            "Use --input to specify a JSON file explicitly."
+        )
+
+    raw_data = json.loads(default_path.read_text())
+    competitors: list[Any] = []
+    if isinstance(raw_data, list):
+        competitors = raw_data
+    elif isinstance(raw_data, dict):
+        for key in ("competitors", "companies", "data"):
+            value = raw_data.get(key)
+            if isinstance(value, list):
+                competitors = value
+                break
+        else:
+            raise click.UsageError(
+                f"Cannot parse {default_path}: expected a list or dict with a "
+                "'competitors', 'companies', or 'data' key."
+            )
+
+    companies: list[Company] = []
+    for i, item in enumerate(competitors):
+        try:
+            company = convert_to_domain_company(item, i)
+            companies.append(company)
+        except Exception as e:
+            logger.warning(f"[CLI] Skipping company at index {i}: {e}")
+
+    return companies
 
 
 @cli.command()
@@ -287,8 +343,7 @@ def generate_report(company_name: str, input: Path | None, output: Path | None) 
     click.echo(f"📊 Generating reports for: {company_name}")
 
     try:
-        loader = CompetitorDataLoader()
-        companies = loader.load_from_json(input) if input else loader.load_companies()
+        companies = _load_companies_for_report(input)
 
         scorer = GrowthScorer()
         scored_companies: list[Company] = []
@@ -344,8 +399,7 @@ def generate_llm_report(company_name: str, output: Path | None, no_llm: bool) ->
     click.echo(f"🤖 Generating LLM-enhanced reports for: {company_name}")
 
     try:
-        loader = CompetitorDataLoader()
-        companies = loader.load_companies()
+        companies = _load_companies_for_report()
 
         scorer = GrowthScorer()
         scored_companies: list[Company] = []
@@ -397,8 +451,7 @@ def generate_all_reports(output: Path | None) -> None:
     click.echo("📊 Generating reports for all companies...")
 
     try:
-        loader = CompetitorDataLoader()
-        companies = loader.load_companies()
+        companies = _load_companies_for_report()
 
         scorer = GrowthScorer()
         scored_companies: list[Company] = []

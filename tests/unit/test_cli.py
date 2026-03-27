@@ -213,25 +213,21 @@ def test_cli_export_excel_rejects_unknown_object_payload(tmp_path):
 
 
 def test_generate_report_default_output_dir_not_company_nested(monkeypatch):
+    """STORY-171: generate-report uses _load_companies_for_report (not CompetitorDataLoader)."""
     captured = {}
+
+    _dummy_companies = [
+        cli_module.Company(
+            id="cmp-201", name="Acme", industry="Tech", financials={"revenue": 100.0, "valuation": 500.0}
+        ),
+        cli_module.Company(
+            id="cmp-202", name="Beta", industry="Tech", financials={"revenue": 80.0, "valuation": 450.0}
+        ),
+    ]
 
     class DummyScorer:
         def calculate_scores(self, company):
             return company
-
-    class DummyLoader:
-        def load_competitors(self, _path=None):
-            return [
-                cli_module.Company(
-                    id="cmp-201", name="Acme", industry="Tech", financials={"revenue": 100.0, "valuation": 500.0}
-                ),
-                cli_module.Company(
-                    id="cmp-202", name="Beta", industry="Tech", financials={"revenue": 80.0, "valuation": 450.0}
-                ),
-            ]
-
-        def load_companies(self, _path=None):
-            return self.load_competitors(_path)
 
     class DummyGenerator:
         def __init__(self, output_dir):
@@ -240,7 +236,8 @@ def test_generate_report_default_output_dir_not_company_nested(monkeypatch):
         def generate_client_report(self, _target, _competitors):
             return {"client_report": "ok"}
 
-    monkeypatch.setattr(cli_module, "CompetitorDataLoader", DummyLoader)
+    # STORY-171: patch _load_companies_for_report, not CompetitorDataLoader
+    monkeypatch.setattr(cli_module, "_load_companies_for_report", lambda _path=None: _dummy_companies)
     monkeypatch.setattr(cli_module, "GrowthScorer", DummyScorer)
     monkeypatch.setattr(cli_module, "assert_client_report_ready", lambda *_, **__: None)
     monkeypatch.setattr(cli_module, "ClientReportGenerator", DummyGenerator)
@@ -253,25 +250,21 @@ def test_generate_report_default_output_dir_not_company_nested(monkeypatch):
 
 
 def test_generate_llm_report_default_output_dir_not_company_nested(monkeypatch):
+    """STORY-171: generate-llm-report uses _load_companies_for_report (not CompetitorDataLoader)."""
     captured = {}
+
+    _dummy_companies = [
+        cli_module.Company(
+            id="cmp-301", name="Acme", industry="Tech", financials={"revenue": 100.0, "valuation": 500.0}
+        ),
+        cli_module.Company(
+            id="cmp-302", name="Beta", industry="Tech", financials={"revenue": 80.0, "valuation": 450.0}
+        ),
+    ]
 
     class DummyScorer:
         def calculate_scores(self, company):
             return company
-
-    class DummyLoader:
-        def load_competitors(self, _path=None):
-            return [
-                cli_module.Company(
-                    id="cmp-301", name="Acme", industry="Tech", financials={"revenue": 100.0, "valuation": 500.0}
-                ),
-                cli_module.Company(
-                    id="cmp-302", name="Beta", industry="Tech", financials={"revenue": 80.0, "valuation": 450.0}
-                ),
-            ]
-
-        def load_companies(self, _path=None):
-            return self.load_competitors(_path)
 
     class DummyGenerator:
         def __init__(self, output_dir):
@@ -280,7 +273,8 @@ def test_generate_llm_report_default_output_dir_not_company_nested(monkeypatch):
         def generate_client_report(self, _target, _competitors):
             return {"client_report": "ok"}
 
-    monkeypatch.setattr(cli_module, "CompetitorDataLoader", DummyLoader)
+    # STORY-171: patch _load_companies_for_report, not CompetitorDataLoader
+    monkeypatch.setattr(cli_module, "_load_companies_for_report", lambda _path=None: _dummy_companies)
     monkeypatch.setattr(cli_module, "GrowthScorer", DummyScorer)
     monkeypatch.setattr(cli_module, "assert_client_report_ready", lambda *_, **__: None)
     monkeypatch.setattr(cli_module, "ClientReportGenerator", DummyGenerator)

@@ -10,15 +10,18 @@ import json
 import logging
 import warnings
 from pathlib import Path
-from typing import Any
 
 from solstein.config import get_settings
-from solstein.domain.models import Company
 from solstein.data.converters import convert_to_domain_company
+from solstein.domain.models import Company
 
 logger = logging.getLogger(__name__)
 
 
+# TODO: STORY-171 — remove in next cleanup sprint
+# The CLI no longer imports CompetitorDataLoader (replaced by _load_companies_for_report).
+# This class is still used internally by UnifiedCompanyLoader as a JSON bootstrap step.
+# Safe to remove once UnifiedCompanyLoader is refactored to read JSON directly.
 class CompetitorDataLoader:
     """Load competitor data from JSON files and convert to domain entities.
 
