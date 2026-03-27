@@ -73,8 +73,8 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 16 | STORY-067 | Migrate Authentication to Supabase Auth | IN_PROGRESS | M1 complete — unblocked 2026-03-26 |
-| 17 | STORY-068 | Remove Auth Bypass and Wire Supabase JWT Middleware | READY | |
+| 16 | STORY-067 | Migrate Authentication to Supabase Auth | DONE | PR #97 |
+| 17 | STORY-068 | Remove Auth Bypass and Wire Supabase JWT Middleware | IN_PROGRESS | |
 | 18 | STORY-069 | Error Handling and Input Sanitization | READY | |
 | 19 | STORY-070 | Fix SSRF Vulnerability in Web and Website Agents | READY | |
 
