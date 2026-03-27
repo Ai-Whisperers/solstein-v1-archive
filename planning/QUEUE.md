@@ -759,3 +759,12 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: STORY-113/114/115 (READY) — STORY-111 merged. Stale lock removed (PID 962891).
 - **Branch hygiene**: Deleted 5 remote + 13 local feature branches. 2 remote branches remain (develop, master).
 - **Actions taken**: Fixed 3 PR base branches (master->develop), rebased 5 conflicting PRs, merged 6 PRs, branch cleanup.
+
+### [2026-03-27 18:57] Work Checker Run
+- **PRs merged**: 8 total — #146 (STORY-051 Prometheus middleware+docs), #147 (STORY-113 export status tracking), #148 (STORY-114 PDF export), #149 (STORY-115 Supabase storage, rebased), #150 (STORY-145 AI readiness scoring), #151 (STORY-146 transformation calculator), #152 (STORY-147 PE due diligence), #153 (STORY-148 roadmap generator)
+- **PRs rebased**: 1 successful — #149 (STORY-115) had conflict in `src/solstein/worker/export_tasks.py`; resolved by keeping STORY-115 tempfile+upload approach, discarding stale pdf/markdown blocks from develop
+- **Open PRs**: 0 remaining
+- **Queue**: M1: 15/15 DONE. M2: all DONE. P0: complete except EPIC-052 (BLOCKED). M3: EPIC-033/023/024/030 all 5/5 DONE. M4: EPIC-021/022 DONE. M5: EPIC-025/026/027/014 DONE. M6: EPIC-038 4/4 DONE. EPIC-039 STORY-149 IN_PROGRESS (partial uncommitted work on develop from stash)
+- **Dependencies unblocked**: EPIC-039 (STORY-150/151/152) READY after STORY-149 is merged
+- **Branch hygiene**: Stale lock removed (PID 1054856 dead). 8 remote branches deleted (--delete-branch on merge). 1 local merged branch cleaned. Pruned stale refs. 2 remote branches remain (develop, master).
+- **Actions taken**: Removed stale lock; merged 7 PRs cleanly; rebased + merged PR #149 (resolved export_tasks.py conflict); branch cleanup. Note: STORY-149 has partial work stashed/unstaged on develop — next worker should commit or discard.
