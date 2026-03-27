@@ -128,7 +128,10 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 28 | — | See EPIC-062 README for stories | READY | 4 stories |
+| 28a | STORY-226 | Implement domain-aware fetch policy matrix and retry strategy | IN_PROGRESS | |
+| 28b | STORY-227 | Add extraction contract with unit normalization and contradiction flags | READY | Depends on STORY-226 |
+| 28c | STORY-228 | Persist field-level evidence ledger and provenance lineage | READY | Depends on STORY-227 |
+| 28d | STORY-229 | Apply freshness windows and evidence-aware export trust tiers | READY | Depends on STORY-228 |
 
 ### EPIC-064: Markdown Integrity and Registry Correctness (P0)
 
