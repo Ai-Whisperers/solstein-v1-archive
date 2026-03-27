@@ -10,7 +10,6 @@ from __future__ import annotations
 from loguru import logger
 
 
-
 class WebSearchDiscoverySource:
     """Wraps ``search_company_info()`` as a DiscoverySource."""
 
@@ -29,7 +28,7 @@ class WebSearchDiscoverySource:
         extra_keywords: list[str] | None = None,
     ) -> list[DiscoveryCandidate]:
         from solstein.research.discovery import DiscoveryCandidate, _slugify
-        
+
         try:
             from solstein.data.web_search_client import search_company_info
 

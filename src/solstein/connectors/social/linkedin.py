@@ -1,8 +1,7 @@
 """LinkedIn connector for company data (requires scraping or API)."""
 
 import logging
-from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig
 
@@ -14,7 +13,7 @@ class LinkedInConnector(BaseConnector):
 
     BASE_URL = "https://api.linkedin.com/v2"
 
-    def __init__(self, access_token: Optional[str] = None):
+    def __init__(self, access_token: str | None = None):
         config = SourceConfig(
             name="linkedin",
             base_url=self.BASE_URL,

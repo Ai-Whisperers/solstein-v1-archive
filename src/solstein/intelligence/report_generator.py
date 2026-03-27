@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     from solstein.evidence.models import Claim
 except ImportError:
     Claim = None  # Evidence system requires Neo4j
 from solstein.intelligence.capability_overlap import (
-    CapabilityMatch,
-    CapabilityOverlapMatrix,
     OverlapLevel,
 )
 from solstein.intelligence.deep_analyzer import DeepAnalysisReport
@@ -23,12 +21,12 @@ class CitedReportGenerator:
     def __init__(self):
         """Initialize report generator."""
         self.citation_counter = 0
-        self.citations: Dict[int, Dict[str, Any]] = {}
+        self.citations: dict[int, dict[str, Any]] = {}
 
     def generate(
         self,
         report: DeepAnalysisReport,
-        claims: Optional[List[Claim]] = None,
+        claims: list[Claim] | None = None,
     ) -> str:
         """Generate complete deep analysis report with citations.
 
@@ -256,7 +254,7 @@ class DeepAnalysisExporter:
         """
         return self.report_generator.generate(report)
 
-    def to_dict(self, report: DeepAnalysisReport) -> Dict[str, Any]:
+    def to_dict(self, report: DeepAnalysisReport) -> dict[str, Any]:
         """Export report to dictionary.
 
         Args:
@@ -301,7 +299,7 @@ class DeepAnalysisExporter:
 
     def generate_comparison_table(
         self,
-        reports: List[DeepAnalysisReport],
+        reports: list[DeepAnalysisReport],
     ) -> str:
         """Generate comparison table for multiple competitors.
 

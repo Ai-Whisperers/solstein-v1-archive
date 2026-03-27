@@ -5,7 +5,7 @@ Main orchestrator that combines trajectory, funding, vectors, and projections.
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from .financial_models import FinancialIntelligence
 from .funding_intelligence import FundingIntelligenceAnalyzer
@@ -120,11 +120,11 @@ class FinancialGrowthAnalyzer:
     def _build_revenue_timeline(
         self,
         timeline_data: list[dict],
-        current_revenue: Optional[float],
-        growth_rate: Optional[float],
+        current_revenue: float | None,
+        growth_rate: float | None,
     ) -> list:
         """Build revenue timeline from available data."""
-        from .financial_models import RevenuePoint, ConfidenceLevel
+        from .financial_models import ConfidenceLevel, RevenuePoint
 
         timeline = []
 
@@ -143,7 +143,7 @@ class FinancialGrowthAnalyzer:
         # Add current point if not in timeline
         if current_revenue and timeline:
             latest_year = max(t.year for t in timeline)
-            if 2024 > latest_year:
+            if latest_year < 2024:
                 timeline.append(
                     RevenuePoint(
                         year=2024,

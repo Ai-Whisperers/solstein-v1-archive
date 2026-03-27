@@ -20,11 +20,10 @@ Test Strategy:
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
-from solstein.data.loaders import convert_to_domain_company
 from solstein.data.converters.company import convert_to_domain_company
 
 
@@ -37,7 +36,7 @@ class TestGoldenDatasetFieldPreservation:
         return Path(__file__).parent.parent.parent / "data" / "input" / "competitor_data_real_enriched.json"
 
     @pytest.fixture
-    def golden_companies(self, real_data_file) -> List[Dict[str, Any]]:
+    def golden_companies(self, real_data_file) -> list[dict[str, Any]]:
         """Load all companies from real data."""
         if not real_data_file.exists():
             pytest.skip(f"Real data file not found: {real_data_file}")
@@ -47,7 +46,7 @@ class TestGoldenDatasetFieldPreservation:
 
         return data["competitors"]
 
-    def test_golden_dataset_has_required_companies(self, golden_companies: List[Dict[str, Any]]):
+    def test_golden_dataset_has_required_companies(self, golden_companies: list[dict[str, Any]]):
         """Verify golden dataset contains expected companies."""
         company_names = [c["company_name"] for c in golden_companies]
         expected = {"ABB", "Enphase Energy", "Moixa", "OVO Energy", "Sunrun"}
@@ -58,7 +57,7 @@ class TestGoldenDatasetFieldPreservation:
                 f"Expected company '{expected_name}' in golden dataset"
             )
 
-    def test_flat_format_revenue_extraction(self, golden_companies: List[Dict[str, Any]]):
+    def test_flat_format_revenue_extraction(self, golden_companies: list[dict[str, Any]]):
         """Test flat format revenue extraction (top-level float)."""
         # ABB has flat format: "revenue": 33219.999744 (at top level)
         abb_data = next(c for c in golden_companies if c["company_name"] == "ABB")
@@ -71,7 +70,7 @@ class TestGoldenDatasetFieldPreservation:
             f"Revenue mismatch. Expected 33219.999744, got {company.revenue}"
         )
 
-    def test_flat_format_growth_rate_extraction(self, golden_companies: List[Dict[str, Any]]):
+    def test_flat_format_growth_rate_extraction(self, golden_companies: list[dict[str, Any]]):
         """Test flat format growth_rate extraction (top-level float)."""
         abb_data = next(c for c in golden_companies if c["company_name"] == "ABB")
 
@@ -81,7 +80,7 @@ class TestGoldenDatasetFieldPreservation:
         assert company.growth_rate is not None, "Growth rate must not be None for ABB"
         assert abs(company.growth_rate - 5.4) < 0.001, f"Growth rate mismatch. Expected 5.4, got {company.growth_rate}"
 
-    def test_metric_lineage_confidence_extraction(self, golden_companies: List[Dict[str, Any]]):
+    def test_metric_lineage_confidence_extraction(self, golden_companies: list[dict[str, Any]]):
         """Test confidence score extraction from metric_lineage metadata."""
         abb_data = next(c for c in golden_companies if c["company_name"] == "ABB")
 
@@ -103,7 +102,7 @@ class TestGoldenDatasetFieldPreservation:
                 f"{field} confidence mismatch. Expected {expected_conf}, got {actual_conf}"
             )
 
-    def test_all_required_fields_present_rich_company(self, golden_companies: List[Dict[str, Any]]):
+    def test_all_required_fields_present_rich_company(self, golden_companies: list[dict[str, Any]]):
         """Test that all required fields are extracted for rich companies (ABB, Enphase, Sunrun)."""
         # Rich companies have most fields populated
         abb_data = next(c for c in golden_companies if c["company_name"] == "ABB")
@@ -123,7 +122,7 @@ class TestGoldenDatasetFieldPreservation:
         for field_name, field_value in required_fields.items():
             assert field_value is not None, f"Critical field '{field_name}' is None for ABB (rich company)"
 
-    def test_sparse_company_none_handling(self, golden_companies: List[Dict[str, Any]]):
+    def test_sparse_company_none_handling(self, golden_companies: list[dict[str, Any]]):
         """Test graceful handling of companies with sparse data (Moixa, OVO)."""
         # Moixa and OVO have many null fields
         moixa_data = next(c for c in golden_companies if c["company_name"] == "Moixa")
@@ -136,7 +135,7 @@ class TestGoldenDatasetFieldPreservation:
         # Revenue is allowed to be None for sparse companies
         assert company.revenue is None or isinstance(company.revenue, (int, float))
 
-    def test_parity_flat_vs_nested_same_company(self, golden_companies: List[Dict[str, Any]]):
+    def test_parity_flat_vs_nested_same_company(self, golden_companies: list[dict[str, Any]]):
         """Test that flat and nested formats produce same output for same data."""
         abb_data = next(c for c in golden_companies if c["company_name"] == "ABB")
 
@@ -150,7 +149,7 @@ class TestGoldenDatasetFieldPreservation:
         assert company_flat.name == "ABB"
         assert company_flat.revenue == 33219.999744
 
-    def test_all_companies_convertible(self, golden_companies: List[Dict[str, Any]]):
+    def test_all_companies_convertible(self, golden_companies: list[dict[str, Any]]):
         """Test that all 5 golden companies convert without errors."""
         converted_count = 0
         errors = []
@@ -174,7 +173,7 @@ class TestGoldenDatasetFieldPreservation:
             f"Expected {len(golden_companies)} conversions, got {converted_count}"
         )
 
-    def test_confidence_default_fallback(self, golden_companies: List[Dict[str, Any]]):
+    def test_confidence_default_fallback(self, golden_companies: list[dict[str, Any]]):
         """Test that missing confidence values default to 0.5 (neutral)."""
         # Moixa has null confidence values
         moixa_data = next(c for c in golden_companies if c["company_name"] == "Moixa")
@@ -187,7 +186,7 @@ class TestGoldenDatasetFieldPreservation:
             assert isinstance(conf, (int, float)), f"Confidence for {field} must be numeric, got {type(conf)}"
             assert 0.0 <= conf <= 1.0, f"Confidence for {field} out of range: {conf}"
 
-    def test_no_field_loss_rich_to_sparse(self, golden_companies: List[Dict[str, Any]]):
+    def test_no_field_loss_rich_to_sparse(self, golden_companies: list[dict[str, Any]]):
         """Regression test: ensure no fields silently lost when converting rich/sparse mix."""
         # Convert all companies and track which fields are present
         companies = []
@@ -217,7 +216,7 @@ class TestGoldenDatasetFieldPreservation:
         for field in ["revenue", "employees", "growth_rate"]:
             assert field_presence[field]["present"] > 0, f"Field '{field}' is missing from ALL companies (regression!)"
 
-    def test_extract_confidence_from_metric_lineage(self, golden_companies: List[Dict[str, Any]]):
+    def test_extract_confidence_from_metric_lineage(self, golden_companies: list[dict[str, Any]]):
         """Integration test: metric_lineage confidence → Company.signal_confidences."""
         abb_data = next(c for c in golden_companies if c["company_name"] == "ABB")
         metric_lineage = abb_data.get("metric_lineage", {})
@@ -235,7 +234,7 @@ class TestGoldenDatasetFieldPreservation:
                     assert actual_conf is not None, f"Confidence for '{field_key}' not extracted from metric_lineage"
                     assert abs(actual_conf - expected_conf) < 0.01
 
-    def test_format_detection_consistency(self, golden_companies: List[Dict[str, Any]]):
+    def test_format_detection_consistency(self, golden_companies: list[dict[str, Any]]):
         """Test that format auto-detection is consistent across batch."""
         # Load and convert all companies; each should detect its format correctly
         for idx, company_data in enumerate(golden_companies):
@@ -248,7 +247,7 @@ class TestGoldenDatasetFieldPreservation:
             if company_data.get("revenue"):
                 assert company.revenue is not None, f"Company {idx}: revenue field present but not extracted"
 
-    def test_batch_conversion_performance(self, golden_companies: List[Dict[str, Any]]):
+    def test_batch_conversion_performance(self, golden_companies: list[dict[str, Any]]):
         """Performance test: ensure batch conversion is fast."""
         import time
 
@@ -262,7 +261,7 @@ class TestGoldenDatasetFieldPreservation:
         # 5 companies should convert in < 1 second
         assert elapsed < 1.0, f"Batch conversion too slow: {elapsed:.3f}s for 5 companies"
 
-    def test_signal_confidences_type_safety(self, golden_companies: List[Dict[str, Any]]):
+    def test_signal_confidences_type_safety(self, golden_companies: list[dict[str, Any]]):
         """Test that signal_confidences dict has correct types."""
         for idx, company_data in enumerate(golden_companies):
             company = convert_to_domain_company(company_data, index=idx)
@@ -323,7 +322,6 @@ class TestRegressionPrevention:
         company_flat = convert_to_domain_company(flat_data, index=0)
         assert company_flat.revenue == 500.0
         assert company_flat.growth_rate == 10.0
-
 
         # Both flat formats should work
         flat_data_2 = {

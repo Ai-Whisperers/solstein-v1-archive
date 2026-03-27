@@ -74,6 +74,7 @@ def extract_artifact_hashes(stage_report: dict[str, Any]) -> dict[str, str]:
 def extract_db_artifact_hash(payload: object) -> str | None:
     """Extract artifact hash from database payload."""
     import json
+
     if isinstance(payload, str):
         try:
             payload = json.loads(payload)

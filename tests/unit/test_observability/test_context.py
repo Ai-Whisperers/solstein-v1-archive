@@ -6,21 +6,22 @@ all layers of the application.
 """
 
 import asyncio
-import pytest
 from contextvars import copy_context
 
+import pytest
+
 from solstein.utils.context import (
-    REQUEST_ID,
     CORRELATION_ID,
+    OPERATION,
+    REQUEST_ID,
     TENANT_ID,
     USER_ID,
-    OPERATION,
-    get_current_context,
-    set_context,
-    reset_context,
     clear_context,
-    generate_request_id,
     generate_correlation_id,
+    generate_request_id,
+    get_current_context,
+    reset_context,
+    set_context,
     with_context,
 )
 
@@ -179,7 +180,7 @@ class TestContextReset:
 
     def test_clear_context(self):
         """Test clear_context clears all variables."""
-        tokens = set_context(
+        set_context(
             request_id="test",
             correlation_id="corr",
         )

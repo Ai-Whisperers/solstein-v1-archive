@@ -37,9 +37,9 @@ class EnhancedLLMClient:
     # Tested 2026-03-11: DeepInfra ✅, Mistral ✅, NVIDIA ✅ — all others 401/404/429/503.
     # Dead providers commented out to avoid ~20s wasted per LLM call.
     PROVIDER_PRIORITY = [
-        "deepinfra",   # ✅ 200 OK — cheapest working provider
-        "mistral",     # ✅ 200 OK
-        "nvidia",      # ✅ 200 OK
+        "deepinfra",  # ✅ 200 OK — cheapest working provider
+        "mistral",  # ✅ 200 OK
+        "nvidia",  # ✅ 200 OK
         # --- broken as of 2026-03-11 (re-enable when keys/endpoints fixed) ---
         # "groq",       # 401 Unauthorized
         # "cerebras",   # 404 Not Found (wrong model?)

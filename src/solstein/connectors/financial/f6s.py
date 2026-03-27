@@ -1,7 +1,6 @@
 """F6S connector for startup programs and funding."""
 
 import logging
-from datetime import datetime
 from typing import Any
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig

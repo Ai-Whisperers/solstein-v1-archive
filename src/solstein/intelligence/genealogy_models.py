@@ -8,7 +8,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date
 from enum import Enum
-from typing import Optional
 
 
 class TransactionType(Enum):
@@ -32,10 +31,10 @@ class TransactionStatus(Enum):
 @dataclass
 class CorporateTransaction:
     transaction_type: TransactionType
-    date: Optional[date]
+    date: date | None
     target_name: str
-    acquirer_name: Optional[str]
-    value_eur_millions: Optional[float] = None
+    acquirer_name: str | None
+    value_eur_millions: float | None = None
     status: TransactionStatus = TransactionStatus.COMPLETED
     description: str = ""
     strategic_rationale: str = ""
@@ -45,8 +44,8 @@ class CorporateTransaction:
 @dataclass
 class OwnershipStake:
     owner_name: str
-    percentage: Optional[float]
-    acquisition_date: Optional[date]
+    percentage: float | None
+    acquisition_date: date | None
     current: bool = True
 
 
@@ -54,7 +53,7 @@ class OwnershipStake:
 class SubsidiaryInfo:
     name: str
     relationship_type: str
-    formation_date: Optional[date]
+    formation_date: date | None
     geography: str = ""
     business_focus: str = ""
 
@@ -71,10 +70,10 @@ class CorporateGenealogy:
     divestiture_count: int = 0
     merger_count: int = 0
 
-    total_acquisition_value: Optional[float] = None
-    total_divestiture_value: Optional[float] = None
+    total_acquisition_value: float | None = None
+    total_divestiture_value: float | None = None
 
-    current_owner: Optional[str] = None
+    current_owner: str | None = None
     ownership_type: str = "independent"
 
     genealogy_narrative: str = ""

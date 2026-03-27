@@ -23,17 +23,17 @@ class SSRFError(ValueError):
 
 # Private and reserved IP networks that must be blocked (REQ-2)
 _BLOCKED_NETWORKS = [
-    ipaddress.ip_network("10.0.0.0/8"),        # RFC 1918 private
-    ipaddress.ip_network("172.16.0.0/12"),      # RFC 1918 private
-    ipaddress.ip_network("192.168.0.0/16"),     # RFC 1918 private
-    ipaddress.ip_network("127.0.0.0/8"),        # Loopback
-    ipaddress.ip_network("169.254.0.0/16"),     # Link-local / AWS metadata
-    ipaddress.ip_network("0.0.0.0/8"),          # "This" network
-    ipaddress.ip_network("100.64.0.0/10"),      # Carrier-grade NAT
-    ipaddress.ip_network("198.18.0.0/15"),      # Benchmarking
-    ipaddress.ip_network("::1/128"),            # IPv6 loopback
-    ipaddress.ip_network("fc00::/7"),           # IPv6 unique local
-    ipaddress.ip_network("fe80::/10"),          # IPv6 link-local
+    ipaddress.ip_network("10.0.0.0/8"),  # RFC 1918 private
+    ipaddress.ip_network("172.16.0.0/12"),  # RFC 1918 private
+    ipaddress.ip_network("192.168.0.0/16"),  # RFC 1918 private
+    ipaddress.ip_network("127.0.0.0/8"),  # Loopback
+    ipaddress.ip_network("169.254.0.0/16"),  # Link-local / AWS metadata
+    ipaddress.ip_network("0.0.0.0/8"),  # "This" network
+    ipaddress.ip_network("100.64.0.0/10"),  # Carrier-grade NAT
+    ipaddress.ip_network("198.18.0.0/15"),  # Benchmarking
+    ipaddress.ip_network("::1/128"),  # IPv6 loopback
+    ipaddress.ip_network("fc00::/7"),  # IPv6 unique local
+    ipaddress.ip_network("fe80::/10"),  # IPv6 link-local
 ]
 
 _ALLOWED_SCHEMES = {"http", "https"}
@@ -72,10 +72,7 @@ def validate_url(url: str) -> str:
 
     # REQ-2: Scheme validation
     if parsed.scheme not in _ALLOWED_SCHEMES:
-        raise SSRFError(
-            f"URL scheme '{parsed.scheme}' not allowed. "
-            f"Only {_ALLOWED_SCHEMES} are permitted."
-        )
+        raise SSRFError(f"URL scheme '{parsed.scheme}' not allowed. Only {_ALLOWED_SCHEMES} are permitted.")
 
     hostname = parsed.hostname
     if not hostname:
@@ -85,9 +82,7 @@ def validate_url(url: str) -> str:
     try:
         addr = ipaddress.ip_address(hostname)
         if _is_blocked_ip(str(addr)):
-            raise SSRFError(
-                f"URL resolves to blocked IP range: {addr}"
-            )
+            raise SSRFError(f"URL resolves to blocked IP range: {addr}")
         return url
     except ValueError:
         pass  # Not an IP literal — proceed to DNS resolution
@@ -101,11 +96,7 @@ def validate_url(url: str) -> str:
     for family, _type, _proto, _canonname, sockaddr in addrinfos:
         ip_str = sockaddr[0]
         if _is_blocked_ip(ip_str):
-            logger.warning(
-                f"SSRF blocked: '{hostname}' resolved to private IP {ip_str}"
-            )
-            raise SSRFError(
-                f"Hostname '{hostname}' resolves to a blocked IP range"
-            )
+            logger.warning(f"SSRF blocked: '{hostname}' resolved to private IP {ip_str}")
+            raise SSRFError(f"Hostname '{hostname}' resolves to a blocked IP range")
 
     return url

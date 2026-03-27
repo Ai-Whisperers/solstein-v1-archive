@@ -1,10 +1,10 @@
 """Product and developer connectors."""
 
 from .github import GitHubConnector
-from .stackoverflow import StackOverflowConnector
-from .producthunt import ProductHuntConnector
 from .npm import NPMConnector
+from .producthunt import ProductHuntConnector
 from .pypi import PyPIConnector
+from .stackoverflow import StackOverflowConnector
 
 __all__ = [
     "GitHubConnector",
@@ -15,36 +15,44 @@ __all__ = [
 ]
 
 
-from .appstore import AppStoreConnector
-from .googleplay import GooglePlayConnector
+from .appstore import AppStoreConnector  # noqa: F401
+from .googleplay import GooglePlayConnector  # noqa: F401
 
-__all__.extend([
-    "AppStoreConnector",
-    "GooglePlayConnector",
-])
-
-
-from .maven import MavenCentralConnector
-from .dockerhub import DockerHubConnector
-from .gitlab import GitLabConnector
-from .g2 import G2Connector
-
-__all__.extend([
-    "MavenCentralConnector",
-    "DockerHubConnector",
-    "GitLabConnector",
-    "G2Connector",
-])
+__all__.extend(
+    [
+        "AppStoreConnector",
+        "GooglePlayConnector",
+    ]
+)
 
 
-from .capterra import CapterraConnector
+from .dockerhub import DockerHubConnector  # noqa: F401
+from .g2 import G2Connector  # noqa: F401
+from .gitlab import GitLabConnector  # noqa: F401
+from .maven import MavenCentralConnector  # noqa: F401
 
-__all__.extend([
-    "CapterraConnector",
-])
+__all__.extend(
+    [
+        "MavenCentralConnector",
+        "DockerHubConnector",
+        "GitLabConnector",
+        "G2Connector",
+    ]
+)
 
-from .bitbucket import BitbucketConnector
 
-__all__.extend([
-    "BitbucketConnector",
-])
+from .capterra import CapterraConnector  # noqa: F401
+
+__all__.extend(
+    [
+        "CapterraConnector",
+    ]
+)
+
+from .bitbucket import BitbucketConnector  # noqa: F401
+
+__all__.extend(
+    [
+        "BitbucketConnector",
+    ]
+)

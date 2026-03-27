@@ -1,7 +1,4 @@
-from typing import Dict
-
-
-_USAGE_RATES: Dict[str, Dict[str, tuple[float, float]]] = {
+_USAGE_RATES: dict[str, dict[str, tuple[float, float]]] = {
     "openai": {
         "gpt-4o-mini": (0.00015, 0.0006),
     },
@@ -18,7 +15,7 @@ class UsageTracker:
         self.total_input_tokens = 0
         self.total_output_tokens = 0
         self.total_cost_usd = 0.0
-        self.costs_by_provider: Dict[str, float] = {}
+        self.costs_by_provider: dict[str, float] = {}
 
     def record_usage(
         self,
@@ -43,7 +40,7 @@ class UsageTracker:
         self.costs_by_provider[normalized_provider] = self.costs_by_provider.get(normalized_provider, 0.0) + cost
         return cost
 
-    def get_summary(self) -> Dict[str, object]:
+    def get_summary(self) -> dict[str, object]:
         return {
             "total_requests": self.total_requests,
             "total_input_tokens": self.total_input_tokens,

@@ -1,7 +1,6 @@
 """G2 connector for software reviews."""
 
 import logging
-from datetime import datetime
 from typing import Any
 
 import aiohttp

@@ -10,7 +10,6 @@ Usage:
 """
 
 from enum import Enum
-from typing import Any
 
 from cryptography.fernet import Fernet
 

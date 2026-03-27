@@ -15,10 +15,8 @@ Usage:
 import time
 from collections.abc import Callable
 from functools import wraps
-from typing import Any
 
 import pytest
-
 
 # Test markers
 slow = pytest.mark.slow

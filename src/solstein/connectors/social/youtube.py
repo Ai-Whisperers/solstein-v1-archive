@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig
 
@@ -14,7 +14,7 @@ class YouTubeConnector(BaseConnector):
 
     BASE_URL = "https://www.googleapis.com/youtube/v3"
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         config = SourceConfig(
             name="youtube",
             base_url=self.BASE_URL,

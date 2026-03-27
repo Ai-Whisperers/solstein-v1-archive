@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -16,7 +16,7 @@ class ProductHuntConnector(BaseConnector):
 
     BASE_URL = "https://api.producthunt.com/v2/api/graphql"
 
-    def __init__(self, api_token: Optional[str] = None):
+    def __init__(self, api_token: str | None = None):
         config = SourceConfig(
             name="producthunt",
             base_url=self.BASE_URL,

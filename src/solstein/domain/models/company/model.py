@@ -140,7 +140,7 @@ class Company(CompanyUtilityMixin, CompanyPropertyMixin, CompanySyncMixin):
     validate_geography_code = field_validator("geography_code")(CompanyValidators.validate_geography_code)
 
     @model_validator(mode="after")
-    def require_primary_financial_metric(self) -> "Company":
+    def require_primary_financial_metric(self) -> Company:
         revenue = self.revenue if self.revenue is not None else getattr(self.financials, "revenue", None)
         employees = self.employees if self.employees is not None else getattr(self.financials, "employees", None)
         if revenue is None and employees is None:

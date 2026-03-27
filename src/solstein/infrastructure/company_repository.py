@@ -184,10 +184,7 @@ class CompanyRepository:
 
         search_field = getattr(CompanyRecord, field)
         result = await self.session.execute(
-            select(CompanyRecord)
-            .where(search_field.ilike(f"%{query}%"))
-            .offset(skip)
-            .limit(limit)
+            select(CompanyRecord).where(search_field.ilike(f"%{query}%")).offset(skip).limit(limit)
         )
         return list(result.scalars().all())
 
@@ -215,12 +212,7 @@ class CompanyRepository:
                 raise ValueError(f"CompanyRecord has no attribute '{key}'")
             conditions.append(getattr(CompanyRecord, key) == value)
 
-        result = await self.session.execute(
-            select(CompanyRecord)
-            .where(and_(*conditions))
-            .offset(skip)
-            .limit(limit)
-        )
+        result = await self.session.execute(select(CompanyRecord).where(and_(*conditions)).offset(skip).limit(limit))
         return list(result.scalars().all())
 
     async def get_all_filtered(

@@ -7,7 +7,6 @@ across all pipeline stages during a research run.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -45,7 +44,7 @@ class PipelineContext:
 
     # Configuration
     config: PipelineConfig
-    registry: "SourceRegistry"
+    registry: SourceRegistry
     batch_id: str
 
     # Stage tracking
@@ -53,7 +52,7 @@ class PipelineContext:
     artifact_hashes: dict[str, str] = field(default_factory=dict)
 
     # Data
-    candidates: list["DiscoveryCandidate"] = field(default_factory=list)
+    candidates: list[DiscoveryCandidate] = field(default_factory=list)
     companies: list[Company] = field(default_factory=list)
     scored_companies: list[Company] = field(default_factory=list)
     analysis: MarketAnalysis | None = None

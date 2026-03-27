@@ -68,9 +68,7 @@ class EnrichmentTask(Task):
     ) -> None:
         """Called on task failure - log with full traceback."""
         company_id = args[0] if args else kwargs.get("company_id", "unknown")
-        logger.error(
-            f"[EnrichmentTask] Task {task_id} failed for company {company_id}: {exc}\n{einfo}"
-        )
+        logger.error(f"[EnrichmentTask] Task {task_id} failed for company {company_id}: {exc}\n{einfo}")
 
 
 @celery_app.task(base=EnrichmentTask, bind=True, max_retries=3)
@@ -139,9 +137,7 @@ def enrich_company_async(
         request = cast(Any, self).request
         retries = int(request.retries)
         countdown = 5 * (2**retries)
-        logger.info(
-            f"[RETRY-ATTEMPT-{retries + 1}] Enrichment for {company_id} will retry in {countdown}s"
-        )
+        logger.info(f"[RETRY-ATTEMPT-{retries + 1}] Enrichment for {company_id} will retry in {countdown}s")
 
         try:
             _retry_task(self, exc=exc, countdown=countdown)

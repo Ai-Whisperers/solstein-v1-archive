@@ -67,8 +67,7 @@ async def handle_api_error(request: Request, exc: APIError) -> JSONResponse:
     """Handle custom APIError exceptions with opaque response."""
     error_id = _generate_error_id()
     logger.warning(
-        f"[{error_id}] APIError on {request.url.path}: "
-        f"code={exc.code} status={exc.status_code} message={exc.message}"
+        f"[{error_id}] APIError on {request.url.path}: code={exc.code} status={exc.status_code} message={exc.message}"
     )
     response: dict[str, Any] = {
         "error": {
@@ -115,11 +114,13 @@ async def handle_validation_error(request: Request, exc: RequestValidationError)
     # Sanitize validation error details — remove 'url' and 'input' fields
     safe_errors = []
     for err in exc.errors():
-        safe_errors.append({
-            "type": err.get("type", "unknown"),
-            "loc": err.get("loc", []),
-            "msg": err.get("msg", "Validation failed"),
-        })
+        safe_errors.append(
+            {
+                "type": err.get("type", "unknown"),
+                "loc": err.get("loc", []),
+                "msg": err.get("msg", "Validation failed"),
+            }
+        )
 
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -143,10 +144,7 @@ async def handle_generic_exception(request: Request, exc: Exception) -> JSONResp
     error_id = _generate_error_id()
 
     # Log full error details server-side for debugging
-    logger.error(
-        f"[{error_id}] Unhandled {type(exc).__name__} on {request.url.path}: "
-        f"{exc}\n{traceback.format_exc()}"
-    )
+    logger.error(f"[{error_id}] Unhandled {type(exc).__name__} on {request.url.path}: {exc}\n{traceback.format_exc()}")
 
     # Opaque response — never expose internals
     return JSONResponse(

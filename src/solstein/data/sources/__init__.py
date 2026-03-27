@@ -5,6 +5,10 @@ EPIC-021: Modularized from monolithic 769-line additional_sources.py file.
 
 from __future__ import annotations
 
+# Sources
+from .funding import FundingSource
+from .linkedin import LinkedInSource
+
 # Models
 from .models import (
     FundingData,
@@ -14,10 +18,6 @@ from .models import (
     PressCoverage,
     ProductInfo,
 )
-
-# Sources
-from .funding import FundingSource
-from .linkedin import LinkedInSource
 from .news import NewsSource
 from .patents import PatentSource
 from .web import WebSource

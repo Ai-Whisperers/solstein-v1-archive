@@ -3,7 +3,7 @@
 import asyncio
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class YahooFinanceConnector(BaseConnector):
     """Connector for Yahoo Finance data."""
 
-    def __init__(self, config: Optional[SourceConfig] = None):
+    def __init__(self, config: SourceConfig | None = None):
         if config is None:
             config = SourceConfig(
                 name="yahoo_finance",

@@ -277,7 +277,9 @@ def configure_logging(
     # Configure formatter
     if json_output:
         formatter = LogFormatter()
-        sink = lambda msg: print(formatter.json_format(msg.record), file=sys.stdout)
+
+        def sink(msg):
+            return print(formatter.json_format(msg.record), file=sys.stdout)
     else:
         sink = sys.stdout
 
@@ -291,7 +293,7 @@ def configure_logging(
 
     # Configure shipper if endpoint provided
     if ship_endpoint:
-        shipper = LogShipper(ship_endpoint)
+        LogShipper(ship_endpoint)
         # Add custom handler for shipping
         # loguru_logger.add(lambda msg: shipper.ship(msg.record))
 

@@ -232,7 +232,6 @@ class NewsSignalDetector:
             request=request,
             operation=_operation,
             retryable_exceptions=(httpx.HTTPError, RuntimeError, TimeoutError),
-
             empty_error="No signals detected",
             extra_metadata={"detector_count": len(self._detectors)},
         )

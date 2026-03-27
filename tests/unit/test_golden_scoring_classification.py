@@ -7,18 +7,18 @@ regression or intentional calibration change that must be reviewed.
 Part of EPIC-017 Wave 2 Testing Hardening.
 """
 
-import pytest
-from datetime import date
 from typing import Any
 
+import pytest
+
 from solstein.analytics.classification_service import ClassificationService
-from solstein.analytics.scoring import GrowthScorer, classify_company
 from solstein.analytics.constants import (
+    LEAD_SCORE_THRESHOLD,
     PHOENIX_SCORE_THRESHOLD,
     SALT_SCORE_THRESHOLD,
-    LEAD_SCORE_THRESHOLD,
 )
-from solstein.domain.models import Company, ThreatLevel
+from solstein.analytics.scoring import GrowthScorer, classify_company
+from solstein.domain.models import Company
 
 
 class TestClassificationGoldenCases:

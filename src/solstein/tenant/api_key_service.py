@@ -105,8 +105,7 @@ def create_api_key(
     db.flush()
 
     logger.info(
-        f"[ApiKeyService] Created API key '{name}' for tenant {tenant_id} "
-        f"(scope={scope}, prefix={key_prefix}...)"
+        f"[ApiKeyService] Created API key '{name}' for tenant {tenant_id} (scope={scope}, prefix={key_prefix}...)"
     )
 
     return {
@@ -219,10 +218,7 @@ def rotate_api_key(
         test_mode=test_mode,
     )
 
-    logger.info(
-        f"[ApiKeyService] Rotated API key '{old_record.name}' "
-        f"(old={key_id}, new={result['record']['id']})"
-    )
+    logger.info(f"[ApiKeyService] Rotated API key '{old_record.name}' (old={key_id}, new={result['record']['id']})")
 
     return result
 
@@ -244,11 +240,7 @@ def validate_api_key(db: Session, *, api_key: str) -> dict[str, object] | None:
 
     key_hash = hash_api_key(api_key)
 
-    record = (
-        db.query(ApiKeyRecord)
-        .filter(ApiKeyRecord.key_hash == key_hash)
-        .first()
-    )
+    record = db.query(ApiKeyRecord).filter(ApiKeyRecord.key_hash == key_hash).first()
 
     if not record:
         return None

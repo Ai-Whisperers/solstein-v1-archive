@@ -131,7 +131,6 @@ class FinancialMetric(BaseModel):
         return v
 
 
-
 class Company(BaseModel):
     """Company domain entity."""
 

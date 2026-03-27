@@ -4,7 +4,7 @@ Usage:
     locust -f tests/performance/locustfile.py --host=http://localhost:8000
 """
 
-from locust import HttpUser, task, between
+from locust import HttpUser, between, task
 
 
 class APIUser(HttpUser):

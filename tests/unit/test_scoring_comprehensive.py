@@ -1,8 +1,9 @@
 """Comprehensive unit tests for scoring module - EPIC-012"""
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
@@ -15,31 +16,19 @@ class TestCompositeScoreCalculation:
 
     def test_high_scoring_company(self):
         """High scoring inputs should produce high composite score."""
-        result = calculate_composite_score(
-            growth_score=9.0,
-            financial_health_score=8.5,
-            competitive_position_score=9.5
-        )
+        result = calculate_composite_score(growth_score=9.0, financial_health_score=8.5, competitive_position_score=9.5)
         assert result.composite_score > 8.0
         assert result.classification == CompanyClassification.PHOENIX
 
     def test_medium_scoring_company(self):
         """Medium scoring inputs should produce medium composite score."""
-        result = calculate_composite_score(
-            growth_score=5.0,
-            financial_health_score=6.0,
-            competitive_position_score=5.5
-        )
+        result = calculate_composite_score(growth_score=5.0, financial_health_score=6.0, competitive_position_score=5.5)
         assert 4.0 <= result.composite_score < 7.0
         assert result.classification == CompanyClassification.SALT
 
     def test_low_scoring_company(self):
         """Low scoring inputs should produce low composite score."""
-        result = calculate_composite_score(
-            growth_score=2.0,
-            financial_health_score=3.0,
-            competitive_position_score=2.5
-        )
+        result = calculate_composite_score(growth_score=2.0, financial_health_score=3.0, competitive_position_score=2.5)
         assert result.composite_score < 4.0
         assert result.classification == CompanyClassification.LEAD
 

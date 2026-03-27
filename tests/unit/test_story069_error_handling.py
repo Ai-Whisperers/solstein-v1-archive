@@ -49,8 +49,7 @@ class TestOpaqueErrorResponses:
                 # Walk the content dict for traceback keys
                 source = ast.get_source_segment(content, kw.value) or ""
                 assert "stack_trace" not in source, (
-                    "JSONResponse content contains 'stack_trace' — "
-                    "tracebacks must never be in HTTP responses"
+                    "JSONResponse content contains 'stack_trace' — tracebacks must never be in HTTP responses"
                 )
                 assert "traceback" not in source.lower() or "format_exc" not in source, (
                     "JSONResponse content references traceback data"
@@ -119,8 +118,7 @@ class TestServerSideLogging:
         """Error handlers should not import get_settings (no env-conditional responses)."""
         content = EXCEPTIONS_PATH.read_text()
         assert "get_settings" not in content, (
-            "exceptions.py still imports get_settings — "
-            "responses should be opaque regardless of environment"
+            "exceptions.py still imports get_settings — responses should be opaque regardless of environment"
         )
 
 
@@ -130,9 +128,7 @@ class TestMiddlewareSanitization:
     def test_sanitization_middleware_exists(self):
         """InputSanitizationMiddleware must exist in security.py."""
         content = SECURITY_PATH.read_text()
-        assert "class InputSanitizationMiddleware" in content, (
-            "InputSanitizationMiddleware not found in security.py"
-        )
+        assert "class InputSanitizationMiddleware" in content, "InputSanitizationMiddleware not found in security.py"
 
     def test_sanitization_in_middleware_chain(self):
         """setup_security_middleware must register InputSanitizationMiddleware."""
@@ -150,8 +146,7 @@ class TestMiddlewareSanitization:
         for router_file in routers_dir.glob("*.py"):
             content = router_file.read_text()
             assert "from solstein.data.security_hardening import InputValidator" not in content, (
-                f"{router_file.name} imports InputValidator directly — "
-                "sanitization should be via middleware (REQ-3)"
+                f"{router_file.name} imports InputValidator directly — sanitization should be via middleware (REQ-3)"
             )
 
 
@@ -167,12 +162,10 @@ class TestResponseShape:
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef) and node.name == "APIError":
                 method_names = [
-                    item.name for item in node.body
-                    if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+                    item.name for item in node.body if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
                 ]
                 assert "to_dict" not in method_names, (
-                    "APIError still has to_dict — response should be built inline "
-                    "with error_id in the handler"
+                    "APIError still has to_dict — response should be built inline with error_id in the handler"
                 )
                 return
         pytest.fail("APIError class not found")

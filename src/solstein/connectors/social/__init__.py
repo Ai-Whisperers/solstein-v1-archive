@@ -1,10 +1,10 @@
 """Social media connectors."""
 
-from .reddit import RedditConnector
-from .youtube import YouTubeConnector
-from .linkedin import LinkedInConnector
 from .glassdoor import GlassdoorConnector
+from .linkedin import LinkedInConnector
+from .reddit import RedditConnector
 from .trustpilot import TrustpilotConnector
+from .youtube import YouTubeConnector
 
 __all__ = [
     "RedditConnector",
@@ -15,14 +15,18 @@ __all__ = [
 ]
 
 
-from .podcastindex import PodcastIndexConnector
+from .podcastindex import PodcastIndexConnector  # noqa: F401
 
-__all__.extend([
-    "PodcastIndexConnector",
-])
+__all__.extend(
+    [
+        "PodcastIndexConnector",
+    ]
+)
 
-from .twitter import TwitterConnector
+from .twitter import TwitterConnector  # noqa: F401
 
-__all__.extend([
-    "TwitterConnector",
-])
+__all__.extend(
+    [
+        "TwitterConnector",
+    ]
+)

@@ -3,13 +3,13 @@
 EPIC-022: Refactored from ProviderHealthChecker god class.
 """
 
+from .checker import HealthChecker
 from .models import (
     ProviderError,
     ProviderErrorType,
     ProviderHealth,
     ProviderStatus,
 )
-from .checker import HealthChecker
 
 __all__ = [
     "HealthChecker",

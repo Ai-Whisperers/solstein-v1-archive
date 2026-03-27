@@ -109,25 +109,19 @@ class TestTenantIdColumns:
     def test_tenant_id_column_added(self, migration_sql: str, table: str) -> None:
         # Check for ALTER TABLE ... ADD COLUMN ... tenant_id
         pattern = rf"ALTER TABLE public\.{table}\s+ADD COLUMN IF NOT EXISTS tenant_id"
-        assert re.search(pattern, migration_sql, re.IGNORECASE), (
-            f"Missing tenant_id column addition for table: {table}"
-        )
+        assert re.search(pattern, migration_sql, re.IGNORECASE), f"Missing tenant_id column addition for table: {table}"
 
     @pytest.mark.parametrize("table", TENANT_SCOPED_TABLES)
     def test_tenant_id_backfill(self, migration_sql: str, table: str) -> None:
         # Check for UPDATE ... SET tenant_id = default
         pattern = rf"UPDATE public\.{table}\s+SET tenant_id = '00000000-0000-0000-0000-000000000000'"
-        assert re.search(pattern, migration_sql, re.IGNORECASE), (
-            f"Missing tenant_id backfill for table: {table}"
-        )
+        assert re.search(pattern, migration_sql, re.IGNORECASE), f"Missing tenant_id backfill for table: {table}"
 
     @pytest.mark.parametrize("table", TENANT_SCOPED_TABLES)
     def test_tenant_id_index_created(self, migration_sql: str, table: str) -> None:
         # Check for index on tenant_id
         pattern = rf"CREATE INDEX IF NOT EXISTS ix_{table}_tenant_id ON public\.{table}\(tenant_id\)"
-        assert re.search(pattern, migration_sql, re.IGNORECASE), (
-            f"Missing tenant_id index for table: {table}"
-        )
+        assert re.search(pattern, migration_sql, re.IGNORECASE), f"Missing tenant_id index for table: {table}"
 
 
 class TestOldPoliciesDropped:
@@ -136,9 +130,7 @@ class TestOldPoliciesDropped:
     @pytest.mark.parametrize("table", TENANT_SCOPED_TABLES)
     def test_old_anon_read_policy_dropped(self, migration_sql: str, table: str) -> None:
         pattern = rf'DROP POLICY IF EXISTS "Allow basic anon read" ON public\.{table}'
-        assert re.search(pattern, migration_sql), (
-            f"Old anon read policy not dropped for table: {table}"
-        )
+        assert re.search(pattern, migration_sql), f"Old anon read policy not dropped for table: {table}"
 
 
 class TestTenantPoliciesCreated:
@@ -150,38 +142,30 @@ class TestTenantPoliciesCreated:
     @pytest.mark.parametrize("op", OPERATIONS)
     def test_tenant_policy_exists(self, migration_sql: str, table: str, op: str) -> None:
         pattern = rf'CREATE POLICY "tenant_{op}" ON public\.{table}'
-        assert re.search(pattern, migration_sql), (
-            f"Missing tenant_{op} policy for table: {table}"
-        )
+        assert re.search(pattern, migration_sql), f"Missing tenant_{op} policy for table: {table}"
 
     @pytest.mark.parametrize("table", TENANT_SCOPED_TABLES)
     def test_select_uses_using_clause(self, migration_sql: str, table: str) -> None:
         # Find the SELECT policy for this table and check it has USING clause
         pattern = rf'CREATE POLICY "tenant_select" ON public\.{table}\s+FOR SELECT TO authenticated\s+USING \(tenant_id = public\.get_user_tenant_id\(\)\)'
-        assert re.search(pattern, migration_sql), (
-            f"tenant_select policy for {table} missing correct USING clause"
-        )
+        assert re.search(pattern, migration_sql), f"tenant_select policy for {table} missing correct USING clause"
 
     @pytest.mark.parametrize("table", TENANT_SCOPED_TABLES)
     def test_insert_uses_with_check(self, migration_sql: str, table: str) -> None:
         pattern = rf'CREATE POLICY "tenant_insert" ON public\.{table}\s+FOR INSERT TO authenticated\s+WITH CHECK \(tenant_id = public\.get_user_tenant_id\(\)\)'
-        assert re.search(pattern, migration_sql), (
-            f"tenant_insert policy for {table} missing correct WITH CHECK clause"
-        )
+        assert re.search(pattern, migration_sql), f"tenant_insert policy for {table} missing correct WITH CHECK clause"
 
     @pytest.mark.parametrize("table", TENANT_SCOPED_TABLES)
     def test_policies_target_authenticated_role(self, migration_sql: str, table: str) -> None:
         # All policies for each table should target 'authenticated' role
         patterns = [
-            rf'ON public\.{table}\s+FOR SELECT TO authenticated',
-            rf'ON public\.{table}\s+FOR INSERT TO authenticated',
-            rf'ON public\.{table}\s+FOR UPDATE TO authenticated',
-            rf'ON public\.{table}\s+FOR DELETE TO authenticated',
+            rf"ON public\.{table}\s+FOR SELECT TO authenticated",
+            rf"ON public\.{table}\s+FOR INSERT TO authenticated",
+            rf"ON public\.{table}\s+FOR UPDATE TO authenticated",
+            rf"ON public\.{table}\s+FOR DELETE TO authenticated",
         ]
         for p in patterns:
-            assert re.search(p, migration_sql), (
-                f"Policy for {table} not targeting authenticated role: {p}"
-            )
+            assert re.search(p, migration_sql), f"Policy for {table} not targeting authenticated role: {p}"
 
 
 class TestRLSEnabled:
@@ -190,9 +174,7 @@ class TestRLSEnabled:
     @pytest.mark.parametrize("table", TENANT_SCOPED_TABLES)
     def test_rls_enabled(self, migration_sql: str, table: str) -> None:
         pattern = rf"ALTER TABLE public\.{table} ENABLE ROW LEVEL SECURITY"
-        assert re.search(pattern, migration_sql), (
-            f"RLS not enabled for table: {table}"
-        )
+        assert re.search(pattern, migration_sql), f"RLS not enabled for table: {table}"
 
 
 class TestNonTenantTablesExcluded:
@@ -201,9 +183,7 @@ class TestNonTenantTablesExcluded:
     @pytest.mark.parametrize("table", NON_TENANT_TABLES)
     def test_no_tenant_policy(self, migration_sql: str, table: str) -> None:
         pattern = rf'CREATE POLICY "tenant_select" ON public\.{table}'
-        assert not re.search(pattern, migration_sql), (
-            f"Non-tenant table {table} should NOT have tenant policies"
-        )
+        assert not re.search(pattern, migration_sql), f"Non-tenant table {table} should NOT have tenant policies"
 
 
 class TestServiceRoleBypass:
@@ -214,7 +194,7 @@ class TestServiceRoleBypass:
 
     def test_no_explicit_service_role_policy(self, migration_sql: str) -> None:
         # Supabase service_role bypasses RLS by default, so no policy needed
-        assert 'TO service_role' not in migration_sql, (
+        assert "TO service_role" not in migration_sql, (
             "No explicit service_role policy should be created (Supabase bypasses RLS for service_role)"
         )
 
@@ -239,9 +219,7 @@ class TestAlembicMigration:
 
     def test_all_tenant_tables_listed(self, alembic_migration_text: str) -> None:
         for table in TENANT_SCOPED_TABLES:
-            assert table in alembic_migration_text, (
-                f"Alembic migration missing table: {table}"
-            )
+            assert table in alembic_migration_text, f"Alembic migration missing table: {table}"
 
     def test_revision_id(self, alembic_migration_text: str) -> None:
         assert 'revision: str = "014"' in alembic_migration_text
@@ -256,9 +234,7 @@ class TestDocumentation:
     def test_docs_list_all_tenant_tables(self) -> None:
         docs_text = RLS_DOCS.read_text()
         for table in TENANT_SCOPED_TABLES:
-            assert table in docs_text, (
-                f"RLS documentation missing table: {table}"
-            )
+            assert table in docs_text, f"RLS documentation missing table: {table}"
 
     def test_docs_mention_service_role(self) -> None:
         docs_text = RLS_DOCS.read_text()
@@ -271,6 +247,4 @@ class TestDocumentation:
     def test_docs_list_excluded_tables(self) -> None:
         docs_text = RLS_DOCS.read_text()
         for table in NON_TENANT_TABLES:
-            assert table in docs_text, (
-                f"RLS documentation should list excluded table: {table}"
-            )
+            assert table in docs_text, f"RLS documentation should list excluded table: {table}"

@@ -5,7 +5,6 @@ H1-H3: Tests for provenance tracking and validation.
 
 from datetime import datetime, timezone
 from decimal import Decimal
-from decimal import Decimal
 from unittest.mock import Mock
 
 import pytest
@@ -274,7 +273,7 @@ class TestValidateCompanyProvenance:
 
         assert len(violations) == 0
 
-    def test_missing_provenance(self) -> None:
+    def test_missing_provenance_all_fields(self) -> None:
         company = Mock()
         company.revenue = 1000000
         company.growth_rate = 0.5

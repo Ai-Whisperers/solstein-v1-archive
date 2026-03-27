@@ -4,14 +4,13 @@ Regression guard: ensures that .env.example stays in sync with config.py as new
 fields are added to the Settings class. The validate_env_example.py script is
 the primary CI artifact; these tests verify the script itself behaves correctly.
 """
+
 from __future__ import annotations
 
 import re
 import subprocess
 import sys
 from pathlib import Path
-
-import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 ENV_EXAMPLE = PROJECT_ROOT / ".env.example"
@@ -85,7 +84,7 @@ class TestEnvExampleExists:
         # Patterns that look like real secrets (not placeholders)
         suspicious_patterns = [
             r"ghp_[a-zA-Z0-9]{36}",  # Real GitHub token
-            r"sk-[a-zA-Z0-9]{48}",   # Real OpenAI key
+            r"sk-[a-zA-Z0-9]{48}",  # Real OpenAI key
             r"gsk_[a-zA-Z0-9]{52}",  # Real Groq key
         ]
         for pattern in suspicious_patterns:
@@ -112,9 +111,7 @@ class TestRequiredVariables:
     def test_all_required_vars_are_present(self) -> None:
         """All vars listed in story acceptance criteria must appear at minimum as comments."""
         missing = REQUIRED_PRESENT_VARS - self.all_vars
-        assert not missing, (
-            f"These variables are missing from .env.example entirely: {sorted(missing)}"
-        )
+        assert not missing, f"These variables are missing from .env.example entirely: {sorted(missing)}"
 
     def test_github_token_marked_required(self) -> None:
         """GITHUB_TOKEN must be present and ideally flagged as required."""

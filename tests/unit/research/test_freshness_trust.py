@@ -10,7 +10,7 @@ Tests cover:
 - Edge cases (empty data, missing fields)
 """
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 from solstein.research.freshness_trust import (
     KEY_FIELDS,
@@ -26,7 +26,6 @@ from solstein.research.freshness_trust import (
     compute_trust_tier,
     get_freshness_window,
 )
-
 
 # ---------------------------------------------------------------------------
 # Field volatility classification
@@ -180,7 +179,7 @@ class TestComputeTrustTierGold:
         ts = now.isoformat()
         run = _make_run(
             sources=["https://a.com", "https://b.com"],
-            fields={f: 1 for f in KEY_FIELDS},
+            fields=dict.fromkeys(KEY_FIELDS, 1),
             timestamp=ts,
         )
         entry = {"runs": [run]}
@@ -213,7 +212,7 @@ class TestComputeTrustTierSilver:
         ts = now.isoformat()
         run = _make_run(
             sources=["https://a.com", "https://b.com", "https://c.com"],
-            fields={f: 1 for f in KEY_FIELDS},
+            fields=dict.fromkeys(KEY_FIELDS, 1),
             timestamp=ts,
             contradictions={
                 "revenue": [{"severity": "major", "ratio": 4.0}],
@@ -276,7 +275,7 @@ class TestComputeTrustTierReviewRequired:
         ts = now.isoformat()
         run = _make_run(
             sources=["https://a.com", "https://b.com", "https://c.com"],
-            fields={f: 1 for f in KEY_FIELDS},
+            fields=dict.fromkeys(KEY_FIELDS, 1),
             timestamp=ts,
             contradictions={
                 "revenue": [{"severity": "critical", "ratio": 15.0}],
@@ -398,11 +397,13 @@ class TestEdgeCases:
 
     def test_missing_field_evidence(self) -> None:
         entry = {
-            "runs": [{
-                "run_id": "run-1",
-                "timestamp": "2026-03-27",
-                "sources_used": ["https://a.com"],
-            }],
+            "runs": [
+                {
+                    "run_id": "run-1",
+                    "timestamp": "2026-03-27",
+                    "sources_used": ["https://a.com"],
+                }
+            ],
         }
         now = datetime(2026, 3, 27, 12, 0, tzinfo=timezone.utc)
         result = compute_trust_tier(entry, now=now)
@@ -414,17 +415,17 @@ class TestEdgeCases:
         ts = now.isoformat()
         run1 = _make_run(
             sources=["https://a.com"],
-            fields={f: 1 for f in KEY_FIELDS},
+            fields=dict.fromkeys(KEY_FIELDS, 1),
             timestamp=ts,
         )
         run2 = _make_run(
             sources=["https://b.com"],
-            fields={f: 2 for f in KEY_FIELDS},
+            fields=dict.fromkeys(KEY_FIELDS, 2),
             timestamp=ts,
         )
         run3 = _make_run(
             sources=["https://c.com"],
-            fields={f: 3 for f in KEY_FIELDS},
+            fields=dict.fromkeys(KEY_FIELDS, 3),
             timestamp=ts,
         )
         entry = {"runs": [run1, run2, run3]}

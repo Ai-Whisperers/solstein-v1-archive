@@ -6,7 +6,6 @@ Projects 12-month revenue forecasts based on growth trajectories and vectors.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 from .financial_models import (
     ConfidenceLevel,
@@ -35,7 +34,7 @@ class FinancialProjectionEngine:
         self,
         current_revenue: float,
         financial_intelligence: FinancialIntelligence,
-        market_growth_rate: Optional[float] = None,
+        market_growth_rate: float | None = None,
     ) -> ProjectionResult:
         """Generate 12-month revenue projection.
 
@@ -233,8 +232,8 @@ class FinancialProjectionEngine:
     def quick_project(
         self,
         current_revenue: float,
-        growth_rate: Optional[float] = None,
-        confidence: Optional[ConfidenceLevel] = None,
+        growth_rate: float | None = None,
+        confidence: ConfidenceLevel | None = None,
     ) -> ProjectionResult:
         """Quick projection when full intelligence not available.
 

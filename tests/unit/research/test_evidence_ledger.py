@@ -34,11 +34,10 @@ from solstein.research.evidence_ledger import (
 )
 from solstein.research.numeric_normalization import (
     ContradictionFlag,
+    Currency,
     NormalizedValue,
     NumericUnit,
-    Currency,
 )
-
 
 # ---------------------------------------------------------------------------
 # Schema version detection
@@ -174,12 +173,16 @@ class TestSerializationRoundTrip:
 
     def test_field_evidence_round_trip(self) -> None:
         winner = EvidenceCandidate(
-            value=100.0, source_url="https://a.com",
-            confidence=0.9, extraction_timestamp="2026-01-01",
+            value=100.0,
+            source_url="https://a.com",
+            confidence=0.9,
+            extraction_timestamp="2026-01-01",
         )
         candidate = EvidenceCandidate(
-            value=95.0, source_url="https://b.com",
-            confidence=0.7, extraction_timestamp="2026-01-01",
+            value=95.0,
+            source_url="https://b.com",
+            confidence=0.7,
+            extraction_timestamp="2026-01-01",
         )
         evidence = FieldEvidence(
             field_name="revenue",
@@ -201,8 +204,10 @@ class TestSerializationRoundTrip:
                 "revenue": FieldEvidence(
                     field_name="revenue",
                     winner=EvidenceCandidate(
-                        value=200.0, source_url="https://a.com",
-                        confidence=0.9, extraction_timestamp="2026-01-01",
+                        value=200.0,
+                        source_url="https://a.com",
+                        confidence=0.9,
+                        extraction_timestamp="2026-01-01",
                     ),
                 ),
             },
@@ -260,9 +265,12 @@ class TestBuildFieldEvidence:
 
     def test_evidence_with_normalization(self) -> None:
         nv = NormalizedValue(
-            raw_input="$200M", value=200.0,
-            unit=NumericUnit.MILLIONS, currency=Currency.USD,
-            confidence=0.9, is_ambiguous=False,
+            raw_input="$200M",
+            value=200.0,
+            unit=NumericUnit.MILLIONS,
+            currency=Currency.USD,
+            confidence=0.9,
+            is_ambiguous=False,
         )
         evidence = build_field_evidence(
             field_name="revenue",
@@ -312,8 +320,12 @@ class TestAppendRun:
     def test_retention_window_enforced(self) -> None:
         entry: dict = {
             "runs": [
-                {"run_id": f"run-{i:03d}", "timestamp": f"2026-01-{i+1:02d}",
-                 "sources_used": [], "field_evidence": {}}
+                {
+                    "run_id": f"run-{i:03d}",
+                    "timestamp": f"2026-01-{i + 1:02d}",
+                    "sources_used": [],
+                    "field_evidence": {},
+                }
                 for i in range(MAX_RUNS_PER_COMPANY)
             ]
         }
@@ -335,10 +347,8 @@ class TestGetLatestRun:
     def test_returns_last_run(self) -> None:
         entry = {
             "runs": [
-                {"run_id": "run-001", "timestamp": "2026-01-01",
-                 "sources_used": [], "field_evidence": {}},
-                {"run_id": "run-002", "timestamp": "2026-01-02",
-                 "sources_used": [], "field_evidence": {}},
+                {"run_id": "run-001", "timestamp": "2026-01-01", "sources_used": [], "field_evidence": {}},
+                {"run_id": "run-002", "timestamp": "2026-01-02", "sources_used": [], "field_evidence": {}},
             ]
         }
         run = get_latest_run(entry)
@@ -362,20 +372,26 @@ class TestGetFieldLineage:
         entry = {
             "runs": [
                 {
-                    "run_id": "run-001", "timestamp": "2026-01-01",
-                    "sources_used": [], "field_evidence": {
+                    "run_id": "run-001",
+                    "timestamp": "2026-01-01",
+                    "sources_used": [],
+                    "field_evidence": {
                         "revenue": {
                             "winner": {"value": 100, "source_url": "a", "confidence": 0.8},
-                            "candidates": [], "contradiction_flags": [],
+                            "candidates": [],
+                            "contradiction_flags": [],
                         },
                     },
                 },
                 {
-                    "run_id": "run-002", "timestamp": "2026-01-15",
-                    "sources_used": [], "field_evidence": {
+                    "run_id": "run-002",
+                    "timestamp": "2026-01-15",
+                    "sources_used": [],
+                    "field_evidence": {
                         "revenue": {
                             "winner": {"value": 120, "source_url": "b", "confidence": 0.9},
-                            "candidates": [], "contradiction_flags": [],
+                            "candidates": [],
+                            "contradiction_flags": [],
                         },
                     },
                 },
@@ -390,8 +406,7 @@ class TestGetFieldLineage:
     def test_lineage_missing_field(self) -> None:
         entry = {
             "runs": [
-                {"run_id": "run-001", "timestamp": "2026-01-01",
-                 "sources_used": [], "field_evidence": {}},
+                {"run_id": "run-001", "timestamp": "2026-01-01", "sources_used": [], "field_evidence": {}},
             ],
         }
         lineage = get_field_lineage(entry, "revenue")
@@ -406,24 +421,32 @@ class TestGetFieldLineage:
         entry = {
             "runs": [
                 {
-                    "run_id": "run-001", "timestamp": "2026-01-01",
-                    "sources_used": [], "field_evidence": {
+                    "run_id": "run-001",
+                    "timestamp": "2026-01-01",
+                    "sources_used": [],
+                    "field_evidence": {
                         "revenue": {
                             "winner": {"value": 100, "source_url": "a", "confidence": 0.8},
-                            "candidates": [], "contradiction_flags": [],
+                            "candidates": [],
+                            "contradiction_flags": [],
                         },
                     },
                 },
                 {
-                    "run_id": "run-002", "timestamp": "2026-01-15",
-                    "sources_used": [], "field_evidence": {},
+                    "run_id": "run-002",
+                    "timestamp": "2026-01-15",
+                    "sources_used": [],
+                    "field_evidence": {},
                 },
                 {
-                    "run_id": "run-003", "timestamp": "2026-02-01",
-                    "sources_used": [], "field_evidence": {
+                    "run_id": "run-003",
+                    "timestamp": "2026-02-01",
+                    "sources_used": [],
+                    "field_evidence": {
                         "revenue": {
                             "winner": {"value": 150, "source_url": "c", "confidence": 0.95},
-                            "candidates": [], "contradiction_flags": [],
+                            "candidates": [],
+                            "contradiction_flags": [],
                         },
                     },
                 },

@@ -27,10 +27,7 @@ def normalize_url(url: str) -> str:
         if netloc.startswith("www."):
             netloc = netloc[4:]
         path = parsed.path.rstrip("/") or "/"
-        query_params = [
-            (k, v) for k, v in parse_qsl(parsed.query, keep_blank_values=True)
-            if not k.startswith("utm_")
-        ]
+        query_params = [(k, v) for k, v in parse_qsl(parsed.query, keep_blank_values=True) if not k.startswith("utm_")]
         query = urlencode(query_params)
         return urlunparse((scheme, netloc, path, "", query, ""))
     except (ValueError, AttributeError):

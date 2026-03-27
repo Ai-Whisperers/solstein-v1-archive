@@ -80,8 +80,7 @@ class PatentsUnifiedAdapter(BaseRefreshConnector):
                 tags=["patents", market.lower()],
                 seed_relevance=0.60,
                 discovery_reason=(
-                    f"patent activity: {result.total_patents} patents, "
-                    f"{result.ai_related_patents} AI-related"
+                    f"patent activity: {result.total_patents} patents, {result.ai_related_patents} AI-related"
                 ),
                 source_links=[],
             )

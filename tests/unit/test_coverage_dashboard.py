@@ -5,12 +5,8 @@ Tests the coverage collection, parsing, and reporting functionality.
 
 from __future__ import annotations
 
-import json
-from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
-
-import pytest
 
 from solstein.core.coverage_dashboard import (
     CoverageCollector,

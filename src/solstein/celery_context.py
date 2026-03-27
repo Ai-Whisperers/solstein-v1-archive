@@ -4,9 +4,9 @@ Propagates request context (request_id, correlation_id, tenant_id, user_id)
 to Celery tasks via task headers.
 """
 
-from celery import Task
-from celery.signals import before_task_publish, task_prerun, task_postrun
-from .utils.context import set_context, reset_context, get_current_context
+from celery.signals import before_task_publish, task_postrun, task_prerun
+
+from .utils.context import get_current_context, reset_context, set_context
 
 
 @before_task_publish.connect

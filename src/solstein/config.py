@@ -296,8 +296,7 @@ class Settings(BaseSettings):
         # Required: Database URL
         if not self.database.url:
             raise ConfigurationError(
-                "DATABASE__URL environment variable is required. "
-                "Set DATABASE__URL before starting the application."
+                "DATABASE__URL environment variable is required. Set DATABASE__URL before starting the application."
             )
 
         # STORY-067: Supabase Auth manages JWT signing externally.
@@ -362,8 +361,7 @@ class Settings(BaseSettings):
             "Configuration validation passed.\n"
             "───────────────────────────────────────────────\n"
             "Startup Summary\n"
-            "───────────────────────────────────────────────\n"
-            + "\n".join(configured_lines + missing_lines)
+            "───────────────────────────────────────────────\n" + "\n".join(configured_lines + missing_lines)
         )
 
     @field_validator("environment", mode="before")

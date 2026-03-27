@@ -78,8 +78,8 @@ def build_default_registry(settings: Settings) -> SourceRegistry:
     # lightweight and testable without requiring every dependency.
     from solstein.adapters.discovery.competitor_json import CompetitorJsonSource
     from solstein.adapters.discovery.static_catalog import StaticCatalogSource
-    from solstein.adapters.enrichment.yahoo_finance import YahooFinanceEnrichment
     from solstein.adapters.enrichment.global_market import GlobalMarketEnrichment
+    from solstein.adapters.enrichment.yahoo_finance import YahooFinanceEnrichment
 
     registry = SourceRegistry()
 

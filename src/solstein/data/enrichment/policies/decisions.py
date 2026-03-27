@@ -3,7 +3,7 @@
 EPIC-022: Extracted from EnrichmentOrchestrator for modularity.
 """
 
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from ..models import EnrichableCompany, EnrichmentField
@@ -56,7 +56,7 @@ class EnrichmentPolicy:
 
         return has_revenue and has_growth and has_employees and has_margin
 
-    def get_fields_to_enrich(self, company: "EnrichableCompany") -> List["EnrichmentField"]:
+    def get_fields_to_enrich(self, company: "EnrichableCompany") -> list["EnrichmentField"]:
         """Get list of fields that need enrichment.
 
         Args:
@@ -105,7 +105,6 @@ class EnrichmentPolicy:
         Returns:
             True if field should be overwritten
         """
-        from ...domain.models import ConfidenceLevel
 
         # Never overwrite with null
         if new_value is None:

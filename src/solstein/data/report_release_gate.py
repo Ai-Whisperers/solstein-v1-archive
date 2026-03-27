@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Mapping, cast
 import json
+from collections.abc import Mapping
+from dataclasses import dataclass
+from typing import cast
 
 from loguru import logger
 
 from ..analytics.completeness import CompletenessCalculator, DataQualityTier, completeness_calculator
 from ..domain.models import Company
 from ..infrastructure.refresh import RefreshStatus, raise_if_stale
+from ..research.reconcile import detect_company_contradictions
 from .gap_analyzer import analyze_company_gaps
 from .provenance import validate_company_boundary_provenance
-from ..research.reconcile import detect_company_contradictions
-
 
 CRITICAL_CLAIM_FIELDS = {"revenue", "employee_count", "employees", "funding_total", "funding", "valuation"}
 

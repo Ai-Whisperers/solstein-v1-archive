@@ -1,9 +1,8 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any, cast
-
-import json
 
 
 def _checkpoint_sequence(path: Path) -> int:

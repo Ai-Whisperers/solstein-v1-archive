@@ -154,7 +154,6 @@ async def get_current_tenant(request: Request) -> dict[str, Any]:
     return tenant
 
 
-
 async def require_admin(user: UserPayload = Depends(get_current_user)) -> UserPayload:
     """Require admin role for access.
 

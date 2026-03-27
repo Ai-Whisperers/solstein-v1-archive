@@ -3,18 +3,17 @@
 E1: Tests for extracted orchestration layer.
 """
 
-import asyncio
 from dataclasses import dataclass
 from typing import Any
 
 import pytest
 
+from solstein.data.conflict_resolution import CompositeResolver
 from solstein.data.loader_orchestrator import (
     LoadConfig,
     LoadResult,
     UnifiedLoaderOrchestrator,
 )
-from solstein.data.conflict_resolution import CompositeResolver, ConflictResolver
 from solstein.data.normalization import DataNormalizer
 from solstein.domain.models import Company
 

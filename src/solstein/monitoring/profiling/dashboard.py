@@ -5,11 +5,10 @@ EPIC-023 Story 1: Web-based dashboard for viewing profiling results.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
 from ..profiling import profiler

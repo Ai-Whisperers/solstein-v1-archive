@@ -6,7 +6,6 @@ Epic 1: Deep Analysis Intelligence Module - Capability comparison engine.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -27,7 +26,7 @@ class EneveCapability(BaseModel):
     code: str  # e.g., "time_series_mgmt"
     name: str  # Display name
     description: str
-    keywords: List[str]  # Keywords to search for in competitor data
+    keywords: list[str]  # Keywords to search for in competitor data
     weight: float = Field(default=1.0, ge=0.0, le=1.0)  # Importance weight
 
 
@@ -36,14 +35,14 @@ class CapabilityMatch(BaseModel):
 
     capability_code: str
     overlap_level: OverlapLevel
-    evidence: List[str]  # Text snippets showing evidence
+    evidence: list[str]  # Text snippets showing evidence
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
 
     # Detailed scoring
-    keyword_matches: Dict[str, int] = Field(default_factory=dict)  # Keyword -> count
+    keyword_matches: dict[str, int] = Field(default_factory=dict)  # Keyword -> count
 
 
-def get_eneve_capabilities() -> List[EneveCapability]:
+def get_eneve_capabilities() -> list[EneveCapability]:
     """Get the standard Eneve capability definitions.
 
     These are the core capabilities that Eneve's eBase platform provides.
@@ -172,7 +171,7 @@ class CapabilityOverlapMatrix(BaseModel):
     entity_name: str
 
     # Individual capability matches
-    matches: Dict[str, CapabilityMatch] = Field(default_factory=dict)
+    matches: dict[str, CapabilityMatch] = Field(default_factory=dict)
 
     # Aggregate scores
     overall_overlap_score: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -180,8 +179,8 @@ class CapabilityOverlapMatrix(BaseModel):
     high_overlap_capabilities: int = 0
 
     # Comparison summary
-    strongest_matches: List[str] = Field(default_factory=list)
-    gaps: List[str] = Field(default_factory=list)
+    strongest_matches: list[str] = Field(default_factory=list)
+    gaps: list[str] = Field(default_factory=list)
 
     def add_match(self, match: CapabilityMatch) -> None:
         """Add a capability match to the matrix."""
@@ -244,7 +243,7 @@ class OverlapAnalyzer:
         self,
         entity_id: str,
         entity_name: str,
-        source_texts: List[str],
+        source_texts: list[str],
     ) -> CapabilityOverlapMatrix:
         """Analyze capability overlap from source texts.
 
@@ -261,7 +260,7 @@ class OverlapAnalyzer:
             entity_name=entity_name,
         )
 
-        #HS|        # Combine all source texts (filter out None values)
+        # HS|        # Combine all source texts (filter out None values)
         filtered_texts = [str(t) if t is not None else "" for t in source_texts]
         combined_text = " ".join(filtered_texts).lower()
 
@@ -351,8 +350,8 @@ class OverlapAnalyzer:
 
     def compare_competitors(
         self,
-        matrices: List[CapabilityOverlapMatrix],
-    ) -> Dict[str, any]:
+        matrices: list[CapabilityOverlapMatrix],
+    ) -> dict[str, any]:
         """Compare multiple competitors' capability overlap.
 
         Args:

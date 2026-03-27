@@ -11,10 +11,10 @@ FREE sources:
 import asyncio
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any, Optional  # noqa: F401
 
 import aiohttp
-import pandas as pd
+import pandas as pd  # noqa: F401
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig
 
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class YahooFinanceConnector(BaseConnector):
     """Connector for Yahoo Finance data (via yfinance)."""
 
-    def __init__(self, config: Optional[SourceConfig] = None):
+    def __init__(self, config: SourceConfig | None = None):
         if config is None:
             config = SourceConfig(
                 name="yahoo_finance",
@@ -122,7 +122,7 @@ class AlphaVantageConnector(BaseConnector):
 
     BASE_URL = "https://www.alphavantage.co/query"
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         config = SourceConfig(
             name="alpha_vantage",
             base_url=self.BASE_URL,
@@ -246,7 +246,6 @@ async def create_financial_connector(source_type: str, **kwargs) -> BaseConnecto
     return connector
 
 
-
 # Import additional connectors
 from .crunchbase import CrunchbaseConnector
 
@@ -259,24 +258,30 @@ __all__ = [
 ]
 
 
-from .angellist import AngelListConnector
-from .f6s import F6SConnector
+from .angellist import AngelListConnector  # noqa: F401
+from .f6s import F6SConnector  # noqa: F401
 
-__all__.extend([
-    "AngelListConnector",
-    "F6SConnector",
-])
+__all__.extend(
+    [
+        "AngelListConnector",
+        "F6SConnector",
+    ]
+)
 
-from .opencorporates import OpenCorporatesConnector
-from .betalist import BetaListConnector
+from .betalist import BetaListConnector  # noqa: F401
+from .opencorporates import OpenCorporatesConnector  # noqa: F401
 
-__all__.extend([
-    "OpenCorporatesConnector",
-    "BetaListConnector",
-])
+__all__.extend(
+    [
+        "OpenCorporatesConnector",
+        "BetaListConnector",
+    ]
+)
 
 from .sec_edgar import SECEdgarConnector
 
-__all__.extend([
-    "SECEdgarConnector",
-])
+__all__.extend(
+    [
+        "SECEdgarConnector",
+    ]
+)

@@ -4,7 +4,6 @@ EPIC-022: Extracted from EnrichmentOrchestrator for modularity.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional
 
 from ..models import EnrichmentResult, EnrichmentSource
 

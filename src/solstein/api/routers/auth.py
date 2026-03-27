@@ -88,9 +88,7 @@ async def login(request: LoginRequest) -> AuthTokenResponse:
 
     try:
         client = get_supabase()
-        response = client.auth.sign_in_with_password(
-            {"email": request.email, "password": request.password}
-        )
+        response = client.auth.sign_in_with_password({"email": request.email, "password": request.password})
     except (ValueError, ImportError) as e:
         logger.error(f"Supabase configuration error during login: {e}")
         raise HTTPException(
@@ -149,9 +147,7 @@ async def signup(request: SignupRequest) -> AuthTokenResponse:
 
     try:
         client = get_supabase()
-        response = client.auth.sign_up(
-            {"email": request.email, "password": request.password}
-        )
+        response = client.auth.sign_up({"email": request.email, "password": request.password})
     except (ValueError, ImportError) as e:
         logger.error(f"Supabase configuration error during signup: {e}")
         raise HTTPException(

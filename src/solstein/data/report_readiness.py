@@ -2,9 +2,8 @@ from typing import Any
 
 from loguru import logger
 
-from solstein.domain.models import Company
 from solstein.data.report_release_gate import ReportReleaseGate
-
+from solstein.domain.models import Company
 
 REQUIRED_FINANCIAL_FIELDS = ("revenue", "employees", "growth_rate", "profit_margin")
 REQUIRED_PE_FIELDS = (
@@ -79,7 +78,9 @@ def assert_report_ready(companies: list[Company]) -> None:
     result = gate.evaluate(companies)
     if not result.passed:
         reason_codes = ", ".join(reason.code for reason in result.reasons)
-        logger.warning(f"Report gate advisory: {len(companies)} companies did not pass PE-ready gate ({reason_codes}). Proceeding anyway.")
+        logger.warning(
+            f"Report gate advisory: {len(companies)} companies did not pass PE-ready gate ({reason_codes}). Proceeding anyway."
+        )
 
 
 def build_report_gate_snapshot(companies: list[Company], min_confidence: float = 0.6) -> dict[str, object]:
@@ -99,7 +100,9 @@ def assert_client_report_ready(
     target_result = gate.evaluate([target])
     if not target_result.passed:
         reason_codes = ", ".join(reason.code for reason in target_result.reasons)
-        logger.warning(f"Report gate advisory: target company '{target.name}' is not PE-ready ({reason_codes}). Proceeding anyway.")
+        logger.warning(
+            f"Report gate advisory: target company '{target.name}' is not PE-ready ({reason_codes}). Proceeding anyway."
+        )
 
     ready_peers = 0
     blocked_peers: list[str] = []

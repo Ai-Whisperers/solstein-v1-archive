@@ -30,7 +30,7 @@ class ConnectorResponse(Generic[PayloadT]):
         request: ConnectorRequest,
         payload: PayloadT,
         metadata: dict[str, Any] | None = None,
-    ) -> "ConnectorResponse[PayloadT]":
+    ) -> ConnectorResponse[PayloadT]:
         return ConnectorResponse(
             status="success",
             connector=request.connector,
@@ -45,7 +45,7 @@ class ConnectorResponse(Generic[PayloadT]):
         payload: PayloadT | None,
         error: str,
         metadata: dict[str, Any] | None = None,
-    ) -> "ConnectorResponse[PayloadT]":
+    ) -> ConnectorResponse[PayloadT]:
         return ConnectorResponse(
             status="degraded",
             connector=request.connector,
@@ -60,7 +60,7 @@ class ConnectorResponse(Generic[PayloadT]):
         request: ConnectorRequest,
         error: str,
         metadata: dict[str, Any] | None = None,
-    ) -> "ConnectorResponse[PayloadT]":
+    ) -> ConnectorResponse[PayloadT]:
         return ConnectorResponse(
             status="failure",
             connector=request.connector,

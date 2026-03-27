@@ -25,6 +25,7 @@ class ReconciliationError(RuntimeError):
 
 def _as_payload_dict(payload: object) -> dict[str, JsonValue] | None:
     import json
+
     if isinstance(payload, str):
         try:
             payload = json.loads(payload)
@@ -99,16 +100,15 @@ def reconcile_research_run(
     EPIC-020: Refactored from 170-line function to use helper functions.
     """
     from .reconciliation_helpers import (
-        resolve_run_and_output_dir,
-        extract_artifact_hashes,
-        compare_artifacts,
         build_reconciliation_report,
+        compare_artifacts,
+        extract_artifact_hashes,
+        resolve_run_and_output_dir,
     )
 
     # Resolve run_id and output_dir
     resolved_run_id, resolved_output_dir, outbox_record = resolve_run_and_output_dir(
-        session, run_id, output_dir,
-        _find_outbox_for_run_id, _find_outbox_for_output_dir, _as_payload_dict
+        session, run_id, output_dir, _find_outbox_for_run_id, _find_outbox_for_output_dir, _as_payload_dict
     )
 
     # Load artifacts
@@ -158,13 +158,21 @@ def reconcile_research_run(
 
     # Build and write report
     report = build_reconciliation_report(
-        resolved_run_id, resolved_output_dir, run_db_present,
-        matched, missing_in_db, missing_in_json, mismatched_hash,
-        json_artifact_names, db_artifact_names, len(outbox_matches_for_run)
+        resolved_run_id,
+        resolved_output_dir,
+        run_db_present,
+        matched,
+        missing_in_db,
+        missing_in_json,
+        mismatched_hash,
+        json_artifact_names,
+        db_artifact_names,
+        len(outbox_matches_for_run),
     )
 
     _ = _write_reconciliation_report(output_dir=resolved_output_dir, report=report)
     return report
+
 
 def reconcile_research_run_with_configured_db(
     *,

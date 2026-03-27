@@ -234,18 +234,12 @@ class TestNoHardcodedMagicNumbers:
     def test_no_hardcoded_failure_threshold_in_src(self):
         """AC2: grep -rE 'failure_threshold=[0-9]' src/ must return zero results."""
         hits = self._grep_src(r"failure_threshold=[0-9]")
-        assert not hits, (
-            "Found hardcoded failure_threshold values — move them to config.py:\n"
-            + "\n".join(hits)
-        )
+        assert not hits, "Found hardcoded failure_threshold values — move them to config.py:\n" + "\n".join(hits)
 
     def test_no_hardcoded_task_time_limit_in_src(self):
         """AC3: grep -rE 'task_time_limit=[0-9]' src/ must return zero results."""
         hits = self._grep_src(r"task_time_limit=[0-9]")
-        assert not hits, (
-            "Found hardcoded task_time_limit values — move them to config.py:\n"
-            + "\n".join(hits)
-        )
+        assert not hits, "Found hardcoded task_time_limit values — move them to config.py:\n" + "\n".join(hits)
 
     def test_no_hardcoded_timeout_in_adapters(self):
         """AC1: grep -rE 'timeout=[0-9]' src/solstein/adapters/ must return zero results."""
@@ -261,7 +255,4 @@ class TestNoHardcodedMagicNumbers:
             for line in text.splitlines():
                 if compiled.search(line):
                     hits.append(f"{path}:{line.strip()}")
-        assert not hits, (
-            "Found hardcoded timeout values in adapters/ — move them to config.py:\n"
-            + "\n".join(hits)
-        )
+        assert not hits, "Found hardcoded timeout values in adapters/ — move them to config.py:\n" + "\n".join(hits)

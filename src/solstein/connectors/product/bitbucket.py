@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -16,7 +16,7 @@ class BitbucketConnector(BaseConnector):
 
     BASE_URL = "https://api.bitbucket.org/2.0"
 
-    def __init__(self, username: Optional[str] = None, app_password: Optional[str] = None):
+    def __init__(self, username: str | None = None, app_password: str | None = None):
         config = SourceConfig(
             name="bitbucket",
             base_url=self.BASE_URL,

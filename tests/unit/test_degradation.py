@@ -4,11 +4,9 @@ F5: Tests for degraded-mode propagation signals.
 """
 
 import pytest
-from datetime import datetime, timedelta, timezone
 
 from solstein.core.degradation import (
     DegradationContext,
-    DegradationHandler,
     DegradationLevel,
     DegradationSignal,
     DegradationState,

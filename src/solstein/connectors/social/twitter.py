@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -16,7 +16,7 @@ class TwitterConnector(BaseConnector):
 
     BASE_URL = "https://api.twitter.com/2"
 
-    def __init__(self, bearer_token: Optional[str] = None):
+    def __init__(self, bearer_token: str | None = None):
         config = SourceConfig(
             name="twitter",
             base_url=self.BASE_URL,

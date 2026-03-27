@@ -6,7 +6,7 @@ EPIC-022: Extracted from IdentifierLookupService for modularity.
 import asyncio
 import importlib
 import re
-from typing import Any, Optional
+from typing import Any
 
 from loguru import logger
 
@@ -23,12 +23,12 @@ class DuckDuckGoStrategy(LookupStrategy):
         # Try to import DDGS
         try:
             ddgs_module = importlib.import_module("ddgs")
-            self._ddg_client = getattr(ddgs_module, "DDGS")
+            self._ddg_client = ddgs_module.DDGS
             self._ddg_available = True
         except Exception:
             try:
                 ddgs_module = importlib.import_module("duckduckgo_search")
-                self._ddg_client = getattr(ddgs_module, "DDGS")
+                self._ddg_client = ddgs_module.DDGS
                 self._ddg_available = True
             except Exception as exc:
                 logger.warning("DDG search client unavailable", error=str(exc))
@@ -101,7 +101,7 @@ class DuckDuckGoStrategy(LookupStrategy):
 
         return result
 
-    def _lookup_ticker(self, company_name: str) -> Optional[str]:
+    def _lookup_ticker(self, company_name: str) -> str | None:
         """Lookup ticker symbol."""
         text = self._search_text(f"{company_name} ticker symbol")
         if not text:
@@ -120,7 +120,7 @@ class DuckDuckGoStrategy(LookupStrategy):
 
         return None
 
-    def _lookup_company_number(self, company_name: str) -> Optional[str]:
+    def _lookup_company_number(self, company_name: str) -> str | None:
         """Lookup company number."""
         text = self._search_text(f"{company_name} company number Companies House")
         if not text:
@@ -136,7 +136,7 @@ class DuckDuckGoStrategy(LookupStrategy):
 
         return None
 
-    def _lookup_isin(self, company_name: str) -> Optional[str]:
+    def _lookup_isin(self, company_name: str) -> str | None:
         """Lookup ISIN."""
         text = self._search_text(f"{company_name} ISIN")
         if not text:
@@ -148,7 +148,7 @@ class DuckDuckGoStrategy(LookupStrategy):
 
         return None
 
-    def _infer_geography(self, company_name: str, headquarters: Optional[str] = None) -> Optional[str]:
+    def _infer_geography(self, company_name: str, headquarters: str | None = None) -> str | None:
         """Infer geography from company name and headquarters."""
         haystack = f"{company_name} {headquarters or ''}".lower()
 

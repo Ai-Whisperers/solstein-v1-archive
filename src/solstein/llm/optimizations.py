@@ -9,7 +9,6 @@ Features:
 from __future__ import annotations
 
 import hashlib
-import json
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -45,9 +44,7 @@ class LLMBatcher:
         self._pending.append((request, future))
 
         # Check if we should flush
-        if len(self._pending) >= self.max_batch_size:
-            await self._flush()
-        elif time.time() - self._last_flush > self.max_wait_time:
+        if len(self._pending) >= self.max_batch_size or time.time() - self._last_flush > self.max_wait_time:
             await self._flush()
 
         return await future

@@ -32,6 +32,7 @@ from solstein.research.fetch_policy import (
 # Domain classification tests
 # ---------------------------------------------------------------------------
 
+
 class TestClassifyDomainKnown:
     """Test domain classification for known domain classes."""
 
@@ -96,6 +97,7 @@ class TestClassifyDomainEdgeCases:
 # Policy selection tests
 # ---------------------------------------------------------------------------
 
+
 class TestGetPolicy:
     """Test policy retrieval and override mechanism."""
 
@@ -139,6 +141,7 @@ class TestGetPolicy:
 # Fetch sequence tests
 # ---------------------------------------------------------------------------
 
+
 class TestBuildFetchSequence:
     """Test fetch strategy sequence generation."""
 
@@ -177,6 +180,7 @@ class TestBuildFetchSequence:
 # Retry and backoff tests
 # ---------------------------------------------------------------------------
 
+
 class TestRetryBehavior:
     """Test retry caps and backoff computation."""
 
@@ -199,8 +203,7 @@ class TestRetryBehavior:
             policy = get_policy(dc)
             # No policy should allow more than 3 retries
             assert policy.max_retries <= 3, (
-                f"Policy for {dc.value} has max_retries={policy.max_retries}, "
-                f"which exceeds the hard cap of 3"
+                f"Policy for {dc.value} has max_retries={policy.max_retries}, which exceeds the hard cap of 3"
             )
 
     def test_no_infinite_retry_path(self) -> None:
@@ -210,14 +213,13 @@ class TestRetryBehavior:
             sequence = build_fetch_sequence(policy)
             # Total attempts = len(sequence) * (max_retries + 1)
             max_attempts = len(sequence) * (policy.max_retries + 1)
-            assert max_attempts <= 10, (
-                f"Policy for {dc.value} can produce up to {max_attempts} attempts"
-            )
+            assert max_attempts <= 10, f"Policy for {dc.value} can produce up to {max_attempts} attempts"
 
 
 # ---------------------------------------------------------------------------
 # Fetch attempt recording tests
 # ---------------------------------------------------------------------------
+
 
 class TestRecordAttempt:
     """Test structured fetch attempt recording."""
@@ -256,6 +258,7 @@ class TestRecordAttempt:
 # ---------------------------------------------------------------------------
 # FetchResult metadata tests
 # ---------------------------------------------------------------------------
+
 
 class TestFetchResultMetadata:
     """Test FetchResult.to_metadata() produces structured output."""
@@ -317,6 +320,7 @@ class TestFetchResultMetadata:
 # Utility tests
 # ---------------------------------------------------------------------------
 
+
 class TestElapsedMs:
     """Test elapsed time helper."""
 
@@ -331,6 +335,7 @@ class TestElapsedMs:
 # ---------------------------------------------------------------------------
 # Reader URL generation
 # ---------------------------------------------------------------------------
+
 
 class TestReaderUrl:
     """Test reader URL template in policy."""

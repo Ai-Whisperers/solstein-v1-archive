@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from solstein.core.scoring_utils import populate_signal_confidences  # noqa: F401
+from solstein.data.metric_contract import normalize_financial_payload
 from solstein.domain.models import (
     AIMaturity,
     Company,
@@ -22,7 +23,6 @@ from solstein.domain.models import (
     ConfidenceLevel,
     FinancialMetric,
 )
-from solstein.data.metric_contract import normalize_financial_payload
 
 from .company_extractors import (
     build_confidence_scores,

@@ -38,7 +38,7 @@ class NPMConnector(BaseConnector):
             # npm search API
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    f"https://registry.npmjs.org/-/v1/search", params={"text": query, "size": kwargs.get("limit", 10)}
+                    "https://registry.npmjs.org/-/v1/search", params={"text": query, "size": kwargs.get("limit", 10)}
                 ) as response:
                     data = await response.json()
                     packages = data.get("objects", [])

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .financial_models import FinancialIntelligence, FundingRound, GrowthVector
+    from .financial_models import FinancialIntelligence
 
 
 class FinancialGrowthReportGenerator:
@@ -21,7 +21,7 @@ class FinancialGrowthReportGenerator:
     def generate(
         self,
         company_name: str,
-        financial_intelligence: "FinancialIntelligence",
+        financial_intelligence: FinancialIntelligence,
     ) -> str:
         """Generate complete financial growth report.
 
@@ -47,7 +47,7 @@ class FinancialGrowthReportGenerator:
     def generate_and_save(
         self,
         company_name: str,
-        financial_intelligence: "FinancialIntelligence",
+        financial_intelligence: FinancialIntelligence,
         output_path: Path,
     ) -> Path:
         """Generate and save report to file.
@@ -72,7 +72,7 @@ class FinancialGrowthReportGenerator:
 
 ---"""
 
-    def _generate_growth_trajectory(self, fi: "FinancialIntelligence") -> str:
+    def _generate_growth_trajectory(self, fi: FinancialIntelligence) -> str:
         """Generate growth trajectory section."""
         sections = ["## Growth Trajectory"]
 
@@ -124,7 +124,7 @@ class FinancialGrowthReportGenerator:
 
         return "\n".join(sections)
 
-    def _generate_funding_intelligence(self, fi: "FinancialIntelligence") -> str:
+    def _generate_funding_intelligence(self, fi: FinancialIntelligence) -> str:
         """Generate funding intelligence section."""
         sections = ["## Funding Intelligence"]
 
@@ -156,8 +156,7 @@ class FinancialGrowthReportGenerator:
 
             # Check if we have detailed round data or just summary
             has_detailed_rounds = any(
-                r.date is not None or r.lead_investor is not None
-                for r in fi.funding_rounds_enhanced
+                r.date is not None or r.lead_investor is not None for r in fi.funding_rounds_enhanced
             )
 
             if has_detailed_rounds:
@@ -168,7 +167,9 @@ class FinancialGrowthReportGenerator:
                     amount_str = self.currency_format.format(round_data.amount) if round_data.amount else "Undisclosed"
                     date_str = round_data.date.isoformat() if round_data.date else "Unknown"
                     lead_str = round_data.lead_investor or "Unknown"
-                    val_str = self.currency_format.format(round_data.valuation) if round_data.valuation else "Undisclosed"
+                    val_str = (
+                        self.currency_format.format(round_data.valuation) if round_data.valuation else "Undisclosed"
+                    )
 
                     sections.append(f"| {round_data.round_name} | {amount_str} | {date_str} | {lead_str} | {val_str} |")
             else:
@@ -185,7 +186,7 @@ class FinancialGrowthReportGenerator:
 
         return "\n".join(sections)
 
-    def _generate_growth_vectors(self, fi: "FinancialIntelligence") -> str:
+    def _generate_growth_vectors(self, fi: FinancialIntelligence) -> str:
         """Generate growth vectors section."""
         sections = ["## Growth Vectors"]
 
@@ -219,7 +220,7 @@ class FinancialGrowthReportGenerator:
 
         return "\n".join(sections)
 
-    def _generate_projection(self, fi: "FinancialIntelligence") -> str:
+    def _generate_projection(self, fi: FinancialIntelligence) -> str:
         """Generate projection section."""
         sections = ["## 12-Month Projection"]
 
@@ -249,7 +250,7 @@ class FinancialGrowthReportGenerator:
 
         return "\n".join(sections)
 
-    def _generate_health_assessment(self, fi: "FinancialIntelligence") -> str:
+    def _generate_health_assessment(self, fi: FinancialIntelligence) -> str:
         """Generate health assessment section."""
         sections = ["## Financial Health Assessment"]
 
@@ -302,7 +303,7 @@ class BatchFinancialReportGenerator:
 
     def generate_batch(
         self,
-        results: list[tuple[str, "FinancialIntelligence"]],
+        results: list[tuple[str, FinancialIntelligence]],
         output_dir: Path,
     ) -> list[Path]:
         """Generate reports for multiple companies.
@@ -333,7 +334,7 @@ class BatchFinancialReportGenerator:
 
     def generate_summary_table(
         self,
-        results: list[tuple[str, "FinancialIntelligence"]],
+        results: list[tuple[str, FinancialIntelligence]],
     ) -> str:
         """Generate summary table of all analyses.
 
@@ -370,16 +371,15 @@ class BatchFinancialReportGenerator:
 
         return "\n".join(lines)
 
-
-
     async def generate_narratives(
         self,
         company_name: str,
-        financial_intelligence: "FinancialIntelligence",
+        financial_intelligence: FinancialIntelligence,
         industry: str = "energy software",
         region: str = "Europe",
     ) -> dict[str, str]:
         from .narrative_synthesis import NarrativeContext, NarrativeSynthesisEngine
+
         context = NarrativeContext(
             company_name=company_name,
             industry=industry,
@@ -392,7 +392,7 @@ class BatchFinancialReportGenerator:
     def generate_with_narratives(
         self,
         company_name: str,
-        financial_intelligence: "FinancialIntelligence",
+        financial_intelligence: FinancialIntelligence,
         narratives: dict[str, str],
     ) -> str:
         sections = [

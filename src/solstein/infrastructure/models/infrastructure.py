@@ -9,15 +9,11 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Index, Integer, JSON, String, Text, Uuid
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Index, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
-
-if TYPE_CHECKING:
-    pass
 
 
 class OutboxRecord(Base):
@@ -74,9 +70,9 @@ class TenantRecord(Base):
     )
 
     def to_dict(self) -> dict[str, object]:
-        from typing import Optional, cast
+        from typing import cast
 
-        created_at = cast(Optional[datetime], cast(object, self.created_at))
+        created_at = cast(datetime | None, cast(object, self.created_at))
         created_at_value = created_at.isoformat() if created_at is not None else None
         return {
             "id": str(self.id),
@@ -107,14 +103,10 @@ class ApiKeyRecord(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     key_prefix: Mapped[str] = mapped_column(String(16), nullable=False)
     key_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
-    scope: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="read_only"
-    )  # read_only|read_write|admin
+    scope: Mapped[str] = mapped_column(String(50), nullable=False, default="read_only")  # read_only|read_write|admin
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 

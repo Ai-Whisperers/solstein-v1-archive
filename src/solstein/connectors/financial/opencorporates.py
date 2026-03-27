@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -16,7 +16,7 @@ class OpenCorporatesConnector(BaseConnector):
 
     BASE_URL = "https://api.opencorporates.com/v0.4"
 
-    def __init__(self, api_token: Optional[str] = None):
+    def __init__(self, api_token: str | None = None):
         config = SourceConfig(
             name="opencorporates",
             base_url=self.BASE_URL,

@@ -5,10 +5,8 @@ Provides configurable rate limiting per API tenant.
 
 import time
 from dataclasses import dataclass
-from typing import Optional
 
 from fastapi import HTTPException, Request
-from fastapi.security import HTTPAuthorizationCredentials
 from loguru import logger
 
 

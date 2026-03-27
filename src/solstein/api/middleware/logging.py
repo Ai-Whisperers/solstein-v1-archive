@@ -14,10 +14,10 @@ import uuid
 from collections.abc import Callable
 
 from fastapi import Request, Response
-from starlette.middleware.base import BaseHTTPMiddleware
 from loguru import logger
+from starlette.middleware.base import BaseHTTPMiddleware
 
-from ...utils.context import set_context, reset_context, generate_request_id, generate_correlation_id
+from ...utils.context import generate_correlation_id, generate_request_id, reset_context, set_context
 
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
@@ -87,7 +87,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Log request/response details."""
-        request_id = getattr(request.state, "request_id", "unknown")
+        getattr(request.state, "request_id", "unknown")
         start_time = time.time()
 
         # Get client IP
@@ -124,7 +124,6 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         duration = time.time() - start_time
 
         # Log response
-        log_level = "info" if response.status_code < 400 else "warning"
 
         if response.status_code < 400:
             logger.info(

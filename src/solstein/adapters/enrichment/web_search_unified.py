@@ -20,8 +20,9 @@ from solstein.data.web_search_client import (
     search_company_news,
 )
 from solstein.domain.models import DataSourceType, RawDataSource
-from solstein.infrastructure.database import DatabaseManager, db_manager as default_db_manager
 from solstein.infrastructure.conflict_resolution import SourceAuthority
+from solstein.infrastructure.database import DatabaseManager
+from solstein.infrastructure.database import db_manager as default_db_manager
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
 
@@ -82,7 +83,9 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
                 title = result.get("title", "")
                 snippet = result.get("snippet", "")
                 name = title.split(" - ")[0].split(" | ")[0][:100] or "unknown-company"
-                company_id = "-".join(part for part in "".join(ch if ch.isalnum() else " " for ch in name.lower()).split())
+                company_id = "-".join(
+                    part for part in "".join(ch if ch.isalnum() else " " for ch in name.lower()).split()
+                )
                 source_url = result.get("url", "")
 
                 # Create candidate

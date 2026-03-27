@@ -291,15 +291,12 @@ class TestCreateApiKeyService:
     """Test create_api_key service function."""
 
     def test_create_returns_key_and_record(self) -> None:
-        mock_db = MagicMock()
+        MagicMock()
 
-        result = None
         with patch(
             "solstein.tenant.api_key_service.ApiKeyRecord",
             create=True,
         ):
-            from solstein.tenant.api_key_service import create_api_key
-
             # Patch ApiKeyRecord import inside the function
             mock_record_cls = MagicMock()
             mock_instance = MagicMock()

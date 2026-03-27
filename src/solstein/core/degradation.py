@@ -6,10 +6,11 @@ Provides mechanisms for services to signal degradation and for clients to handle
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from enum import Enum, auto
-from typing import Any, Callable
+from typing import Any
 
 from loguru import logger
 

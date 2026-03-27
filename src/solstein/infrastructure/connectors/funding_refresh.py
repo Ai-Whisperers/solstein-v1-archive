@@ -4,7 +4,6 @@ Uses Crunchbase API or news-based detection to fetch funding data.
 Implements incremental refresh with funding round detection.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any
 
@@ -93,7 +92,7 @@ class FundingRefreshConnector(BaseRefreshConnector):
                 if hasattr(funding, "latest_round") and funding.latest_round:
                     lr = funding.latest_round
                     # Handle both dict and dataclass/object
-                    lr_get = lr.get if isinstance(lr, dict) else lambda k, d=None: getattr(lr, k, d)
+                    lr_get = lr.get if isinstance(lr, dict) else lambda k, d=None, _lr=lr: getattr(_lr, k, d)  # noqa: B023
                     facts.append(
                         {
                             "company_id": company_name,

@@ -97,9 +97,7 @@ async def test_news_signal_refresh_awaits_detector_methods(monkeypatch: pytest.M
 @pytest.mark.asyncio
 async def test_web_researcher_search_web_offloads_duckduckgo(monkeypatch: pytest.MonkeyPatch) -> None:
     researcher = WebResearcher()
-    mock_search = MagicMock(
-        return_value=[{"title": "Acme", "href": "https://example.com", "body": "Acme overview"}]
-    )
+    mock_search = MagicMock(return_value=[{"title": "Acme", "href": "https://example.com", "body": "Acme overview"}])
     calls: list[tuple[object, tuple[object, ...], dict[str, object]]] = []
 
     async def fake_to_thread(func, *args, **kwargs):

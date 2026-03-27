@@ -124,18 +124,26 @@ ignore = [
     "B008",
     "B007",
     "B017",
+    "B028",   # No explicit stacklevel — pre-existing, low risk
+    "B905",   # zip() without strict= — pre-existing, needs audit
     "C401",
     "C408",
     "C414",
     "E402",
     "E501",
     "E701",
+    "F403",   # Wildcard imports in connector __init__.py — intentional re-export pattern
+    "F405",   # Undefined from wildcard import — consequence of F403 pattern
+    "F821",   # Undefined name from TYPE_CHECKING blocks — needs Python 3.12 migration
     "N802",
     "N803",
     "N806",
     "SIM102",
     "SIM103",
+    "SIM105", # contextlib.suppress — pre-existing, style preference
     "SIM108",
+    "SIM110", # any() replacement — pre-existing, readability preference
+    "SIM117", # Nested with statements — pre-existing, needs refactor epic
     "SIM118",
     "TC001",
     "TC002",
@@ -145,6 +153,7 @@ ignore = [
     "UP036",
     "UP042",
     "W291",
+    "W293",   # Whitespace in blank lines — auto-fixable but noisy
 ]
 
 [tool.mypy]

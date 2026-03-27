@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from solstein.domain.models import ConfidenceLevel
 
 from .company import UnifiedCompany
-from .error_tracking import format_enrichment_error, build_error_context
+from .error_tracking import build_error_context, format_enrichment_error
 
 if TYPE_CHECKING:
     from typing import Any
@@ -78,7 +78,6 @@ def _validate_and_fill_employees(
 
     Returns True if field was filled, False otherwise.
     """
-    from .enrichment import is_valid_number
 
     if filing_data.get("employees") is None:
         return False

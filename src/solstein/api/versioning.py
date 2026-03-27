@@ -6,10 +6,8 @@ Supports /api/v1/, /api/v2/ URL patterns with deprecation headers.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Callable
 
-from fastapi import FastAPI, Request, Response
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
 from loguru import logger
 
 

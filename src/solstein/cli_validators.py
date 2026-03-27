@@ -54,9 +54,7 @@ def validate_input_file(path: Path) -> None:
     try:
         data = json.loads(content)
     except json.JSONDecodeError as exc:
-        raise click.UsageError(
-            f"Invalid JSON in '{path}': {exc.msg} (line {exc.lineno}, col {exc.colno})"
-        ) from exc
+        raise click.UsageError(f"Invalid JSON in '{path}': {exc.msg} (line {exc.lineno}, col {exc.colno})") from exc
 
     _validate_company_list_structure(data, path)
 
@@ -77,8 +75,7 @@ def _validate_company_list_structure(data: object, source: Path) -> None:
         )
 
     raise click.UsageError(
-        f"Unsupported JSON structure in '{source}'. "
-        "Expected a JSON array or an object containing a list of companies."
+        f"Unsupported JSON structure in '{source}'. Expected a JSON array or an object containing a list of companies."
     )
 
 
@@ -141,9 +138,7 @@ def validate_output_dir(path: Path) -> Path:
     try:
         path.mkdir(parents=True, exist_ok=True)
     except OSError as exc:
-        raise click.UsageError(
-            f"Cannot create output directory '{path}': {exc}"
-        ) from exc
+        raise click.UsageError(f"Cannot create output directory '{path}': {exc}") from exc
 
     # Verify write permission with a probe file
     probe = path / ".solstein_write_probe"
@@ -151,8 +146,6 @@ def validate_output_dir(path: Path) -> Path:
         probe.touch()
         probe.unlink()
     except OSError as exc:
-        raise click.UsageError(
-            f"Output directory '{path}' is not writable: {exc}"
-        ) from exc
+        raise click.UsageError(f"Output directory '{path}' is not writable: {exc}") from exc
 
     return path

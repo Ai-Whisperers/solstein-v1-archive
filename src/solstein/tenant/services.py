@@ -9,22 +9,21 @@ Usage:
     companies = await service.get_companies()  # Only returns tenant's companies
 """
 
-from typing import Any, Optional, List
-
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from typing import Any
 
 from loguru import logger
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from solstein.tenant.context import TenantAwareRepository, require_tenant, get_current_tenant
-from solstein.tenant.models import TenantConfig, TenantLimits, TenantFeatures
 from solstein.infrastructure.database_models import CompanyRecord
+from solstein.tenant.context import require_tenant
+from solstein.tenant.models import TenantConfig, TenantFeatures, TenantLimits
 
 
 class TenantCompanyService:
     """Company service with automatic tenant filtering."""
 
-    def __init__(self, session: AsyncSession, tenant_id: Optional[str] = None):
+    def __init__(self, session: AsyncSession, tenant_id: str | None = None):
         """Initialize service.
 
         Args:
@@ -34,7 +33,7 @@ class TenantCompanyService:
         self.session = session
         self.tenant_id = tenant_id or require_tenant()
 
-    async def get_companies(self, limit: int = 100, offset: int = 0) -> List[CompanyRecord]:
+    async def get_companies(self, limit: int = 100, offset: int = 0) -> list[CompanyRecord]:
         """Get companies for current tenant.
 
         Args:
@@ -48,7 +47,7 @@ class TenantCompanyService:
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
-    async def get_company(self, company_id: str) -> Optional[CompanyRecord]:
+    async def get_company(self, company_id: str) -> CompanyRecord | None:
         """Get single company if it belongs to tenant.
 
         Args:
@@ -119,7 +118,7 @@ class TenantConfigService:
         """
         # In production, fetch from database
         # For now, return default config
-        from solstein.tenant.models import get_default_config, TenantPlan
+        from solstein.tenant.models import TenantPlan, get_default_config
 
         defaults = get_default_config(TenantPlan.STARTER)
         return TenantConfig(
@@ -170,7 +169,7 @@ class TenantConfigService:
 class TenantEnrichmentService:
     """Enrichment service with tenant quotas."""
 
-    def __init__(self, session: AsyncSession, tenant_id: Optional[str] = None):
+    def __init__(self, session: AsyncSession, tenant_id: str | None = None):
         """Initialize service.
 
         Args:
@@ -223,7 +222,7 @@ class TenantEnrichmentService:
 class TenantExportService:
     """Export service with tenant isolation."""
 
-    def __init__(self, session: AsyncSession, tenant_id: Optional[str] = None):
+    def __init__(self, session: AsyncSession, tenant_id: str | None = None):
         """Initialize service.
 
         Args:

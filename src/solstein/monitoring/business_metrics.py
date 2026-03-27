@@ -18,7 +18,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from solstein.infrastructure.database_models import (
     CompanyRecord,
     ResearchRunRecord,
-    ScoringRecord,
 )
 
 

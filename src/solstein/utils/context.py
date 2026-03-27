@@ -6,8 +6,8 @@ request_id, correlation_id, tenant_id, and user_id across async boundaries.
 
 import asyncio
 import contextvars
-from typing import Any
 from functools import wraps
+from typing import Any
 from uuid import uuid4
 
 # Context variables for request-scoped data
@@ -104,6 +104,7 @@ def with_context(operation: str | None = None):
 
     def decorator(func):
         if asyncio.iscoroutinefunction(func):
+
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
                 tokens = []
@@ -114,8 +115,10 @@ def with_context(operation: str | None = None):
                 finally:
                     if tokens:
                         reset_context(tokens)
+
             return async_wrapper
         else:
+
             @wraps(func)
             def wrapper(*args, **kwargs):
                 tokens = []
@@ -126,6 +129,7 @@ def with_context(operation: str | None = None):
                 finally:
                     if tokens:
                         reset_context(tokens)
+
             return wrapper
 
     return decorator

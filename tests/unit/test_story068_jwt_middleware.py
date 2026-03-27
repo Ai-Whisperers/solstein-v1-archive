@@ -35,10 +35,7 @@ def _extract_public_paths_from_ast(tree: ast.AST) -> set[str] | None:
                     continue
                 set_node = item.value.args[0]
                 if isinstance(set_node, ast.Set):
-                    return {
-                        elt.value for elt in set_node.elts
-                        if isinstance(elt, ast.Constant)
-                    }
+                    return {elt.value for elt in set_node.elts if isinstance(elt, ast.Constant)}
     return None
 
 
@@ -69,9 +66,15 @@ class TestNoAuthBypass:
         assert paths is not None, "Could not find PUBLIC_PATHS in SupabaseJWTMiddleware"
 
         allowed = {
-            "/health", "/healthz", "/ready",
-            "/docs", "/redoc", "/openapi.json",
-            "/auth/login", "/auth/signup", "/auth/refresh",
+            "/health",
+            "/healthz",
+            "/ready",
+            "/docs",
+            "/redoc",
+            "/openapi.json",
+            "/auth/login",
+            "/auth/signup",
+            "/auth/refresh",
         }
         unexpected = paths - allowed
         assert not unexpected, f"PUBLIC_PATHS contains unexpected routes: {unexpected}"
@@ -119,23 +122,17 @@ class TestMiddlewareOrdering:
     def test_middleware_class_exists(self):
         """SupabaseJWTMiddleware class must exist."""
         content = SECURITY_PATH.read_text()
-        assert "class SupabaseJWTMiddleware" in content, (
-            "SupabaseJWTMiddleware class not found"
-        )
+        assert "class SupabaseJWTMiddleware" in content, "SupabaseJWTMiddleware class not found"
 
     def test_old_authentication_middleware_removed(self):
         """Old AuthenticationMiddleware with PROTECTED_PREFIXES must be gone."""
         content = SECURITY_PATH.read_text()
-        assert "PROTECTED_PREFIXES" not in content, (
-            "Old PROTECTED_PREFIXES pattern still in security.py"
-        )
+        assert "PROTECTED_PREFIXES" not in content, "Old PROTECTED_PREFIXES pattern still in security.py"
 
     def test_setup_registers_supabase_middleware(self):
         """setup_security_middleware must register SupabaseJWTMiddleware."""
         content = SECURITY_PATH.read_text()
-        assert "SupabaseJWTMiddleware" in content, (
-            "setup_security_middleware does not register SupabaseJWTMiddleware"
-        )
+        assert "SupabaseJWTMiddleware" in content, "setup_security_middleware does not register SupabaseJWTMiddleware"
 
     def test_no_base_http_middleware(self):
         """Should use raw ASGI interface, not BaseHTTPMiddleware (perf)."""
@@ -151,9 +148,7 @@ class TestSpecificExceptions:
     def test_uses_auth_api_error(self):
         """Must catch AuthApiError specifically."""
         content = SECURITY_PATH.read_text()
-        assert "AuthApiError" in content, (
-            "security.py does not catch AuthApiError specifically"
-        )
+        assert "AuthApiError" in content, "security.py does not catch AuthApiError specifically"
 
     def test_no_bare_except(self):
         """No bare 'except:' or 'except Exception:' in middleware."""

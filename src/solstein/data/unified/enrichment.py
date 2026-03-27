@@ -6,19 +6,19 @@ Handles enrichment from SEC EDGAR, Companies House, and News Signals.
 
 from __future__ import annotations
 
-import time
 import asyncio
-from datetime import datetime, timezone
-from typing import Mapping, Protocol
+import time
+from collections.abc import Mapping
+from datetime import datetime
+from typing import Protocol
 
 from loguru import logger
 
-from solstein.domain.models import ConfidenceLevel
 from solstein.data.enrichment_orchestrator import EnrichmentConfig, EnrichmentOrchestrator, EnrichmentSource
 
 from .batch_outcomes import BatchEnrichmentOutcome, BatchEnrichmentStatus
 from .company import UnifiedCompany
-from .error_tracking import format_enrichment_error, build_error_context
+from .error_tracking import build_error_context, format_enrichment_error
 from .sec_edgar_helpers import (
     _handle_sec_edgar_error,
     _store_additional_metrics,
@@ -134,13 +134,16 @@ def fill_identifiers_from_lookup(loader, company: UnifiedCompany) -> UnifiedComp
 
         if loop and loop.is_running():
             import concurrent.futures
+
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 response = pool.submit(
                     asyncio.run,
                     service.resolve_identifiers_enveloped(company.name, headquarters=company.headquarters),
                 ).result()
         else:
-            response = asyncio.run(service.resolve_identifiers_enveloped(company.name, headquarters=company.headquarters))
+            response = asyncio.run(
+                service.resolve_identifiers_enveloped(company.name, headquarters=company.headquarters)
+            )
         company.metric_justifications["identifier_lookup_status"] = str(response.status)
         company.metric_justifications["identifier_lookup_attempts"] = str(response.metadata.get("attempts"))
 
@@ -229,9 +232,7 @@ def enrich_batch(
                 if cached_result:
                     cached_company = UnifiedCompany.model_validate(cached_result)
                     logger.debug(f"Cache hit for {company.name}")
-                    enriched_companies.append(
-                        _build_batch_outcome(cached_company, status="success", from_cache=True)
-                    )
+                    enriched_companies.append(_build_batch_outcome(cached_company, status="success", from_cache=True))
                     loader.metrics.record_enrichment(0, True)  # 0ms for cache
                     continue
 
@@ -446,6 +447,7 @@ def attach_news_signals(loader, company: UnifiedCompany) -> UnifiedCompany:
 
         if loop and loop.is_running():
             import concurrent.futures
+
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 response = pool.submit(
                     asyncio.run,

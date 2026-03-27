@@ -5,7 +5,7 @@ Extracted from unified_loader.py as part of EPIC-021 file splitting.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 from solstein.domain.models import Company
 

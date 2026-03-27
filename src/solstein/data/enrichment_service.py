@@ -15,15 +15,15 @@ from pathlib import Path
 
 from .enrichment_config import UnifiedCompanyLoaderConfig, get_config
 from .enrichment_orchestrator import EnrichmentConfig, EnrichmentOrchestrator, EnrichmentSource
-from .gap_analyzer import analyze_company_gaps
-from .enrichment_validators import (
-    validate_revenue,
-    validate_growth_rate,
-    validate_employee_count,
-    validate_profit_margin,
-)
-from .source_policy import SourceTier
 from .enrichment_types import EnrichableCompany
+from .enrichment_validators import (
+    validate_employee_count,
+    validate_growth_rate,
+    validate_profit_margin,
+    validate_revenue,
+)
+from .gap_analyzer import analyze_company_gaps
+from .source_policy import SourceTier
 
 logger = logging.getLogger(__name__)
 
@@ -262,9 +262,7 @@ class EnrichmentService:
 
         # Execute free source enrichment
         free_executor = FreeEnrichmentExecutor(self, self.orchestrator)
-        enriched, sources_used, errors, fields = free_executor.execute(
-            company, enriched, fields, sources_free
-        )
+        enriched, sources_used, errors, fields = free_executor.execute(company, enriched, fields, sources_free)
 
         # Execute paid escalation if needed
         if fields and self.config.allow_paid_escalation:
@@ -279,7 +277,6 @@ class EnrichmentService:
             skip_handler.handle(company, fields)
 
         return enriched, sources_used, errors
-
 
     def analyze_unresolved_gaps(
         self,

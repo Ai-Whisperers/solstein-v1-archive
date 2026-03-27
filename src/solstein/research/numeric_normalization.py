@@ -22,10 +22,10 @@ from typing import Any
 class NumericUnit(str, Enum):
     """Canonical unit scale for numeric values."""
 
-    UNITS = "units"          # raw count (employees, years)
+    UNITS = "units"  # raw count (employees, years)
     THOUSANDS = "thousands"  # K
-    MILLIONS = "millions"    # M  (canonical for monetary)
-    BILLIONS = "billions"    # B
+    MILLIONS = "millions"  # M  (canonical for monetary)
+    BILLIONS = "billions"  # B
     TRILLIONS = "trillions"  # T
     UNKNOWN = "unknown"
 
@@ -51,19 +51,32 @@ _SCALE_TO_MILLIONS: dict[NumericUnit, float] = {
 
 # Currency symbol/prefix mapping
 _CURRENCY_SYMBOLS: dict[str, Currency] = {
-    "$": Currency.USD, "usd": Currency.USD, "us$": Currency.USD,
-    "€": Currency.EUR, "eur": Currency.EUR,
-    "£": Currency.GBP, "gbp": Currency.GBP,
-    "chf": Currency.CHF, "sfr": Currency.CHF,
+    "$": Currency.USD,
+    "usd": Currency.USD,
+    "us$": Currency.USD,
+    "€": Currency.EUR,
+    "eur": Currency.EUR,
+    "£": Currency.GBP,
+    "gbp": Currency.GBP,
+    "chf": Currency.CHF,
+    "sfr": Currency.CHF,
 }
 
 # Scale keyword mapping
 _SCALE_KEYWORDS: dict[str, NumericUnit] = {
-    "k": NumericUnit.THOUSANDS, "thousand": NumericUnit.THOUSANDS,
-    "m": NumericUnit.MILLIONS, "million": NumericUnit.MILLIONS, "mn": NumericUnit.MILLIONS,
-    "mm": NumericUnit.MILLIONS, "mil": NumericUnit.MILLIONS,
-    "b": NumericUnit.BILLIONS, "billion": NumericUnit.BILLIONS, "bn": NumericUnit.BILLIONS,
-    "t": NumericUnit.TRILLIONS, "trillion": NumericUnit.TRILLIONS, "tn": NumericUnit.TRILLIONS,
+    "k": NumericUnit.THOUSANDS,
+    "thousand": NumericUnit.THOUSANDS,
+    "m": NumericUnit.MILLIONS,
+    "million": NumericUnit.MILLIONS,
+    "mn": NumericUnit.MILLIONS,
+    "mm": NumericUnit.MILLIONS,
+    "mil": NumericUnit.MILLIONS,
+    "b": NumericUnit.BILLIONS,
+    "billion": NumericUnit.BILLIONS,
+    "bn": NumericUnit.BILLIONS,
+    "t": NumericUnit.TRILLIONS,
+    "trillion": NumericUnit.TRILLIONS,
+    "tn": NumericUnit.TRILLIONS,
 }
 
 # Regex to parse numeric strings like "$1.5B", "€200M", "1,500,000", "2.3 million"
@@ -165,25 +178,37 @@ def normalize_monetary(raw: Any, field_name: str = "") -> NormalizedValue:
     """
     if raw is None:
         return NormalizedValue(
-            raw_input="", value=None, unit=NumericUnit.UNKNOWN,
-            currency=Currency.UNKNOWN, confidence=0.0,
-            is_ambiguous=False, ambiguity_reason="null input",
+            raw_input="",
+            value=None,
+            unit=NumericUnit.UNKNOWN,
+            currency=Currency.UNKNOWN,
+            confidence=0.0,
+            is_ambiguous=False,
+            ambiguity_reason="null input",
         )
 
     raw_str = str(raw).strip()
     if not raw_str:
         return NormalizedValue(
-            raw_input=raw_str, value=None, unit=NumericUnit.UNKNOWN,
-            currency=Currency.UNKNOWN, confidence=0.0,
-            is_ambiguous=False, ambiguity_reason="empty input",
+            raw_input=raw_str,
+            value=None,
+            unit=NumericUnit.UNKNOWN,
+            currency=Currency.UNKNOWN,
+            confidence=0.0,
+            is_ambiguous=False,
+            ambiguity_reason="empty input",
         )
 
     number = extract_number(raw_str)
     if number is None:
         return NormalizedValue(
-            raw_input=raw_str, value=None, unit=NumericUnit.UNKNOWN,
-            currency=Currency.UNKNOWN, confidence=0.0,
-            is_ambiguous=True, ambiguity_reason="no numeric value found",
+            raw_input=raw_str,
+            value=None,
+            unit=NumericUnit.UNKNOWN,
+            currency=Currency.UNKNOWN,
+            confidence=0.0,
+            is_ambiguous=True,
+            ambiguity_reason="no numeric value found",
         )
 
     currency, currency_conf = detect_currency(raw_str)
@@ -234,18 +259,26 @@ def normalize_count(raw: Any, field_name: str = "") -> NormalizedValue:
     """Normalize a count value (employees, etc.) to absolute units."""
     if raw is None:
         return NormalizedValue(
-            raw_input="", value=None, unit=NumericUnit.UNITS,
-            currency=Currency.UNKNOWN, confidence=0.0,
-            is_ambiguous=False, ambiguity_reason="null input",
+            raw_input="",
+            value=None,
+            unit=NumericUnit.UNITS,
+            currency=Currency.UNKNOWN,
+            confidence=0.0,
+            is_ambiguous=False,
+            ambiguity_reason="null input",
         )
 
     raw_str = str(raw).strip()
     number = extract_number(raw_str)
     if number is None:
         return NormalizedValue(
-            raw_input=raw_str, value=None, unit=NumericUnit.UNITS,
-            currency=Currency.UNKNOWN, confidence=0.0,
-            is_ambiguous=True, ambiguity_reason="no numeric value found",
+            raw_input=raw_str,
+            value=None,
+            unit=NumericUnit.UNITS,
+            currency=Currency.UNKNOWN,
+            confidence=0.0,
+            is_ambiguous=True,
+            ambiguity_reason="no numeric value found",
         )
 
     scale, scale_conf = detect_scale(raw_str)
@@ -277,24 +310,35 @@ def normalize_year(raw: Any) -> NormalizedValue:
     """Normalize a year value to a 4-digit integer."""
     if raw is None:
         return NormalizedValue(
-            raw_input="", value=None, unit=NumericUnit.UNITS,
-            currency=Currency.UNKNOWN, confidence=0.0,
-            is_ambiguous=False, ambiguity_reason="null input",
+            raw_input="",
+            value=None,
+            unit=NumericUnit.UNITS,
+            currency=Currency.UNKNOWN,
+            confidence=0.0,
+            is_ambiguous=False,
+            ambiguity_reason="null input",
         )
 
     raw_str = str(raw).strip()
     match = re.search(r"\b(1[89]\d{2}|20[0-2]\d)\b", raw_str)
     if match:
         return NormalizedValue(
-            raw_input=raw_str, value=int(match.group(1)),
-            unit=NumericUnit.UNITS, currency=Currency.UNKNOWN,
-            confidence=0.95, is_ambiguous=False,
+            raw_input=raw_str,
+            value=int(match.group(1)),
+            unit=NumericUnit.UNITS,
+            currency=Currency.UNKNOWN,
+            confidence=0.95,
+            is_ambiguous=False,
         )
 
     return NormalizedValue(
-        raw_input=raw_str, value=None, unit=NumericUnit.UNITS,
-        currency=Currency.UNKNOWN, confidence=0.0,
-        is_ambiguous=True, ambiguity_reason="no valid year found",
+        raw_input=raw_str,
+        value=None,
+        unit=NumericUnit.UNITS,
+        currency=Currency.UNKNOWN,
+        confidence=0.0,
+        is_ambiguous=True,
+        ambiguity_reason="no valid year found",
     )
 
 
@@ -308,8 +352,8 @@ COUNT_FIELDS = frozenset({"employees"})
 YEAR_FIELDS = frozenset({"founded_year"})
 
 # Contradiction thresholds: ratio of max/min between two sources
-_MINOR_THRESHOLD = 1.5   # >1.5x difference
-_MAJOR_THRESHOLD = 3.0   # >3x difference
+_MINOR_THRESHOLD = 1.5  # >1.5x difference
+_MAJOR_THRESHOLD = 3.0  # >3x difference
 _CRITICAL_THRESHOLD = 10.0  # >10x difference
 
 
@@ -356,13 +400,17 @@ def detect_contradictions(
                 continue
             ratio = max(val_a, val_b) / min(val_a, val_b)
             if ratio >= _MINOR_THRESHOLD:
-                flags.append(ContradictionFlag(
-                    field_name=field_name,
-                    source_a=src_a, value_a=val_a,
-                    source_b=src_b, value_b=val_b,
-                    ratio=round(ratio, 2),
-                    severity=_classify_contradiction_severity(ratio),
-                ))
+                flags.append(
+                    ContradictionFlag(
+                        field_name=field_name,
+                        source_a=src_a,
+                        value_a=val_a,
+                        source_b=src_b,
+                        value_b=val_b,
+                        ratio=round(ratio, 2),
+                        severity=_classify_contradiction_severity(ratio),
+                    )
+                )
 
     return flags
 
@@ -409,11 +457,22 @@ def contradiction_to_dict(flag: ContradictionFlag) -> dict[str, Any]:
 
 
 __all__ = [
-    "NumericUnit", "Currency", "NormalizedValue",
-    "ContradictionFlag", "SynthesisContradictions",
-    "normalize_monetary", "normalize_count", "normalize_year",
-    "detect_currency", "detect_scale", "extract_number",
-    "detect_contradictions", "build_contradiction_summary",
-    "normalized_value_to_dict", "contradiction_to_dict",
-    "MONETARY_FIELDS", "COUNT_FIELDS", "YEAR_FIELDS",
+    "NumericUnit",
+    "Currency",
+    "NormalizedValue",
+    "ContradictionFlag",
+    "SynthesisContradictions",
+    "normalize_monetary",
+    "normalize_count",
+    "normalize_year",
+    "detect_currency",
+    "detect_scale",
+    "extract_number",
+    "detect_contradictions",
+    "build_contradiction_summary",
+    "normalized_value_to_dict",
+    "contradiction_to_dict",
+    "MONETARY_FIELDS",
+    "COUNT_FIELDS",
+    "YEAR_FIELDS",
 ]

@@ -8,10 +8,10 @@ FREE sources:
 - OpenAlex (free API)
 """
 
-import asyncio
+import asyncio  # noqa: F401
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any, Optional  # noqa: F401
 
 import aiohttp
 
@@ -25,7 +25,7 @@ class SemanticScholarConnector(BaseConnector):
 
     BASE_URL = "https://api.semanticscholar.org/graph/v1"
 
-    def __init__(self, config: Optional[SourceConfig] = None):
+    def __init__(self, config: SourceConfig | None = None):
         if config is None:
             config = SourceConfig(
                 name="semantic_scholar",
@@ -42,7 +42,7 @@ class SemanticScholarConnector(BaseConnector):
                 async with session.get(
                     f"{self.config.base_url}/graph/v1/paper/search",
                     params={"query": "test", "limit": 1, "fields": "paperId"},
-                    timeout=aiohttp.ClientTimeout(total=10)
+                    timeout=aiohttp.ClientTimeout(total=10),
                 ) as response:
                     # SS returns 200 even for empty results
                     return response.status in [200, 404]
@@ -179,7 +179,7 @@ class ArXivConnector(BaseConnector):
 
     BASE_URL = "http://export.arxiv.org/api/query"
 
-    def __init__(self, config: Optional[SourceConfig] = None):
+    def __init__(self, config: SourceConfig | None = None):
         if config is None:
             config = SourceConfig(
                 name="arxiv",
@@ -310,7 +310,6 @@ async def create_academic_connector(source_type: str, **kwargs) -> BaseConnector
 
     connector = connector_class(**kwargs)
     return connector
-
 
 
 __all__ = [

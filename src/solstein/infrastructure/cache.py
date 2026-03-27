@@ -4,10 +4,11 @@ Provides Redis-based caching with fallback to in-memory cache when Redis is unav
 """
 
 import json
-from loguru import logger
 from collections.abc import Callable
 from functools import wraps
 from typing import Any
+
+from loguru import logger
 
 try:
     import redis
@@ -18,7 +19,6 @@ except ImportError:
     REDIS_AVAILABLE = False
     redis = None  # type: ignore
     AsyncRedis = None  # type: ignore
-
 
 
 class CacheManager:

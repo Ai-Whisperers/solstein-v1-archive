@@ -149,8 +149,6 @@ class BatchProtocolReportGenerator:
 
         return paths
 
-
-
     async def generate_narratives(
         self,
         protocol_map: ProtocolMap,
@@ -158,6 +156,7 @@ class BatchProtocolReportGenerator:
         region: str = "Europe",
     ) -> dict[str, str]:
         from .narrative_synthesis import NarrativeContext, NarrativeSynthesisEngine
+
         context = NarrativeContext(
             company_name=protocol_map.company_name,
             industry=industry,
@@ -167,9 +166,7 @@ class BatchProtocolReportGenerator:
         engine = NarrativeSynthesisEngine()
         return await engine.generate_protocol_narrative(protocol_map, context)
 
-    def generate_with_narratives(
-        self, protocol_map: ProtocolMap, narratives: dict[str, str]
-    ) -> str:
+    def generate_with_narratives(self, protocol_map: ProtocolMap, narratives: dict[str, str]) -> str:
         lines = [
             f"# Market Protocol Mapping - {protocol_map.company_name}",
             "",

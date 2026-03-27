@@ -22,7 +22,6 @@ def add_title_banner(ws: Any, styles: ExcelStyles, title: str, subtitle: str = "
         title: Main title
         subtitle: Optional subtitle
     """
-    from openpyxl.utils import get_column_letter
 
     # Merge cells for title
     ws.merge_cells(

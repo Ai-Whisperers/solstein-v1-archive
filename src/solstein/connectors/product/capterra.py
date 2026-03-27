@@ -1,7 +1,6 @@
 """Capterra connector for software reviews."""
 
 import logging
-from datetime import datetime
 from typing import Any
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig

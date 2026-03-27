@@ -9,7 +9,7 @@ EPIC-025 Story 7: Implements advanced query optimization patterns including:
 
 from typing import Any
 
-from sqlalchemy import Column, exists, func, select, text
+from sqlalchemy import Column, exists, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Query
 

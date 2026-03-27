@@ -16,6 +16,9 @@ from .numbers import (
     parse_number,
 )
 
+# Records
+from .records import DataNormalizer
+
 # Strings and collections
 from .strings import (
     clean_company_name,
@@ -28,9 +31,6 @@ from .strings import (
     normalize_string,
     truncate_for_log,
 )
-
-# Records
-from .records import DataNormalizer
 
 __all__ = [
     # Errors

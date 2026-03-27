@@ -93,8 +93,7 @@ def _load_companies_for_report(input_path: Path | None = None) -> list[Company]:
 
     if not default_path.exists():
         raise click.UsageError(
-            f"Default data file not found: {default_path}. "
-            "Use --input to specify a JSON file explicitly."
+            f"Default data file not found: {default_path}. Use --input to specify a JSON file explicitly."
         )
 
     raw_data = json.loads(default_path.read_text())
@@ -470,7 +469,7 @@ try:
     import warnings
 
     research_module = importlib.import_module("solstein.cli_research")
-    register_commands = getattr(research_module, "register_commands")
+    register_commands = research_module.register_commands
     register_commands(cli)
 except ImportError as e:
     import warnings
@@ -483,7 +482,7 @@ try:
     import warnings
 
     ai_research_module = importlib.import_module("solstein.cli_ai_research")
-    register_ai_research_commands = getattr(ai_research_module, "register_ai_research_commands")
+    register_ai_research_commands = ai_research_module.register_ai_research_commands
     register_ai_research_commands(cli)
 except ImportError as e:
     import warnings

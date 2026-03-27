@@ -197,14 +197,18 @@ class DataQualityIndicators:
 
         # Financial metrics
         fin = company.financials
-        summary["Revenue"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(fin.revenue_confidence if fin else None, "?")
+        summary["Revenue"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(
+            fin.revenue_confidence if fin else None, "?"
+        )
         summary["Employees"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(
             fin.employees_confidence if fin else None, "?"
         )
         summary["Growth Rate"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(
             fin.growth_confidence if fin else None, "?"
         )
-        summary["Funding"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(fin.funding_confidence if fin else None, "?")
+        summary["Funding"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(
+            fin.funding_confidence if fin else None, "?"
+        )
         summary["Valuation"] = DataQualityIndicators.CONFIDENCE_INDICATORS.get(
             fin.valuation_confidence if fin else None, "?"
         )

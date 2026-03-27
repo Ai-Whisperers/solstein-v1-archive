@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-import copy
 import logging
-from dataclasses import dataclass, field as dataclass_field
-from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
 from datetime import datetime, timezone
+from enum import Enum
 
 from ...domain.models import ConfidenceLevel
-from ..source_policy import SourceTier, default_source_policy_catalog
 from ..enrichment_types import EnrichableCompany
 
 logger = logging.getLogger(__name__)
@@ -46,7 +44,7 @@ class EnrichmentCost:
     api_calls: int = 0
     duration_ms: float = 0.0
     success: bool = False
-    error: Optional[str] = None
+    error: str | None = None
     timestamp: datetime = dataclass_field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -54,11 +52,11 @@ class EnrichmentCost:
 class EnrichmentResult:
     """Result of enrichment operation."""
 
-    company: "EnrichableCompany"
-    sources_used: List[EnrichmentSource] = dataclass_field(default_factory=list)
-    fields_enriched: List[EnrichmentField] = dataclass_field(default_factory=list)
-    costs: List[EnrichmentCost] = dataclass_field(default_factory=list)
-    errors: List[str] = dataclass_field(default_factory=list)
+    company: EnrichableCompany
+    sources_used: list[EnrichmentSource] = dataclass_field(default_factory=list)
+    fields_enriched: list[EnrichmentField] = dataclass_field(default_factory=list)
+    costs: list[EnrichmentCost] = dataclass_field(default_factory=list)
+    errors: list[str] = dataclass_field(default_factory=list)
     total_api_calls: int = 0
     total_duration_ms: float = 0.0
     idempotent: bool = True  # Same input = same output on retries
@@ -73,14 +71,14 @@ class EnrichmentConfig:
     dry_run: bool = False
 
     # Source configuration
-    source_order: List[EnrichmentSource] = dataclass_field(
+    source_order: list[EnrichmentSource] = dataclass_field(
         default_factory=lambda: [
             EnrichmentSource.SEC_EDGAR,
             EnrichmentSource.COMPANIES_HOUSE,
             EnrichmentSource.NEWS_SIGNALS,
         ]
     )
-    enabled_sources: Set[EnrichmentSource] = dataclass_field(
+    enabled_sources: set[EnrichmentSource] = dataclass_field(
         default_factory=lambda: {
             EnrichmentSource.SEC_EDGAR,
             EnrichmentSource.COMPANIES_HOUSE,
@@ -89,7 +87,7 @@ class EnrichmentConfig:
     )
 
     # Field selection
-    fields_to_enrich: Optional[Set[EnrichmentField]] = None  # None = all fields
+    fields_to_enrich: set[EnrichmentField] | None = None  # None = all fields
 
     # Confidence thresholds
     min_confidence_to_overwrite: ConfidenceLevel = ConfidenceLevel.ESTIMATED

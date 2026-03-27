@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Generator
+from collections.abc import Generator
 
 import pytest
 from loguru import logger
@@ -31,11 +31,8 @@ def log_capture() -> Generator[_LogCapture, None, None]:
     finally:
         logger.remove(sink_id)
 
-import pathlib
 
 import pytest
-
-from solstein.config import ConfigurationError, SecurityConfig, Settings
 
 
 def test_change_me_in_production_absent_from_source() -> None:

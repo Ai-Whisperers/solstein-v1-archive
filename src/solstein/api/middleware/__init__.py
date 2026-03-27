@@ -1,11 +1,11 @@
 """API Middleware for SolStein platform."""
 
 from .logging import (
-    setup_logging_middleware,
     ContextMiddleware,
+    ErrorLoggingMiddleware,
     RequestIDMiddleware,
     RequestLoggingMiddleware,
-    ErrorLoggingMiddleware,
+    setup_logging_middleware,
 )
 from .rate_limit import (
     RateLimitConfig,

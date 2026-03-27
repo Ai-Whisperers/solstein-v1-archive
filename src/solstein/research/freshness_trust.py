@@ -22,7 +22,6 @@ from typing import Any
 
 from loguru import logger
 
-
 # ---------------------------------------------------------------------------
 # Trust tier enum
 # ---------------------------------------------------------------------------
@@ -72,7 +71,7 @@ STATIC_FIELDS: set[str] = {
 }
 
 # Freshness windows in hours
-VOLATILE_FRESHNESS_HOURS = 24 * 7     # 7 days
+VOLATILE_FRESHNESS_HOURS = 24 * 7  # 7 days
 STATIC_FRESHNESS_HOURS = 24 * 30 * 3  # ~90 days
 
 # Key fields that must be present for higher tiers
@@ -343,12 +342,7 @@ def _check_review_required(m: _EvidenceMetrics) -> list[str] | None:
 
 def _check_gold(m: _EvidenceMetrics) -> bool:
     """Check if metrics qualify for gold tier."""
-    return (
-        m.source_count >= 3
-        and m.major_contradictions == 0
-        and m.coverage >= 1.0
-        and len(m.stale_fields) == 0
-    )
+    return m.source_count >= 3 and m.major_contradictions == 0 and m.coverage >= 1.0 and len(m.stale_fields) == 0
 
 
 def _build_silver_reasons(m: _EvidenceMetrics) -> list[str]:
@@ -441,12 +435,16 @@ def compute_trust_tier(
     # Silver tier: 2+ sources, decent coverage
     if m.source_count >= 2 and m.coverage >= 0.6:
         return _make_assessment(
-            TrustTier.SILVER, _build_silver_reasons(m), m,
+            TrustTier.SILVER,
+            _build_silver_reasons(m),
+            m,
         )
 
     # Bronze: everything else
     return _make_assessment(
-        TrustTier.BRONZE, _build_bronze_reasons(m), m,
+        TrustTier.BRONZE,
+        _build_bronze_reasons(m),
+        m,
     )
 
 
@@ -479,9 +477,18 @@ def assess_and_export(
 
 
 __all__ = [
-    "TrustTier", "VOLATILE_FIELDS", "STATIC_FIELDS", "KEY_FIELDS",
-    "VOLATILE_FRESHNESS_HOURS", "STATIC_FRESHNESS_HOURS",
-    "FreshnessResult", "TrustAssessment",
-    "classify_field_volatility", "get_freshness_window", "check_field_freshness",
-    "compute_trust_tier", "build_export_metadata", "assess_and_export",
+    "TrustTier",
+    "VOLATILE_FIELDS",
+    "STATIC_FIELDS",
+    "KEY_FIELDS",
+    "VOLATILE_FRESHNESS_HOURS",
+    "STATIC_FRESHNESS_HOURS",
+    "FreshnessResult",
+    "TrustAssessment",
+    "classify_field_volatility",
+    "get_freshness_window",
+    "check_field_freshness",
+    "compute_trust_tier",
+    "build_export_metadata",
+    "assess_and_export",
 ]

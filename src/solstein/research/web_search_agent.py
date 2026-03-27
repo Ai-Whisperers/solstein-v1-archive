@@ -131,9 +131,7 @@ class WebSearchAgent:
 
         return results
 
-    async def _search_searxng_html(
-        self, client: httpx.AsyncClient, query: str, max_results: int
-    ) -> list[SearchResult]:
+    async def _search_searxng_html(self, client: httpx.AsyncClient, query: str, max_results: int) -> list[SearchResult]:
         """Fallback: Parse SearXNG HTML results when JSON is unavailable."""
         results: list[SearchResult] = []
         try:

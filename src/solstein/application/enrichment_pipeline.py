@@ -21,14 +21,13 @@ Usage::
 from __future__ import annotations
 
 import asyncio
+import uuid
 from typing import Any
 
 from loguru import logger
 
-import uuid
-
 from solstein.adapters.registry import SourceRegistry
-from solstein.domain.models import AggregatedDataRecord, AggregatedFact, RawDataRecord, RawDataSource
+from solstein.domain.models import AggregatedDataRecord, AggregatedFact, RawDataSource
 
 
 class EnrichmentPipeline:

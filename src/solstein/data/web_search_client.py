@@ -1,6 +1,6 @@
-from datetime import datetime
 import importlib
 import os
+from datetime import datetime
 from typing import Any
 
 from loguru import logger
@@ -19,11 +19,11 @@ def _ddg_search_fallback(query: str, max_results: int = 20) -> list[dict[str, An
 
     try:
         ddgs_module = importlib.import_module("duckduckgo_search")
-        ddgs_cls = getattr(ddgs_module, "DDGS")
+        ddgs_cls = ddgs_module.DDGS
     except Exception:
         try:
             ddgs_module = importlib.import_module("ddgs")
-            ddgs_cls = getattr(ddgs_module, "DDGS")
+            ddgs_cls = ddgs_module.DDGS
         except Exception as e:
             logger.warning(f"DuckDuckGo module not available: {e}")
             return []
@@ -53,7 +53,7 @@ def _ddg_search_fallback(query: str, max_results: int = 20) -> list[dict[str, An
         return []
     try:
         ddgs_module = importlib.import_module("ddgs")
-        ddgs_cls = getattr(ddgs_module, "DDGS")
+        ddgs_cls = ddgs_module.DDGS
 
         with ddgs_cls() as ddgs:
             results = list(ddgs.text(query, max_results=max_results))
@@ -79,7 +79,7 @@ def _ddg_search_fallback(query: str, max_results: int = 20) -> list[dict[str, An
 def _google_search_fallback(company_name: str, max_results: int = 20) -> list[dict[str, Any]]:
     try:
         google_module = importlib.import_module("google_search")
-        google_search = getattr(google_module, "google_search")
+        google_search = google_module.google_search
 
         query = f"{company_name} latest news {_current_year()}"
         results = google_search(query, num_results=max_results)
@@ -118,7 +118,7 @@ def search_company_news(company_name: str, max_results: int = 20) -> list[dict[s
 
     try:
         exa_module = importlib.import_module("exa_py")
-        exa_cls = getattr(exa_module, "Exa")
+        exa_cls = exa_module.Exa
 
         exa = exa_cls(api_key=exa_api_key)
         results = exa.search_and_contents(
@@ -179,7 +179,7 @@ def search_company_info(company_name: str, query_type: str = "general") -> list[
 
     try:
         exa_module = importlib.import_module("exa_py")
-        exa_cls = getattr(exa_module, "Exa")
+        exa_cls = exa_module.Exa
 
         exa = exa_cls(api_key=exa_api_key)
         results = exa.search_and_contents(

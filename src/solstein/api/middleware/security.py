@@ -67,17 +67,19 @@ class SupabaseJWTMiddleware:
     """
 
     # REQ-1: Only genuinely public routes are excluded from authentication.
-    PUBLIC_PATHS = frozenset({
-        "/health",
-        "/healthz",
-        "/ready",
-        "/docs",
-        "/redoc",
-        "/openapi.json",
-        "/auth/login",
-        "/auth/signup",
-        "/auth/refresh",
-    })
+    PUBLIC_PATHS = frozenset(
+        {
+            "/health",
+            "/healthz",
+            "/ready",
+            "/docs",
+            "/redoc",
+            "/openapi.json",
+            "/auth/login",
+            "/auth/signup",
+            "/auth/refresh",
+        }
+    )
 
     # Path prefixes that are always public
     PUBLIC_PREFIXES = (

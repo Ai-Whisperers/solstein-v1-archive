@@ -11,15 +11,12 @@ Verifies:
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 from click.testing import CliRunner
 
 import solstein.cli as cli_module
 from solstein.cli import cli
 from solstein.domain.models import Company
-
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -145,7 +142,6 @@ def test_generate_llm_report_company_not_found(tmp_path, monkeypatch):
 
 def test_generate_llm_report_llm_path_mocked(tmp_path, monkeypatch):
     """LLM-enhanced path should call LLMEnhancedReportGenerator and produce reports."""
-    import asyncio
 
     expected_reports = {
         "executive_summary": tmp_path / "exec.md",
@@ -156,9 +152,7 @@ def test_generate_llm_report_llm_path_mocked(tmp_path, monkeypatch):
         def __init__(self, output_dir: Path):
             pass
 
-        async def generate_llm_enhanced_report(
-            self, target: Company, competitors: list[Company]
-        ) -> dict:
+        async def generate_llm_enhanced_report(self, target: Company, competitors: list[Company]) -> dict:
             return expected_reports
 
     monkeypatch.setattr(cli_module, "CompetitorDataLoader", DummyLoader)
@@ -180,9 +174,7 @@ def test_generate_llm_report_llm_exception_handled(tmp_path, monkeypatch):
         def __init__(self, output_dir: Path):
             pass
 
-        async def generate_llm_enhanced_report(
-            self, target: Company, competitors: list[Company]
-        ) -> dict:
+        async def generate_llm_enhanced_report(self, target: Company, competitors: list[Company]) -> dict:
             raise RuntimeError("LLM provider unavailable")
 
     monkeypatch.setattr(cli_module, "CompetitorDataLoader", DummyLoader)

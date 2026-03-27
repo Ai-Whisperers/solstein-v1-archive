@@ -13,7 +13,6 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from solstein.monitoring.database_optimizer import (
@@ -79,7 +78,9 @@ class TestDatabaseOptimizer:
 
     @patch("solstein.monitoring.database_optimizer.create_async_engine")
     @patch("solstein.monitoring.database_optimizer.event.listens_for")
-    def test_create_engine(self, mock_listens_for: Mock, mock_create_engine: Mock, optimizer: DatabaseOptimizer) -> None:
+    def test_create_engine(
+        self, mock_listens_for: Mock, mock_create_engine: Mock, optimizer: DatabaseOptimizer
+    ) -> None:
         """Test engine creation with pooling config."""
         mock_engine = MagicMock()
         mock_create_engine.return_value = mock_engine
@@ -276,7 +277,7 @@ class TestOptimizedTransaction:
         mock_session = AsyncMock(spec=AsyncSession)
 
         with pytest.raises(ValueError):
-            async with optimized_transaction(mock_session) as session:
+            async with optimized_transaction(mock_session):
                 raise ValueError("Test error")
 
         mock_session.rollback.assert_called_once()

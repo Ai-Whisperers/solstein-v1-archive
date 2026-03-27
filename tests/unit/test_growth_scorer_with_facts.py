@@ -12,8 +12,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
 from solstein.analytics.scorers._shared import confidence_to_level
+from solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
 from solstein.domain.facts import Fact
 from solstein.domain.models import ConfidenceLevel, FinancialMetric
 

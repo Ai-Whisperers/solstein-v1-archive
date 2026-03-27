@@ -6,28 +6,11 @@ EPIC-021: Modularized from monolithic 801-line file.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, Request
 from sqlalchemy import text
 
-from solstein.api.schemas.enrichment import (
-    AuditEntry,
-    AuditTrailResponse,
-    BatchEnrichmentRequest,
-    BatchEnrichmentResponse,
-    BatchEnrichmentResult,
-    CacheCheckResponse,
-    CacheClearResponse,
-    EnrichmentRequest,
-    EnrichmentResponse,
-    EnrichmentResultData,
-    HealthCheckResponse,
-    MetricsResponse,
-    ReadinessCheckResponse,
-)
-from solstein.data.security_hardening import audit_logger, input_validator, rate_limiter
-from solstein.data.unified_loader import UnifiedCompany, unified_loader
+from solstein.data.unified_loader import unified_loader
 from solstein.infrastructure.database import db_manager
 from solstein.infrastructure.enrichment_repositories import EnrichmentAuditRepository, EnrichmentCacheRepository
 
@@ -121,9 +104,7 @@ async def check_cache_health() -> tuple[str, bool]:
     """Check cache health (in-memory or Redis)."""
     try:
         cache_repo = await get_cache_repo_if_available()
-        if cache_repo:
-            return "operational", True
-        elif hasattr(unified_loader, "cache") and unified_loader.cache:
+        if cache_repo or hasattr(unified_loader, "cache") and unified_loader.cache:
             return "operational", True
         else:
             return "not_initialized", False

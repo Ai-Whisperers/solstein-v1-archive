@@ -7,7 +7,6 @@ from typing import Any
 from .errors import NormalizationError
 from .numbers import parse_decimal, parse_integer, parse_number
 from .strings import (
-    clean_company_name,
     extract_domain_from_url,
     normalize_boolean,
     normalize_date,

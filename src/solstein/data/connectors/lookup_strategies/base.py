@@ -4,7 +4,7 @@ EPIC-022: Extracted from IdentifierLookupService for modularity.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 
 class LookupStrategy(ABC):

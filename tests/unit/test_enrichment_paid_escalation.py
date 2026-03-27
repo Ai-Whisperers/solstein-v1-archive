@@ -1,5 +1,5 @@
 from solstein.data.enrichment_config import UnifiedCompanyLoaderConfig
-from solstein.data.enrichment_orchestrator import EnrichmentSource, EnrichmentField
+from solstein.data.enrichment_orchestrator import EnrichmentField, EnrichmentSource
 from solstein.data.enrichment_service import EnrichmentService
 from solstein.data.source_policy import SourcePolicy, SourceTier
 from solstein.data.unified_loader import UnifiedCompany

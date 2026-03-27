@@ -5,8 +5,7 @@ Epic 1: Deep Analysis Intelligence Module - LLM-powered report generation.
 
 from __future__ import annotations
 
-import json
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from loguru import logger
 
@@ -14,9 +13,7 @@ from solstein.domain.models import Company
 from solstein.intelligence.capability_overlap import (
     CapabilityOverlapMatrix,
     OverlapAnalyzer,
-    OverlapLevel,
 )
-
 
 # Eneve context for comparative analysis
 ENEVÉ_CONTEXT = {
@@ -43,7 +40,7 @@ class DeepAnalysisReport:
         self,
         company: Company,
         capability_matrix: CapabilityOverlapMatrix,
-        ai_assessment: Dict[str, Any],
+        ai_assessment: dict[str, Any],
     ):
         self.company = company
         self.capability_matrix = capability_matrix
@@ -54,7 +51,7 @@ class DeepAnalysisReport:
         self.product_offering: str = ""
         self.strategic_implications: str = ""
         self.blindspot_analysis: str = ""
-        self.key_insights: List[str] = []
+        self.key_insights: list[str] = []
 
 
 class DeepAnalysisGenerator:
@@ -73,7 +70,7 @@ class DeepAnalysisGenerator:
     async def generate(
         self,
         company: Company,
-        source_texts: List[str],
+        source_texts: list[str],
     ) -> DeepAnalysisReport:
         """Generate complete deep analysis report.
 
@@ -118,8 +115,8 @@ class DeepAnalysisGenerator:
     def _assess_ai_capabilities(
         self,
         company: Company,
-        source_texts: List[str],
-    ) -> Dict[str, Any]:
+        source_texts: list[str],
+    ) -> dict[str, Any]:
         """Assess AI capabilities from source texts.
 
         Args:
@@ -226,7 +223,7 @@ class DeepAnalysisGenerator:
     async def _generate_with_llm(
         self,
         report: DeepAnalysisReport,
-        source_texts: List[str],
+        source_texts: list[str],
     ) -> None:
         """Generate narrative sections using LLM.
 
@@ -269,7 +266,7 @@ class DeepAnalysisGenerator:
     def _generate_template_based(
         self,
         report: DeepAnalysisReport,
-        source_texts: List[str],
+        source_texts: list[str],
     ) -> None:
         """Generate narrative sections using templates (fallback).
 
@@ -300,7 +297,7 @@ class DeepAnalysisGenerator:
         self,
         company: Company,
         matrix: CapabilityOverlapMatrix,
-        ai: Dict[str, Any],
+        ai: dict[str, Any],
     ) -> str:
         """Generate executive assessment from template."""
         paragraphs = []
@@ -399,7 +396,7 @@ class DeepAnalysisGenerator:
         self,
         company: Company,
         matrix: CapabilityOverlapMatrix,
-        ai: Dict[str, Any],
+        ai: dict[str, Any],
     ) -> str:
         """Generate strategic implications from template."""
         implications = []
@@ -413,8 +410,8 @@ class DeepAnalysisGenerator:
             )
         elif matrix.overall_overlap_score >= 0.4:
             implications.append(
-                f"**Selective Competition**: Moderate overlap suggests competition in "
-                f"specific segments rather than head-to-head across all capabilities."
+                "**Selective Competition**: Moderate overlap suggests competition in "
+                "specific segments rather than head-to-head across all capabilities."
             )
 
         # AI threat
@@ -436,8 +433,8 @@ class DeepAnalysisGenerator:
         # Market positioning
         if matrix.high_overlap_capabilities >= 5:
             implications.append(
-                f"**Functional Twin**: This company closely mirrors Eneve's capabilities. "
-                f"Watch for: pricing changes, customer wins/losses, and feature parity."
+                "**Functional Twin**: This company closely mirrors Eneve's capabilities. "
+                "Watch for: pricing changes, customer wins/losses, and feature parity."
             )
 
         return "\n\n".join(implications) if implications else "No specific strategic implications identified."
@@ -463,8 +460,8 @@ class DeepAnalysisGenerator:
         self,
         company: Company,
         matrix: CapabilityOverlapMatrix,
-        ai: Dict[str, Any],
-    ) -> List[str]:
+        ai: dict[str, Any],
+    ) -> list[str]:
         """Generate bullet point key insights."""
         insights = []
 
@@ -494,8 +491,8 @@ class DeepAnalysisGenerator:
     def _prepare_llm_context(
         self,
         report: DeepAnalysisReport,
-        source_texts: List[str],
-    ) -> Dict[str, Any]:
+        source_texts: list[str],
+    ) -> dict[str, Any]:
         """Prepare context dictionary for LLM prompts."""
         company = report.company
         matrix = report.capability_matrix
@@ -549,7 +546,7 @@ class DeepAnalysisGenerator:
             logger.error("LLM generation error", error=str(e))
             return ""
 
-    def _executive_assessment_prompt(self, context: Dict[str, Any]) -> str:
+    def _executive_assessment_prompt(self, context: dict[str, Any]) -> str:
         """Generate prompt for executive assessment section."""
         return f"""Write a 2-3 paragraph executive assessment of {context["company"]["name"]} as a competitor to Eneve.
 
@@ -562,7 +559,7 @@ Context:
 
 Write in professional board-level language. Highlight competitive position and key strengths/weaknesses relative to Eneve."""
 
-    def _product_offering_prompt(self, context: Dict[str, Any]) -> str:
+    def _product_offering_prompt(self, context: dict[str, Any]) -> str:
         """Generate prompt for product offering section."""
         return f"""Write a 3-4 paragraph product offering summary for {context["company"]["name"]}.
 
@@ -573,7 +570,7 @@ Key Capabilities (with Eneve overlap):
 
 Describe the product positioning, key features, and how it compares to Eneve's eBase platform."""
 
-    def _strategic_implications_prompt(self, context: Dict[str, Any]) -> str:
+    def _strategic_implications_prompt(self, context: dict[str, Any]) -> str:
         """Generate prompt for strategic implications section."""
         return f"""Write strategic implications for Eneve regarding competitor {context["company"]["name"]}.
 
@@ -585,7 +582,7 @@ Competitor Context:
 
 Explain why Eneve should care about this competitor, specific threats, and recommended actions."""
 
-    def _blindspot_prompt(self, context: Dict[str, Any]) -> str:
+    def _blindspot_prompt(self, context: dict[str, Any]) -> str:
         """Generate prompt for blindspot analysis section."""
         return f"""Explain why {context["company"]["name"]} might be hard to discover through traditional competitive research.
 
@@ -613,24 +610,30 @@ Provide 2-3 specific reasons with explanations."""
         """
         basic = company_data.get("basic_info", {})
         description = basic.get("description", "")
-        
+
         # Extract source texts
         source_texts = [description] if description else []
         for source in company_data.get("data_sources", []):
             if source.get("url"):
                 source_texts.append(source["url"])
-        
+
         # Analyze capability overlap
         capability_matrix = self.overlap_analyzer.analyze(
             entity_id=company_name.lower().replace(" ", "_"),
             entity_name=company_name,
             source_texts=source_texts if source_texts else ["energy software company"],
         )
-        
+
         # Assess AI capabilities (inline simple version)
         combined_text = " ".join(source_texts).lower()
         ai_signals = {
-            "very_strong": ["ai-native", "machine learning", "deep learning", "neural network", "artificial intelligence"],
+            "very_strong": [
+                "ai-native",
+                "machine learning",
+                "deep learning",
+                "neural network",
+                "artificial intelligence",
+            ],
             "strong": ["ai", "ml", "predictive", "automation", "algorithm"],
             "moderate": ["analytics", "data-driven", "optimization"],
         }
@@ -642,11 +645,17 @@ Provide 2-3 specific reasons with explanations."""
                     detected_signals.append(keyword)
                     signal_strength += {"very_strong": 3, "strong": 2, "moderate": 1}[level]
                     break
-        
+
         ai_score = min(10, signal_strength * 1.5)
         ai_assessment = {
             "score": round(ai_score, 1),
-            "signal_level": "Very Strong" if ai_score >= 8 else "Strong" if ai_score >= 5 else "Moderate" if ai_score >= 2 else "Minimal",
+            "signal_level": "Very Strong"
+            if ai_score >= 8
+            else "Strong"
+            if ai_score >= 5
+            else "Moderate"
+            if ai_score >= 2
+            else "Minimal",
             "evidence": detected_signals[:5],
             "evidence_count": len(detected_signals),
         }
@@ -657,9 +666,9 @@ Provide 2-3 specific reasons with explanations."""
         founded_year = basic.get("founded_year")
         if not isinstance(founded_year, int):
             founded_year = None
-        
+
         # Generate sections using templates (no LLM required)
-        context = {
+        {
             "company": {
                 "name": company_name,
                 "description": description or "Energy software company",
@@ -678,7 +687,7 @@ Provide 2-3 specific reasons with explanations."""
             },
             "ai_assessment": ai_assessment,
         }
-        
+
         # Generate report sections inline
         paragraphs = []
         score = capability_matrix.overall_overlap_score * 10
@@ -690,17 +699,17 @@ Provide 2-3 specific reasons with explanations."""
             classification = "moderate player"
         else:
             classification = "emerging or niche player"
-        
+
         paragraphs.append(
             f"{company_name} is a {classification} in the energy software market "
             f"with an overall competitive score of {score:.1f}/10. "
             f"The company demonstrates {capability_matrix.matching_capabilities} high-overlap "
             f"capabilities with Eneve's core platform."
         )
-        
+
         ai_score = ai_assessment["score"]
         ai_level = ai_assessment["signal_level"]
-        
+
         if ai_score >= 7:
             paragraphs.append(
                 f"AI capabilities are a significant strength with a {ai_level} signal "
@@ -717,7 +726,7 @@ Provide 2-3 specific reasons with explanations."""
                 f"Limited AI signal detected ({ai_score}/10), suggesting traditional "
                 f"technology approaches without significant AI integration."
             )
-        
+
         if capability_matrix.high_overlap_capabilities >= 5:
             paragraphs.append(
                 f"This is a **direct competitor** with very high capability overlap "
@@ -735,31 +744,33 @@ Provide 2-3 specific reasons with explanations."""
                 f"Limited capability overlap ({capability_matrix.high_overlap_capabilities}/8) "
                 f"suggests either niche focus or adjacent market positioning."
             )
-        
+
         executive_assessment = "\n\n".join(paragraphs)
-        
+
         # Product offering
         product_offering = f"## Product Overview\n\n{basic.get('description', 'Energy software company')}\n\n"
         if capability_matrix.strongest_matches:
             product_offering += "**Key Capabilities (with Eneve overlap):**\n"
             for cap in capability_matrix.strongest_matches[:5]:
                 product_offering += f"- {cap}\n"
-        
+
         # Strategic implications
-        strategic_implications = f"## Strategic Assessment\n\n"
+        strategic_implications = "## Strategic Assessment\n\n"
         strategic_implications += f"**Headquarters:** {basic.get('headquarters', 'Unknown')}\n"
         strategic_implications += f"**Employees:** {basic.get('employees', 'Unknown')}\n"
         strategic_implications += f"**Founded:** {basic.get('founded_year', 'Unknown')}\n\n"
         strategic_implications += f"**Threat Level:** {'High' if capability_matrix.high_overlap_capabilities >= 5 else 'Medium' if capability_matrix.high_overlap_capabilities >= 3 else 'Low'}\n"
         strategic_implications += f"**AI Maturity:** {ai_assessment['signal_level']}\n"
-        
+
         # Blindspot analysis
         blindspot_analysis = "## Why This Company Matters\n\n"
         blindspot_analysis += "This competitor may be hard to discover through traditional research because:\n\n"
         blindspot_analysis += "1. **Search term variations:** May use non-standard terminology for energy software\n"
         blindspot_analysis += "2. **Geographic factors:** Different regional positioning or market focus\n"
-        blindspot_analysis += "3. **Category positioning:** Markets itself outside traditional ETRM/energy software categories\n"
-        
+        blindspot_analysis += (
+            "3. **Category positioning:** Markets itself outside traditional ETRM/energy software categories\n"
+        )
+
         # Key insights
         key_insights = [
             f"Capability Overlap: {capability_matrix.matching_capabilities}/8 Eneve capabilities",
@@ -768,7 +779,9 @@ Provide 2-3 specific reasons with explanations."""
             + (
                 "Yes"
                 if capability_matrix.high_overlap_capabilities >= 5
-                else "Partial" if capability_matrix.high_overlap_capabilities >= 3 else "Limited"
+                else "Partial"
+                if capability_matrix.high_overlap_capabilities >= 3
+                else "Limited"
             ),
         ]
 

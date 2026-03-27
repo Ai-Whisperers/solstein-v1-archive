@@ -3,12 +3,12 @@
 Automatically fixes common data quality issues without manual intervention.
 """
 
-from typing import Any, Callable
+from collections.abc import Callable
 from dataclasses import dataclass
+
 from loguru import logger
 
 from solstein.domain.models import Company
-from solstein.validation.company_validator import CompanyValidator, ValidationIssue
 
 
 @dataclass

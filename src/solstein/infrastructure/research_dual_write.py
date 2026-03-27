@@ -14,8 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from sqlalchemy.sql.schema import Table
 
-from solstein.research.sources import canonicalize_url  # type: ignore[reportMissingTypeStubs]
-
+from .database import Base as BaseImported
 from .database_models import (
     ContradictionRecord,
     ContradictionTransitionRecord,
@@ -27,7 +26,6 @@ from .database_models import (
     ResearchStageRecord,
     SourceDocumentRecord,
 )
-from .database import Base as BaseImported
 from .research_outbox_helpers import JsonValue, OutboxEvent, record_outbox_failure
 
 if TYPE_CHECKING:
@@ -135,14 +133,14 @@ def transition_contradiction_status(
 
 # Import helper functions from research_persistence module
 from .research_persistence import (
-    delete_existing_run,
     create_research_run,
-    persist_stage_records,
+    delete_existing_run,
     persist_artifact_records,
-    persist_source_documents,
-    persist_metric_observations,
-    persist_evidence_readiness,
     persist_contradictions,
+    persist_evidence_readiness,
+    persist_metric_observations,
+    persist_source_documents,
+    persist_stage_records,
 )
 
 

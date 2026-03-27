@@ -29,7 +29,7 @@ def stream_jsonl(filepath: str) -> Generator[dict, None, None]:
     """Stream JSON lines file without loading entire file."""
     import json
 
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line:
@@ -91,7 +91,6 @@ class StreamingJSONResponse:
 
 def estimate_object_size(obj: Any) -> int:
     """Estimate object size in bytes."""
-    import sys
 
     return sys.getsizeof(obj)
 

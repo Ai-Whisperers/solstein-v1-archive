@@ -58,6 +58,7 @@ class WebsiteRefreshConnector(BaseRefreshConnector):
         company_website_map: dict[str, str] = {}
         try:
             from sqlalchemy import select
+
             from solstein.infrastructure.database_models import CompanyRecord
 
             async with self.db_manager.get_session() as session:

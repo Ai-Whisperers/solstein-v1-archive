@@ -4,7 +4,6 @@ E3: Tests for extracted conflict resolution adapter.
 """
 
 from datetime import datetime
-from decimal import Decimal
 
 import pytest
 

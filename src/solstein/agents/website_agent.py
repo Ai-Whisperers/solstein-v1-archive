@@ -31,9 +31,7 @@ class WebsiteAgent(BaseDataGatheringAgent):
             # STORY-070: Validate URL before fetch (SSRF prevention)
             validate_url(str(url))
 
-            resp = await asyncio.to_thread(
-                requests.get, str(url), timeout=20, headers={"User-Agent": "Solstein-AI"}
-            )
+            resp = await asyncio.to_thread(requests.get, str(url), timeout=20, headers={"User-Agent": "Solstein-AI"})
             text = resp.text or ""
             excerpt = text[:5000]
 

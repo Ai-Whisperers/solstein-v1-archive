@@ -5,6 +5,17 @@ EPIC-022: Modularized analyzers for GitHub data extraction.
 
 from __future__ import annotations
 
+# Analyzers
+from .analyzers import (
+    AISignalAnalyzer,
+    DependencyAnalyzer,
+    TechStackAnalyzer,
+    VelocityAnalyzer,
+)
+
+# Client and Search
+from .client import GitHubClient
+
 # Models
 from .models import (
     AISignal,
@@ -13,18 +24,7 @@ from .models import (
     TechStack,
     VelocityMetrics,
 )
-
-# Client and Search
-from .client import GitHubClient
 from .search import GitHubOrgSearcher
-
-# Analyzers
-from .analyzers import (
-    AISignalAnalyzer,
-    DependencyAnalyzer,
-    TechStackAnalyzer,
-    VelocityAnalyzer,
-)
 
 __all__ = [
     # Models

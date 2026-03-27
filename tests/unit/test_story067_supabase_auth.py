@@ -53,9 +53,7 @@ class TestNoChangeInProductionDefaults:
     def test_no_change_me_in_production_in_config(self):
         config_path = SRC_DIR / "config.py"
         content = config_path.read_text()
-        assert "change-me-in-production" not in content, (
-            "config.py still contains 'change-me-in-production'"
-        )
+        assert "change-me-in-production" not in content, "config.py still contains 'change-me-in-production'"
 
 
 class TestDependenciesUseSupabase:
@@ -68,16 +66,12 @@ class TestDependenciesUseSupabase:
         for node in ast.walk(tree):
             if isinstance(node, (ast.Import, ast.ImportFrom)):
                 import_str = ast.dump(node)
-                assert "jwt_handler" not in import_str, (
-                    "dependencies.py still imports jwt_handler"
-                )
+                assert "jwt_handler" not in import_str, "dependencies.py still imports jwt_handler"
 
     def test_imports_supabase_client(self):
         deps_path = SRC_DIR / "api" / "dependencies.py"
         content = deps_path.read_text()
-        assert "get_supabase" in content, (
-            "dependencies.py does not import get_supabase"
-        )
+        assert "get_supabase" in content, "dependencies.py does not import get_supabase"
 
 
 class TestConfigRemovesAdminCredentials:
@@ -93,9 +87,7 @@ class TestConfigRemovesAdminCredentials:
                 for item in node.body:
                     if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
                         field_names.append(item.target.id)
-                assert "admin_email" not in field_names, (
-                    "SecurityConfig still declares admin_email as a field"
-                )
+                assert "admin_email" not in field_names, "SecurityConfig still declares admin_email as a field"
                 return
         pytest.fail("SecurityConfig class not found in config.py")
 
@@ -122,37 +114,27 @@ class TestAuthRouterUsesSupabase:
     def test_auth_router_imports_supabase(self):
         auth_path = SRC_DIR / "api" / "routers" / "auth.py"
         content = auth_path.read_text()
-        assert "get_supabase" in content, (
-            "auth.py does not import get_supabase"
-        )
+        assert "get_supabase" in content, "auth.py does not import get_supabase"
 
     def test_auth_router_has_login_endpoint(self):
         auth_path = SRC_DIR / "api" / "routers" / "auth.py"
         content = auth_path.read_text()
-        assert "sign_in_with_password" in content, (
-            "auth.py login does not call sign_in_with_password"
-        )
+        assert "sign_in_with_password" in content, "auth.py login does not call sign_in_with_password"
 
     def test_auth_router_has_refresh_endpoint(self):
         auth_path = SRC_DIR / "api" / "routers" / "auth.py"
         content = auth_path.read_text()
-        assert "refresh_session" in content, (
-            "auth.py refresh does not call refresh_session"
-        )
+        assert "refresh_session" in content, "auth.py refresh does not call refresh_session"
 
     def test_auth_router_has_signup_endpoint(self):
         auth_path = SRC_DIR / "api" / "routers" / "auth.py"
         content = auth_path.read_text()
-        assert "sign_up" in content, (
-            "auth.py does not have a signup endpoint"
-        )
+        assert "sign_up" in content, "auth.py does not have a signup endpoint"
 
     def test_auth_router_has_logout_endpoint(self):
         auth_path = SRC_DIR / "api" / "routers" / "auth.py"
         content = auth_path.read_text()
-        assert "sign_out" in content, (
-            "auth.py does not have a logout endpoint using sign_out"
-        )
+        assert "sign_out" in content, "auth.py does not have a logout endpoint using sign_out"
 
 
 class TestAuthRouterModels:
@@ -168,21 +150,15 @@ class TestAuthRouterModels:
                 for item in node.body:
                     if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
                         field_names.append(item.target.id)
-                assert "refresh_token" in field_names, (
-                    "AuthTokenResponse missing refresh_token field"
-                )
-                assert "access_token" in field_names, (
-                    "AuthTokenResponse missing access_token field"
-                )
+                assert "refresh_token" in field_names, "AuthTokenResponse missing refresh_token field"
+                assert "access_token" in field_names, "AuthTokenResponse missing access_token field"
                 return
         pytest.fail("AuthTokenResponse class not found in auth.py")
 
     def test_user_info_response_exists(self):
         auth_path = SRC_DIR / "api" / "routers" / "auth.py"
         content = auth_path.read_text()
-        assert "class UserInfoResponse" in content, (
-            "UserInfoResponse class not found in auth.py"
-        )
+        assert "class UserInfoResponse" in content, "UserInfoResponse class not found in auth.py"
 
 
 class TestNoCustomPasswordHelpersRemain:
@@ -191,13 +167,9 @@ class TestNoCustomPasswordHelpersRemain:
     def test_no_hash_password_function(self):
         auth_path = SRC_DIR / "api" / "routers" / "auth.py"
         content = auth_path.read_text()
-        assert "def hash_password" not in content, (
-            "auth.py still has hash_password function"
-        )
+        assert "def hash_password" not in content, "auth.py still has hash_password function"
 
     def test_no_verify_password_function(self):
         auth_path = SRC_DIR / "api" / "routers" / "auth.py"
         content = auth_path.read_text()
-        assert "def verify_password" not in content, (
-            "auth.py still has verify_password function"
-        )
+        assert "def verify_password" not in content, "auth.py still has verify_password function"

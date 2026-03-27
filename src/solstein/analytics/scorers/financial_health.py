@@ -30,10 +30,11 @@ class FinancialHealthScorer:
 
     # Missing data penalty
     _UNKNOWN_DATA_PENALTY: float = -2.0  # Penalty when financial data is unknown
+
     def score(
         self,
         financials: FinancialMetric,
-        fact_repo: "FactRepository | None" = None,
+        fact_repo: FactRepository | None = None,
         company_id: str | None = None,
     ) -> tuple[float, ScoringExplanation]:
         """Calculate financial health score (0-10) with explanation.
@@ -214,4 +215,3 @@ class FinancialHealthScorer:
             )
 
         return score
-

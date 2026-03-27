@@ -80,9 +80,7 @@ def test_load_companies_for_report_emits_no_deprecation_warning(tmp_path: Path) 
         warnings.simplefilter("always")
         _load_companies_for_report(input_path=input_file)
 
-    deprecation_warnings = [
-        w for w in caught if issubclass(w.category, DeprecationWarning)
-    ]
+    deprecation_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
     assert len(deprecation_warnings) == 0, (
         f"Unexpected DeprecationWarning(s): {[str(w.message) for w in deprecation_warnings]}"
     )

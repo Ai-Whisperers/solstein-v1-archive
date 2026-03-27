@@ -23,8 +23,8 @@ if TYPE_CHECKING:
 
 
 def _extract_source_links(
-    candidate: "DiscoveryCandidate",
-    aggregated: "AggregatedDataRecord",
+    candidate: DiscoveryCandidate,
+    aggregated: AggregatedDataRecord,
 ) -> list[str]:
     """Extract source links from aggregated facts."""
     all_sources: list[str] = []
@@ -36,11 +36,11 @@ def _extract_source_links(
 
 
 def _build_financials(
-    signals: dict[str, "SignalExtraction"],
+    signals: dict[str, SignalExtraction],
     facts: dict[str, Any],
 ) -> FinancialMetric:
     """Build FinancialMetric from signals and facts."""
-    from .gather import _get_signal_numeric, _confidence_from_signal
+    from .gather import _confidence_from_signal, _get_signal_numeric
 
     revenue = _get_signal_numeric(signals, "revenue_level")
     growth = _get_signal_numeric(signals, "growth_rate")
@@ -79,7 +79,7 @@ def _build_financials(
 
 
 def _extract_descriptive_fields(
-    candidate: "DiscoveryCandidate",
+    candidate: DiscoveryCandidate,
     facts: dict[str, Any],
 ) -> dict[str, Any]:
     """Extract descriptive fields from facts."""
@@ -97,7 +97,7 @@ def _extract_descriptive_fields(
 
 def _build_tech_stack(
     facts: dict[str, Any],
-    candidate: "DiscoveryCandidate",
+    candidate: DiscoveryCandidate,
 ) -> list[str]:
     """Build tech stack from facts and candidate tags."""
     from .gather import _get_fact_value
@@ -112,17 +112,17 @@ def _build_tech_stack(
 
 
 def _determine_tier_threat_ai(
-    signals: dict[str, "SignalExtraction"],
+    signals: dict[str, SignalExtraction],
     facts: dict[str, Any],
     description: Any,
 ) -> tuple[CompanyTier, ThreatLevel, AIMaturity, float | None]:
     """Determine tier, threat level, and AI maturity."""
     from .gather import (
-        _get_signal_numeric,
-        _tier_from_market_cap,
-        _threat_from_growth,
         _ai_maturity_from_score,
         _ai_maturity_from_text,
+        _get_signal_numeric,
+        _threat_from_growth,
+        _tier_from_market_cap,
     )
 
     market_cap = _get_signal_numeric(signals, "valuation")
@@ -149,7 +149,7 @@ def _extract_lead_investors(facts: dict[str, Any]) -> list[str]:
     return list(investors) if isinstance(investors, list) else []
 
 
-def _build_data_source_description(aggregated: "AggregatedDataRecord") -> str:
+def _build_data_source_description(aggregated: AggregatedDataRecord) -> str:
     """Build data source description."""
     source_count = len(aggregated.facts)
     return (
@@ -158,19 +158,19 @@ def _build_data_source_description(aggregated: "AggregatedDataRecord") -> str:
 
 
 def build_company_entity_from_signals(
-    candidate: "DiscoveryCandidate",
-    signal_record: "SignalExtractionRecord",
-    aggregated: "AggregatedDataRecord",
-    signals: dict[str, "SignalExtraction"],
+    candidate: DiscoveryCandidate,
+    signal_record: SignalExtractionRecord,
+    aggregated: AggregatedDataRecord,
+    signals: dict[str, SignalExtraction],
     facts: dict[str, Any],
 ) -> Company:
     """Build Company entity from signals and aggregated facts."""
     from .gather import (
-        _get_signal,
-        _get_fact_value,
-        _build_metric_sources,
-        _build_metric_observations,
         _build_metric_justifications,
+        _build_metric_observations,
+        _build_metric_sources,
+        _get_fact_value,
+        _get_signal,
     )
 
     now = datetime.now(timezone.utc)

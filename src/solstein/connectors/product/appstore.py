@@ -49,6 +49,7 @@ class AppStoreConnector(BaseConnector):
                     # iTunes API returns text/javascript, not application/json
                     text = await response.text()
                     import json
+
                     data = json.loads(text)
                     results = data.get("results", [])
 

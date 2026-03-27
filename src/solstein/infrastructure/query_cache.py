@@ -5,8 +5,9 @@ Provides caching for database query results to reduce load and improve response 
 
 import hashlib
 import json
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, TypeVar
 
 from loguru import logger
 
@@ -16,13 +17,14 @@ from solstein.infrastructure.cache import cache_manager as _cache_manager
 def get_cache() -> object:
     return _cache_manager
 
+
 T = TypeVar("T")
 
 
 def cached_query(
     ttl: int = 300,
-    key_prefix: Optional[str] = None,
-    invalidate_on: Optional[list[str]] = None,
+    key_prefix: str | None = None,
+    invalidate_on: list[str] | None = None,
 ) -> Callable[[Callable[..., T]], Callable[..., T]]:
     """Decorator to cache database query results.
 

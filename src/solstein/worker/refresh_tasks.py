@@ -7,8 +7,8 @@ Provides Celery tasks for refreshing data from 12 sources.
 from __future__ import annotations
 
 import traceback
+from collections.abc import Callable
 from datetime import datetime, timedelta
-from typing import Callable
 
 from celery import shared_task
 from celery.exceptions import MaxRetriesExceededError
@@ -79,6 +79,7 @@ def create_refresh_task(
         logger.info(f"Starting {source_name} refresh task")
 
         try:
+
             async def _refresh():
                 db_manager = get_db_manager()
                 company_ids = await get_tracked_company_ids(db_manager)

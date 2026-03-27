@@ -5,12 +5,15 @@ with timing, correlation ID propagation, and failure tracking.
 """
 
 import time
-from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator
-from dataclasses import dataclass, field
 from collections import defaultdict
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
 from statistics import median
+from typing import Any
+
 from loguru import logger
+
 from .context import get_current_context
 
 

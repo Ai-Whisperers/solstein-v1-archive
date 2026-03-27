@@ -99,9 +99,7 @@ async def store_facts(db_manager: DatabaseManager, facts: list[dict[str, Any]], 
                 fact_value = payload.value
 
                 # Verify the company exists before writing
-                result = await session.execute(
-                    select(CompanyRecord).where(CompanyRecord.company_id == company_id)
-                )
+                result = await session.execute(select(CompanyRecord).where(CompanyRecord.company_id == company_id))
                 record = result.scalar_one_or_none()
 
                 if record is None:
@@ -140,7 +138,9 @@ async def store_facts(db_manager: DatabaseManager, facts: list[dict[str, Any]], 
                 stored_count += 1
 
             except Exception as e:
-                logger.warning(f"[store_facts] Failed to store fact from {source} for company {fact_dict.get('company_id', '?')}: {e}")
+                logger.warning(
+                    f"[store_facts] Failed to store fact from {source} for company {fact_dict.get('company_id', '?')}: {e}"
+                )
                 continue
 
         # Mark batch as completed (or failed if nothing stored)

@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -16,7 +16,7 @@ class GitLabConnector(BaseConnector):
 
     BASE_URL = "https://gitlab.com/api/v4"
 
-    def __init__(self, private_token: Optional[str] = None):
+    def __init__(self, private_token: str | None = None):
         config = SourceConfig(
             name="gitlab",
             base_url=self.BASE_URL,

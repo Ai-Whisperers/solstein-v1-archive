@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -17,7 +17,7 @@ class RedditConnector(BaseConnector):
     BASE_URL = "https://www.reddit.com"
     OAUTH_URL = "https://oauth.reddit.com"
 
-    def __init__(self, client_id: Optional[str] = None, client_secret: Optional[str] = None):
+    def __init__(self, client_id: str | None = None, client_secret: str | None = None):
         config = SourceConfig(
             name="reddit",
             base_url=self.BASE_URL,

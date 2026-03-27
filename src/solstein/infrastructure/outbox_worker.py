@@ -4,11 +4,11 @@
 
 from __future__ import annotations
 
-from loguru import logger
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
+from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.schema import Table

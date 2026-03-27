@@ -4,7 +4,6 @@ EPIC-022: Extracted from Company model for modularity.
 """
 
 import re
-from typing import Any
 
 from pydantic import field_validator
 

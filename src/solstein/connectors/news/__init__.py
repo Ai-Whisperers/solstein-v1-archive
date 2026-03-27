@@ -9,7 +9,7 @@ FREE sources:
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any, Optional  # noqa: F401
 
 import aiohttp
 import feedparser
@@ -24,7 +24,7 @@ class HackerNewsConnector(BaseConnector):
 
     BASE_URL = "https://hacker-news.firebaseio.com/v0"
 
-    def __init__(self, config: Optional[SourceConfig] = None):
+    def __init__(self, config: SourceConfig | None = None):
         if config is None:
             config = SourceConfig(
                 name="hacker_news",
@@ -349,7 +349,6 @@ class RSSFeedConnector(BaseConnector):
             "summary": content.get("summary"),
             "raw_content": content,
         }
-
 
 
 __all__ = [

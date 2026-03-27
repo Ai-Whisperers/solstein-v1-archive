@@ -237,7 +237,6 @@ class EneveEnricher:
                 company_id=company_name.lower().replace(" ", "-"),
                 company_name=company_name,
                 website=params["website"],
-
             )
 
             if result and result.facts:
@@ -332,7 +331,9 @@ class EneveEnricher:
         if raw_sources:
             confidences = [getattr(s, "confidence", None) for s in raw_sources]
             valid_confidences = [c for c in confidences if isinstance(c, (int, float)) and 0.0 <= c <= 1.0]
-            company_data["data_quality_score"] = round(sum(valid_confidences) / len(valid_confidences), 3) if valid_confidences else 0.0
+            company_data["data_quality_score"] = (
+                round(sum(valid_confidences) / len(valid_confidences), 3) if valid_confidences else 0.0
+            )
         else:
             company_data["data_quality_score"] = 0.0
 

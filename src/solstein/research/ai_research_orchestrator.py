@@ -18,6 +18,18 @@ from .research_agents import (
     ResearchPlannerAgent,
     WebSearchAgent,
 )
+from .research_memory import (
+    ResearchMemoryStore as _ResearchMemoryStore,
+)
+from .research_memory import (
+    is_report_stale as _is_report_stale,
+)
+from .research_memory import (
+    normalize_url as _normalize_url,
+)
+from .research_memory import (
+    score_completeness as _score_completeness,
+)
 from .research_types import (
     ExtractedData,
     ResearchPlan,
@@ -25,17 +37,20 @@ from .research_types import (
     SearchResult,
     ValidationResult,
 )
-from .research_memory import (
-    ResearchMemoryStore as _ResearchMemoryStore,
-    is_report_stale as _is_report_stale,
-    normalize_url as _normalize_url,
-    score_completeness as _score_completeness,
-)
 
 # Orchestrator constants (module-level to reduce class body size)
 _TARGET_FIELDS = [
-    "website", "description", "industry", "headquarters", "founded_year",
-    "employees", "revenue", "revenue_currency", "valuation", "funding_raised", "funding_rounds",
+    "website",
+    "description",
+    "industry",
+    "headquarters",
+    "founded_year",
+    "employees",
+    "revenue",
+    "revenue_currency",
+    "valuation",
+    "funding_raised",
+    "funding_rounds",
 ]
 
 _ADAPTIVE_QUERY_BY_FIELD: dict[str, list[str]] = {
@@ -52,8 +67,9 @@ _ADAPTIVE_QUERY_BY_FIELD: dict[str, list[str]] = {
     "funding_rounds": ["{company} series funding", "{company} investors"],
 }
 
-_VOLATILE_FIELDS = frozenset({"employees", "revenue", "revenue_currency",
-                              "valuation", "funding_raised", "funding_rounds"})
+_VOLATILE_FIELDS = frozenset(
+    {"employees", "revenue", "revenue_currency", "valuation", "funding_raised", "funding_rounds"}
+)
 
 
 def _flatten_report_to_fields(report_dict: dict[str, Any]) -> dict[str, Any]:
@@ -113,7 +129,9 @@ def _missing_fields(final_data: dict[str, Any]) -> list[str]:
 
 
 def _build_adaptive_queries(
-    company_name: str, missing_fields: list[str], max_queries: int = 6,
+    company_name: str,
+    missing_fields: list[str],
+    max_queries: int = 6,
 ) -> list[dict[str, str]]:
     """Build targeted search queries for missing fields."""
     seen: set[str] = set()
@@ -243,7 +261,9 @@ class AIResearchOrchestrator:
         self._memory_store.save()
 
     async def _extract_and_validate(
-        self, company_name: str, results: list[SearchResult],
+        self,
+        company_name: str,
+        results: list[SearchResult],
     ) -> list[dict[str, Any]]:
         validated_data: list[dict[str, Any]] = []
         for result in results:
@@ -287,7 +307,11 @@ class AIResearchOrchestrator:
                     funding=previous_report.get("funding", {}),
                     data_sources=previous_report.get("data_sources", []),
                     metadata={
-                        **(previous_report.get("metadata", {}) if isinstance(previous_report.get("metadata"), dict) else {}),
+                        **(
+                            previous_report.get("metadata", {})
+                            if isinstance(previous_report.get("metadata"), dict)
+                            else {}
+                        ),
                         "research_date": datetime.now().isoformat(),
                         "cache_reuse": True,
                         "previous_completeness": round(completeness, 3),
@@ -295,7 +319,9 @@ class AIResearchOrchestrator:
                         "sources_reused": len(previous_urls),
                         "research_time_seconds": (datetime.now() - start_time).total_seconds(),
                     },
-                    errors=list(previous_report.get("errors", [])) if isinstance(previous_report.get("errors"), list) else [],
+                    errors=list(previous_report.get("errors", []))
+                    if isinstance(previous_report.get("errors"), list)
+                    else [],
                 )
                 self._persist_report(report)
                 return report
@@ -479,12 +505,18 @@ class AIResearchOrchestrator:
                     funding=previous_report.get("funding", {}),
                     data_sources=previous_report.get("data_sources", []),
                     metadata={
-                        **(previous_report.get("metadata", {}) if isinstance(previous_report.get("metadata"), dict) else {}),
+                        **(
+                            previous_report.get("metadata", {})
+                            if isinstance(previous_report.get("metadata"), dict)
+                            else {}
+                        ),
                         "research_date": datetime.now().isoformat(),
                         "fallback_to_previous_on_error": True,
                         "error": str(error),
                     },
-                    errors=list(previous_report.get("errors", [])) if isinstance(previous_report.get("errors"), list) else [],
+                    errors=list(previous_report.get("errors", []))
+                    if isinstance(previous_report.get("errors"), list)
+                    else [],
                 )
             report.errors.append(str(error))
 
@@ -493,7 +525,14 @@ class AIResearchOrchestrator:
 
 
 __all__ = [
-    "AIResearchOrchestrator", "ResearchPlannerAgent", "WebSearchAgent",
-    "ContentExtractorAgent", "DataValidatorAgent", "ResearchReport",
-    "ResearchPlan", "SearchResult", "ExtractedData", "ValidationResult",
+    "AIResearchOrchestrator",
+    "ResearchPlannerAgent",
+    "WebSearchAgent",
+    "ContentExtractorAgent",
+    "DataValidatorAgent",
+    "ResearchReport",
+    "ResearchPlan",
+    "SearchResult",
+    "ExtractedData",
+    "ValidationResult",
 ]

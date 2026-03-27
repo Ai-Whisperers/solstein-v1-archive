@@ -17,8 +17,8 @@ Tests cover:
 import pytest
 
 from solstein.research.numeric_normalization import (
-    MONETARY_FIELDS,
     COUNT_FIELDS,
+    MONETARY_FIELDS,
     YEAR_FIELDS,
     ContradictionFlag,
     Currency,
@@ -35,7 +35,6 @@ from solstein.research.numeric_normalization import (
     normalize_year,
     normalized_value_to_dict,
 )
-
 
 # ---------------------------------------------------------------------------
 # Currency detection tests
@@ -302,75 +301,105 @@ class TestDetectContradictions:
     """Test cross-source contradiction detection."""
 
     def test_no_contradiction_for_similar_values(self) -> None:
-        flags = detect_contradictions("revenue", [
-            {"source": "source_a", "value": 100.0},
-            {"source": "source_b", "value": 110.0},
-        ])
+        flags = detect_contradictions(
+            "revenue",
+            [
+                {"source": "source_a", "value": 100.0},
+                {"source": "source_b", "value": 110.0},
+            ],
+        )
         assert len(flags) == 0
 
     def test_minor_contradiction(self) -> None:
-        flags = detect_contradictions("revenue", [
-            {"source": "source_a", "value": 100.0},
-            {"source": "source_b", "value": 160.0},
-        ])
+        flags = detect_contradictions(
+            "revenue",
+            [
+                {"source": "source_a", "value": 100.0},
+                {"source": "source_b", "value": 160.0},
+            ],
+        )
         assert len(flags) == 1
         assert flags[0].severity == "minor"
 
     def test_major_contradiction(self) -> None:
-        flags = detect_contradictions("revenue", [
-            {"source": "crunchbase", "value": 50.0},
-            {"source": "bloomberg", "value": 200.0},
-        ])
+        flags = detect_contradictions(
+            "revenue",
+            [
+                {"source": "crunchbase", "value": 50.0},
+                {"source": "bloomberg", "value": 200.0},
+            ],
+        )
         assert len(flags) == 1
         assert flags[0].severity == "major"
 
     def test_critical_contradiction(self) -> None:
-        flags = detect_contradictions("valuation", [
-            {"source": "source_a", "value": 10.0},
-            {"source": "source_b", "value": 1000.0},
-        ])
+        flags = detect_contradictions(
+            "valuation",
+            [
+                {"source": "source_a", "value": 10.0},
+                {"source": "source_b", "value": 1000.0},
+            ],
+        )
         assert len(flags) == 1
         assert flags[0].severity == "critical"
         assert flags[0].ratio >= 10.0
 
     def test_skips_zero_values(self) -> None:
-        flags = detect_contradictions("revenue", [
-            {"source": "source_a", "value": 0},
-            {"source": "source_b", "value": 100.0},
-        ])
+        flags = detect_contradictions(
+            "revenue",
+            [
+                {"source": "source_a", "value": 0},
+                {"source": "source_b", "value": 100.0},
+            ],
+        )
         assert len(flags) == 0
 
     def test_skips_ambiguous_normalized_values(self) -> None:
         ambiguous = NormalizedValue(
-            raw_input="5000", value=5000.0,
-            unit=NumericUnit.UNKNOWN, currency=Currency.UNKNOWN,
-            confidence=0.2, is_ambiguous=True,
+            raw_input="5000",
+            value=5000.0,
+            unit=NumericUnit.UNKNOWN,
+            currency=Currency.UNKNOWN,
+            confidence=0.2,
+            is_ambiguous=True,
         )
-        flags = detect_contradictions("revenue", [
-            {"source": "source_a", "value": ambiguous},
-            {"source": "source_b", "value": 100.0},
-        ])
+        flags = detect_contradictions(
+            "revenue",
+            [
+                {"source": "source_a", "value": ambiguous},
+                {"source": "source_b", "value": 100.0},
+            ],
+        )
         assert len(flags) == 0
 
     def test_uses_normalized_value_when_not_ambiguous(self) -> None:
         nv = NormalizedValue(
-            raw_input="$200M", value=200.0,
-            unit=NumericUnit.MILLIONS, currency=Currency.USD,
-            confidence=0.9, is_ambiguous=False,
+            raw_input="$200M",
+            value=200.0,
+            unit=NumericUnit.MILLIONS,
+            currency=Currency.USD,
+            confidence=0.9,
+            is_ambiguous=False,
         )
-        flags = detect_contradictions("revenue", [
-            {"source": "sec", "value": nv},
-            {"source": "news", "value": 800.0},
-        ])
+        flags = detect_contradictions(
+            "revenue",
+            [
+                {"source": "sec", "value": nv},
+                {"source": "news", "value": 800.0},
+            ],
+        )
         assert len(flags) == 1
         assert flags[0].severity == "major"
 
     def test_multiple_sources_pairwise(self) -> None:
-        flags = detect_contradictions("employees", [
-            {"source": "a", "value": 100.0},
-            {"source": "b", "value": 500.0},
-            {"source": "c", "value": 110.0},
-        ])
+        flags = detect_contradictions(
+            "employees",
+            [
+                {"source": "a", "value": 100.0},
+                {"source": "b", "value": 500.0},
+                {"source": "c", "value": 110.0},
+            ],
+        )
         # a vs b = 5x (major), b vs c = 4.5x (major), a vs c = 1.1x (no flag)
         assert len(flags) == 2
 
@@ -379,9 +408,12 @@ class TestDetectContradictions:
         assert len(flags) == 0
 
     def test_single_source(self) -> None:
-        flags = detect_contradictions("revenue", [
-            {"source": "a", "value": 100.0},
-        ])
+        flags = detect_contradictions(
+            "revenue",
+            [
+                {"source": "a", "value": 100.0},
+            ],
+        )
         assert len(flags) == 0
 
 
@@ -423,9 +455,12 @@ class TestSerialization:
 
     def test_normalized_value_to_dict(self) -> None:
         nv = NormalizedValue(
-            raw_input="$200M", value=200.0,
-            unit=NumericUnit.MILLIONS, currency=Currency.USD,
-            confidence=0.9, is_ambiguous=False,
+            raw_input="$200M",
+            value=200.0,
+            unit=NumericUnit.MILLIONS,
+            currency=Currency.USD,
+            confidence=0.9,
+            is_ambiguous=False,
         )
         d = normalized_value_to_dict(nv)
         assert d["value"] == 200.0

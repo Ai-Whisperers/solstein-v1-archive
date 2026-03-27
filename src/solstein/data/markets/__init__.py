@@ -5,25 +5,25 @@ EPIC-021: Modularized from monolithic 510-line markets.py file.
 
 from __future__ import annotations
 
-# Enums
-from .models import Currency, MarketRegion
-
-# Models
-from .models import (
-    CurrencyRate,
-    GlobalStockData,
-    IndexData,
-    MarketDataPoint,
-    MarketIndex,
-    StockExchange,
-)
+# Classes
+from .currency import CurrencyConverter
 
 # Data
 from .exchanges import STOCK_EXCHANGES
 from .indices import MARKET_INDICES
 
-# Classes
-from .currency import CurrencyConverter
+# Enums
+# Models
+from .models import (
+    Currency,
+    CurrencyRate,
+    GlobalStockData,
+    IndexData,
+    MarketDataPoint,
+    MarketIndex,
+    MarketRegion,
+    StockExchange,
+)
 
 # Functions
 from .utils import format_price, get_exchange_for_ticker, get_index_for_region

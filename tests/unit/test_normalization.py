@@ -3,8 +3,9 @@
 E2: Tests for extracted normalization utilities.
 """
 
-import pytest
 from decimal import Decimal
+
+import pytest
 
 from solstein.data.normalization import (
     DataNormalizer,

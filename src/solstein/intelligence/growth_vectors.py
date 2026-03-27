@@ -7,10 +7,8 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Any, Optional
 
 from .financial_models import GrowthVector, GrowthVectorType
-
 
 # AI/ML signal keywords
 AI_ML_SIGNALS = {
@@ -161,7 +159,7 @@ class VectorDetectionResult:
     """Result of growth vector detection."""
 
     vectors: list[GrowthVector] = field(default_factory=list)
-    primary_vector: Optional[GrowthVectorType] = None
+    primary_vector: GrowthVectorType | None = None
     confidence_scores: dict[str, float] = field(default_factory=dict)
     summary: str = ""
 
@@ -182,10 +180,10 @@ class GrowthVectorDetector:
         company_description: str = "",
         recent_news: list[str] = None,
         funding_rounds: list[dict] = None,
-        employees: Optional[int] = None,
-        growth_rate: Optional[float] = None,
-        ai_score: Optional[float] = None,
-        saas_maturity: Optional[float] = None,
+        employees: int | None = None,
+        growth_rate: float | None = None,
+        ai_score: float | None = None,
+        saas_maturity: float | None = None,
     ) -> VectorDetectionResult:
         """Detect growth vectors from company data.
 
@@ -261,7 +259,7 @@ class GrowthVectorDetector:
             summary=summary,
         )
 
-    def _detect_ai_vector(self, text: str, ai_score: Optional[float]) -> GrowthVector:
+    def _detect_ai_vector(self, text: str, ai_score: float | None) -> GrowthVector:
         """Detect AI/ML growth vector."""
         evidence = []
         confidence = 0.0
@@ -300,7 +298,7 @@ class GrowthVectorDetector:
             estimated_impact=impact,
         )
 
-    def _detect_saas_vector(self, text: str, saas_maturity: Optional[float]) -> GrowthVector:
+    def _detect_saas_vector(self, text: str, saas_maturity: float | None) -> GrowthVector:
         """Detect SaaS scaling vector."""
         evidence = []
         confidence = 0.0
@@ -338,7 +336,7 @@ class GrowthVectorDetector:
             estimated_impact=impact,
         )
 
-    def _detect_geo_vector(self, text: str, funding_rounds: Optional[list[dict]]) -> GrowthVector:
+    def _detect_geo_vector(self, text: str, funding_rounds: list[dict] | None) -> GrowthVector:
         """Detect geographic expansion vector."""
         evidence = []
         confidence = 0.0
@@ -376,7 +374,7 @@ class GrowthVectorDetector:
             estimated_impact=impact,
         )
 
-    def _detect_ma_vector(self, text: str, funding_rounds: Optional[list[dict]]) -> GrowthVector:
+    def _detect_ma_vector(self, text: str, funding_rounds: list[dict] | None) -> GrowthVector:
         """Detect M&A growth vector."""
         evidence = []
         confidence = 0.0
@@ -467,7 +465,7 @@ class GrowthVectorDetector:
             estimated_impact=impact,
         )
 
-    def _generate_summary(self, vectors: list[GrowthVector], growth_rate: Optional[float]) -> str:
+    def _generate_summary(self, vectors: list[GrowthVector], growth_rate: float | None) -> str:
         """Generate summary of growth vectors."""
         if not vectors:
             return "No clear growth vectors identified from available data."

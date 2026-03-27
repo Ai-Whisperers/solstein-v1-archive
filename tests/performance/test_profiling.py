@@ -10,9 +10,7 @@ from pathlib import Path
 import pytest
 
 from solstein.monitoring.profiling import (
-    PROFILING_ENABLED,
     ProfileResult,
-    PerformanceProfiler,
     profile,
     profiler,
     time_it,

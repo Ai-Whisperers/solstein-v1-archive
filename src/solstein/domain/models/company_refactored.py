@@ -77,7 +77,7 @@ class CompanyPropertyMixin:
 class CompanySyncMixin:
     """Mixin providing synchronization methods for Company model."""
 
-    def sync_financial_fields(self) -> "Company":
+    def sync_financial_fields(self) -> Company:
         """Synchronize financial fields between top-level and financials object."""
         # Ensure company_name is set
         if self.company_name is None:

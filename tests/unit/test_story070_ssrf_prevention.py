@@ -113,8 +113,10 @@ class TestDNSRebinding:
         fake_addrinfo = [
             (socket.AF_INET, socket.SOCK_STREAM, 0, "", ("10.0.0.1", 0)),
         ]
-        with patch("solstein.core.url_validator.socket.getaddrinfo", return_value=fake_addrinfo), \
-                pytest.raises(SSRFError, match="blocked"):
+        with (
+            patch("solstein.core.url_validator.socket.getaddrinfo", return_value=fake_addrinfo),
+            pytest.raises(SSRFError, match="blocked"),
+        ):
             validate_url("http://evil-rebind.example.com/")
 
     def test_blocks_hostname_resolving_to_loopback(self):
@@ -122,8 +124,10 @@ class TestDNSRebinding:
         fake_addrinfo = [
             (socket.AF_INET, socket.SOCK_STREAM, 0, "", ("127.0.0.1", 0)),
         ]
-        with patch("solstein.core.url_validator.socket.getaddrinfo", return_value=fake_addrinfo), \
-                pytest.raises(SSRFError, match="blocked"):
+        with (
+            patch("solstein.core.url_validator.socket.getaddrinfo", return_value=fake_addrinfo),
+            pytest.raises(SSRFError, match="blocked"),
+        ):
             validate_url("http://localhost-rebind.example.com/")
 
     def test_blocks_hostname_resolving_to_metadata(self):
@@ -131,8 +135,10 @@ class TestDNSRebinding:
         fake_addrinfo = [
             (socket.AF_INET, socket.SOCK_STREAM, 0, "", ("169.254.169.254", 0)),
         ]
-        with patch("solstein.core.url_validator.socket.getaddrinfo", return_value=fake_addrinfo), \
-                pytest.raises(SSRFError, match="blocked"):
+        with (
+            patch("solstein.core.url_validator.socket.getaddrinfo", return_value=fake_addrinfo),
+            pytest.raises(SSRFError, match="blocked"),
+        ):
             validate_url("http://metadata-rebind.example.com/")
 
 
@@ -146,22 +152,16 @@ class TestSharedUtilityUsage:
     def test_website_agent_imports_validator(self):
         """website_agent.py must import from url_validator."""
         content = WEBSITE_AGENT_PATH.read_text()
-        assert "validate_url" in content, (
-            "website_agent.py does not use validate_url"
-        )
+        assert "validate_url" in content, "website_agent.py does not use validate_url"
 
     def test_website_agent_calls_validate_url(self):
         """website_agent.py must call validate_url before fetch."""
         content = WEBSITE_AGENT_PATH.read_text()
         validate_pos = content.find("validate_url")
         fetch_pos = content.find("requests.get")
-        assert validate_pos < fetch_pos, (
-            "validate_url must be called before requests.get in website_agent.py"
-        )
+        assert validate_pos < fetch_pos, "validate_url must be called before requests.get in website_agent.py"
 
     def test_website_agent_catches_ssrf_error(self):
         """website_agent.py must catch SSRFError specifically."""
         content = WEBSITE_AGENT_PATH.read_text()
-        assert "SSRFError" in content, (
-            "website_agent.py does not catch SSRFError"
-        )
+        assert "SSRFError" in content, "website_agent.py does not catch SSRFError"

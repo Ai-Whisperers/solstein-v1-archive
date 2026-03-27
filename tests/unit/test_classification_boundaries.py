@@ -2,11 +2,13 @@
 Classification Boundary Tests
 Verifies that classification thresholds are unified and consistent across all code paths.
 """
+
 import pytest
+
 from solstein.analytics.classification import classify_company_balanced
 from solstein.analytics.classification_service import ClassificationService, classify_company
+from solstein.analytics.constants import LEAD_SCORE_THRESHOLD, PHOENIX_SCORE_THRESHOLD, SALT_SCORE_THRESHOLD
 from solstein.analytics.scoring import classify_company as scoring_classify
-from solstein.analytics.constants import PHOENIX_SCORE_THRESHOLD, SALT_SCORE_THRESHOLD, LEAD_SCORE_THRESHOLD
 
 
 class TestClassificationBoundaries:
@@ -24,25 +26,28 @@ class TestClassificationBoundaries:
         """Verify Lead threshold is 4.49 (anything below Salt threshold)."""
         assert LEAD_SCORE_THRESHOLD == 4.49
 
-    @pytest.mark.parametrize("score,expected", [
-        # Phoenix: >= 7.0
-        (10.0, "Phoenix"),
-        (9.0, "Phoenix"),
-        (8.0, "Phoenix"),
-        (7.5, "Phoenix"),
-        (7.0, "Phoenix"),
-        # Salt: 4.5 - 6.99
-        (6.9, "Salt"),
-        (6.0, "Salt"),
-        (5.5, "Salt"),
-        (5.0, "Salt"),
-        (4.5, "Salt"),
-        # Lead: < 4.5
-        (4.4, "Lead"),
-        (4.0, "Lead"),
-        (3.0, "Lead"),
-        (0.0, "Lead"),
-    ])
+    @pytest.mark.parametrize(
+        "score,expected",
+        [
+            # Phoenix: >= 7.0
+            (10.0, "Phoenix"),
+            (9.0, "Phoenix"),
+            (8.0, "Phoenix"),
+            (7.5, "Phoenix"),
+            (7.0, "Phoenix"),
+            # Salt: 4.5 - 6.99
+            (6.9, "Salt"),
+            (6.0, "Salt"),
+            (5.5, "Salt"),
+            (5.0, "Salt"),
+            (4.5, "Salt"),
+            # Lead: < 4.5
+            (4.4, "Lead"),
+            (4.0, "Lead"),
+            (3.0, "Lead"),
+            (0.0, "Lead"),
+        ],
+    )
     def test_classify_company_boundaries(self, score, expected):
         """Test classification at all boundary values."""
         assert classify_company(score) == expected
@@ -73,6 +78,7 @@ class TestThresholdSingleSourceOfTruth:
     def test_thresholds_defined_in_constants(self):
         """Verify classification thresholds exist in constants module."""
         from solstein.analytics import constants
+
         assert hasattr(constants, "PHOENIX_SCORE_THRESHOLD")
         assert hasattr(constants, "SALT_SCORE_THRESHOLD")
         assert hasattr(constants, "LEAD_SCORE_THRESHOLD")

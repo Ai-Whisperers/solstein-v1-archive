@@ -3,9 +3,6 @@
 F3: Tests for standardized error envelope.
 """
 
-import pytest
-from datetime import datetime
-
 from solstein.core.error_envelope import (
     ErrorCategory,
     ErrorContext,

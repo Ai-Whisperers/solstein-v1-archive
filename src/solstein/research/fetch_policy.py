@@ -168,47 +168,62 @@ DEFAULT_POLICIES: dict[DomainClass, FetchPolicy] = {
 # ---------------------------------------------------------------------------
 
 # Domains known to block bots aggressively
-_BLOCKED_PRONE_DOMAINS: frozenset[str] = frozenset({
-    "linkedin.com",
-    "glassdoor.com",
-    "indeed.com",
-    "facebook.com",
-    "instagram.com",
-    "twitter.com",
-    "x.com",
-})
+_BLOCKED_PRONE_DOMAINS: frozenset[str] = frozenset(
+    {
+        "linkedin.com",
+        "glassdoor.com",
+        "indeed.com",
+        "facebook.com",
+        "instagram.com",
+        "twitter.com",
+        "x.com",
+    }
+)
 
 # Domains that rely heavily on JavaScript rendering
-_JS_HEAVY_DOMAINS: frozenset[str] = frozenset({
-    "bloomberg.com",
-    "wsj.com",
-    "ft.com",
-    "reuters.com",
-    "techcrunch.com",
-    "pitchbook.com",
-    "app.dealroom.co",
-})
+_JS_HEAVY_DOMAINS: frozenset[str] = frozenset(
+    {
+        "bloomberg.com",
+        "wsj.com",
+        "ft.com",
+        "reuters.com",
+        "techcrunch.com",
+        "pitchbook.com",
+        "app.dealroom.co",
+    }
+)
 
 # Trusted data sources with stable, bot-friendly pages
-_TRUSTED_DOMAINS: frozenset[str] = frozenset({
-    "sec.gov",
-    "companieshouse.gov.uk",
-    "opencorporates.com",
-    "wikipedia.org",
-    "wikidata.org",
-    "github.com",
-    "crunchbase.com",
-})
+_TRUSTED_DOMAINS: frozenset[str] = frozenset(
+    {
+        "sec.gov",
+        "companieshouse.gov.uk",
+        "opencorporates.com",
+        "wikipedia.org",
+        "wikidata.org",
+        "github.com",
+        "crunchbase.com",
+    }
+)
 
 # Document-heavy domains (PDFs, spreadsheets, etc.)
-_DOCUMENT_HEAVY_DOMAINS: frozenset[str] = frozenset({
-    "sec.gov",  # Also trusted, but EDGAR filings are document-heavy
-})
+_DOCUMENT_HEAVY_DOMAINS: frozenset[str] = frozenset(
+    {
+        "sec.gov",  # Also trusted, but EDGAR filings are document-heavy
+    }
+)
 
 # Document-heavy file extensions
-_DOCUMENT_EXTENSIONS: frozenset[str] = frozenset({
-    ".pdf", ".xlsx", ".xls", ".csv", ".doc", ".docx",
-})
+_DOCUMENT_EXTENSIONS: frozenset[str] = frozenset(
+    {
+        ".pdf",
+        ".xlsx",
+        ".xls",
+        ".csv",
+        ".doc",
+        ".docx",
+    }
+)
 
 
 def classify_domain(url: str) -> DomainClass:
@@ -278,7 +293,9 @@ def get_policy(
         max_retries=int(overrides["max_retries"]) if "max_retries" in overrides else base.max_retries,
         timeout_seconds=float(overrides["timeout_seconds"]) if "timeout_seconds" in overrides else base.timeout_seconds,
         backoff_base=float(overrides["backoff_base"]) if "backoff_base" in overrides else base.backoff_base,
-        reader_url_template=str(overrides["reader_url_template"]) if "reader_url_template" in overrides else base.reader_url_template,
+        reader_url_template=str(overrides["reader_url_template"])
+        if "reader_url_template" in overrides
+        else base.reader_url_template,
     )
 
 
@@ -287,7 +304,7 @@ def compute_backoff(attempt: int, backoff_base: float) -> float:
 
     Uses exponential backoff with a hard cap of 30 seconds.
     """
-    delay = backoff_base * (2 ** attempt)
+    delay = backoff_base * (2**attempt)
     return min(delay, 30.0)
 
 
@@ -384,7 +401,9 @@ async def execute_policy_fetch(
             target_url = policy.reader_url(url) if step_strategy == FetchStrategy.READER else url
             try:
                 response = await http_client.get(
-                    target_url, headers=headers, timeout=policy.timeout_seconds,
+                    target_url,
+                    headers=headers,
+                    timeout=policy.timeout_seconds,
                 )
                 response.raise_for_status()
                 text = response.text
@@ -393,40 +412,64 @@ async def execute_policy_fetch(
 
                 # Check content quality
                 is_good = (
-                    (text and len(text) >= 50) if step_strategy == FetchStrategy.READER
+                    (text and len(text) >= 50)
+                    if step_strategy == FetchStrategy.READER
                     else usability.is_usable(text, content_type)
                 )
 
                 if is_good:
-                    attempts.append(record_attempt(
-                        url, step_strategy, retry + 1, FetchOutcome.SUCCESS,
-                        status_code=response.status_code,
-                        duration_ms=duration, content_length=len(text),
-                    ))
+                    attempts.append(
+                        record_attempt(
+                            url,
+                            step_strategy,
+                            retry + 1,
+                            FetchOutcome.SUCCESS,
+                            status_code=response.status_code,
+                            duration_ms=duration,
+                            content_length=len(text),
+                        )
+                    )
                     return FetchResult(
-                        url=url, domain_class=domain_class, policy=policy,
-                        success=True, content=text, content_type=content_type,
-                        attempts=attempts, terminal_outcome=FetchOutcome.SUCCESS,
+                        url=url,
+                        domain_class=domain_class,
+                        policy=policy,
+                        success=True,
+                        content=text,
+                        content_type=content_type,
+                        attempts=attempts,
+                        terminal_outcome=FetchOutcome.SUCCESS,
                         total_duration_ms=elapsed_ms(overall_start),
                     )
 
                 # Content retrieved but not usable
                 outcome = FetchOutcome.BLOCKED if usability.looks_blocked(text) else FetchOutcome.UNUSABLE_CONTENT
-                attempts.append(record_attempt(
-                    url, step_strategy, retry + 1, outcome,
-                    status_code=response.status_code, duration_ms=duration,
-                    error_message=f"Content not usable ({outcome.value})",
-                    content_length=len(text),
-                ))
+                attempts.append(
+                    record_attempt(
+                        url,
+                        step_strategy,
+                        retry + 1,
+                        outcome,
+                        status_code=response.status_code,
+                        duration_ms=duration,
+                        error_message=f"Content not usable ({outcome.value})",
+                        content_length=len(text),
+                    )
+                )
                 break  # Don't retry for blocked/unusable — move to next strategy
 
             except Exception as exc:
                 outcome, status_code = _classify_fetch_error(exc)
-                attempts.append(record_attempt(
-                    url, step_strategy, retry + 1, outcome,
-                    status_code=status_code, duration_ms=elapsed_ms(attempt_start),
-                    error_message=str(exc),
-                ))
+                attempts.append(
+                    record_attempt(
+                        url,
+                        step_strategy,
+                        retry + 1,
+                        outcome,
+                        status_code=status_code,
+                        duration_ms=elapsed_ms(attempt_start),
+                        error_message=str(exc),
+                    )
+                )
                 # Don't retry 4xx errors
                 if outcome == FetchOutcome.HTTP_ERROR and status_code and 400 <= status_code < 500:
                     break
@@ -436,8 +479,12 @@ async def execute_policy_fetch(
     # All strategies exhausted
     terminal = attempts[-1].outcome if attempts else FetchOutcome.NETWORK_ERROR
     return FetchResult(
-        url=url, domain_class=domain_class, policy=policy,
-        success=False, attempts=attempts, terminal_outcome=terminal,
+        url=url,
+        domain_class=domain_class,
+        policy=policy,
+        success=False,
+        attempts=attempts,
+        terminal_outcome=terminal,
         total_duration_ms=elapsed_ms(overall_start),
     )
 

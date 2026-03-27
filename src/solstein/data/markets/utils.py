@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from .models import Currency, MarketIndex, MarketRegion, StockExchange
 from .exchanges import STOCK_EXCHANGES
 from .indices import MARKET_INDICES
+from .models import Currency, MarketIndex, MarketRegion, StockExchange
 
 
 def get_exchange_for_ticker(ticker: str) -> StockExchange:

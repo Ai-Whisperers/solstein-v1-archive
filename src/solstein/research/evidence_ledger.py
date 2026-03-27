@@ -40,8 +40,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
-from loguru import logger
-
 from .numeric_normalization import (
     ContradictionFlag,
     NormalizedValue,
@@ -128,10 +126,7 @@ def run_record_to_dict(run: RunRecord) -> dict[str, Any]:
         "run_id": run.run_id,
         "timestamp": run.timestamp,
         "sources_used": run.sources_used,
-        "field_evidence": {
-            name: field_evidence_to_dict(ev)
-            for name, ev in run.field_evidence.items()
-        },
+        "field_evidence": {name: field_evidence_to_dict(ev) for name, ev in run.field_evidence.items()},
     }
 
 
@@ -154,10 +149,7 @@ def dict_to_field_evidence(name: str, data: dict[str, Any]) -> FieldEvidence:
     return FieldEvidence(
         field_name=name,
         winner=dict_to_candidate(winner_data) if isinstance(winner_data, dict) else None,
-        candidates=[
-            dict_to_candidate(c) for c in data.get("candidates", [])
-            if isinstance(c, dict)
-        ],
+        candidates=[dict_to_candidate(c) for c in data.get("candidates", []) if isinstance(c, dict)],
         contradiction_flags=[],  # flags are informational, not round-tripped
     )
 
@@ -170,9 +162,7 @@ def dict_to_run_record(data: dict[str, Any]) -> RunRecord:
         timestamp=data.get("timestamp", ""),
         sources_used=list(data.get("sources_used", [])),
         field_evidence={
-            name: dict_to_field_evidence(name, ev)
-            for name, ev in evidence_data.items()
-            if isinstance(ev, dict)
+            name: dict_to_field_evidence(name, ev) for name, ev in evidence_data.items() if isinstance(ev, dict)
         },
     )
 
@@ -206,13 +196,15 @@ def build_field_evidence(
         if value is None:
             continue
 
-        candidates.append(EvidenceCandidate(
-            value=value,
-            source_url=source_url,
-            confidence=float(item.get("confidence", 0.0)),
-            extraction_timestamp=now,
-            is_ambiguous=False,
-        ))
+        candidates.append(
+            EvidenceCandidate(
+                value=value,
+                source_url=source_url,
+                confidence=float(item.get("confidence", 0.0)),
+                extraction_timestamp=now,
+                is_ambiguous=False,
+            )
+        )
 
     winner_candidate = EvidenceCandidate(
         value=winner.value,
@@ -378,23 +370,37 @@ def get_field_lineage(
             continue
         winner = field_ev.get("winner")
         if isinstance(winner, dict):
-            lineage.append({
-                "run_id": run_data.get("run_id", ""),
-                "timestamp": run_data.get("timestamp", ""),
-                "value": winner.get("value"),
-                "source_url": winner.get("source_url", ""),
-                "confidence": winner.get("confidence", 0.0),
-            })
+            lineage.append(
+                {
+                    "run_id": run_data.get("run_id", ""),
+                    "timestamp": run_data.get("timestamp", ""),
+                    "value": winner.get("value"),
+                    "source_url": winner.get("source_url", ""),
+                    "confidence": winner.get("confidence", 0.0),
+                }
+            )
 
     return lineage
 
 
 __all__ = [
-    "SCHEMA_VERSION", "MAX_RUNS_PER_COMPANY",
-    "WinnerInfo", "EvidenceCandidate", "FieldEvidence", "RunRecord",
-    "generate_run_id", "build_field_evidence",
-    "candidate_to_dict", "field_evidence_to_dict", "run_record_to_dict",
-    "dict_to_candidate", "dict_to_field_evidence", "dict_to_run_record",
-    "detect_schema_version", "migrate_v1_to_v2",
-    "append_run", "get_latest_run", "get_field_lineage",
+    "SCHEMA_VERSION",
+    "MAX_RUNS_PER_COMPANY",
+    "WinnerInfo",
+    "EvidenceCandidate",
+    "FieldEvidence",
+    "RunRecord",
+    "generate_run_id",
+    "build_field_evidence",
+    "candidate_to_dict",
+    "field_evidence_to_dict",
+    "run_record_to_dict",
+    "dict_to_candidate",
+    "dict_to_field_evidence",
+    "dict_to_run_record",
+    "detect_schema_version",
+    "migrate_v1_to_v2",
+    "append_run",
+    "get_latest_run",
+    "get_field_lineage",
 ]

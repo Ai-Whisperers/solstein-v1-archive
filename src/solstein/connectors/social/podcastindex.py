@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -16,7 +16,7 @@ class PodcastIndexConnector(BaseConnector):
 
     BASE_URL = "https://api.podcastindex.org/api/1.0"
 
-    def __init__(self, api_key: Optional[str] = None, api_secret: Optional[str] = None):
+    def __init__(self, api_key: str | None = None, api_secret: str | None = None):
         config = SourceConfig(
             name="podcastindex",
             base_url=self.BASE_URL,

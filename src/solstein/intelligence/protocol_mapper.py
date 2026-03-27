@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import re
-from typing import Optional
-
 from .protocol_models import (
     EU_ENERGY_PROTOCOLS,
     MarketMaturity,
@@ -13,7 +10,6 @@ from .protocol_models import (
     ProtocolPresence,
     ProtocolType,
 )
-
 
 COUNTRY_PATTERNS = {
     "DE": ["germany", "german", "deutschland", "berlin", "munich", "hamburg"],
@@ -170,7 +166,7 @@ class ProtocolMapper:
 
         return list(detected)
 
-    def _detect_country_from_hq(self, headquarters: str) -> Optional[str]:
+    def _detect_country_from_hq(self, headquarters: str) -> str | None:
         text = headquarters.lower()
 
         country_mappings = {
@@ -213,7 +209,7 @@ class ProtocolMapper:
         country_code: str,
         text: str,
         company_name: str,
-    ) -> Optional[MarketPresence]:
+    ) -> MarketPresence | None:
         country_name = self._get_country_name(country_code)
 
         protocols = self.known_protocols.get(country_code, [])
@@ -371,7 +367,7 @@ class ProtocolMapper:
         if protocol_map.geographic_diversification_score < 5:
             opportunities.append("Geographic diversification to reduce single-market risk")
 
-        missing_mature = set(["Germany", "United Kingdom", "Netherlands"]) - set(protocol_map.primary_markets)
+        missing_mature = {"Germany", "United Kingdom", "Netherlands"} - set(protocol_map.primary_markets)
         if missing_mature:
             opportunities.append(f"Consider entry to major market: {', '.join(missing_mature)}")
 

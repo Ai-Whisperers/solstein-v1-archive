@@ -7,9 +7,10 @@ Provides timing and throughput measurements for loader operations.
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 from loguru import logger
 
@@ -157,7 +158,6 @@ class PerformanceBenchmark:
         Returns:
             Result of the coroutine
         """
-        import asyncio
 
         start_time = time.perf_counter()
         try:
@@ -348,5 +348,3 @@ class LoaderPerformanceMonitor:
         """Log the benchmark summary."""
         summary = self.benchmark.to_dict()
         logger.info("Loader performance summary", **summary)
-
-

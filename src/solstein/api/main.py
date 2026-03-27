@@ -100,6 +100,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # EPIC-018: Warm cache in background
     try:
         import asyncio as _asyncio
+
         from solstein.infrastructure.cache import CacheManager as _CacheManager
 
         _cache = _CacheManager()

@@ -96,8 +96,7 @@ class HttpTimeoutsConfig(BaseModel):
         default=2.0,
         ge=0.1,
         description=(
-            "Celery inspect timeout (seconds) used by the health endpoint. "
-            "Default: 2.0s — fast health check."
+            "Celery inspect timeout (seconds) used by the health endpoint. Default: 2.0s — fast health check."
         ),
     )
 
@@ -115,8 +114,7 @@ class CircuitBreakerConfig(BaseModel):
         default=5,
         ge=1,
         description=(
-            "Consecutive failures before the circuit opens. Default: 5. "
-            "Previously varied between 3–5 across agents."
+            "Consecutive failures before the circuit opens. Default: 5. Previously varied between 3–5 across agents."
         ),
     )
     recovery_timeout: float = Field(

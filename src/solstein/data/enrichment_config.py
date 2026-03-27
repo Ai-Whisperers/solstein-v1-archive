@@ -12,9 +12,7 @@ Centralized configuration for the enrichment system with:
 
 import os
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 from datetime import datetime, timezone
-
 
 from loguru import logger
 
@@ -44,7 +42,7 @@ class EnvValidator:
     }
 
     @staticmethod
-    def validate_startup() -> Dict[str, object]:
+    def validate_startup() -> dict[str, object]:
         """
         Validate .env file on startup.
 
@@ -54,7 +52,7 @@ class EnvValidator:
         Raises:
             ConfigError: If required keys missing or invalid
         """
-        env_vars: Dict[str, object] = {}
+        env_vars: dict[str, object] = {}
 
         # Check required keys
         for key, description in EnvValidator.REQUIRED_KEYS.items():
@@ -161,7 +159,7 @@ class ConnectorConfig:
     enabled: bool = True
     timeout_seconds: int = 30
     max_retries: int = 3
-    api_key: Optional[str] = None
+    api_key: str | None = None
     batch_size: int = 10
     cache_ttl_hours: int = 24
 
@@ -265,7 +263,7 @@ class UnifiedCompanyLoaderConfig:
                     return default
             return default
 
-        def as_optional_str(key: str) -> Optional[str]:
+        def as_optional_str(key: str) -> str | None:
             raw = env_vars.get(key)
             if isinstance(raw, str):
                 return raw
@@ -344,7 +342,7 @@ class UnifiedCompanyLoaderConfig:
 
 
 # Global configuration instance
-_global_config: Optional[UnifiedCompanyLoaderConfig] = None
+_global_config: UnifiedCompanyLoaderConfig | None = None
 
 
 def get_config() -> UnifiedCompanyLoaderConfig:

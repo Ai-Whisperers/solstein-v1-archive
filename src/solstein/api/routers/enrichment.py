@@ -24,14 +24,15 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
+from .enrichment_audit import router as audit_router
+
 # Import all endpoints from modular files
 from .enrichment_base import router as base_router
+from .enrichment_batch import router as batch_router
+from .enrichment_cache import router as cache_router
 from .enrichment_health import router as health_router
 from .enrichment_metrics import router as metrics_router
 from .enrichment_single import router as single_router
-from .enrichment_batch import router as batch_router
-from .enrichment_audit import router as audit_router
-from .enrichment_cache import router as cache_router
 
 # Create main router
 router = APIRouter()
@@ -46,24 +47,23 @@ router.include_router(audit_router)
 router.include_router(cache_router)
 
 # Re-export for backward compatibility
+from .enrichment_audit import get_audit_trail
 from .enrichment_base import (
+    check_cache_health,
+    check_companies_house_health,
+    check_database_health,
+    check_news_signals_health,
+    check_sec_edgar_health,
     get_audit_repo_if_available,
     get_cache_repo_if_available,
-    check_database_health,
-    check_sec_edgar_health,
-    check_companies_house_health,
-    check_news_signals_health,
-    check_cache_health,
     get_client_id,
     logger,
 )
-
+from .enrichment_batch import enrich_batch
+from .enrichment_cache import check_cache, clear_all_cache, clear_company_cache
 from .enrichment_health import health_check, readiness_check
 from .enrichment_metrics import get_metrics
 from .enrichment_single import enrich_single_company
-from .enrichment_batch import enrich_batch
-from .enrichment_audit import get_audit_trail
-from .enrichment_cache import check_cache, clear_all_cache, clear_company_cache
 
 __all__ = [
     # Router

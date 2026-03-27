@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 
 class ProtocolType(Enum):
@@ -42,7 +41,7 @@ class MarketProtocol:
 class ProtocolPresence:
     protocol: MarketProtocol
     is_active: bool
-    entry_date: Optional[str] = None
+    entry_date: str | None = None
     capabilities_used: list[str] = field(default_factory=list)
     evidence_source: str = ""
 
@@ -53,7 +52,7 @@ class MarketPresence:
     country_name: str
     protocols: list[ProtocolPresence] = field(default_factory=list)
     market_maturity: MarketMaturity = MarketMaturity.MATURE
-    market_share_estimate: Optional[str] = None
+    market_share_estimate: str | None = None
     competitive_intensity: str = "medium"
     entry_barriers: list[str] = field(default_factory=list)
     local_partners: list[str] = field(default_factory=list)

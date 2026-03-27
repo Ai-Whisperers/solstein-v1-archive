@@ -15,17 +15,16 @@ import httpx
 from bs4 import BeautifulSoup
 from loguru import logger
 
+from ..llm.enhanced_client import EnhancedLLMClient
 from .fetch_policy import FetchResult, execute_policy_fetch
 from .research_types import (
     ExtractedData,
     ResearchPlan,
+    ResearchReport,
     SearchResult,
     ValidationResult,
-    ResearchReport,
 )
 from .web_search_agent import WebSearchAgent
-from ..llm.enhanced_client import EnhancedLLMClient
-
 
 # ---------------------------------------------------------------------------
 # Agent classes
@@ -144,8 +143,11 @@ class ContentExtractorAgent:
                     extra={"fetch_metadata": fetch_result.to_metadata()},
                 )
                 return ExtractedData(
-                    url, "error", {"_fetch_metadata": fetch_result.to_metadata()},
-                    0.0, f"fetch_failed:{fetch_result.terminal_outcome.value}",
+                    url,
+                    "error",
+                    {"_fetch_metadata": fetch_result.to_metadata()},
+                    0.0,
+                    f"fetch_failed:{fetch_result.terminal_outcome.value}",
                     raw_content="",
                 )
 
@@ -186,9 +188,15 @@ class ContentExtractorAgent:
     def _looks_blocked_page(text: str) -> bool:
         lower = text.lower()
         blocked_markers = [
-            "enable javascript", "access denied", "are you a human",
-            "captcha", "bot detection", "cloudflare",
-            "forbidden", "please sign in", "login required",
+            "enable javascript",
+            "access denied",
+            "are you a human",
+            "captcha",
+            "bot detection",
+            "cloudflare",
+            "forbidden",
+            "please sign in",
+            "login required",
         ]
         return any(marker in lower for marker in blocked_markers)
 
