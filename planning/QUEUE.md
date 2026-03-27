@@ -134,7 +134,10 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 29 | — | See EPIC-064 README for stories | READY | 4 stories |
+| 29 | STORY-234 | Fix broken relative links across docs/ and backlog/ | DONE | PR #96 |
+| 30 | STORY-235 | Allowlist unresolvable links | DONE | PR #96 |
+| 31 | STORY-236 | Replace placeholder tokens with descriptive text | DONE | PR #96 |
+| 32 | STORY-237 | Mirror drift analysis — docs/active/backlog/ vs backlog/EPICS/ | DONE | PR #96 |
 
 ---
 
@@ -274,3 +277,15 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: EPIC-020 (4 stories) → READY (M1 now fully merged)
 - **Branch hygiene**: Removed stale lock (PID 2888213 dead). Pushed 1 pending develop commit. Deleted 9 remote feature branches + 1 orphaned STORY-144 branch. Deleted 11 local merged branches. 2 remote branches remain (develop, master + STORY-172).
 - **Uncommitted work**: 35 modified/new files on develop from stopped EPIC-064 worker session — left uncommitted for next worker to handle.
+
+### [2026-03-26] Worker Run — EPIC-064 Complete
+- **EPIC-064 (Markdown Integrity)**: All 4 stories implemented — PR #96 targeting develop.
+  - STORY-234: Fixed 53 broken relative links across backlog/ and docs/ (12 EPIC-054/055/056 story files; docs/reference/; docs/guides/; docs/developers/; backlog/README.md; EPIC-001/020/023/024/044 readmes/stories)
+  - STORY-235: Created docs/link-allowlist.md documenting 101 allowlisted links (77 mirror group + 24 active-unresolvable). Before: 164 broken / 87 active. After: 111 broken / 34 active.
+  - STORY-236: Eliminated placeholder tokens — EPIC-XXX → descriptive labels (FILE-OWNERSHIP-MATRIX.md); TBD → unverified/not-yet-verified (IVAN_FIXES checklist, STORY-100)
+  - STORY-237: Mirror drift report generated (docs/MIRROR_DRIFT_REPORT_2026-03-26.md). Decision: retire docs/active/backlog/. Deletion pending human approval.
+- **Branch**: feature/EPIC-064-markdown-integrity
+- **Commit**: 585e24d — 36 files changed, 247 insertions, 107 deletions
+- **Quality gates**: All pre-commit hooks passed (trailing whitespace auto-fixed on 5 files).
+- **Follow-up required**: Human approval needed to delete docs/active/backlog/ and docs/active/epics/ directories (per CLAUDE.md destructive-op policy).
+- **Queue**: EPIC-064 = ALL 4 STORIES DONE. Next READY epic: EPIC-062 (Scraping Resilience).
