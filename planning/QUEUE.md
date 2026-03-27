@@ -300,7 +300,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 86 | STORY-177 | Fix `ai_score` Float Truncation in Company Loaders | DONE | Already implemented: ai_score typed float|None; loads 7.5 correctly; covered by test_unified_converter_story_202.py |
 | 87 | STORY-178 | Map `funding_raised` to `total_funding_raised_eur` in Company | DONE | PR #158 — total_funding_raised_eur, latest_valuation_eur, funding_rounds, lead_investors; 10 tests |
 | 88 | STORY-179 | Expose `ebitda_margin_pct` and `recurring_revenue_pct` on Company | DONE | PR #159 — top-level Company fields populated, scorer bonuses added; 12 tests |
-| 89 | STORY-180 | Add Field Mapping Parity Test | IN_PROGRESS | Depends on STORY-177/178/179 |
+| 89 | STORY-180 | Add Field Mapping Parity Test | DONE | PR #160 |
 
 ---
 
@@ -796,3 +796,13 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: EPIC-039 (STORY-150/151/152) READY after STORY-149 is merged
 - **Branch hygiene**: Stale lock removed (PID 1054856 dead). 8 remote branches deleted (--delete-branch on merge). 1 local merged branch cleaned. Pruned stale refs. 2 remote branches remain (develop, master).
 - **Actions taken**: Removed stale lock; merged 7 PRs cleanly; rebased + merged PR #149 (resolved export_tasks.py conflict); branch cleanup. Note: STORY-149 has partial work stashed/unstaged on develop — next worker should commit or discard.
+
+### [2026-03-27 23:30] Worker Run — EPIC-047
+- **Epic**: EPIC-047 Data Loading Fidelity (P1) — all 4 stories complete
+- **PRs created**: #158 (STORY-178), #159 (STORY-179), #160 (STORY-180)
+- **STORY-177**: Already implemented — ai_score loads as float 7.5 correctly; existing tests confirm. Marked DONE without changes.
+- **STORY-178**: Mapped funding_raised (raw EUR) to `Company.total_funding_raised_eur` and valuation to `Company.latest_valuation_eur`. Added 10 tests.
+- **STORY-179**: Mapped profitability fields (ebitda_margin, recurring_revenue_pct, revenue_per_employee_eur_k) to top-level Company; added scorer bonuses (+0.25) for high recurring revenue and strong EBITDA margin. Added 12 tests.
+- **STORY-180**: Parity test with 14 assertions covering the entire JSON→Company mapping surface; every leaf field in competitor_data.json is either mapped or explicitly allowlisted with a reason. Catches silent data loss on schema changes.
+- **Queue**: M7 EPIC-047 all 4/4 DONE. PRs #158/#159/#160 pending checker merge.
+- **Next**: Checker to merge #158, #159, #160 (in order — #160 cherry-picks #158 changes).
