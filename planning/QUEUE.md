@@ -63,7 +63,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 12 | STORY-165 | Archive Historical Professionalization Documents | DONE | PR #86 | |
 | 13 | STORY-166 | Consolidate Setup Documentation | DONE | PR #87 | |
 | 14 | STORY-167 | Organize Strategic Documents | DONE | PR #88 | |
-| 15 | STORY-168 | Create Repository Organization Standards | IN_PROGRESS | |
+| 15 | STORY-168 | Create Repository Organization Standards | DONE | PR #89 | |
 
 ---
 
@@ -202,3 +202,23 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: None — M1 still needs STORY-144 + EPIC-043 (4 stories) before unblocking M2
 - **Branch hygiene**: Deleted 4 remote feature branches (STORY-140–143). Pruned stale refs. Deleted 5 local merged branches (STORY-140–144). 2 remote branches remain (develop, master).
 - **Actions taken**: Removed stale lock, merged 4 PRs, deleted 4 remote branches, cleaned 5 local branches, reset STORY-144 to READY
+
+### [2026-03-26] Worker Run — EPIC-037 + EPIC-043 Complete
+
+**Session summary**: Full autonomous run completing two epics (8 stories total).
+
+**EPIC-037 — Dead Code Elimination Phase 2**
+- STORY-141 DONE (PR #83): Deleted `src/solstein/api/routes/refresh.py` (210 lines, 4 endpoints never registered in `main.py`)
+- STORY-142 DONE (PR #84): Verified `worker_tasks_v2.py` already absent — created deletion audit doc
+- STORY-143 DONE (PR #85): Deleted 3 truly orphaned data files (282+238+221 lines) + 2 orphan test files (251+222 lines); retained 7 files that had real production callers after thorough grep analysis
+- STORY-144 DONE (direct commit 7476ffd): Added `.github/workflows/dead-code-weekly.yml` — Monday 9am UTC scheduled job, JSON metrics + full report + threshold warning at count > 50
+
+**EPIC-043 — Repository Cleanup & Organization**
+- STORY-165 DONE (PR #86): Moved `ENEVE_PIPELINE_CRITICAL_ANALYSIS.md` from root to `docs/archive/analysis/`; created `docs/archive/analysis/README.md` index
+- STORY-166 DONE (PR #87): Created canonical `docs/guides/setup.md` consolidating SETUP.md + SETUP_GUIDE.md; added redirect notices to both old files; updated `docs/README.md` links
+- STORY-167 DONE (PR #88): Moved `docs/archive/calls/2026-02-27-michiel-kuiper.md` → `docs/strategy/calls/`; moved `docs/reference/AGENT_DEPLOYMENT_GUIDE.md` → `docs/internal/`; created `docs/strategy/README.md` index
+- STORY-168 DONE (PR #89): Created `REPOSITORY_STRUCTURE.md` (root placement standards, docs/ layout, naming conventions, lifecycle); created `.github/PULL_REQUEST_TEMPLATE.md` with organization checklist
+
+**Queue state after run**: M1 = 15/15 DONE. M2 (EPIC-020, EPIC-019) remains BLOCKED pending external dependency resolution. P0 new epics (EPIC-045, 046, 052, 058, 062, 064) all READY.
+
+**Quality gates**: All pre-commit hooks passed on all commits. No regressions in existing tests.
