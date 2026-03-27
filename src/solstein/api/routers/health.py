@@ -21,17 +21,27 @@ router = APIRouter(prefix="/health", tags=["health"])
 
 @router.get("", name="health_check")
 async def health_check() -> dict:
-    """Overall health status endpoint.
+    """Overall health status endpoint with per-component detail.
 
-    Returns basic health indicator with HTTP 200 if healthy,
-    503 if unhealthy (for load balancer compatibility).
+    Returns HTTP 200 with component-level status for healthy/degraded states.
+    Returns HTTP 503 only when critical components (database) are unhealthy.
+
+    STORY-047: Returns per-component status so operators and load balancers
+    can see exactly which component is down without hitting /health/status.
     """
     await health_monitor.run_all_checks()
     overall_status = health_monitor.get_overall_status()
 
+    # Build per-component status map
+    components = {
+        name: check.status
+        for name, check in health_monitor.checks.items()
+    }
+
     response = {
         "status": overall_status,
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        "components": components,
     }
 
     if overall_status == "unhealthy":
@@ -58,13 +68,20 @@ async def readiness_check() -> dict:
     """Kubernetes readiness probe.
 
     Returns 200 if ready to serve requests, 503 if not.
+    Includes per-component status for diagnostics.
     """
     await health_monitor.run_all_checks()
     is_ready = health_monitor.is_ready()
 
+    components = {
+        name: check.status
+        for name, check in health_monitor.checks.items()
+    }
+
     response = {
         "ready": is_ready,
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        "components": components,
     }
 
     if not is_ready:

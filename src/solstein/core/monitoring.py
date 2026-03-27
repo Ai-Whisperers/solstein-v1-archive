@@ -97,8 +97,16 @@ class HealthMonitor:
 
         return self.checks
 
+    # Components whose failure should make the overall status "unhealthy"
+    # (triggers HTTP 503). Non-critical component failures result in "degraded".
+    CRITICAL_COMPONENTS = {"database", "configuration"}
+
     def get_overall_status(self) -> str:
         """Get overall health status based on checks.
+
+        STORY-047: Only critical component failures (database, configuration)
+        produce "unhealthy". Non-critical failures (redis, llm_services, api)
+        produce "degraded" so the service stays routable.
 
         Returns:
             Overall HealthStatus
@@ -106,10 +114,15 @@ class HealthMonitor:
         if not self.checks:
             return HealthStatus.UNHEALTHY
 
-        statuses = [check.status for check in self.checks.values()]
+        # Check critical components first
+        for name in self.CRITICAL_COMPONENTS:
+            if name in self.checks and self.checks[name].status == HealthStatus.UNHEALTHY:
+                return HealthStatus.UNHEALTHY
 
+        # Non-critical unhealthy or any degraded -> degraded
+        statuses = [check.status for check in self.checks.values()]
         if any(s == HealthStatus.UNHEALTHY for s in statuses):
-            return HealthStatus.UNHEALTHY
+            return HealthStatus.DEGRADED
         if any(s == HealthStatus.DEGRADED for s in statuses):
             return HealthStatus.DEGRADED
         return HealthStatus.HEALTHY
