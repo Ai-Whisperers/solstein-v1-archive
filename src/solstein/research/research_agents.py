@@ -1,13 +1,13 @@
-"""
-Research agent classes for the AI research orchestrator.
+"""Research agent classes for the AI research orchestrator.
 
 Extracted from ai_research_orchestrator.py to reduce file size.
 Contains planner, extraction, and validation agents.
+
+STORY-072: Migrated to Instructor for schema-validated structured outputs.
 """
 
 from __future__ import annotations
 
-import json
 from typing import Any
 from urllib.parse import urlparse
 
@@ -16,6 +16,8 @@ from bs4 import BeautifulSoup
 from loguru import logger
 
 from ..llm.enhanced_client import EnhancedLLMClient
+from ..llm.instructor_client import InstructorClient
+from ..llm.schemas import CompanyExtractionResponse, ResearchPlanResponse
 from .fetch_policy import FetchResult, execute_policy_fetch
 from .research_types import (
     ExtractedData,
@@ -32,74 +34,63 @@ from .web_search_agent import WebSearchAgent
 
 
 class ResearchPlannerAgent:
-    """Creates research strategies using the configured LLM provider."""
+    """Creates research strategies using Instructor-validated LLM calls.
 
-    def __init__(self, llm_client: EnhancedLLMClient | None = None) -> None:
+    STORY-072: Replaced ad-hoc JSON parsing with Instructor schema validation.
+    """
+
+    def __init__(
+        self,
+        llm_client: EnhancedLLMClient | None = None,
+        instructor_client: InstructorClient | None = None,
+    ) -> None:
         self.llm = llm_client or EnhancedLLMClient()
+        self.instructor = instructor_client or InstructorClient()
 
     async def create_plan(self, company_name: str, industry: str | None = None) -> ResearchPlan:
         """Generate a research plan with prioritized search queries."""
         industry_context = f"in the {industry} industry" if industry else ""
-        prompt = f"""Create a detailed web research plan for: {company_name} {industry_context}
-
-Your goal is to find factual information about this company from web sources.
-Generate 6-8 specific search queries for website, funding, financials,
-headcount, news, social presence, and industry positioning.
-
-Return ONLY valid JSON in this format:
-{{
-  "queries": [
-    {{"query": "...", "priority": 1, "intent": "website"}},
-    {{"query": "...", "priority": 1, "intent": "funding"}}
-  ],
-  "estimated_sources": 5
-}}
-"""
+        prompt = (
+            f"Create a detailed web research plan for: {company_name} {industry_context}\n\n"
+            "Generate 6-8 specific search queries for website, funding, financials, "
+            "headcount, news, social presence, and industry positioning."
+        )
 
         try:
-            response = await self.llm.generate(prompt)
-            if response is None or response == "":
-                raise ValueError("Planner returned empty response")
-            response_text = str(response)
-            plan_data = json.loads(self._extract_json(response_text))
-            queries = sorted(plan_data.get("queries", []), key=lambda item: item.get("priority", 3))
+            plan_response = await self.instructor.extract(
+                prompt=prompt,
+                schema=ResearchPlanResponse,
+                system_prompt=(
+                    "You are a research planning assistant. Generate structured "
+                    "search plans for competitive intelligence research."
+                ),
+            )
+            queries = sorted(
+                [q.model_dump() for q in plan_response.queries],
+                key=lambda item: item.get("priority", 3),
+            )
             return ResearchPlan(
                 company_name=company_name,
                 queries=queries,
-                estimated_sources=plan_data.get("estimated_sources", 5),
+                estimated_sources=plan_response.estimated_sources,
             )
-        except (json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
-            logger.error(f"Failed to create plan for {company_name}: {error}")
-            return ResearchPlan(
-                company_name=company_name,
-                queries=[
-                    {"query": f"{company_name} official website", "priority": 1, "intent": "website"},
-                    {"query": f"{company_name} funding valuation", "priority": 1, "intent": "funding"},
-                    {"query": f"{company_name} revenue 2024", "priority": 2, "intent": "financials"},
-                    {"query": f"{company_name} employees headcount", "priority": 2, "intent": "employees"},
-                ],
-                estimated_sources=4,
-            )
+        except Exception as error:  # noqa: BLE001
+            logger.error(f"[ResearchPlanner] Instructor extraction failed for {company_name}: {error}")
+            return self._fallback_plan(company_name)
 
     @staticmethod
-    def _extract_json(text: str) -> str:
-        """Extract JSON payload from an LLM response."""
-        if "```json" in text:
-            start = text.find("```json") + 7
-            end = text.find("```", start)
-            return text[start:end].strip()
-
-        if "```" in text:
-            start = text.find("```") + 3
-            end = text.find("```", start)
-            return text[start:end].strip()
-
-        start = text.find("{")
-        end = text.rfind("}")
-        if start >= 0 and end > start:
-            return text[start : end + 1]
-
-        return text
+    def _fallback_plan(company_name: str) -> ResearchPlan:
+        """Return a safe fallback plan when LLM extraction fails."""
+        return ResearchPlan(
+            company_name=company_name,
+            queries=[
+                {"query": f"{company_name} official website", "priority": 1, "intent": "website"},
+                {"query": f"{company_name} funding valuation", "priority": 1, "intent": "funding"},
+                {"query": f"{company_name} revenue 2024", "priority": 2, "intent": "financials"},
+                {"query": f"{company_name} employees headcount", "priority": 2, "intent": "employees"},
+            ],
+            estimated_sources=4,
+        )
 
 
 def classify_source(url: str) -> str:
@@ -117,10 +108,18 @@ def classify_source(url: str) -> str:
 
 
 class ContentExtractorAgent:
-    """Extracts structured data from web pages using an LLM."""
+    """Extracts structured data from web pages using Instructor-validated LLM calls.
 
-    def __init__(self, llm_client: EnhancedLLMClient | None = None) -> None:
+    STORY-072: Replaced ad-hoc JSON parsing with Instructor schema validation.
+    """
+
+    def __init__(
+        self,
+        llm_client: EnhancedLLMClient | None = None,
+        instructor_client: InstructorClient | None = None,
+    ) -> None:
         self.llm = llm_client or EnhancedLLMClient()
+        self.instructor = instructor_client or InstructorClient()
         self.http = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
 
     async def aclose(self) -> None:
@@ -168,7 +167,7 @@ class ContentExtractorAgent:
                 extraction_method="llm_parsing",
                 raw_content=text[:2000],
             )
-        except (httpx.HTTPError, json.JSONDecodeError, ValueError, KeyError) as error:
+        except (httpx.HTTPError, ValueError, KeyError) as error:
             logger.error(f"Extraction failed for {url}: {error}")
             return ExtractedData(url, "error", {}, 0.0, f"error: {error}", raw_content="")
 
@@ -230,48 +229,30 @@ class ContentExtractorAgent:
         return "\n".join(chunk for chunk in chunks if chunk)
 
     async def _llm_extract(self, text: str, company_name: str, url: str) -> dict[str, Any]:
-        prompt = f"""Extract structured company information from this content.
-Company: {company_name}
-Source: {url}
+        """Extract structured company data using Instructor schema validation.
 
-Return ONLY valid JSON (no markdown, no explanation) with these keys:
-company_name, website, description, industry, headquarters, founded_year,
-employees, revenue, revenue_currency, funding_raised, valuation,
-funding_rounds, key_executives, products, is_public.
-Use null for unknown values.
-
-Content:
-{text[:6000]}
-"""
+        STORY-072: Replaces ad-hoc JSON parsing with Instructor. Schema violations
+        are caught at the call site rather than propagating as KeyError downstream.
+        """
+        prompt = (
+            f"Extract structured company information from this content.\n"
+            f"Company: {company_name}\nSource: {url}\n\n"
+            f"Content:\n{text[:6000]}"
+        )
         try:
-            response = await self.llm.generate(prompt)
-            if response is None or response == "":
-                raise ValueError("Extractor returned empty response")
-            response_text = str(response)
-            json_str = self._extract_json_from_response(response_text)
-            return json.loads(json_str)
-        except (json.JSONDecodeError, ValueError, TypeError) as error:
-            logger.error(f"LLM extraction failed for {url}: {error}")
+            extraction = await self.instructor.extract(
+                prompt=prompt,
+                schema=CompanyExtractionResponse,
+                system_prompt=(
+                    "You are a company data extraction specialist. "
+                    "Extract all available structured information about the company. "
+                    "Use null for unknown values."
+                ),
+            )
+            return extraction.model_dump(exclude_none=False)
+        except Exception as error:  # noqa: BLE001
+            logger.error(f"[ContentExtractor] Instructor extraction failed for {url}: {error}")
             return {}
-
-    @staticmethod
-    def _extract_json_from_response(text: str) -> str:
-        """Extract JSON payload from an LLM response that may contain markdown fences."""
-        if "```json" in text:
-            start = text.find("```json") + 7
-            end = text.find("```", start)
-            if end > start:
-                return text[start:end].strip()
-        if "```" in text:
-            start = text.find("```") + 3
-            end = text.find("```", start)
-            if end > start:
-                return text[start:end].strip()
-        start = text.find("{")
-        end = text.rfind("}")
-        if start >= 0 and end > start:
-            return text[start : end + 1]
-        return text
 
     def _calculate_confidence(self, data: dict[str, Any]) -> float:
         critical_fields = ["company_name", "website", "description"]

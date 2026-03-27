@@ -35,6 +35,7 @@ from .health_checker import (
     get_health_checker,
     reset_health_checker,
 )
+from .instructor_client import InstructorClient
 from .usage_tracker import UsageTracker, get_usage_tracker
 
 __all__ = [
@@ -42,6 +43,8 @@ __all__ = [
     "EnhancedLLMClient",
     "LLMGenerationError",
     "get_enhanced_llm_client",
+    # Instructor client (STORY-072)
+    "InstructorClient",
     # Health checking
     "ProviderHealthChecker",
     "ProviderHealth",
