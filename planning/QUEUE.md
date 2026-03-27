@@ -289,6 +289,21 @@ The first worker run MUST do a verification pass before starting implementation 
 
 ---
 
+## M7: Data Fidelity
+
+> M6 complete. Next batch: data loading fidelity bugs discovered in live end-to-end analysis. All EPIC-047 stories are independent; STORY-180 depends on 177-179 being fixed first.
+
+### EPIC-047: Data Loading Fidelity (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 86 | STORY-177 | Fix `ai_score` Float Truncation in Company Loaders | DONE | Already implemented: ai_score typed float|None; loads 7.5 correctly; covered by test_unified_converter_story_202.py |
+| 87 | STORY-178 | Map `funding_raised` to `total_funding_raised_eur` in Company | READY | top-level Company.total_funding_raised_eur not populated; funding_data["total_funding_eur"] exists |
+| 88 | STORY-179 | Expose `ebitda_margin_pct` and `recurring_revenue_pct` on Company | READY | Top-level Company.ebitda_margin and .recurring_revenue_pct not populated from profitability_data |
+| 89 | STORY-180 | Add Field Mapping Parity Test | READY | Depends on STORY-177/178/179 |
+
+---
+
 ## Orchestrator Log
 
 Worker and checker append timestamped entries here:
