@@ -96,8 +96,8 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 33 | STORY-012 | Fix Dual-Write Atomicity in Research Pipeline | DONE | Completed in prior work |
-| 34 | STORY-014 | Remove Hardcoded Date Path from Data Loader | DONE | PR #109 |
-| 35 | STORY-013 | Fix Conflict Resolution Logic | IN_PROGRESS | No recency/reliability in resolution; MANUAL_REVIEW is a no-op |
+| 34 | STORY-014 | Remove Hardcoded Date Path from Data Loader | IN_PROGRESS | PR #109 open — CI failing (lint, type check, tests, security, pre-commit) |
+| 35 | STORY-013 | Fix Conflict Resolution Logic | IN_PROGRESS | Uncommitted changes on develop (conflict_resolution.py + tests); needs worker to finish |
 
 ---
 
@@ -375,3 +375,12 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: None this run
 - **Branch hygiene**: No stale lock. 1 remote feature branch (tied to PR #108). No local merged branches to clean.
 - **Actions taken**: Updated STORY-066 status to IN_PROGRESS (CI failing), appended log entry
+
+### [2026-03-27 19:32] Work Checker Run
+- **PRs merged**: 0 — both PRs MERGEABLE but CI failing on all checks
+- **PRs rebased**: 0 — no conflicts to resolve
+- **Open PRs**: 2 remaining — #108 (STORY-066) CI-red, #109 (STORY-014) CI-red
+- **Queue**: M1: 15/15 DONE. EPIC-020: 4/4 DONE. EPIC-019: 3/4 DONE. EPIC-004: 1/3 DONE, 2 IN_PROGRESS (STORY-014 PR CI-red, STORY-013 uncommitted on develop).
+- **Dependencies unblocked**: None this run
+- **Branch hygiene**: Stale lock removed (PID 3691828 dead). Deleted 1 local merged branch (STORY-013). 2 remote feature branches remain (tied to open PRs). Uncommitted STORY-013 work on develop (conflict_resolution.py + tests + 16 cycle docs).
+- **Actions taken**: Removed stale lock, fixed STORY-014 status from DONE→IN_PROGRESS (CI failing), cleaned 1 local branch, updated queue notes
