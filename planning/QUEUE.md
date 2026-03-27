@@ -69,14 +69,14 @@ The first worker run MUST do a verification pass before starting implementation 
 
 ## M2: Secure Identity
 
-### EPIC-020: Supabase Auth Migration (P1) — BLOCKED on M1 completion
+### EPIC-020: Supabase Auth Migration (P1) — READY (M1 complete 2026-03-26)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 16 | STORY-067 | Migrate Authentication to Supabase Auth | BLOCKED | Depends on EPIC-002 completion |
-| 17 | STORY-068 | Remove Auth Bypass and Wire Supabase JWT Middleware | BLOCKED | |
-| 18 | STORY-069 | Error Handling and Input Sanitization | BLOCKED | |
-| 19 | STORY-070 | Fix SSRF Vulnerability in Web and Website Agents | BLOCKED | |
+| 16 | STORY-067 | Migrate Authentication to Supabase Auth | READY | M1 complete — unblocked 2026-03-26 |
+| 17 | STORY-068 | Remove Auth Bypass and Wire Supabase JWT Middleware | READY | |
+| 18 | STORY-069 | Error Handling and Input Sanitization | READY | |
+| 19 | STORY-070 | Fix SSRF Vulnerability in Web and Website Agents | READY | |
 
 ### EPIC-019: Multi-Tenancy & Data Isolation (P1) — BLOCKED on EPIC-020
 
@@ -98,7 +98,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 24 | STORY-169 | Fix JSON parsing in score/analyze-market/compare/export-excel | DONE | PR #90 |
 | 24b | STORY-170 | Restore generate-llm-report exporter import | DONE | PR #91 |
 | 24c | STORY-171 | Migrate all CLI commands from deprecated CompetitorDataLoader | DONE | PR #92 |
-| 24d | STORY-172 | Add structured input validation with actionable error messages | DONE | PR #93 |
+| 24d | STORY-172 | Add structured input validation with actionable error messages | BLOCKED | PR #93 conflicting — cli.py conflict with merged STORY-171 |
 
 ### EPIC-046: Scoring Engine Correctness (P0)
 
@@ -265,3 +265,12 @@ Worker and checker append timestamped entries here:
   - Result: 22/22 tests pass (was 8 failing).
 - **Quality gates**: All pre-commit hooks passed. No regressions.
 - **Next**: EPIC-062 (Scraping Resilience) or EPIC-064 (Markdown Integrity) — both READY.
+
+### [2026-03-27 12:35] Work Checker Run
+- **PRs merged**: 9 total — #86 (STORY-165), #87 (STORY-166), #88 (STORY-167), #89 (STORY-168), #90 (STORY-169), #91 (STORY-170), #92 (STORY-171), #94 (STORY-174), #95 (STORY-204/205)
+- **PRs rebased**: 1 attempted, 0 successful — #93 (STORY-172) conflicts in cli.py with merged STORY-171; rebase aborted
+- **Open PRs**: 1 remaining — #93 (STORY-172) CONFLICTING; needs manual conflict resolution in cli.py + test_cli.py
+- **Queue**: M1: 15/15 DONE. EPIC-020 unblocked → 4 stories now READY. M2 EPIC-019: 4 still BLOCKED on EPIC-020. P0: EPIC-045 partial (STORY-172 conflicting), EPIC-046/058 complete. EPIC-062/064: READY.
+- **Dependencies unblocked**: EPIC-020 (4 stories) → READY (M1 now fully merged)
+- **Branch hygiene**: Removed stale lock (PID 2888213 dead). Pushed 1 pending develop commit. Deleted 9 remote feature branches + 1 orphaned STORY-144 branch. Deleted 11 local merged branches. 2 remote branches remain (develop, master + STORY-172).
+- **Uncommitted work**: 35 modified/new files on develop from stopped EPIC-064 worker session — left uncommitted for next worker to handle.
