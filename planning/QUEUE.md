@@ -214,8 +214,8 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 55 | STORY-076 | Define LangGraph Architecture and State Schema | DONE | PR #125 |
 | 56 | STORY-077 | Migrate Coordinator to LangGraph | DONE | PR #126 (stacked on #125) |
-| 57 | STORY-078 | Implement Real Agent Nodes | IN_PROGRESS | |
-| 58 | STORY-079 | Add Checkpointing and Human-in-the-Loop | BLOCKED | Dep: STORY-078 |
+| 57 | STORY-078 | Implement Real Agent Nodes | DONE | PR #127 |
+| 58 | STORY-079 | Add Checkpointing and Human-in-the-Loop | READY | Dep: STORY-078 ✅ |
 
 ---
 
@@ -578,3 +578,11 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: None this run
 - **Branch hygiene**: 1 remote feature branch (STORY-078, tied to open PR). No local merged branches to clean. Pruned refs. 3 remote branches: develop, master, STORY-078.
 - **Actions taken**: Removed stale lock, verified queue accuracy, pruned refs. CI failures on PR #127 need worker remediation.
+
+### [2026-03-27 Worker] STORY-078 Complete
+- **Story**: STORY-078 — Implement Real Agent Nodes
+- **PR**: #127 (https://github.com/Ai-Whisperers/solstein/pull/127)
+- **Branch**: feature/STORY-078-real-agent-nodes → develop
+- **Status**: DONE — PR created, branch pushed
+- **Queue**: STORY-078 DONE, STORY-079 unblocked (READY)
+- **Key changes**: Real GitHubNode, SECFilingsNode, CompaniesHouseNode, NewsAPINode, LinkedInNode replacing stub agents; dict-dispatch pattern to reduce nesting; test file split to stay under 500-line limit
