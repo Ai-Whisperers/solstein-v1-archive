@@ -161,9 +161,15 @@ class CeleryTimingConfig(BaseModel):
         ),
     )
     result_expires: int = Field(
-        default=3600,
+        default=86400,
         ge=60,
-        description="Seconds before task results are purged from the result backend. Default: 3600.",
+        description=(
+            "Seconds before task results are purged from the result backend. Default: 86400 (24 hours). "
+            "Results are written to Redis after every task completion. Without a TTL, results accumulate "
+            "indefinitely and eventually cause Redis to evict keys silently under memory pressure. "
+            "Pollers must read AsyncResult.status within this window or accept that the result may be "
+            "gone. Override via CELERY_TIMING__RESULT_EXPIRES or the alias CELERY_RESULT_EXPIRES_SECONDS."
+        ),
     )
 
     @model_validator(mode="after")
