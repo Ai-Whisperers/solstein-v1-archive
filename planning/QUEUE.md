@@ -249,8 +249,8 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 68 | STORY-097 | Automate Alembic Migrations Pre-Deploy | DONE | PR #135 |
 | 69 | STORY-098 | Add migrate, seed, deploy Makefile Targets | DONE | PR #136 |
-| 70 | STORY-099 | Add Staging Deploy + Post-Deploy Smoke Test Workflow | IN_PROGRESS | Starting |
-| 71 | STORY-100 | Delete Root Bypass Scripts | READY | STORY-098 DONE |
+| 70 | STORY-099 | Add Staging Deploy + Post-Deploy Smoke Test Workflow | DONE | PR #137 |
+| 71 | STORY-100 | Delete Root Bypass Scripts | DONE | PR #138 |
 
 ### EPIC-014: Observability & Telemetry (P2)
 
@@ -683,3 +683,14 @@ Worker and checker append timestamped entries here:
 - **STORY-097 DONE**: PR #135 — Automate Alembic Migrations Pre-Deploy. Canonical migration runner with structured logging, timeout, dry-run, idempotency. Integrated into staging+production CI/CD workflows. 24 tests pass. Also fixed pre-existing YAML parse issue in deploy-production.yml.
 - **EPIC-027 progress**: 1/4 stories done (STORY-097). STORY-098 and STORY-099 now READY. STORY-100 still BLOCKED on STORY-098.
 - **Next**: STORY-098 (Add migrate, seed, deploy Makefile Targets).
+
+### [2026-03-27 17:34] Worker Run — EPIC-027 Complete (CI/CD Automation)
+- **Epic**: EPIC-027 — CI/CD Automation (4 stories, all DONE)
+- **Stories completed this session**: STORY-097 (PR #135), STORY-098 (PR #136), STORY-099 (PR #137), STORY-100 (PR #138)
+- **STORY-098**: Makefile targets — migrate, migrate-dry-run, migrate-rollback, migrate-status, migrate-down (with confirmation), check-migrations, seed, seed-test, deploy, help. 26 tests.
+- **STORY-099**: Staging smoke test workflow — real smoke_test.sh (health, API, JSON validation), rollback-on-failure job, notify job, production gating on staging success. 18 tests.
+- **STORY-100**: Root bypass script guardrails — check_root_scripts.py CI gate, MIGRATION_GUIDE.md documenting old-to-new workflow transition. 12 tests.
+- **Total tests across EPIC-027**: 80 (24 + 26 + 18 + 12)
+- **Quality gates**: All pre-commit hooks pass on all commits. Ruff clean. No regressions.
+- **Dependencies unblocked**: EPIC-014 (Observability) STORY-047/049 already READY
+- **Queue**: M5 EPIC-025 5/5 DONE, EPIC-026 4/4 DONE, EPIC-027 4/4 DONE. Next READY: EPIC-014 STORY-047.
