@@ -1,6 +1,6 @@
 # Solstein Command Center
 
-.PHONY: install run dashboard test lint format docs-serve docs-strict docs-generate docs-generated-check hooks-install check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical type-strict lint-ast ast-test gate-critical gate-engineering lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries
+.PHONY: install run dashboard test lint format docs-serve docs-strict docs-generate docs-generated-check hooks-install check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical type-strict lint-ast ast-test gate-critical gate-engineering lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries migrate migrate-dry-run migrate-rollback
 
 # Variables
 PYTHON = python3
@@ -236,6 +236,27 @@ gate-engineering: lint-ast ast-test type-strict docs-strict docs-generated-check
 
 gate-critical: lint-critical lint-ast lint-async-boundaries type-critical type-strict test-critical test-contracts test-schema-boundaries
 	@echo "Critical pipeline quality gates passed."
+
+# =============================================================================
+# Database Migrations (STORY-097)
+# =============================================================================
+
+# Run Alembic migrations to head (idempotent, with timeout and logging)
+migrate:
+	$(PYTHON) scripts/ci/run_migrations.py --timeout 300
+
+# Show what migrations would be applied without running them
+migrate-dry-run:
+	$(PYTHON) scripts/ci/run_migrations.py --dry-run
+
+# Roll back the last migration (use with caution)
+migrate-rollback:
+	alembic downgrade -1
+
+# Show current migration status
+migrate-status:
+	alembic current
+	alembic heads
 
 # Reset development database
 dev-reset-db:
