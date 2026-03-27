@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-03-27 | Updated By | Autonomous worker (M3 queuing) |
+| Last Updated | 2026-03-27 | Updated By | Autonomous worker (M4 queuing) |
 
 ## Status Key
 
@@ -194,9 +194,33 @@ The first worker run MUST do a verification pass before starting implementation 
 
 ---
 
-## M4-M6: Remaining Milestones
+## M4: Intelligent Agents
 
-Worker should complete M3 before advancing to these.
+> M3 effectively complete — only EPIC-030 blocked on EPIC-025 (M5). Advancing to M4.
+
+### EPIC-021: Modern LLM Stack Migration (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 50 | STORY-071 | Replace Custom LLM Client with Anthropic SDK | READY | Dep: EPIC-002 (DONE) |
+| 51 | STORY-072 | Implement Structured LLM Outputs with Instructor | READY | Dep: STORY-071 |
+| 52 | STORY-073 | Integrate Langfuse for Cost Tracking and Prompt Management | READY | Dep: STORY-071 |
+| 53 | STORY-074 | Migrate LLM Evaluation to Langfuse | READY | Dep: STORY-073 |
+| 54 | STORY-075 | Implement Provider Fallback and Circuit Breaking via SDK | READY | Dep: STORY-071 |
+
+### EPIC-022: LangGraph Agent Orchestration (P2)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 55 | STORY-076 | Define LangGraph Architecture and State Schema | READY | Dep: EPIC-021 |
+| 56 | STORY-077 | Migrate Coordinator to LangGraph | BLOCKED | Dep: STORY-076 |
+| 57 | STORY-078 | Implement Real Agent Nodes | BLOCKED | Dep: STORY-077 |
+| 58 | STORY-079 | Add Checkpointing and Human-in-the-Loop | BLOCKED | Dep: STORY-078 |
+
+---
+
+## M5-M6: Remaining Milestones
+
 See `backlog/README.md` for the full milestone roadmap.
 
 ---
