@@ -7,6 +7,7 @@ from .excel_compat import ExcelExporter
 from .excel_improved import ImprovedExcelExporter
 from .excel_streaming import StreamingExcelExporter
 from .llm import LLMReportEnhancer
+from .pdf import PDFExporter
 from .markdown.generator import (
     ClientReportGenerator,
     LLMEnhancedReportGenerator,
@@ -18,6 +19,7 @@ __all__ = [
     "ImprovedExcelExporter",
     "StreamingExcelExporter",
     "LLMReportEnhancer",
+    "PDFExporter",
     "PipelineAuditReportGenerator",
     "ClientReportGenerator",
     "LLMEnhancedReportGenerator",

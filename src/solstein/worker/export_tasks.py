@@ -256,6 +256,12 @@ async def _generate_file(
         await _generate_json(output_path, filters)
         return str(output_path)
 
+    if export_format == "pdf":
+        filename = f"export_{prefix}_{timestamp}.pdf"
+        output_path = export_dir / filename
+        await _generate_pdf(output_path, filters, progress_callback)
+        return str(output_path)
+
     if export_format == "markdown":
         filename = f"export_{prefix}_{timestamp}.md"
         output_path = export_dir / filename
@@ -290,6 +296,30 @@ async def _generate_excel(
     if companies:
         exporter.create_dashboard(
             companies, output_path, progress_callback,
+        )
+
+
+async def _generate_pdf(
+    output_path: Any,
+    filters: dict[str, Any],
+    progress_callback: Any | None = None,
+) -> None:
+    """Generate PDF export using PDFExporter.
+
+    STORY-114: Renders a structured PDF report with financial overview,
+    company profiles, source citations, and revenue charts.
+    """
+    from solstein.exporters.pdf import PDFExporter
+
+    exporter = PDFExporter()
+    companies = await _fetch_companies(filters)
+    if companies:
+        page_format = filters.get("page_format", "a4")
+        exporter.export(
+            companies,
+            output_path=output_path,
+            page_format=page_format,
+            progress_callback=progress_callback,
         )
 
 

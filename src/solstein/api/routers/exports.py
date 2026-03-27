@@ -8,7 +8,7 @@ STORY-113: Added GET /api/v1/exports (list with pagination/filtering),
 DELETE /api/v1/exports/{job_id} (cancel with Celery revoke), and
 expiry-aware status responses.
 
-Supported formats: excel, csv, json, markdown, llm
+Supported formats: excel, csv, json, markdown, llm, pdf
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ router = APIRouter(prefix="/api/v1/exports", tags=["Exports"])
 
 # Valid export formats
 _VALID_FORMATS = frozenset({
-    "excel", "csv", "json", "markdown", "llm",
+    "excel", "csv", "json", "markdown", "llm", "pdf",
 })
 
 # Valid status values for filtering
@@ -49,7 +49,7 @@ class ExportRequest(BaseModel):
 
     format: str = Field(
         ...,
-        description="Export format: excel, csv, json, markdown, llm",
+        description="Export format: excel, csv, json, markdown, llm, pdf",
     )
     company_id: str | None = Field(
         None,
