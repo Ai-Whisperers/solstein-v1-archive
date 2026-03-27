@@ -82,6 +82,11 @@ celery_app.conf.update(
     task_reject_on_worker_lost=True,
     worker_prefetch_multiplier=1,
     worker_max_tasks_per_child=100,
+    # STORY-093: Enable task events so Flower (STORY-095) can monitor
+    # real-time task state, success/failure rates, and queue depths.
+    # This adds minimal overhead (~1 Redis message per task state change).
+    worker_send_task_events=True,
+    task_send_sent_event=True,
 )
 
 # Beat schedule for automated data refresh
