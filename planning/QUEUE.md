@@ -256,11 +256,11 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 72 | STORY-047 | Replace Fake Health Checks with Real Probes | IN_PROGRESS | Worker started 2026-03-27 17:34 |
-| 73 | STORY-049 | Add Structured Logging with Correlation IDs | READY | EPIC-025 now DONE |
-| 74 | STORY-050 | Implement OpenTelemetry Distributed Tracing | BLOCKED | Depends on STORY-049 |
-| 75 | STORY-051 | Add Prometheus Metrics Endpoints | BLOCKED | Depends on STORY-047 |
-| 76 | STORY-086 | Enforce Universal Audit Trail Across All Endpoints | BLOCKED | Depends on STORY-049 |
+| 72 | STORY-047 | Replace Fake Health Checks with Real Probes | DONE | PR #139 |
+| 73 | STORY-049 | Add Structured Logging with Correlation IDs | DONE | PR #140 (already implemented, tests added) |
+| 74 | STORY-050 | Implement OpenTelemetry Distributed Tracing | IN_PROGRESS | Worker started 2026-03-27 17:50 |
+| 75 | STORY-051 | Add Prometheus Metrics Endpoints | READY | STORY-047 DONE |
+| 76 | STORY-086 | Enforce Universal Audit Trail Across All Endpoints | READY | STORY-049 DONE |
 | 77 | STORY-087 | Implement Celery Dead Letter Queue | SKIP | Superseded by STORY-088 (EPIC-025) |
 
 ---
@@ -694,3 +694,12 @@ Worker and checker append timestamped entries here:
 - **Quality gates**: All pre-commit hooks pass on all commits. Ruff clean. No regressions.
 - **Dependencies unblocked**: EPIC-014 (Observability) STORY-047/049 already READY
 - **Queue**: M5 EPIC-025 5/5 DONE, EPIC-026 4/4 DONE, EPIC-027 4/4 DONE. Next READY: EPIC-014 STORY-047.
+
+### [2026-03-28 06:45] Work Checker Run
+- **PRs merged**: 7 total — #133 (STORY-093/094/095), #134 (STORY-096), #135 (STORY-097), #136 (STORY-098), #137 (STORY-099), #138 (STORY-100), #139 (STORY-047)
+- **PRs rebased**: 0 — all cleanly MERGEABLE
+- **Open PRs**: 0 remaining
+- **Queue**: M1-M4: all DONE. M5: EPIC-025/026/027 DONE. EPIC-014: 1/5 DONE, STORY-049+051 READY.
+- **Dependencies unblocked**: STORY-051 (Prometheus) unblocked by STORY-047 merge. Stale lock removed (PID 763048).
+- **Branch hygiene**: Deleted 7 remote feature branches. 2 remote branches remain (develop, master).
+- **Actions taken**: Merged 7 PRs, updated STORY-047 DONE, unblocked STORY-051, branch cleanup.
