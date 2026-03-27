@@ -557,3 +557,14 @@ Worker and checker append timestamped entries here:
 - **Deliverables**: `isolation.py` (with_error_isolation decorator, extracted to break circular import), `executor.py` (RequestCache, GraphExecutor, run_graph_research), updated topology/init exports
 - **Dependencies unblocked**: STORY-078 (Implement Real Agent Nodes) marked READY
 - **Notes**: Circular import between topology.py and executor.py resolved by extracting `with_error_isolation` into `isolation.py`. Pre-commit hook `GITHUB_TOKEN` env var was conflicting with keyring auth for gh CLI — worked around with `unset GITHUB_TOKEN`.
+
+### [2026-03-28 01:33] Work Checker Run
+- **PRs merged**: 2 total — #125 (STORY-076 LangGraph architecture), #126 (STORY-077 coordinator migration to LangGraph)
+- **PRs rebased**: 0 — both were cleanly MERGEABLE (PR #126 base fixed from feature branch → develop)
+- **Open PRs**: 0 remaining
+- **Stale lock**: Removed dead worker lock (PID 196800)
+- **Base branch fix**: PR #126 had base=feature/STORY-076, corrected to develop before merge
+- **Queue**: M4 EPIC-022: 2/4 DONE (#125/#126 merged). STORY-078 (Implement Real Agent Nodes) remains READY.
+- **Dependencies unblocked**: None — STORY-078 already READY
+- **Branch hygiene**: Deleted 2 remote feature branches (STORY-076, STORY-077). Deleted 2 local merged branches. Pruned refs. 2 remote branches remain (develop, master).
+- **Actions taken**: Removed stale lock; fixed PR #126 base branch; merged both PRs sequentially; branch cleanup.
