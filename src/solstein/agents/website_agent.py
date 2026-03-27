@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import requests
 from loguru import logger
 
+from ..core.url_validator import SSRFError, validate_url
 from ..domain.models import DataSourceType
 from .base_agent import AgentTaskResult, BaseDataGatheringAgent
 
@@ -27,6 +28,9 @@ class WebsiteAgent(BaseDataGatheringAgent):
             return result
 
         try:
+            # STORY-070: Validate URL before fetch (SSRF prevention)
+            validate_url(str(url))
+
             resp = await asyncio.to_thread(
                 requests.get, str(url), timeout=20, headers={"User-Agent": "Solstein-AI"}
             )
@@ -93,7 +97,12 @@ class WebsiteAgent(BaseDataGatheringAgent):
             result.success = True
             return result
 
-        except Exception as e:
+        except SSRFError as e:
+            logger.warning(f"WebsiteAgent SSRF blocked for {company_name}: {e}")
+            result.error_message = f"URL validation failed: {e}"
+            result.success = False
+            return result
+        except (requests.RequestException, OSError) as e:
             logger.warning(f"WebsiteAgent failed for {company_name}: {e}")
             result.error_message = str(e)
             result.success = False
