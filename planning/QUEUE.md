@@ -649,3 +649,13 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: None — EPIC-022 complete; no dependent epic in queue yet. M5-M6 epics not yet queued.
 - **Branch hygiene**: Deleted 2 remote feature branches (STORY-078, STORY-079). Deleted 2 local merged branches. Pruned refs. 2 remote branches remain (develop, master). Untracked files on develop: 29 agent-cycle docs + 2 source files (data/checkpoints/, scripts/ci/pre_push_gate.py, src/solstein/research/types.py) — left for next worker.
 - **Actions taken**: Merged 2 PRs via GitHub API (gh CLI auth broken — used token directly); deleted merged branches; pruned stale refs; cleaned 2 local branches.
+
+### [2026-03-28 04:35] Work Checker Run
+- **PRs merged**: 2 total — #130 (STORY-088 persistent DLQ), #129 (STORY-091 result expiry TTL)
+- **PRs rebased**: 1 attempted, 0 successful — #131 (STORY-089+090) conflict in `src/solstein/celery_config.py`; rebase aborted
+- **Open PRs**: 1 remaining — #131 (STORY-089+090) CONFLICTING; needs rebase against develop (celery_config.py conflict with STORY-091 changes)
+- **Queue**: M5 EPIC-025: STORY-091/088/089/090 DONE (PRs exist), STORY-092 READY. EPIC-026/027/014 remain BLOCKED on EPIC-025 completion.
+- **Dependencies unblocked**: None — EPIC-025 not yet complete (PR #131 still open/conflicting); EPIC-026 correctly BLOCKED
+- **Stale lock**: Removed dead worker lock (PID 536777)
+- **Branch hygiene**: Deleted 2 remote branches (STORY-088, STORY-091). Deleted 2 local merged branches. 2 remote branches remain (develop, feature/STORY-089-090). 1 local feature branch (STORY-089-090) kept (tied to open PR).
+- **Actions taken**: Removed stale lock; merged 2 PRs; attempted rebase of PR #131 (failed — conflict in celery_config.py); branch cleanup
