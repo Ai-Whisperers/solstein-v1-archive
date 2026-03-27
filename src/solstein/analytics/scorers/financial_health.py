@@ -143,6 +143,19 @@ class FinancialHealthScorer:
                 )
             )
 
+        # STORY-179: Recurring revenue bonus — strong SaaS stability signal
+        if financials.recurring_revenue_pct is not None and financials.recurring_revenue_pct > 80:
+            _RECURRING_REVENUE_BONUS = 0.25
+            score += _RECURRING_REVENUE_BONUS
+            explanation.components.append(
+                ScoreComponent(
+                    name="High Recurring Revenue",
+                    value=_RECURRING_REVENUE_BONUS,
+                    formula=f"recurring_revenue_pct({financials.recurring_revenue_pct}%) > 80% → +0.25",
+                    reasoning="Recurring revenue above 80% signals strong SaaS-like predictability and financial stability.",
+                )
+            )
+
         return score
 
     def _score_operating_efficiency(

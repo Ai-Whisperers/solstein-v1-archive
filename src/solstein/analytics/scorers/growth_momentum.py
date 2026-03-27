@@ -254,6 +254,19 @@ class GrowthMomentumScorer:
                 )
             )
 
+        # STORY-179: EBITDA margin bonus — strong operational efficiency signal
+        if financials.ebitda_margin is not None and financials.ebitda_margin > 25:
+            _EBITDA_MARGIN_BONUS = 0.25
+            score += _EBITDA_MARGIN_BONUS
+            explanation.components.append(
+                ScoreComponent(
+                    name="Strong EBITDA Margin",
+                    value=_EBITDA_MARGIN_BONUS,
+                    formula=f"ebitda_margin({financials.ebitda_margin}%) > 25% → +0.25",
+                    reasoning="EBITDA margin above 25% indicates strong operational efficiency and sustainable growth potential.",
+                )
+            )
+
         return score
 
     def _apply_compound_penalties(
