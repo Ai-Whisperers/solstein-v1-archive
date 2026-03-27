@@ -230,9 +230,9 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 59 | STORY-091 | Set Result Expiry TTL to Prevent Redis Bloat | DONE | PR #129 |
 | 60 | STORY-088 | Fix In-Memory DLQ — Persist to PostgreSQL | DONE | PR #130 |
-| 61 | STORY-089 | Set task_acks_late and task_reject_on_worker_lost | READY | Deploy with STORY-090 |
-| 62 | STORY-090 | Implement Task Idempotency via Deduplication Lock | READY | Deploy with STORY-089 |
-| 63 | STORY-092 | Merge worker_tasks_v2.py — Eliminate Duplicate Task Files | BLOCKED | Depends on STORY-088, STORY-089 |
+| 61 | STORY-089 | Set task_acks_late and task_reject_on_worker_lost | DONE | PR #131 |
+| 62 | STORY-090 | Implement Task Idempotency via Deduplication Lock | DONE | PR #131 |
+| 63 | STORY-092 | Merge worker_tasks_v2.py — Eliminate Duplicate Task Files | READY | Depends on STORY-088, STORY-089 — both DONE |
 
 ### EPIC-026: Service Topology (P1)
 
