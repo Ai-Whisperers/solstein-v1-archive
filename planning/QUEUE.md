@@ -232,7 +232,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 60 | STORY-088 | Fix In-Memory DLQ — Persist to PostgreSQL | DONE | PR #130 |
 | 61 | STORY-089 | Set task_acks_late and task_reject_on_worker_lost | DONE | PR #131 |
 | 62 | STORY-090 | Implement Task Idempotency via Deduplication Lock | DONE | PR #131 |
-| 63 | STORY-092 | Merge worker_tasks_v2.py — Eliminate Duplicate Task Files | READY | Depends on STORY-088, STORY-089 — both DONE |
+| 63 | STORY-092 | Merge worker_tasks_v2.py — Eliminate Duplicate Task Files | IN_PROGRESS | Worker started |
 
 ### EPIC-026: Service Topology (P1)
 
