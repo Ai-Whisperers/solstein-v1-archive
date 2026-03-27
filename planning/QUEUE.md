@@ -85,7 +85,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 20 | STORY-063 | Define Tenant Model and Domain Object Scoping | DONE | PR #105 merged |
 | 21 | STORY-064 | Implement Supabase RLS for All Tables | DONE | PR #106 merged |
 | 22 | STORY-065 | Add Tenant-Scoped API Key Management | DONE | PR #107 merged |
-| 23 | STORY-066 | Enforce Tenant Isolation in Research Jobs | DONE | PR #108 |
+| 23 | STORY-066 | Enforce Tenant Isolation in Research Jobs | IN_PROGRESS | PR #108 open — CI failing (lint, type check, tests, security, pre-commit) |
 
 ---
 
@@ -354,3 +354,12 @@ Worker and checker append timestamped entries here:
 - **Tests**: 14 new + 5 updated unit tests (19 total, all passing)
 - **Code quality**: Fixed pre-existing bare excepts, reduced parameter counts, removed stale duplicate file
 - **Queue**: EPIC-019 now 4/4 DONE (STORY-063, 064, 065, 066 all complete)
+
+### [2026-03-27 18:34] Work Checker Run
+- **PRs merged**: 0 — PR #108 (STORY-066) is MERGEABLE but CI failing (6/13 checks red: lint, type check, tests x2, security, pre-commit, PR size)
+- **PRs rebased**: 0 — no conflicts, CI issues need fixing by worker
+- **Open PRs**: 1 remaining — #108 (STORY-066) CI-red, cannot merge
+- **Queue**: M1: 15/15 DONE. EPIC-020: 4/4 DONE. EPIC-019: 3/4 DONE (STORY-066 PR pending CI fix). P0: all complete except EPIC-052 (BLOCKED).
+- **Dependencies unblocked**: None this run
+- **Branch hygiene**: No stale lock. 1 remote feature branch (tied to PR #108). No local merged branches to clean.
+- **Actions taken**: Updated STORY-066 status to IN_PROGRESS (CI failing), appended log entry
