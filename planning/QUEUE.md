@@ -62,8 +62,8 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 12 | STORY-165 | Archive Historical Professionalization Documents | DONE | PR #86 | |
 | 13 | STORY-166 | Consolidate Setup Documentation | DONE | PR #87 | |
-| 14 | STORY-167 | Organize Strategic Documents | IN_PROGRESS | |
-| 15 | STORY-168 | Create Repository Organization Standards | READY | |
+| 14 | STORY-167 | Organize Strategic Documents | DONE | PR #88 | |
+| 15 | STORY-168 | Create Repository Organization Standards | IN_PROGRESS | |
 
 ---
 
