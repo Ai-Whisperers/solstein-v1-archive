@@ -295,7 +295,14 @@ class WebResearcher:
             if website_data.get("description"):
                 result.description = website_data["description"]
             if website_data.get("employees"):
-                result.employees = website_data["employees"]
+                # STORY-127: Write employee count to canonical source (FinancialMetric)
+                if result.financials is None:
+                    from solstein.domain.models import FinancialMetric
+                    result.financials = FinancialMetric(
+                        employees=website_data["employees"], allow_empty_primary=True
+                    )
+                else:
+                    result.financials.employees = website_data["employees"]
             if website_data.get("founded"):
                 with contextlib.suppress(BaseException):
                     result.founded_year = int(str(website_data["founded"])[:4])

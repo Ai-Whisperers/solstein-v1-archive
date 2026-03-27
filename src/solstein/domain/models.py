@@ -15,7 +15,7 @@ import sys
 from datetime import datetime, timezone
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
 if sys.version_info >= (3, 11):  # noqa: UP036
     from enum import StrEnum
@@ -214,11 +214,12 @@ class Company(BaseModel):
     tech_stack: list[str] = Field(default_factory=list)
 
     # Financials
+    # STORY-127: FinancialMetric is the canonical source of truth for all financial metrics.
+    # profit_margin, employees, and employee_count are computed properties delegating to financials.
+    # Direct assignment to these fields will raise AttributeError — write to financials instead.
     financials: FinancialMetric | None = Field(default_factory=lambda: FinancialMetric(allow_empty_primary=True))
     revenue: float | None = None
-    employees: int | None = None
     growth_rate: float | None = None
-    profit_margin: float | None = None
     funding: float | None = None
     valuation: float | None = None
 
@@ -274,6 +275,76 @@ class Company(BaseModel):
     revenue_cagr_3yr: float | None = None
     revenue_cagr_5yr: float | None = None
 
+    @model_validator(mode="before")
+    @classmethod
+    def route_deprecated_fields_to_financials(cls, data: Any) -> Any:
+        """STORY-127: Route deprecated Company-level financial fields to FinancialMetric.
+
+        Fields `profit_margin`, `employees`, and `employee_count` are no longer stored
+        on Company. When passed in constructor kwargs, they are forwarded to the
+        `financials` sub-model (FinancialMetric), which is the canonical source of truth.
+        """
+        if not isinstance(data, dict):
+            return data
+
+        financials = data.get("financials")
+
+        # Extract deprecated fields from top-level
+        pm = data.pop("profit_margin", None)
+        emp = data.pop("employees", None)
+        emp_count = data.pop("employee_count", None)
+
+        # If no deprecated fields were passed, nothing to route
+        if pm is None and emp is None and emp_count is None:
+            return data
+
+        # Route into financials (handle both dict and FinancialMetric)
+        if isinstance(financials, FinancialMetric):
+            if pm is not None and financials.profit_margin is None:
+                financials.profit_margin = pm
+            if emp is not None and financials.employees is None:
+                financials.employees = emp
+            if emp_count is not None and financials.employees is None:
+                financials.employees = emp_count
+        elif isinstance(financials, dict):
+            if pm is not None and financials.get("profit_margin") is None:
+                financials["profit_margin"] = pm
+            if emp is not None and financials.get("employees") is None:
+                financials["employees"] = emp
+            if emp_count is not None and financials.get("employees") is None:
+                financials["employees"] = emp_count
+        else:
+            # No financials yet — create a dict for Pydantic to validate
+            fin_data: dict[str, Any] = {"allow_empty_primary": True}
+            if pm is not None:
+                fin_data["profit_margin"] = pm
+            if emp is not None:
+                fin_data["employees"] = emp
+            elif emp_count is not None:
+                fin_data["employees"] = emp_count
+            data["financials"] = fin_data
+
+        return data
+
+    # STORY-127: Computed properties — canonical source is FinancialMetric
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def profit_margin(self) -> float | None:
+        """Read-only. Canonical source: FinancialMetric.profit_margin."""
+        return self.financials.profit_margin if self.financials else None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def employees(self) -> int | None:
+        """Read-only. Canonical source: FinancialMetric.employees."""
+        return self.financials.employees if self.financials else None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def employee_count(self) -> int | None:
+        """Read-only alias for employees. Canonical source: FinancialMetric.employees."""
+        return self.financials.employees if self.financials else None
+
     @model_validator(mode="after")
     def sync_financial_fields(self) -> "Company":
         if self.company_name is None:
@@ -291,9 +362,10 @@ class Company(BaseModel):
                 setattr(self.financials, financial_name, value)
 
         sync_field("revenue", "revenue")
-        sync_field("employees", "employees")
+        # STORY-127: employees and profit_margin are now computed properties reading from
+        # FinancialMetric. They are no longer synced bidirectionally — FinancialMetric is
+        # the single source of truth.
         sync_field("growth_rate", "growth_rate")
-        sync_field("profit_margin", "profit_margin")
         sync_field("valuation", "valuation")
 
         funding_value = self.funding
@@ -315,9 +387,8 @@ class Company(BaseModel):
         if self.financials is not None and getattr(self.financials, "allow_empty_primary", False):
             return self
         revenue = self.revenue if self.revenue is not None else (self.financials.revenue if self.financials else None)
-        employees = (
-            self.employees if self.employees is not None else (self.financials.employees if self.financials else None)
-        )
+        # STORY-127: employees is now always read from financials (canonical source)
+        employees = self.financials.employees if self.financials else None
         if revenue is None and employees is None:
             raise ValueError("At least revenue OR employees required")
         return self
@@ -415,7 +486,8 @@ class Company(BaseModel):
 
         return (filled / len(key_fields)) * 100 if key_fields else 0.0
 
-    profit_margin: float | None = None
+    # STORY-127: profit_margin removed as field — now a computed_field from financials.
+    # STORY-127: employee_count removed as field — now a computed_field from financials.
     ebitda_margin: float | None = None
     recurring_revenue_pct: float | None = None
     revenue_per_employee_eur_k: float | None = None
@@ -427,7 +499,6 @@ class Company(BaseModel):
     lead_investors: list[str] = Field(default_factory=list)
     funding_war_chest: str | None = None
 
-    employee_count: int | None = None
     employee_cagr_3yr: float | None = None
     open_positions: int | None = None
 
@@ -459,18 +530,20 @@ class Company(BaseModel):
             raise ValueError("CAGR cannot be less than -100%")
         return v
 
-    @field_validator("profit_margin", "ebitda_margin", "recurring_revenue_pct")
+    # STORY-127: profit_margin validation is now on FinancialMetric only (canonical source)
+    @field_validator("ebitda_margin", "recurring_revenue_pct")
     @classmethod
     def validate_percentage(cls, v: float | None) -> float | None:
         if v is not None and (v < -100 or v > 100):
             raise ValueError("Percentage must be between -100 and 100")
         return v
 
-    @field_validator("employee_count", "open_positions")
+    # STORY-127: employee_count validation is now on FinancialMetric only (canonical source)
+    @field_validator("open_positions")
     @classmethod
     def validate_positive_int(cls, v: int | None) -> int | None:
         if v is not None and v < 0:
-            raise ValueError("Employee count cannot be negative")
+            raise ValueError("Open positions cannot be negative")
         return v
 
     @field_validator("ticker")
