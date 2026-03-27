@@ -14,8 +14,8 @@ This applies to code as much as to companies. We do not patch over problems. We 
 
 ## Before You Start
 
-1. Read the [Developer Guide](docs/guides/developer.md) for setup instructions
-2. Understand the [Architecture Decision Records](docs/architecture/decisions.md) — know *why* things are built the way they are before changing them
+1. Read the [Developer Guide](../guides/developer.md) for setup instructions
+2. Understand the [Architecture Decision Records](../architecture/decisions.md) — know *why* things are built the way they are before changing them
 3. Run the full test suite and confirm it passes: `pytest tests/`
 
 ---
@@ -83,8 +83,8 @@ Every new feature must include tests in the appropriate layer:
 3. Attach result to `Company` in `calculate_scores()`
 4. Add unit test with exact expected value
 5. Add golden dataset test protecting the classification boundary
-6. Update the [API Reference](docs/api/reference.md) if the score appears in a response
-7. Add an ADR in [Architecture Decisions](docs/architecture/decisions.md)
+6. Update the [API Reference](../api/reference.md) if the score appears in a response
+7. Add an ADR in [Architecture Decisions](../architecture/decisions.md)
 
 ---
 

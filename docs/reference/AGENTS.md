@@ -1,7 +1,7 @@
 # Solstein - AI-Powered Competitive Intelligence Platform
 
-> **AGENTS.md v3.0** | Claude Code v1.0+ Standard  
-> Last Updated: 2026-03-01  
+> **AGENTS.md v3.0** | Claude Code v1.0+ Standard
+> Last Updated: 2026-03-01
 > Source of truth: verified against actual codebase
 
 ## Quick Reference
@@ -18,13 +18,13 @@ python_min: "3.10"
 
 ## Project Identity
 
-**What is this?**  
+**What is this?**
 AI-powered competitive intelligence platform for PE/VC professionals. Analyzes market data, company financials, competitive positioning, and generates strategic insights using 13 LLM providers with automatic failover.
 
-**Why does it exist?**  
+**Why does it exist?**
 Private equity and venture capital firms need rapid, data-driven competitive analysis. Traditional research is slow and expensive. Solstein automates this with AI.
 
-**Who maintains it?**  
+**Who maintains it?**
 Core team with AI-assisted development via Claude Code.
 
 ## Tech Stack
@@ -636,8 +636,8 @@ python scripts/ci/check_file_sizes.py
 ```
 
 ### Code Smell References
-- See [EPIC-019](../docs/epics/EPIC-019-AUTOMATED-CODE-QUALITY-GUARDRAILS.md) for full guidelines
-- See [COMPLETE_CODE_SMELLS_FULL_ANALYSIS.md](../COMPLETE_CODE_SMELLS_FULL_ANALYSIS.md) for current issues
+- See [EPIC-019](../archive/epics/EPIC-019/versions/EPIC-019-AUTOMATED-CODE-QUALITY-GUARDRAILS-legacy.md) for full guidelines
+- See [COMPLETE_CODE_SMELLS_FULL_ANALYSIS.md](../archive/analysis/COMPLETE_CODE_SMELLS_FULL_ANALYSIS.md) for current issues
 - All new code must not increase smell count
 
 ### Agent Pre-Commit Quality Checklist (EPIC-019 Story 4)

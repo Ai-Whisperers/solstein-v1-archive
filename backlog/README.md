@@ -2,7 +2,7 @@
 
 > *The authoritative tracking document for the Solstein architectural remediation programme. All work originates here.*
 
-| Last Updated: 2026-03-01 | Audit Version: 2.0 | Status: 🔴 DO NOT SHIP |
+| Last Updated: 2026-03-26 | Audit Version: 2.1 | Status: 🔴 DO NOT SHIP |
 
 ---
 
@@ -10,13 +10,12 @@
 
 | Metric | Value | Trend |
 |--------|-------|-------|
-| Total Epics | 52 | +9 |
-| Total Stories | 202 | +34 |
-| P0 Stories (Ship Blockers) | 19 | 🔴 Unresolved (+6) |
-| P1 Stories (Current Sprint) | 83 | 🟠 Queued (+21) |
-| P2 Stories (Next Quarter) | 78 | 🟡 Backlogged (+5) |
-| P3 Stories (Sustaining) | 22 | 🟢 Deferred (+2) |
+| Total Epics | 66 | Generated from backlog/EPICS/ |
+| Total Stories | 242 | Generated from backlog/EPICS/*/STORIES/*.md |
+| Stories Completed (QUEUE.md) | 27+ | Tracked in planning/QUEUE.md |
 | Overall System Status | **CRITICAL** | 🔴 Do Not Ship |
+
+> **Note (STORY-236)**: Priority breakdowns (P0/P1/P2/P3) are pending automated generation from story files. Counts above are source-of-truth from the filesystem as of 2026-03-26.
 
 ---
 
@@ -163,9 +162,9 @@ EPIC-002: Configuration Integrity
 | [STORY-013](EPICS/EPIC-004-data-integrity-atomicity/STORIES/STORY-013-fix-conflict-resolution-logic.md) | Fix Conflict Resolution Logic | EPIC-004 | 🔴 Open |
 | [STORY-014](EPICS/EPIC-004-data-integrity-atomicity/STORIES/STORY-014-remove-hardcoded-date-path.md) | Remove Hardcoded Date Path from Data Loader | EPIC-004 | 🔴 Open |
 | [STORY-067](EPICS/EPIC-020-supabase-auth-migration/STORIES/STORY-067-migrate-to-supabase-auth.md) | Migrate Authentication to Supabase Auth | EPIC-020 | 🔴 Open |
-| [STORY-068](EPICS/EPIC-020-supabase-auth-migration/STORIES/STORY-068-remove-auth-bypass.md) | Remove Auth Bypass and Wire Supabase JWT Middleware | EPIC-020 | 🔴 Open |
+| [STORY-068](EPICS/EPIC-020-supabase-auth-migration/STORIES/STORY-068-supabase-jwt-middleware.md) | Remove Auth Bypass and Wire Supabase JWT Middleware | EPIC-020 | 🔴 Open |
 | [STORY-069](EPICS/EPIC-020-supabase-auth-migration/STORIES/STORY-069-error-handling-sanitization.md) | Migrate Error Handling and Input Sanitization | EPIC-020 | 🔴 Open |
-| [STORY-070](EPICS/EPIC-020-supabase-auth-migration/STORIES/STORY-070-ssrf-fix.md) | Fix SSRF Vulnerability in Web and Website Agents | EPIC-020 | 🔴 Open |
+| [STORY-070](EPICS/EPIC-020-supabase-auth-migration/STORIES/STORY-070-ssrf-prevention.md) | Fix SSRF Vulnerability in Web and Website Agents | EPIC-020 | 🔴 Open |
 
 ### P1 — Current Sprint (62 stories)
 
@@ -198,16 +197,16 @@ EPIC-002: Configuration Integrity
 | STORY-060 | Define Environment Configuration via IaC | EPIC-018 | 🔴 Open |
 | STORY-061 | Build CI Pipeline with Quality Gates | EPIC-018 | 🔴 Open |
 | STORY-062 | Implement Pre-commit Hooks and Linting Automation | EPIC-018 | 🔴 Open |
-| [STORY-063](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-063-tenant-model.md) | Define Tenant Model and Domain Object Scoping | EPIC-019 | 🔴 Open |
-| [STORY-064](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-064-supabase-rls.md) | Implement Supabase RLS for All Tables | EPIC-019 | 🔴 Open |
-| [STORY-065](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-065-tenant-api-keys.md) | Add Tenant-Scoped API Key Management | EPIC-019 | 🔴 Open |
-| [STORY-066](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-066-tenant-research-jobs.md) | Enforce Tenant Isolation in Research Jobs | EPIC-019 | 🔴 Open |
-| [STORY-071](EPICS/EPIC-021-modern-llm-stack/STORIES/STORY-071-anthropic-sdk.md) | Replace Custom LLM Client with Anthropic SDK | EPIC-021 | 🔴 Open |
+| [STORY-063](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-063-define-tenant-model.md) | Define Tenant Model and Domain Object Scoping | EPIC-019 | 🔴 Open |
+| [STORY-064](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-064-supabase-rls-policies.md) | Implement Supabase RLS for All Tables | EPIC-019 | 🔴 Open |
+| [STORY-065](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-065-tenant-api-key-management.md) | Add Tenant-Scoped API Key Management | EPIC-019 | 🔴 Open |
+| [STORY-066](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-066-tenant-isolation-research-jobs.md) | Enforce Tenant Isolation in Research Jobs | EPIC-019 | 🔴 Open |
+| [STORY-071](EPICS/EPIC-021-modern-llm-stack/STORIES/STORY-071-anthropic-sdk-migration.md) | Replace Custom LLM Client with Anthropic SDK | EPIC-021 | 🔴 Open |
 | [STORY-072](EPICS/EPIC-021-modern-llm-stack/STORIES/STORY-072-instructor-structured-outputs.md) | Implement Structured LLM Outputs with Instructor | EPIC-021 | 🔴 Open |
 | [STORY-073](EPICS/EPIC-021-modern-llm-stack/STORIES/STORY-073-langfuse-integration.md) | Integrate Langfuse for Cost Tracking and Prompt Management | EPIC-021 | 🔴 Open |
 | [STORY-075](EPICS/EPIC-021-modern-llm-stack/STORIES/STORY-075-multi-provider-fallback.md) | Implement Multi-Provider Fallback via SDK | EPIC-021 | 🔴 Open |
-| [STORY-086](EPICS/EPIC-014-observability-telemetry/STORIES/STORY-086-audit-trail.md) | Enforce Universal Audit Trail Across All Endpoints | EPIC-014 | 🔴 Open |
-| [STORY-087](EPICS/EPIC-018-infrastructure-cicd/STORIES/STORY-087-celery-dlq.md) | Implement Celery Dead Letter Queue | EPIC-018 | 🔴 Open |
+| [STORY-086](EPICS/EPIC-014-observability-telemetry/STORIES/STORY-086-enforce-universal-audit-trail.md) | Enforce Universal Audit Trail Across All Endpoints | EPIC-014 | 🔴 Open |
+| [STORY-087](EPICS/EPIC-018-infrastructure-cicd/STORIES/STORY-087-celery-dead-letter-queue.md) | Implement Celery Dead Letter Queue | EPIC-018 | 🔴 Open |
 | [STORY-088](EPICS/EPIC-025-worker-reliability/STORIES/STORY-088-persistent-dead-letter-queue.md) | Fix In-Memory DLQ — Persist to PostgreSQL | EPIC-025 | 🔴 Open |
 | [STORY-089](EPICS/EPIC-025-worker-reliability/STORIES/STORY-089-task-acks-late-configuration.md) | Set task_acks_late and task_reject_on_worker_lost | EPIC-025 | 🔴 Open |
 | [STORY-090](EPICS/EPIC-025-worker-reliability/STORIES/STORY-090-task-idempotency-deduplication.md) | Implement Task Idempotency via Deduplication Lock | EPIC-025 | 🔴 Open |

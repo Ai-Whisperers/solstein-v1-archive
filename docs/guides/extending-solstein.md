@@ -792,7 +792,7 @@ See `/docs/examples/custom_scoring_dimension_example.py` *(coming soon)* for a c
 
 - [Architecture Decisions](../architecture/decisions.md) — Design patterns
 - [Developer Guide](developer.md) — Code structure
-- [CONTRIBUTING.md](../../CONTRIBUTING.md) — Review process
+- [CONTRIBUTING.md](../reference/CONTRIBUTING.md) — Review process
 
 ---
 

@@ -342,7 +342,7 @@ When making **operational changes:**
 
 ## 💡 Contributing to Documentation
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md#documentation) for:
+See [CONTRIBUTING.md](reference/CONTRIBUTING.md#documentation) for:
 - Documentation style guide
 - How to add new docs
 - Review process
@@ -365,7 +365,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md#documentation) for:
 | **"How do I [task]?"** | 👉 [QUICK-REFERENCE.md](QUICK-REFERENCE.md) |
 | **"What does X mean?"** | 👉 [GLOSSARY.md](GLOSSARY.md) |
 | **"Where is file X?"** | 👉 [STRUCTURE.md](STRUCTURE.md) |
-| **"How should I code?"** | 👉 [CONTRIBUTING.md](../CONTRIBUTING.md) |
+| **"How should I code?"** | 👉 [CONTRIBUTING.md](reference/CONTRIBUTING.md) |
 | **"Why was Y decided?"** | 👉 [architecture/decisions.md](architecture/decisions.md) |
 | **"What's broken?"** | 👉 [guides/troubleshooting.md](guides/troubleshooting.md) |
 | **"How do async tasks work?"** | 👉 [guides/async-patterns.md](guides/async-patterns.md) |
@@ -393,7 +393,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md#documentation) for:
    - [phases/README.md](phases/README.md) — Phase evolution
 
 4. **Contributing** (1 hour)
-   - [CONTRIBUTING.md](../CONTRIBUTING.md) — Code standards
+   - [CONTRIBUTING.md](reference/CONTRIBUTING.md) — Code standards
    - [guides/code-conventions.md](guides/code-conventions.md)
 
 5. **Advanced Topics** (2 hours)
@@ -425,5 +425,5 @@ We're aiming for **excellent** documentation where:
 ---
 
 *Last Updated: February 26, 2026 (Wave 4 Complete)*
-*Maintained by: Engineering Documentation Team*  
+*Maintained by: Engineering Documentation Team*
 *Next Review: March 26, 2026*

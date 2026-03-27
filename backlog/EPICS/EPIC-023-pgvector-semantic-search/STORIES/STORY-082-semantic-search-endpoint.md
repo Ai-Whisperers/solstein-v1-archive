@@ -7,7 +7,7 @@
 | Severity | HIGH |
 | Epic | [EPIC-023: pgvector Semantic Search](../README.md) |
 | Created | 2026-02-28 |
-| Dependencies | [STORY-080](STORY-080-pgvector-schema.md), [STORY-081](STORY-081-embed-during-research.md), [STORY-038](../../EPIC-010-api-layer-hardening/STORIES/STORY-038-typed-response-models.md) (typed response models) |
+| Dependencies | [STORY-080](STORY-080-pgvector-schema.md), [STORY-081](STORY-081-embed-during-research.md), [STORY-038](../../EPIC-010-api-layer-hardening/STORIES/STORY-038-add-typed-response-models.md) (typed response models) |
 
 ---
 
@@ -46,7 +46,7 @@ Filter-based search finds companies that match exact criteria. Semantic search f
 - **REQ-4**: Results must be scoped to the authenticated tenant's data (RLS from EPIC-019 must apply to vector queries)
 - **REQ-5**: The response must include: company details, similarity score, and whether the company has a complete embedding
 - **REQ-6**: Companies without embeddings must be excluded from semantic search results (not returned with null similarity)
-- **REQ-7**: The endpoint must be paginated (consistent with [STORY-037](../../EPIC-010-api-layer-hardening/STORIES/STORY-037-pagination.md))
+- **REQ-7**: The endpoint must be paginated (consistent with [STORY-037](../../EPIC-010-api-layer-hardening/STORIES/STORY-037-add-pagination.md))
 
 ## Acceptance Criteria
 
