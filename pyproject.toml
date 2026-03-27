@@ -40,6 +40,7 @@ dependencies = [
     "anthropic>=0.40.0",  # EPIC-021: Native Anthropic SDK for LLM calls
     "openai>=1.0",  # EPIC-021: OpenAI-compatible SDK for multi-provider support
     "instructor>=1.0",  # STORY-072: Pydantic schema validation for structured LLM outputs
+    "langfuse>=2.0",  # STORY-073: LLM observability, cost tracking, prompt management
 ]
 
 [project.license]

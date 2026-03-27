@@ -2,9 +2,11 @@
 
 STORY-071: Refactored from 284→96 lines. Retry/failover in failover.py,
 JSON parsing in json_parsing.py. Anthropic uses native AsyncAnthropic SDK.
+STORY-073: Added Langfuse tracing via LLMTracer.
 """
 from __future__ import annotations
 
+import time
 from typing import Any, TypeVar
 
 from loguru import logger
@@ -15,6 +17,7 @@ from .failover import try_provider
 from .health_checker import ProviderHealthChecker, get_health_checker
 from .json_parsing import parse_structured_result
 from .query import AnthropicQuerier, CloudProviderQuerier
+from .tracing import TraceRecord, get_tracer
 
 TBaseModel = TypeVar("TBaseModel", bound=BaseModel)
 PROVIDER_PRIORITY = ["deepinfra", "mistral", "nvidia"]
@@ -83,13 +86,30 @@ class EnhancedLLMClient:
         return PROVIDER_PRIORITY.copy()
 
     async def _query_provider(self, provider: str, prompt: str, system_prompt: str | None) -> Any:
+        """Query a provider and emit a Langfuse trace (STORY-073)."""
         client = self._get_client(provider)
         if not client:
             raise RuntimeError(f"No client available for {provider}")
         model = self._get_model(provider)
-        if provider == "anthropic":
-            return await self.anthropic_querier.query(client, model, prompt, system_prompt)
-        return await self.cloud_querier.query(client, provider, model, prompt, system_prompt)
+        start = time.monotonic()
+        try:
+            if provider == "anthropic":
+                result = await self.anthropic_querier.query(client, model, prompt, system_prompt)
+            else:
+                result = await self.cloud_querier.query(client, provider, model, prompt, system_prompt)
+            elapsed = time.monotonic() - start
+            get_tracer(self.settings).record(TraceRecord(
+                prompt=prompt[:500], provider=provider, model=model,
+                latency_s=elapsed, success=True,
+            ))
+            return result
+        except Exception as exc:
+            elapsed = time.monotonic() - start
+            get_tracer(self.settings).record(TraceRecord(
+                prompt=prompt[:500], provider=provider, model=model,
+                latency_s=elapsed, success=False, error=str(exc),
+            ))
+            raise
 
     async def check_all_providers(self) -> dict[str, Any]:
         health = await self.health_checker.check_all_providers()
