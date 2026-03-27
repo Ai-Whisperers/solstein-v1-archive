@@ -50,7 +50,7 @@ jobs:
           else
             VERSION=${{ github.event.inputs.version }}
           fi
-          
+
           if ! git rev-parse "$VERSION" >/dev/null 2>&1; then
             echo "❌ Tag $VERSION does not exist"
             exit 1
@@ -70,11 +70,41 @@ jobs:
           # trivy image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION
           echo "✅ Security scan passed"
 
+  migrate-production:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: pre-deployment-checks
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install alembic sqlalchemy psycopg[binary] pydantic pydantic-settings python-dotenv
+
+      - name: Run Alembic migrations
+        env:
+          DATABASE__URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          SECURITY__SECRET_KEY: ${{ secrets.PRODUCTION_SECRET_KEY }}
+        run: |
+          python scripts/ci/run_migrations.py --timeout 300
+
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: pre-deployment-checks
+    needs: [pre-deployment-checks, migrate-production]
     permissions:
       contents: read
       id-token: write
@@ -152,8 +182,6 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: '🚨 Production Deployment Failed - Rollback Initiated',
-              body: `Deployment of ${{ steps.version.outputs.version }} failed and was rolled back.
-              
-[View Run](${context.payload.repository.html_url}/actions/runs/${context.runId})`,
+              body: `Deployment of ${{ steps.version.outputs.version }} failed and was rolled back.\n\n[View Run](${context.payload.repository.html_url}/actions/runs/${context.runId})`,
               labels: ['incident', 'production', 'deployment']
             });

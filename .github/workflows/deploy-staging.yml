@@ -88,11 +88,41 @@ jobs:
           path: sbom.spdx.json
           retention-days: 30
 
+  migrate:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build-and-push
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install alembic sqlalchemy psycopg[binary] pydantic pydantic-settings python-dotenv
+
+      - name: Run Alembic migrations
+        env:
+          DATABASE__URL: ${{ secrets.STAGING_DATABASE_URL }}
+          SECURITY__SECRET_KEY: ${{ secrets.STAGING_SECRET_KEY }}
+        run: |
+          python scripts/ci/run_migrations.py --timeout 300
+
   deploy:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: build-and-push
+    needs: [build-and-push, migrate]
     permissions:
       contents: read
       id-token: write
@@ -153,10 +183,10 @@ jobs:
         with:
           script: |
             const status = '${{ job.status }}';
-            const message = status === 'success' 
+            const message = status === 'success'
               ? '✅ Staging deployment successful'
               : '❌ Staging deployment failed';
-            
+
             github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
