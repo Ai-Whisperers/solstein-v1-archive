@@ -294,6 +294,13 @@ class Company(BaseModel):
     energy_market_segments: list[str] = Field(default_factory=list)
     energy_market_breakdown: dict[str, Any] = Field(default_factory=dict)
 
+    # STORY-151: Trading Platform & Digital Infrastructure (EPIC-039)
+    energy_trading_score: float | None = None  # 0-100 composite
+    energy_platform_maturity: str | None = None  # advanced / intermediate / basic / unknown
+    energy_infrastructure_tier: str | None = None  # cloud_native / hybrid / legacy / unknown
+    energy_trading_breakdown: dict[str, Any] = Field(default_factory=dict)
+
+
     @model_validator(mode="before")
     @classmethod
     def route_deprecated_fields_to_financials(cls, data: Any) -> Any:

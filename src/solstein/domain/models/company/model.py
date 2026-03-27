@@ -140,6 +140,13 @@ class Company(CompanyUtilityMixin, CompanyPropertyMixin, CompanySyncMixin):
     energy_market_segments: list[str] = Field(default_factory=list)
     energy_market_breakdown: dict[str, Any] = Field(default_factory=dict)
 
+    # STORY-151: Trading Platform & Digital Infrastructure (EPIC-039)
+    energy_trading_score: float | None = None
+    energy_platform_maturity: str | None = None
+    energy_infrastructure_tier: str | None = None
+    energy_trading_breakdown: dict[str, Any] = Field(default_factory=dict)
+
+
     # Aliases for backward compatibility
     @property
     def funding(self) -> float | None:
