@@ -29,6 +29,7 @@ celery_app = Celery(
     backend=settings.celery_result_backend or "redis://localhost:6379/1",
     include=[
         "solstein.worker_tasks",
+        "solstein.worker.export_tasks",  # STORY-111: Async export tasks
     ],
 )
 
@@ -87,7 +88,21 @@ celery_app.conf.update(
     # This adds minimal overhead (~1 Redis message per task state change).
     worker_send_task_events=True,
     task_send_sent_event=True,
+    # STORY-111: Route export tasks to dedicated queue with higher time limits.
+    # Default exports: 60 s soft / 90 s hard.
+    # LLM exports override per-task via task_time_limit annotation.
+    task_routes={
+        "solstein.worker_tasks.generate_export": {"queue": "export"},
+    },
 )
+
+# STORY-111: Per-task time limit overrides for LLM exports (120 s)
+celery_app.conf.task_annotations = {
+    "solstein.worker_tasks.generate_export": {
+        "time_limit": 150,
+        "soft_time_limit": 120,
+    },
+}
 
 # Beat schedule for automated data refresh
 # All 12 sources with appropriate frequencies based on data freshness requirements

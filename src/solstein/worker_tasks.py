@@ -61,6 +61,9 @@ from solstein.worker.enrichment_tasks import (
     enrich_company_async,
 )
 
+# Export tasks (STORY-111)
+from solstein.worker.export_tasks import generate_export
+
 # Orchestration
 from solstein.worker.orchestration import refresh_all_sources
 
@@ -121,4 +124,6 @@ __all__ = [
     "validate_task_tenant_id",
     "task_tenant_context",
     "require_tenant_id",
+    # Export tasks (STORY-111)
+    "generate_export",
 ]
