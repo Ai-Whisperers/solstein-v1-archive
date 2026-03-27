@@ -44,7 +44,7 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 4 | STORY-137 | Centralize All Environment Variables in config.py | DONE | PR #80 merged (content in develop) |
 | 5 | STORY-138 | Replace Hardcoded Paths with Config-Driven Paths | DONE | PR #81 merged |
-| 6 | STORY-139 | Centralize Timeouts and Magic Numbers | IN_PROGRESS | Worker started, died mid-task (stale lock). 16 files staged, _config_timeouts.py untracked. Worker should resume. |
+| 6 | STORY-139 | Centralize Timeouts and Magic Numbers | DONE | Committed d385899 to develop. 17 files, 19 tests pass. |
 | 7 | STORY-140 | Fix .env.example with All Required Variables | READY | |
 
 ### EPIC-037: Dead Code Elimination Phase 2 (P2)
@@ -168,6 +168,13 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: None — M1 not yet complete
 - **Branch hygiene**: Deleted 9 remote branches (2 feature, 5 dependabot auto-deleted, 1 orphaned 'update', 1 STORY-137). Pruned stale refs. 2 local branches cleaned.
 - **Actions taken**: Fixed 6 PRs targeting master to develop; merged all; updated QUEUE.md notes
+
+### [2026-03-26 21:35] Worker Run — STORY-139 Complete
+- **Story**: STORY-139 Centralize Timeouts and Magic Numbers
+- **Commit**: d385899 pushed to develop
+- **Changes**: 17 files changed; new `_config_timeouts.py`; `call_with_retry` 8→4 params; `ConnectorRuntime.run` 6→5 params; lazy imports resolved; bare excepts annotated with noqa:BLE001
+- **Tests**: 19/19 new unit tests pass; pre-commit hook passes; ruff clean
+- **Queue**: M1: 6/15 DONE. STORY-140 is READY next.
 
 ### [2026-03-27 10:31] Work Checker Run
 - **PRs merged**: 0 — no open PRs; worker lock was present but stale (PID 2648746 dead), removed lock
