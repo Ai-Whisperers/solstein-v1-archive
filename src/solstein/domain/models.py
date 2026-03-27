@@ -288,6 +288,12 @@ class Company(BaseModel):
     transformation_risk_level: str | None = None  # high / medium / low
     transformation_breakdown: dict[str, Any] = Field(default_factory=dict)
 
+    # STORY-150: Energy Market Forecasting (EPIC-039)
+    energy_market_score: float | None = None  # 0-100 composite
+    energy_market_positioning: str | None = None  # leader / aligned / transitioning / misaligned / unknown
+    energy_market_segments: list[str] = Field(default_factory=list)
+    energy_market_breakdown: dict[str, Any] = Field(default_factory=dict)
+
     @model_validator(mode="before")
     @classmethod
     def route_deprecated_fields_to_financials(cls, data: Any) -> Any:

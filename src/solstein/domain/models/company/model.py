@@ -134,6 +134,12 @@ class Company(CompanyUtilityMixin, CompanyPropertyMixin, CompanySyncMixin):
     energy_control_tier: str | None = None  # advanced / standard / legacy / unknown
     energy_compliance_breakdown: dict[str, Any] = Field(default_factory=dict)
 
+    # STORY-150: Energy Market Forecasting (EPIC-039)
+    energy_market_score: float | None = None  # 0-100 composite
+    energy_market_positioning: str | None = None
+    energy_market_segments: list[str] = Field(default_factory=list)
+    energy_market_breakdown: dict[str, Any] = Field(default_factory=dict)
+
     # Aliases for backward compatibility
     @property
     def funding(self) -> float | None:
