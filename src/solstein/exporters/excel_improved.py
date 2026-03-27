@@ -31,6 +31,7 @@ from .excel.sheets_extended import (
     add_revenue_history,
 )
 from .excel.styles import ExcelStyles
+from .export_schema import EXPORT_SCHEMA_VERSION, validate_export
 
 
 class ImprovedExcelExporter:
@@ -93,12 +94,17 @@ class ImprovedExcelExporter:
             ws_advanced = wb.create_sheet("Advanced Data")
             add_advanced_data(ws_advanced, self.styles, profiles)
 
-            if metadata:
-                self._add_metadata_sheet(wb, metadata)
+            # STORY-126: Always embed schema version in metadata
+            export_metadata = metadata.copy() if metadata else {}
+            export_metadata["export_schema_version"] = EXPORT_SCHEMA_VERSION
+            self._add_metadata_sheet(wb, export_metadata)
 
             # Save workbook
             output_path.parent.mkdir(parents=True, exist_ok=True)
             wb.save(output_path)
+
+            # STORY-126: Validate exported file against schema
+            validate_export(output_path)
 
             logger.info(f"Excel dashboard saved to {output_path}")
 
