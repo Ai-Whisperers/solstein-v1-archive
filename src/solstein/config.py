@@ -206,6 +206,19 @@ class Settings(BaseSettings):
     news_api_key: str | None = Field(default=None)
     patentsview_api_key: str | None = Field(default=None)
 
+    # STORY-091: Top-level alias so CELERY_RESULT_EXPIRES_SECONDS env var works alongside
+    # the nested CELERY_TIMING__RESULT_EXPIRES. When set, celery_config.py uses this value
+    # instead of celery_timing.result_expires. Defaults to None (no override).
+    celery_result_expires_seconds: int | None = Field(
+        default=None,
+        ge=60,
+        description=(
+            "Override for Celery result TTL (seconds). Alias for CELERY_TIMING__RESULT_EXPIRES. "
+            "When set, takes precedence over celery_timing.result_expires. "
+            "Polling contract: callers must read results within this window or accept expiry."
+        ),
+    )
+
     connector_max_attempts: int = Field(default=3, ge=1, le=10)
     connector_retry_base_delay: float = Field(default=0.25, ge=0.0, le=30.0)
     connector_retry_max_delay: float = Field(default=2.0, ge=0.0, le=120.0)

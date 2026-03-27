@@ -32,6 +32,17 @@ celery_app = Celery(
     ],
 )
 
+# STORY-091: Resolve result TTL — top-level CELERY_RESULT_EXPIRES_SECONDS overrides the
+# nested CELERY_TIMING__RESULT_EXPIRES if both are set. Default is 86400s (24 hours).
+# Polling contract: callers must read AsyncResult.status within this window.
+# After expiry, a PENDING status is returned for completed tasks — this is misleading,
+# not a bug. Size the TTL to exceed your longest expected polling delay.
+_result_expires: int = (
+    settings.celery_result_expires_seconds
+    if settings.celery_result_expires_seconds is not None
+    else settings.celery_timing.result_expires
+)
+
 celery_app.conf.update(
     task_serializer="json",
     accept_content=["json"],
@@ -41,7 +52,14 @@ celery_app.conf.update(
     task_track_started=True,
     task_time_limit=settings.celery_timing.task_time_limit,
     task_soft_time_limit=settings.celery_timing.task_soft_time_limit,
-    result_expires=settings.celery_timing.result_expires,
+    # Result TTL — see STORY-091. Default: 86400s (24h). Set via:
+    #   CELERY_RESULT_EXPIRES_SECONDS=86400  (top-level alias)
+    #   CELERY_TIMING__RESULT_EXPIRES=86400  (nested config)
+    # Pollers must read results within this window or accept expiry.
+    result_expires=_result_expires,
+    # worker_prefetch_multiplier=1 is required for at-least-once delivery
+    # (see STORY-089: task_acks_late). Setting prefetch to 1 ensures a worker
+    # receives exactly one task at a time, so a crash drops at most one task.
     worker_prefetch_multiplier=1,
     worker_max_tasks_per_child=100,
 )
