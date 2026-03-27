@@ -202,7 +202,7 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 50 | STORY-071 | Replace Custom LLM Client with Anthropic SDK | READY | Dep: EPIC-002 (DONE) |
+| 50 | STORY-071 | Replace Custom LLM Client with Anthropic SDK | IN_PROGRESS | Dep: EPIC-002 (DONE) |
 | 51 | STORY-072 | Implement Structured LLM Outputs with Instructor | READY | Dep: STORY-071 |
 | 52 | STORY-073 | Integrate Langfuse for Cost Tracking and Prompt Management | READY | Dep: STORY-071 |
 | 53 | STORY-074 | Migrate LLM Evaluation to Langfuse | READY | Dep: STORY-073 |
