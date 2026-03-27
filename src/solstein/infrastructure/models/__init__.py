@@ -11,6 +11,8 @@ This package contains all SQLAlchemy ORM models organized by domain:
 All models are re-exported from this package for convenience.
 """
 
+# Audit models (STORY-086)
+from .audit import DataAccessAuditRecord
 from .base import Base
 
 # Company and scoring models
@@ -81,4 +83,6 @@ __all__ = [
     # API Keys (EPIC-019)
     "ApiKeyRecord",
     "ApiKeyUsageRecord",
+    # Data Access Audit (STORY-086)
+    "DataAccessAuditRecord",
 ]
