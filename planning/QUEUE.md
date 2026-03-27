@@ -78,14 +78,14 @@ The first worker run MUST do a verification pass before starting implementation 
 | 18 | STORY-069 | Error Handling and Input Sanitization | DONE | PR #99 |
 | 19 | STORY-070 | Fix SSRF Vulnerability in Web and Website Agents | DONE | PR #100 |
 
-### EPIC-019: Multi-Tenancy & Data Isolation (P1) — BLOCKED on EPIC-020
+### EPIC-019: Multi-Tenancy & Data Isolation (P1) — EPIC-020 merged, READY
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 20 | STORY-063 | Define Tenant Model and Domain Object Scoping | BLOCKED | Depends on EPIC-020 |
-| 21 | STORY-064 | Implement Supabase RLS for All Tables | BLOCKED | |
-| 22 | STORY-065 | Add Tenant-Scoped API Key Management | BLOCKED | |
-| 23 | STORY-066 | Enforce Tenant Isolation in Research Jobs | BLOCKED | |
+| 20 | STORY-063 | Define Tenant Model and Domain Object Scoping | READY | EPIC-020 fully merged 2026-03-27 |
+| 21 | STORY-064 | Implement Supabase RLS for All Tables | READY | |
+| 22 | STORY-065 | Add Tenant-Scoped API Key Management | READY | |
+| 23 | STORY-066 | Enforce Tenant Isolation in Research Jobs | READY | |
 
 ---
 
@@ -98,7 +98,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 24 | STORY-169 | Fix JSON parsing in score/analyze-market/compare/export-excel | DONE | PR #90 |
 | 24b | STORY-170 | Restore generate-llm-report exporter import | DONE | PR #91 |
 | 24c | STORY-171 | Migrate all CLI commands from deprecated CompetitorDataLoader | DONE | PR #92 |
-| 24d | STORY-172 | Add structured input validation with actionable error messages | BLOCKED | PR #93 conflicting — cli.py conflict with merged STORY-171 |
+| 24d | STORY-172 | Add structured input validation with actionable error messages | DONE | PR #93 — rebased by checker, conflict resolved, merged 2026-03-27 |
 
 ### EPIC-046: Scoring Engine Correctness (P0)
 
@@ -319,3 +319,12 @@ Worker and checker append timestamped entries here:
 - **Dependencies**: EPIC-019 correctly BLOCKED — EPIC-020 PRs not merged yet. STORY-229 correctly READY (depends on STORY-228 in progress).
 - **Branch hygiene**: 8 remote feature branches (all tied to open PRs). No stale branches. No local merged branches to clean.
 - **Actions taken**: Queue verified accurate, no changes needed. Log entry appended.
+
+### [2026-03-27 15:31] Work Checker Run
+- **PRs merged**: 10 total — #96 (EPIC-064), #97 (STORY-067), #98 (STORY-068), #99 (STORY-069), #100 (STORY-070), #101 (STORY-226), #102 (STORY-227), #103 (STORY-228), #104 (STORY-229), #93 (STORY-172, after rebase)
+- **PRs rebased**: 1 successful — #93 (STORY-172): import conflict in cli.py resolved (kept STORY-171's get_settings/convert_to_domain_company, added STORY-172's cli_validators import; dropped stale CompetitorDataLoader). 38/38 tests pass.
+- **Open PRs**: 0 remaining
+- **Queue**: M1: 15/15 DONE. EPIC-020: 4/4 DONE (all merged). EPIC-045: 4/4 DONE (STORY-172 unblocked). EPIC-062/064 complete. EPIC-019: 4 stories UNBLOCKED → READY.
+- **Dependencies unblocked**: EPIC-019 (STORY-063/064/065/066) — EPIC-020 fully merged; all 4 stories now READY for next worker
+- **Branch hygiene**: Stale lock PID 3128724 removed. 10 remote feature branches deleted. 10 local merged branches deleted. 2 remote branches remain (develop, master).
+- **Actions taken**: Removed stale lock; merged 10 PRs; resolved STORY-172 import conflict via manual rebase; marked STORY-172 DONE + EPIC-019 READY in queue
