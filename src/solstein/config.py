@@ -145,11 +145,19 @@ class DataConfig(BaseModel):
     data_dir: Path = Field(default=Path("data/input"))
     cache_dir: Path = Field(default=Path("data/cache"))
     export_dir: Path = Field(default=Path("data/output/exports"))
+    market_data_dir: Path | None = Field(
+        default=None,
+        description="Directory containing market data files (e.g. company markdown profiles). "
+        "When set, the unified loader reads from this directory instead of requiring "
+        "MARKET_DATA_DIR env var. No hardcoded market or date defaults are used.",
+    )
 
-    @field_validator("data_dir", "cache_dir", "export_dir", mode="before")
+    @field_validator("data_dir", "cache_dir", "export_dir", "market_data_dir", mode="before")
     @classmethod
-    def resolve_paths(cls, v: Any) -> Path:
+    def resolve_paths(cls, v: Any) -> Path | None:
         """Resolve paths to absolute."""
+        if v is None:
+            return None
         v_path = Path(v) if isinstance(v, str) else v
 
         if v_path and not v_path.is_absolute():
