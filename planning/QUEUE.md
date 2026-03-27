@@ -186,8 +186,8 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 45 | STORY-111 | Move Exports to Async Celery Tasks | READY | EPIC-025 now DONE |
-| 46 | STORY-112 | Streaming Excel Export for Large Datasets | BLOCKED | Depends on STORY-111 |
+| 45 | STORY-111 | Move Exports to Async Celery Tasks | DONE | PR #144, 53 tests |
+| 46 | STORY-112 | Streaming Excel Export for Large Datasets | DONE | PR #145, 38 tests |
 | 47 | STORY-113 | Export Status Tracking and Download Links | BLOCKED | Depends on STORY-111 |
 | 48 | STORY-114 | Add PDF Export Format | BLOCKED | Depends on STORY-111 |
 | 49 | STORY-115 | Store Exports in Supabase Storage | BLOCKED | Depends on STORY-111 |
@@ -276,6 +276,13 @@ See `backlog/README.md` for the full milestone roadmap.
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-03-27] Worker Run — EPIC-030 Progress (STORY-111, 112)
+- **Epic**: EPIC-030 — Export Pipeline
+- **Stories completed**: STORY-111 (PR #144, 53 tests), STORY-112 (PR #145, 38 tests)
+- **Key deliverables**: Async Celery export task with DLQ/idempotency, StreamingExcelExporter with O(1) memory
+- **Quality**: All pre-commit hooks pass, ruff clean, 91 tests total
+- **Remaining**: STORY-113 (Status Tracking), STORY-114 (PDF Export), STORY-115 (Supabase Storage) — all BLOCKED on STORY-111 merge
 
 ### [2026-03-27] Worker Run — EPIC-014 Progress (STORY-047, 049, 050)
 - **Epic**: EPIC-014 — Observability & Telemetry
