@@ -283,8 +283,8 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 82 | STORY-149 | Energy Compliance & Regulatory Scoring Module | DONE | PR #154 |
-| 83 | STORY-150 | Energy Market Forecasting & Demand Scoring | IN_PROGRESS | Starting implementation |
-| 84 | STORY-151 | Trading Platform & Digital Infrastructure Assessment | READY | Depends on STORY-149 |
+| 83 | STORY-150 | Energy Market Forecasting & Demand Scoring | DONE | PR #155 |
+| 84 | STORY-151 | Trading Platform & Digital Infrastructure Assessment | IN_PROGRESS | Starting implementation |
 | 85 | STORY-152 | Grid Integration & Smart Infrastructure Scoring | READY | Depends on STORY-149 |
 
 ---
