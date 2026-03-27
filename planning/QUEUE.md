@@ -186,7 +186,7 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 45 | STORY-111 | Move Exports to Async Celery Tasks | BLOCKED | Hard dep on EPIC-025 (Worker Reliability) |
+| 45 | STORY-111 | Move Exports to Async Celery Tasks | READY | EPIC-025 now DONE |
 | 46 | STORY-112 | Streaming Excel Export for Large Datasets | BLOCKED | Depends on STORY-111 |
 | 47 | STORY-113 | Export Status Tracking and Download Links | BLOCKED | Depends on STORY-111 |
 | 48 | STORY-114 | Add PDF Export Format | BLOCKED | Depends on STORY-111 |
@@ -232,22 +232,22 @@ The first worker run MUST do a verification pass before starting implementation 
 | 60 | STORY-088 | Fix In-Memory DLQ — Persist to PostgreSQL | DONE | PR #130 |
 | 61 | STORY-089 | Set task_acks_late and task_reject_on_worker_lost | DONE | PR #131 |
 | 62 | STORY-090 | Implement Task Idempotency via Deduplication Lock | DONE | PR #131 |
-| 63 | STORY-092 | Merge worker_tasks_v2.py — Eliminate Duplicate Task Files | IN_PROGRESS | Worker started |
+| 63 | STORY-092 | Merge worker_tasks_v2.py — Eliminate Duplicate Task Files | DONE | PR #132 |
 
 ### EPIC-026: Service Topology (P1)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 64 | STORY-093 | Add Celery Worker Service to docker-compose | BLOCKED | Depends on EPIC-025 |
-| 65 | STORY-094 | Add Celery Beat Service to docker-compose | BLOCKED | Depends on EPIC-025 |
-| 66 | STORY-095 | Add Flower Monitoring Service to docker-compose | BLOCKED | Depends on EPIC-025 |
-| 67 | STORY-096 | Multi-Stage Dockerfile for Production | BLOCKED | Depends on EPIC-025 |
+| 64 | STORY-093 | Add Celery Worker Service to docker-compose | READY | EPIC-025 now DONE |
+| 65 | STORY-094 | Add Celery Beat Service to docker-compose | READY | EPIC-025 now DONE |
+| 66 | STORY-095 | Add Flower Monitoring Service to docker-compose | READY | EPIC-025 now DONE |
+| 67 | STORY-096 | Multi-Stage Dockerfile for Production | READY | EPIC-025 now DONE |
 
 ### EPIC-027: CI/CD Automation (P1)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 68 | STORY-097 | Automate Alembic Migrations Pre-Deploy | BLOCKED | Depends on EPIC-025 |
+| 68 | STORY-097 | Automate Alembic Migrations Pre-Deploy | READY | EPIC-025 now DONE |
 | 69 | STORY-098 | Add migrate, seed, deploy Makefile Targets | BLOCKED | Depends on STORY-097 |
 | 70 | STORY-099 | Add Staging Deploy + Post-Deploy Smoke Test Workflow | BLOCKED | Depends on STORY-097 |
 | 71 | STORY-100 | Delete Root Bypass Scripts | BLOCKED | Depends on STORY-098 |
@@ -256,8 +256,8 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 72 | STORY-047 | Replace Fake Health Checks with Real Probes | BLOCKED | Depends on EPIC-025 |
-| 73 | STORY-049 | Add Structured Logging with Correlation IDs | BLOCKED | Depends on EPIC-025 |
+| 72 | STORY-047 | Replace Fake Health Checks with Real Probes | READY | EPIC-025 now DONE |
+| 73 | STORY-049 | Add Structured Logging with Correlation IDs | READY | EPIC-025 now DONE |
 | 74 | STORY-050 | Implement OpenTelemetry Distributed Tracing | BLOCKED | Depends on STORY-049 |
 | 75 | STORY-051 | Add Prometheus Metrics Endpoints | BLOCKED | Depends on STORY-047 |
 | 76 | STORY-086 | Enforce Universal Audit Trail Across All Endpoints | BLOCKED | Depends on STORY-049 |
@@ -659,3 +659,13 @@ Worker and checker append timestamped entries here:
 - **Stale lock**: Removed dead worker lock (PID 536777)
 - **Branch hygiene**: Deleted 2 remote branches (STORY-088, STORY-091). Deleted 2 local merged branches. 2 remote branches remain (develop, feature/STORY-089-090). 1 local feature branch (STORY-089-090) kept (tied to open PR).
 - **Actions taken**: Removed stale lock; merged 2 PRs; attempted rebase of PR #131 (failed — conflict in celery_config.py); branch cleanup
+
+### [2026-03-27 19:23] Worker Run — STORY-092 (EPIC-025 Capstone)
+- **PRs merged**: 1 — #131 (STORY-089+090) rebased and merged (resolved `celery_config.py` conflict: kept STORY-091's `_result_expires` variable + added STORY-089's `task_acks_late`/`task_reject_on_worker_lost` settings block)
+- **PRs created**: 1 — #132 (STORY-092: canonical worker_tasks import surface)
+- **Open PRs**: 1 — #132 awaiting review
+- **EPIC-025 status**: ALL 5 STORIES DONE (STORY-091 PR #129, STORY-088 PR #130, STORY-089+090 PR #131, STORY-092 PR #132)
+- **Key changes**: Added `task_name_override` param to `deduplicate()` to fix lock-key collision in factory-generated closures; extracted `_handle_retry_or_dlq` helper (factory was 117 lines → 89); updated `worker_tasks.py` docstring with full 12-task schedule/queue table; 13 new acceptance-criterion tests; added `# noqa: BLE001` to intentional broad-except blocks in `idempotency.py`
+- **Dependencies unblocked**: EPIC-026 (STORY-093–096 → READY), EPIC-027 (STORY-097 → READY), EPIC-014 (STORY-047/049 → READY), EPIC-030 (STORY-111 → READY)
+- **Branch hygiene**: feature/STORY-089-090 deleted (merged). feature/STORY-092-merge-worker-tasks pushed (PR open).
+- **Actions taken**: Rebased and merged PR #131; marked STORY-092 IN_PROGRESS; implemented all acceptance criteria; committed with passing pre-commit hooks (all 13 tests pass, ruff clean, function sizes under limit); pushed PR #132; unblocked downstream stories
