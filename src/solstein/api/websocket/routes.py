@@ -2,6 +2,7 @@
 
 Routes:
 - /ws/jobs/{job_id} — Live enrichment job progress
+- /ws/tenants/{tenant_id}/jobs — All job updates for a tenant dashboard
 - /ws/companies/{company_id} — Company score change notifications
 """
 
@@ -38,6 +39,29 @@ async def job_websocket(websocket: WebSocket, job_id: str) -> None:
     except WebSocketDisconnect:
         manager.disconnect(websocket, channel)
         logger.info("Job WebSocket disconnected", job_id=job_id)
+
+
+@router.websocket("/tenants/{tenant_id}/jobs")
+async def tenant_jobs_websocket(websocket: WebSocket, tenant_id: str) -> None:
+    """Subscribe to all job updates for a tenant's dashboard.
+
+    The Supabase Realtime listener broadcasts to ``tenant:<id>:jobs``
+    whenever any research job for that tenant changes.
+
+    Messages sent by server:
+    - {"type": "job_update", "event": "UPDATE", "job_id": "...", ...}
+    """
+    channel = f"tenant:{tenant_id}:jobs"
+    await manager.connect(websocket, channel)
+    logger.info("Tenant jobs WebSocket connected", tenant_id=tenant_id)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            msg: dict[str, Any] = {"type": "ack", "received": data}
+            await manager.send_personal(websocket, msg)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, channel)
+        logger.info("Tenant jobs WebSocket disconnected", tenant_id=tenant_id)
 
 
 @router.websocket("/companies/{company_id}")

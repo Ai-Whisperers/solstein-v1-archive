@@ -110,7 +110,27 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as _exc:
         logger.warning("Cache warming could not start", error=str(_exc))
 
+    # EPIC-024 / STORY-084: Start Supabase Realtime listener
+    try:
+        from solstein.api.websocket.realtime_listener import start_realtime_listener
+
+        await start_realtime_listener()
+        logger.info("Supabase Realtime listener started")
+    except (ImportError, ConnectionError, OSError) as _rt_exc:
+        logger.warning(
+            "Supabase Realtime listener could not start",
+            error=str(_rt_exc),
+        )
+
     yield
+
+    # EPIC-024: Stop Realtime listener before shutdown
+    try:
+        from solstein.api.websocket.realtime_listener import stop_realtime_listener
+
+        await stop_realtime_listener()
+    except (ImportError, RuntimeError) as _rt_exc:
+        logger.warning("Realtime listener stop error", error=str(_rt_exc))
 
     logger.info("Executing graceful shutdown sequence")
     await graceful_shutdown.shutdown()
@@ -169,6 +189,11 @@ app.include_router(drill_down.router)
 app.include_router(simulation.router, prefix="/simulation")
 app.include_router(async_jobs.router)
 app.include_router(research_jobs.router, prefix="/jobs")
+
+# WebSocket realtime endpoints (EPIC-024)
+from .websocket.routes import router as ws_router
+
+app.include_router(ws_router)
 
 # Dashboard API
 from .routers.dashboard import router as dashboard_router
