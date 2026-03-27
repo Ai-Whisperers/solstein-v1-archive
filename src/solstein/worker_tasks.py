@@ -61,6 +61,23 @@ from solstein.worker.refresh_tasks import (
     refresh_yahoo_finance,
 )
 
+# Enrichment tasks
+from solstein.worker.enrichment_tasks import (
+    EnrichmentTask,
+    enrich_company_async,
+    enrich_companies_batch_async,
+)
+
+# Orchestration
+from solstein.worker.orchestration import refresh_all_sources
+
+# Tenant isolation (STORY-066)
+from solstein.worker.tenant_isolation import (
+    TenantIsolationError,
+    validate_task_tenant_id,
+    task_tenant_context,
+    require_tenant_id,
+)
 __all__ = [
     # Base utilities
     "DeadLetterQueue",
@@ -88,4 +105,9 @@ __all__ = [
     "enrich_companies_batch_async",
     # Orchestration
     "refresh_all_sources",
+    # Tenant isolation (STORY-066)
+    "TenantIsolationError",
+    "validate_task_tenant_id",
+    "task_tenant_context",
+    "require_tenant_id",
 ]
