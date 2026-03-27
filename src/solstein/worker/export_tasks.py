@@ -159,9 +159,26 @@ async def _execute_export(
         job.status = "processing"
         await session.commit()
 
+    # STORY-112: Progress callback updates export_jobs.progress_pct
+    async def _update_progress(pct: int) -> None:
+        async with AsyncSession(engine, expire_on_commit=False) as s:
+            r = await s.execute(
+                select(ExportJobRecord).where(
+                    ExportJobRecord.id == uuid.UUID(export_job_id)
+                )
+            )
+            j = r.scalar_one_or_none()
+            if j is not None:
+                j.progress_pct = min(pct, 99)  # 100 only on completion
+                await s.commit()
+
+    def _sync_progress(pct: int) -> None:
+        """Synchronous progress callback for non-async exporters."""
+        _run_in_dedicated_loop(_update_progress(pct))
+
     # Generate the export file
     file_url = await _generate_file(
-        tenant_id, export_format, filters
+        tenant_id, export_format, filters, _sync_progress,
     )
 
     # Mark as completed
@@ -189,11 +206,14 @@ async def _generate_file(
     tenant_id: str,
     export_format: str,
     filters: dict[str, Any],
+    progress_callback: Any | None = None,
 ) -> str:
     """Dispatch to the appropriate exporter and return the file URL.
 
     This is the integration point with existing exporters. Each format
     generates a file and returns a URL (local path or signed URL).
+
+    STORY-112: Added progress_callback parameter for streaming exports.
     """
 
     from solstein.config import get_settings
@@ -209,7 +229,7 @@ async def _generate_file(
     if export_format == "excel":
         filename = f"export_{prefix}_{timestamp}.xlsx"
         output_path = export_dir / filename
-        await _generate_excel(output_path, filters)
+        await _generate_excel(output_path, filters, progress_callback)
         return str(output_path)
 
     if export_format == "csv":
@@ -240,15 +260,25 @@ async def _generate_file(
 
 
 async def _generate_excel(
-    output_path: Any, filters: dict[str, Any]
+    output_path: Any,
+    filters: dict[str, Any],
+    progress_callback: Any | None = None,
 ) -> None:
-    """Generate Excel export using ExcelExporter."""
-    from solstein.exporters import ExcelExporter
+    """Generate Excel export using streaming write_only mode.
 
-    exporter = ExcelExporter()
+    STORY-112: Uses StreamingExcelExporter for O(1) memory usage.
+    Falls back to standard ExcelExporter if streaming fails.
+    """
+    from solstein.exporters.excel_streaming import (
+        StreamingExcelExporter,
+    )
+
+    exporter = StreamingExcelExporter()
     companies = await _fetch_companies(filters)
     if companies:
-        exporter.create_dashboard(companies, output_path)
+        exporter.create_dashboard(
+            companies, output_path, progress_callback,
+        )
 
 
 async def _generate_csv(

@@ -3,6 +3,8 @@
 STORY-111: Async export pipeline — tracks export job lifecycle from
 queued through processing to completed/failed.
 
+STORY-112: Added progress_pct field for streaming export progress tracking.
+
 This table is the single source of truth for export job status. The API
 creates a row with status='queued', the Celery task updates it to
 'processing' then 'completed' or 'failed', and the GET endpoint reads it.
@@ -57,6 +59,9 @@ class ExportJobRecord(Base):
     error_message: Mapped[str | None] = mapped_column(
         Text, nullable=True,
     )
+    progress_pct: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0,
+    )
     retry_count: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0,
     )
@@ -83,6 +88,7 @@ class ExportJobRecord(Base):
             "status": self.status,
             "file_url": self.file_url,
             "error_message": self.error_message,
+            "progress_pct": self.progress_pct,
             "created_at": (
                 self.created_at.isoformat()
                 if self.created_at
