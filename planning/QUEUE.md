@@ -241,13 +241,13 @@ The first worker run MUST do a verification pass before starting implementation 
 | 64 | STORY-093 | Add Celery Worker Service to docker-compose | DONE | PR #133 |
 | 65 | STORY-094 | Add Celery Beat Service to docker-compose | DONE | PR #133 (combined with STORY-093) |
 | 66 | STORY-095 | Add Flower Monitoring Service to docker-compose | DONE | PR #133 (combined with STORY-093) |
-| 67 | STORY-096 | Multi-Stage Dockerfile for Production | IN_PROGRESS | EPIC-025 now DONE |
+| 67 | STORY-096 | Multi-Stage Dockerfile for Production | DONE | PR #134 |
 
 ### EPIC-027: CI/CD Automation (P1)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 68 | STORY-097 | Automate Alembic Migrations Pre-Deploy | READY | EPIC-025 now DONE |
+| 68 | STORY-097 | Automate Alembic Migrations Pre-Deploy | IN_PROGRESS | EPIC-025/026 now DONE |
 | 69 | STORY-098 | Add migrate, seed, deploy Makefile Targets | BLOCKED | Depends on STORY-097 |
 | 70 | STORY-099 | Add Staging Deploy + Post-Deploy Smoke Test Workflow | BLOCKED | Depends on STORY-097 |
 | 71 | STORY-100 | Delete Root Bypass Scripts | BLOCKED | Depends on STORY-098 |
