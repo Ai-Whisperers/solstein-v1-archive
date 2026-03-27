@@ -223,6 +223,11 @@ from .routers.dashboard import router as dashboard_router
 
 app.include_router(dashboard_router)
 
+# STORY-051: Prometheus scrape endpoint (unauthenticated by design)
+from .routers.prometheus import router as prometheus_router
+
+app.include_router(prometheus_router)
+
 
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html() -> Any:
