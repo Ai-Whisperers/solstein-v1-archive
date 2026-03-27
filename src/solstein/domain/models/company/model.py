@@ -128,6 +128,12 @@ class Company(CompanyUtilityMixin, CompanyPropertyMixin, CompanySyncMixin):
     transformation_risk_level: str | None = None
     transformation_breakdown: dict[str, Any] = Field(default_factory=dict)
 
+    # STORY-149: Energy Compliance (EPIC-039)
+    energy_compliance_score: float | None = None  # 0-100 composite
+    energy_compliance_risk: str | None = None  # high / medium / low
+    energy_control_tier: str | None = None  # advanced / standard / legacy / unknown
+    energy_compliance_breakdown: dict[str, Any] = Field(default_factory=dict)
+
     # Aliases for backward compatibility
     @property
     def funding(self) -> float | None:

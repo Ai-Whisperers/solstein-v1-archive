@@ -275,6 +275,12 @@ class Company(BaseModel):
     revenue_cagr_3yr: float | None = None
     revenue_cagr_5yr: float | None = None
 
+    # STORY-149: Energy Compliance (EPIC-039)
+    energy_compliance_score: float | None = None  # 0-100 composite
+    energy_compliance_risk: str | None = None  # high / medium / low
+    energy_control_tier: str | None = None  # advanced / standard / legacy / unknown
+    energy_compliance_breakdown: dict[str, Any] = Field(default_factory=dict)
+
     # STORY-146: AI Transformation Readiness (EPIC-038)
     transformation_time_months: float | None = None  # estimated months to AI-Ready
     transformation_cost_eur: float | None = None  # estimated investment EUR
