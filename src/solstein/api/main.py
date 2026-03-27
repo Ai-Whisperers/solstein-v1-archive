@@ -51,6 +51,7 @@ from .routers import (
     health,
     jobs,
     market,
+    research_jobs,
     scoring,
     simulation,
 )
@@ -167,6 +168,7 @@ app.include_router(jobs.router, prefix="/jobs")
 app.include_router(drill_down.router)
 app.include_router(simulation.router, prefix="/simulation")
 app.include_router(async_jobs.router)
+app.include_router(research_jobs.router, prefix="/jobs")
 
 # Dashboard API
 from .routers.dashboard import router as dashboard_router

@@ -276,3 +276,95 @@ class ContradictionTransitionRecord(Base):
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     contradiction: Mapped[ContradictionRecord] = relationship("ContradictionRecord", back_populates="transitions")
+
+
+class ResearchJobRecord(Base):
+    """Tracks research job execution status for realtime updates (STORY-083).
+
+    Designed for Supabase Realtime — row changes are broadcast to subscribed
+    clients. RLS ensures tenant isolation.
+
+    State machine: queued -> running -> completed | failed | cancelled
+
+    Attributes:
+        id: UUID primary key.
+        tenant_id: Owning tenant (RLS scope).
+        company_id: Target company for the research job.
+        company_name: Cached company name for display without joins.
+        status: Job state (queued/running/completed/failed/cancelled).
+        progress_pct: Approximate completion percentage (0-100).
+        current_stage: Name of the currently executing pipeline stage.
+        error_message: Error details if status is 'failed'.
+        metadata: Extensible JSONB for stage outputs and intermediate data.
+        created_at: When the job was enqueued.
+        started_at: When execution began.
+        completed_at: When the job finished (success or failure).
+    """
+
+    __tablename__ = "research_jobs"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    tenant_id: Mapped[str] = mapped_column(
+        String(255), index=True, nullable=False
+    )
+    company_id: Mapped[str] = mapped_column(
+        String(255), index=True, nullable=False
+    )
+    company_name: Mapped[str | None] = mapped_column(
+        String(500), nullable=True
+    )
+    status: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="queued", index=True
+    )
+    progress_pct: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0
+    )
+    current_stage: Mapped[str | None] = mapped_column(
+        String(100), nullable=True
+    )
+    error_message: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )
+    job_metadata: Mapped[object | None] = mapped_column(
+        JSON, nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
+    started_at: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=True
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=True
+    )
+
+    __table_args__ = (
+        Index("ix_research_job_tenant", "tenant_id"),
+        Index("ix_research_job_company", "company_id"),
+        Index("ix_research_job_status", "status"),
+        Index("ix_research_job_tenant_status", "tenant_id", "status"),
+        Index("ix_research_job_created", "created_at"),
+    )
+
+    # Valid status transitions
+    VALID_TRANSITIONS: dict[str, set[str]] = {
+        "queued": {"running", "cancelled"},
+        "running": {"completed", "failed", "cancelled"},
+        "completed": set(),
+        "failed": set(),
+        "cancelled": set(),
+    }
+
+    def can_transition_to(self, new_status: str) -> bool:
+        """Check if a status transition is valid.
+
+        Args:
+            new_status: The target status.
+
+        Returns:
+            True if the transition is allowed.
+        """
+        allowed = self.VALID_TRANSITIONS.get(self.status, set())
+        return new_status in allowed

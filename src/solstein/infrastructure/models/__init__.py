@@ -40,6 +40,7 @@ from .research import (
     EvidenceReadinessRecord,
     MetricObservationRecord,
     ResearchArtifactRecord,
+    ResearchJobRecord,
     ResearchRunRecord,
     ResearchStageRecord,
     SourceDocumentRecord,
@@ -67,6 +68,8 @@ __all__ = [
     "EvidenceReadinessRecord",
     "ContradictionRecord",
     "ContradictionTransitionRecord",
+    # Research Jobs (STORY-083)
+    "ResearchJobRecord",
     # Enrichment
     "EnrichmentAuditRecord",
     "EnrichmentCacheRecord",
