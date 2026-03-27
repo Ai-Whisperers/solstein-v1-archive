@@ -219,7 +219,53 @@ The first worker run MUST do a verification pass before starting implementation 
 
 ---
 
-## M5-M6: Remaining Milestones
+## M5: Production Ready
+
+> M4 complete (EPIC-021, EPIC-022 all DONE). Advancing to M5: worker reliability, service topology, CI/CD, observability.
+> Dependency note: EPIC-030 (export pipeline) unblocks once EPIC-025 is DONE.
+
+### EPIC-025: Worker Reliability (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 59 | STORY-091 | Set Result Expiry TTL to Prevent Redis Bloat | READY | No deps |
+| 60 | STORY-088 | Fix In-Memory DLQ — Persist to PostgreSQL | READY | No deps |
+| 61 | STORY-089 | Set task_acks_late and task_reject_on_worker_lost | READY | Deploy with STORY-090 |
+| 62 | STORY-090 | Implement Task Idempotency via Deduplication Lock | READY | Deploy with STORY-089 |
+| 63 | STORY-092 | Merge worker_tasks_v2.py — Eliminate Duplicate Task Files | BLOCKED | Depends on STORY-088, STORY-089 |
+
+### EPIC-026: Service Topology (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 64 | STORY-093 | Add Celery Worker Service to docker-compose | BLOCKED | Depends on EPIC-025 |
+| 65 | STORY-094 | Add Celery Beat Service to docker-compose | BLOCKED | Depends on EPIC-025 |
+| 66 | STORY-095 | Add Flower Monitoring Service to docker-compose | BLOCKED | Depends on EPIC-025 |
+| 67 | STORY-096 | Multi-Stage Dockerfile for Production | BLOCKED | Depends on EPIC-025 |
+
+### EPIC-027: CI/CD Automation (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 68 | STORY-097 | Automate Alembic Migrations Pre-Deploy | BLOCKED | Depends on EPIC-025 |
+| 69 | STORY-098 | Add migrate, seed, deploy Makefile Targets | BLOCKED | Depends on STORY-097 |
+| 70 | STORY-099 | Add Staging Deploy + Post-Deploy Smoke Test Workflow | BLOCKED | Depends on STORY-097 |
+| 71 | STORY-100 | Delete Root Bypass Scripts | BLOCKED | Depends on STORY-098 |
+
+### EPIC-014: Observability & Telemetry (P2)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 72 | STORY-047 | Replace Fake Health Checks with Real Probes | BLOCKED | Depends on EPIC-025 |
+| 73 | STORY-049 | Add Structured Logging with Correlation IDs | BLOCKED | Depends on EPIC-025 |
+| 74 | STORY-050 | Implement OpenTelemetry Distributed Tracing | BLOCKED | Depends on STORY-049 |
+| 75 | STORY-051 | Add Prometheus Metrics Endpoints | BLOCKED | Depends on STORY-047 |
+| 76 | STORY-086 | Enforce Universal Audit Trail Across All Endpoints | BLOCKED | Depends on STORY-049 |
+| 77 | STORY-087 | Implement Celery Dead Letter Queue | SKIP | Superseded by STORY-088 (EPIC-025) |
+
+---
+
+## M6: Business Value
 
 See `backlog/README.md` for the full milestone roadmap.
 
