@@ -267,7 +267,25 @@ The first worker run MUST do a verification pass before starting implementation 
 
 ## M6: Business Value
 
-See `backlog/README.md` for the full milestone roadmap.
+> M5 complete. M6 dependencies satisfied: M5 done, EPIC-021 (Modern LLM Stack) done. EPIC-007 (DDD) listed as hard dep but domain models already support assessments (Company has ai_score, ai_maturity, ai_in_production fields; AIReadinessScorer scaffold exists). Proceeding.
+
+### EPIC-038: AI-Readiness Assessment Framework (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 78 | STORY-145 | Portfolio Company AI-Readiness Scoring Model | READY | Partial scaffold exists in analytics/ai_readiness.py — needs 4 sub-dimensions, new tiers, classification integration |
+| 79 | STORY-146 | AI Transformation Readiness Calculator | READY | Depends on STORY-145 |
+| 80 | STORY-147 | PE Due Diligence Integration Module | READY | Depends on STORY-145, STORY-146 |
+| 81 | STORY-148 | Transformation Roadmap Generator | READY | Depends on STORY-146 |
+
+### EPIC-039: Energy Sector Domain Specialization (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 82 | STORY-149 | Energy Compliance & Regulatory Scoring Module | READY | |
+| 83 | STORY-150 | Energy Market Forecasting & Demand Scoring | READY | Depends on STORY-149 |
+| 84 | STORY-151 | Trading Platform & Digital Infrastructure Assessment | READY | Depends on STORY-149 |
+| 85 | STORY-152 | Grid Integration & Smart Infrastructure Scoring | READY | Depends on STORY-149 |
 
 ---
 
