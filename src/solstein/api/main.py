@@ -194,6 +194,11 @@ app.include_router(research_jobs.router, prefix="/jobs")
 app.include_router(semantic_search.router)
 app.include_router(review.router, prefix="/api/v1")
 
+# STORY-088: Admin DLQ endpoint — list, inspect, resolve, re-queue failed tasks
+from .routers.admin_dlq import router as admin_dlq_router  # noqa: E402
+
+app.include_router(admin_dlq_router)
+
 # WebSocket realtime endpoints (EPIC-024)
 from .websocket.routes import router as ws_router
 

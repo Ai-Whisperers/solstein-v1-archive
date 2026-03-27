@@ -6,7 +6,6 @@ Provides database helpers and dead letter queue for failed jobs.
 
 from __future__ import annotations
 
-import json
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,6 +21,7 @@ from solstein.infrastructure.database import DatabaseManager
 from solstein.infrastructure.database_models import CompanyRecord
 from solstein.infrastructure.fact_payloads import ConnectorFactPayload
 from solstein.monitoring.errors import global_error_tracker
+from solstein.worker.dlq import persist_failed_task
 
 
 class FactIngestionPayload(ConnectorFactPayload):
@@ -191,15 +191,22 @@ async def store_facts(
 
 
 class DeadLetterQueue:
-    """Track permanently failed jobs after max retries exceeded.
+    """Persistent Dead Letter Queue for permanently failed tasks.
 
-    Persists structured failure records to an append-only JSONL audit
-    trail while preserving the in-memory list for backward compatibility.
+    STORY-088: This class previously stored failures in a Python list that
+    evaporated on every worker restart. It now delegates all persistence to
+    PostgreSQL via solstein.worker.dlq.persist_failed_task.
+
+    The class interface is preserved for backward compatibility with callers in
+    refresh_tasks.py and enrichment_tasks.py. The in-memory `failed_jobs` list
+    is kept as a session-level cache only — do not rely on it for durability.
     """
 
     def __init__(self, audit_path: Path | None = None):
-        self.failed_jobs: list[dict[str, Any]] = []
+        # audit_path kept for backward compat — no longer used for primary persistence
         self.audit_path = audit_path or Path("data/output/dead_letter_queue.jsonl")
+        # Session-level cache (not durable — use the DB for real queries)
+        self.failed_jobs: list[dict[str, Any]] = []
 
     def record_failure(
         self,
@@ -209,19 +216,20 @@ class DeadLetterQueue:
         attempt: int,
         **metadata: Any,
     ) -> dict[str, Any]:
-        """Record a permanently failed job with durable structured metadata.
+        """Record a permanently failed job in PostgreSQL (durable) and session cache.
 
         Args:
             task_name: Name of the failed task.
             task_id: Celery task ID.
             error: The exception or error message.
             attempt: Final attempt number before giving up.
-            **metadata: Optional keys: ``traceback_text``, ``context``.
+            **metadata: Optional keys: ``traceback_text``, ``context``, ``queue_name``,
+                ``args``, ``kwargs``, ``tenant_id``.
         """
-        timestamp = datetime.now(timezone.utc)
         error_message = str(error)
         error_type = type(error).__name__ if isinstance(error, Exception) else "TaskFailure"
-        record = {
+        timestamp = datetime.now(timezone.utc)
+        record: dict[str, Any] = {
             "task_name": task_name,
             "task_id": task_id,
             "error": error_message,
@@ -233,24 +241,43 @@ class DeadLetterQueue:
         }
 
         logger.error(
-            f"[RETRY-FAILED] {task_name} (task_id={task_id}) permanently failed after {attempt} attempts: {error_type}: {error_message}"
+            "[RETRY-FAILED] %s (task_id=%s) permanently failed after %d attempts: %s: %s",
+            task_name,
+            task_id,
+            attempt,
+            error_type,
+            error_message[:500],
         )
+
+        # Persist to PostgreSQL — failure here must NOT change the task outcome.
+        # persist_failed_task is already fail-open internally, but if it raises
+        # unexpectedly (e.g. bug in the DLQ code itself), we catch here too.
+        try:
+            persist_failed_task(
+                task_name=task_name,
+                task_id=task_id,
+                error=error,
+                retry_count=attempt,
+                extra={
+                    "queue_name": str(metadata.get("queue_name", "default")),
+                    "args": metadata.get("args") or [],
+                    "kwargs": metadata.get("kwargs") or {},
+                    "tenant_id": metadata.get("tenant_id"),
+                },
+            )
+        except Exception as dlq_exc:  # noqa: BLE001
+            logger.error(
+                "[DLQ] persist_failed_task raised unexpectedly — DLQ write dropped. "
+                "task_name=%s task_id=%s dlq_error=%s",
+                task_name,
+                task_id,
+                str(dlq_exc)[:200],
+            )
+
+        # Update session-level cache and error tracker
         self.failed_jobs.append(record)
-        self._persist_record(record)
         self._track_record(error, record)
         return record
-
-    def _persist_record(self, record: dict[str, Any]) -> None:
-        self.audit_path.parent.mkdir(parents=True, exist_ok=True)
-        serializable = dict(record)
-        timestamp = serializable.get("timestamp")
-        if isinstance(timestamp, datetime):
-            serializable["timestamp"] = timestamp.isoformat()
-        try:
-            with self.audit_path.open("a", encoding="utf-8") as handle:
-                _ = handle.write(json.dumps(serializable, default=str) + "\n")
-        except Exception as exc:
-            logger.error(f"[RETRY-FAILED] Failed to persist DLQ record to {self.audit_path}: {exc}")
 
     def _track_record(self, error: Exception | str, record: dict[str, Any]) -> None:
         context = {
