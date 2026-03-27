@@ -188,6 +188,12 @@ from solstein.monitoring.profiling.dashboard import router as profiling_router
 
 app.include_router(profiling_router, prefix="/admin")
 
+# STORY-086: Data access audit trail (must be added BEFORE TenantMiddleware
+# so it executes AFTER tenant_id is set on request.state)
+from .middleware.audit import AuditMiddleware  # noqa: E402
+
+app.add_middleware(AuditMiddleware)
+
 # Multi-tenancy
 app.add_middleware(TenantMiddleware)
 
