@@ -298,3 +298,13 @@ Worker and checker append timestamped entries here:
 - **Dependencies**: EPIC-019 correctly BLOCKED — EPIC-020 PRs #97/#98 not yet merged, STORY-069/070 incomplete
 - **Branch hygiene**: 4 remote feature branches (all tied to open PRs). No stale branches to clean. Local merged branches pruned.
 - **Actions taken**: Updated STORY-068/069 status in queue, added log entry. No merges attempted (worker active).
+
+### [2026-03-27 00:37] Worker Run — EPIC-020 Complete
+- **EPIC-020 (Supabase Auth Migration)**: All 4 stories implemented — PRs #97-#100 targeting develop.
+  - STORY-067: Migrated auth.py and dependencies.py from bcrypt/JWT to Supabase Auth SDK (PR #97, 17 tests)
+  - STORY-068: Replaced AuthenticationMiddleware with SupabaseJWTMiddleware, removed /companies and /enrichment bypass, raw ASGI for performance (PR #98, 14 tests)
+  - STORY-069: Opaque error responses with UUID error_id correlation, removed all traceback exposure from HTTP responses (PR #99, 12 tests)
+  - STORY-070: SSRF prevention via shared core/url_validator.py, blocks private IPs, loopback, link-local, DNS rebinding (PR #100, 22 tests)
+- **Total tests added**: 65 new unit tests across 4 test files
+- **Quality gates**: All pre-commit hooks passed (ruff, code smell, agent quality, trailing whitespace)
+- **Queue**: EPIC-020 = ALL 4 STORIES DONE. EPIC-019 still BLOCKED (PRs not yet merged). Next READY epic per queue order: EPIC-062 (Scraping Resilience).
