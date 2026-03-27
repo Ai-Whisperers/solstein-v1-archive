@@ -259,8 +259,8 @@ The first worker run MUST do a verification pass before starting implementation 
 | 72 | STORY-047 | Replace Fake Health Checks with Real Probes | DONE | PR #139 |
 | 73 | STORY-049 | Add Structured Logging with Correlation IDs | DONE | PR #140 (already implemented, tests added) |
 | 74 | STORY-050 | Implement OpenTelemetry Distributed Tracing | DONE | PR #141 |
-| 75 | STORY-051 | Add Prometheus Metrics Endpoints | IN_PROGRESS | PR #142 |
-| 76 | STORY-086 | Enforce Universal Audit Trail Across All Endpoints | READY | STORY-049 DONE |
+| 75 | STORY-051 | Add Prometheus Metrics Endpoints | DONE | PR #142 merged, PR #146 (middleware + docs) |
+| 76 | STORY-086 | Enforce Universal Audit Trail Across All Endpoints | DONE | PR #143 merged |
 | 77 | STORY-087 | Implement Celery Dead Letter Queue | SKIP | Superseded by STORY-088 (EPIC-025) |
 
 ---
@@ -276,6 +276,14 @@ See `backlog/README.md` for the full milestone roadmap.
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-03-27 18:55] Worker Run — EPIC-014 Complete (Verification + Supplemental)
+- **Epic**: EPIC-014 — Observability & Telemetry
+- **Stories verified**: STORY-051 (PR #142 already merged), STORY-086 (PR #143 already merged)
+- **Supplemental PR**: #146 — adds PrometheusMiddleware wiring and metrics-catalogue.md docs
+- **Duration**: ~15m (discovery, verification, supplemental implementation)
+- **Quality**: 32/32 STORY-051 tests pass, ruff clean
+- **Notes**: Both stories were implemented by a prior worker run. This run verified completeness, wired the PrometheusMiddleware that was missing, added the metrics catalogue documentation, and updated QUEUE.md to mark both stories DONE.
 
 ### [2026-03-27] Worker Run — EPIC-030 Progress (STORY-111, 112)
 - **Epic**: EPIC-030 — Export Pipeline
