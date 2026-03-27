@@ -285,7 +285,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 82 | STORY-149 | Energy Compliance & Regulatory Scoring Module | DONE | PR #154 |
 | 83 | STORY-150 | Energy Market Forecasting & Demand Scoring | DONE | PR #155 |
 | 84 | STORY-151 | Trading Platform & Digital Infrastructure Assessment | DONE | PR #156 |
-| 85 | STORY-152 | Grid Integration & Smart Infrastructure Scoring | IN_PROGRESS | Starting implementation |
+| 85 | STORY-152 | Grid Integration & Smart Infrastructure Scoring | DONE | PR #157 |
 
 ---
 
@@ -294,6 +294,19 @@ The first worker run MUST do a verification pass before starting implementation 
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-03-27 21:30] Worker Run — EPIC-039 Complete (4 stories)
+- **Epic**: EPIC-039 — Energy Sector Domain Specialization
+- **Stories completed**:
+  - STORY-149: Energy Compliance & Control Intelligence Module (PR #154, 21 tests)
+  - STORY-150: Energy Market Forecasting & Demand Scoring (PR #155, 27 tests)
+  - STORY-151: Trading Platform & Digital Infrastructure Assessment (PR #156, 21 tests)
+  - STORY-152: Grid Integration & Smart Infrastructure Scoring (PR #157, 21 tests)
+- **Total**: 4 new modules, 90 tests, ~1800 lines of implementation + tests
+- **Quality**: All ruff clean, all tests passing, all files under 500 lines, all classes under 300 lines
+- **New analytics modules**: energy_compliance.py, energy_market_forecasting.py, energy_trading_infrastructure.py, energy_grid_infrastructure.py
+- **Company model**: 16 new energy_* fields added across all 3 Company model locations
+- **Notes**: Continuation from prior session that completed EPIC-038 (STORY-145-148). Pre-existing Company class size violations (510 lines) documented in all PRs.
 
 ### [2026-03-27 18:55] Worker Run — EPIC-014 Complete (Verification + Supplemental)
 - **Epic**: EPIC-014 — Observability & Telemetry
