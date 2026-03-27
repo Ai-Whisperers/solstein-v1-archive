@@ -20,6 +20,7 @@ from ..domain.models import (
     ThreatLevel,
 )
 from ..exceptions import ScoringError
+from .ai_readiness import AIReadinessScorer
 from .constants import (
     LEAD_SCORE_THRESHOLD,
     MAX_SCORE,
@@ -236,6 +237,24 @@ class GrowthScorer:
 
         # Derive threat level from classification and score
         profile.threat_level = ThreatLevel(derive_threat_level(profile.classification, profile.composite_score))
+
+        # STORY-145: AI Readiness Assessment (EPIC-038)
+        try:
+            ai_scorer = AIReadinessScorer()
+            ai_result = ai_scorer.score(profile)
+            profile.ai_readiness_score = ai_result.score
+            profile.ai_readiness_tier = ai_result.tier.value
+            profile.ai_readiness_breakdown = ai_result.breakdown
+        except Exception as exc:
+            logger.error(
+                "[EPIC-038] AI readiness scoring failed for %s: %s",
+                profile.name,
+                exc,
+            )
+            # Graceful degradation: scoring continues without AI readiness
+            profile.ai_readiness_score = None
+            profile.ai_readiness_tier = None
+            profile.ai_readiness_breakdown = {}
 
         profile.scoring_breakdown = {
             "growth": growth_expl,

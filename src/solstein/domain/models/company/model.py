@@ -65,6 +65,11 @@ class Company(CompanyUtilityMixin, CompanyPropertyMixin, CompanySyncMixin):
     ai_key_capabilities: str | None = None
     ai_in_production: bool | None = None
 
+    # STORY-145: AI Readiness Assessment (EPIC-038)
+    ai_readiness_score: float | None = None  # 0-100 composite score
+    ai_readiness_tier: str | None = None  # AI-Ready / AI-Capable / AI-Challenged / AI-Resistant
+    ai_readiness_breakdown: dict[str, float] = Field(default_factory=dict)
+
     # Identifiers
     ticker: str | None = None
     company_number: str | None = None

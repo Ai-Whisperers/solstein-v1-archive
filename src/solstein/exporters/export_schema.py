@@ -46,6 +46,8 @@ EXPORT_SCHEMA: list[FieldSpec] = [
     FieldSpec("revenue_eur_m", "Revenue (€M)", "Executive Summary", "number"),
     FieldSpec("growth_rate_pct", "Growth", "Executive Summary", "percentage"),
     FieldSpec("ai_score", "AI Score", "Executive Summary", "number"),
+    FieldSpec("ai_readiness_score", "AI Readiness", "Executive Summary", "number"),
+    FieldSpec("ai_readiness_tier", "AI Readiness Tier", "Executive Summary", "string"),
     FieldSpec("tier", "Tier", "Executive Summary", "string"),
     FieldSpec("threat_level", "Threat Level", "Executive Summary", "string"),
     FieldSpec("tech_stack", "Tech Stack", "Executive Summary", "list"),

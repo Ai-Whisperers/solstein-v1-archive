@@ -47,6 +47,8 @@ class CSVExporter:
         ("Classification", "classification"),
         ("AI Maturity", "ai_maturity"),
         ("AI Score", "ai_score"),
+        ("AI Readiness Score", "ai_readiness_score"),
+        ("AI Readiness Tier", "ai_readiness_tier"),
         ("SaaS Maturity", "saas_maturity"),
         ("Composite Score", "composite_score"),
         ("Growth Score", "growth_score"),
