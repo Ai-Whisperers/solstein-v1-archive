@@ -95,8 +95,8 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 24 | STORY-169 | Fix JSON parsing in score/analyze-market/compare/export-excel | IN_PROGRESS | |
-| 24b | STORY-170 | Restore generate-llm-report exporter import | READY | |
+| 24 | STORY-169 | Fix JSON parsing in score/analyze-market/compare/export-excel | DONE | PR #90 |
+| 24b | STORY-170 | Restore generate-llm-report exporter import | IN_PROGRESS | |
 | 24c | STORY-171 | Migrate all CLI commands from deprecated CompetitorDataLoader | READY | |
 | 24d | STORY-172 | Add structured input validation with actionable error messages | READY | |
 
