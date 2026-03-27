@@ -258,7 +258,7 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 72 | STORY-047 | Replace Fake Health Checks with Real Probes | DONE | PR #139 |
 | 73 | STORY-049 | Add Structured Logging with Correlation IDs | DONE | PR #140 (already implemented, tests added) |
-| 74 | STORY-050 | Implement OpenTelemetry Distributed Tracing | IN_PROGRESS | Worker started 2026-03-27 17:50 |
+| 74 | STORY-050 | Implement OpenTelemetry Distributed Tracing | DONE | PR #141 |
 | 75 | STORY-051 | Add Prometheus Metrics Endpoints | READY | STORY-047 DONE |
 | 76 | STORY-086 | Enforce Universal Audit Trail Across All Endpoints | READY | STORY-049 DONE |
 | 77 | STORY-087 | Implement Celery Dead Letter Queue | SKIP | Superseded by STORY-088 (EPIC-025) |
@@ -276,6 +276,13 @@ See `backlog/README.md` for the full milestone roadmap.
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-03-27] Worker Run — EPIC-014 Progress (STORY-047, 049, 050)
+- **Epic**: EPIC-014 — Observability & Telemetry
+- **Stories completed**: STORY-047 (PR #139), STORY-049 (PR #140), STORY-050 (PR #141)
+- **Tests written**: 96 total (38 + 25 + 33)
+- **Quality**: All pre-commit hooks pass, ruff clean, 0 code smells added
+- **Remaining**: STORY-051 (Prometheus Metrics), STORY-086 (Audit Trail) — both READY
 
 ### [2026-03-26] Worker Run — EPIC-046 Complete
 - **Epic**: EPIC-046 — Scoring Engine Correctness
