@@ -215,7 +215,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 55 | STORY-076 | Define LangGraph Architecture and State Schema | DONE | PR #125 |
 | 56 | STORY-077 | Migrate Coordinator to LangGraph | DONE | PR #126 (stacked on #125) |
 | 57 | STORY-078 | Implement Real Agent Nodes | DONE | PR #127 |
-| 58 | STORY-079 | Add Checkpointing and Human-in-the-Loop | IN_PROGRESS | Dep: STORY-078 ✅ |
+| 58 | STORY-079 | Add Checkpointing and Human-in-the-Loop | DONE | PR #128 |
 
 ---
 
@@ -586,3 +586,11 @@ Worker and checker append timestamped entries here:
 - **Status**: DONE — PR created, branch pushed
 - **Queue**: STORY-078 DONE, STORY-079 unblocked (READY)
 - **Key changes**: Real GitHubNode, SECFilingsNode, CompaniesHouseNode, NewsAPINode, LinkedInNode replacing stub agents; dict-dispatch pattern to reduce nesting; test file split to stay under 500-line limit
+
+### [2026-03-27 Worker] STORY-079 Complete
+- **Story**: STORY-079 — Add LangGraph Checkpointing and Human-in-the-Loop
+- **PR**: #128 (https://github.com/Ai-Whisperers/solstein/pull/128)
+- **Branch**: feature/STORY-079-checkpointing-human-in-loop → develop
+- **Status**: DONE — PR created, branch pushed, all quality gates passed
+- **Queue**: M4 EPIC-022: 4/4 stories DONE (STORY-076, STORY-077, STORY-078, STORY-079)
+- **Key changes**: SqliteSaver durable checkpointer; interrupt()+Command(resume) HITL gate; ReviewQueueStore SQLite backend; FastAPI /api/v1/review/ router; configurable confidence threshold; 32 new tests covering all 6 acceptance criteria; ENV_TEMPLATE extracted to config_template.py; all lazy imports moved to module level
