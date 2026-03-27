@@ -6,6 +6,7 @@ on:
       - 'src/**/*.py'
       - 'tests/**/*.py'
       - 'scripts/**/*.py'
+      - '.env.example'
       - '.github/workflows/code-quality-guardrails.yml'
   push:
     branches: [main, master]
@@ -13,6 +14,7 @@ on:
       - 'src/**/*.py'
       - 'tests/**/*.py'
       - 'scripts/**/*.py'
+      - '.env.example'
       - '.github/workflows/code-quality-guardrails.yml'
 
 env:
@@ -108,19 +110,19 @@ jobs:
           script: |
             const fs = require('fs');
             const report = fs.readFileSync('quality_report.md', 'utf8');
-            
+
             // Find existing comment
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            
-            const botComment = comments.find(comment => 
-              comment.user.type === 'Bot' && 
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
               comment.body.includes('Code Quality Report')
             );
-            
+
             if (botComment) {
               // Update existing comment
               await github.rest.issues.updateComment({
@@ -215,25 +217,25 @@ jobs:
             const fs = require('fs');
             try {
               const suggestions = fs.readFileSync('refactoring_suggestions.md', 'utf8');
-              
+
               // Only post if there are suggestions
               if (suggestions.includes('No refactoring suggestions')) {
                 console.log('No refactoring suggestions to post');
                 return;
               }
-              
+
               // Find existing comment
               const { data: comments } = await github.rest.issues.listComments({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
               });
-              
-              const botComment = comments.find(comment => 
-                comment.user.type === 'Bot' && 
+
+              const botComment = comments.find(comment =>
+                comment.user.type === 'Bot' &&
                 comment.body.includes('Refactoring Suggestions')
               );
-              
+
               if (botComment) {
                 await github.rest.issues.updateComment({
                   owner: context.repo.owner,
@@ -294,19 +296,19 @@ jobs:
             const fs = require('fs');
             try {
               const report = fs.readFileSync('pr_size_report.md', 'utf8');
-              
+
               // Find existing comment
               const { data: comments } = await github.rest.issues.listComments({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
               });
-              
-              const botComment = comments.find(comment => 
-                comment.user.type === 'Bot' && 
+
+              const botComment = comments.find(comment =>
+                comment.user.type === 'Bot' &&
                 comment.body.includes('PR Size Check')
               );
-              
+
               if (botComment) {
                 await github.rest.issues.updateComment({
                   owner: context.repo.owner,
@@ -325,3 +327,21 @@ jobs:
             } catch (error) {
               console.log('Could not post PR size report:', error.message);
             }
+  # STORY-140: .env.example completeness check
+  env-example-validation:
+    name: Validate .env.example Completeness
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: ./.github/workflows/composite/setup-python
+      - uses: ./.github/workflows/composite/setup-uv
+
+      - name: Validate .env.example covers all config.py fields
+        run: |
+          python scripts/validate_env_example.py \
+            --config src/solstein/config.py \
+            --env .env.example \
+            --verbose
