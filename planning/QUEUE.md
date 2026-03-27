@@ -247,9 +247,9 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 68 | STORY-097 | Automate Alembic Migrations Pre-Deploy | IN_PROGRESS | EPIC-025/026 now DONE |
-| 69 | STORY-098 | Add migrate, seed, deploy Makefile Targets | BLOCKED | Depends on STORY-097 |
-| 70 | STORY-099 | Add Staging Deploy + Post-Deploy Smoke Test Workflow | BLOCKED | Depends on STORY-097 |
+| 68 | STORY-097 | Automate Alembic Migrations Pre-Deploy | DONE | PR #135 |
+| 69 | STORY-098 | Add migrate, seed, deploy Makefile Targets | READY | STORY-097 DONE |
+| 70 | STORY-099 | Add Staging Deploy + Post-Deploy Smoke Test Workflow | READY | STORY-097 DONE |
 | 71 | STORY-100 | Delete Root Bypass Scripts | BLOCKED | Depends on STORY-098 |
 
 ### EPIC-014: Observability & Telemetry (P2)
@@ -678,3 +678,8 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: Already unblocked by prior worker run — EPIC-026 (STORY-093–096 READY), EPIC-027 (STORY-097 READY), EPIC-014 (STORY-047/049 READY), EPIC-030 (STORY-111 READY). Next worker should pick STORY-093 (first READY M5 story).
 - **Branch hygiene**: Deleted 1 remote branch (feature/STORY-092-merge-worker-tasks). Deleted 1 local merged branch. Pruned refs. 2 remote branches remain (develop, master).
 - **Actions taken**: Merged PR #132, deleted merged branch, pruned refs, cleaned local branch. No stale worker lock.
+
+### [2026-03-27 17:23] Worker Run (continued from context compaction)
+- **STORY-097 DONE**: PR #135 — Automate Alembic Migrations Pre-Deploy. Canonical migration runner with structured logging, timeout, dry-run, idempotency. Integrated into staging+production CI/CD workflows. 24 tests pass. Also fixed pre-existing YAML parse issue in deploy-production.yml.
+- **EPIC-027 progress**: 1/4 stories done (STORY-097). STORY-098 and STORY-099 now READY. STORY-100 still BLOCKED on STORY-098.
+- **Next**: STORY-098 (Add migrate, seed, deploy Makefile Targets).
