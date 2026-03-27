@@ -157,6 +157,31 @@ class CompositeScoringConfig(BaseModel):
             self.competitive_weight /= total
 
 
+class AIReadinessScoringConfig(BaseModel):
+    """Configuration for AI readiness scoring (EPIC-038, STORY-145).
+
+    Dimension weights must sum to 1.0.
+    classification_influence_weight controls how much AI readiness
+    affects the overall composite score (0.0 = no influence).
+    """
+
+    data_infrastructure_weight: float = Field(
+        default_factory=lambda: float(os.getenv("SCORING_AI_DATA_INFRA_WEIGHT", "0.25"))
+    )
+    technical_debt_weight: float = Field(
+        default_factory=lambda: float(os.getenv("SCORING_AI_TECH_DEBT_WEIGHT", "0.25"))
+    )
+    ai_literacy_weight: float = Field(
+        default_factory=lambda: float(os.getenv("SCORING_AI_LITERACY_WEIGHT", "0.30"))
+    )
+    process_automation_weight: float = Field(
+        default_factory=lambda: float(os.getenv("SCORING_AI_AUTOMATION_WEIGHT", "0.20"))
+    )
+    classification_influence_weight: float = Field(
+        default_factory=lambda: float(os.getenv("SCORING_AI_INFLUENCE_WEIGHT", "0.0"))
+    )
+
+
 class ScoringSettings(BaseModel):
     """Root configuration for all scoring.
 
@@ -170,6 +195,7 @@ class ScoringSettings(BaseModel):
     financial: FinancialHealthConfig = Field(default_factory=FinancialHealthConfig)
     competitive: CompetitivePositionConfig = Field(default_factory=CompetitivePositionConfig)
     composite: CompositeScoringConfig = Field(default_factory=CompositeScoringConfig)
+    ai_readiness: AIReadinessScoringConfig = Field(default_factory=AIReadinessScoringConfig)
 
     @classmethod
     def from_env(cls) -> "ScoringSettings":
