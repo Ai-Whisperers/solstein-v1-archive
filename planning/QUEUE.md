@@ -173,7 +173,7 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 40 | STORY-080 | Add pgvector Extension and Embedding Schema | DONE | PR #115 | |
 | 41 | STORY-081 | Generate Company Embeddings During Research Pipeline | DONE | PR #116 merged 2026-03-27 |
-| 42 | STORY-082 | Implement Semantic Similarity Search Endpoint | IN_PROGRESS | Depends on STORY-081 |
+| 42 | STORY-082 | Implement Semantic Similarity Search Endpoint | DONE | PR #117 |
 
 ### EPIC-024: Supabase Realtime Job Status (P2)
 
