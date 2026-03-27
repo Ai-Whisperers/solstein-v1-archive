@@ -5,7 +5,7 @@ immediately. The actual export runs as a Celery task on the ``export``
 queue. GET /api/v1/exports/{job_id} returns the current status and a
 download URL when complete.
 
-Supported formats: excel, csv, json, markdown, llm
+Supported formats: excel, csv, json, markdown, llm, pdf
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/api/v1/exports", tags=["Exports"])
 
 # Valid export formats
 _VALID_FORMATS = frozenset({
-    "excel", "csv", "json", "markdown", "llm",
+    "excel", "csv", "json", "markdown", "llm", "pdf",
 })
 
 
@@ -33,7 +33,7 @@ class ExportRequest(BaseModel):
 
     format: str = Field(
         ...,
-        description="Export format: excel, csv, json, markdown, llm",
+        description="Export format: excel, csv, json, markdown, llm, pdf",
     )
     company_id: str | None = Field(
         None,
