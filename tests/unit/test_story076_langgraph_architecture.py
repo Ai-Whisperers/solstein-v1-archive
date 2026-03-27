@@ -234,14 +234,26 @@ class TestGraphExecution:
         # Default state has human_review_required=False -> gate node should not run
         assert NODE_HUMAN_REVIEW_GATE not in result.get("completed_nodes", [])
 
-    def test_human_review_gate_runs_when_required(self) -> None:
-        """human_review_gate must appear in completed_nodes when human_review_required=True."""
-        compiled = compile_research_graph()
+    def test_human_review_gate_triggered_when_required(self) -> None:
+        """human_review_gate interrupt fires when human_review_required=True.
+
+        STORY-079: The gate node now calls interrupt() which pauses graph execution.
+        The result contains '__interrupt__' signalling the graph is paused at the
+        review point. This is the correct HITL behavior — the node resumes only
+        after the review API issues an approval.
+        """
+        compiled = compile_research_graph(checkpointer=MemorySaver())
         state = _make_initial_state()
         state["human_review_required"] = True
+        run_id = "test-review-required-076"
+        state["run_id"] = run_id
 
-        result = compiled.invoke(state)
-        assert NODE_HUMAN_REVIEW_GATE in result.get("completed_nodes", [])
+        result = compiled.invoke(
+            state,
+            config={"configurable": {"thread_id": run_id}},
+        )
+        # STORY-079: interrupt() causes '__interrupt__' key in result
+        assert "__interrupt__" in result
 
     def test_all_major_nodes_complete(self) -> None:
         """All pipeline stages must appear in completed_nodes on successful run."""
