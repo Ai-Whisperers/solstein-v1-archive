@@ -24,7 +24,6 @@ from solstein.worker.tenant_isolation import (
 )
 from solstein.worker_tasks import refresh_sec_edgar
 
-
 # ---------------------------------------------------------------------------
 # validate_task_tenant_id
 # ---------------------------------------------------------------------------
@@ -79,9 +78,8 @@ class TestTaskTenantContext:
 
     def test_resets_on_exception(self):
         tenant = str(uuid.uuid4())
-        with pytest.raises(RuntimeError):
-            with task_tenant_context(tenant):
-                raise RuntimeError("boom")
+        with pytest.raises(RuntimeError), task_tenant_context(tenant):
+            raise RuntimeError("boom")
         # Context should be reset after the exception
 
 
@@ -198,8 +196,6 @@ class TestStoreFactsTenantFiltering:
 
         facts = [{"company_id": "comp_001", "fact_type": "revenue", "value": 1000}]
 
-        stored = await store_facts(
-            mock_db, facts, "test_source", tenant_id="tenant-bbb"
-        )
+        stored = await store_facts(mock_db, facts, "test_source", tenant_id="tenant-bbb")
         # Should skip because company belongs to tenant-aaa, not tenant-bbb
         assert stored == 0

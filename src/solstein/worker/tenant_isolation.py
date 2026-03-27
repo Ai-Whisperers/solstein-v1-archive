@@ -15,12 +15,13 @@ Usage:
 from __future__ import annotations
 
 import functools
+from collections.abc import Callable
 from contextlib import contextmanager
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 from loguru import logger
 
-from solstein.utils.context import set_context, reset_context
+from solstein.utils.context import reset_context, set_context
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -48,9 +49,7 @@ def validate_task_tenant_id(tenant_id: str | None, *, task_name: str = "unknown"
         TenantIsolationError: If tenant_id is missing or invalid.
     """
     if tenant_id is None:
-        logger.error(
-            f"[TenantIsolation] Task '{task_name}' called without tenant_id"
-        )
+        logger.error(f"[TenantIsolation] Task '{task_name}' called without tenant_id")
         raise TenantIsolationError(
             f"Task '{task_name}' requires tenant_id but received None",
             task_name=task_name,
@@ -58,9 +57,7 @@ def validate_task_tenant_id(tenant_id: str | None, *, task_name: str = "unknown"
         )
 
     if not isinstance(tenant_id, str):  # type: ignore[redundant-isinstance]
-        logger.error(
-            f"[TenantIsolation] Task '{task_name}' received non-string tenant_id: {type(tenant_id)}"
-        )
+        logger.error(f"[TenantIsolation] Task '{task_name}' received non-string tenant_id: {type(tenant_id)}")
         raise TenantIsolationError(
             f"Task '{task_name}' requires string tenant_id, got {type(tenant_id).__name__}",
             task_name=task_name,
@@ -69,9 +66,7 @@ def validate_task_tenant_id(tenant_id: str | None, *, task_name: str = "unknown"
 
     stripped = tenant_id.strip()
     if not stripped:
-        logger.error(
-            f"[TenantIsolation] Task '{task_name}' received empty tenant_id"
-        )
+        logger.error(f"[TenantIsolation] Task '{task_name}' received empty tenant_id")
         raise TenantIsolationError(
             f"Task '{task_name}' requires non-empty tenant_id",
             task_name=task_name,
@@ -119,6 +114,7 @@ def require_tenant_id(func: F) -> F:
             # tenant_id is validated and context is set
             ...
     """
+
     @functools.wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         # For bind=True tasks, args[0] is self (the Task instance)

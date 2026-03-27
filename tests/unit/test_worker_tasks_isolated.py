@@ -14,13 +14,12 @@ import pytest
 
 celery = pytest.importorskip("celery", reason="celery not installed")
 
-from tests.mocks import MaxRetriesExceededError
-
 from solstein.worker_tasks import (
     refresh_companies_house,
     refresh_news_signals,
     refresh_sec_edgar,
 )
+from tests.mocks import MaxRetriesExceededError
 
 # Valid tenant_id for tests (STORY-066)
 TEST_TENANT_ID = str(uuid.uuid4())
@@ -125,9 +124,9 @@ class TestRetryLogicIsolated:
             with (
                 patch("solstein.worker.refresh_tasks.get_db_manager"),
                 patch("solstein.worker.refresh_tasks.get_tracked_company_ids", return_value=["comp_001"]),
+                contextlib.suppress(Exception),
             ):
-                with contextlib.suppress(Exception):
-                    refresh_sec_edgar.run(TEST_TENANT_ID)
+                refresh_sec_edgar.run(TEST_TENANT_ID)
 
     def test_max_retries_exceeded_logging(self):
         """Test that MaxRetriesExceededError is logged."""
@@ -144,6 +143,6 @@ class TestRetryLogicIsolated:
             with (
                 patch("solstein.worker.refresh_tasks.get_db_manager"),
                 patch("solstein.worker.refresh_tasks.get_tracked_company_ids", return_value=["comp_001"]),
+                contextlib.suppress(Exception),
             ):
-                with contextlib.suppress(Exception):
-                    refresh_sec_edgar.run(TEST_TENANT_ID)
+                refresh_sec_edgar.run(TEST_TENANT_ID)

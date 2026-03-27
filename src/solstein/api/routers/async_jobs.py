@@ -207,7 +207,9 @@ async def enrich_batch_async(request_data: AsyncBatchEnrichmentRequest, request:
         task_id=batch_task_id,
     )
 
-    logger.info(f"Submitted async batch enrichment job {task.id} for {len(request_data.companies)} companies (tenant={tenant_id[:8]}...)")
+    logger.info(
+        f"Submitted async batch enrichment job {task.id} for {len(request_data.companies)} companies (tenant={tenant_id[:8]}...)"
+    )
 
     return {
         "job_id": task.id,

@@ -7,6 +7,7 @@ Provides Celery tasks for refreshing data from 12 sources.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import traceback
 from collections.abc import Callable
 from datetime import datetime, timedelta
@@ -47,10 +48,8 @@ def _run_in_dedicated_loop(coro):
         asyncio.set_event_loop(loop)
         return loop.run_until_complete(coro)
     finally:
-        try:
+        with contextlib.suppress(Exception):
             loop.run_until_complete(loop.shutdown_asyncgens())
-        except Exception:  # noqa: BLE001 — shutdown cleanup, safe to ignore
-            pass
         asyncio.set_event_loop(None)
         loop.close()
 
@@ -93,8 +92,15 @@ def create_refresh_task(
                 company_ids = await get_tracked_company_ids(db_manager, tenant_id=validated_tenant)
 
                 if not company_ids:
-                    logger.warning(f"No tracked companies found for {source_name} refresh (tenant={validated_tenant[:8]}...)")
-                    return {"status": "completed", "source": source_name.lower().replace(" ", "_"), "facts_fetched": 0, "tenant_id": validated_tenant}
+                    logger.warning(
+                        f"No tracked companies found for {source_name} refresh (tenant={validated_tenant[:8]}...)"
+                    )
+                    return {
+                        "status": "completed",
+                        "source": source_name.lower().replace(" ", "_"),
+                        "facts_fetched": 0,
+                        "tenant_id": validated_tenant,
+                    }
 
                 connector = connector_class(db_manager)
 
@@ -104,10 +110,19 @@ def create_refresh_task(
                 else:
                     facts = await connector.fetch_facts(company_ids)
 
-                stored = await store_facts(db_manager, facts, source_name.lower().replace(" ", "_"), tenant_id=validated_tenant)
+                stored = await store_facts(
+                    db_manager, facts, source_name.lower().replace(" ", "_"), tenant_id=validated_tenant
+                )
 
-                logger.info(f"{source_name} refresh completed: {stored} facts stored (tenant={validated_tenant[:8]}...)")
-                return {"status": "completed", "source": source_name.lower().replace(" ", "_"), "facts_fetched": stored, "tenant_id": validated_tenant}
+                logger.info(
+                    f"{source_name} refresh completed: {stored} facts stored (tenant={validated_tenant[:8]}...)"
+                )
+                return {
+                    "status": "completed",
+                    "source": source_name.lower().replace(" ", "_"),
+                    "facts_fetched": stored,
+                    "tenant_id": validated_tenant,
+                }
 
             with task_tenant_context(validated_tenant):
                 return _run_in_dedicated_loop(_refresh())

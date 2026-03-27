@@ -200,9 +200,15 @@ def enrich_company_async(
 
     except Exception as exc:
         return _handle_task_retry(
-            self, exc,
+            self,
+            exc,
             task_name="enrich_company_async",
-            context={"company_id": company_id, "company_name": company_name, "user_id": user_id, "tenant_id": validated_tenant},
+            context={
+                "company_id": company_id,
+                "company_name": company_name,
+                "user_id": user_id,
+                "tenant_id": validated_tenant,
+            },
         )
 
 
@@ -292,7 +298,8 @@ def enrich_companies_batch_async(
 
     except Exception as exc:
         return _handle_task_retry(
-            self, exc,
+            self,
+            exc,
             task_name="enrich_companies_batch_async",
             context={
                 "company_count": len(companies),

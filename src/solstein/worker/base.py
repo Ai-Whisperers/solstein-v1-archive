@@ -172,7 +172,9 @@ async def store_facts(
                 stored_count += 1
 
             except Exception as e:  # noqa: BLE001 — per-fact isolation; log and continue
-                logger.warning(f"[store_facts] Failed to store fact from {source} for company {fact_dict.get('company_id', '?')}: {e}")
+                logger.warning(
+                    f"[store_facts] Failed to store fact from {source} for company {fact_dict.get('company_id', '?')}: {e}"
+                )
                 continue
 
         # Mark batch as completed (or failed if nothing stored)
