@@ -228,7 +228,7 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 59 | STORY-091 | Set Result Expiry TTL to Prevent Redis Bloat | READY | No deps |
+| 59 | STORY-091 | Set Result Expiry TTL to Prevent Redis Bloat | IN_PROGRESS | No deps |
 | 60 | STORY-088 | Fix In-Memory DLQ — Persist to PostgreSQL | READY | No deps |
 | 61 | STORY-089 | Set task_acks_late and task_reject_on_worker_lost | READY | Deploy with STORY-090 |
 | 62 | STORY-090 | Implement Task Idempotency via Deduplication Lock | READY | Deploy with STORY-089 |
