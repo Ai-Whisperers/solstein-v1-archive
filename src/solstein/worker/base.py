@@ -36,14 +36,34 @@ def get_db_manager():
     return db_manager
 
 
-async def get_tracked_company_ids(db_manager) -> list[str]:
-    """Get list of tracked company IDs from database."""
+async def get_tracked_company_ids(db_manager, *, tenant_id: str | None = None) -> list[str]:
+    """Get list of tracked company IDs from database.
+
+    STORY-066: When tenant_id is provided, only returns companies
+    belonging to that tenant.
+
+    Args:
+        db_manager: Database manager instance.
+        tenant_id: Optional tenant ID to scope the query.
+
+    Returns:
+        List of company IDs.
+    """
     async with db_manager.get_session() as session:
-        result = await session.execute(select(CompanyRecord.company_id))
+        query = select(CompanyRecord.company_id)
+        if tenant_id:
+            query = query.where(CompanyRecord.tenant_id == tenant_id)
+        result = await session.execute(query)
         return [row[0] for row in result.fetchall()]
 
 
-async def store_facts(db_manager: DatabaseManager, facts: list[dict[str, Any]], source: str) -> int:
+async def store_facts(
+    db_manager: DatabaseManager,
+    facts: list[dict[str, Any]],
+    source: str,
+    *,
+    tenant_id: str | None = None,
+) -> int:
     """Store fetched facts in database using the Fact repository pattern.
 
     Creates a GatheringBatch, then persists each fact as a proper Fact ORM
@@ -51,12 +71,17 @@ async def store_facts(db_manager: DatabaseManager, facts: list[dict[str, Any]], 
     ``CompanyRecord.raw_data`` blob so downstream code that reads from it
     continues to work.
 
+    STORY-066: When tenant_id is provided, validates that each fact's
+    company belongs to the specified tenant before writing.
+
     Args:
         db_manager: Initialised DatabaseManager.
         facts: List of fact dicts.  Each dict must contain at least
             ``company_id``; ``fact_type``/``type`` and ``value`` are used
             when present.
         source: Name of the data source (e.g. ``"sec_edgar"``).
+        tenant_id: Optional tenant ID. When set, only writes to companies
+            belonging to this tenant.
 
     Returns:
         Number of facts successfully stored.
@@ -106,6 +131,15 @@ async def store_facts(db_manager: DatabaseManager, facts: list[dict[str, Any]], 
                     logger.debug(f"[store_facts] No company record found for {company_id}, skipping fact from {source}")
                     continue
 
+                # STORY-066: Enforce tenant isolation on writes
+                if tenant_id and hasattr(record, "tenant_id") and record.tenant_id != tenant_id:
+                    logger.warning(
+                        f"[store_facts] Tenant mismatch: task tenant={tenant_id[:8]}... "
+                        f"but company {company_id} belongs to tenant={record.tenant_id[:8] if record.tenant_id else 'None'}. "
+                        f"Skipping write from {source}."
+                    )
+                    continue
+
                 # --- Persist as a proper Fact record ---
                 if fact_type:
                     numeric_value = None
@@ -137,7 +171,7 @@ async def store_facts(db_manager: DatabaseManager, facts: list[dict[str, Any]], 
                 legacy_record.last_updated = datetime.now(timezone.utc)
                 stored_count += 1
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 — per-fact isolation; log and continue
                 logger.warning(
                     f"[store_facts] Failed to store fact from {source} for company {fact_dict.get('company_id', '?')}: {e}"
                 )
@@ -173,11 +207,17 @@ class DeadLetterQueue:
         task_id: str,
         error: Exception | str,
         attempt: int,
-        *,
-        traceback_text: str | None = None,
-        context: dict[str, Any] | None = None,
+        **metadata: Any,
     ) -> dict[str, Any]:
-        """Record a permanently failed job with durable structured metadata."""
+        """Record a permanently failed job with durable structured metadata.
+
+        Args:
+            task_name: Name of the failed task.
+            task_id: Celery task ID.
+            error: The exception or error message.
+            attempt: Final attempt number before giving up.
+            **metadata: Optional keys: ``traceback_text``, ``context``.
+        """
         timestamp = datetime.now(timezone.utc)
         error_message = str(error)
         error_type = type(error).__name__ if isinstance(error, Exception) else "TaskFailure"
@@ -186,10 +226,10 @@ class DeadLetterQueue:
             "task_id": task_id,
             "error": error_message,
             "error_type": error_type,
-            "traceback": traceback_text,
+            "traceback": metadata.get("traceback_text"),
             "final_attempt": attempt,
             "timestamp": timestamp,
-            "context": context or {},
+            "context": metadata.get("context") or {},
         }
 
         logger.error(

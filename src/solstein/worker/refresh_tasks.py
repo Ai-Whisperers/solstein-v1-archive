@@ -6,6 +6,8 @@ Provides Celery tasks for refreshing data from 12 sources.
 
 from __future__ import annotations
 
+import asyncio
+import contextlib
 import traceback
 from collections.abc import Callable
 from datetime import datetime, timedelta
@@ -36,21 +38,18 @@ from solstein.infrastructure.connectors.yahoo_finance_refresh import (
 )
 
 from .base import dead_letter_queue, get_db_manager, get_tracked_company_ids, store_facts
+from .tenant_isolation import task_tenant_context, validate_task_tenant_id
 
 
 def _run_in_dedicated_loop(coro):
     """Run a coroutine in a short-lived event loop owned by this task."""
-    import asyncio
-
     loop = asyncio.new_event_loop()
     try:
         asyncio.set_event_loop(loop)
         return loop.run_until_complete(coro)
     finally:
-        try:
+        with contextlib.suppress(Exception):
             loop.run_until_complete(loop.shutdown_asyncgens())
-        except Exception:
-            pass
         asyncio.set_event_loop(None)
         loop.close()
 
@@ -74,19 +73,34 @@ def create_refresh_task(
     """
 
     @shared_task(name=task_name, bind=True, max_retries=3)
-    def refresh_task(self):
-        """Refresh data for all tracked companies."""
-        logger.info(f"Starting {source_name} refresh task")
+    def refresh_task(self, tenant_id: str):
+        """Refresh data for all tracked companies within a tenant.
+
+        STORY-066: tenant_id is now a required parameter.
+
+        Args:
+            tenant_id: Tenant identifier (required, validated at entry)
+        """
+        # STORY-066: Validate and enforce tenant isolation
+        validated_tenant = validate_task_tenant_id(tenant_id, task_name=task_name)
+        logger.info(f"Starting {source_name} refresh task for tenant {validated_tenant[:8]}...")
 
         try:
 
             async def _refresh():
                 db_manager = get_db_manager()
-                company_ids = await get_tracked_company_ids(db_manager)
+                company_ids = await get_tracked_company_ids(db_manager, tenant_id=validated_tenant)
 
                 if not company_ids:
-                    logger.warning(f"No tracked companies found for {source_name} refresh")
-                    return {"status": "completed", "source": source_name.lower().replace(" ", "_"), "facts_fetched": 0}
+                    logger.warning(
+                        f"No tracked companies found for {source_name} refresh (tenant={validated_tenant[:8]}...)"
+                    )
+                    return {
+                        "status": "completed",
+                        "source": source_name.lower().replace(" ", "_"),
+                        "facts_fetched": 0,
+                        "tenant_id": validated_tenant,
+                    }
 
                 connector = connector_class(db_manager)
 
@@ -96,12 +110,22 @@ def create_refresh_task(
                 else:
                     facts = await connector.fetch_facts(company_ids)
 
-                stored = await store_facts(db_manager, facts, source_name.lower().replace(" ", "_"))
+                stored = await store_facts(
+                    db_manager, facts, source_name.lower().replace(" ", "_"), tenant_id=validated_tenant
+                )
 
-                logger.info(f"{source_name} refresh completed: {stored} facts stored")
-                return {"status": "completed", "source": source_name.lower().replace(" ", "_"), "facts_fetched": stored}
+                logger.info(
+                    f"{source_name} refresh completed: {stored} facts stored (tenant={validated_tenant[:8]}...)"
+                )
+                return {
+                    "status": "completed",
+                    "source": source_name.lower().replace(" ", "_"),
+                    "facts_fetched": stored,
+                    "tenant_id": validated_tenant,
+                }
 
-            return _run_in_dedicated_loop(_refresh())
+            with task_tenant_context(validated_tenant):
+                return _run_in_dedicated_loop(_refresh())
 
         except Exception as exc:
             logger.error(f"{source_name} refresh failed: {exc}")
