@@ -96,8 +96,8 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 33 | STORY-012 | Fix Dual-Write Atomicity in Research Pipeline | DONE | Completed in prior work |
-| 34 | STORY-014 | Remove Hardcoded Date Path from Data Loader | DONE | PR #109 — awaiting CI + merge by checker |
-| 35 | STORY-013 | Fix Conflict Resolution Logic | DONE | PR #110 — recency-first priority chain, ManualReviewQueue, 19 tests |
+| 34 | STORY-014 | Remove Hardcoded Date Path from Data Loader | DONE | PR #109 merged 2026-03-27 |
+| 35 | STORY-013 | Fix Conflict Resolution Logic | DONE | PR #110 merged 2026-03-27 |
 
 ---
 
@@ -172,7 +172,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 40 | STORY-080 | Add pgvector Extension and Embedding Schema | DONE | PR #115 | |
-| 41 | STORY-081 | Generate Company Embeddings During Research Pipeline | IN_PROGRESS | Depends on STORY-080 |
+| 41 | STORY-081 | Generate Company Embeddings During Research Pipeline | DONE | PR #116 merged 2026-03-27 |
 | 42 | STORY-082 | Implement Semantic Similarity Search Endpoint | READY | Depends on STORY-081 |
 
 ### EPIC-024: Supabase Realtime Job Status (P2)
@@ -475,3 +475,12 @@ Worker and checker append timestamped entries here:
 - **Tests added**: 11 unit tests covering field extraction, documentation extraction, strict/non-strict modes, warning output
 - **Quality gates**: All pre-commit hooks pass, CI check confirms 82/82 fields documented
 - **Epic status**: EPIC-033 now fully DONE (4/4 stories: STORY-127 PR#111, STORY-125 PR#112, STORY-126 PR#113, STORY-128 PR#114)
+
+### [2026-03-27 22:43] Work Checker Run
+- **PRs merged**: 3 total — #114 (STORY-128 field lineage), #115 (STORY-080 pgvector schema, rebased), #116 (STORY-081 embeddings)
+- **PRs rebased**: 1 successful — #115 (STORY-080) was UNKNOWN, rebased cleanly onto develop, became MERGEABLE
+- **Open PRs**: 0 remaining
+- **Queue**: M1: 15/15 DONE. M2: all DONE. P0: all complete except EPIC-052 (BLOCKED). M3: EPIC-033 4/4 DONE, EPIC-023 2/3 DONE (STORY-082 READY).
+- **Dependencies unblocked**: STORY-082 (semantic search endpoint) — STORY-080 + STORY-081 both merged
+- **Branch hygiene**: Stale lock removed (PID 4032004 dead). Deleted 3 remote feature branches. 2 remote branches remain (develop, master).
+- **Actions taken**: Removed stale lock, rebased PR#115, merged 3 PRs, updated STORY-081 DONE + STORY-014/013 notes in queue
