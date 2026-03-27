@@ -155,9 +155,9 @@ class InstructorClient:
 
     def _pick_provider(self) -> str:
         """Pick the first available provider."""
-        from .enhanced_client import PROVIDER_PRIORITY
+        from ..config import get_settings
 
-        for provider in PROVIDER_PRIORITY:
+        for provider in get_settings().llm_provider_order:
             if self._create_raw_client(provider) is not None:
                 return provider
         raise RuntimeError("No LLM provider available (no API keys configured)")

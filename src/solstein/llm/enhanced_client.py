@@ -3,6 +3,7 @@
 STORY-071: Refactored from 284→96 lines. Retry/failover in failover.py,
 JSON parsing in json_parsing.py. Anthropic uses native AsyncAnthropic SDK.
 STORY-073: Added Langfuse tracing via LLMTracer.
+STORY-075: Integrated FallbackChain with circuit breakers and template fallback.
 """
 from __future__ import annotations
 
@@ -13,28 +14,37 @@ from loguru import logger
 from pydantic import BaseModel
 
 from ..config import get_settings
-from .failover import try_provider
+from .fallback import TEMPLATE_FALLBACK_RESPONSE, FallbackChain
 from .health_checker import ProviderHealthChecker, get_health_checker
 from .json_parsing import parse_structured_result
 from .query import AnthropicQuerier, CloudProviderQuerier
 from .tracing import TraceRecord, get_tracer
 
 TBaseModel = TypeVar("TBaseModel", bound=BaseModel)
-PROVIDER_PRIORITY = ["deepinfra", "mistral", "nvidia"]
 
 
 class LLMGenerationError(Exception):
-    """Raised when all LLM providers fail."""
+    """Raised when all LLM providers fail and template fallback is disabled."""
     def __init__(self, message: str, attempts: list[dict[str, Any]]):
         super().__init__(message)
         self.attempts = attempts
 
 
 class EnhancedLLMClient:
-    """LLM client with health tracking and automatic failover."""
-    def __init__(self, health_checker: ProviderHealthChecker | None = None):
+    """LLM client with health tracking, circuit breaking, and automatic failover.
+
+    STORY-075: Provider order is configurable via settings.llm_provider_order.
+    Circuit breakers prevent requests to known-failing providers.
+    Template fallback returns structured placeholder when all providers fail.
+    """
+    def __init__(
+        self,
+        health_checker: ProviderHealthChecker | None = None,
+        fallback_chain: FallbackChain | None = None,
+    ):
         self.settings = get_settings()
         self.health_checker = health_checker or get_health_checker()
+        self._fallback = fallback_chain or FallbackChain(self.settings)
         self._clients: dict[str, Any] = {}
         self.cloud_querier = CloudProviderQuerier()
         self.anthropic_querier = AnthropicQuerier()
@@ -54,19 +64,31 @@ class EnhancedLLMClient:
     async def generate(
         self, prompt: str, system_prompt: str | None = None,
         max_retries: int = 2, preferred_provider: str | None = None,
+        use_template_fallback: bool = True,
     ) -> str:
-        """Generate text using available LLM with automatic failover."""
+        """Generate text using available LLM with automatic failover.
+
+        STORY-075: Uses FallbackChain with circuit breakers. If all providers
+        fail, returns template fallback content (or raises LLMGenerationError
+        if use_template_fallback=False).
+        """
         await self.health_checker.check_all_providers()
-        providers = self._get_provider_order(preferred_provider)
-        attempts: list[dict[str, Any]] = []
-        for provider in providers:
-            result = await try_provider(
-                provider, lambda p: self._query_provider(p, prompt, system_prompt),
-                self.health_checker, max_retries, attempts,
-            )
-            if result is not None:
-                return result
-        logger.error(f"All LLM providers failed after {len(attempts)} attempts")
+        fb_result = await self._fallback.execute(
+            query_fn=lambda p: self._query_provider(p, prompt, system_prompt),
+            preferred_provider=preferred_provider,
+            max_retries=max_retries,
+        )
+        if fb_result.result is not None:
+            return fb_result.result
+
+        if fb_result.is_template_fallback and use_template_fallback:
+            logger.warning("[EnhancedLLMClient] Returning template fallback response")
+            return TEMPLATE_FALLBACK_RESPONSE["content"]
+
+        attempts = [
+            {"provider": d.provider, "action": d.action, "reason": d.reason}
+            for d in fb_result.decisions
+        ]
         raise LLMGenerationError(
             f"All LLM providers exhausted ({len(attempts)} attempts)", attempts=attempts)
 
@@ -79,11 +101,6 @@ class EnhancedLLMClient:
         json_prompt = f"{prompt}\n\nIMPORTANT: Respond ONLY with valid JSON matching this schema"
         result = await self.generate(json_prompt, system_prompt, max_retries, preferred_provider)
         return parse_structured_result(result, schema) if result else None
-
-    def _get_provider_order(self, preferred: str | None) -> list[str]:
-        if preferred:
-            return [preferred] + [p for p in PROVIDER_PRIORITY if p != preferred]
-        return PROVIDER_PRIORITY.copy()
 
     async def _query_provider(self, provider: str, prompt: str, system_prompt: str | None) -> Any:
         """Query a provider and emit a Langfuse trace (STORY-073)."""
