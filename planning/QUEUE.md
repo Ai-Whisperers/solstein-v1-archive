@@ -96,8 +96,8 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 33 | STORY-012 | Fix Dual-Write Atomicity in Research Pipeline | DONE | Completed in prior work |
-| 34 | STORY-014 | Remove Hardcoded Date Path from Data Loader | IN_PROGRESS | dutch_market still hardcoded in fallback path |
-| 35 | STORY-013 | Fix Conflict Resolution Logic | READY | No recency/reliability in resolution; MANUAL_REVIEW is a no-op |
+| 34 | STORY-014 | Remove Hardcoded Date Path from Data Loader | DONE | PR #109 |
+| 35 | STORY-013 | Fix Conflict Resolution Logic | IN_PROGRESS | No recency/reliability in resolution; MANUAL_REVIEW is a no-op |
 
 ---
 
