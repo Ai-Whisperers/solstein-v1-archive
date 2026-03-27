@@ -162,10 +162,10 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 36 | STORY-127 | Deduplicate profit_margin and employee Fields | IN_PROGRESS | First in dependency chain |
-| 37 | STORY-125 | Restore 20 Dropped Fields to Excel Export | READY | Depends on STORY-127 |
-| 38 | STORY-126 | Add Export Schema Validation | READY | Depends on STORY-125 |
-| 39 | STORY-128 | Document Field Lineage from Ingestion to Export | READY | Depends on STORY-125, 126, 127 |
+| 36 | STORY-127 | Deduplicate profit_margin and employee Fields | DONE | PR #111 — computed_field properties, before-validator routing, 29 tests |
+| 37 | STORY-125 | Restore 20 Dropped Fields to Excel Export | DONE | PR #112 — 4+5 new columns, 2 new sheets, 32 tests |
+| 38 | STORY-126 | Add Export Schema Validation | DONE | PR #113 — ExportSchema (41 fields), auto-validation, 13 tests |
+| 39 | STORY-128 | Document Field Lineage from Ingestion to Export | READY | Depends on STORY-125, 126, 127 (all DONE). Was IN_PROGRESS but worker died (stale lock). |
 
 ### EPIC-023: pgvector Semantic Search (P2)
 
@@ -457,3 +457,12 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: None — all M1/M2/P0 stories complete. No READY stories remain in queue. M3-M6 not yet queued.
 - **Branch hygiene**: Deleted 3 remote feature branches (STORY-013, 014, 066). Deleted 3 local merged branches. Pruned refs. 2 remote branches remain (develop, master).
 - **Actions taken**: Merged 3 PRs, updated STORY-066 DONE + EPIC-019 header, branch cleanup. Queue exhausted through M2 + Critical P0s.
+
+### [2026-03-27 22:30] Work Checker Run
+- **PRs merged**: 3 total — #112 (STORY-125 restore dropped fields), #113 (STORY-126 export schema validation). #111 (STORY-127 deduplicate fields) was already merged.
+- **PRs rebased**: 0 — all were MERGEABLE
+- **Open PRs**: 0 remaining
+- **Queue**: M1: 15/15 DONE. M2: all DONE. Critical P0s: all complete except EPIC-052 (BLOCKED). M3 EPIC-033: 3/4 DONE, STORY-128 reset to READY (stale worker lock cleaned).
+- **Dependencies unblocked**: STORY-128 deps satisfied (125, 126, 127 all merged). Reset from IN_PROGRESS to READY.
+- **Branch hygiene**: Deleted 3 remote + 4 local branches. Stale worker lock removed (PID 3919873 dead).
+- **Actions taken**: Merged 2 PRs, cleaned stale lock, reset STORY-128 to READY, branch cleanup.
