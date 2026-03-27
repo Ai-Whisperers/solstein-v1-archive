@@ -13,7 +13,9 @@ from .styles import ExcelStyles, LayoutConstants
 from .utils import auto_adjust_columns, format_number, format_percentage, safe_get, safe_get_financial
 
 
-def add_title_banner(ws: Any, styles: ExcelStyles, title: str, subtitle: str = "") -> None:
+def add_title_banner(
+    ws: Any, styles: ExcelStyles, title: str, subtitle: str = "", num_columns: int = 10
+) -> None:
     """Add a title banner to the worksheet.
 
     Args:
@@ -21,6 +23,7 @@ def add_title_banner(ws: Any, styles: ExcelStyles, title: str, subtitle: str = "
         styles: Excel styles
         title: Main title
         subtitle: Optional subtitle
+        num_columns: Number of columns to span for merge
     """
 
     # Merge cells for title
@@ -28,7 +31,7 @@ def add_title_banner(ws: Any, styles: ExcelStyles, title: str, subtitle: str = "
         start_row=LayoutConstants.TITLE_ROW,
         start_column=LayoutConstants.TITLE_COLUMN,
         end_row=LayoutConstants.TITLE_ROW,
-        end_column=10,
+        end_column=num_columns,
     )
 
     # Add title
@@ -44,7 +47,7 @@ def add_title_banner(ws: Any, styles: ExcelStyles, title: str, subtitle: str = "
             start_row=LayoutConstants.SUBTITLE_ROW,
             start_column=LayoutConstants.TITLE_COLUMN,
             end_row=LayoutConstants.SUBTITLE_ROW,
-            end_column=10,
+            end_column=num_columns,
         )
         subtitle_cell = ws.cell(row=LayoutConstants.SUBTITLE_ROW, column=LayoutConstants.TITLE_COLUMN)
         subtitle_cell.value = subtitle
@@ -90,10 +93,13 @@ def add_executive_summary(ws: Any, styles: ExcelStyles, profiles: list[Company])
     logger.info(f"Adding executive summary for {len(profiles)} companies")
 
     # Title
-    add_title_banner(ws, styles, "Executive Summary", "Market Intelligence Dashboard")
+    add_title_banner(ws, styles, "Executive Summary", "Market Intelligence Dashboard", num_columns=11)
 
-    # Headers
-    headers = ["Company", "Industry", "Revenue (€M)", "Growth", "AI Score", "Tier", "Threat Level"]
+    # Headers — STORY-125: added tech_stack, key_customers, open_positions, data_availability
+    headers = [
+        "Company", "Industry", "Revenue (€M)", "Growth", "AI Score", "Tier", "Threat Level",
+        "Tech Stack", "Key Customers", "Open Positions", "Data Availability",
+    ]
     write_headers(ws, styles, headers)
 
     # Data rows
@@ -148,6 +154,37 @@ def add_executive_summary(ws: Any, styles: ExcelStyles, profiles: list[Company])
         # Threat Level
         cell = ws.cell(row=row, column=7)
         cell.value = safe_get(company, "threat_level", "Unknown")
+        cell.font = styles.data_font
+        cell.alignment = styles.data_alignment
+        cell.fill = styles.get_row_fill(idx)
+
+        # STORY-125: Tech Stack
+        cell = ws.cell(row=row, column=8)
+        tech = safe_get(company, "tech_stack", [])
+        cell.value = ", ".join(tech) if tech else "N/A"
+        cell.font = styles.data_font
+        cell.alignment = styles.data_alignment
+        cell.fill = styles.get_row_fill(idx)
+
+        # STORY-125: Key Customers
+        cell = ws.cell(row=row, column=9)
+        customers = safe_get(company, "key_customers", [])
+        cell.value = ", ".join(customers) if customers else "N/A"
+        cell.font = styles.data_font
+        cell.alignment = styles.data_alignment
+        cell.fill = styles.get_row_fill(idx)
+
+        # STORY-125: Open Positions
+        cell = ws.cell(row=row, column=10)
+        positions = safe_get(company, "open_positions")
+        cell.value = format_number(positions, 0) if positions else "N/A"
+        cell.font = styles.data_font
+        cell.alignment = styles.number_alignment
+        cell.fill = styles.get_row_fill(idx)
+
+        # STORY-125: Data Availability
+        cell = ws.cell(row=row, column=11)
+        cell.value = safe_get(company, "data_availability", "N/A")
         cell.font = styles.data_font
         cell.alignment = styles.data_alignment
         cell.fill = styles.get_row_fill(idx)
@@ -249,9 +286,10 @@ def add_financial_intelligence(ws: Any, styles: ExcelStyles, profiles: list[Comp
     logger.info(f"Adding financial intelligence for {len(profiles)} companies")
 
     # Title
-    add_title_banner(ws, styles, "Financial Intelligence", "Revenue, Funding & Valuation")
+    add_title_banner(ws, styles, "Financial Intelligence", "Revenue, Funding & Valuation", num_columns=12)
 
-    # Headers
+    # Headers — STORY-125: added funding_rounds, funding_war_chest, revenue_cagr_5yr,
+    # revenue_per_employee_eur_k, employee_cagr_3yr
     headers = [
         "Company",
         "Revenue (€M)",
@@ -260,6 +298,11 @@ def add_financial_intelligence(ws: Any, styles: ExcelStyles, profiles: list[Comp
         "Total Funding",
         "Latest Valuation",
         "Investors",
+        "Funding Rounds",
+        "Funding War Chest",
+        "Revenue CAGR 5yr",
+        "Revenue/Employee (€K)",
+        "Employee CAGR 3yr",
     ]
     write_headers(ws, styles, headers)
 
@@ -320,6 +363,54 @@ def add_financial_intelligence(ws: Any, styles: ExcelStyles, profiles: list[Comp
         cell.value = ", ".join(investors) if investors else "N/A"
         cell.font = styles.data_font
         cell.alignment = styles.data_alignment
+        cell.fill = styles.get_row_fill(idx)
+
+        # STORY-125: Funding Rounds
+        cell = ws.cell(row=row, column=8)
+        rounds = safe_get(company, "funding_rounds", [])
+        if rounds:
+            summaries = []
+            for r in rounds:
+                if isinstance(r, dict):
+                    label = r.get("round", r.get("stage", ""))
+                    amount = r.get("amount", r.get("amount_eur", ""))
+                    summaries.append(f"{label}: {amount}" if label else str(amount))
+            cell.value = "; ".join(summaries) if summaries else "N/A"
+        else:
+            cell.value = "N/A"
+        cell.font = styles.data_font
+        cell.alignment = styles.data_alignment
+        cell.fill = styles.get_row_fill(idx)
+
+        # STORY-125: Funding War Chest
+        cell = ws.cell(row=row, column=9)
+        cell.value = safe_get(company, "funding_war_chest", "N/A")
+        cell.font = styles.data_font
+        cell.alignment = styles.data_alignment
+        cell.fill = styles.get_row_fill(idx)
+
+        # STORY-125: Revenue CAGR 5yr
+        cell = ws.cell(row=row, column=10)
+        cagr5 = safe_get(company, "revenue_cagr_5yr")
+        cell.value = format_percentage(cagr5, 1)
+        cell.font = styles.data_font
+        cell.alignment = styles.number_alignment
+        cell.fill = styles.get_row_fill(idx)
+
+        # STORY-125: Revenue per Employee (EUR K)
+        cell = ws.cell(row=row, column=11)
+        rpe = safe_get(company, "revenue_per_employee_eur_k")
+        cell.value = format_number(rpe, 1, "K")
+        cell.font = styles.data_font
+        cell.alignment = styles.number_alignment
+        cell.fill = styles.get_row_fill(idx)
+
+        # STORY-125: Employee CAGR 3yr
+        cell = ws.cell(row=row, column=12)
+        ecagr = safe_get(company, "employee_cagr_3yr")
+        cell.value = format_percentage(ecagr, 1)
+        cell.font = styles.data_font
+        cell.alignment = styles.number_alignment
         cell.fill = styles.get_row_fill(idx)
 
     # Auto-adjust columns

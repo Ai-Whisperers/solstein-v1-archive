@@ -26,6 +26,10 @@ from .excel.sheets import (
     add_financial_intelligence,
     add_market_rankings,
 )
+from .excel.sheets_extended import (
+    add_advanced_data,
+    add_revenue_history,
+)
 from .excel.styles import ExcelStyles
 
 
@@ -80,6 +84,14 @@ class ImprovedExcelExporter:
             # Financial Intelligence
             ws_financial = wb.create_sheet("Financial Intelligence")
             add_financial_intelligence(ws_financial, self.styles, profiles)
+
+            # STORY-125: Revenue History (time-series data)
+            ws_revenue = wb.create_sheet("Revenue History")
+            add_revenue_history(ws_revenue, self.styles, profiles)
+
+            # STORY-125: Advanced Data (corporate structure, provenance, notes)
+            ws_advanced = wb.create_sheet("Advanced Data")
+            add_advanced_data(ws_advanced, self.styles, profiles)
 
             if metadata:
                 self._add_metadata_sheet(wb, metadata)
