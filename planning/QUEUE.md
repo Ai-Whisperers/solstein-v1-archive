@@ -105,7 +105,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 25a | STORY-173 | Derive threat_level from composite score and classification | DONE | Verified: derive_threat_level() in constants.py, set in scoring.py |
-| 25b | STORY-174 | Add null guard for saas_maturity in CompetitivePositionScorer | IN_PROGRESS | Crash confirmed on None input |
+| 25b | STORY-174 | Add null guard for saas_maturity in CompetitivePositionScorer | DONE | PR #94 |
 | 25c | STORY-175 | Remove dead _calculate_* private methods from GrowthScorer | DONE | Verified: methods removed, NOTE comment added |
 | 25d | STORY-176 | Define authoritative classification→threat_level mapping in constants | DONE | Verified: CLASSIFICATION_THREAT_MAPPING + derive_threat_level() in constants.py |
 
@@ -147,6 +147,14 @@ See `backlog/README.md` for the full milestone roadmap.
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-03-26] Worker Run — EPIC-046 Complete
+- **Epic**: EPIC-046 — Scoring Engine Correctness
+- **Stories completed**: STORY-173 (already done), STORY-174 (implemented this run), STORY-175 (already done), STORY-176 (already done)
+- **PR created**: #94 (STORY-174 only — others were already merged)
+- **Duration**: ~30m (assessment + implementation + quality gates)
+- **Quality**: ruff clean on modified file; AST guardrails pass; 6/6 EPIC-046 tests pass (STORY-174 was the only failing test)
+- **Notes**: STORY-173/175/176 were already implemented in develop but not marked DONE in QUEUE.md. Expanded QUEUE.md to show individual story rows for EPIC-046. Pre-existing test failures in test_scoring.py and test_scoring_constants.py are unrelated (hardcoded /tmp paths, scorer config mismatch from prior refactors).
 
 ### [2026-03-26] Worker Run — STORY-138 Complete
 - **Story implemented**: STORY-138 — Replace Hardcoded /home/ Paths with Config-Driven Resolution
