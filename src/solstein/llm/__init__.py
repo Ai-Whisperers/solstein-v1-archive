@@ -28,6 +28,13 @@ from .health_checker import (
     get_health_checker,
     reset_health_checker,
 )
+from .embeddings import (
+    batch_generate_embeddings,
+    company_to_profile_text,
+    generate_company_embedding,
+    generate_embedding,
+    get_embedding_metadata,
+)
 from .usage_tracker import UsageTracker, get_usage_tracker
 
 __all__ = [
@@ -45,4 +52,10 @@ __all__ = [
     "reset_health_checker",
     "UsageTracker",
     "get_usage_tracker",
+    # Embeddings (EPIC-023)
+    "generate_embedding",
+    "generate_company_embedding",
+    "batch_generate_embeddings",
+    "company_to_profile_text",
+    "get_embedding_metadata",
 ]
