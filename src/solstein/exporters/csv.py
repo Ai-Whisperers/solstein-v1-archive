@@ -63,6 +63,10 @@ class CSVExporter:
         ("Total Funding EUR M", "total_funding_raised_eur"),
         ("Latest Valuation EUR M", "latest_valuation_eur"),
         ("AI In Production", "ai_in_production"),
+        ("Transform Time (months)", "transformation_time_months"),
+        ("Transform Cost (EUR)", "transformation_cost_eur"),
+        ("Transform Efficiency Gain %", "transformation_efficiency_gain_pct"),
+        ("Transform Risk", "transformation_risk_level"),
         ("Confidence Level", "confidence_level"),
         ("Description", "description"),
     ]

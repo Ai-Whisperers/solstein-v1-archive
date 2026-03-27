@@ -121,6 +121,13 @@ class Company(CompanyUtilityMixin, CompanyPropertyMixin, CompanySyncMixin):
     data_availability: str | None = None
     confidence_scores: dict[str, float] = Field(default_factory=dict)
 
+    # STORY-146: AI Transformation Readiness (EPIC-038)
+    transformation_time_months: float | None = None
+    transformation_cost_eur: float | None = None
+    transformation_efficiency_gain_pct: float | None = None
+    transformation_risk_level: str | None = None
+    transformation_breakdown: dict[str, Any] = Field(default_factory=dict)
+
     # Aliases for backward compatibility
     @property
     def funding(self) -> float | None:
