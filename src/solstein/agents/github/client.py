@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import base64
 from typing import Any
 
 import httpx
 from loguru import logger
 
-from ..resilience import GITHUB_RETRY_CONFIG, CircuitBreaker, call_with_retry
+from solstein.config import get_settings
+
+from ..resilience import CircuitBreaker
 
 
 class GitHubClient:
@@ -23,9 +26,11 @@ class GitHubClient:
         if self.github_token:
             self.headers["Authorization"] = f"token {self.github_token}"
 
+        _settings = get_settings()
+        self.default_timeout = _settings.http_timeouts.github
         self.circuit_breaker = CircuitBreaker(
-            failure_threshold=5,
-            recovery_timeout=60.0,
+            failure_threshold=_settings.circuit_breaker.failure_threshold,
+            recovery_timeout=_settings.circuit_breaker.recovery_timeout,
             name="GitHubAPI",
         )
 
@@ -40,31 +45,30 @@ class GitHubClient:
         url: str,
         *,
         params: dict[str, Any] | None = None,
-        timeout: float = 15,
+        timeout: float | None = None,
         unauthenticated: bool = False,
     ) -> httpx.Response:
         """Make GET request to GitHub API."""
         import httpx
 
+        effective_timeout = timeout if timeout is not None else self.default_timeout
         headers = self._request_headers(unauthenticated)
 
         with httpx.Client() as client:
-            resp = client.get(url, headers=headers, params=params, timeout=timeout)
+            resp = client.get(url, headers=headers, params=params, timeout=effective_timeout)
 
         if resp.status_code == 401 and "Authorization" in self.headers and not unauthenticated:
             # Retry without auth
-            return self.get(url, params=params, timeout=timeout, unauthenticated=True)
+            return self.get(url, params=params, timeout=effective_timeout, unauthenticated=True)
 
         return resp
 
     def fetch_file(self, org: str, repo: str, path: str) -> str | None:
         """Fetch file contents from repo."""
-        import base64
-
         url = f"{self.api_base}/repos/{org}/{repo}/contents/{path}"
 
         try:
-            resp = self.get(url, timeout=10)
+            resp = self.get(url)
             if resp.status_code != 200:
                 return None
 
@@ -78,6 +82,6 @@ class GitHubClient:
             raw = base64.b64decode(content.encode("utf-8"))
             return raw.decode("utf-8", errors="replace")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"[GitHubClient] fetch_file {org}/{repo}/{path} failed: {e}")
             return None

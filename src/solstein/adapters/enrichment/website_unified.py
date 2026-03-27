@@ -12,9 +12,11 @@ from typing import Any
 import requests
 from loguru import logger
 
+from solstein.config import get_settings
 from solstein.domain.models import RawDataSource
-from solstein.infrastructure.database import DatabaseManager, db_manager as default_db_manager
 from solstein.infrastructure.conflict_resolution import SourceAuthority
+from solstein.infrastructure.database import DatabaseManager
+from solstein.infrastructure.database import db_manager as default_db_manager
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
 
@@ -43,9 +45,10 @@ class WebsiteUnifiedAdapter(BaseRefreshConnector):
             if not website.startswith(("http://", "https://")):
                 website = f"https://{website}"
 
+            _settings = get_settings()
             response = requests.get(
                 website,
-                timeout=10,
+                timeout=_settings.http_timeouts.website_scraper,
                 headers={"User-Agent": "Mozilla/5.0 (compatible; SolsteinBot/1.0)"},
             )
             response.raise_for_status()
@@ -113,7 +116,7 @@ class WebsiteUnifiedAdapter(BaseRefreshConnector):
                 "tech_count": len(tech_stack),
             }
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Error scraping {website}: {e}")
             return {
                 "main_products": [],

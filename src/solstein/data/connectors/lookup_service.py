@@ -14,7 +14,7 @@ FREE tools used:
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from loguru import logger
 
@@ -75,7 +75,7 @@ class IdentifierLookupService:
     async def resolve_identifiers(
         self,
         company_name: str,
-        headquarters: Optional[str] = None,
+        headquarters: str | None = None,
         use_cache: bool = True,
     ) -> dict[str, Any]:
         """Resolve all identifiers for a company using all strategies.
@@ -142,7 +142,7 @@ class IdentifierLookupService:
     async def resolve_identifiers_enveloped(
         self,
         company_name: str,
-        headquarters: Optional[str] = None,
+        headquarters: str | None = None,
         use_cache: bool = True,
     ) -> ConnectorResponse[dict[str, Any]]:
         request = ConnectorRequest(
@@ -166,7 +166,7 @@ class IdentifierLookupService:
             request=request,
             operation=_operation,
             retryable_exceptions=(RuntimeError, TimeoutError),
-            empty_is_degraded=True,
+
             empty_error="No identifiers resolved",
             extra_metadata={"strategy_count": len(self._strategies)},
         )
@@ -228,7 +228,7 @@ class IdentifierLookupService:
 
         return merged
 
-    def _infer_geography(self, company_name: str, headquarters: Optional[str] = None) -> Optional[str]:
+    def _infer_geography(self, company_name: str, headquarters: str | None = None) -> str | None:
         """Infer geography from company name and headquarters."""
         haystack = f"{company_name} {headquarters or ''}".lower()
 

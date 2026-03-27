@@ -4,10 +4,12 @@ Gathers information from web search, news articles, and press releases
 to extract facts about company growth, funding, and announcements.
 """
 
-import asyncio
 from datetime import datetime, timezone
 
+import dateutil.parser
 import httpx
+
+from solstein.config import get_settings
 
 from ..domain.models import DataSourceType
 from .base_agent import AgentTaskResult, BaseDataGatheringAgent
@@ -29,7 +31,13 @@ class WebSearchAgent(BaseDataGatheringAgent):
         self.search_engine_id = search_engine_id
         self.search_base = "https://www.googleapis.com/customsearch/v1"
 
-        self.circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=45.0, name="GoogleSearchAPI")
+        _settings = get_settings()
+        self.http_timeout = _settings.http_timeouts.web_search_agent
+        self.circuit_breaker = CircuitBreaker(
+            failure_threshold=_settings.circuit_breaker.failure_threshold,
+            recovery_timeout=_settings.circuit_breaker.recovery_timeout,
+            name="GoogleSearchAPI",
+        )
 
     async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
         """Gather web search data for a company."""
@@ -57,8 +65,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
             for query_name, query_text in search_queries:
                 try:
                     articles = await call_with_retry(
-                        self._api_search_news,
-                        query_text,
+                        lambda q=query_text: self._api_search_news(q),
                         retry_config=WEB_SEARCH_RETRY_CONFIG,
                         circuit_breaker=self.circuit_breaker,
                         name=f"search_news[{query_name}]",
@@ -84,7 +91,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
                         )
                         result.raw_sources.append(raw_source)
 
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     self.log_warning(f"Error searching {query_name}: {e}")
 
             if result.raw_sources:
@@ -93,7 +100,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
             result.success = True
             self.log_info(f"Successfully gathered {len(result.raw_sources)} web sources")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.log_error(f"Error gathering web search data: {e}")
             result.error_message = str(e)
             result.success = False
@@ -133,13 +140,13 @@ class WebSearchAgent(BaseDataGatheringAgent):
             }
 
             async with httpx.AsyncClient() as client:
-                resp = await client.get(self.search_base, params=params, timeout=15.0)
+                resp = await client.get(self.search_base, params=params, timeout=self.http_timeout)
                 if resp.status_code == 200:
                     data = resp.json()
                     return data.get("items", [])
                 else:
                     self.log_warning(f"Search API error {resp.status_code}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.log_error(f"Error calling search API: {e}")
 
         return []
@@ -189,14 +196,12 @@ class WebSearchAgent(BaseDataGatheringAgent):
             return None
 
         try:
-            import dateutil.parser
-
             for word in text.split():
                 try:
                     return dateutil.parser.parse(word)
                 except (ValueError, TypeError):
                     continue
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.log_warning(f"Error parsing date from text: {e}")
 
         return None

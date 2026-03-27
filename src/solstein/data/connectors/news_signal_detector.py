@@ -23,19 +23,22 @@ from typing import Any
 import httpx
 from loguru import logger
 
-from .contracts import ConnectorRequest, ConnectorResponse
+from solstein.config import get_settings
+from solstein.infrastructure.retry_policy import CircuitBreaker, RetryPolicy
+
 from .constants import (
     HTTP_STATUS_RATE_LIMITED,
     NEWS_SIGNAL_DAILY_QUERY_LIMIT,
     NEWS_SIGNAL_REQUEST_TIMEOUT_S,
 )
+from .contracts import ConnectorRequest, ConnectorResponse
+from .runtime import ConnectorRuntime
 from .signal_detectors import (
     FundingSignalDetector,
     KeyHireSignalDetector,
     PartnershipSignalDetector,
     Signal,
 )
-from .runtime import ConnectorRuntime
 
 
 class NewsSignalDetector:
@@ -60,9 +63,6 @@ class NewsSignalDetector:
         Raises:
             ValueError: If no API key provided and NEWSAPI_KEY not in environment.
         """
-        from solstein.config import get_settings
-        from solstein.infrastructure.retry_policy import CircuitBreaker, RetryPolicy
-
         settings = get_settings()
         self.api_key = api_key or settings.news_api_key
         if not self.api_key:
@@ -146,7 +146,7 @@ class NewsSignalDetector:
             except httpx.HTTPStatusError as e:
                 logger.error("NewsAPI HTTP error", status=e.response.status_code, error=str(e))
                 raise
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("NewsAPI request failed", error=str(e))
                 raise
 
@@ -232,7 +232,7 @@ class NewsSignalDetector:
             request=request,
             operation=_operation,
             retryable_exceptions=(httpx.HTTPError, RuntimeError, TimeoutError),
-            empty_is_degraded=True,
+
             empty_error="No signals detected",
             extra_metadata={"detector_count": len(self._detectors)},
         )

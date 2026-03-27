@@ -12,6 +12,9 @@ from loguru import logger
 from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from solstein._config_timeouts import CeleryTimingConfig, CircuitBreakerConfig, HttpTimeoutsConfig
+from solstein.utils.logging import setup_logging as _setup_logging
+
 
 class ConfigurationError(Exception):
     """Raised when configuration is invalid or incomplete."""
@@ -175,6 +178,10 @@ class Settings(BaseSettings):
     debug_errors: bool = Field(
         default=False, description="Include debug info (tracebacks) in error responses. NEVER enable in production."
     )
+    # Timeout and resilience configuration
+    http_timeouts: HttpTimeoutsConfig = Field(default_factory=HttpTimeoutsConfig)
+    circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
+    celery_timing: CeleryTimingConfig = Field(default_factory=CeleryTimingConfig)
     # Components
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     api: APIConfig = Field(default_factory=APIConfig)
@@ -402,9 +409,7 @@ def get_settings() -> "Settings":
 
 def configure_logging(settings: Settings) -> None:
     """Configure logging based on settings."""
-    from .utils.logging import setup_logging
-
-    setup_logging(
+    _setup_logging(
         level=settings.logging.level,
         json_format=settings.logging.format.lower() == "json",
         log_file=settings.logging.file_path,

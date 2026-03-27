@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 
 import httpx
 
+from solstein.config import get_settings as _get_settings
+
 from ..domain.models import DataSourceType
 from .base_agent import AgentTaskResult, BaseDataGatheringAgent
 from .resilience import COMPANIES_HOUSE_RETRY_CONFIG, CircuitBreaker, call_with_retry
@@ -20,14 +22,17 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
     def __init__(self):
         """Initialize Companies House agent."""
         super().__init__("CompaniesHouseAgent", DataSourceType.COMPANY_FILINGS)
-        from solstein.config import get_settings
-
-        settings = get_settings()
+        settings = _get_settings()
         self.api_key = settings.companies_house_api_key
         self.api_base = "https://api.company-information.service.gov.uk"
         self.headers = {"User-Agent": "Solstein-AI"}
 
-        self.circuit_breaker = CircuitBreaker(failure_threshold=4, recovery_timeout=90.0, name="CompaniesHouseAPI")
+        self.http_timeout = settings.http_timeouts.companies_house
+        self.circuit_breaker = CircuitBreaker(
+            failure_threshold=settings.circuit_breaker.failure_threshold,
+            recovery_timeout=settings.circuit_breaker.recovery_timeout,
+            name="CompaniesHouseAPI",
+        )
 
     async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
         """Gather Companies House data for a company."""
@@ -96,7 +101,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             result.success = True
             self.log_info(f"Successfully gathered Companies House data for {company_name}")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.log_error(f"Error gathering Companies House data: {e}")
             result.error_message = str(e)
             result.success = False
@@ -112,9 +117,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
 
         try:
             company_num = await call_with_retry(
-                asyncio.to_thread,
-                self._api_search_company,
-                company_name,
+                lambda: asyncio.to_thread(self._api_search_company, company_name),
                 retry_config=COMPANIES_HOUSE_RETRY_CONFIG,
                 circuit_breaker=self.circuit_breaker,
                 name=f"search_company[{company_name}]",
@@ -122,7 +125,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             if company_num:
                 self.log_info(f"Found company number: {company_num}")
             return company_num
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.log_error(f"Error searching company: {e}")
             return None
 
@@ -139,7 +142,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 url,
                 headers=self.headers,
                 params=params,
-                timeout=10,
+                timeout=self.http_timeout,
                 auth=(self.api_key or "", ""),
             )
             if resp.status_code == 200:
@@ -151,7 +154,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                     return company_num
             else:
                 self.log_warning(f"Search error {resp.status_code}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.log_warning(f"Error searching: {e}")
 
         return None
@@ -162,15 +165,13 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
 
         try:
             data = await call_with_retry(
-                asyncio.to_thread,
-                self._api_get_company,
-                company_num,
+                lambda: asyncio.to_thread(self._api_get_company, company_num),
                 retry_config=COMPANIES_HOUSE_RETRY_CONFIG,
                 circuit_breaker=self.circuit_breaker,
                 name=f"get_company[{company_num}]",
             )
             return data
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.log_error(f"Error fetching company details: {e}")
             return None
 
@@ -182,14 +183,14 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             resp = httpx.get(
                 url,
                 headers=self.headers,
-                timeout=10,
+                timeout=self.http_timeout,
                 auth=(self.api_key or "", ""),
             )
             if resp.status_code == 200:
                 return resp.json()
             else:
                 self.log_warning(f"Get company error {resp.status_code}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.log_warning(f"Error getting company: {e}")
 
         return None
@@ -200,15 +201,13 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
 
         try:
             data = await call_with_retry(
-                asyncio.to_thread,
-                self._api_get_financials,
-                company_num,
+                lambda: asyncio.to_thread(self._api_get_financials, company_num),
                 retry_config=COMPANIES_HOUSE_RETRY_CONFIG,
                 circuit_breaker=self.circuit_breaker,
                 name=f"get_financials[{company_num}]",
             )
             return data
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.log_error(f"Error fetching financials: {e}")
             return None
 
@@ -225,7 +224,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 url,
                 headers=self.headers,
                 params=params,
-                timeout=10,
+                timeout=self.http_timeout,
                 auth=(self.api_key or "", ""),
             )
             if resp.status_code == 200:
@@ -238,7 +237,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                     }
             else:
                 self.log_warning(f"Get financials error {resp.status_code}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.log_warning(f"Error getting financials: {e}")
 
         return None

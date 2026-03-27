@@ -36,7 +36,7 @@ class GitHubOrgSearcher:
         params = {"q": f"{query} type:org", "per_page": 5}
 
         try:
-            resp = self.client.get(url, params=params, timeout=10)
+            resp = self.client.get(url, params=params)
             if resp.status_code == 200:
                 data = resp.json()
                 items = data.get("items", [])
@@ -65,7 +65,7 @@ class GitHubOrgSearcher:
             }
 
             try:
-                resp = self.client.get(url, params=params, timeout=15)
+                resp = self.client.get(url, params=params)
                 if resp.status_code != 200:
                     logger.warning(f"GitHub repo fetch failed for org '{org_name}' (status={resp.status_code})")
                     break

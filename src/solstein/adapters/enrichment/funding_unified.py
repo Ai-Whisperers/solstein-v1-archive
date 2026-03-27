@@ -12,9 +12,12 @@ from typing import Any
 import requests
 from loguru import logger
 
+from solstein.config import get_settings
+from solstein.data.additional_sources import AdditionalDataSources
 from solstein.domain.models import DataSourceType, RawDataSource
-from solstein.infrastructure.database import DatabaseManager, db_manager as default_db_manager
 from solstein.infrastructure.conflict_resolution import SourceAuthority
+from solstein.infrastructure.database import DatabaseManager
+from solstein.infrastructure.database import db_manager as default_db_manager
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
 
@@ -47,7 +50,8 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
         headers = {"Authorization": f"Bearer {self.crunchbase_api_key}"}
 
         try:
-            response = requests.get(url, headers=headers, timeout=10)
+            _settings = get_settings()
+            response = requests.get(url, headers=headers, timeout=_settings.http_timeouts.funding)
             if response.status_code == 200:
                 data = response.json()
                 props = data.get("properties", {})
@@ -59,7 +63,7 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
                     "last_round_valuation": props.get("valuation"),
                     "num_rounds": props.get("funding_rounds", 0),
                 }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Crunchbase API error", error=str(e))
 
         return None
@@ -67,8 +71,6 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
     def _get_public_funding_data(self, company_name: str) -> list[dict[str, Any]]:
         """Get funding news from public sources."""
         try:
-            from solstein.data.additional_sources import AdditionalDataSources
-
             additional = AdditionalDataSources()
             news = additional.get_news(company_name, days_back=180)
 
@@ -85,7 +87,7 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
                     )
 
             return rounds
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Public funding search error", error=str(e))
             return []
 

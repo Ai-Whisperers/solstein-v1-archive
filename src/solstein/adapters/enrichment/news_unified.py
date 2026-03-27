@@ -12,9 +12,11 @@ from typing import Any
 import requests
 from loguru import logger
 
+from solstein.config import get_settings
 from solstein.domain.models import RawDataSource
-from solstein.infrastructure.database import DatabaseManager, db_manager as default_db_manager
 from solstein.infrastructure.conflict_resolution import SourceAuthority
+from solstein.infrastructure.database import DatabaseManager
+from solstein.infrastructure.database import db_manager as default_db_manager
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
 
@@ -104,7 +106,8 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
         }
 
         try:
-            response = requests.get(url, params=params, timeout=10)
+            _settings = get_settings()
+            response = requests.get(url, params=params, timeout=_settings.http_timeouts.news_api)
             data = response.json()
 
             articles: list[dict[str, Any]] = []
@@ -128,7 +131,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
 
             return articles
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Error fetching news from API", error=str(e))
             return []
 

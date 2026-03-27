@@ -154,7 +154,10 @@ async def worker_health() -> dict:
         "status": "degraded",
     }
     try:
-        inspect = celery_app.control.inspect(timeout=2.0)
+        from solstein.config import get_settings as _get_settings
+
+        _ht = _get_settings().http_timeouts
+        inspect = celery_app.control.inspect(timeout=_ht.health_celery_inspect)
         ping_result: dict | None = inspect.ping()
         if ping_result:
             result["workers"] = [{"name": worker, "status": "online"} for worker in ping_result]
