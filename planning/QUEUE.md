@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-03-27 | Updated By | Autonomous worker (EPIC-004) |
+| Last Updated | 2026-03-27 | Updated By | Autonomous worker (M3 queuing) |
 
 ## Status Key
 
@@ -156,9 +156,47 @@ The first worker run MUST do a verification pass before starting implementation 
 
 ---
 
-## M3-M6: Remaining Milestones
+## M3: Modern Data Layer
 
-Worker should complete M1, M2, and Critical P0s before advancing to these.
+### EPIC-033: Data Completeness & Export Integrity (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 36 | STORY-127 | Deduplicate profit_margin and employee Fields | IN_PROGRESS | First in dependency chain |
+| 37 | STORY-125 | Restore 20 Dropped Fields to Excel Export | READY | Depends on STORY-127 |
+| 38 | STORY-126 | Add Export Schema Validation | READY | Depends on STORY-125 |
+| 39 | STORY-128 | Document Field Lineage from Ingestion to Export | READY | Depends on STORY-125, 126, 127 |
+
+### EPIC-023: pgvector Semantic Search (P2)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 40 | STORY-080 | Add pgvector Extension and Embedding Schema | READY | |
+| 41 | STORY-081 | Generate Company Embeddings During Research Pipeline | READY | Depends on STORY-080 |
+| 42 | STORY-082 | Implement Semantic Similarity Search Endpoint | READY | Depends on STORY-081 |
+
+### EPIC-024: Supabase Realtime Job Status (P2)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 43 | STORY-083 | Define Research Job Status Table with Realtime | READY | |
+| 44 | STORY-084 | Replace Polling with Supabase Realtime Subscriptions | READY | Depends on STORY-083 |
+
+### EPIC-030: Export Pipeline Modernization (P2)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 45 | STORY-111 | Move Exports to Async Celery Tasks | BLOCKED | Hard dep on EPIC-025 (Worker Reliability) |
+| 46 | STORY-112 | Streaming Excel Export for Large Datasets | BLOCKED | Depends on STORY-111 |
+| 47 | STORY-113 | Export Status Tracking and Download Links | BLOCKED | Depends on STORY-111 |
+| 48 | STORY-114 | Add PDF Export Format | BLOCKED | Depends on STORY-111 |
+| 49 | STORY-115 | Store Exports in Supabase Storage | BLOCKED | Depends on STORY-111 |
+
+---
+
+## M4-M6: Remaining Milestones
+
+Worker should complete M3 before advancing to these.
 See `backlog/README.md` for the full milestone roadmap.
 
 ---
