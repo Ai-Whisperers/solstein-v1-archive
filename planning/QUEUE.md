@@ -198,21 +198,21 @@ The first worker run MUST do a verification pass before starting implementation 
 
 > M3 effectively complete — only EPIC-030 blocked on EPIC-025 (M5). Advancing to M4.
 
-### EPIC-021: Modern LLM Stack Migration (P1)
+### EPIC-021: Modern LLM Stack Migration (P1) — ALL STORIES DONE
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 50 | STORY-071 | Replace Custom LLM Client with Anthropic SDK | DONE | PR #120 |
-| 51 | STORY-072 | Implement Structured LLM Outputs with Instructor | IN_PROGRESS | Dep: STORY-071 (DONE) |
-| 52 | STORY-073 | Integrate Langfuse for Cost Tracking and Prompt Management | READY | Dep: STORY-071 |
-| 53 | STORY-074 | Migrate LLM Evaluation to Langfuse | READY | Dep: STORY-073 |
-| 54 | STORY-075 | Implement Provider Fallback and Circuit Breaking via SDK | READY | Dep: STORY-071 |
+| 51 | STORY-072 | Implement Structured LLM Outputs with Instructor | DONE | PR #121 |
+| 52 | STORY-073 | Integrate Langfuse for Cost Tracking and Prompt Management | DONE | PR #122 |
+| 53 | STORY-074 | Migrate LLM Evaluation to Langfuse | DONE | PR #123 |
+| 54 | STORY-075 | Implement Provider Fallback and Circuit Breaking via SDK | DONE | PR #124 |
 
 ### EPIC-022: LangGraph Agent Orchestration (P2)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 55 | STORY-076 | Define LangGraph Architecture and State Schema | READY | Dep: EPIC-021 |
+| 55 | STORY-076 | Define LangGraph Architecture and State Schema | READY | Dep: EPIC-021 (DONE) |
 | 56 | STORY-077 | Migrate Coordinator to LangGraph | BLOCKED | Dep: STORY-076 |
 | 57 | STORY-078 | Implement Real Agent Nodes | BLOCKED | Dep: STORY-077 |
 | 58 | STORY-079 | Add Checkpointing and Human-in-the-Loop | BLOCKED | Dep: STORY-078 |
@@ -517,3 +517,13 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: None — EPIC-030 blocked on EPIC-025 (Worker Reliability), not yet queued
 - **Branch hygiene**: Deleted 3 remote feature branches + 3 local merged branches. Pruned refs. 2 remote branches remain (develop, master).
 - **Actions taken**: Merged 2 MERGEABLE PRs, rebased + merged 1 CONFLICTING PR, branch cleanup, queue notes updated
+
+### [2026-03-27] Worker Run — EPIC-021 Complete (Modern LLM Stack Migration)
+- **Epic**: EPIC-021 — Modern LLM Stack Migration (5 stories, all DONE)
+- **Stories completed this session**: STORY-073 (PR #122), STORY-074 (PR #123), STORY-075 (PR #124)
+- **Stories completed prior session**: STORY-071 (PR #120), STORY-072 (PR #121)
+- **STORY-075 summary**: FallbackChain orchestrator with per-provider circuit breakers, configurable provider order via Settings.llm_provider_order, template fallback for graceful degradation, decision logging for every fallback step. Wired into EnhancedLLMClient. 22 tests, all passing.
+- **Total tests across EPIC-021**: 91 (21 STORY-071 + 0 STORY-072 inline + 48 STORY-074 + 22 STORY-075)
+- **Quality gates**: All pre-commit hooks pass. Ruff clean. No regressions across all EPIC-021 tests.
+- **Dependencies unblocked**: EPIC-022 (LangGraph Agent Orchestration) — STORY-076 now READY
+- **Queue**: M4 EPIC-021 5/5 DONE. EPIC-022 STORY-076 READY. Next worker should pick STORY-076.
