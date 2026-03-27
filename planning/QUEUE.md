@@ -104,7 +104,10 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 25 | — | See EPIC-046 README for stories | READY | 4 stories, check epic dir |
+| 25a | STORY-173 | Derive threat_level from composite score and classification | DONE | Verified: derive_threat_level() in constants.py, set in scoring.py |
+| 25b | STORY-174 | Add null guard for saas_maturity in CompetitivePositionScorer | IN_PROGRESS | Crash confirmed on None input |
+| 25c | STORY-175 | Remove dead _calculate_* private methods from GrowthScorer | DONE | Verified: methods removed, NOTE comment added |
+| 25d | STORY-176 | Define authoritative classification→threat_level mapping in constants | DONE | Verified: CLASSIFICATION_THREAT_MAPPING + derive_threat_level() in constants.py |
 
 ### EPIC-052: Provenance, Confidence, Quality Gates (P0)
 
