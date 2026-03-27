@@ -1,6 +1,6 @@
 # Solstein Command Center
 
-.PHONY: install run dashboard test lint format docs-serve docs-strict docs-generate docs-generated-check hooks-install check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical type-strict lint-ast ast-test gate-critical gate-engineering lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries migrate migrate-dry-run migrate-rollback
+.PHONY: install run dashboard test lint format docs-serve docs-strict docs-generate docs-generated-check hooks-install check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical type-strict lint-ast ast-test gate-critical gate-engineering lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries migrate migrate-dry-run migrate-rollback migrate-down check-migrations seed seed-test deploy help
 
 # Variables
 PYTHON = python3
@@ -257,6 +257,138 @@ migrate-rollback:
 migrate-status:
 	alembic current
 	alembic heads
+
+# Roll back the last migration with confirmation (interactive safety)
+# In CI, set CONFIRM=yes to skip the prompt
+migrate-down:
+	@if [ -z "$$CONFIRM" ] && [ -t 0 ]; then \
+		echo "WARNING: This will revert the last Alembic migration."; \
+		echo "Run 'alembic history --verbose | head -20' to review."; \
+		printf "Type 'yes' to proceed: "; \
+		read answer; \
+		if [ "$$answer" != "yes" ]; then \
+			echo "Aborted."; \
+			exit 0; \
+		fi; \
+	elif [ "$$CONFIRM" != "yes" ]; then \
+		echo "ERROR: migrate-down requires interactive TTY or CONFIRM=yes"; \
+		exit 1; \
+	fi
+	alembic downgrade -1
+	@echo "Migration rolled back. Run 'make migrate-status' to verify."
+
+# Verify no unapplied migrations exist (CI gate / pre-deploy check)
+check-migrations:
+	@$(PYTHON) -c "\
+	import subprocess, sys; \
+	current = subprocess.run(['alembic', 'current'], capture_output=True, text=True).stdout.strip(); \
+	heads = subprocess.run(['alembic', 'heads'], capture_output=True, text=True).stdout.strip(); \
+	print(f'Current: {current}'); \
+	print(f'Head:    {heads}'); \
+	if not current or not heads: \
+		print('ERROR: Could not determine migration state'); sys.exit(1); \
+	head_rev = heads.split()[0] if heads else ''; \
+	current_rev = current.split()[0] if current else ''; \
+	if head_rev != current_rev: \
+		print(f'PENDING MIGRATIONS: database at {current_rev}, head is {head_rev}'); sys.exit(1); \
+	print('OK: database is at head revision'); \
+	"
+
+# =============================================================================
+# Seed Data (STORY-098)
+# =============================================================================
+
+# Seed development database with sample companies (idempotent)
+seed:
+	@echo "Seeding development database..."
+	PYTHONPATH=src $(PYTHON) scripts/seed_db.py --count 100
+	@echo "Seed complete."
+
+# Seed test fixtures only (for CI and local test runs)
+seed-test:
+	@echo "Seeding test fixtures..."
+	PYTHONPATH=src DATABASE__URL=$(TEST_DATABASE_URL) SECURITY__SECRET_KEY=$(TEST_SECRET_KEY) \
+		$(PYTHON) scripts/seed_db.py --count 10
+	@echo "Test seed complete."
+
+# =============================================================================
+# Deploy Readiness (STORY-098)
+# =============================================================================
+
+# Full deploy-readiness check: lint, test, check-migrations
+# Locally: validates everything CI would check before deploy
+# In CI: delegates to the workflow (deploy-staging.yml / deploy-production.yml)
+deploy:
+	@echo "=== Deploy Readiness Check ==="
+	@echo "--- Step 1/4: Lint ---"
+	$(MAKE) lint-critical
+	@echo "--- Step 2/4: Tests ---"
+	DATABASE__URL=$(TEST_DATABASE_URL) SECURITY__SECRET_KEY=$(TEST_SECRET_KEY) GITHUB_TOKEN=$(TEST_GITHUB_TOKEN) \
+		$(BIN)/pytest tests/unit -x --tb=short -q
+	@echo "--- Step 3/4: Migrations ---"
+	$(MAKE) check-migrations
+	@echo "--- Step 4/4: Type Check ---"
+	$(MAKE) type-critical
+	@echo "=== All checks passed. Ready to deploy — push to staging branch. ==="
+
+# =============================================================================
+# Help (STORY-098)
+# =============================================================================
+
+# List all available targets with descriptions
+help:
+	@echo "Solstein Command Center"
+	@echo "======================"
+	@echo ""
+	@echo "Development:"
+	@echo "  make install          Install all dependencies (Python + JS)"
+	@echo "  make run              Start API server (FastAPI with reload)"
+	@echo "  make dashboard        Start dashboard (Next.js dev server)"
+	@echo "  make dev              Start full dev environment (Docker Compose)"
+	@echo "  make dev-setup        Initial Docker dev environment setup"
+	@echo "  make dev-shell        Open shell in dev container"
+	@echo "  make dev-logs         View dev container logs"
+	@echo "  make dev-stop         Stop dev environment"
+	@echo "  make dev-clean        Remove dev environment and volumes"
+	@echo ""
+	@echo "Testing:"
+	@echo "  make test             Run all tests with coverage"
+	@echo "  make test-fast        Run tests excluding slow markers"
+	@echo "  make test-critical    Run critical pipeline regression tests"
+	@echo "  make test-contracts   Run data contract tests"
+	@echo ""
+	@echo "Quality:"
+	@echo "  make lint             Run all linters (ruff + mypy + eslint)"
+	@echo "  make lint-critical    Run critical path linters"
+	@echo "  make format           Auto-format code (ruff)"
+	@echo "  make type-critical    Type-check critical paths (mypy)"
+	@echo "  make type-strict      Strict type-check (basedpyright)"
+	@echo "  make gate-critical    Run all critical quality gates"
+	@echo "  make gate-engineering Run engineering guardrails"
+	@echo ""
+	@echo "Database:"
+	@echo "  make migrate          Run pending Alembic migrations"
+	@echo "  make migrate-dry-run  Preview migrations without applying"
+	@echo "  make migrate-rollback Roll back last migration (no prompt)"
+	@echo "  make migrate-down     Roll back last migration (with confirmation)"
+	@echo "  make migrate-status   Show current and head revisions"
+	@echo "  make check-migrations Verify database is at head (CI gate)"
+	@echo "  make seed             Seed dev database with 100 companies"
+	@echo "  make seed-test        Seed test fixtures (10 companies)"
+	@echo ""
+	@echo "Deploy:"
+	@echo "  make deploy           Run full deploy-readiness checks"
+	@echo ""
+	@echo "Documentation:"
+	@echo "  make docs-serve       Serve docs locally (MkDocs)"
+	@echo "  make docs-strict      Build docs in strict mode"
+	@echo "  make docs-generate    Generate API docs"
+	@echo ""
+	@echo "Other:"
+	@echo "  make clean            Remove all build artifacts"
+	@echo "  make scan-secrets     Run secret scanning"
+	@echo "  make check-coverage   Enforce coverage thresholds"
+	@echo "  make help             Show this help message"
 
 # Reset development database
 dev-reset-db:
