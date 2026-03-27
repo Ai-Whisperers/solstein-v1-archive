@@ -165,7 +165,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 36 | STORY-127 | Deduplicate profit_margin and employee Fields | DONE | PR #111 — computed_field properties, before-validator routing, 29 tests |
 | 37 | STORY-125 | Restore 20 Dropped Fields to Excel Export | DONE | PR #112 — 4+5 new columns, 2 new sheets, 32 tests |
 | 38 | STORY-126 | Add Export Schema Validation | DONE | PR #113 — ExportSchema (41 fields), auto-validation, 13 tests |
-| 39 | STORY-128 | Document Field Lineage from Ingestion to Export | READY | Depends on STORY-125, 126, 127 (all DONE). Was IN_PROGRESS but worker died (stale lock). |
+| 39 | STORY-128 | Document Field Lineage from Ingestion to Export | DONE | PR #114 — field lineage doc (82 fields), Mermaid data flow, CI check script, 11 tests |
 
 ### EPIC-023: pgvector Semantic Search (P2)
 
@@ -466,3 +466,12 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: STORY-128 deps satisfied (125, 126, 127 all merged). Reset from IN_PROGRESS to READY.
 - **Branch hygiene**: Deleted 3 remote + 4 local branches. Stale worker lock removed (PID 3919873 dead).
 - **Actions taken**: Merged 2 PRs, cleaned stale lock, reset STORY-128 to READY, branch cleanup.
+
+### [2026-03-27 21:47] Worker Run — STORY-128 Complete (EPIC-033 COMPLETE)
+- **Story implemented**: STORY-128 — Document Field Lineage from Ingestion to Export
+- **PR created**: #114 targeting develop
+- **Branch**: feature/STORY-128-document-field-lineage
+- **Deliverables**: Field lineage doc (82 fields across 7 categories), Mermaid data flow diagram, CI check script with --strict mode
+- **Tests added**: 11 unit tests covering field extraction, documentation extraction, strict/non-strict modes, warning output
+- **Quality gates**: All pre-commit hooks pass, CI check confirms 82/82 fields documented
+- **Epic status**: EPIC-033 now fully DONE (4/4 stories: STORY-127 PR#111, STORY-125 PR#112, STORY-126 PR#113, STORY-128 PR#114)
