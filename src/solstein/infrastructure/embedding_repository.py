@@ -4,6 +4,7 @@ Handles vector storage, retrieval, and similarity search using pgvector.
 Extracted from CompanyRepository to keep class sizes under 300 lines.
 """
 
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
@@ -12,6 +13,28 @@ from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .database_models import CompanyRecord
+
+
+@dataclass
+class SimilaritySearchParams:
+    """Parameters for vector similarity search.
+
+    Bundles filter/pagination options for find_similar_by_vector to keep
+    the method signature under the 5-parameter limit.
+
+    Attributes:
+        limit: Maximum number of results per page.
+        offset: Number of results to skip (for pagination).
+        tenant_id: Optional tenant scope filter.
+        min_similarity: Minimum similarity threshold (0.0-1.0).
+        exclude_company_id: Exclude this company from results.
+    """
+
+    limit: int = 10
+    offset: int = 0
+    tenant_id: str | None = None
+    min_similarity: float = 0.0
+    exclude_company_id: str | None = None
 
 
 class EmbeddingRepository:
@@ -84,12 +107,35 @@ class EmbeddingRepository:
         )
         return list(result.scalars().all())
 
+    async def get_embedding_by_company_id(
+        self,
+        company_id: str,
+    ) -> list[float] | None:
+        """Retrieve the stored embedding vector for a specific company.
+
+        Args:
+            company_id: The company's unique identifier.
+
+        Returns:
+            The embedding vector as a list of floats, or None if not found
+            or if the company has no embedding.
+        """
+        result = await self.session.execute(
+            select(CompanyRecord.profile_embedding).where(
+                CompanyRecord.company_id == company_id
+            )
+        )
+        row = result.scalar_one_or_none()
+        if row is None:
+            return None
+        # pgvector returns a numpy-like object; convert to plain list
+        return list(row) if row is not None else None
+
     async def find_similar_by_vector(
         self,
         query_vector: list[float],
-        limit: int = 10,
-        tenant_id: str | None = None,
-    ) -> list[tuple[CompanyRecord, float]]:
+        search_params: SimilaritySearchParams | None = None,
+    ) -> tuple[list[tuple[CompanyRecord, float]], int]:
         """Find companies similar to a query vector using cosine distance.
 
         Uses pgvector's cosine distance operator (<=>). Returns results
@@ -97,27 +143,48 @@ class EmbeddingRepository:
 
         Args:
             query_vector: The query embedding vector.
-            limit: Maximum number of results.
-            tenant_id: Optional tenant scope filter.
+            search_params: Filter/pagination options. Defaults to
+                SimilaritySearchParams() if not provided.
 
         Returns:
-            List of (CompanyRecord, similarity_score) tuples, ordered by similarity.
+            Tuple of (results, total_count) where results is a list of
+            (CompanyRecord, similarity_score) tuples ordered by similarity,
+            and total_count is the total matching rows (before pagination).
         """
+        sp = search_params or SimilaritySearchParams()
         vector_str = "[" + ",".join(str(v) for v in query_vector) + "]"
 
-        where_clause = "profile_embedding IS NOT NULL"
-        params: dict[str, Any] = {"vec": vector_str, "lim": limit}
+        where_clauses = ["profile_embedding IS NOT NULL"]
+        params: dict[str, Any] = {"vec": vector_str, "lim": sp.limit, "off": sp.offset}
 
-        if tenant_id is not None:
-            where_clause += " AND tenant_id = :tid"
-            params["tid"] = tenant_id
+        if sp.tenant_id is not None:
+            where_clauses.append("tenant_id = :tid")
+            params["tid"] = sp.tenant_id
 
+        if sp.min_similarity > 0.0:
+            where_clauses.append("1 - (profile_embedding <=> :vec::vector) >= :min_sim")
+            params["min_sim"] = sp.min_similarity
+
+        if sp.exclude_company_id is not None:
+            where_clauses.append("company_id != :excl_cid")
+            params["excl_cid"] = sp.exclude_company_id
+
+        where_sql = " AND ".join(where_clauses)
+
+        # Count total matching rows
+        count_sql = text(
+            f"SELECT COUNT(*) FROM companies WHERE {where_sql}"
+        )
+        count_result = await self.session.execute(count_sql, params)
+        total_count = count_result.scalar() or 0
+
+        # Fetch paginated results
         sql = text(
             f"SELECT *, 1 - (profile_embedding <=> :vec::vector) AS similarity "
             f"FROM companies "
-            f"WHERE {where_clause} "
+            f"WHERE {where_sql} "
             f"ORDER BY profile_embedding <=> :vec::vector "
-            f"LIMIT :lim"
+            f"LIMIT :lim OFFSET :off"
         )
 
         result = await self.session.execute(sql, params)
@@ -133,4 +200,4 @@ class EmbeddingRepository:
             similarity = row.similarity
             results.append((record, similarity))
 
-        return results
+        return results, total_count
