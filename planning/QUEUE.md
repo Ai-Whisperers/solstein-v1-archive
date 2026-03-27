@@ -52,8 +52,8 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 8 | STORY-141 | Delete Disconnected Refresh Router | DONE | PR #83 | |
-| 9 | STORY-142 | Delete Orphaned worker_tasks_v2.py | IN_PROGRESS | |
-| 10 | STORY-143 | Audit and Delete Orphaned Data Layer Files | READY | |
+| 9 | STORY-142 | Delete Orphaned worker_tasks_v2.py | DONE | PR #84 | |
+| 10 | STORY-143 | Audit and Delete Orphaned Data Layer Files | IN_PROGRESS | |
 | 11 | STORY-144 | Create Dead Code Detection CI Job | READY | |
 
 ### EPIC-043: Repository Cleanup & Organization (P2)
