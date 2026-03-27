@@ -98,7 +98,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 24 | STORY-169 | Fix JSON parsing in score/analyze-market/compare/export-excel | DONE | PR #90 |
 | 24b | STORY-170 | Restore generate-llm-report exporter import | DONE | PR #91 |
 | 24c | STORY-171 | Migrate all CLI commands from deprecated CompetitorDataLoader | DONE | PR #92 |
-| 24d | STORY-172 | Add structured input validation with actionable error messages | IN_PROGRESS | |
+| 24d | STORY-172 | Add structured input validation with actionable error messages | DONE | PR #93 |
 
 ### EPIC-046: Scoring Engine Correctness (P0)
 
@@ -233,3 +233,11 @@ Worker and checker append timestamped entries here:
 - **Changes**: New `_load_companies_for_report()` helper in cli.py replaces CompetitorDataLoader; updated `generate-report`, `generate-llm-report`, `generate-all-reports`; added TODO annotation to competitor_loader.py
 - **Tests**: 19 passing (14 test_cli.py + 5 test_loader_parity.py new); no DeprecationWarning emitted
 - **Queue**: EPIC-045: STORY-169 DONE, STORY-170 DONE, STORY-171 DONE, STORY-172 IN_PROGRESS
+
+### [2026-03-26] Worker Run — STORY-172 Complete
+- **Story implemented**: STORY-172 — Add structured input validation with actionable error messages
+- **PR created**: #93 targeting develop
+- **Branch**: feature/STORY-172-input-validation
+- **Changes**: New `cli_validators.py` (validate_input_file, validate_company_exists, validate_output_dir); wired into all 7 CLI commands; 4 existing tests updated for new error messages
+- **Tests**: 24 new unit tests (all validator paths) + 3 CLI integration tests = 38 total passing
+- **Queue**: EPIC-045 = ALL 4 STORIES DONE (PR #90, #91, #92, #93). Next: EPIC-046 Scoring Engine Correctness
