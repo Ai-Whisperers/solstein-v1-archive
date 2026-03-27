@@ -97,7 +97,7 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 33 | STORY-012 | Fix Dual-Write Atomicity in Research Pipeline | DONE | Completed in prior work |
 | 34 | STORY-014 | Remove Hardcoded Date Path from Data Loader | IN_PROGRESS | PR #109 open — CI failing (lint, type check, tests, security, pre-commit) |
-| 35 | STORY-013 | Fix Conflict Resolution Logic | IN_PROGRESS | Uncommitted changes on develop (conflict_resolution.py + tests); needs worker to finish |
+| 35 | STORY-013 | Fix Conflict Resolution Logic | DONE | PR #110 — recency-first priority chain, ManualReviewQueue, 19 tests |
 
 ---
 
