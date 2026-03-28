@@ -415,7 +415,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 126 | STORY-244 | Enforce Generated Docs Freshness Through Git Hooks and CI | DONE | PR #192 — generated-docs-freshness.yml CI workflow |
 | 127 | STORY-238 | Implement CI Docs Quality Gates | DONE | PR #193 |
 | 128 | STORY-239 | Add Stale-Doc Detection and Ownership Alerts | DONE | PR #194 |
-| 129 | STORY-240 | Introduce Docs Review Checklist and Change-Control Workflow | READY | |
+| 129 | STORY-240 | Introduce Docs Review Checklist and Change-Control Workflow | DONE | PR #195 |
 | 130 | STORY-241 | Publish Docs Health Dashboard and Weekly Audit Automation | READY | |
 | 131 | STORY-245 | Expand Generated API Docs and Schema Registries | READY | |
 

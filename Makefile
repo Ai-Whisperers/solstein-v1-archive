@@ -1,6 +1,6 @@
 # Solstein Command Center
 
-.PHONY: install run dashboard test lint format docs-serve docs-strict docs-generate docs-generated-check docs-stale-check docs-quality-check hooks-install check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical type-strict lint-ast ast-test gate-critical gate-engineering lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries migrate migrate-dry-run migrate-rollback migrate-down check-migrations seed seed-test deploy help
+.PHONY: install run dashboard test lint format docs-serve docs-strict docs-generate docs-generated-check docs-stale-check docs-quality-check docs-health-generate hooks-install check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical type-strict lint-ast ast-test gate-critical gate-engineering lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries migrate migrate-dry-run migrate-rollback migrate-down check-migrations seed seed-test deploy help
 
 # Variables
 PYTHON = python3
@@ -62,6 +62,9 @@ docs-stale-check:
 docs-quality-check:
 	$(BIN)/python scripts/ci/check_docs_quality.py --path docs
 	$(BIN)/python scripts/ci/check_docs_quality.py --path backlog
+
+docs-health-generate:
+	cd scripts/docs && $(BIN)/python generate_docs_health.py
 
 hooks-install:
 	git config core.hooksPath .githooks
