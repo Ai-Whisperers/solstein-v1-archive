@@ -343,14 +343,14 @@ The first worker run MUST do a verification pass before starting implementation 
 | 102 | STORY-209 | Implement Validation Before Scoring | DONE | PR #173 merged |
 | 103 | STORY-210 | Add Robustness Tests for Incomplete Data | DONE | PR #174 merged |
 
-### EPIC-028: External Service Consolidation (P1) — Deps satisfied (EPIC-034, 019, 020, 026 all DONE)
+### EPIC-028: External Service Consolidation (P1) — ALL STORIES DONE
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 104 | STORY-101 | Replace Google Custom Search with Self-Hosted SearXNG | DONE | PR #175 — SearXNG primary, GCS fallback, Redis cache, 18 tests |
-| 105 | STORY-102 | Replace NewsAPI with GDELT + RSS Aggregation | DONE | PR #176 — GDELT primary, RSS supplement, NewsAPI fallback, 13 tests |
-| 106 | STORY-103 | Stabilize Yahoo Finance Integration | DONE | PR #177 — Circuit breaker, DEGRADED detection, data freshness SLA, 15 tests |
-| 107 | STORY-104 | Add Slack and Email Notification Service | DONE | PR #178 — Slack webhook, Email SMTP, dispatcher with opt-out, 15 tests |
+| 104 | STORY-101 | Replace Google Custom Search with Self-Hosted SearXNG | DONE | PR #175 merged — SearXNG primary, GCS fallback, Redis cache, 18 tests |
+| 105 | STORY-102 | Replace NewsAPI with GDELT + RSS Aggregation | DONE | PR #176 merged — GDELT primary, RSS supplement, NewsAPI fallback, 13 tests |
+| 106 | STORY-103 | Stabilize Yahoo Finance Integration | DONE | PR #177 merged — Circuit breaker, DEGRADED detection, data freshness SLA, 15 tests |
+| 107 | STORY-104 | Add Slack and Email Notification Service | DONE | PR #178 merged — Slack webhook, Email SMTP, dispatcher with opt-out, 15 tests |
 | 108 | STORY-105 | Move File Exports to Supabase Storage | DONE | Already implemented by EPIC-030 STORY-115 (PR #149) |
 
 ---
@@ -360,6 +360,15 @@ The first worker run MUST do a verification pass before starting implementation 
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-03-28 13:37] Work Checker Run
+- **PRs merged**: 4 — #175 (STORY-101), #176 (STORY-102), #177 (STORY-103), #178 (STORY-104)
+- **PRs rebased**: 0 — all were MERGEABLE
+- **Open PRs**: 0 remaining
+- **Queue**: M1-M8 complete. M9: EPIC-034 DONE, EPIC-059 DONE, EPIC-028 DONE (all PRs now merged). M9 COMPLETE.
+- **Dependencies unblocked**: None — no new stories waiting
+- **Branch hygiene**: Deleted 4 remote + 4 local feature branches (STORY-101–104). Pruned refs. 2 remote branches remain (develop, master).
+- **Actions taken**: Merged 4 EPIC-028 PRs, updated EPIC-028 header to ALL DONE, cleaned branches
 
 ### [2026-03-27 22:40] Worker Run — EPIC-034 Complete (4 stories)
 - **Epic**: EPIC-034 — Exception Handling Transparency (P1)
