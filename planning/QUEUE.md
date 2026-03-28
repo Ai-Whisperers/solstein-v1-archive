@@ -386,7 +386,7 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 116 | STORY-230 | Define Canonical Docs Topology and Ownership Matrix | IN_PROGRESS | |
+| 116 | STORY-230 | Define Canonical Docs Topology and Ownership Matrix | DONE | PR #186 | |
 | 117 | STORY-231 | Resolve Mirrored Backlog Trees with One-Way Sync or Migration | READY | Risk: HIGH — requires dry-run report before execution |
 | 118 | STORY-232 | Normalize Epic Directory Naming and Remove Topology Anomalies | READY | |
 | 119 | STORY-233 | Establish Archival and Deprecation Metadata Policy | READY | |
