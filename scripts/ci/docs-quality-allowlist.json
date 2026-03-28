@@ -1,0 +1,188 @@
+[
+  {
+    "owner": "platform-team",
+    "rationale": "GitHub Actions secret references in CI/CD documentation — {{ secrets.X }} is standard GitHub Actions YAML syntax, not an unfilled template variable.",
+    "expiry": "2027-12-31",
+    "pattern": "{{ secrets.AWS_ROLE_ARN }}"
+  },
+  {
+    "owner": "platform-team",
+    "rationale": "GitHub Actions secret references in CI/CD documentation.",
+    "expiry": "2027-12-31",
+    "pattern": "{{ secrets.AWS_REGION }}"
+  },
+  {
+    "owner": "platform-team",
+    "rationale": "GitHub Actions secret references in CI/CD documentation.",
+    "expiry": "2027-12-31",
+    "pattern": "{{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}"
+  },
+  {
+    "owner": "platform-team",
+    "rationale": "GitHub Actions secret references in CI/CD documentation.",
+    "expiry": "2027-12-31",
+    "pattern": "{{ secrets.GCP_SERVICE_ACCOUNT }}"
+  },
+  {
+    "owner": "platform-team",
+    "rationale": "GitHub Actions secret references in CI/CD documentation.",
+    "expiry": "2027-12-31",
+    "pattern": "{{ secrets.AZURE_CLIENT_ID }}"
+  },
+  {
+    "owner": "platform-team",
+    "rationale": "GitHub Actions secret references in CI/CD documentation.",
+    "expiry": "2027-12-31",
+    "pattern": "{{ secrets.AZURE_TENANT_ID }}"
+  },
+  {
+    "owner": "platform-team",
+    "rationale": "GitHub Actions secret references in CI/CD documentation.",
+    "expiry": "2027-12-31",
+    "pattern": "{{ secrets.AZURE_SUBSCRIPTION_ID }}"
+  },
+  {
+    "owner": "platform-team",
+    "rationale": "GitHub Actions GITHUB_TOKEN reference in CI/CD documentation — illustrative YAML, not an unfilled template.",
+    "expiry": "2027-12-31",
+    "pattern": "{{ secrets.GITHUB_TOKEN }}"
+  },
+  {
+    "owner": "platform-team",
+    "rationale": "GitHub Actions secret reference in testing documentation.",
+    "expiry": "2027-12-31",
+    "pattern": "{{ secrets.DATABASE_URL_TEST }}"
+  },
+  {
+    "owner": "platform-team",
+    "rationale": "Anthropic API key reference in LLM eval guide — illustrative CI/CD YAML.",
+    "expiry": "2027-12-31",
+    "pattern": "{{ secrets.ANTHROPIC_API_KEY }}"
+  },
+  {
+    "owner": "platform-team",
+    "rationale": "Prometheus/Alertmanager label template syntax in observability docs — {{ $labels.service }} is standard Alertmanager notation, not an unfilled slot.",
+    "expiry": "2027-12-31",
+    "pattern": "{{ $labels.service }}"
+  },
+  {
+    "owner": "backend-team",
+    "rationale": "Jinja2/template filter syntax in report-generation story spec — illustrative template code examples, not unfilled slots.",
+    "expiry": "2026-12-31",
+    "pattern": "{{ company.competitive_position_score }}"
+  },
+  {
+    "owner": "backend-team",
+    "rationale": "Jinja2/template filter syntax in report-generation story spec.",
+    "expiry": "2026-12-31",
+    "pattern": "{{ score | round2 }}"
+  },
+  {
+    "owner": "backend-team",
+    "rationale": "Jinja2/template filter syntax in report-generation story spec.",
+    "expiry": "2026-12-31",
+    "pattern": "{{ company.growth_score | round2 }}"
+  },
+  {
+    "owner": "backend-team",
+    "rationale": "Jinja2/template filter syntax in report-generation story spec.",
+    "expiry": "2026-12-31",
+    "pattern": "{{ company.financial_health_score | round2 }}"
+  },
+  {
+    "owner": "backend-team",
+    "rationale": "Jinja2/template filter syntax in report-generation story spec.",
+    "expiry": "2026-12-31",
+    "pattern": "{{ company.competitive_position_score | round2 }}"
+  },
+  {
+    "owner": "backend-team",
+    "rationale": "Jinja2/template filter syntax in report-generation story spec.",
+    "expiry": "2026-12-31",
+    "pattern": "{{ company.composite_score | round2 }}"
+  },
+  {
+    "owner": "docs-team",
+    "rationale": "TODO in archived EPIC-018 story spec — historical reference, remediation tracked in EPIC-065.",
+    "expiry": "2026-06-30",
+    "pattern": "TODO:",
+    "file": "docs/active/epics/EPIC-018-OBSERVABILITY-REFACTOR/STORY-18.3-FIX-SILENT-ERRORS.md"
+  },
+  {
+    "owner": "docs-team",
+    "rationale": "TODO in CLI story spec — outstanding acceptance criterion tracked in EPIC-045.",
+    "expiry": "2026-06-30",
+    "pattern": "TODO:",
+    "file": "docs/active/backlog/EPIC-045-cli-runtime-correctness/STORIES/STORY-171.md"
+  },
+  {
+    "owner": "docs-team",
+    "rationale": "TODO in CLI story spec (backlog mirror) — outstanding acceptance criterion tracked in EPIC-045.",
+    "expiry": "2026-06-30",
+    "pattern": "TODO:",
+    "file": "backlog/EPICS/EPIC-045-cli-runtime-correctness/STORIES/STORY-171.md"
+  },
+  {
+    "owner": "docs-team",
+    "rationale": "TODO in governance audit document — remediation tracked in EPIC-065.",
+    "expiry": "2026-06-30",
+    "pattern": "TODO:",
+    "file": "docs/audit/DOCUMENTATION_GOVERNANCE_AUDIT_2026-03-11.md"
+  },
+  {
+    "owner": "docs-team",
+    "rationale": "TODO in production path analysis — historical audit doc, not a governance doc.",
+    "expiry": "2026-06-30",
+    "pattern": "TODO:",
+    "file": "docs/audit/PRODUCTION_PATH_ANALYSIS.md"
+  },
+  {
+    "owner": "docs-team",
+    "rationale": "TODO in STORY-235 (remove-placeholder-token-leakage) acceptance criteria — the story itself is about fixing this class of issue, tracked in EPIC-064.",
+    "expiry": "2026-06-30",
+    "pattern": "TODO:",
+    "file": "backlog/EPICS/EPIC-064-markdown-integrity-registry-correctness/STORIES/STORY-235-remove-placeholder-token-leakage.md"
+  },
+  {
+    "owner": "docs-team",
+    "rationale": "exception-handling.md predates the blockquote front-matter standard (STORY-233). Full metadata addition tracked in STORY-240.",
+    "expiry": "2026-06-30",
+    "pattern": "missing:Status",
+    "file": "docs/standards/exception-handling.md"
+  },
+  {
+    "owner": "docs-team",
+    "rationale": "exception-handling.md predates the blockquote front-matter standard. Full metadata addition tracked in STORY-240.",
+    "expiry": "2026-06-30",
+    "pattern": "missing:Owner",
+    "file": "docs/standards/exception-handling.md"
+  },
+  {
+    "owner": "docs-team",
+    "rationale": "exception-handling.md predates the blockquote front-matter standard. Full metadata addition tracked in STORY-240.",
+    "expiry": "2026-06-30",
+    "pattern": "missing:Last Reviewed",
+    "file": "docs/standards/exception-handling.md"
+  },
+  {
+    "owner": "docs-team",
+    "rationale": "exception-handling.md predates the blockquote front-matter standard. Full metadata addition tracked in STORY-240.",
+    "expiry": "2026-06-30",
+    "pattern": "missing:Superseded By",
+    "file": "docs/standards/exception-handling.md"
+  },
+  {
+    "owner": "docs-team",
+    "rationale": "Template variable used in the STORY template inside epic-management.md — the braces are illustrative, not an unfilled slot.",
+    "expiry": "2026-12-31",
+    "pattern": "{{story_title}}",
+    "file": ".claude/rules/epic-management.md"
+  },
+  {
+    "owner": "docs-team",
+    "rationale": "TBD marker in the epic-management template is intentional placeholder text shown to developers as an example.",
+    "expiry": "2026-12-31",
+    "pattern": "TBD",
+    "file": ".claude/rules/epic-management.md"
+  }
+]
