@@ -1,6 +1,6 @@
 # Solstein Command Center
 
-.PHONY: install run dashboard test lint format docs-serve docs-strict docs-generate docs-generated-check docs-stale-check hooks-install check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical type-strict lint-ast ast-test gate-critical gate-engineering lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries migrate migrate-dry-run migrate-rollback migrate-down check-migrations seed seed-test deploy help
+.PHONY: install run dashboard test lint format docs-serve docs-strict docs-generate docs-generated-check docs-stale-check docs-quality-check hooks-install check-all mcp-check clean test-critical test-contracts test-golden lint-critical type-critical type-strict lint-ast ast-test gate-critical gate-engineering lint-async-boundaries test-async-boundaries gate-async-boundaries test-schema-boundaries gate-schema-boundaries migrate migrate-dry-run migrate-rollback migrate-down check-migrations seed seed-test deploy help
 
 # Variables
 PYTHON = python3
@@ -58,6 +58,10 @@ docs-generated-check:
 docs-stale-check:
 	$(BIN)/python scripts/ci/check_stale_docs.py --path docs
 	$(BIN)/python scripts/ci/check_stale_docs.py --path backlog
+
+docs-quality-check:
+	$(BIN)/python scripts/ci/check_docs_quality.py --path docs
+	$(BIN)/python scripts/ci/check_docs_quality.py --path backlog
 
 hooks-install:
 	git config core.hooksPath .githooks
@@ -235,7 +239,7 @@ type-critical:
 type-strict:
 	$(BIN)/basedpyright --warnings
 
-gate-engineering: lint-ast ast-test type-strict docs-strict docs-generated-check
+gate-engineering: lint-ast ast-test type-strict docs-strict docs-generated-check docs-quality-check
 	@echo "Engineering guardrails passed."
 
 gate-critical: lint-critical lint-ast lint-async-boundaries type-critical type-strict test-critical test-contracts test-schema-boundaries
@@ -387,6 +391,7 @@ help:
 	@echo "  make docs-serve       Serve docs locally (MkDocs)"
 	@echo "  make docs-strict      Build docs in strict mode"
 	@echo "  make docs-generate    Generate API docs"
+	@echo "  make docs-quality-check  Run placeholder token + metadata validation gates"
 	@echo ""
 	@echo "Other:"
 	@echo "  make clean            Remove all build artifacts"
