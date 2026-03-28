@@ -61,22 +61,30 @@ class CompositeScoreResult:
     breakdown: dict[str, float | str]
 
 
+# STORY-208: Default confidence for signals without metadata.
+# When signal_confidences IS populated but a specific signal is missing,
+# use this neutral default instead of 1.0 (which would assume full confidence).
+_DEFAULT_SIGNAL_CONFIDENCE: float = 0.50
+
+
 def _confidence_weight(
     component_name: str,
     signal_confidences: dict[str, float],
 ) -> float:
     """Look up the average signal confidence for a scoring component.
 
-    Returns 1.0 when the component has no mapped signals or none of the
-    mapped signals have confidence data (preserves original score).
+    Returns 1.0 when the component has no mapped signals (unmapped components
+    keep their original score).  For mapped signals missing from the dict,
+    uses _DEFAULT_SIGNAL_CONFIDENCE (0.50) as a neutral prior per STORY-208.
     """
     signal_names = _COMPONENT_SIGNAL_MAP.get(component_name, [])
     if not signal_names:
         return 1.0
-    confidences = [signal_confidences[s] for s in signal_names if s in signal_confidences]
-    if not confidences:
-        return 1.0
-    return safe_avg(confidences, default=1.0, label="signal_confidence_avg") or 1.0
+    confidences = [
+        signal_confidences.get(s, _DEFAULT_SIGNAL_CONFIDENCE)
+        for s in signal_names
+    ]
+    return safe_avg(confidences, default=_DEFAULT_SIGNAL_CONFIDENCE, label="signal_confidence_avg") or _DEFAULT_SIGNAL_CONFIDENCE
 
 
 def _apply_confidence_weights(

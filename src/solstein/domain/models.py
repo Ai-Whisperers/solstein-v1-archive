@@ -815,6 +815,29 @@ class ScoringExplanation(BaseModel):
     data_confidence: float = 1.0  # 0.0 to 1.0 — reduced when fields are None
     data_warnings: list[str] = Field(default_factory=list)  # human-readable warnings
 
+    # STORY-208: Narrative formatting with confidence info
+    def format_narrative(self) -> str:
+        """Format scoring explanation as human-readable narrative with confidence.
+
+        Returns text like:
+            Score: 7.20 (data confidence: 85%)
+            - Revenue Growth: +2.50 (60% confident)
+            - Employee Efficiency: +1.00 (100% confident)
+        """
+        conf_pct = int(self.data_confidence * 100)
+        lines = [f"Score: {self.final_score:.2f} (data confidence: {conf_pct}%)"]
+        for comp in self.components:
+            weight_pct = int(comp.confidence_weight * 100)
+            sign = "+" if comp.value >= 0 else ""
+            lines.append(
+                f"  {comp.name}: {sign}{comp.value:.2f} ({weight_pct}% confident)"
+            )
+        if self.data_warnings:
+            lines.append("  Warnings:")
+            for warning in self.data_warnings:
+                lines.append(f"    - {warning}")
+        return "\n".join(lines)
+
 
 class CompetitiveOverlap(BaseModel):
     """Competitive overlap domain entity."""
