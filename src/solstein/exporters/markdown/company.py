@@ -89,6 +89,35 @@ class CompanyReportGenerator(BaseReportGenerator):
         output_path = strategy.get_output_path(company, output_dir)
         return self._write_report(report, output_path)
 
+    def generate_company_reports(self, company: Company, output_dir: Path | None = None) -> dict[str, Path]:
+        """Generate all report types for a single company.
+
+        STORY-181: Creates a company-named subdirectory and writes all
+        reports there. Returns dict keyed by report type.
+
+        Args:
+            company: Company to generate reports for
+            output_dir: Base output directory (company subdir created inside)
+
+        Returns:
+            Dict mapping report type name to output path
+        """
+        output_dir = output_dir or self.output_dir
+
+        # Create company-specific directory (avoid double nesting)
+        sanitized_name = self.formatter.sanitize_filename(company.name)
+        if output_dir.name == sanitized_name:
+            company_dir = output_dir
+        else:
+            company_dir = output_dir / sanitized_name
+            company_dir.mkdir(parents=True, exist_ok=True)
+
+        return {
+            "corporate_history": self.generate_corporate_history(company, company_dir),
+            "deep_analysis": self.generate_deep_analysis(company, company_dir),
+            "financial_growth": self.generate_financial_growth(company, company_dir),
+        }
+
     def generate_all_reports(self, company: Company, output_dir: Path | None = None) -> list[Path]:
         """Generate all report types for a company.
 
@@ -99,12 +128,5 @@ class CompanyReportGenerator(BaseReportGenerator):
         Returns:
             List of paths to generated reports
         """
-        output_dir = output_dir or self.output_dir
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-        paths = []
-        paths.append(self.generate_corporate_history(company, output_dir))
-        paths.append(self.generate_deep_analysis(company, output_dir))
-        paths.append(self.generate_financial_growth(company, output_dir))
-
-        return paths
+        reports = self.generate_company_reports(company, output_dir)
+        return list(reports.values())
