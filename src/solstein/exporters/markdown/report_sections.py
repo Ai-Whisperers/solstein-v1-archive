@@ -58,7 +58,7 @@ companies in the {client.industry or "energy software"} market.
 - **Current Position**: {client.classification or "N/A"} ({_fmt_float(client.composite_score)}/10)
 - **Revenue**: €{client.financials.revenue or 0:.1f}M (CAGR: {client.revenue_cagr_3yr or "N/A"}%)
 - **Competitive Threats**: {len(threats)} companies with higher composite scores
-- **AI Gap**: {client.ai_score or 0}/10 (Market avg: {_fmt_float(ai_market_avg)})
+- **AI Gap**: {_fmt_float(client.ai_score)}/10 (Market avg: {_fmt_float(ai_market_avg)})
 
 ---
 """
@@ -173,11 +173,11 @@ These companies operate in the same tier with similar market positioning:
 
             # Add key differentiator
             if c.ai_score and client.ai_score and c.ai_score > client.ai_score:
-                section += f"- **AI Advantage**: {c.ai_score}/10 vs your {client.ai_score}/10\n"
+                section += f"- **AI Advantage**: {_fmt_float(c.ai_score)}/10 vs your {_fmt_float(client.ai_score)}/10\n"
             if c.saas_maturity and client.saas_maturity and c.saas_maturity > client.saas_maturity:
-                section += f"- **SaaS Advantage**: {c.saas_maturity}/10 vs your {client.saas_maturity}/10\n"
+                section += f"- **SaaS Advantage**: {_fmt_float(c.saas_maturity)}/10 vs your {_fmt_float(client.saas_maturity)}/10\n"
             if c.revenue_cagr_3yr and client.revenue_cagr_3yr and c.revenue_cagr_3yr > client.revenue_cagr_3yr:
-                section += f"- **Growth Advantage**: {c.revenue_cagr_3yr}% CAGR vs your {client.revenue_cagr_3yr}%\n"
+                section += f"- **Growth Advantage**: {c.revenue_cagr_3yr:.1f}% CAGR vs your {client.revenue_cagr_3yr:.1f}%\n"
 
             section += "\n"
 
