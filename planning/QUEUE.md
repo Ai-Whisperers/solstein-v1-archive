@@ -410,7 +410,7 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 124 | STORY-242 | Generate AST Rule Catalog and Guardrail Registry | IN_PROGRESS | Partial work exists — needs CI reference + non-ast-grep gates |
+| 124 | STORY-242 | Generate AST Rule Catalog and Guardrail Registry | IN_PROGRESS (worker 2026-03-28) | Partial work exists — needs CI reference + non-ast-grep gates |
 | 125 | STORY-243 | Generate Master Audit Issue Index and Keep It Current | IN_PROGRESS | Partial work exists — needs fix-verification reconciliation link |
 | 126 | STORY-244 | Enforce Generated Docs Freshness Through Git Hooks and CI | IN_PROGRESS | Partial work exists — needs CI workflow step |
 | 127 | STORY-238 | Implement CI Docs Quality Gates | READY | |
