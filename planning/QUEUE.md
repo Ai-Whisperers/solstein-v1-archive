@@ -328,8 +328,8 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 95 | STORY-132 | Create Exception Handling Standards Document | IN_PROGRESS | No deps — standards doc that other stories reference |
-| 96 | STORY-131 | Add Null Safety Guards for Division Operations | READY | Deps: STORY-132 |
+| 95 | STORY-132 | Create Exception Handling Standards Document | DONE | PR #166 |
+| 96 | STORY-131 | Add Null Safety Guards for Division Operations | IN_PROGRESS | Deps: STORY-132 (done) |
 | 97 | STORY-129 | Eliminate Silent None Returns in enhanced_client.py | READY | Deps: STORY-132, EPIC-021 (done) |
 | 98 | STORY-130 | Add Structured Logging to All Adapter Exception Handlers | READY | Deps: STORY-132, EPIC-014 (done) |
 
