@@ -4,6 +4,16 @@
 
 ---
 
+## Documentation Governance
+
+| Document | Purpose |
+|----------|---------|
+| **[governance/docs-topology.md](governance/docs-topology.md)** | Canonical docs topology map, document classes, and ownership matrix (STORY-230) |
+
+See `docs/governance/` for all documentation governance documents.
+
+---
+
 ## 🆕 Recently Added (February 26, 2026 — Wave 4 Complete)
 
 ### Phase 13 Documentation (Production Reliability)
