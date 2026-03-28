@@ -35,23 +35,17 @@ class MarketReportGenerator(BaseReportGenerator):
             logger.warning("No companies provided for market overview")
             return output_dir / "market_overview_empty.md"
 
-        # Calculate aggregate statistics
-        formatter.avg([c.composite_score or 0 for c in companies])
-        formatter.avg([getattr(c.financials, "growth_rate", 0) or 0 for c in companies if hasattr(c, "financials")])
-
-        # Tier distribution
-        tier_counts = {}
+        # Classification distribution — normalise to title-case for
+        # case-insensitive counting and include unclassified companies.
+        classification_counts: dict[str, int] = {"Phoenix": 0, "Salt": 0, "Lead": 0}
+        unclassified = 0
         for c in companies:
-            tier = getattr(c, "tier", None)
-            tier_str = tier.value if hasattr(tier, "value") else str(tier) if tier else "Unknown"
-            tier_counts[tier_str] = tier_counts.get(tier_str, 0) + 1
-
-        # Classification distribution
-        classification_counts = {}
-        for c in companies:
-            classification = getattr(c, "classification", None)
-            if classification:
-                classification_counts[classification] = classification_counts.get(classification, 0) + 1
+            raw = getattr(c, "classification", None)
+            if raw:
+                key = raw.strip().title()  # "phoenix" / "PHOENIX" → "Phoenix"
+                classification_counts[key] = classification_counts.get(key, 0) + 1
+            else:
+                unclassified += 1
 
         # Top performers
         top_companies = sorted(
@@ -77,9 +71,11 @@ AI readiness.
 ### Key Metrics
 
 | Metric | Value |
-|| Phoenix Tier Companies | {classification_counts.get("Phoenix", 0)} |
-|| Salt Tier Companies | {classification_counts.get("Salt", 0)} |
-|| Lead Tier Companies | {classification_counts.get("Lead", 0)} |
+|---|---|
+| Phoenix Tier Companies | {classification_counts.get("Phoenix", 0)} |
+| Salt Tier Companies | {classification_counts.get("Salt", 0)} |
+| Lead Tier Companies | {classification_counts.get("Lead", 0)} |
+| Unclassified | {unclassified} |
 
 ---
 
