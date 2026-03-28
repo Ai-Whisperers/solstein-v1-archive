@@ -419,14 +419,26 @@ The first worker run MUST do a verification pass before starting implementation 
 | 130 | STORY-241 | Publish Docs Health Dashboard and Weekly Audit Automation | DONE | PR #196 |
 | 131 | STORY-245 | Expand Generated API Docs and Schema Registries | READY | |
 
+### EPIC-031: Shared Library and Architecture (P2)
+
+> Deps: EPIC-007 (DDD — satisfied), EPIC-027/STORY-100 (bypass scripts deleted — DONE). All stories READY. Can run in parallel with STORY-245. Required before EPIC-066 can start.
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 136 | STORY-116 | Centralize All Retry/Backoff in core/retry_policy.py | READY | |
+| 137 | STORY-117 | Fix Circular Import Risk — Introduce shared/ Package | READY | |
+| 138 | STORY-118 | Formalize CLI as Proper Package Entrypoint | READY | |
+| 139 | STORY-119 | Split unified_loader.py into Separate Modules | READY | |
+| 140 | STORY-120 | Enforce UTC Timezone Policy Across All Modules | READY | |
+
 ### EPIC-066: Architectural Boundaries and Cycle Elimination (P1)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 132 | STORY-246 | Break patents_unified / discovery / registry cycle | BLOCKED | Dep: EPIC-065 (in progress), EPIC-031 (not done) |
-| 133 | STORY-247 | Move canonicalization and hashing helpers to lower shared boundary | BLOCKED | Dep: EPIC-065 (in progress), EPIC-031 (not done) |
-| 134 | STORY-248 | Decouple domain value objects from analytics constants | BLOCKED | Dep: EPIC-065 (in progress), EPIC-031 (not done) |
-| 135 | STORY-249 | Enforce import-cycle and module-boundary checks in maintained gates | BLOCKED | Dep: EPIC-065 (in progress), EPIC-031 (not done) |
+| 141 | STORY-246 | Break patents_unified / discovery / registry cycle | BLOCKED | Dep: EPIC-065 (STORY-245 pending), EPIC-031 (not started) |
+| 142 | STORY-247 | Move canonicalization and hashing helpers to lower shared boundary | BLOCKED | Dep: EPIC-065 (STORY-245 pending), EPIC-031 (not started) |
+| 143 | STORY-248 | Decouple domain value objects from analytics constants | BLOCKED | Dep: EPIC-065 (STORY-245 pending), EPIC-031 (not started) |
+| 144 | STORY-249 | Enforce import-cycle and module-boundary checks in maintained gates | BLOCKED | Dep: EPIC-065 (STORY-245 pending), EPIC-031 (not started) |
 
 ---
 
@@ -1194,3 +1206,12 @@ Status: All 4 PRs open against develop, all checks pass.
 - **Dependencies unblocked**: None — EPIC-066 requires EPIC-065 complete (STORY-245 pending) + EPIC-031 (not started). NOTE: EPIC-031 stories (STORY-116–120) exist in backlog/ but are NOT in QUEUE.md. Worker or human must add them before EPIC-066 can unblock.
 - **Branch hygiene**: Clean — only develop + master remote branches. No local feature branches. git fetch --prune confirmed no stale refs.
 - **Actions taken**: Queue scan, branch check, no changes needed. Flagged missing EPIC-031 queue entries.
+
+### [2026-03-29 01:37 AEST] Work Checker Run
+- **PRs merged**: 0 — no open PRs
+- **PRs rebased**: 0
+- **Open PRs**: 0 remaining
+- **Queue**: M1-M12 EPIC-065 7/8 DONE. STORY-245 READY. EPIC-031 added to queue (5 stories READY). EPIC-066 4 stories BLOCKED.
+- **Dependencies unblocked**: EPIC-031 (STORY-116–120) queued for first time — all READY; deps satisfied (EPIC-007 domain models confirmed, EPIC-027/STORY-100 bypass scripts deleted). EPIC-066 still BLOCKED (needs EPIC-065 + EPIC-031 both complete).
+- **Branch hygiene**: Clean — only develop + master remote branches. No local feature branches. fetch --prune confirmed no stale refs.
+- **Actions taken**: Added EPIC-031 (5 stories) to QUEUE.md under M12 between EPIC-065 and EPIC-066; updated EPIC-066 dep notes; updated row numbers (132-135 → 141-144).
