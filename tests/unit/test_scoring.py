@@ -123,16 +123,17 @@ def test_calculate_scores_raises_on_subscorer_exception(monkeypatch, scorer):
 @pytest.mark.parametrize(
     "growth_rate,expected_min,expected_max",
     [
-        (0.0, -0.01, 0.01),  # base(0) + growth(0) + stagnant_penalty(-0.75) → clamped to 0.0
-        (20.0, 0.9, 1.1),  # base(0) + 20/20=1.0 = 1.0
-        (45.0, 2.2, 2.3),  # base(0) + 2.25 = 2.25 (no margin, no funding)
-        (400.0, 6.4, 6.6),  # base(0) + cap(4.0) + hyper_growth(≥50%→+2.5) = 6.5
-        (-10.0, -0.01, 0.01),  # base(0) + (-0.5) + compound(-1.0) → clamped to 0.0
+        # STORY-207 adds -1.0 profit_margin unknown-data penalty for profit_margin=None
+        (0.0, -0.01, 0.01),  # base(0) + growth(0) + stagnant(-0.75) + missing_margin(-1.0) → clamped 0.0
+        (20.0, -0.01, 0.01),  # base(0) + 1.0 + missing_margin(-1.0) = 0.0 → clamped 0.0
+        (45.0, 1.2, 1.3),  # base(0) + 2.25 + missing_margin(-1.0) = 1.25
+        (400.0, 5.4, 5.6),  # base(0) + cap(4.0) + hyper(+2.5) + missing_margin(-1.0) = 5.5
+        (-10.0, -0.01, 0.01),  # base(0) + (-0.5) + declining(-1.5) + compound(-1.0) + missing_margin(-1.0) → clamped 0.0
         (
             -40.0,
             -0.01,
             0.01,
-        ),  # base(0) + (-2.0) + compound(-1.0) → clamped to 0.0
+        ),  # base(0) + (-2.0) + declining(-1.5) + compound(-1.0) + missing_margin(-1.0) → clamped 0.0
     ],
 )
 def test_growth_score_ranges(scorer, growth_rate, expected_min, expected_max):
@@ -397,14 +398,21 @@ def test_confidence_weighting_full_confidence_matches_unweighted():
         name="Full Confidence",
         industry="Software",
         financials=financials,
+        # STORY-208: Must include ALL mapped signal names to get 1.0 weight
+        # for every component (missing signals now default to 0.50).
         signal_confidences={
             "revenue_level": 1.0,
+            "revenue": 1.0,
             "growth_rate": 1.0,
             "profitability": 1.0,
+            "profit_margin": 1.0,
             "company_size": 1.0,
+            "employees": 1.0,
             "valuation": 1.0,
             "funding": 1.0,
+            "funding_raised": 1.0,
             "ai_maturity": 1.0,
+            "ai_score": 1.0,
         },
     )
 
