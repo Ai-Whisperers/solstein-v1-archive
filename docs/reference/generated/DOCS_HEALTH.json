@@ -1,0 +1,29 @@
+{
+  "ast_catalog": {
+    "ast_grep_rule_count": 2,
+    "available": true,
+    "blocking_gates": 2,
+    "ci_script_gate_count": 0,
+    "generated_on": "2026-03-28"
+  },
+  "audit_index": {
+    "available": true,
+    "closed_issues": 0,
+    "generated_on": "2026-03-28",
+    "open_issues": 270,
+    "total_issues": 271
+  },
+  "freshness": {
+    "available": false,
+    "error": "Command '['/usr/bin/python3', '/home/ai-whisperers/Documents/Work/solstein/scripts/docs/check_generated_docs.py']' timed out after 60 seconds"
+  },
+  "generated_on": "2026-03-28",
+  "quality_gate": {
+    "available": false,
+    "error": "check_docs_quality.py not found"
+  },
+  "stale_docs": {
+    "available": false,
+    "error": "check_stale_docs.py not found"
+  }
+}
