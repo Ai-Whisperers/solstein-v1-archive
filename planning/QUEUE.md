@@ -363,9 +363,9 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 109 | STORY-044 | Fix autouse Fixture Masking in Test Suite | IN_PROGRESS | No dependencies |
-| 110 | STORY-045 | Add Boundary Tests for All Scoring Tiers | READY | Deps: STORY-009, STORY-011 (EPIC-003 DONE) |
-| 111 | STORY-046 | Add Tests for Untested Core Modules | READY | No dependencies |
+| 109 | STORY-044 | Fix autouse Fixture Masking in Test Suite | DONE | PR #179 |
+| 110 | STORY-045 | Add Boundary Tests for All Scoring Tiers | DONE | PR #180 |
+| 111 | STORY-046 | Add Tests for Untested Core Modules | DONE | PR #181 |
 
 ### EPIC-035: Async-First External Adapters (P2)
 
