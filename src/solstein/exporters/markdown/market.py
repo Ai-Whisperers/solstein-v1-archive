@@ -139,7 +139,7 @@ Companies are scored across three dimensions:
 | Attribute | Value |
 |---|---|
 | Name | {reference.name} |
-| Composite Score | {reference.composite_score or "N/A"} |
+| Composite Score | {formatter.format_score(reference.composite_score)} |
 | Industry | {getattr(reference, "industry", "N/A") or "N/A"} |
 
 ## Competitive Set ({len(competitors)} companies)
@@ -157,8 +157,9 @@ Companies are scored across three dimensions:
                 position = f"{diff:.1f} Behind"
             else:
                 position = "~ Parity"
+            score_str = f"{comp_score:.2f}" if comp_score else "N/A"
             report += (
-                f"| {comp.name} | {comp_score or 'N/A'} | {getattr(comp, 'industry', 'N/A') or 'N/A'} | {position} |\n"
+                f"| {comp.name} | {score_str} | {getattr(comp, 'industry', 'N/A') or 'N/A'} | {position} |\n"
             )
 
         report += """
