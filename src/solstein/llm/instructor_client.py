@@ -7,6 +7,7 @@ violations with validation error feedback.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, TypeVar
 
 import instructor
@@ -14,11 +15,24 @@ from loguru import logger
 from pydantic import BaseModel
 
 from ..config import get_settings
+from .prompts import get_system_prompt
+from .provider_strategies import ProviderClientFactory
 
 T = TypeVar("T", bound=BaseModel)
 
 # Instructor retry config: retry up to 2 times on schema violations
 _MAX_RETRIES = 2
+
+
+@dataclass
+class _ExtractionRequest:
+    """Bundled parameters shared by Anthropic and OpenAI extraction paths."""
+
+    model: str
+    system: str
+    prompt: str
+    schema: type  # type[T] — generic not supported in dataclasses at runtime
+    max_retries: int
 
 
 class InstructorClient:
@@ -55,8 +69,6 @@ class InstructorClient:
 
     def _create_raw_client(self, provider: str) -> Any | None:
         """Create a raw SDK client for the given provider."""
-        from .provider_strategies import ProviderClientFactory  # noqa: F811
-
         return ProviderClientFactory.create_client(provider, self.settings)
 
     def _get_model(self, provider: str) -> str:
@@ -89,13 +101,7 @@ class InstructorClient:
         """
         provider = provider or self._pick_provider()
         model = self._get_model(provider)
-
-        system = (
-            system_prompt
-            or "You are an expert data extractor. Return structured data "
-            "matching the requested schema. Use null for unknown values."
-        )
-
+        system = system_prompt or get_system_prompt("system_data_extractor")
         patched_client = self._get_patched_client(provider)
 
         logger.debug(
@@ -103,60 +109,46 @@ class InstructorClient:
             extra={"provider": provider, "model": model, "schema": schema.__name__},
         )
 
-        if provider == "anthropic":
-            return await self._extract_anthropic(
-                patched_client, model, system, prompt, schema, max_retries
-            )
-        return await self._extract_openai(
-            patched_client, model, system, prompt, schema, max_retries
+        req = _ExtractionRequest(
+            model=model,
+            system=system,
+            prompt=prompt,
+            schema=schema,
+            max_retries=max_retries,
         )
 
-    async def _extract_anthropic(
-        self,
-        client: Any,
-        model: str,
-        system: str,
-        prompt: str,
-        schema: type[T],
-        max_retries: int,
-    ) -> T:
+        if provider == "anthropic":
+            return await self._extract_anthropic(patched_client, req)  # type: ignore[return-value]
+        return await self._extract_openai(patched_client, req)  # type: ignore[return-value]
+
+    async def _extract_anthropic(self, client: Any, req: _ExtractionRequest) -> Any:
         """Extract via Anthropic's native messages API."""
         return await client.messages.create(
-            model=model,
+            model=req.model,
             max_tokens=2000,
-            max_retries=max_retries,
-            messages=[{"role": "user", "content": prompt}],
-            system=system,
-            response_model=schema,
+            max_retries=req.max_retries,
+            messages=[{"role": "user", "content": req.prompt}],
+            system=req.system,
+            response_model=req.schema,
             temperature=0.3,
         )
 
-    async def _extract_openai(
-        self,
-        client: Any,
-        model: str,
-        system: str,
-        prompt: str,
-        schema: type[T],
-        max_retries: int,
-    ) -> T:
+    async def _extract_openai(self, client: Any, req: _ExtractionRequest) -> Any:
         """Extract via OpenAI-compatible chat completions API."""
         return await client.chat.completions.create(
-            model=model,
+            model=req.model,
             max_tokens=2000,
-            max_retries=max_retries,
+            max_retries=req.max_retries,
             messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": prompt},
+                {"role": "system", "content": req.system},
+                {"role": "user", "content": req.prompt},
             ],
-            response_model=schema,
+            response_model=req.schema,
             temperature=0.3,
         )
 
     def _pick_provider(self) -> str:
         """Pick the first available provider."""
-        from ..config import get_settings
-
         for provider in get_settings().llm_provider_order:
             if self._create_raw_client(provider) is not None:
                 return provider

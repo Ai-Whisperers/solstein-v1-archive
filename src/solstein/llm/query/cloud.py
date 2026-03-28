@@ -2,13 +2,30 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 from pydantic import BaseModel
 
+from solstein.llm.prompts import get_system_prompt
+
+
+@dataclass
+class CloudProviderContext:
+    """Bundled cloud-provider context: client handle, provider name, and model."""
+
+    client: Any
+    provider: str
+    model: str
+
 
 class CloudProviderQuerier:
     """Handles queries to cloud LLM providers."""
+
+    @staticmethod
+    def make_ctx(client: Any, provider: str, model: str) -> CloudProviderContext:
+        """Convenience factory for building a CloudProviderContext."""
+        return CloudProviderContext(client=client, provider=provider, model=model)
 
     async def query(
         self,
@@ -17,39 +34,47 @@ class CloudProviderQuerier:
         model: str,
         prompt: str,
         system_prompt: str | None = None,
-        schema: type[BaseModel] | None = None,
     ) -> Any:
-        """Query a cloud LLM provider."""
-        system = (
-            system_prompt
-            or "You are an expert business analyst specializing in technology companies and private equity. Provide concise, data-driven insights."
-        )
+        """Query a cloud LLM provider (free-text output).
 
-        # Check if we can use structured output (OpenAI only)
+        For structured output use query_structured().
+        """
+        system = system_prompt or get_system_prompt("system_business_analyst")
+        ctx = CloudProviderContext(client=client, provider=provider, model=model)
+        return await self._query_standard(ctx, system, prompt, schema=None)
+
+    async def query_structured(
+        self,
+        ctx: CloudProviderContext,
+        prompt: str,
+        schema: type[BaseModel],
+        system_prompt: str | None = None,
+    ) -> Any:
+        """Query a cloud LLM provider with schema-validated structured output."""
+        system = system_prompt or get_system_prompt("system_business_analyst")
+
+        # Prefer OpenAI parse endpoint when available
         use_parse = (
-            schema is not None
-            and provider == "openai"
-            and hasattr(client, "beta")
-            and hasattr(client.beta, "chat")
-            and hasattr(client.beta.chat.completions, "parse")
+            ctx.provider == "openai"
+            and hasattr(ctx.client, "beta")
+            and hasattr(ctx.client.beta, "chat")
+            and hasattr(ctx.client.beta.chat.completions, "parse")
         )
-
         if use_parse:
-            return await self._query_with_parse(client, model, system, prompt, schema)
+            return await self._query_with_parse(ctx, system, prompt, schema)
 
-        return await self._query_standard(client, model, system, prompt, schema, provider)
+        return await self._query_standard(ctx, system, prompt, schema=schema)
 
     async def _query_with_parse(
         self,
-        client: Any,
-        model: str,
+        ctx: CloudProviderContext,
         system: str,
         prompt: str,
         schema: type[BaseModel],
     ) -> BaseModel:
         """Query using OpenAI's parse method for structured output."""
-        response = await client.beta.chat.completions.parse(
-            model=model,
+        response = await ctx.client.beta.chat.completions.parse(
+            model=ctx.model,
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt},
@@ -62,20 +87,18 @@ class CloudProviderQuerier:
 
     async def _query_standard(
         self,
-        client: Any,
-        model: str,
+        ctx: CloudProviderContext,
         system: str,
         prompt: str,
         schema: type[BaseModel] | None,
-        provider: str,
     ) -> Any:
         """Standard chat completion query."""
         create_kwargs: dict[str, Any] = {}
-        if schema and provider in {"openai", "fireworks"}:
+        if schema and ctx.provider in {"openai", "fireworks"}:
             create_kwargs["response_format"] = {"type": "json_object"}
 
-        response = await client.chat.completions.create(
-            model=model,
+        response = await ctx.client.chat.completions.create(
+            model=ctx.model,
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt},

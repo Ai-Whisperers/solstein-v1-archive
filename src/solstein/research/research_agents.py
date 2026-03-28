@@ -17,6 +17,7 @@ from loguru import logger
 
 from ..llm.enhanced_client import EnhancedLLMClient
 from ..llm.instructor_client import InstructorClient
+from ..llm.prompts import get_system_prompt
 from ..llm.schemas import CompanyExtractionResponse, ResearchPlanResponse
 from .fetch_policy import FetchResult, execute_policy_fetch
 from .research_types import (
@@ -60,10 +61,7 @@ class ResearchPlannerAgent:
             plan_response = await self.instructor.extract(
                 prompt=prompt,
                 schema=ResearchPlanResponse,
-                system_prompt=(
-                    "You are a research planning assistant. Generate structured "
-                    "search plans for competitive intelligence research."
-                ),
+                system_prompt=get_system_prompt("system_research_planner"),
             )
             queries = sorted(
                 [q.model_dump() for q in plan_response.queries],
@@ -243,11 +241,7 @@ class ContentExtractorAgent:
             extraction = await self.instructor.extract(
                 prompt=prompt,
                 schema=CompanyExtractionResponse,
-                system_prompt=(
-                    "You are a company data extraction specialist. "
-                    "Extract all available structured information about the company. "
-                    "Use null for unknown values."
-                ),
+                system_prompt=get_system_prompt("system_company_extractor"),
             )
             return extraction.model_dump(exclude_none=False)
         except Exception as error:  # noqa: BLE001

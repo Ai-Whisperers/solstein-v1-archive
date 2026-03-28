@@ -9,6 +9,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 from solstein.config import Settings
+from solstein.llm.prompts import get_system_prompt
 
 
 class OllamaQuerier:
@@ -24,10 +25,7 @@ class OllamaQuerier:
         schema: type[BaseModel] | None = None,
     ) -> Any | None:
         """Query Ollama (local) instance."""
-        system = (
-            system_prompt
-            or "You are an expert business analyst specializing in technology companies and private equity. Provide concise, data-driven insights."
-        )
+        system = system_prompt or get_system_prompt("system_business_analyst")
 
         payload = {
             "model": self.settings.ollama_model,
