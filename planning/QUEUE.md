@@ -343,11 +343,15 @@ The first worker run MUST do a verification pass before starting implementation 
 | 102 | STORY-209 | Implement Validation Before Scoring | DONE | PR #173 merged |
 | 103 | STORY-210 | Add Robustness Tests for Incomplete Data | DONE | PR #174 merged |
 
-### EPIC-028: External Service Consolidation (P1)
+### EPIC-028: External Service Consolidation (P1) — Deps satisfied (EPIC-034, 019, 020, 026 all DONE)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 104-108 | — | See EPIC-028 README for stories | BLOCKED | Deps: EPIC-034 recommended first |
+| 104 | STORY-101 | Replace Google Custom Search with Self-Hosted SearXNG | IN_PROGRESS | Deps: EPIC-026 (DONE) |
+| 105 | STORY-102 | Replace NewsAPI with GDELT + RSS Aggregation | READY | No deps |
+| 106 | STORY-103 | Stabilize Yahoo Finance Integration | READY | No deps |
+| 107 | STORY-104 | Add Slack and Email Notification Service | READY | No deps |
+| 108 | STORY-105 | Move File Exports to Supabase Storage | DONE | Already implemented by EPIC-030 STORY-115 (PR #149) |
 
 ---
 
