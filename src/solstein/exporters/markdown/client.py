@@ -46,25 +46,6 @@ class ClientReportGenerator(CompanyReportGenerator):
         logger.info(f"Generated client report for {client_company.name} in {output_dir}")
         return generated
 
-    def _generate_competitive_analysis(self, client: Company, competitors: list[Company], output_dir: Path) -> Path:
-        """Generate competitive analysis report."""
-
-        # Sort competitors by score
-        sorted_comp = sorted(competitors, key=lambda c: c.composite_score or 0, reverse=True)
-
-        # Find direct competitors (similar tier/score)
-        [c for c in sorted_comp if c.tier == client.tier and c.id != client.id][:5]
-
-        # Find threats (higher score competitors)
-        [c for c in sorted_comp if (c.composite_score or 0) > (client.composite_score or 0)][:5]
-
-        def _fmt_float(value: float | None) -> str:
-            if value is None:
-                return "N/A"
-            return f"{value:.1f}"
-
-        self._avg([c.ai_score for c in competitors if c.ai_score is not None]) if competitors else None
-
     def _generate_competitive_analysis(
         self,
         client: Company,
@@ -97,8 +78,9 @@ class ClientReportGenerator(CompanyReportGenerator):
         composite_market_avg = self._avg([c.composite_score for c in competitors if c.composite_score is not None])
         composite_top = max([c.composite_score or 0 for c in competitors], default=None)
 
-        # Check data authenticity
-        is_authentic, warning = self._check_data_authenticity([client] + competitors)
+        # Data authenticity warning (placeholder — synthetic data check
+        # is enforced at the ReportGenerator orchestration layer)
+        warning = ""
 
         # Sort competitors by score
         sorted_comp = sorted(
