@@ -107,6 +107,40 @@ def _apply_confidence_weights(
     return final, explanation
 
 
+# ---------------------------------------------------------------------------
+# STORY-209: Pre-scoring validation gate
+# ---------------------------------------------------------------------------
+
+
+def validate_before_scoring(company: Company) -> list[str]:
+    """Validate company data before scoring.
+
+    Runs Company.validate_scoring_readiness() and logs each warning.
+    Returns the list of validation warnings (empty = fully valid).
+
+    This function never raises — it logs and returns warnings so the
+    caller can decide whether to proceed with scoring.
+    """
+    warnings: list[str] = []
+
+    try:
+        warnings = company.validate_scoring_readiness()
+    except Exception as exc:
+        # Validation itself should never crash scoring
+        logger.error(
+            f"[EPIC-059] Validation failed for {company.name}: {exc}"
+        )
+        warnings = [f"Validation error: {exc}"]
+
+    if warnings:
+        for warning in warnings:
+            logger.warning(
+                f"[EPIC-059] Pre-scoring validation for '{company.name}': {warning}"
+            )
+
+    return warnings
+
+
 def classify_company(score: float | None) -> CompanyClassification:
     """Central logic to classify a company based on its composite or growth score."""
     if score is None:
@@ -160,8 +194,15 @@ class GrowthScorer:
         self.competitive_position_scorer = CompetitivePositionScorer(self.config)
 
     def calculate_scores(self, profile: Company) -> Company:
-        """Calculate all scores for a company profile."""
+        """Calculate all scores for a company profile.
+
+        STORY-209: Validates company before scoring. Validation warnings are
+        logged and stored in scoring_breakdown but do not block scoring.
+        """
         logger.debug(f"Calculating scores for {profile.name}")
+
+        # STORY-209: Validation gate — run before scoring
+        validation_warnings = validate_before_scoring(profile)
 
         profile.growth_score = None
         profile.financial_health_score = None
@@ -270,6 +311,10 @@ class GrowthScorer:
             "financial": fin_expl,
             "competitive": comp_expl,
         }
+
+        # STORY-209: Persist validation warnings in breakdown
+        if validation_warnings:
+            profile.scoring_breakdown["validation_warnings"] = validation_warnings
 
         return profile
 
