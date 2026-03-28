@@ -35,6 +35,16 @@ Story:
 - [ ] No new code smells (`make smell`)
 - [ ] File sizes within limits (`make check-sizes`)
 
+## Docs Quality Gates (if this PR touches docs/ or backlog/)
+
+<!-- See docs/guides/docs-change-control.md for the full checklist. -->
+
+- [ ] `make docs-quality-check` passes (placeholder tokens + metadata)
+- [ ] `make docs-generated-check` passes (if generated docs were re-generated)
+- [ ] Link integrity: no broken relative links
+- [ ] Governance / standards docs: blockquote metadata updated (`Last Reviewed` → today)
+- [ ] Major change impact summary included (required for governance/standards/architecture docs)
+
 ## Repository Organization
 
 <!-- See REPOSITORY_STRUCTURE.md for placement rules. -->

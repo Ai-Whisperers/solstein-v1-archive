@@ -1,3 +1,9 @@
+> **Status**: Active
+> **Owner**: backend-team
+> **Last Reviewed**: 2026-03-28
+> **Superseded By**: N/A
+> **Review Cadence**: Semi-annually
+
 # Exception Handling Standards
 
 > STORY-132 | EPIC-034: Exception Handling Transparency
