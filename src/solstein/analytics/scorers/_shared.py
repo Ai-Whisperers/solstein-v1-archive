@@ -18,6 +18,41 @@ def confidence_to_level(confidence: float) -> ConfidenceLevel:
         return ConfidenceLevel.UNKNOWN
 
 
+# STORY-207: Data confidence calculation based on field availability
+# Each missing critical field reduces confidence by this amount
+_CONFIDENCE_REDUCTION_PER_FIELD = 0.15
+
+# Critical fields for scoring — if these are None, confidence drops
+_CRITICAL_SCORING_FIELDS = [
+    ("revenue", "Revenue data"),
+    ("growth_rate", "Growth rate data"),
+    ("employees", "Employee count"),
+    ("profit_margin", "Profit margin data"),
+    ("funding_raised", "Funding data"),
+]
+
+
+def calculate_data_confidence(financials: FinancialMetric) -> tuple[float, list[str]]:
+    """Calculate data confidence score based on field availability.
+
+    Returns:
+        Tuple of (confidence: 0.0-1.0, warnings: list of human-readable messages)
+    """
+    confidence = 1.0
+    warnings: list[str] = []
+
+    for field_name, description in _CRITICAL_SCORING_FIELDS:
+        value = getattr(financials, field_name, None)
+        if value is None:
+            confidence -= _CONFIDENCE_REDUCTION_PER_FIELD
+            warnings.append(f"{description} missing ({field_name}=None)")
+
+    # Clamp to [0.0, 1.0]
+    confidence = max(0.0, min(confidence, 1.0))
+
+    return confidence, warnings
+
+
 def merge_facts_into_financials(
     financials: FinancialMetric,
     fact_repo: FactRepository,

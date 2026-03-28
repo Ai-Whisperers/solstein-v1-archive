@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from loguru import logger
+
 from ...core.math_utils import safe_div
 from ...core.scoring_config import ScoringSettings
 from ...domain.models import (
@@ -20,7 +22,7 @@ from ...domain.models import (
 if TYPE_CHECKING:
     from ...infrastructure.repositories import FactRepository
 
-from ._shared import merge_facts_into_financials
+from ._shared import calculate_data_confidence, merge_facts_into_financials
 
 
 class FinancialHealthScorer:
@@ -55,6 +57,15 @@ class FinancialHealthScorer:
         # Merge facts from repository if available
         if fact_repo and company_id:
             financials = merge_facts_into_financials(financials, fact_repo, company_id)
+
+        # STORY-207: Calculate data confidence before scoring
+        data_confidence, data_warnings = calculate_data_confidence(financials)
+        explanation.data_confidence = data_confidence
+        explanation.data_warnings = data_warnings
+
+        if data_warnings:
+            for warning in data_warnings:
+                logger.warning(f"[EPIC-059] Financial health scorer: {warning}")
 
         # Apply all scoring components
         score = self._score_revenue_scale(financials, score, explanation, cfg)
