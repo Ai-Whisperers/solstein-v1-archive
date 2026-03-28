@@ -1,0 +1,83 @@
+{
+  "_comment": "Staleness policy for docs/. Each class defines the max age (days) before a doc is considered stale. Override per file with the allowlist.",
+  "classes": [
+    {
+      "class_id": "governance",
+      "description": "Governance and standards documents in docs/governance/ and docs/standards/",
+      "path_prefixes": ["docs/governance/", "docs/standards/"],
+      "max_age_days": 90,
+      "owner_team": "docs-team",
+      "escalation_owner": "platform-team"
+    },
+    {
+      "class_id": "audit",
+      "description": "Audit documents in docs/audit/ — reviewed on each audit cycle",
+      "path_prefixes": ["docs/audit/"],
+      "max_age_days": 180,
+      "owner_team": "docs-team",
+      "escalation_owner": "platform-team"
+    },
+    {
+      "class_id": "reference",
+      "description": "Reference and developer guides in docs/reference/ and docs/developers/",
+      "path_prefixes": ["docs/reference/", "docs/developers/"],
+      "max_age_days": 180,
+      "owner_team": "backend-team",
+      "escalation_owner": "platform-team"
+    },
+    {
+      "class_id": "guides",
+      "description": "User-facing guides in docs/guides/",
+      "path_prefixes": ["docs/guides/"],
+      "max_age_days": 180,
+      "owner_team": "docs-team",
+      "escalation_owner": "platform-team"
+    },
+    {
+      "class_id": "active_backlog",
+      "description": "Active backlog stories and epic docs",
+      "path_prefixes": ["docs/active/", "backlog/"],
+      "max_age_days": 365,
+      "owner_team": "product-team",
+      "escalation_owner": "platform-team"
+    },
+    {
+      "class_id": "generated",
+      "description": "Machine-generated docs — freshness enforced by the generated-docs gate",
+      "path_prefixes": ["docs/reference/generated/", "docs/audit/generated/"],
+      "max_age_days": 7,
+      "owner_team": "platform-team",
+      "escalation_owner": "platform-team"
+    },
+    {
+      "class_id": "default",
+      "description": "All other docs not matched by a more specific class",
+      "path_prefixes": ["docs/"],
+      "max_age_days": 365,
+      "owner_team": "docs-team",
+      "escalation_owner": "platform-team"
+    }
+  ],
+  "ownership_map": {
+    "docs/governance/": "docs-team",
+    "docs/standards/": "docs-team",
+    "docs/audit/": "docs-team",
+    "docs/reference/": "backend-team",
+    "docs/developers/": "backend-team",
+    "docs/observability/": "platform-team",
+    "docs/communications/": "platform-team",
+    "docs/guides/": "docs-team",
+    "docs/active/backlog/EPIC-018": "platform-team",
+    "docs/active/backlog/EPIC-020": "backend-team",
+    "docs/active/backlog/EPIC-027": "platform-team",
+    "docs/active/backlog/EPIC-045": "backend-team",
+    "docs/active/backlog/EPIC-048": "backend-team",
+    "docs/active/backlog/EPIC-064": "docs-team",
+    "docs/active/backlog/EPIC-065": "docs-team",
+    "backlog/": "product-team"
+  },
+  "escalation": {
+    "unowned_owner": "platform-team",
+    "unowned_rationale": "No ownership mapping found for this path — default escalation to platform-team."
+  }
+}
