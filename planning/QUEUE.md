@@ -330,8 +330,8 @@ The first worker run MUST do a verification pass before starting implementation 
 |---|-------|-------|--------|-------|
 | 95 | STORY-132 | Create Exception Handling Standards Document | DONE | PR #166 |
 | 96 | STORY-131 | Add Null Safety Guards for Division Operations | DONE | PR #167 — safe_div/safe_pct/safe_avg, 26 tests |
-| 97 | STORY-129 | Eliminate Silent None Returns in enhanced_client.py | IN_PROGRESS | Deps: STORY-132 (done), EPIC-021 (done) |
-| 98 | STORY-130 | Add Structured Logging to All Adapter Exception Handlers | READY | Deps: STORY-132, EPIC-014 (done) |
+| 97 | STORY-129 | Eliminate Silent None Returns in enhanced_client.py | DONE | PR #168 — classified exceptions, Prometheus metrics, health signals, 13 tests |
+| 98 | STORY-130 | Add Structured Logging to All Adapter Exception Handlers | IN_PROGRESS | Deps: STORY-132, EPIC-014 (done) |
 
 ### EPIC-059: Input Validation & Graceful Degradation (P1)
 
