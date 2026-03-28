@@ -348,8 +348,8 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 104 | STORY-101 | Replace Google Custom Search with Self-Hosted SearXNG | DONE | PR #175 — SearXNG primary, GCS fallback, Redis cache, 18 tests |
-| 105 | STORY-102 | Replace NewsAPI with GDELT + RSS Aggregation | IN_PROGRESS | No deps |
-| 106 | STORY-103 | Stabilize Yahoo Finance Integration | READY | No deps |
+| 105 | STORY-102 | Replace NewsAPI with GDELT + RSS Aggregation | DONE | PR #176 — GDELT primary, RSS supplement, NewsAPI fallback, 13 tests |
+| 106 | STORY-103 | Stabilize Yahoo Finance Integration | IN_PROGRESS | No deps |
 | 107 | STORY-104 | Add Slack and Email Notification Service | READY | No deps |
 | 108 | STORY-105 | Move File Exports to Supabase Storage | DONE | Already implemented by EPIC-030 STORY-115 (PR #149) |
 
