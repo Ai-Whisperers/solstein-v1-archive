@@ -371,7 +371,7 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 112 | STORY-133 | Replace requests with httpx in GitHub Agent | READY | Deps: EPIC-021, EPIC-028 (both DONE) |
+| 112 | STORY-133 | Replace requests with httpx in GitHub Agent | IN_PROGRESS | Deps: EPIC-021, EPIC-028 (both DONE) |
 | 113 | STORY-134 | Replace requests with httpx in News and Funding Adapters | READY | Deps: STORY-133 |
 | 114 | STORY-135 | Replace requests with httpx in Companies House and Website Agents | READY | Deps: STORY-133 |
 | 115 | STORY-136 | Add Async HTTP Client Guidelines and Linting | READY | Deps: STORY-133-135 |
