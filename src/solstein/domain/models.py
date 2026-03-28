@@ -130,6 +130,23 @@ class FinancialMetric(BaseModel):
             raise ValueError("Employees cannot be negative")
         return v
 
+    # STORY-206: Range validators for financial fields
+    @field_validator("revenue")
+    @classmethod
+    def validate_revenue_range(cls, v: float | None) -> float | None:
+        """Revenue must be positive when provided."""
+        if v is not None and v < 0:
+            raise ValueError(f"revenue must be >= 0, got: {v}")
+        return v
+
+    @field_validator("growth_rate")
+    @classmethod
+    def validate_growth_rate_range(cls, v: float | None) -> float | None:
+        """Growth rate must be in reasonable range when provided (percentage points)."""
+        if v is not None and (v < -100 or v > 1000):
+            raise ValueError(f"growth_rate must be in [-100, 1000], got: {v}")
+        return v
+
 
 class Company(BaseModel):
     """Company domain entity."""
@@ -517,6 +534,46 @@ class Company(BaseModel):
 
         return (filled / len(key_fields)) * 100 if key_fields else 0.0
 
+    # STORY-206: Scoring readiness validation
+    def validate_scoring_readiness(self) -> list[str]:
+        """Check if company has sufficient data for scoring.
+
+        Returns a list of warning messages for missing or suspicious fields.
+        Empty list means company is fully ready for scoring.
+        """
+        warnings: list[str] = []
+        fin = self.financials
+
+        # Primary indicators
+        if fin is None:
+            warnings.append("financials is None - no financial data available")
+            return warnings
+
+        if fin.revenue is None:
+            warnings.append("revenue is None - growth and financial scoring will be incomplete")
+        elif fin.revenue == 0:
+            warnings.append("revenue is 0 - may indicate missing data rather than zero revenue")
+
+        if fin.employees is None:
+            warnings.append("employees is None - efficiency scoring will be skipped")
+        elif fin.employees == 0:
+            warnings.append("employees is 0 - may indicate missing data")
+
+        if fin.growth_rate is None:
+            warnings.append("growth_rate is None - growth momentum scoring will be incomplete")
+
+        if fin.profit_margin is None:
+            warnings.append("profit_margin is None - profitability scoring will use penalty")
+
+        if fin.funding_raised is None:
+            warnings.append("funding_raised is None - funding momentum scoring will be skipped")
+
+        # Confidence check
+        if not self.signal_confidences:
+            warnings.append("signal_confidences is empty - confidence weighting unavailable")
+
+        return warnings
+
     # STORY-127: profit_margin removed as field — now a computed_field from financials.
     # STORY-127: employee_count removed as field — now a computed_field from financials.
     ebitda_margin: float | None = None
@@ -550,6 +607,23 @@ class Company(BaseModel):
     def validate_ai_score_value(cls, v: float | None) -> float | None:
         if v is not None and (v < 0 or v > 10):
             raise ValueError("AI score must be between 0 and 10")
+        return v
+
+    # STORY-206: Range validators for Company-level financial fields
+    @field_validator("revenue")
+    @classmethod
+    def validate_revenue_range(cls, v: float | None) -> float | None:
+        """Revenue must be non-negative when provided."""
+        if v is not None and v < 0:
+            raise ValueError(f"revenue must be >= 0, got: {v}")
+        return v
+
+    @field_validator("growth_rate")
+    @classmethod
+    def validate_growth_rate_range(cls, v: float | None) -> float | None:
+        """Growth rate must be in reasonable range when provided (percentage points)."""
+        if v is not None and (v < -100 or v > 1000):
+            raise ValueError(f"growth_rate must be in [-100, 1000], got: {v}")
         return v
 
     @field_validator("saas_maturity")
