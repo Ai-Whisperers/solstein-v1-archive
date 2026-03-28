@@ -1,5 +1,5 @@
 {
-  "generated_on": "2026-03-26",
+  "generated_on": "2026-03-27",
   "issues": [
     {
       "heading_line": 114,
@@ -2937,30 +2937,74 @@
       "summary": "",
       "table_occurrences": 0,
       "title": "`status=\"partial_failure\"` rejected by `BatchEnrichmentResponse.validate_status` \u2014 correct value is `\"partial\"`"
+    },
+    {
+      "heading_line": 7557,
+      "issue_id": "ISSUE-268",
+      "latest_table_line": null,
+      "location": "src/solstein/adapters/enrichment/patents_unified.py:19`, `src/solstein/research/discovery.py:10`, `src/solstein/adapters/registry.py:98",
+      "severity": "\ud83d\udfe1 MED",
+      "status": "Open",
+      "summary": "",
+      "table_occurrences": 0,
+      "title": "Static import cycle between `patents_unified`, `research.discovery`, and `adapters.registry` breaks structural tooling assumptions"
+    },
+    {
+      "heading_line": 7566,
+      "issue_id": "ISSUE-269",
+      "latest_table_line": null,
+      "location": "src/solstein/domain/value_objects.py:24,160,165",
+      "severity": "\ud83d\udfe1 MED",
+      "status": "Open",
+      "summary": "",
+      "table_occurrences": 0,
+      "title": "Domain `value_objects` imports analytics scoring constants, coupling core domain rules to the analytics layer"
+    },
+    {
+      "heading_line": 7575,
+      "issue_id": "ISSUE-270",
+      "latest_table_line": null,
+      "location": "src/solstein/infrastructure/research_dual_write.py:17`, `src/solstein/infrastructure/research_persistence.py:14",
+      "severity": "\ud83d\udfe1 MED",
+      "status": "Open",
+      "summary": "",
+      "table_occurrences": 0,
+      "title": "Infrastructure persistence imports URL canonicalization from the higher `research` layer instead of a lower shared utility boundary"
+    },
+    {
+      "heading_line": 7584,
+      "issue_id": "ISSUE-271",
+      "latest_table_line": null,
+      "location": "src/solstein/infrastructure/reconcile_runs.py:12",
+      "severity": "\ud83d\udfe1 MED",
+      "status": "Open",
+      "summary": "",
+      "table_occurrences": 0,
+      "title": "Infrastructure reconciliation imports JSON hashing helper from the higher `research` layer"
     }
   ],
   "notes": [
     "The audit tracker reports 284 total issues found, while the source file exposes 267 distinct ISSUE-* identifiers.",
     "The generated index follows concrete issue identifiers and preserves the source audit without rewriting its aggregate tracker totals."
   ],
-  "parsed_issue_count": 267,
+  "parsed_issue_count": 271,
   "parsed_table_row_count": 1196,
   "source_file": "docs/audit/18-03-2026_MASTER_AUDIT.md",
-  "source_line_count": 7548,
+  "source_line_count": 7589,
   "source_metrics": {
     "Closed (false positive)": "3 (ISSUE-43, ISSUE-158, ISSUE-226)",
     "Confirmed fixes": "3",
     "Coverage": "**100%** \u2705",
     "Files directly read": "555",
     "Last commit": "see below",
-    "Last pass": "Eighteenth-pass (FINAL) \u2014 100% coverage sweep: monitoring/business_metrics.py, api/routers/enrichment_batch.py, infrastructure/repositories+company+enrichment+eager+search+refresh+research_persistence, data/unified/*, data/enrichment_*, data/converters, analytics/*, llm/, exporters/, domain/facts+payload_compat, validation/data_remediation, config, exceptions, core/repositories. 3 final HIGH bugs: ISSUE-265\u2013267 (2026-03-19)",
+    "Last pass": "Nineteenth-pass addendum \u2014 recursive structural sweep using `basedpyright`, `ast-grep`, import-cycle detection, and module-boundary enforcement. 4 new MED architectural issues: ISSUE-268\u2013271 (2026-03-26)",
     "Open \ud83d\udd34 HIGH": "130",
-    "Open \ud83d\udfe1 MED": "109",
+    "Open \ud83d\udfe1 MED": "113",
     "Open \ud83d\udfe2 LOW": "44",
     "Remediation coverage": "**100% (74/74 fixable + 2 FP closed)**",
     "Still open": "**0**",
     "Total `.py` files in `src/solstein/`": "555",
-    "Total issues found": "284 (3 false positives closed, 1 issue corrected)",
+    "Total issues found": "288 (3 false positives closed, 1 issue corrected)",
     "Total resolved": "**76**"
   }
 }

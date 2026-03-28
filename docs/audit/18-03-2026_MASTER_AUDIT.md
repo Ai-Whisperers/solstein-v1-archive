@@ -15,13 +15,13 @@
 | **Total `.py` files in `src/solstein/`** | 555 |
 | **Files directly read** | 555 |
 | **Coverage** | **100%** ✅ |
-| **Total issues found** | 284 (3 false positives closed, 1 issue corrected) |
+| **Total issues found** | 288 (3 false positives closed, 1 issue corrected) |
 | **Open 🔴 HIGH** | 130 |
-| **Open 🟡 MED** | 109 |
+| **Open 🟡 MED** | 113 |
 | **Open 🟢 LOW** | 44 |
 | **Closed (false positive)** | 3 (ISSUE-43, ISSUE-158, ISSUE-226) |
 | **Confirmed fixes** | 3 |
-| **Last pass** | Eighteenth-pass (FINAL) — 100% coverage sweep: monitoring/business_metrics.py, api/routers/enrichment_batch.py, infrastructure/repositories+company+enrichment+eager+search+refresh+research_persistence, data/unified/*, data/enrichment_*, data/converters, analytics/*, llm/, exporters/, domain/facts+payload_compat, validation/data_remediation, config, exceptions, core/repositories. 3 final HIGH bugs: ISSUE-265–267 (2026-03-19) |
+| **Last pass** | Nineteenth-pass addendum — recursive structural sweep using `basedpyright`, `ast-grep`, import-cycle detection, and module-boundary enforcement. 4 new MED architectural issues: ISSUE-268–271 (2026-03-26) |
 | **Last commit** | see below |
 
 ### Directories with meaningful coverage
@@ -7519,8 +7519,8 @@ The following files were read in the final pass and confirmed to have no bugs:
 ## AUDIT COMPLETE — FINAL SUMMARY
 
 **Total `.py` files audited:** 555 / 555 — **100% coverage** ✅
-**Total issues found:** 284
-**Severity breakdown:** 130 🔴 HIGH | 109 🟡 MED | 44 🟢 LOW
+**Total issues found:** 288
+**Severity breakdown:** 130 🔴 HIGH | 113 🟡 MED | 44 🟢 LOW
 **False positives closed:** 3 (ISSUE-43, ISSUE-158, ISSUE-226)
 **Confirmed fixes since audit began:** 3
 
@@ -7546,3 +7546,44 @@ The following files were read in the final pass and confirmed to have no bugs:
 7. **Data / merger** — stub profiles crash merge roundtrip (ISSUE-250)
 8. **Monitoring / business metrics** — collect_company_metrics() always crashes (ISSUE-265/266)
 
+---
+
+## NINETEENTH PASS — RECURSIVE STRUCTURAL ADDENDUM — 2026-03-26
+**Scope:** Recursive structural sweep after the fix-and-guardrail rollout. The pass used `basedpyright`, `ast-grep`, `scripts/ci/detect_import_cycles.py`, and `scripts/ci/enforce_module_boundaries.py`, followed by direct source reads on every flagged module to confirm only source-corroborated issues.
+**Result:** 4 new MED architectural issues (ISSUE-268–271). No new type or AST rule violations; `basedpyright` passed clean.
+
+---
+
+### ISSUE-268
+**File:** `src/solstein/adapters/enrichment/patents_unified.py:19`, `src/solstein/research/discovery.py:10`, `src/solstein/adapters/registry.py:98`
+**Severity:** 🟡 MED
+**Category:** import-cycle
+**Title:** Static import cycle between `patents_unified`, `research.discovery`, and `adapters.registry` breaks structural tooling assumptions
+**Detail:** `PatentsUnifiedAdapter` imports `DiscoveryCandidate` from `solstein.research.discovery`. `research.discovery` has a `TYPE_CHECKING` import of `SourceRegistry` from `solstein.adapters.registry`. `adapters.registry` imports `PatentsUnifiedAdapter` when unified enrichment is enabled. Runtime import is partially masked by `TYPE_CHECKING`, but the repo's cycle detector still finds a real module graph cycle: `solstein.adapters.enrichment.patents_unified → solstein.research.discovery → solstein.adapters.registry → solstein.adapters.enrichment.patents_unified`. This makes tokenless graph tooling, generated dependency documentation, and future stricter import enforcement brittle because the adapter/discovery boundary is not truly acyclic.
+
+---
+
+### ISSUE-269
+**File:** `src/solstein/domain/value_objects.py:24,160,165`
+**Severity:** 🟡 MED
+**Category:** module-boundary
+**Title:** Domain `value_objects` imports analytics scoring constants, coupling core domain rules to the analytics layer
+**Detail:** `domain/value_objects.py` imports `MAX_SCORE` and `MIN_SCORE` from `solstein.analytics.constants` at module load time, and `Score.is_phoenix()` / `Score.is_lead()` import analytics thresholds from the same module. This violates the intended dependency direction (`analytics` may depend on `domain`, not vice versa) and makes the domain layer impossible to reuse independently of analytics. It also undermines the new generated-doc and AST boundary maps because the core domain package is no longer a lower-layer truth source.
+
+---
+
+### ISSUE-270
+**File:** `src/solstein/infrastructure/research_dual_write.py:17`, `src/solstein/infrastructure/research_persistence.py:14`
+**Severity:** 🟡 MED
+**Category:** module-boundary
+**Title:** Infrastructure persistence imports URL canonicalization from the higher `research` layer instead of a lower shared utility boundary
+**Detail:** Both `research_dual_write.py` and `research_persistence.py` import `canonicalize_url` from `solstein.research.sources`. The function itself is a pure URL-normalization utility with no research-stage behavior, but it currently lives in a higher layer. This reverses dependency direction for persistence code and prevents the infrastructure layer from staying independently testable and package-addressable. The module-boundary enforcement script flags both imports, and direct source reading confirms the utility should live in a lower shared surface instead.
+
+---
+
+### ISSUE-271
+**File:** `src/solstein/infrastructure/reconcile_runs.py:12`
+**Severity:** 🟡 MED
+**Category:** module-boundary
+**Title:** Infrastructure reconciliation imports JSON hashing helper from the higher `research` layer
+**Detail:** `reconcile_runs.py` imports `canonical_json_dumps` from `solstein.research.hashing`. Like ISSUE-270, this is a lower-level utility concern embedded in a higher-level research module. The result is another dependency inversion in infrastructure code, which makes boundary enforcement fail and keeps generated structural docs from representing a clean layer model. The helper should live in a shared lower utility module consumed by both research and infrastructure.
