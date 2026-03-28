@@ -304,6 +304,22 @@ The first worker run MUST do a verification pass before starting implementation 
 
 ---
 
+## M8: Report Quality
+
+> M7 complete. Next: user-facing report output bugs discovered in live end-to-end analysis. STORY-185 depends on STORY-181-184 landing first.
+
+### EPIC-048: Report Generation Quality (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 90 | STORY-181 | Fix Report Output Path Nesting Bug | IN_PROGRESS | |
+| 91 | STORY-182 | Round All Score Outputs to 2 Decimal Places | READY | |
+| 92 | STORY-183 | Fix Market Overview Classification Counters | READY | |
+| 93 | STORY-184 | Replace Boilerplate Deep Analysis with Signal-Based Weaknesses | READY | |
+| 94 | STORY-185 | Add Report Content Quality Assertions to Tests | READY | Depends on STORY-181-184 |
+
+---
+
 ## Orchestrator Log
 
 Worker and checker append timestamped entries here:
