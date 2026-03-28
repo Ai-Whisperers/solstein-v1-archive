@@ -1,42 +1,56 @@
 """Web search agent for news, press releases, and market intelligence.
 
+STORY-101: Uses SearXNG (self-hosted meta-search) as primary backend.
+Falls back to Google Custom Search when SearXNG is unreachable.
+Results are cached in Redis to avoid redundant queries within the TTL window.
+
 Gathers information from web search, news articles, and press releases
 to extract facts about company growth, funding, and announcements.
 """
 
+from __future__ import annotations
+
+import logging
 from datetime import datetime, timezone
 
 import dateutil.parser
-import httpx
 
 from solstein.config import get_settings
 
 from ..domain.models import DataSourceType
 from .base_agent import AgentTaskResult, BaseDataGatheringAgent
-from .resilience import WEB_SEARCH_RETRY_CONFIG, CircuitBreaker, call_with_retry
+from .search_backends import SearchBackendDispatcher
+
+logger = logging.getLogger(__name__)
 
 
 class WebSearchAgent(BaseDataGatheringAgent):
-    """Agent for gathering data from web search and news."""
+    """Agent for gathering data from web search and news.
 
-    def __init__(self, google_api_key: str | None = None, search_engine_id: str | None = None):
+    Primary backend: SearXNG (self-hosted, free, unlimited).
+    Fallback: Google Custom Search (100 free queries/day, paid after).
+    """
+
+    def __init__(
+        self,
+        google_api_key: str | None = None,
+        search_engine_id: str | None = None,
+    ) -> None:
         """Initialize web search agent.
 
         Args:
-            google_api_key: Google Custom Search API key
-            search_engine_id: Google Custom Search Engine ID
+            google_api_key: Google Custom Search API key (fallback).
+            search_engine_id: Google Custom Search Engine ID (fallback).
         """
         super().__init__("WebSearchAgent", DataSourceType.NEWS)
-        self.google_api_key = google_api_key
-        self.search_engine_id = search_engine_id
-        self.search_base = "https://www.googleapis.com/customsearch/v1"
 
         _settings = get_settings()
-        self.http_timeout = _settings.http_timeouts.web_search_agent
-        self.circuit_breaker = CircuitBreaker(
-            failure_threshold=_settings.circuit_breaker.failure_threshold,
-            recovery_timeout=_settings.circuit_breaker.recovery_timeout,
-            name="GoogleSearchAPI",
+        self.dispatcher = SearchBackendDispatcher(
+            searxng_url=_settings.searxng_url,
+            searxng_engines=_settings.searxng_engines,
+            search_cache_ttl=_settings.search_cache_ttl,
+            google_api_key=google_api_key,
+            search_engine_id=search_engine_id,
         )
 
     async def gather(self, company_name: str, context: dict) -> AgentTaskResult:
@@ -50,43 +64,33 @@ class WebSearchAgent(BaseDataGatheringAgent):
 
         try:
             self.log_info(f"Starting web search research for {company_name}")
-
-            if not self.google_api_key or not self.search_engine_id:
-                self.log_warning("Google Custom Search API not configured")
-                result.coverage_gaps.append("Web search API not configured")
-                result.success = False
-                result.error_message = "Web search API not configured"
-                result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
-                return result
-
             search_queries = self._generate_search_queries(company_name, context)
             self.log_info(f"Running {len(search_queries)} search queries")
 
             for query_name, query_text in search_queries:
                 try:
-                    articles = await call_with_retry(
-                        lambda q=query_text: self._api_search_news(q),
-                        retry_config=WEB_SEARCH_RETRY_CONFIG,
-                        circuit_breaker=self.circuit_breaker,
-                        name=f"search_news[{query_name}]",
+                    search_results = await self.dispatcher.search(query_text)
+                    self.log_info(
+                        f"Found {len(search_results)} results for: {query_name}"
                     )
-                    self.log_info(f"Found {len(articles)} articles for: {query_name}")
 
-                    for article in articles[:5]:
+                    for sr in search_results[:5]:
                         raw_source = self._create_raw_source(
                             raw_content={
-                                "title": article.get("title"),
-                                "snippet": article.get("snippet"),
-                                "link": article.get("link"),
+                                "title": sr.title,
+                                "snippet": sr.snippet,
+                                "link": sr.url,
                             },
-                            source_name=f"Web Search: {article.get('displayLink', 'unknown')}",
-                            url=article.get("link"),
-                            publication_date=self._parse_date(article.get("snippet")),
+                            source_name=f"Web Search: {sr.source_engine}",
+                            url=sr.url,
+                            publication_date=self._parse_date(sr.snippet),
                             confidence=0.75,
-                            extraction_method="google_custom_search",
+                            extraction_method=f"search_{sr.source_engine}",
                             metadata={
                                 "query": query_name,
-                                "title": article.get("title"),
+                                "title": sr.title,
+                                "source_engine": sr.source_engine,
+                                "relevance_score": sr.relevance_score,
                             },
                         )
                         result.raw_sources.append(raw_source)
@@ -95,10 +99,14 @@ class WebSearchAgent(BaseDataGatheringAgent):
                     self.log_warning(f"Error searching {query_name}: {e}")
 
             if result.raw_sources:
-                result.extracted_facts.extend(self._extract_facts_from_sources(result.raw_sources, company_name))
+                result.extracted_facts.extend(
+                    self._extract_facts_from_sources(result.raw_sources, company_name)
+                )
 
             result.success = True
-            self.log_info(f"Successfully gathered {len(result.raw_sources)} web sources")
+            self.log_info(
+                f"Successfully gathered {len(result.raw_sources)} web sources"
+            )
 
         except Exception as e:  # noqa: BLE001
             self.log_error(f"Error gathering web search data: {e}")
@@ -106,11 +114,15 @@ class WebSearchAgent(BaseDataGatheringAgent):
             result.success = False
 
         finally:
-            result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
+            result.execution_time_seconds = (
+                datetime.now(timezone.utc) - start_time
+            ).total_seconds()
 
         return result
 
-    def _generate_search_queries(self, company_name: str, context: dict) -> list[tuple[str, str]]:
+    def _generate_search_queries(
+        self, company_name: str, context: dict
+    ) -> list[tuple[str, str]]:
         """Generate relevant search queries."""
         industry = context.get("industry", "company")
 
@@ -125,68 +137,31 @@ class WebSearchAgent(BaseDataGatheringAgent):
             ("Press Releases", f"{company_name} press release news"),
         ]
 
-    async def _api_search_news(self, query: str) -> list[dict]:
-        """API call to Google Custom Search."""
-        if not self.google_api_key or not self.search_engine_id:
-            return []
-
-        try:
-            params = {
-                "q": query,
-                "key": self.google_api_key,
-                "cx": self.search_engine_id,
-                "num": 10,
-                "sort": "date",
-            }
-
-            async with httpx.AsyncClient() as client:
-                resp = await client.get(self.search_base, params=params, timeout=self.http_timeout)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    return data.get("items", [])
-                else:
-                    self.log_warning(f"Search API error {resp.status_code}")
-        except Exception as e:  # noqa: BLE001
-            self.log_error(f"Error calling search API: {e}")
-
-        return []
-
-    def _extract_facts_from_sources(self, raw_sources: list, company_name: str) -> list:
+    def _extract_facts_from_sources(
+        self, raw_sources: list, company_name: str
+    ) -> list:
         """Extract facts from web search sources."""
         facts = []
 
-        funding_mentions = [s for s in raw_sources if "funding" in s.metadata.get("query", "").lower()]
-        if funding_mentions:
-            facts.append(
-                self._create_fact(
-                    fact_type="funding_news_signal",
-                    value=len(funding_mentions),
-                    confidence=0.70,
-                    sources_used=[s.source_name for s in funding_mentions[:3]],
+        for fact_type, keyword, confidence in [
+            ("funding_news_signal", "funding", 0.70),
+            ("hiring_news_signal", "hiring", 0.70),
+            ("product_innovation_signal", "product", 0.65),
+        ]:
+            mentions = [
+                s
+                for s in raw_sources
+                if keyword in s.metadata.get("query", "").lower()
+            ]
+            if mentions:
+                facts.append(
+                    self._create_fact(
+                        fact_type=fact_type,
+                        value=len(mentions),
+                        confidence=confidence,
+                        sources_used=[s.source_name for s in mentions[:3]],
+                    )
                 )
-            )
-
-        hiring_mentions = [s for s in raw_sources if "hiring" in s.metadata.get("query", "").lower()]
-        if hiring_mentions:
-            facts.append(
-                self._create_fact(
-                    fact_type="hiring_news_signal",
-                    value=len(hiring_mentions),
-                    confidence=0.70,
-                    sources_used=[s.source_name for s in hiring_mentions[:3]],
-                )
-            )
-
-        product_mentions = [s for s in raw_sources if "product" in s.metadata.get("query", "").lower()]
-        if product_mentions:
-            facts.append(
-                self._create_fact(
-                    fact_type="product_innovation_signal",
-                    value=len(product_mentions),
-                    confidence=0.65,
-                    sources_used=[s.source_name for s in product_mentions[:3]],
-                )
-            )
 
         return facts
 
