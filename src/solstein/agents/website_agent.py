@@ -1,10 +1,14 @@
+"""Website data gathering agent.
+
+STORY-135: Replaced requests with httpx.AsyncClient for non-blocking HTTP.
+"""
+
 from __future__ import annotations
 
-import asyncio
 import re
 from datetime import datetime, timezone
 
-import requests
+import httpx
 from loguru import logger
 
 from ..core.url_validator import SSRFError, validate_url
@@ -31,7 +35,8 @@ class WebsiteAgent(BaseDataGatheringAgent):
             # STORY-070: Validate URL before fetch (SSRF prevention)
             validate_url(str(url))
 
-            resp = await asyncio.to_thread(requests.get, str(url), timeout=20, headers={"User-Agent": "Solstein-AI"})
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(str(url), timeout=20, headers={"User-Agent": "Solstein-AI"})
             text = resp.text or ""
             excerpt = text[:5000]
 
@@ -100,7 +105,7 @@ class WebsiteAgent(BaseDataGatheringAgent):
             result.error_message = f"URL validation failed: {e}"
             result.success = False
             return result
-        except (requests.RequestException, OSError) as e:
+        except (httpx.HTTPError, httpx.TimeoutException, OSError) as e:
             logger.warning(f"WebsiteAgent failed for {company_name}: {e}")
             result.error_message = str(e)
             result.success = False

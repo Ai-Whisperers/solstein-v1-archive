@@ -2,9 +2,11 @@
 
 Retrieves official financial data from UK Companies House registry
 for UK-registered companies and their subsidiaries.
+
+STORY-135: Converted sync httpx.get + asyncio.to_thread to native
+httpx.AsyncClient for non-blocking HTTP calls.
 """
 
-import asyncio
 from datetime import datetime, timezone
 
 import httpx
@@ -117,7 +119,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
 
         try:
             company_num = await call_with_retry(
-                lambda: asyncio.to_thread(self._api_search_company, company_name),
+                lambda: self._api_search_company(company_name),
                 retry_config=COMPANIES_HOUSE_RETRY_CONFIG,
                 circuit_breaker=self.circuit_breaker,
                 name=f"search_company[{company_name}]",
@@ -129,8 +131,8 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             self.log_error(f"Error searching company: {e}")
             return None
 
-    def _api_search_company(self, company_name: str) -> str | None:
-        """API call to search for company."""
+    async def _api_search_company(self, company_name: str) -> str | None:
+        """API call to search for company (async, uses httpx.AsyncClient)."""
         try:
             url = f"{self.api_base}/search/companies"
             params = {
@@ -138,13 +140,14 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 "items_per_page": 10,
             }
 
-            resp = httpx.get(
-                url,
-                headers=self.headers,
-                params=params,
-                timeout=self.http_timeout,
-                auth=(self.api_key or "", ""),
-            )
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(
+                    url,
+                    headers=self.headers,
+                    params=params,
+                    timeout=self.http_timeout,
+                    auth=(self.api_key or "", ""),
+                )
             if resp.status_code == 200:
                 data = resp.json()
                 items = data.get("items", [])
@@ -154,7 +157,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                     return company_num
             else:
                 self.log_warning(f"Search error {resp.status_code}")
-        except Exception as e:  # noqa: BLE001
+        except (httpx.HTTPError, httpx.TimeoutException, OSError) as e:
             self.log_warning(f"Error searching: {e}")
 
         return None
@@ -165,7 +168,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
 
         try:
             data = await call_with_retry(
-                lambda: asyncio.to_thread(self._api_get_company, company_num),
+                lambda: self._api_get_company(company_num),
                 retry_config=COMPANIES_HOUSE_RETRY_CONFIG,
                 circuit_breaker=self.circuit_breaker,
                 name=f"get_company[{company_num}]",
@@ -175,22 +178,23 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             self.log_error(f"Error fetching company details: {e}")
             return None
 
-    def _api_get_company(self, company_num: str) -> dict | None:
-        """API call to get company details."""
+    async def _api_get_company(self, company_num: str) -> dict | None:
+        """API call to get company details (async, uses httpx.AsyncClient)."""
         try:
             url = f"{self.api_base}/company/{company_num}"
 
-            resp = httpx.get(
-                url,
-                headers=self.headers,
-                timeout=self.http_timeout,
-                auth=(self.api_key or "", ""),
-            )
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(
+                    url,
+                    headers=self.headers,
+                    timeout=self.http_timeout,
+                    auth=(self.api_key or "", ""),
+                )
             if resp.status_code == 200:
                 return resp.json()
             else:
                 self.log_warning(f"Get company error {resp.status_code}")
-        except Exception as e:  # noqa: BLE001
+        except (httpx.HTTPError, httpx.TimeoutException, OSError) as e:
             self.log_warning(f"Error getting company: {e}")
 
         return None
@@ -201,7 +205,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
 
         try:
             data = await call_with_retry(
-                lambda: asyncio.to_thread(self._api_get_financials, company_num),
+                lambda: self._api_get_financials(company_num),
                 retry_config=COMPANIES_HOUSE_RETRY_CONFIG,
                 circuit_breaker=self.circuit_breaker,
                 name=f"get_financials[{company_num}]",
@@ -211,8 +215,8 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
             self.log_error(f"Error fetching financials: {e}")
             return None
 
-    def _api_get_financials(self, company_num: str) -> dict | None:
-        """API call to get financial filing."""
+    async def _api_get_financials(self, company_num: str) -> dict | None:
+        """API call to get financial filing (async, uses httpx.AsyncClient)."""
         try:
             url = f"{self.api_base}/company/{company_num}/filing-history"
             params = {
@@ -220,13 +224,14 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                 "items_per_page": 5,
             }
 
-            resp = httpx.get(
-                url,
-                headers=self.headers,
-                params=params,
-                timeout=self.http_timeout,
-                auth=(self.api_key or "", ""),
-            )
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(
+                    url,
+                    headers=self.headers,
+                    params=params,
+                    timeout=self.http_timeout,
+                    auth=(self.api_key or "", ""),
+                )
             if resp.status_code == 200:
                 data = resp.json()
                 items = data.get("items", [])
@@ -237,7 +242,7 @@ class CompaniesHouseAgent(BaseDataGatheringAgent):
                     }
             else:
                 self.log_warning(f"Get financials error {resp.status_code}")
-        except Exception as e:  # noqa: BLE001
+        except (httpx.HTTPError, httpx.TimeoutException, OSError) as e:
             self.log_warning(f"Error getting financials: {e}")
 
         return None
