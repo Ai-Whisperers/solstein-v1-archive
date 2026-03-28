@@ -15,9 +15,6 @@ All models are re-exported from this package for convenience.
 from .audit import DataAccessAuditRecord
 from .base import Base
 
-# Export models (STORY-111)
-from .export import ExportJobRecord
-
 # Company and scoring models
 from .company import (
     AuditTrailRecord,
@@ -34,6 +31,9 @@ from .enrichment import (
     EnrichmentJobRecord,
     ReleaseGateAuditRecord,
 )
+
+# Export models (STORY-111)
+from .export import ExportJobRecord
 
 # Infrastructure models
 from .infrastructure import ApiKeyRecord, ApiKeyUsageRecord, OutboxRecord, TenantRecord
