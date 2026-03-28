@@ -11,6 +11,8 @@ from typing import Any
 from loguru import logger
 from pydantic import BaseModel
 
+from solstein.llm.prompts import get_system_prompt
+
 
 class AnthropicQuerier:
     """Handles queries to Anthropic via the native SDK."""
@@ -38,11 +40,7 @@ class AnthropicQuerier:
         Raises:
             RuntimeError: If response content is empty.
         """
-        system = (
-            system_prompt
-            or "You are an expert business analyst specializing in technology "
-            "companies and private equity. Provide concise, data-driven insights."
-        )
+        system = system_prompt or get_system_prompt("system_business_analyst")
 
         create_kwargs: dict[str, Any] = {
             "model": model,
