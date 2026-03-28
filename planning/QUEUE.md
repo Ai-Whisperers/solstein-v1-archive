@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-03-28 | Updated By | Autonomous worker (M10 queuing) |
+| Last Updated | 2026-03-28 | Updated By | Autonomous worker (M12 queuing — EPIC-065 + EPIC-066) |
 
 ## Status Key
 
@@ -399,6 +399,34 @@ The first worker run MUST do a verification pass before starting implementation 
 | 121 | STORY-056 | Build LLM Output Evaluation Harness | DONE | PR #191 |
 | 122 | STORY-057 | Automate Local Development Setup | BLOCKED | Dep: STORY-059 (Dockerfile exists via EPIC-026, verify fully satisfies) |
 | 123 | STORY-058 | Write Developer Onboarding Documentation | BLOCKED | Dep: STORY-039 (not done) |
+
+---
+
+## M12: Documentation Lifecycle Automation and Architectural Integrity
+
+> M11 complete. M12: enforce docs quality through CI automation (EPIC-065) and eliminate live import cycles (EPIC-066). EPIC-065 deps satisfied (EPIC-063 DONE, EPIC-064 DONE). EPIC-066 blocked on EPIC-065 + EPIC-031.
+
+### EPIC-065: Documentation Lifecycle Automation and CI Enforcement (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 124 | STORY-242 | Generate AST Rule Catalog and Guardrail Registry | IN_PROGRESS | Partial work exists — needs CI reference + non-ast-grep gates |
+| 125 | STORY-243 | Generate Master Audit Issue Index and Keep It Current | IN_PROGRESS | Partial work exists — needs fix-verification reconciliation link |
+| 126 | STORY-244 | Enforce Generated Docs Freshness Through Git Hooks and CI | IN_PROGRESS | Partial work exists — needs CI workflow step |
+| 127 | STORY-238 | Implement CI Docs Quality Gates | READY | |
+| 128 | STORY-239 | Add Stale-Doc Detection and Ownership Alerts | READY | |
+| 129 | STORY-240 | Introduce Docs Review Checklist and Change-Control Workflow | READY | |
+| 130 | STORY-241 | Publish Docs Health Dashboard and Weekly Audit Automation | READY | |
+| 131 | STORY-245 | Expand Generated API Docs and Schema Registries | READY | |
+
+### EPIC-066: Architectural Boundaries and Cycle Elimination (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 132 | STORY-246 | Break patents_unified / discovery / registry cycle | BLOCKED | Dep: EPIC-065 (in progress), EPIC-031 (not done) |
+| 133 | STORY-247 | Move canonicalization and hashing helpers to lower shared boundary | BLOCKED | Dep: EPIC-065 (in progress), EPIC-031 (not done) |
+| 134 | STORY-248 | Decouple domain value objects from analytics constants | BLOCKED | Dep: EPIC-065 (in progress), EPIC-031 (not done) |
+| 135 | STORY-249 | Enforce import-cycle and module-boundary checks in maintained gates | BLOCKED | Dep: EPIC-065 (in progress), EPIC-031 (not done) |
 
 ---
 
