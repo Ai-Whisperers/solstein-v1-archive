@@ -396,7 +396,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 120 | STORY-055 | Centralize LLM Prompt Templates into Managed Registry | DONE | PR #190 |
-| 121 | STORY-056 | Build LLM Output Evaluation Harness | READY | STORY-055 complete — unblocked |
+| 121 | STORY-056 | Build LLM Output Evaluation Harness | IN_PROGRESS | STORY-055 complete — unblocked |
 | 122 | STORY-057 | Automate Local Development Setup | BLOCKED | Dep: STORY-059 (Dockerfile exists via EPIC-026, verify fully satisfies) |
 | 123 | STORY-058 | Write Developer Onboarding Documentation | BLOCKED | Dep: STORY-039 (not done) |
 
