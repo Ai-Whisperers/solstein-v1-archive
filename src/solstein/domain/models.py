@@ -737,6 +737,9 @@ class ScoringExplanation(BaseModel):
     base_score: float
     components: list[ScoreComponent] = Field(default_factory=list)
     final_score: float = 0.0
+    # STORY-207: Data confidence tracking
+    data_confidence: float = 1.0  # 0.0 to 1.0 — reduced when fields are None
+    data_warnings: list[str] = Field(default_factory=list)  # human-readable warnings
 
 
 class CompetitiveOverlap(BaseModel):
