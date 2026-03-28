@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from ...core.math_utils import safe_div
 from ...core.scoring_config import ScoringSettings
 from ...domain.models import (
     FinancialMetric,
@@ -171,7 +172,12 @@ class FinancialHealthScorer:
 
         # Convert revenue from millions to actual EUR for calculation
         revenue_eur = financials.revenue * 1_000_000
-        rev_per_emp = revenue_eur / financials.employees
+        rev_per_emp = safe_div(
+            revenue_eur, financials.employees,
+            default=None, label="revenue_per_employee_financial",
+        )
+        if rev_per_emp is None:
+            return score
 
         adj = 0.0
         if rev_per_emp > cfg.efficiency_exceptional_threshold:
@@ -206,7 +212,12 @@ class FinancialHealthScorer:
             return score
 
         # Both in millions, so ratio is unitless
-        ratio = financials.funding_raised / financials.revenue
+        ratio = safe_div(
+            financials.funding_raised, financials.revenue,
+            default=None, label="funding_to_revenue_ratio",
+        )
+        if ratio is None:
+            return score
         adj = 0.0
 
         if ratio > cfg.cushion_high_ratio:
