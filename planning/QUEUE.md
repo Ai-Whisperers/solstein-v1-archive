@@ -413,7 +413,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 124 | STORY-242 | Generate AST Rule Catalog and Guardrail Registry | DONE | PR #192 — ScriptGateRecord + 8 CI gates, guardrails.md, 18 tests |
 | 125 | STORY-243 | Generate Master Audit Issue Index and Keep It Current | DONE | PR #192 — reconciliation_protocol in JSON+MD |
 | 126 | STORY-244 | Enforce Generated Docs Freshness Through Git Hooks and CI | DONE | PR #192 — generated-docs-freshness.yml CI workflow |
-| 127 | STORY-238 | Implement CI Docs Quality Gates | READY | |
+| 127 | STORY-238 | Implement CI Docs Quality Gates | IN_PROGRESS | |
 | 128 | STORY-239 | Add Stale-Doc Detection and Ownership Alerts | READY | |
 | 129 | STORY-240 | Introduce Docs Review Checklist and Change-Control Workflow | READY | |
 | 130 | STORY-241 | Publish Docs Health Dashboard and Weekly Audit Automation | READY | |
