@@ -331,7 +331,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 95 | STORY-132 | Create Exception Handling Standards Document | DONE | PR #166 |
 | 96 | STORY-131 | Add Null Safety Guards for Division Operations | DONE | PR #167 — safe_div/safe_pct/safe_avg, 26 tests |
 | 97 | STORY-129 | Eliminate Silent None Returns in enhanced_client.py | DONE | PR #168 — classified exceptions, Prometheus metrics, health signals, 13 tests |
-| 98 | STORY-130 | Add Structured Logging to All Adapter Exception Handlers | IN_PROGRESS | Deps: STORY-132, EPIC-014 (done) |
+| 98 | STORY-130 | Add Structured Logging to All Adapter Exception Handlers | DONE | PR #169 — log_adapter_error() helper, 11 handlers updated, 5 tests |
 
 ### EPIC-059: Input Validation & Graceful Degradation (P1)
 
@@ -356,6 +356,23 @@ The first worker run MUST do a verification pass before starting implementation 
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-03-27 22:40] Worker Run — EPIC-034 Complete (4 stories)
+- **Epic**: EPIC-034 — Exception Handling Transparency (P1)
+- **Milestone**: M9 — Resilient Operations (first epic)
+- **Stories completed**:
+  - STORY-132: Create Exception Handling Standards Document (PR #166)
+  - STORY-131: Add Null Safety Guards for Division Operations (PR #167, 26 tests)
+  - STORY-129: Eliminate Silent None Returns in enhanced_client.py (PR #168, 13 tests)
+  - STORY-130: Add Structured Logging to All Adapter Exception Handlers (PR #169, 5 tests)
+- **Total new tests**: 44
+- **Key deliverables**:
+  - `docs/standards/exception-handling.md` — prescriptive standards with decision tree
+  - `core/math_utils.py` — safe_div/safe_pct/safe_avg (guards zero, None, NaN)
+  - Prometheus counters: `llm_requests_total`, `llm_errors_total`
+  - `adapters/logging.py` — shared structured logging helper
+  - TRY ruff rules enabled with gradual adoption strategy
+- **M9 status**: EPIC-034 DONE — next: EPIC-059 (Input Validation) now unblocked
 
 ### [2026-03-27 22:15] Worker Run — EPIC-048 Complete (5 stories)
 - **Epic**: EPIC-048 — Report Generation Quality (P1)
