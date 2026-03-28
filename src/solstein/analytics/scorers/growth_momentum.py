@@ -10,7 +10,7 @@ from ...domain.models import FinancialMetric, ScoreComponent, ScoringExplanation
 
 if TYPE_CHECKING:
     from ...infrastructure.repositories import FactRepository
-from ._shared import merge_facts_into_financials
+from ._shared import calculate_data_confidence, merge_facts_into_financials
 
 _STAGNANT_GROWTH_UPPER: float = 5.0
 _BELOW_AVERAGE_GROWTH_UPPER: float = 10.0
@@ -52,6 +52,15 @@ class GrowthMomentumScorer:
         # Merge facts from repository if available
         if fact_repo and company_id:
             financials = merge_facts_into_financials(financials, fact_repo, company_id)
+
+        # STORY-207: Calculate data confidence before scoring
+        data_confidence, data_warnings = calculate_data_confidence(financials)
+        explanation.data_confidence = data_confidence
+        explanation.data_warnings = data_warnings
+
+        if data_warnings:
+            for warning in data_warnings:
+                logger.warning(f"[EPIC-059] Growth scorer: {warning}")
 
         # Apply all scoring components
         score = self._score_growth_rate(financials, score, explanation, cfg)
