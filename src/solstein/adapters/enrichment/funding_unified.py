@@ -12,6 +12,7 @@ from typing import Any
 import requests
 from loguru import logger
 
+from solstein.adapters.logging import log_adapter_error
 from solstein.config import get_settings
 from solstein.data.additional_sources import AdditionalDataSources
 from solstein.domain.models import DataSourceType, RawDataSource
@@ -64,7 +65,13 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
                     "num_rounds": props.get("funding_rounds", 0),
                 }
         except Exception as e:  # noqa: BLE001
-            logger.warning("Crunchbase API error", error=str(e))
+            log_adapter_error(
+                component="FundingUnifiedSource",
+                operation="_get_crunchbase_data",
+                error=e,
+                entity_name=company_name,
+                level="warning",
+            )
 
         return None
 
@@ -88,7 +95,13 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
 
             return rounds
         except Exception as e:  # noqa: BLE001
-            logger.warning("Public funding search error", error=str(e))
+            log_adapter_error(
+                component="FundingUnifiedSource",
+                operation="_get_public_funding_data",
+                error=e,
+                entity_name=company_name,
+                level="warning",
+            )
             return []
 
     def discover(

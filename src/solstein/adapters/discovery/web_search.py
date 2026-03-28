@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from loguru import logger
 
+from solstein.adapters.logging import log_adapter_error
+
 
 class WebSearchDiscoverySource:
     """Wraps ``search_company_info()`` as a DiscoverySource."""
@@ -34,7 +36,13 @@ class WebSearchDiscoverySource:
 
             results = search_company_info(seed_company, query_type="general")
         except Exception as exc:
-            logger.warning("WebSearchDiscoverySource: search failed: {}", exc)
+            log_adapter_error(
+                component="WebSearchDiscoverySource",
+                operation="discover",
+                error=exc,
+                entity_name=seed_company,
+                level="warning",
+            )
             return []
 
         candidates: list[DiscoveryCandidate] = []

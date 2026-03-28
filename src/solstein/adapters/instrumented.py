@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
+from solstein.adapters.logging import log_adapter_error
 from solstein.adapters.protocols import DiscoverySource, EnrichmentSource
 from solstein.domain.models import DataSourceType, RawDataSource
 from solstein.research.discovery import DiscoveryCandidate
@@ -91,6 +92,13 @@ class InstrumentedEnrichmentSource:
                     company_name=company_name,
                 )
             )
+            log_adapter_error(
+                component=f"Instrumented:{self._inner.source_name}",
+                operation="enrich",
+                error=exc,
+                entity_id=company_id,
+                entity_name=company_name,
+            )
             raise
 
 
@@ -141,6 +149,12 @@ class InstrumentedDiscoverySource:
                     response_time_ms=round(elapsed_ms, 1),
                     error_message=str(exc),
                 )
+            )
+            log_adapter_error(
+                component=f"Instrumented:{self._inner.source_name}",
+                operation="discover",
+                error=exc,
+                entity_name=seed_company,
             )
             raise
 

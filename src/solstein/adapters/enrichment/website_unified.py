@@ -12,6 +12,7 @@ from typing import Any
 import requests
 from loguru import logger
 
+from solstein.adapters.logging import log_adapter_error
 from solstein.config import get_settings
 from solstein.domain.models import RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
@@ -117,7 +118,12 @@ class WebsiteUnifiedAdapter(BaseRefreshConnector):
             }
 
         except Exception as e:  # noqa: BLE001
-            logger.error(f"Error scraping {website}: {e}")
+            log_adapter_error(
+                component="WebsiteUnifiedSource",
+                operation="_scrape_website",
+                error=e,
+                entity_name=website,
+            )
             return {
                 "main_products": [],
                 "tech_stack": [],

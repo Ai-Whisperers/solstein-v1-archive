@@ -14,6 +14,8 @@ from typing import Any
 
 from loguru import logger
 
+from solstein.adapters.logging import log_adapter_error
+
 from solstein.domain.models import DataSourceType, RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 
@@ -44,7 +46,13 @@ class CompetitorJsonSource:
             loader = CompetitorDataLoader()
             companies = loader.load_companies()
         except Exception as exc:
-            logger.warning("CompetitorJsonSource: failed to load competitor data: {}", exc)
+            log_adapter_error(
+                component="CompetitorJsonSource",
+                operation="discover",
+                error=exc,
+                entity_name=market,
+                level="warning",
+            )
             return []
 
         source_url = "https://github.com/ai-whisperers/solstein/blob/main/data/input/competitor_data.json"
