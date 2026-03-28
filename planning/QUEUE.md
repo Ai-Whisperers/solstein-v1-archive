@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-03-27 | Updated By | Autonomous worker (M4 queuing) |
+| Last Updated | 2026-03-28 | Updated By | Autonomous worker (M10 queuing) |
 
 ## Status Key
 
@@ -352,6 +352,29 @@ The first worker run MUST do a verification pass before starting implementation 
 | 106 | STORY-103 | Stabilize Yahoo Finance Integration | DONE | PR #177 merged — Circuit breaker, DEGRADED detection, data freshness SLA, 15 tests |
 | 107 | STORY-104 | Add Slack and Email Notification Service | DONE | PR #178 merged — Slack webhook, Email SMTP, dispatcher with opt-out, 15 tests |
 | 108 | STORY-105 | Move File Exports to Supabase Storage | DONE | Already implemented by EPIC-030 STORY-115 (PR #149) |
+
+---
+
+## M10: Test & Code Quality
+
+> M9 complete. M10 focuses on test suite integrity and code quality. EPIC-013 has no dependencies. EPIC-035 depends on EPIC-021 + EPIC-028 (both DONE).
+
+### EPIC-013: Test Suite Integrity (P2)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 109 | STORY-044 | Fix autouse Fixture Masking in Test Suite | READY | No dependencies |
+| 110 | STORY-045 | Add Boundary Tests for All Scoring Tiers | READY | Deps: STORY-009, STORY-011 (EPIC-003 DONE) |
+| 111 | STORY-046 | Add Tests for Untested Core Modules | READY | No dependencies |
+
+### EPIC-035: Async-First External Adapters (P2)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 112 | STORY-133 | Replace requests with httpx in GitHub Agent | READY | Deps: EPIC-021, EPIC-028 (both DONE) |
+| 113 | STORY-134 | Replace requests with httpx in News and Funding Adapters | READY | Deps: STORY-133 |
+| 114 | STORY-135 | Replace requests with httpx in Companies House and Website Agents | READY | Deps: STORY-133 |
+| 115 | STORY-136 | Add Async HTTP Client Guidelines and Linting | READY | Deps: STORY-133-135 |
 
 ---
 
