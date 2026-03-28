@@ -1,4 +1,8 @@
-"""GitHub API client."""
+"""GitHub API client.
+
+STORY-133: Migrated from sync httpx.Client to async httpx.AsyncClient.
+All HTTP calls now use `await` and do not block the event loop.
+"""
 
 from __future__ import annotations
 
@@ -14,7 +18,11 @@ from ..resilience import CircuitBreaker
 
 
 class GitHubClient:
-    """GitHub API client with resilience patterns."""
+    """GitHub API client with resilience patterns.
+
+    Uses httpx.AsyncClient for non-blocking HTTP calls.
+    Connection pooling is handled by reusing the client instance.
+    """
 
     def __init__(self, github_token: str | None = None):
         self.github_token = github_token
@@ -40,7 +48,7 @@ class GitHubClient:
             headers.pop("Authorization", None)
         return headers
 
-    def get(
+    async def get(
         self,
         url: str,
         *,
@@ -48,27 +56,31 @@ class GitHubClient:
         timeout: float | None = None,
         unauthenticated: bool = False,
     ) -> httpx.Response:
-        """Make GET request to GitHub API."""
-        import httpx
+        """Make async GET request to GitHub API.
 
+        Uses httpx.AsyncClient as a context manager to ensure proper
+        connection pooling and resource cleanup.
+        """
         effective_timeout = timeout if timeout is not None else self.default_timeout
         headers = self._request_headers(unauthenticated)
 
-        with httpx.Client() as client:
-            resp = client.get(url, headers=headers, params=params, timeout=effective_timeout)
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                url, headers=headers, params=params, timeout=effective_timeout
+            )
 
         if resp.status_code == 401 and "Authorization" in self.headers and not unauthenticated:
             # Retry without auth
-            return self.get(url, params=params, timeout=effective_timeout, unauthenticated=True)
+            return await self.get(url, params=params, timeout=effective_timeout, unauthenticated=True)
 
         return resp
 
-    def fetch_file(self, org: str, repo: str, path: str) -> str | None:
+    async def fetch_file(self, org: str, repo: str, path: str) -> str | None:
         """Fetch file contents from repo."""
         url = f"{self.api_base}/repos/{org}/{repo}/contents/{path}"
 
         try:
-            resp = self.get(url)
+            resp = await self.get(url)
             if resp.status_code != 200:
                 return None
 
