@@ -11,6 +11,7 @@ from typing import Any
 from loguru import logger
 
 _TIER_PROXIMITY_NORMALIZER: float = 3.0
+from ..core.math_utils import safe_avg, safe_div, safe_pct
 from ..core.scoring_config import ScoringSettings
 from ..domain.models import (
     Company,
@@ -75,7 +76,7 @@ def _confidence_weight(
     confidences = [signal_confidences[s] for s in signal_names if s in signal_confidences]
     if not confidences:
         return 1.0
-    return sum(confidences) / len(confidences)
+    return safe_avg(confidences, default=1.0, label="signal_confidence_avg") or 1.0
 
 
 def _apply_confidence_weights(
@@ -290,15 +291,14 @@ class MarketAnalyzer:
         growth_rates = [
             p.financials.growth_rate for p in profiles if p.financials and p.financials.growth_rate is not None
         ]
-        avg_growth = sum(growth_rates) / len(growth_rates) if growth_rates else 0.0
+        avg_growth = safe_avg(growth_rates, default=0.0, label="market_avg_growth") or 0.0
 
         # Calculate CR4
         cr4 = 0.0
         if revenues:
             sorted_revenues = sorted(revenues, reverse=True)
             top_4 = sorted_revenues[:4]
-            if sum(revenues) > 0:
-                cr4 = sum(top_4) / sum(revenues) * 100
+            cr4 = safe_pct(sum(top_4), sum(revenues), default=0.0, label="cr4") or 0.0
 
         # Return Domain Entity
         return MarketAnalysis(
@@ -437,7 +437,10 @@ class MarketAnalyzer:
         revenues = [p.financials.revenue for p in profiles if p.financials.revenue]
         if revenues:
             total_revenue = sum(revenues)
-            market_shares = [r / total_revenue * 100 for r in revenues]
+            market_shares = [
+                safe_pct(r, total_revenue, default=0.0, label="market_share") or 0.0
+                for r in revenues
+            ]
             hhi = sum(share**2 for share in market_shares)
         else:
             hhi = 0.0
@@ -503,7 +506,7 @@ class CompetitiveOverlapCalculator:
         scores.append(tier_proximity)
 
         # Average the scores
-        return sum(scores) / len(scores) if scores else 0.0
+        return safe_avg(scores, default=0.0, label="similarity_score") or 0.0
 
     def _calculate_geographic_overlap(self, p1: Company, p2: Company) -> float:
         """Calculate geographic overlap (0-1)."""
@@ -516,7 +519,7 @@ class CompetitiveOverlapCalculator:
         intersection = len(set1.intersection(set2))
         union = len(set1.union(set2))
 
-        return intersection / union if union > 0 else 0.0
+        return safe_div(intersection, union, default=0.0, label="geographic_overlap") or 0.0
 
     def _calculate_technology_overlap(self, p1: Company, p2: Company) -> float:
         """Calculate technology stack overlap (0-1)."""
@@ -529,7 +532,7 @@ class CompetitiveOverlapCalculator:
         intersection = len(set1.intersection(set2))
         union = len(set1.union(set2))
 
-        return intersection / union if union > 0 else 0.0
+        return safe_div(intersection, union, default=0.0, label="technology_overlap") or 0.0
 
     def _calculate_customer_overlap(self, p1: Company, p2: Company) -> float:
         """Calculate customer overlap (0-1)."""
@@ -548,7 +551,7 @@ class CompetitiveOverlapCalculator:
                     common_terms += 1
 
         max_customers = max(len(p1.key_customers), len(p2.key_customers))
-        return common_terms / max_customers if max_customers > 0 else 0.0
+        return safe_div(common_terms, max_customers, default=0.0, label="customer_overlap") or 0.0
 
     def _calculate_tier_proximity(self, p1: Company, p2: Company) -> float:
         """Calculate tier proximity score (0-1)."""
@@ -558,4 +561,4 @@ class CompetitiveOverlapCalculator:
         tier2 = tier_order.get(p2.tier, 2)
 
         distance = abs(tier1 - tier2)
-        return 1.0 - (distance / _TIER_PROXIMITY_NORMALIZER)
+        return 1.0 - (safe_div(distance, _TIER_PROXIMITY_NORMALIZER, default=0.0) or 0.0)

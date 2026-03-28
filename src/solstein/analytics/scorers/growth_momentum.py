@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 
+from ...core.math_utils import safe_div
 from ...core.scoring_config import ScoringSettings
 from ...domain.models import FinancialMetric, ScoreComponent, ScoringExplanation
 
@@ -84,10 +85,11 @@ class GrowthMomentumScorer:
             return score
 
         growth_rate = financials.growth_rate
-        growth_factor = min(
-            growth_rate / cfg.revenue_growth_divisor,
-            cfg.revenue_growth_cap,
+        growth_quotient = safe_div(
+            growth_rate, cfg.revenue_growth_divisor,
+            default=0.0, label="growth_factor",
         )
+        growth_factor = min(growth_quotient or 0.0, cfg.revenue_growth_cap)
         score += growth_factor
 
         # Apply growth penalties
@@ -159,7 +161,12 @@ class GrowthMomentumScorer:
             return score
 
         revenue_eur = financials.revenue * 1_000_000
-        rev_per_emp = revenue_eur / financials.employees
+        rev_per_emp = safe_div(
+            revenue_eur, financials.employees,
+            default=None, label="revenue_per_employee_growth",
+        )
+        if rev_per_emp is None:
+            return score
         bonus = 0.0
 
         if rev_per_emp > cfg.efficiency_high_threshold:
