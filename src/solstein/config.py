@@ -198,7 +198,23 @@ class Settings(BaseSettings):
     github_token: str | None = Field(default=None)
     companies_house_api_key: str | None = Field(default=None)
     google_api_key: str | None = Field(default=None)
+    google_search_engine_id: str | None = Field(default=None)
     sec_user_agent: str | None = Field(default=None)
+
+    # STORY-101: SearXNG self-hosted meta-search engine (primary web search backend)
+    searxng_url: str = Field(
+        default="http://searxng:8080",
+        description="SearXNG instance URL. docker-compose provides this as a service.",
+    )
+    searxng_engines: str | None = Field(
+        default=None,
+        description="Comma-separated SearXNG engine list (e.g. 'google,bing,duckduckgo,brave').",
+    )
+    search_cache_ttl: int = Field(
+        default=3600,
+        ge=60,
+        description="Search result cache TTL in seconds (default: 1 hour).",
+    )
 
     # Data source APIs
     exa_api_key: str | None = Field(default=None)
@@ -207,16 +223,11 @@ class Settings(BaseSettings):
     patentsview_api_key: str | None = Field(default=None)
 
     # STORY-091: Top-level alias so CELERY_RESULT_EXPIRES_SECONDS env var works alongside
-    # the nested CELERY_TIMING__RESULT_EXPIRES. When set, celery_config.py uses this value
-    # instead of celery_timing.result_expires. Defaults to None (no override).
+    # the nested CELERY_TIMING__RESULT_EXPIRES.
     celery_result_expires_seconds: int | None = Field(
         default=None,
         ge=60,
-        description=(
-            "Override for Celery result TTL (seconds). Alias for CELERY_TIMING__RESULT_EXPIRES. "
-            "When set, takes precedence over celery_timing.result_expires. "
-            "Polling contract: callers must read results within this window or accept expiry."
-        ),
+        description="Override for Celery result TTL (seconds).",
     )
 
     connector_max_attempts: int = Field(default=3, ge=1, le=10)
@@ -243,19 +254,9 @@ class Settings(BaseSettings):
     celery_result_backend: str | None = Field(default=None)
     refresh_schedule: dict[str, Any] | None = Field(default=None)
 
-    llm_provider: str = Field(
-        default="auto",
-        description="LLM provider selection: auto|ollama|openai|groq|fireworks|mistral|deepinfra|gemini|nvidia|cerebras|kimi|anthropic|siliconflow|alibaba|none",
-    )
-    # STORY-075: Configurable provider fallback order
-    llm_provider_order: list[str] = Field(
-        default=["deepinfra", "mistral", "nvidia"],
-        description="Ordered list of LLM providers for fallback chain. First available is used.",
-    )
-    llm_circuit_breaker_enabled: bool = Field(
-        default=True,
-        description="Enable circuit breaker for LLM provider failover (STORY-075)",
-    )
+    llm_provider: str = Field(default="auto")
+    llm_provider_order: list[str] = Field(default=["deepinfra", "mistral", "nvidia"])
+    llm_circuit_breaker_enabled: bool = Field(default=True)
     ollama_url: str = Field(default="http://localhost:11434")
     ollama_model: str = Field(default="llama3.2:latest")
     openai_model: str = Field(default="gpt-4o-mini")
@@ -274,49 +275,23 @@ class Settings(BaseSettings):
     alibaba_api_key: str | None = Field(default=None)
     alibaba_model: str = Field(default="qwen-plus")
 
-    # OpenTelemetry (STORY-050): set to OTLP endpoint to enable tracing
+    # OpenTelemetry (STORY-050)
     otlp_endpoint: str | None = Field(default=None)
 
     # Langfuse observability (STORY-073)
-    langfuse_public_key: str | None = Field(default=None, description="Langfuse public key for tracing")
-    langfuse_secret_key: str | None = Field(default=None, description="Langfuse secret key for tracing")
-    langfuse_host: str = Field(
-        default="https://cloud.langfuse.com", description="Langfuse API host"
-    )
+    langfuse_public_key: str | None = Field(default=None)
+    langfuse_secret_key: str | None = Field(default=None)
+    langfuse_host: str = Field(default="https://cloud.langfuse.com")
 
-    # Embedding (EPIC-023: pgvector semantic search)
+    # Embedding (EPIC-023)
     embedding_model: str = Field(default="text-embedding-3-small")
     embedding_dimensions: int = Field(default=1536)
     embedding_batch_size: int = Field(default=50, ge=1, le=500)
 
     # STORY-079: LangGraph checkpointing and human-in-the-loop
-    graph_checkpoint_db_path: Path = Field(
-        default=Path("data/checkpoints/research_graph.db"),
-        description=(
-            "Path to SQLite database for LangGraph checkpoint store (STORY-079). "
-            "Must survive process restart. A crashed graph resumes from the last "
-            "successful node using this store."
-        ),
-    )
-    human_review_confidence_threshold: float = Field(
-        default=0.5,
-        ge=0.0,
-        le=1.0,
-        description=(
-            "Confidence threshold below which research results require human review "
-            "(STORY-079). When any company's confidence score falls below this value, "
-            "the pipeline pauses at the human_review_gate node and creates a review "
-            "queue entry. Lower values = fewer reviews. Start at 0.5; calibrate with "
-            "analyst feedback to target ~10-15%% of results."
-        ),
-    )
-    review_queue_db_path: Path = Field(
-        default=Path("data/checkpoints/review_queue.db"),
-        description=(
-            "Path to SQLite database for the human review queue (STORY-079). "
-            "Stores pending, approved, and rejected review entries."
-        ),
-    )
+    graph_checkpoint_db_path: Path = Field(default=Path("data/checkpoints/research_graph.db"))
+    human_review_confidence_threshold: float = Field(default=0.5, ge=0.0, le=1.0)
+    review_queue_db_path: Path = Field(default=Path("data/checkpoints/review_queue.db"))
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -329,7 +304,6 @@ class Settings(BaseSettings):
     @classmethod
     def load(cls) -> "Settings":
         """Load settings with environment variable overrides."""
-        # Try to load from .env file
         env_file = Path(".env")
         if env_file.exists():
             logger.info(f"Loading configuration from {env_file}")
@@ -337,14 +311,12 @@ class Settings(BaseSettings):
             logger.warning("No .env file found, using defaults")
 
         settings = cls()
-        settings._validate_runtime_safety()
+        _validate_runtime_safety(settings)
         settings.data.ensure_dirs()
 
-        # Log configuration summary
         logger.info(f"Environment: {settings.environment}")
         logger.info(f"Debug mode: {settings.debug}")
         logger.info(f"Data directory: {settings.data.data_dir}")
-
         return settings
 
     def get_database_url(self, test: bool = False) -> str:
@@ -356,83 +328,8 @@ class Settings(BaseSettings):
         return url
 
     def check_configuration(self) -> None:
-        """Check required configuration at startup.
-
-        Raises ConfigurationError if critical keys are missing.
-        Warns for optional keys. Logs a full startup summary.
-        """
-        self._validate_runtime_safety()
-
-        # Required: Database URL
-        if not self.database.url:
-            raise ConfigurationError(
-                "DATABASE__URL environment variable is required. Set DATABASE__URL before starting the application."
-            )
-
-        # STORY-067: Supabase Auth manages JWT signing externally.
-        # Validate Supabase URL and key if configured.
-        if self.supabase.url and not self.supabase.key:
-            logger.warning(
-                "SUPABASE__URL is set but SUPABASE__KEY is missing. "
-                "Supabase Auth will not function without a valid key."
-            )
-
-        # Required: GitHub token
-        if not (self.github_token or "").strip():
-            raise ConfigurationError(
-                "GITHUB_TOKEN environment variable is required. "
-                "Get a token from: https://github.com/settings/tokens and set it before starting."
-            )
-
-        # Optional data source keys
-        optional_data: dict[str, str | None] = {
-            "COMPANIES_HOUSE_API_KEY": self.companies_house_api_key,
-            "GOOGLE_API_KEY": self.google_api_key,
-            "EXA_API_KEY": self.exa_api_key,
-            "CRUNCHBASE_API_KEY": self.crunchbase_api_key,
-            "NEWS_API_KEY": self.news_api_key,
-            "SEC_USER_AGENT": self.sec_user_agent,
-        }
-        for name, value in optional_data.items():
-            if not value:
-                logger.warning(f"{name} not configured — related data gathering will be disabled.")
-
-        # LLM provider summary
-        llm_providers: dict[str, str | None] = {
-            "OPENAI_API_KEY": self.openai_api_key,
-            "ANTHROPIC_API_KEY": self.anthropic_api_key,
-            "GROQ_API_KEY": self.groq_api_key,
-            "GEMINI_API_KEY": self.gemini_api_key,
-            "FIREWORKS_API_KEY": self.fireworks_api_key,
-            "MISTRAL_API_KEY": self.mistral_api_key,
-            "DEEPINFRA_API_KEY": self.deepinfra_api_key,
-            "CEREBRAS_API_KEY": self.cerebras_api_key,
-            "KIMI_API_KEY": self.kimi_api_key,
-            "SILICONFLOW_API_KEY": self.siliconflow_api_key,
-            "ALIBABA_API_KEY": self.alibaba_api_key,
-            "NVIDIA_NIM_API_KEY": self.nvidia_nim_api_key,
-            "PERPLEXITY_API_KEY": self.perplexity_api_key,
-            "OLLAMA_URL": self.ollama_url if self.llm_provider == "ollama" else None,
-        }
-        configured = [name for name, val in llm_providers.items() if val]
-        missing = [name for name, val in llm_providers.items() if not val]
-
-        if not configured:
-            logger.warning(
-                "No LLM provider API keys configured. "
-                "AI features (report generation, analysis) will be unavailable. "
-                f"Set any of: {', '.join(llm_providers.keys())}"
-            )
-
-        configured_lines = [f"  ✓ {n}" for n in sorted(configured)]
-        missing_lines = [f"  - {n} (optional)" for n in sorted(missing)]
-
-        logger.info(
-            "Configuration validation passed.\n"
-            "───────────────────────────────────────────────\n"
-            "Startup Summary\n"
-            "───────────────────────────────────────────────\n" + "\n".join(configured_lines + missing_lines)
-        )
+        """Check required configuration at startup."""
+        _check_settings_configuration(self)
 
     @field_validator("environment", mode="before")
     @classmethod
@@ -442,30 +339,109 @@ class Settings(BaseSettings):
             return value or "development"
         return "development"
 
-    def _validate_runtime_safety(self) -> None:
-        if self.environment != "production":
-            return
 
-        # STORY-067: Supabase Auth manages JWT secrets externally.
-        # Validate Supabase config instead of local secret_key.
-        if not self.supabase.url or not self.supabase.key:
-            raise ConfigurationError(
-                "SUPABASE__URL and SUPABASE__KEY must be configured in production. "
-                "Supabase Auth manages authentication and JWT signing."
-            )
+# ---------------------------------------------------------------------------
+# Extracted validation helpers (keep Settings class under 300 lines)
+# ---------------------------------------------------------------------------
 
-        if self.debug:
-            raise ConfigurationError("DEBUG must be false in production.")
 
-        if self.debug_errors:
-            raise ConfigurationError("DEBUG_ERRORS must be false in production.")
+def _validate_runtime_safety(settings: Settings) -> None:
+    """Validate production safety constraints."""
+    if settings.environment != "production":
+        return
 
-        if not self.api.require_api_key:
-            raise ConfigurationError("API__REQUIRE_API_KEY must be true in production.")
+    if not settings.supabase.url or not settings.supabase.key:
+        raise ConfigurationError(
+            "SUPABASE__URL and SUPABASE__KEY must be configured in production. "
+            "Supabase Auth manages authentication and JWT signing."
+        )
 
-        lowered_db_url = self.database.url.lower()
-        if "postgres:postgres@" in self.database.url or "password" in lowered_db_url:
-            raise ConfigurationError("DATABASE__URL appears to use insecure default credentials in production.")
+    if settings.debug:
+        raise ConfigurationError("DEBUG must be false in production.")
+
+    if settings.debug_errors:
+        raise ConfigurationError("DEBUG_ERRORS must be false in production.")
+
+    if not settings.api.require_api_key:
+        raise ConfigurationError("API__REQUIRE_API_KEY must be true in production.")
+
+    lowered_db_url = settings.database.url.lower()
+    if "postgres:postgres@" in settings.database.url or "password" in lowered_db_url:
+        raise ConfigurationError("DATABASE__URL appears to use insecure default credentials in production.")
+
+
+def _check_settings_configuration(settings: Settings) -> None:
+    """Check required configuration at startup.
+
+    Raises ConfigurationError if critical keys are missing.
+    Warns for optional keys. Logs a full startup summary.
+    """
+    _validate_runtime_safety(settings)
+
+    if not settings.database.url:
+        raise ConfigurationError(
+            "DATABASE__URL environment variable is required. Set DATABASE__URL before starting the application."
+        )
+
+    if settings.supabase.url and not settings.supabase.key:
+        logger.warning(
+            "SUPABASE__URL is set but SUPABASE__KEY is missing. "
+            "Supabase Auth will not function without a valid key."
+        )
+
+    if not (settings.github_token or "").strip():
+        raise ConfigurationError(
+            "GITHUB_TOKEN environment variable is required. "
+            "Get a token from: https://github.com/settings/tokens and set it before starting."
+        )
+
+    optional_data: dict[str, str | None] = {
+        "COMPANIES_HOUSE_API_KEY": settings.companies_house_api_key,
+        "GOOGLE_API_KEY": settings.google_api_key,
+        "EXA_API_KEY": settings.exa_api_key,
+        "CRUNCHBASE_API_KEY": settings.crunchbase_api_key,
+        "NEWS_API_KEY": settings.news_api_key,
+        "SEC_USER_AGENT": settings.sec_user_agent,
+    }
+    for name, value in optional_data.items():
+        if not value:
+            logger.warning(f"{name} not configured — related data gathering will be disabled.")
+
+    llm_providers: dict[str, str | None] = {
+        "OPENAI_API_KEY": settings.openai_api_key,
+        "ANTHROPIC_API_KEY": settings.anthropic_api_key,
+        "GROQ_API_KEY": settings.groq_api_key,
+        "GEMINI_API_KEY": settings.gemini_api_key,
+        "FIREWORKS_API_KEY": settings.fireworks_api_key,
+        "MISTRAL_API_KEY": settings.mistral_api_key,
+        "DEEPINFRA_API_KEY": settings.deepinfra_api_key,
+        "CEREBRAS_API_KEY": settings.cerebras_api_key,
+        "KIMI_API_KEY": settings.kimi_api_key,
+        "SILICONFLOW_API_KEY": settings.siliconflow_api_key,
+        "ALIBABA_API_KEY": settings.alibaba_api_key,
+        "NVIDIA_NIM_API_KEY": settings.nvidia_nim_api_key,
+        "PERPLEXITY_API_KEY": settings.perplexity_api_key,
+        "OLLAMA_URL": settings.ollama_url if settings.llm_provider == "ollama" else None,
+    }
+    configured = [name for name, val in llm_providers.items() if val]
+    missing = [name for name, val in llm_providers.items() if not val]
+
+    if not configured:
+        logger.warning(
+            "No LLM provider API keys configured. "
+            "AI features (report generation, analysis) will be unavailable. "
+            f"Set any of: {', '.join(llm_providers.keys())}"
+        )
+
+    configured_lines = [f"  ✓ {n}" for n in sorted(configured)]
+    missing_lines = [f"  - {n} (optional)" for n in sorted(missing)]
+
+    logger.info(
+        "Configuration validation passed.\n"
+        "───────────────────────────────────────────────\n"
+        "Startup Summary\n"
+        "───────────────────────────────────────────────\n" + "\n".join(configured_lines + missing_lines)
+    )
 
 
 @lru_cache
