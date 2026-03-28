@@ -395,8 +395,8 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 120 | STORY-055 | Centralize LLM Prompt Templates into Managed Registry | READY | No deps — prompts.py exists, inline prompts remain in agent files |
-| 121 | STORY-056 | Build LLM Output Evaluation Harness | BLOCKED | Dep: STORY-055 |
+| 120 | STORY-055 | Centralize LLM Prompt Templates into Managed Registry | DONE | PR #190 |
+| 121 | STORY-056 | Build LLM Output Evaluation Harness | READY | STORY-055 complete — unblocked |
 | 122 | STORY-057 | Automate Local Development Setup | BLOCKED | Dep: STORY-059 (Dockerfile exists via EPIC-026, verify fully satisfies) |
 | 123 | STORY-058 | Write Developer Onboarding Documentation | BLOCKED | Dep: STORY-039 (not done) |
 
@@ -407,6 +407,29 @@ The first worker run MUST do a verification pass before starting implementation 
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-03-28 07:30 AEST] Worker Run — EPIC-063 Complete + STORY-055 Complete
+
+**Epics worked**: EPIC-063 (Documentation Topology, P1) ✅ + EPIC-017 STORY-055 ✅
+
+**EPIC-063 — Documentation Topology and Source-of-Truth Governance**
+All 4 stories shipped in a single worker cycle:
+- **STORY-230** — docs/governance/docs-topology.md (canonical topology map, 4 doc classes, ownership matrix) → PR #186
+- **STORY-231** — docs/governance/mirror-retirement-plan.md (dry-run: 236 files, 3-phase plan, approval gates for Phase 3) → PR #189
+- **STORY-232** — docs/governance/epic-naming-convention.md (EPIC-{NNN}-{slug}, anomaly registry) → PR #187
+- **STORY-233** — docs/governance/archival-policy.md (lifecycle states, 5 CI-checkable rules, archival log) → PR #188
+Status: All 4 PRs open against develop, all checks pass.
+
+**EPIC-017 STORY-055 — Centralize LLM Prompt Templates**
+- All inline LLM system-prompt strings moved to `solstein/llm/prompts.py` registry
+- Files updated: `query/{anthropic_querier,cloud,ollama}.py`, `instructor_client.py`, `structured_client.py`, `research/research_agents.py`, `analytics/filters/llm.py`
+- Added `get_system_prompt()` convenience function; fixed JSON brace escaping in `system_company_filter`
+- Bonus quality improvements: `CloudProviderContext` dataclass (cloud.py param reduction), `_ExtractionRequest` dataclass (instructor_client.py), lifted lazy imports
+- 24 new unit tests, all pass
+- PR #190 open against develop
+- **STORY-056 now READY** (dep: STORY-055 satisfied)
+
+**Next recommended story**: STORY-056 — Build LLM Output Evaluation Harness (EPIC-017, no remaining deps)
 
 ### [2026-03-28 21:32 AEST] Work Checker Run
 - **PRs merged**: 4 — #182 (STORY-133), #183 (STORY-134), #184 (STORY-135), #185 (STORY-136) — all EPIC-035
