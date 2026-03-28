@@ -320,6 +320,37 @@ The first worker run MUST do a verification pass before starting implementation 
 
 ---
 
+## M9: Resilient Operations
+
+> M8 complete. M9 focuses on exception handling transparency, input validation, and external service resilience. Dependencies satisfied: EPIC-014 (Observability), EPIC-021 (LLM Stack), EPIC-046 (Scoring), EPIC-047 (Data Loading), EPIC-019/020 (Auth/Tenancy) all DONE.
+
+### EPIC-034: Exception Handling Transparency (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 95 | STORY-132 | Create Exception Handling Standards Document | IN_PROGRESS | No deps — standards doc that other stories reference |
+| 96 | STORY-131 | Add Null Safety Guards for Division Operations | READY | Deps: STORY-132 |
+| 97 | STORY-129 | Eliminate Silent None Returns in enhanced_client.py | READY | Deps: STORY-132, EPIC-021 (done) |
+| 98 | STORY-130 | Add Structured Logging to All Adapter Exception Handlers | READY | Deps: STORY-132, EPIC-014 (done) |
+
+### EPIC-059: Input Validation & Graceful Degradation (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 99 | STORY-206 | TBD | BLOCKED | Deps: EPIC-034 completion recommended first |
+| 100 | STORY-207 | TBD | BLOCKED | Deps: EPIC-034 |
+| 101 | STORY-208 | TBD | BLOCKED | Deps: EPIC-034 |
+| 102 | STORY-209 | TBD | BLOCKED | Deps: EPIC-034 |
+| 103 | STORY-210 | TBD | BLOCKED | Deps: EPIC-034 |
+
+### EPIC-028: External Service Consolidation (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 104-108 | — | See EPIC-028 README for stories | BLOCKED | Deps: EPIC-034 recommended first |
+
+---
+
 ## Orchestrator Log
 
 Worker and checker append timestamped entries here:
