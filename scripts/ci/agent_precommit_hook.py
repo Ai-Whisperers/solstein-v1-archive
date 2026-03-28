@@ -7,6 +7,7 @@ Runs quality checks before allowing commits.
 
 from __future__ import annotations
 
+import ast as _ast
 import subprocess
 import sys
 from pathlib import Path
@@ -120,6 +121,40 @@ def check_lazy_imports(files: list[Path]) -> bool:
     return True
 
 
+def check_banned_imports(files: list[Path]) -> bool:
+    """Check for banned `import requests` in adapter/agent code (STORY-136)."""
+    BANNED = {"requests"}
+    violations = []
+
+    for file in files:
+        if not file.exists() or "tests/" in str(file):
+            continue
+
+        try:
+            content = file.read_text()
+            tree = _ast.parse(content)
+
+            for node in _ast.walk(tree):
+                if isinstance(node, _ast.Import):
+                    for alias in node.names:
+                        if alias.name in BANNED:
+                            violations.append(f"{file}:{node.lineno}: `import {alias.name}` is banned (use httpx)")
+                elif isinstance(node, _ast.ImportFrom):
+                    if node.module and node.module.split(".")[0] in BANNED:
+                        violations.append(
+                            f"{file}:{node.lineno}: `from {node.module} import ...` is banned (use httpx)"
+                        )
+        except SyntaxError:
+            pass
+
+    if violations:
+        print("❌ Banned imports found (use httpx instead of requests):")
+        for v in violations:
+            print(f"  - {v}")
+        return False
+    return True
+
+
 def check_file_size(files: list[Path], max_lines: int = 500) -> bool:
     """Check if any modified files exceed size limits."""
     violations = []
@@ -161,6 +196,7 @@ def print_quality_checklist():
     print("  □ Error handling is explicit (no silent catches)")
     print("  □ Type hints used for function signatures")
     print("  □ Google-style docstrings for public functions")
+    print("  □ No `import requests` (use httpx — EPIC-035)")
     print("  □ New code does not increase smell count")
     print("=" * 60)
     print()
@@ -344,6 +380,14 @@ def main():
         all_passed = False
     else:
         print("   ✅ All files within 500 lines")
+    print()
+
+    # Check 7: Banned imports (STORY-136)
+    print("7️⃣  Checking for banned imports...")
+    if not check_banned_imports(files):
+        all_passed = False
+    else:
+        print("   ✅ No banned imports (requests) found")
     print()
 
     if all_passed:
