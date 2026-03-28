@@ -338,10 +338,10 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 99 | STORY-206 | Implement Company Model Field Validation | DONE | PR #170 — 33 tests |
-| 100 | STORY-207 | Add None-Safety to GrowthScorer | IN_PROGRESS | Deps: STORY-206 (DONE) |
-| 101 | STORY-208 | Add Confidence Score Preservation from Metric Lineage | READY | Deps: STORY-204 (DONE) |
-| 102 | STORY-209 | Implement Validation Before Scoring | BLOCKED | Deps: STORY-206, STORY-207 |
-| 103 | STORY-210 | Add Robustness Tests for Incomplete Data | BLOCKED | Deps: STORY-206, 207, 209 |
+| 100 | STORY-207 | Add None-Safety to GrowthScorer | DONE | PR #171 — 16 tests, confidence tracking in both scorers |
+| 101 | STORY-208 | Add Confidence Score Preservation from Metric Lineage | IN_PROGRESS | Deps: STORY-204 (DONE) |
+| 102 | STORY-209 | Implement Validation Before Scoring | READY | Deps: STORY-206 (DONE), STORY-207 (DONE) |
+| 103 | STORY-210 | Add Robustness Tests for Incomplete Data | BLOCKED | Deps: STORY-206 (DONE), 207 (DONE), 209 |
 
 ### EPIC-028: External Service Consolidation (P1)
 
