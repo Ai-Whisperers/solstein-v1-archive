@@ -129,6 +129,7 @@ select = [
     "N",
     "SIM",
     "TCH",
+    "TRY",   # STORY-132: Exception handling lint rules
 ]
 ignore = [
     "B008",
@@ -159,6 +160,11 @@ ignore = [
     "TC002",
     "TC003",
     "TC006",
+    "TRY003",  # STORY-132: raise-vanilla-args — 351 pre-existing, gradual cleanup
+    "TRY300",  # STORY-132: try-consider-else — 97 pre-existing, style preference
+    "TRY301",  # STORY-132: raise-within-try — 18 pre-existing, gradual cleanup
+    "TRY004",  # STORY-132: type-check-without-type-error — 8 pre-existing, style preference
+    "TRY400",  # STORY-132: error-instead-of-exception — 75 pre-existing, gradual cleanup
     "UP017",
     "UP036",
     "UP042",
