@@ -4,6 +4,7 @@ STORY-071: Refactored from 284→96 lines. Retry/failover in failover.py,
 JSON parsing in json_parsing.py. Anthropic uses native AsyncAnthropic SDK.
 STORY-073: Added Langfuse tracing via LLMTracer.
 STORY-075: Integrated FallbackChain with circuit breakers and template fallback.
+STORY-129: Classified exception handling with Prometheus metrics and health signals.
 """
 from __future__ import annotations
 
@@ -14,7 +15,9 @@ from loguru import logger
 from pydantic import BaseModel
 
 from ..config import get_settings
+from ..monitoring.metrics import LLM_ERRORS_TOTAL, LLM_REQUESTS_TOTAL
 from .fallback import TEMPLATE_FALLBACK_RESPONSE, FallbackChain
+from .health.errors import ErrorClassifier
 from .health_checker import ProviderHealthChecker, get_health_checker
 from .json_parsing import parse_structured_result
 from .query import AnthropicQuerier, CloudProviderQuerier
@@ -46,6 +49,7 @@ class EnhancedLLMClient:
         self.health_checker = health_checker or get_health_checker()
         self._fallback = fallback_chain or FallbackChain(self.settings)
         self._clients: dict[str, Any] = {}
+        self._error_classifier = ErrorClassifier()
         self.cloud_querier = CloudProviderQuerier()
         self.anthropic_querier = AnthropicQuerier()
 
@@ -103,7 +107,12 @@ class EnhancedLLMClient:
         return parse_structured_result(result, schema) if result else None
 
     async def _query_provider(self, provider: str, prompt: str, system_prompt: str | None) -> Any:
-        """Query a provider and emit a Langfuse trace (STORY-073)."""
+        """Query a provider with classified error handling (STORY-129).
+
+        Exceptions are classified into ProviderErrorType categories, emitted
+        as Prometheus metrics, reported to the health checker, and logged with
+        structured fields before being re-raised for the FallbackChain.
+        """
         client = self._get_client(provider)
         if not client:
             raise RuntimeError(f"No client available for {provider}")
@@ -115,13 +124,41 @@ class EnhancedLLMClient:
             else:
                 result = await self.cloud_querier.query(client, provider, model, prompt, system_prompt)
             elapsed = time.monotonic() - start
+
+            # Record success traces and metrics
             get_tracer(self.settings).record(TraceRecord(
                 prompt=prompt[:500], provider=provider, model=model,
                 latency_s=elapsed, success=True,
             ))
+            LLM_REQUESTS_TOTAL.labels(provider=provider, model=model, status="success").inc()
+            self.health_checker.report_success(provider)
             return result
+
         except Exception as exc:
             elapsed = time.monotonic() - start
+            classified = self._error_classifier.classify(exc, provider)
+
+            # Structured logging with required fields per exception-handling.md
+            logger.error(
+                "[EnhancedLLMClient] Provider query failed",
+                component="EnhancedLLMClient",
+                operation="_query_provider",
+                error_type=classified.error_type.value,
+                message=str(exc),
+                provider=provider,
+                model=model,
+                latency_s=f"{elapsed:.3f}",
+                status_code=classified.status_code,
+            )
+
+            # Prometheus metrics — classified error counters
+            LLM_REQUESTS_TOTAL.labels(provider=provider, model=model, status="error").inc()
+            LLM_ERRORS_TOTAL.labels(provider=provider, error_type=classified.error_type.value).inc()
+
+            # Signal health checker with explicit failure type
+            self.health_checker.report_error(provider, exc)
+
+            # Langfuse trace
             get_tracer(self.settings).record(TraceRecord(
                 prompt=prompt[:500], provider=provider, model=model,
                 latency_s=elapsed, success=False, error=str(exc),
