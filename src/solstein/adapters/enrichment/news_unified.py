@@ -4,12 +4,16 @@ Converts news functionality from additional_sources to a unified adapter
 implementing the full UnifiedDataSource protocol.
 
 Uses NewsAPI.org as primary with web search fallback.
+
+STORY-134: Replaced requests with httpx. fetch_facts uses asyncio.gather
+for concurrent per-company fetches.
 """
 
+import asyncio
 from datetime import datetime, timedelta
 from typing import Any
 
-import requests
+import httpx
 from loguru import logger
 
 from solstein.adapters.logging import log_adapter_error
@@ -21,12 +25,35 @@ from solstein.infrastructure.database import db_manager as default_db_manager
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
 
+_POSITIVE_WORDS = [
+    "growth", "profit", "revenue", "success", "win", "launch",
+    "expand", "innovation", "leader", "partnership", "award",
+    "acquisition", "positive", "strong", "beat", "bullish",
+]
+
+_NEGATIVE_WORDS = [
+    "loss", "lawsuit", "investigation", "scandal", "fire", "layoff",
+    "bankruptcy", "decline", "weak", "miss", "warning", "fraud",
+    "investor", "concern", "risk",
+]
+
+
+def analyze_sentiment(text: str) -> str:
+    """Simple keyword-based sentiment analysis."""
+    text_lower = text.lower()
+    pos_count = sum(1 for w in _POSITIVE_WORDS if w in text_lower)
+    neg_count = sum(1 for w in _NEGATIVE_WORDS if w in text_lower)
+    if pos_count > neg_count + 1:
+        return "positive"
+    elif neg_count > pos_count + 1:
+        return "negative"
+    return "neutral"
+
 
 class NewsUnifiedAdapter(BaseRefreshConnector):
     """Unified News adapter implementing the full protocol.
 
     Fetches news coverage for companies using NewsAPI and web search.
-    Includes sentiment analysis of articles.
 
     Confidence: 0.70
     Authority: NEWS_API
@@ -41,57 +68,11 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
         )
         self.news_api_key = news_api_key
 
-    def _analyze_sentiment(self, text: str) -> str:
-        """Simple keyword-based sentiment analysis."""
-        text_lower = text.lower()
-
-        positive_words = [
-            "growth",
-            "profit",
-            "revenue",
-            "success",
-            "win",
-            "launch",
-            "expand",
-            "innovation",
-            "leader",
-            "partnership",
-            "award",
-            "acquisition",
-            "positive",
-            "strong",
-            "beat",
-            "bullish",
-        ]
-        negative_words = [
-            "loss",
-            "lawsuit",
-            "investigation",
-            "scandal",
-            "fire",
-            "layoff",
-            "bankruptcy",
-            "decline",
-            "weak",
-            "miss",
-            "warning",
-            "fraud",
-            "investor",
-            "concern",
-            "risk",
-        ]
-
-        pos_count = sum(1 for w in positive_words if w in text_lower)
-        neg_count = sum(1 for w in negative_words if w in text_lower)
-
-        if pos_count > neg_count + 1:
-            return "positive"
-        elif neg_count > pos_count + 1:
-            return "negative"
-        return "neutral"
+    # Keep backward-compatible alias
+    _analyze_sentiment = staticmethod(analyze_sentiment)
 
     def _get_news_from_api(self, company_name: str, days_back: int = 30) -> list[dict[str, Any]]:
-        """Get news using NewsAPI.org."""
+        """Get news using NewsAPI.org (sync, uses httpx)."""
         if not self.news_api_key:
             return []
 
@@ -108,7 +89,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
 
         try:
             _settings = get_settings()
-            response = requests.get(url, params=params, timeout=_settings.http_timeouts.news_api)
+            response = httpx.get(url, params=params, timeout=_settings.http_timeouts.news_api)
             data = response.json()
 
             articles: list[dict[str, Any]] = []
@@ -132,10 +113,62 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
 
             return articles
 
-        except Exception as e:  # noqa: BLE001
+        except (httpx.HTTPError, httpx.TimeoutException, OSError) as e:
             log_adapter_error(
                 component="NewsUnifiedSource",
                 operation="_fetch_from_api",
+                error=e,
+                entity_name=company_name,
+            )
+            return []
+
+    async def _get_news_from_api_async(self, company_name: str, days_back: int = 30) -> list[dict[str, Any]]:
+        """Get news using NewsAPI.org (async, uses httpx.AsyncClient)."""
+        if not self.news_api_key:
+            return []
+
+        from_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
+
+        url = "https://newsapi.org/v2/everything"
+        params = {
+            "q": company_name,
+            "from": from_date,
+            "sortBy": "relevancy",
+            "pageSize": 50,
+            "apiKey": self.news_api_key,
+        }
+
+        try:
+            _settings = get_settings()
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, params=params, timeout=_settings.http_timeouts.news_api)
+            data = response.json()
+
+            articles: list[dict[str, Any]] = []
+            for article in data.get("articles", [])[:20]:
+                published = article.get("publishedAt")
+                if published:
+                    published = datetime.fromisoformat(published.replace("Z", "+00:00"))
+
+                sentiment = self._analyze_sentiment(article.get("title", "") + " " + (article.get("description") or ""))
+
+                articles.append(
+                    {
+                        "title": article.get("title", ""),
+                        "description": article.get("description"),
+                        "source": article.get("source", {}).get("name", "Unknown"),
+                        "url": article.get("url", ""),
+                        "published_at": published or datetime.now(),
+                        "sentiment": sentiment,
+                    }
+                )
+
+            return articles
+
+        except (httpx.HTTPError, httpx.TimeoutException, OSError) as e:
+            log_adapter_error(
+                component="NewsUnifiedSource",
+                operation="_fetch_from_api_async",
                 error=e,
                 entity_name=company_name,
             )
@@ -225,28 +258,38 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
         start_date: datetime | None = None,
         end_date: datetime | None = None,
     ) -> list[dict[str, Any]]:
-        """Fetch news facts for companies."""
-        import asyncio
+        """Fetch news facts for companies concurrently.
+
+        STORY-134: Uses asyncio.gather for concurrent per-company fetches
+        instead of sequential asyncio.to_thread calls.
+        """
+        async def _fetch_one(company_name: str) -> dict[str, Any] | None:
+            articles = await self._get_news_from_api_async(company_name, 7)
+            if articles:
+                return {
+                    "company_id": company_name,
+                    "fact_type": "news_coverage",
+                    "value": {
+                        "articles": articles[:10],
+                        "article_count": len(articles),
+                    },
+                    "confidence": self.confidence,
+                    "extracted_at": datetime.now(),
+                    "source": self.source_name,
+                }
+            return None
+
+        results = await asyncio.gather(
+            *[_fetch_one(cid) for cid in company_ids],
+            return_exceptions=True,
+        )
 
         facts: list[dict[str, Any]] = []
-
-        for company_name in company_ids:
-            articles = await asyncio.to_thread(self._get_news_from_api, company_name, 7)
-
-            if articles:
-                facts.append(
-                    {
-                        "company_id": company_name,
-                        "fact_type": "news_coverage",
-                        "value": {
-                            "articles": articles[:10],
-                            "article_count": len(articles),
-                        },
-                        "confidence": self.confidence,
-                        "extracted_at": datetime.now(),
-                        "source": self.source_name,
-                    }
-                )
+        for i, result in enumerate(results):
+            if isinstance(result, BaseException):
+                logger.warning(f"[NewsUnifiedAdapter] fetch_facts failed for {company_ids[i]}: {result}")
+            elif result is not None:
+                facts.append(result)
 
         return facts
 

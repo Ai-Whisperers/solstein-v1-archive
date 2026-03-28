@@ -4,12 +4,16 @@ Converts funding functionality from additional_sources to a unified adapter
 implementing the full UnifiedDataSource protocol.
 
 Uses Crunchbase API when available, falls back to public sources.
+
+STORY-134: Replaced requests with httpx. fetch_facts uses asyncio.gather
+for concurrent per-company fetches.
 """
 
+import asyncio
 from datetime import datetime
 from typing import Any
 
-import requests
+import httpx
 from loguru import logger
 
 from solstein.adapters.logging import log_adapter_error
@@ -43,7 +47,7 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
         self.crunchbase_api_key = crunchbase_api_key
 
     def _get_crunchbase_data(self, company_name: str) -> dict[str, Any] | None:
-        """Get funding data from Crunchbase API."""
+        """Get funding data from Crunchbase API (sync, uses httpx)."""
         if not self.crunchbase_api_key:
             return None
 
@@ -52,7 +56,7 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
 
         try:
             _settings = get_settings()
-            response = requests.get(url, headers=headers, timeout=_settings.http_timeouts.funding)
+            response = httpx.get(url, headers=headers, timeout=_settings.http_timeouts.funding)
             if response.status_code == 200:
                 data = response.json()
                 props = data.get("properties", {})
@@ -64,10 +68,44 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
                     "last_round_valuation": props.get("valuation"),
                     "num_rounds": props.get("funding_rounds", 0),
                 }
-        except Exception as e:  # noqa: BLE001
+        except (httpx.HTTPError, httpx.TimeoutException, OSError) as e:
             log_adapter_error(
                 component="FundingUnifiedSource",
                 operation="_get_crunchbase_data",
+                error=e,
+                entity_name=company_name,
+                level="warning",
+            )
+
+        return None
+
+    async def _get_crunchbase_data_async(self, company_name: str) -> dict[str, Any] | None:
+        """Get funding data from Crunchbase API (async, uses httpx.AsyncClient)."""
+        if not self.crunchbase_api_key:
+            return None
+
+        url = f"https://api.crunchbase.com/v4/organizations/{company_name}"
+        headers = {"Authorization": f"Bearer {self.crunchbase_api_key}"}
+
+        try:
+            _settings = get_settings()
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, headers=headers, timeout=_settings.http_timeouts.funding)
+            if response.status_code == 200:
+                data = response.json()
+                props = data.get("properties", {})
+                return {
+                    "total_raised": props.get("total_funding"),
+                    "last_round_amount": props.get("last_funding_amount"),
+                    "last_round_date": props.get("last_funded_at"),
+                    "last_round_stage": props.get("last_funding_stage"),
+                    "last_round_valuation": props.get("valuation"),
+                    "num_rounds": props.get("funding_rounds", 0),
+                }
+        except (httpx.HTTPError, httpx.TimeoutException, OSError) as e:
+            log_adapter_error(
+                component="FundingUnifiedSource",
+                operation="_get_crunchbase_data_async",
                 error=e,
                 entity_name=company_name,
                 level="warning",
@@ -182,25 +220,36 @@ class FundingUnifiedAdapter(BaseRefreshConnector):
         start_date: datetime | None = None,
         end_date: datetime | None = None,
     ) -> list[dict[str, Any]]:
-        """Fetch funding facts for companies."""
-        import asyncio
+        """Fetch funding facts for companies concurrently.
+
+        STORY-134: Uses asyncio.gather for concurrent per-company fetches
+        instead of sequential asyncio.to_thread calls.
+        """
+
+        async def _fetch_one(company_name: str) -> dict[str, Any] | None:
+            crunchbase_data = await self._get_crunchbase_data_async(company_name)
+            if crunchbase_data:
+                return {
+                    "company_id": company_name,
+                    "fact_type": "funding_summary",
+                    "value": crunchbase_data,
+                    "confidence": self.confidence,
+                    "extracted_at": datetime.now(),
+                    "source": self.source_name,
+                }
+            return None
+
+        results = await asyncio.gather(
+            *[_fetch_one(cid) for cid in company_ids],
+            return_exceptions=True,
+        )
 
         facts: list[dict[str, Any]] = []
-
-        for company_name in company_ids:
-            crunchbase_data = await asyncio.to_thread(self._get_crunchbase_data, company_name)
-
-            if crunchbase_data:
-                facts.append(
-                    {
-                        "company_id": company_name,
-                        "fact_type": "funding_summary",
-                        "value": crunchbase_data,
-                        "confidence": self.confidence,
-                        "extracted_at": datetime.now(),
-                        "source": self.source_name,
-                    }
-                )
+        for i, result in enumerate(results):
+            if isinstance(result, BaseException):
+                logger.warning(f"[FundingUnifiedAdapter] fetch_facts failed for {company_ids[i]}: {result}")
+            elif result is not None:
+                facts.append(result)
 
         return facts
 
