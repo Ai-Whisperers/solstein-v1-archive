@@ -12,6 +12,7 @@ from typing import Any
 import requests
 from loguru import logger
 
+from solstein.adapters.logging import log_adapter_error
 from solstein.config import get_settings
 from solstein.domain.models import RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
@@ -132,7 +133,12 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
             return articles
 
         except Exception as e:  # noqa: BLE001
-            logger.error("Error fetching news from API", error=str(e))
+            log_adapter_error(
+                component="NewsUnifiedSource",
+                operation="_fetch_from_api",
+                error=e,
+                entity_name=company_name,
+            )
             return []
 
     def discover(

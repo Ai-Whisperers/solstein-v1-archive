@@ -15,6 +15,7 @@ from typing import Any
 
 from loguru import logger
 
+from solstein.adapters.logging import log_adapter_error
 from solstein.data.web_search_client import (
     search_company_info,
     search_company_news,
@@ -107,7 +108,12 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
             return candidates
 
         except Exception as e:
-            logger.error("Web search discovery failed", error=str(e))
+            log_adapter_error(
+                component="WebSearchUnifiedSource",
+                operation="discover",
+                error=e,
+                entity_name=seed_company,
+            )
             return []
 
     def enrich(
@@ -167,7 +173,13 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
             return raw_data
 
         except Exception as e:
-            logger.error("Web search enrichment failed", error=str(e))
+            log_adapter_error(
+                component="WebSearchUnifiedSource",
+                operation="enrich",
+                error=e,
+                entity_id=company_id,
+                entity_name=company_name,
+            )
             # Return empty raw data source
             return RawDataSource(
                 source_name=self.source_name,
@@ -246,7 +258,13 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
                     )
 
             except Exception as e:
-                logger.warning(f"Failed to fetch web search data for {company_name}: {e}")
+                log_adapter_error(
+                    component="WebSearchUnifiedSource",
+                    operation="fetch_facts",
+                    error=e,
+                    entity_name=company_name,
+                    level="warning",
+                )
                 continue
 
         return facts

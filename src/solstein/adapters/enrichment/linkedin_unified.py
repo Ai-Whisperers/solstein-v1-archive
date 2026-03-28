@@ -12,6 +12,7 @@ from typing import Any
 
 from loguru import logger
 
+from solstein.adapters.logging import log_adapter_error
 from solstein.domain.models import RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
@@ -70,7 +71,13 @@ class LinkedInUnifiedAdapter(BaseRefreshConnector):
                 "sentiment": news.sentiment_score,
             }
         except Exception as e:
-            logger.warning("LinkedIn signal error", error=str(e))
+            log_adapter_error(
+                component="LinkedInUnifiedSource",
+                operation="_get_hiring_signals",
+                error=e,
+                entity_name=company_name,
+                level="warning",
+            )
             return {
                 "ai_related_positions": None,
                 "hiring_mentions": 0,
