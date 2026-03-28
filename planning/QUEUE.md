@@ -372,9 +372,9 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 112 | STORY-133 | Replace requests with httpx in GitHub Agent | DONE | PR #182 |
-| 113 | STORY-134 | Replace requests with httpx in News and Funding Adapters | IN_PROGRESS | Deps: STORY-133 (DONE) |
-| 114 | STORY-135 | Replace requests with httpx in Companies House and Website Agents | READY | Deps: STORY-133 |
-| 115 | STORY-136 | Add Async HTTP Client Guidelines and Linting | READY | Deps: STORY-133-135 |
+| 113 | STORY-134 | Replace requests with httpx in News and Funding Adapters | DONE | PR #183 |
+| 114 | STORY-135 | Replace requests with httpx in Companies House and Website Agents | DONE | PR #184 |
+| 115 | STORY-136 | Add Async HTTP Client Guidelines and Linting | DONE | PR #185 |
 
 ---
 
@@ -383,6 +383,23 @@ The first worker run MUST do a verification pass before starting implementation 
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-03-28 05:30 AEST] Worker Run — EPIC-035 Complete (4 stories)
+- **Epic**: EPIC-035 — Async-First External Adapters (P2)
+- **Milestone**: M10
+- **Stories completed**:
+  - STORY-133: Replace requests with httpx in GitHub Agent (PR #182, previous session)
+  - STORY-134: Replace requests with httpx in News and Funding Adapters (PR #183, 21 tests)
+  - STORY-135: Replace requests with httpx in Companies House and Website Agents (PR #184, 16 tests)
+  - STORY-136: Add Async HTTP Client Guidelines and Linting (PR #185, 4 tests)
+- **Total new tests**: 41
+- **Key deliverables**:
+  - All adapter/agent HTTP calls migrated from `requests` to `httpx`
+  - Async methods use `httpx.AsyncClient` with `asyncio.gather()` for concurrency
+  - `docs/developers/async-http-guidelines.md` — comprehensive usage guide
+  - `scripts/ci/check_banned_imports.py` — AST-based CI enforcement
+  - Pre-commit hook check 7: banned import detection
+- **M10 status**: EPIC-013 DONE (3 stories), EPIC-035 DONE (4 stories)
 
 ### [2026-03-28 16:31 AEST] Work Checker Run
 - **PRs merged**: 0 — no open PRs
