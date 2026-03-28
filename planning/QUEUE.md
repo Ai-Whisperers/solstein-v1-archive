@@ -340,8 +340,8 @@ The first worker run MUST do a verification pass before starting implementation 
 | 99 | STORY-206 | Implement Company Model Field Validation | DONE | PR #170 — 33 tests |
 | 100 | STORY-207 | Add None-Safety to GrowthScorer | DONE | PR #171 — 16 tests, confidence tracking in both scorers |
 | 101 | STORY-208 | Add Confidence Score Preservation from Metric Lineage | DONE | PR #172 — 18 tests, default 0.50, narrative formatting |
-| 102 | STORY-209 | Implement Validation Before Scoring | IN_PROGRESS | Deps: STORY-206 (DONE), STORY-207 (DONE) |
-| 103 | STORY-210 | Add Robustness Tests for Incomplete Data | READY | Deps: STORY-206 (DONE), 207 (DONE), 209 (in progress) |
+| 102 | STORY-209 | Implement Validation Before Scoring | DONE | PR #173 merged |
+| 103 | STORY-210 | Add Robustness Tests for Incomplete Data | DONE | PR #174 merged |
 
 ### EPIC-028: External Service Consolidation (P1)
 
@@ -909,3 +909,12 @@ Worker and checker append timestamped entries here:
 - **Dependencies unblocked**: None — remaining epics blocked on unwritten story definitions
 - **Branch hygiene**: Deleted 9 remote feature branches + 9 local merged branches. Pruned refs. 2 remote branches remain (develop, master).
 - **Actions taken**: Merged 9 PRs (all MERGEABLE despite UNSTABLE CI — failures are systemic, not PR-specific). Note: 9 Dependabot security vulnerabilities flagged (2 critical, 3 high).
+
+### [2026-03-28 12:36] Work Checker Run
+- **PRs merged**: 5 total — #170 (STORY-206), #171 (STORY-207), #172 (STORY-208), #173 (STORY-209), #174 (STORY-210)
+- **PRs rebased**: 1 successful (#172 conflicted after #170-171 merged, rebased cleanly), 0 failed
+- **Open PRs**: 0 remaining — queue clear
+- **Queue**: M1-M8 all DONE. EPIC-049 5/5 DONE (STORY-209/210 merged). EPIC-034 BLOCKED (no stories). EPIC-028 BLOCKED on EPIC-034. EPIC-052 BLOCKED (no story files).
+- **Dependencies unblocked**: None — remaining epics blocked on unwritten story definitions
+- **Branch hygiene**: Deleted 5 remote + 5 local merged branches. Fixed PRs #173/#174 base from master→develop. 2 remote branches remain (develop, master).
+- **Actions taken**: Fixed 2 PR bases (master→develop), merged 5 PRs, rebased 1 conflict, updated STORY-209/210 to DONE. 11 Dependabot vulnerabilities flagged (2 critical, 5 high).
