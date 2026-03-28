@@ -1,7 +1,12 @@
-"""GitHub analyzers for extracting insights from repositories."""
+"""GitHub analyzers for extracting insights from repositories.
+
+STORY-133: DependencyAnalyzer.analyze migrated to async for non-blocking file fetches.
+"""
 
 from __future__ import annotations
 
+import asyncio
+import json
 import re
 from typing import Any
 
@@ -134,22 +139,37 @@ class DependencyAnalyzer:
     def __init__(self, client: GitHubClient):
         self.client = client
 
-    def analyze(self, org_name: str, repos: list[GitHubRepo]) -> DependencyHealth | None:
-        """Analyze dependency health."""
+    async def analyze(self, org_name: str, repos: list[GitHubRepo]) -> DependencyHealth | None:
+        """Analyze dependency health.
+
+        STORY-133: Now async. File fetches for each repo are gathered concurrently.
+        """
         python_deps: dict[str, dict] = {}
         js_deps: dict[str, dict] = {}
 
-        for repo in repos[:5]:  # Limit to top 5 repos
-            # Parse Python requirements
-            reqs_text = self.client.fetch_file(org_name, repo.name, "requirements.txt")
+        # Fetch all dependency files concurrently across repos
+        limited_repos = repos[:5]
+        fetch_tasks = []
+        for repo in limited_repos:
+            fetch_tasks.append(self.client.fetch_file(org_name, repo.name, "requirements.txt"))
+            fetch_tasks.append(self.client.fetch_file(org_name, repo.name, "package.json"))
+
+        results = await asyncio.gather(*fetch_tasks, return_exceptions=True)
+
+        for i, repo in enumerate(limited_repos):
+            reqs_result = results[i * 2]
+            pkg_result = results[i * 2 + 1]
+
+            # Parse Python requirements (skip if fetch failed)
+            reqs_text = reqs_result if isinstance(reqs_result, str) else None
             if reqs_text:
                 for dep in self._parse_requirements_txt(reqs_text):
                     name = dep.get("name")
                     if name and name not in python_deps:
                         python_deps[name] = dep
 
-            # Parse JS package.json
-            pkg_text = self.client.fetch_file(org_name, repo.name, "package.json")
+            # Parse JS package.json (skip if fetch failed)
+            pkg_text = pkg_result if isinstance(pkg_result, str) else None
             if pkg_text:
                 for name, spec in self._parse_package_json_deps(pkg_text).items():
                     if name not in js_deps:
@@ -215,8 +235,6 @@ class DependencyAnalyzer:
 
     def _parse_package_json_deps(self, text: str) -> dict[str, str]:
         """Parse package.json dependencies."""
-        import json
-
         try:
             data = json.loads(text)
         except json.JSONDecodeError:
