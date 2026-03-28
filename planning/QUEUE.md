@@ -312,8 +312,8 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 90 | STORY-181 | Fix Report Output Path Nesting Bug | IN_PROGRESS | |
-| 91 | STORY-182 | Round All Score Outputs to 2 Decimal Places | READY | |
+| 90 | STORY-181 | Fix Report Output Path Nesting Bug | DONE | PR #161 |
+| 91 | STORY-182 | Round All Score Outputs to 2 Decimal Places | IN_PROGRESS | |
 | 92 | STORY-183 | Fix Market Overview Classification Counters | READY | |
 | 93 | STORY-184 | Replace Boilerplate Deep Analysis with Signal-Based Weaknesses | READY | |
 | 94 | STORY-185 | Add Report Content Quality Assertions to Tests | READY | Depends on STORY-181-184 |
