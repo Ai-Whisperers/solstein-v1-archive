@@ -396,7 +396,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 120 | STORY-055 | Centralize LLM Prompt Templates into Managed Registry | DONE | PR #190 |
-| 121 | STORY-056 | Build LLM Output Evaluation Harness | IN_PROGRESS | STORY-055 complete — unblocked |
+| 121 | STORY-056 | Build LLM Output Evaluation Harness | DONE | PR #191 |
 | 122 | STORY-057 | Automate Local Development Setup | BLOCKED | Dep: STORY-059 (Dockerfile exists via EPIC-026, verify fully satisfies) |
 | 123 | STORY-058 | Write Developer Onboarding Documentation | BLOCKED | Dep: STORY-039 (not done) |
 
@@ -1117,4 +1117,16 @@ Status: All 4 PRs open against develop, all checks pass.
 - **Queue**: M1-M9 DONE. M10: EPIC-013 3/3 DONE. EPIC-035 4 stories READY.
 - **Dependencies unblocked**: EPIC-013 now fully DONE (all 3 stories merged this run)
 - **Branch hygiene**: Fixed 3 PRs targeting master → develop. Deleted 3 merged branches. 2 remotes remain.
+
+### [2026-03-28] Worker Run — STORY-056 Complete (EPIC-017)
+- **Epic**: EPIC-017 — Developer Experience (P2)
+- **Stories completed**: STORY-056 — Build LLM Output Evaluation Harness
+- **PRs created**: #191
+- **Quality**: pre-commit hooks pass, 48 tests pass, 7 skip (llm_eval marker — require ANTHROPIC_API_KEY)
+- **Deliverables**:
+  - `pytest.ini`: `llm_eval` marker registered
+  - `tests/llm_eval/conftest.py`: `anthropic_client` + `eval_model` fixtures, auto-skip guard
+  - `tests/llm_eval/test_eval_live_llm.py`: 5 live cases (fintech, enterprise SaaS, unknown startup, energy, biotech) + 2 negative-path cases
+  - `docs/developers/llm-eval-guide.md`: authoring guide + CI integration
+- **EPIC-017 remaining**: STORY-057 (BLOCKED — dep: Dockerfile verify), STORY-058 (BLOCKED — dep: STORY-039)
 - **Actions taken**: Base-branch fix (3 PRs), merge (3 PRs), rebase+conflict-resolve (#180), branch cleanup, queue update.
