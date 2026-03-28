@@ -316,7 +316,7 @@ The first worker run MUST do a verification pass before starting implementation 
 | 91 | STORY-182 | Round All Score Outputs to 2 Decimal Places | DONE | PR #162 |
 | 92 | STORY-183 | Fix Market Overview Classification Counters | DONE | PR #163 |
 | 93 | STORY-184 | Replace Boilerplate Deep Analysis with Signal-Based Weaknesses | DONE | PR #164 |
-| 94 | STORY-185 | Add Report Content Quality Assertions to Tests | IN_PROGRESS | Depends on STORY-181-184 |
+| 94 | STORY-185 | Add Report Content Quality Assertions to Tests | DONE | PR #165 |
 
 ---
 
@@ -325,6 +325,18 @@ The first worker run MUST do a verification pass before starting implementation 
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-03-27 22:15] Worker Run — EPIC-048 Complete (5 stories)
+- **Epic**: EPIC-048 — Report Generation Quality (P1)
+- **Stories completed**:
+  - STORY-181: Fix Report Output Path Nesting Bug (PR #161, 6 tests)
+  - STORY-182: Round All Score Outputs to 2 Decimal Places (PR #162, 6 tests)
+  - STORY-183: Fix Market Overview Classification Counters (PR #163, 8 tests)
+  - STORY-184: Signal-Based Deep Analysis Strengths/Weaknesses (PR #164, 27 tests)
+  - STORY-185: Report Content Quality Assertions (PR #165, 15 tests)
+- **Total new tests**: 62
+- **Fixes**: path nesting, raw float output, broken markdown tables, dead code, boilerplate analysis
+- **M8 status**: COMPLETE — all 5 stories DONE
 
 ### [2026-03-28 11:00] Work Checker Run
 - **PRs merged**: 0 — no open PRs
