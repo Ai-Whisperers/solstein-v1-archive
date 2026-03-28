@@ -1,0 +1,85 @@
+name: Stale Docs Detection
+
+on:
+  schedule:
+    # Run every Monday at 08:00 UTC — weekly staleness report
+    - cron: '0 8 * * 1'
+  pull_request:
+    branches: [develop, main, master]
+    paths:
+      - 'scripts/ci/check_stale_docs.py'
+      - 'scripts/ci/stale-docs-policy.json'
+      - 'scripts/ci/stale-docs-allowlist.json'
+      - '.github/workflows/stale-docs.yml'
+  workflow_dispatch:
+    inputs:
+      fail_on_stale:
+        description: 'Fail the workflow if stale docs are found'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stale-docs:
+    name: Stale Doc Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history required for git log age detection
+
+      - uses: ./.github/workflows/composite/setup-python
+
+      - name: Run stale-doc detector (docs)
+        id: stale_docs
+        run: |
+          FAIL_FLAG=""
+          if [ "${{ inputs.fail_on_stale }}" = "true" ]; then
+            FAIL_FLAG="--fail"
+          fi
+          python scripts/ci/check_stale_docs.py --path docs $FAIL_FLAG --json \
+            > /tmp/stale-docs-report.json
+          python scripts/ci/check_stale_docs.py --path docs $FAIL_FLAG
+
+      - name: Run stale-doc detector (backlog)
+        run: |
+          FAIL_FLAG=""
+          if [ "${{ inputs.fail_on_stale }}" = "true" ]; then
+            FAIL_FLAG="--fail"
+          fi
+          python scripts/ci/check_stale_docs.py --path backlog $FAIL_FLAG
+
+      - name: Upload stale-docs report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stale-docs-report
+          path: /tmp/stale-docs-report.json
+          retention-days: 30
+
+      - name: Summary
+        if: always()
+        run: |
+          ACTIONABLE=$(python3 -c "import json; d=json.load(open('/tmp/stale-docs-report.json')); print(d['actionable_stale_count'])")
+          SCANNED=$(python3 -c "import json; d=json.load(open('/tmp/stale-docs-report.json')); print(d['total_scanned'])")
+          echo "## Stale Docs Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Docs scanned: \`${SCANNED}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Actionable stale docs: \`${ACTIONABLE}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${ACTIONABLE}" -gt "0" ]; then
+            echo "### Stale Docs by Owner" >> $GITHUB_STEP_SUMMARY
+            echo "Run \`make docs-stale-check\` locally for the full list." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "To suppress a false positive, add an entry to \`scripts/ci/stale-docs-allowlist.json\`." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No stale docs found." >> $GITHUB_STEP_SUMMARY
+          fi
