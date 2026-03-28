@@ -378,6 +378,30 @@ The first worker run MUST do a verification pass before starting implementation 
 
 ---
 
+## M11: Documentation Governance & Developer Experience
+
+> M10 complete. M11 focuses on documentation topology governance (making backlog/docs ownership explicit and drift-free) and developer experience improvements. Dependencies verified: EPIC-043 DONE (req. for EPIC-063), EPIC-013 DONE (req. for EPIC-017).
+
+### EPIC-063: Documentation Topology and Source-of-Truth Governance (P1)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 116 | STORY-230 | Define Canonical Docs Topology and Ownership Matrix | IN_PROGRESS | |
+| 117 | STORY-231 | Resolve Mirrored Backlog Trees with One-Way Sync or Migration | READY | Risk: HIGH — requires dry-run report before execution |
+| 118 | STORY-232 | Normalize Epic Directory Naming and Remove Topology Anomalies | READY | |
+| 119 | STORY-233 | Establish Archival and Deprecation Metadata Policy | READY | |
+
+### EPIC-017: Developer Experience (P2)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 120 | STORY-055 | Centralize LLM Prompt Templates into Managed Registry | READY | No deps — prompts.py exists, inline prompts remain in agent files |
+| 121 | STORY-056 | Build LLM Output Evaluation Harness | BLOCKED | Dep: STORY-055 |
+| 122 | STORY-057 | Automate Local Development Setup | BLOCKED | Dep: STORY-059 (Dockerfile exists via EPIC-026, verify fully satisfies) |
+| 123 | STORY-058 | Write Developer Onboarding Documentation | BLOCKED | Dep: STORY-039 (not done) |
+
+---
+
 ## Orchestrator Log
 
 Worker and checker append timestamped entries here:
