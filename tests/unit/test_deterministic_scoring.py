@@ -5,6 +5,10 @@ Ensures that the scoring engine produces identical results across multiple runs.
 This is critical for reproducibility and auditability of company assessments.
 """
 
+import random
+from copy import deepcopy
+from unittest.mock import patch
+
 import pytest
 
 from solstein.analytics.scoring import GrowthScorer
@@ -20,10 +24,15 @@ class TestDeterministicScoring:
         return GrowthScorer()
 
     @pytest.fixture
-    def unified_companies(self):
-        """Load unified companies."""
+    def unified_companies(self, mock_competitor_data):
+        """Load unified companies (uses mock data via explicit fixture).
+
+        STORY-044: Explicitly requests mock_competitor_data and patches
+        _load_markdown_companies to avoid needing a real market data directory.
+        """
         loader = UnifiedCompanyLoader()
-        return loader.load_unified_companies()
+        with patch.object(loader, "_load_markdown_companies", return_value=[]):
+            return loader.load_unified_companies()
 
     @pytest.fixture
     def eneve(self, unified_companies):
@@ -108,8 +117,6 @@ class TestDeterministicScoring:
 
     def test_no_random_state_dependency(self, scorer, eneve):
         """Test that scoring doesn't depend on random state."""
-        import random
-
         # Set different random seeds and verify scoring is still deterministic
         scores = []
         for seed in [42, 123, 999]:
@@ -135,8 +142,6 @@ class TestDeterministicScoring:
 
     def test_company_copy_produces_same_score(self, scorer, eneve):
         """Test that scoring a copy of a company produces the same score."""
-        from copy import deepcopy
-
         eneve_copy = deepcopy(eneve)
 
         scored_original = scorer.calculate_scores(eneve)

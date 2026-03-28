@@ -5,6 +5,8 @@ Verify that AI maturity levels are consistent with AI scores.
 Fixes contradictions like 'Strong' maturity with 0/10 score.
 """
 
+from unittest.mock import patch
+
 import pytest
 
 from solstein.data.unified_loader import UnifiedCompanyLoader
@@ -20,9 +22,10 @@ class TestAIMaturityConsistency:
         return UnifiedCompanyLoader()
 
     @pytest.fixture
-    def companies(self, loader):
+    def companies(self, loader, mock_competitor_data):
         """Get all unified companies."""
-        return loader.load_unified_companies()
+        with patch.object(loader, "_load_markdown_companies", return_value=[]):
+            return loader.load_unified_companies()
 
     def test_eneve_ai_maturity_consistency(self, companies):
         """Test that Eneve has consistent AI maturity and score."""

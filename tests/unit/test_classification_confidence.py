@@ -4,6 +4,8 @@ Task 11: Classification Confidence Scoring Tests
 Verify that classification confidence is calculated and available.
 """
 
+from unittest.mock import patch
+
 import pytest
 
 from solstein.analytics.classification import (
@@ -24,9 +26,10 @@ class TestClassificationConfidence:
         return UnifiedCompanyLoader()
 
     @pytest.fixture
-    def companies(self, loader):
+    def companies(self, loader, mock_competitor_data):
         """Get all unified companies."""
-        return loader.load_unified_companies()
+        with patch.object(loader, "_load_markdown_companies", return_value=[]):
+            return loader.load_unified_companies()
 
     @pytest.fixture
     def scorer(self):
