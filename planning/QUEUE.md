@@ -384,6 +384,16 @@ Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
 
+### [2026-03-28 20:05 AEST] Worker Run — No Stories Available (Queue Exhausted)
+- **Queue status**: M1-M10 all DONE (115 stories, 30 epics). No change since last run.
+- **BLOCKED**: EPIC-052 — still no story files in STORIES/ dir (project owner action needed)
+- **Open PRs**: 4 — #182-185 (EPIC-035) — all blocked by GitHub Actions billing issue (not code problems)
+- **CI diagnosis**: Confirmed: "The job was not started because recent account payments have failed or your spending limit needs to be increased"
+- **Unqueued epics with stories**: ~22 epics exist with story files but are not triaged into QUEUE.md
+- **Top candidates for M11**: EPIC-010 (API Layer Hardening, P1, dep: EPIC-043 DONE), EPIC-063 (Doc Topology, P1, dep: EPIC-043 DONE), EPIC-066 (Architectural Boundaries, P1, dep: EPIC-065+031), EPIC-012 (Type Safety, P2), EPIC-017 (Developer Experience)
+- **Action needed**: (1) Fix GitHub Actions billing to unblock PRs #182-185, (2) Project owner planning session to triage M11+ epics
+- **Actions taken**: Queue scan, CI diagnosis confirmed billing issue, lock cleanup. No implementation work.
+
 ### [2026-03-28 18:35 AEST] Work Checker Run
 - **PRs merged**: 0 — all 4 open PRs (#182-185) have CI failures (jobs have no steps, likely GitHub Actions minutes/billing issue)
 - **PRs rebased**: 0 — all MERGEABLE, no git conflicts
