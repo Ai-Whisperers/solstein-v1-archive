@@ -363,7 +363,7 @@ The first worker run MUST do a verification pass before starting implementation 
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 109 | STORY-044 | Fix autouse Fixture Masking in Test Suite | READY | No dependencies |
+| 109 | STORY-044 | Fix autouse Fixture Masking in Test Suite | IN_PROGRESS | No dependencies |
 | 110 | STORY-045 | Add Boundary Tests for All Scoring Tiers | READY | Deps: STORY-009, STORY-011 (EPIC-003 DONE) |
 | 111 | STORY-046 | Add Tests for Untested Core Modules | READY | No dependencies |
 
