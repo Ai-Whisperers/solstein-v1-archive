@@ -28,10 +28,10 @@ This epic creates hard quality gates so untrusted or low-confidence data cannot 
 
 | Story | Title | Priority | Status |
 |-------|-------|----------|--------|
-| STORY-198 | Enforce provenance completeness at enrichment write boundary | P0 | 🔴 Not Started |
-| STORY-199 | Implement confidence calibration profile per source/reliability tier | P1 | 🔴 Not Started |
-| STORY-200 | Add quality-gate policy before scoring and export | P0 | 🔴 Not Started |
-| STORY-201 | Add CI contract tests for provenance, confidence, and synthetic gates | P1 | 🔴 Not Started |
+| [STORY-198](STORIES/STORY-198-enforce-provenance-completeness-at-write-boundary.md) | Enforce provenance completeness at enrichment write boundary | P0 | 🔴 Not Started |
+| [STORY-199](STORIES/STORY-199-confidence-calibration-profile-per-source-tier.md) | Implement confidence calibration profile per source/reliability tier | P1 | 🔴 Not Started |
+| [STORY-200](STORIES/STORY-200-quality-gate-before-scoring-and-export.md) | Add quality-gate policy before scoring and export | P0 | 🔴 Not Started |
+| [STORY-201](STORIES/STORY-201-ci-contract-tests-for-provenance-confidence-and-synthetic-gates.md) | Add CI contract tests for provenance, confidence, and synthetic gates | P1 | 🔴 Not Started |
 
 ## Target Integration Points
 
@@ -70,3 +70,34 @@ This epic creates hard quality gates so untrusted or low-confidence data cannot 
 ## Notes
 
 This epic is the trust boundary. Without it, improved acquisition can still produce polished garbage. With it, every score is quality-qualified and auditable.
+
+## Autonomous Continuation Notes
+
+### Queue Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` before starting any story here.
+- `planning/QUEUE.md` last marked this epic `BLOCKED` because canonical story files were missing.
+- This pass adds canonical story files for `STORY-198` through `STORY-201`, so future agents must re-check the queue blocker text before implementation instead of trusting the old reason blindly.
+
+### Develop-Relevant Evidence
+
+- The current develop branch already contains stricter batch-enrichment boundary models in `src/solstein/api/schemas/enrichment.py` and `src/solstein/data/unified/batch_outcomes.py`.
+- `tests/unit/test_issue11_batch_enrichment_outcomes.py` is the closest existing regression anchor for explicit typed outcomes, partial-status validation, and aggregate consistency checks.
+- Future provenance/confidence work should follow this explicit boundary-contract style instead of introducing loose intermediary dict payloads.
+
+### Next Agent Action
+
+- Use the new canonical story files to plan the next queue update or implementation pass.
+- Preferred execution order remains: provenance write-boundary enforcement -> confidence calibration -> pre-scoring/export quality gate -> CI contract tests.
+
+### Required Working Style
+
+- Use `docs/reference/SCHEMA_INVENTORY_AND_VALIDATION_NOTES.md` as the boundary map.
+- Use `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md` as the anti-slop rule set: prefer strict schemas, deterministic gates, and generated/checked artifacts over prose summaries.
+- Do not allow loose dict payloads to cross enrichment, scoring, export, or worker boundaries without an explicit validator.
+
+### Minimum Verification For Future Agents
+
+- Add regression coverage for every new gate.
+- Prove gate behavior in both pass and fail modes.
+- Keep verification focused on machine-checkable outputs: schema validation, targeted tests, and gate commands rather than narrative inspection.

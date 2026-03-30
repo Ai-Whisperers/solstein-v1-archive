@@ -65,3 +65,29 @@ There is no consistent lifecycle enforcement from authoring through archival.
 - Docs quality trends are visible in a single dashboard.
 - Generated audit and AST indexes are committed and refreshed automatically.
 - Repo hooks and CI prevent stale generated docs from being pushed.
+
+## Autonomous Continuation Notes
+
+### Queue Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` before continuing this epic.
+- `planning/QUEUE.md` shows `STORY-242` through `STORY-244` complete on `develop`.
+- The only remaining active story in this epic is `STORY-245`, currently `READY`.
+
+### Next Agent Action
+
+- Continue with `STORY-245` only.
+- Keep the work source-derived: expand generated API docs and schema registries from code, schemas, and audited structural inputs rather than hand-written summaries.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md` and the tokenless-doc direction in `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Do not add broad manual docs that restate code. Prefer generated references, schema inventories, and machine-refreshable indexes.
+- Preserve the strict-docs honesty rule: only maintained docs belong in blocking gates.
+
+### Minimum Verification For Future Agents
+
+- Run `make docs-strict`.
+- Run `make docs-generated-check`.
+- Run `make docs-quality-check`.
+- If the work changes maintained engineering references, finish with `make gate-engineering` or document the exact pre-existing blocker.

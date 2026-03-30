@@ -134,3 +134,32 @@ Add test fixtures for:
 - Company with only employees
 - Company with both None (should fail validation)
 - Company with partial growth_rate (should score with reduced confidence)
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This epic currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently schedule this epic, treat it as triage-required backlog inventory instead of self-startable work.
+
+### Develop-Relevant Evidence
+
+- `tests/unit/test_story209_validation_before_scoring.py` already exists and should be treated as a real boundary-validation anchor rather than a future placeholder.
+- `STORY-206` through `STORY-210` already encode Pydantic `ValidationError` expectations and conversion/scoring validation behavior in a machine-checkable way.
+- Future work should extend these validation-before-scoring contracts, not create a second detached validation pass.
+
+### Next Agent Action
+
+- Reconcile this epic against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before selecting a story.
+- Do not start implementation from this README alone unless the queue or a fresh planning decision activates the epic.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Prefer narrow, machine-checkable progress over broad narrative backlog churn.
+
+### Minimum Verification For Future Agents
+
+- If this epic is reactivated, update the queue or controlling planning artifact first.
+- Then execute one story at a time with the relevant tests, gates, and generated references for the touched surface.
