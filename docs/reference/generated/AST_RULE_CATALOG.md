@@ -1,6 +1,6 @@
 # AST Rule Catalog
 
-Generated on `2026-03-27` from `tooling/ast-grep/rules`.
+Generated on `2026-03-30` from `tooling/ast-grep/rules`.
 
 This is a generated index of the repository's `ast-grep` structural guardrails.
 
