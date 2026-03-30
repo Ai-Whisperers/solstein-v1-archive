@@ -1,0 +1,67 @@
+name: Docs Quality Gates
+
+on:
+  pull_request:
+    branches: [develop, main, master]
+    paths:
+      - 'docs/**'
+      - 'backlog/**'
+      - 'scripts/ci/check_docs_quality.py'
+      - 'scripts/ci/docs-quality-allowlist.json'
+      - '.github/workflows/docs-quality-gates.yml'
+  push:
+    branches: [develop]
+    paths:
+      - 'docs/**'
+      - 'backlog/**'
+  workflow_dispatch:
+    inputs:
+      strict:
+        description: 'Run in strict mode (warnings become blocking)'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-quality:
+    name: Docs Quality Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/workflows/composite/setup-python
+
+      - name: Run docs quality gate
+        id: quality
+        run: |
+          STRICT_FLAG=""
+          if [ "${{ inputs.strict }}" = "true" ]; then
+            STRICT_FLAG="--strict"
+          fi
+          python scripts/ci/check_docs_quality.py --path docs $STRICT_FLAG
+          python scripts/ci/check_docs_quality.py --path backlog $STRICT_FLAG
+
+      - name: Summary on failure
+        if: failure() && steps.quality.outcome == 'failure'
+        run: |
+          echo "## Docs Quality Gate Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "One or more blocking violations were found in the docs." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**To fix:**" >> $GITHUB_STEP_SUMMARY
+          echo "1. Remove or resolve the flagged placeholder tokens / missing metadata." >> $GITHUB_STEP_SUMMARY
+          echo "2. If the pattern is intentional, add an allowlist entry to \`scripts/ci/docs-quality-allowlist.json\`." >> $GITHUB_STEP_SUMMARY
+          echo "   Every allowlist entry requires: \`owner\`, \`rationale\`, \`expiry\`, and \`pattern\`." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run locally:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "make docsquality-check" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

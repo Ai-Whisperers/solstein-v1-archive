@@ -1,0 +1,84 @@
+name: Docs Health Dashboard
+
+on:
+  schedule:
+    # Run every Monday at 09:00 UTC (after stale-docs at 08:00)
+    - cron: '0 9 * * 1'
+  push:
+    branches: [develop]
+    paths:
+      - 'scripts/docs/generate_docs_health.py'
+      - 'scripts/docs/generate_all.py'
+      - 'scripts/ci/check_stale_docs.py'
+      - 'scripts/ci/stale-docs-policy.json'
+      - 'docs/audit/generated/MASTER_AUDIT_ISSUE_INDEX.json'
+      - '.github/workflows/docs-health-dashboard.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate-dashboard:
+    name: Generate Docs Health Dashboard
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write  # Required to commit updated dashboard
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history required for stale-docs age detection
+
+      - uses: ./.github/workflows/composite/setup-python
+
+      - name: Install docs dependencies
+        run: pip install mkdocs mkdocs-material
+
+      - name: Generate health dashboard
+        run: |
+          cd scripts/docs
+          python generate_docs_health.py
+
+      - name: Upload dashboard artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-health-dashboard
+          path: |
+            docs/reference/generated/DOCS_HEALTH.json
+            docs/reference/generated/DOCS_HEALTH.md
+          retention-days: 90
+
+      - name: Commit updated dashboard (scheduled and develop push only)
+        if: github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/develop')
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/reference/generated/DOCS_HEALTH.json docs/reference/generated/DOCS_HEALTH.md
+          if git diff --staged --quiet; then
+            echo "Dashboard unchanged — no commit needed."
+          else
+            git commit -m "chore(docs): regenerate health dashboard [skip ci]"
+            git push
+          fi
+
+      - name: Dashboard summary
+        run: |
+          echo "## Docs Health Dashboard" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f docs/reference/generated/DOCS_HEALTH.json ]; then
+            OPEN=$(python3 -c "import json; d=json.load(open('docs/reference/generated/DOCS_HEALTH.json')); print(d.get('audit_index', {}).get('open_issues', 'N/A'))")
+            STALE=$(python3 -c "import json; d=json.load(open('docs/reference/generated/DOCS_HEALTH.json')); print(d.get('stale_docs', {}).get('actionable_stale', 'N/A'))")
+            QG=$(python3 -c "import json; d=json.load(open('docs/reference/generated/DOCS_HEALTH.json')); print(d.get('quality_gate', {}).get('status', 'N/A'))")
+            FR=$(python3 -c "import json; d=json.load(open('docs/reference/generated/DOCS_HEALTH.json')); print(d.get('freshness', {}).get('status', 'N/A'))")
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+            echo "| Quality gate | \`${QG}\` |" >> $GITHUB_STEP_SUMMARY
+            echo "| Freshness | \`${FR}\` |" >> $GITHUB_STEP_SUMMARY
+            echo "| Actionable stale docs | \`${STALE}\` |" >> $GITHUB_STEP_SUMMARY
+            echo "| Open audit issues | \`${OPEN}\` |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Dashboard JSON not found." >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,60 @@
+name: Generated Docs Freshness
+
+# STORY-244 (EPIC-065): Enforce generated docs freshness in CI using the same
+# check that runs locally via the pre-push hook (`make docs-generated-check`).
+#
+# Triggers whenever content that feeds the generators changes — AST rules,
+# CI scripts, source files, or the generator scripts themselves.
+
+on:
+  pull_request:
+    branches: [develop, main, master]
+    paths:
+      - 'tooling/ast-grep/rules/**'
+      - 'scripts/docs/**'
+      - 'scripts/ci/**'
+      - 'src/**/*.py'
+      - 'docs/audit/18-03-2026_MASTER_AUDIT.md'
+      - '.github/workflows/generated-docs-freshness.yml'
+  push:
+    branches: [main, master]
+    paths:
+      - 'tooling/ast-grep/rules/**'
+      - 'scripts/docs/**'
+      - 'scripts/ci/**'
+      - 'src/**/*.py'
+      - 'docs/audit/18-03-2026_MASTER_AUDIT.md'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  freshness-check:
+    name: Generated Docs Freshness
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/workflows/composite/setup-python
+
+      - name: Verify generated docs are up to date
+        working-directory: scripts/docs
+        run: |
+          python check_generated_docs.py
+        # Fails when committed generated artifacts differ from a fresh regeneration.
+        # Fix: run `make docs-generate` locally and commit the updated artifacts.
+
+      - name: Summary
+        if: failure()
+        run: |
+          echo "## Generated Docs Are Stale" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "One or more generated files under \`docs/reference/generated/\` or \`docs/audit/generated/\` are out of date." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Fix**: run \`make docs-generate\` locally and commit the updated artifacts." >> $GITHUB_STEP_SUMMARY
