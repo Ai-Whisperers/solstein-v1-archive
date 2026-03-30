@@ -18,6 +18,7 @@ dependencies = [
     "python-dotenv>=1.0",
     "click>=8.1",
     "fastapi>=0.104,<1.0",
+    "starlette>=0.37.0,<1.0",  # Pinned: starlette 1.0+ requires fastapi>=0.115.0 which has breaking changes
     "uvicorn[standard]>=0.24",
     "sqlalchemy>=2.0,<3.0",
     "alembic>=1.12",
