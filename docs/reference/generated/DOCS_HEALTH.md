@@ -11,7 +11,7 @@ remediation workflow.
 | Metric | Status | Detail |
 |---|---|---|
 | Quality Gate (placeholders + metadata) | **FAIL** | 7 blocking, 11 warnings |
-| Stale Docs | **PASS** | 0 actionable stale (900 scanned) |
+| Stale Docs | **PASS** | 0 actionable stale (1005 scanned) |
 | Generated Docs Freshness | **N/A** | N/A |
 | AST Guardrail Gates | **OK** | 2 ast-grep rules, 8 CI script gates, 5 blocking |
 | Open Audit Issues | **OK** | 270 open / 271 total |

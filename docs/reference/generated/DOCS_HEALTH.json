@@ -15,7 +15,7 @@
   },
   "freshness": {
     "available": false,
-    "error": "Command '['/d1/AI WHISPERERS/AGENTIC/solstein/.venv/bin/python3', '/d1/AI WHISPERERS/AGENTIC/solstein/scripts/docs/check_generated_docs.py']' timed out after 60 seconds"
+    "error": "Command '['/tmp/solstein-safe-push/.venv/bin/python3', '/tmp/solstein-safe-push/scripts/docs/check_generated_docs.py']' timed out after 60 seconds"
   },
   "generated_on": "2026-03-30",
   "quality_gate": {
@@ -41,6 +41,6 @@
     "allowlisted_stale": 0,
     "available": true,
     "status": "pass",
-    "total_scanned": 900
+    "total_scanned": 1005
   }
 }
