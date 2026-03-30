@@ -1,6 +1,6 @@
 # Docs Health Dashboard
 
-Generated on `2026-03-28`. Updated automatically on every push to `develop` and weekly on Mondays.
+Generated on `2026-03-30`. Updated automatically on every push to `develop` and weekly on Mondays.
 
 This dashboard aggregates metrics from the repository's documentation CI gates.
 See [docs/guides/docs-change-control.md](../../../guides/docs-change-control.md) for the
@@ -10,10 +10,10 @@ remediation workflow.
 
 | Metric | Status | Detail |
 |---|---|---|
-| Quality Gate (placeholders + metadata) | **N/A** | N/A blocking, N/A warnings |
-| Stale Docs | **N/A** | N/A actionable stale (N/A scanned) |
+| Quality Gate (placeholders + metadata) | **FAIL** | 7 blocking, 11 warnings |
+| Stale Docs | **PASS** | 0 actionable stale (900 scanned) |
 | Generated Docs Freshness | **N/A** | N/A |
-| AST Guardrail Gates | **OK** | 2 ast-grep rules, 0 CI script gates, 2 blocking |
+| AST Guardrail Gates | **OK** | 2 ast-grep rules, 8 CI script gates, 5 blocking |
 | Open Audit Issues | **OK** | 270 open / 271 total |
 
 ## Remediation Links
@@ -28,8 +28,8 @@ remediation workflow.
 
 ## Data Sources
 
-- AST catalog: [AST_RULE_CATALOG.json](AST_RULE_CATALOG.json) (generated 2026-03-28)
-- Audit index: [MASTER_AUDIT_ISSUE_INDEX.json](MASTER_AUDIT_ISSUE_INDEX.json) (generated 2026-03-28)
+- AST catalog: [AST_RULE_CATALOG.json](AST_RULE_CATALOG.json) (generated 2026-03-30)
+- Audit index: [MASTER_AUDIT_ISSUE_INDEX.json](MASTER_AUDIT_ISSUE_INDEX.json) (generated 2026-03-30)
 - Quality gate: `scripts/ci/check_docs_quality.py`
 - Stale docs: `scripts/ci/check_stale_docs.py`
 - Freshness: `scripts/docs/check_generated_docs.py`

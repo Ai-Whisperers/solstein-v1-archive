@@ -2,28 +2,45 @@
   "ast_catalog": {
     "ast_grep_rule_count": 2,
     "available": true,
-    "blocking_gates": 2,
-    "ci_script_gate_count": 0,
-    "generated_on": "2026-03-28"
+    "blocking_gates": 5,
+    "ci_script_gate_count": 8,
+    "generated_on": "2026-03-30"
   },
   "audit_index": {
     "available": true,
     "closed_issues": 0,
-    "generated_on": "2026-03-28",
+    "generated_on": "2026-03-30",
     "open_issues": 270,
     "total_issues": 271
   },
   "freshness": {
     "available": false,
-    "error": "Command '['/usr/bin/python3', '/home/ai-whisperers/Documents/Work/solstein/scripts/docs/check_generated_docs.py']' timed out after 60 seconds"
+    "error": "Command '['/d1/AI WHISPERERS/AGENTIC/solstein/.venv/bin/python3', '/d1/AI WHISPERERS/AGENTIC/solstein/scripts/docs/check_generated_docs.py']' timed out after 60 seconds"
   },
-  "generated_on": "2026-03-28",
+  "generated_on": "2026-03-30",
   "quality_gate": {
-    "available": false,
-    "error": "check_docs_quality.py not found"
+    "available": true,
+    "paths": {
+      "backlog": {
+        "blocking": 0,
+        "exit_code": 0,
+        "warnings": 2
+      },
+      "docs": {
+        "blocking": 7,
+        "exit_code": 1,
+        "warnings": 9
+      }
+    },
+    "status": "fail",
+    "total_blocking": 7,
+    "total_warnings": 11
   },
   "stale_docs": {
-    "available": false,
-    "error": "check_stale_docs.py not found"
+    "actionable_stale": 0,
+    "allowlisted_stale": 0,
+    "available": true,
+    "status": "pass",
+    "total_scanned": 900
   }
 }
