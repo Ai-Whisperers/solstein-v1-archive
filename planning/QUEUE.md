@@ -49,7 +49,7 @@ These stories were added after a live audit found schema-enforcement gaps, a fai
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0d | STORY-251 | Enforce Strict Boundary Schemas for Connector, API, and Domain Ingress | IN_PROGRESS | Worker run 2026-03-31 |
+| 0d | STORY-251 | Enforce Strict Boundary Schemas for Connector, API, and Domain Ingress | DONE | PR #208 |
 
 ### EPIC-021: Modern LLM Stack Migration (Audit Hotfix)
 
