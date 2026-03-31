@@ -1,5 +1,15 @@
 """Tests for STORY-047: Replace Fake Health Checks with Real Infrastructure Probes.
 
+.. deprecated:: STORY-253
+   The source-inspection tests in this file (84.8% of assertions read source
+   with ``Path.read_text()``) have been superseded by behavioral contract
+   tests in ``test_behavioral_contracts.py`` which verify route registration,
+   health check class existence, strategy inheritance, and HealthCheckResult
+   fields at runtime.
+
+   This file is retained for backward-compatibility during the transition.
+   New health-check contract tests should go in ``test_behavioral_contracts.py``.
+
 Validates that health check endpoints use real probes and return per-component status.
 """
 
