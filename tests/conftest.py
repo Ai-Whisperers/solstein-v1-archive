@@ -13,6 +13,9 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 _ = os.environ.setdefault("GITHUB_TOKEN", "test-github-token-12345")
+_ = os.environ.setdefault("DATABASE__URL", "postgresql+asyncpg://test:test@localhost:5432/solstein_test")
+_ = os.environ.setdefault("SECURITY__SECRET_KEY", "test-secret-key-for-unit-tests-32chars!")
+_ = os.environ.setdefault("COMPANIES_HOUSE_API_KEY", "test-ch-api-key-12345")
 
 try:
     from tests.factories import make_company
