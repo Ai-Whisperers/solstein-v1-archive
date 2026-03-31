@@ -77,10 +77,10 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0k | STORY-263 | Build Provider Scorecard and Enforcement Matrix | READY | Added 2026-03-31: one provider ownership matrix before more adapter churn |
-| 0l | STORY-265 | Collapse Duplicate Adapter Pairs and Placeholder Services | BLOCKED | Depends on STORY-263 so collapse decisions cite one scorecard, name feature-flag branching in `adapters/registry.py`, and include orphan/LOC reduction accounting |
-| 0m | STORY-264 | Remove Replaceable Providers from the Canonical Runtime | BLOCKED | Depends on STORY-263 and EPIC-067 canonical-runtime decision |
-| 0n | STORY-266 | Ban New Compatibility Patches at Provider Boundaries | READY | Added 2026-03-31: stop net-new wrapper growth during consolidation |
+| 0k | STORY-263 | Build Provider Scorecard and Enforcement Matrix | DONE | PR #212; scorecard at `docs/architecture/provider-scorecard.md` |
+| 0l | STORY-265 | Collapse Duplicate Adapter Pairs and Placeholder Services | DONE | PR #215 | Unblocked: STORY-263 (DONE); cite scorecard section 4 |
+| 0m | STORY-264 | Remove Replaceable Providers from the Canonical Runtime | DONE | PR #216; NewsAPI/Exa removed, YahooFinance/Crunchbase retained with justification |
+| 0n | STORY-266 | Ban New Compatibility Patches at Provider Boundaries | DONE | PR #213; adapter freeze check in `scripts/ci/adapter_freeze_check.py` |
 
 ### EPIC-070: Empirical Golden Runs and Rebuild Gate (Consolidation)
 
