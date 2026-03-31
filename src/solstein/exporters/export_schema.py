@@ -19,7 +19,7 @@ from openpyxl import load_workbook
 # ─────────────────────────────────────────────
 # Schema version — bump on any structural change
 # ─────────────────────────────────────────────
-EXPORT_SCHEMA_VERSION = "1.0"
+EXPORT_SCHEMA_VERSION = "1.1"
 
 
 # ─────────────────────────────────────────────
@@ -225,6 +225,7 @@ def generate_schema_docs() -> str:
     lines.append("")
     lines.append("| Version | Date | Changes |")
     lines.append("|---------|------|---------|")
+    lines.append("| 1.1 | 2026-03-31 | STORY-250: Reconcile Executive Summary headers with schema — add AI Readiness and Transformation fields |")
     lines.append("| 1.0 | 2026-03-27 | Initial schema: 5 sheets, all 20 STORY-125 fields + original fields |")
     lines.append("")
 
