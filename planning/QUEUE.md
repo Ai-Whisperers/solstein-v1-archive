@@ -78,7 +78,7 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 0k | STORY-263 | Build Provider Scorecard and Enforcement Matrix | DONE | PR #212; scorecard at `docs/architecture/provider-scorecard.md` |
-| 0l | STORY-265 | Collapse Duplicate Adapter Pairs and Placeholder Services | READY | Unblocked: STORY-263 (DONE); cite scorecard section 4 |
+| 0l | STORY-265 | Collapse Duplicate Adapter Pairs and Placeholder Services | IN_PROGRESS | Unblocked: STORY-263 (DONE); cite scorecard section 4 |
 | 0m | STORY-264 | Remove Replaceable Providers from the Canonical Runtime | READY | Unblocked: STORY-263 (DONE) + EPIC-067 canonical runtime (STORY-255 DONE) |
 | 0n | STORY-266 | Ban New Compatibility Patches at Provider Boundaries | DONE | PR #213; adapter freeze check in `scripts/ci/adapter_freeze_check.py` |
 
