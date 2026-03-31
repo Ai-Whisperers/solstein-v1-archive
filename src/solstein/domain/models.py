@@ -87,9 +87,14 @@ DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000000"
 
 
 class FinancialMetric(BaseModel):
-    """Financial metrics domain entity."""
+    """Financial metrics domain entity.
 
-    model_config = ConfigDict(validate_assignment=True)
+    STORY-251: extra="ignore" is the explicit policy for domain models.
+    Extra fields are silently dropped rather than persisted, ensuring
+    model_dump() never contains undeclared keys.
+    """
+
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")
 
     allow_empty_primary: bool = Field(default=False, exclude=True)
     revenue: float | None = None
@@ -149,9 +154,14 @@ class FinancialMetric(BaseModel):
 
 
 class Company(BaseModel):
-    """Company domain entity."""
+    """Company domain entity.
 
-    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
+    STORY-251: extra="ignore" is the explicit policy. Extra fields are
+    silently dropped at construction so model_dump() never leaks undeclared
+    keys downstream.
+    """
+
+    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True, extra="ignore")
 
     id: str = Field(..., description="Unique company identifier")
     tenant_id: str = Field(
@@ -749,7 +759,7 @@ class Company(BaseModel):
 class MarketAnalysis(BaseModel):
     """Market-level analysis domain entity."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     market_name: str
     analysis_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -794,7 +804,7 @@ class MarketAnalysis(BaseModel):
 class ScoreComponent(BaseModel):
     """A single component of a score calculation."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     name: str
     value: float
@@ -806,7 +816,7 @@ class ScoreComponent(BaseModel):
 class ScoringExplanation(BaseModel):
     """Detailed explanation of how a final score was calculated."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     base_score: float
     components: list[ScoreComponent] = Field(default_factory=list)
@@ -842,7 +852,7 @@ class ScoringExplanation(BaseModel):
 class CompetitiveOverlap(BaseModel):
     """Competitive overlap domain entity."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     company_a_id: str
     company_b_id: str
@@ -882,7 +892,7 @@ class DataSourceType(StrEnum):
 class RawDataSource(BaseModel):
     """A single raw source document (article, filing, etc.)."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     source_type: DataSourceType
     source_name: str  # e.g., "TechCrunch", "Companies House", "GitHub"
@@ -900,7 +910,7 @@ class RawDataSource(BaseModel):
 class RawDataRecord(BaseModel):
     """Collection of raw sources for a single company analysis."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     company_id: str
     gathering_batch_id: str
@@ -921,7 +931,7 @@ class RawDataRecord(BaseModel):
 class AggregatedFact(BaseModel):
     """A single deduplicated fact extracted from multiple sources."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     fact_type: str  # e.g., "revenue", "employee_count", "ai_maturity"
     value: Any  # The extracted value (can be number, string, enum, etc.)
@@ -947,7 +957,7 @@ class AggregatedFact(BaseModel):
 class AggregatedDataRecord(BaseModel):
     """Collection of aggregated facts for a company."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     company_id: str
     gathering_batch_id: str
@@ -971,7 +981,7 @@ class AggregatedDataRecord(BaseModel):
 class SignalExtraction(BaseModel):
     """A business signal extracted from facts (bridges facts → scoring)."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     signal_name: str  # e.g., "revenue_growth_rate", "ai_maturity", "geographic_reach"
     signal_value: Any  # Processed value (number, enum, etc.)
@@ -993,7 +1003,7 @@ class SignalExtraction(BaseModel):
 class SignalExtractionRecord(BaseModel):
     """Collection of signals for a company."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     company_id: str
     gathering_batch_id: str
@@ -1004,7 +1014,7 @@ class SignalExtractionRecord(BaseModel):
 class GatheringBatch(BaseModel):
     """Metadata about a data gathering analysis."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     batch_id: str  # e.g., "batch_20250220_001"
     market_name: str
@@ -1036,7 +1046,7 @@ class GatheringBatch(BaseModel):
 class CompanyAnalysisAuditTrail(BaseModel):
     """Complete audit trail for one company analysis."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     company_id: str
     gathering_batch_id: str
@@ -1095,7 +1105,7 @@ class ApiKey(BaseModel):
     only the hash is stored.
     """
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     id: str = Field(default="", description="Unique identifier for the key")
     tenant_id: str = Field(
