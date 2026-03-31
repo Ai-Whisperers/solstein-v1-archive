@@ -8,12 +8,14 @@ from __future__ import annotations
 
 from .research import (
     CompanyExtractionResponse,
+    EmptyExtractionError,
     ResearchPlanResponse,
     SearchQueryItem,
 )
 
 __all__ = [
     "CompanyExtractionResponse",
+    "EmptyExtractionError",
     "ResearchPlanResponse",
     "SearchQueryItem",
 ]
