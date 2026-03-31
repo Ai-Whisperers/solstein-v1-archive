@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from solstein.adapters.enrichment.patents_unified import PatentsUnifiedAdapter
+from solstein.adapters.enrichment._retired.patents_unified import PatentsUnifiedAdapter
 from solstein.data.web_research_pipeline import WebResearcher
 from solstein.infrastructure.connectors.news_signal_refresh import NewsSignalRefreshConnector
 from solstein.infrastructure.connectors.web_search_refresh import WebSearchRefreshConnector

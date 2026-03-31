@@ -19,12 +19,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from solstein.adapters.enrichment.funding_unified import FundingUnifiedAdapter
-from solstein.adapters.enrichment.linkedin_unified import LinkedInUnifiedAdapter
-from solstein.adapters.enrichment.news_unified import NewsUnifiedAdapter
-from solstein.adapters.enrichment.patents_unified import PatentsUnifiedAdapter
-from solstein.adapters.enrichment.web_search_unified import WebSearchUnifiedAdapter
-from solstein.adapters.enrichment.website_unified import WebsiteUnifiedAdapter
+from solstein.adapters.enrichment._retired.funding_unified import FundingUnifiedAdapter
+from solstein.adapters.enrichment._retired.linkedin_unified import LinkedInUnifiedAdapter
+from solstein.adapters.enrichment._retired.news_unified import NewsUnifiedAdapter
+from solstein.adapters.enrichment._retired.patents_unified import PatentsUnifiedAdapter
+from solstein.adapters.enrichment._retired.web_search_unified import WebSearchUnifiedAdapter
+from solstein.adapters.enrichment._retired.website_unified import WebsiteUnifiedAdapter
 from solstein.adapters.protocols import UnifiedDataSource
 from solstein.domain.models import DataSourceType
 from solstein.infrastructure.conflict_resolution import SourceAuthority

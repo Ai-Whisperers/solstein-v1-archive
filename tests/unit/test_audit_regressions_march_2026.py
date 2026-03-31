@@ -8,9 +8,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from starlette.requests import Request
 
-from solstein.adapters.enrichment.funding_unified import FundingUnifiedAdapter
-from solstein.adapters.enrichment.patents_unified import PatentsUnifiedAdapter
-from solstein.adapters.enrichment.web_search_unified import WebSearchUnifiedAdapter
+from solstein.adapters.enrichment._retired.funding_unified import FundingUnifiedAdapter
+from solstein.adapters.enrichment._retired.patents_unified import PatentsUnifiedAdapter
+from solstein.adapters.enrichment._retired.web_search_unified import WebSearchUnifiedAdapter
 from solstein.api.schemas.enrichment import BatchEnrichmentRequest
 from solstein.domain.models import DataSourceType
 from solstein.infrastructure.connectors.funding_refresh import FundingRefreshConnector
