@@ -67,6 +67,9 @@ Before any further migration or compatibility work, the backlog now requires:
 - a LOC/file duplication ledger for any temporarily retained dual-system surface
 - a time-bounded deletion plan for every non-canonical runtime or adapter family left in the tree
 
+Current artifact:
+- `docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md` is the active source-backed ledger for STORY-271.
+
 ### Explicit Pause List
 
 The following backlog areas are **blocked by consolidation** unless a story is explicitly required to support the canonical legacy runtime:

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| **Status** | 🔴 Open |
+| **Status** | 🟡 In Progress |
 | **Priority** | P0 - Ship Blocker |
 | **Size** | M (3-5 days) |
 | **Epic** | EPIC-067 Legacy Runtime Canonicalization |
@@ -61,3 +61,7 @@ Without that ledger, the team keeps arguing from partial context and adding comp
 - Treat empty dict/list success payloads in graph scoring, conflict resolution, analytics, and export paths as failure candidates for future golden runs.
 - Distinguish "reachable from production API" from "reachable only through manual review or test scaffolding" when classifying orphan risk.
 - Require before/after file-count and LOC deltas for any decision to keep both legacy and graph systems temporarily.
+
+## Working Artifact
+
+- Runtime ledger: [`docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md`](../../../../docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md)
