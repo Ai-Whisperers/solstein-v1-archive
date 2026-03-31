@@ -81,7 +81,7 @@ class TestExportSchemaDefinition:
     """Schema definition completeness."""
 
     def test_schema_has_version(self) -> None:
-        assert EXPORT_SCHEMA_VERSION == "1.0"
+        assert EXPORT_SCHEMA_VERSION == "1.1"
 
     def test_schema_covers_all_five_sheets(self) -> None:
         by_sheet = get_schema_by_sheet()
