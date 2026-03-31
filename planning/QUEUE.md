@@ -67,8 +67,8 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0f | STORY-271 | Publish Runtime Depth, Wiring, and Duplication Ledger | READY | Added 2026-03-31: document wired vs unwired surfaces, orphan objects, and dual-system LOC/file bloat before more migration work |
-| 0g | STORY-255 | Freeze Graph Runtime and Declare Legacy Pipeline Canonical | READY | Added 2026-03-31: commit history shows graph intent, runtime reality still favors legacy path |
+| 0f | STORY-271 | Publish Runtime Depth, Wiring, and Duplication Ledger | READY | Added 2026-03-31: include exact evidence anchors for legacy pipeline depth, graph placeholders, review-resume-only graph wiring, registry branching, and tenant/workflow mock surfaces |
+| 0g | STORY-255 | Freeze Graph Runtime and Declare Legacy Pipeline Canonical | READY | Added 2026-03-31: commit history shows graph intent, runtime reality still favors legacy path, and current evidence shows graph resume wiring without a confirmed normal production caller |
 | 0h | STORY-256 | Delete Runtime Aliases and Feature-Flag Branching Around Orchestration | BLOCKED | Depends on STORY-271 and STORY-255 so deletion is evidence-driven rather than ad-hoc |
 | 0i | STORY-257 | Repair Legacy Entrypoints to Share One Registry and One Converter | BLOCKED | Depends on STORY-271 and STORY-256 |
 | 0j | STORY-258 | Define Salvage-vs-Rebuild Trigger for the Legacy Runtime | BLOCKED | Depends on STORY-271 and EPIC-070 evidence work |
@@ -78,7 +78,7 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 0k | STORY-263 | Build Provider Scorecard and Enforcement Matrix | READY | Added 2026-03-31: one provider ownership matrix before more adapter churn |
-| 0l | STORY-265 | Collapse Duplicate Adapter Pairs and Placeholder Services | BLOCKED | Depends on STORY-263 so collapse decisions cite one scorecard and include orphan/LOC reduction accounting |
+| 0l | STORY-265 | Collapse Duplicate Adapter Pairs and Placeholder Services | BLOCKED | Depends on STORY-263 so collapse decisions cite one scorecard, name feature-flag branching in `adapters/registry.py`, and include orphan/LOC reduction accounting |
 | 0m | STORY-264 | Remove Replaceable Providers from the Canonical Runtime | BLOCKED | Depends on STORY-263 and EPIC-067 canonical-runtime decision |
 | 0n | STORY-266 | Ban New Compatibility Patches at Provider Boundaries | READY | Added 2026-03-31: stop net-new wrapper growth during consolidation |
 
