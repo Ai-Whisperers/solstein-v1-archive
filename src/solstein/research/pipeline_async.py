@@ -1,6 +1,11 @@
 """Async research pipeline for market intelligence.
 
 EPIC-023 Story 5: Converted from synchronous to async pipeline for better performance.
+
+NOTE (STORY-256): The backward-compatible alias ``run_market_intelligence``
+was removed in this module.  The canonical synchronous entry-point lives in
+``solstein.research.pipeline.run_market_intelligence``.  If you need the
+async variant, import ``run_market_intelligence_async`` explicitly.
 """
 
 from __future__ import annotations
@@ -141,5 +146,10 @@ async def run_market_intelligence_async(
     return run_summary
 
 
-# Backward compatibility alias
-run_market_intelligence = run_market_intelligence_async
+# STORY-256: Backward-compatibility alias removed.
+# The canonical synchronous ``run_market_intelligence`` lives in
+# ``solstein.research.pipeline``.  Import the async variant explicitly
+# as ``run_market_intelligence_async`` when needed.
+#
+# Deletion trigger: this comment block can be removed once all callers
+# have been audited (target: EPIC-067 completion).
