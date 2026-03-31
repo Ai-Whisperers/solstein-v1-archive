@@ -2,7 +2,7 @@
 
 > *The authoritative tracking document for the Solstein architectural remediation programme. All work originates here.*
 
-| Last Updated: 2026-03-01 | Audit Version: 2.0 | Status: 🔴 DO NOT SHIP |
+| Last Updated: 2026-03-31 | Audit Version: 2.2 | Status: 🔴 DO NOT SHIP |
 
 ---
 
@@ -10,13 +10,12 @@
 
 | Metric | Value | Trend |
 |--------|-------|-------|
-| Total Epics | 52 | +9 |
-| Total Stories | 202 | +34 |
-| P0 Stories (Ship Blockers) | 19 | 🔴 Unresolved (+6) |
-| P1 Stories (Current Sprint) | 83 | 🟠 Queued (+21) |
-| P2 Stories (Next Quarter) | 78 | 🟡 Backlogged (+5) |
-| P3 Stories (Sustaining) | 22 | 🟢 Deferred (+2) |
+| Total Epics | 70 | Generated from backlog/EPICS/ |
+| Total Stories | 265 | Generated from backlog/EPICS/*/STORIES/*.md |
+| Stories Completed (QUEUE.md) | 27+ | Tracked in planning/QUEUE.md |
 | Overall System Status | **CRITICAL** | 🔴 Do Not Ship |
+
+> **Note (STORY-236)**: Priority breakdowns (P0/P1/P2/P3) and the detailed story index below are pending automated regeneration from story files. Counts above are the source of truth from the filesystem as of 2026-03-31.
 
 ---
 
@@ -25,6 +24,62 @@
 The Solstein platform audit revealed a system that functions as a demonstration prototype while presenting itself as production software. Authentication in `auth.py` accepts any credential pair and returns a valid JWT — the code contains the comment `# Demo: Accept any credentials` and it is accurate. Configuration in `config.py` contains duplicate class body definitions where Python silently discards the first, meaning validators engineers believe are running are dead code. Three separate files define conflicting classification thresholds for the platform's core deliverable — company tier assignment — producing non-deterministic output depending on which code path executes. The research pipeline in `research_dual_write.py` performs 7 sequential database commits with no rollback mechanism; a mid-sequence failure leaves the database permanently inconsistent. Health checks in `monitoring.py` call `asyncio.sleep(0.01)` and report success — they verify nothing. Seven stub agents return hardcoded mock data as if they were real intelligence sources. Six duplicate adapter pairs from an incomplete migration coexist without any indication of which is canonical. This is not a system with technical debt. This is a system where the load-bearing walls are painted cardboard.
 
 Following a strategic review, the team has adopted Path B (Migrate Directly), replacing EPIC-001 with EPIC-020 (Supabase Auth Migration) and adding six new epics that introduce a modern AI-native architecture.
+
+## 2026-03-31 Consolidation Directive
+
+The 2026-03-31 review of `docs/quality-and-fixes/COMPREHENSIVE-UPDATE.md` and the current codebase changes the execution order materially:
+
+- **Stop compatibility patches immediately.**
+- **Treat `backlog/` as the only authoritative backlog.**
+- **Prioritize the legacy Python research pipeline as the canonical runtime until a replacement proves parity with empirical evidence.**
+- **Do not continue broad feature expansion on top of dual runtimes, alias-heavy payload transforms, or placeholder adapters.**
+- **If two systems are retained temporarily, they must have an explicit coexistence budget: owner list, wired/unwired inventory, LOC/file duplication ledger, and deletion plan.**
+- **Do not treat orphan objects, unwired components, mock returns, or placeholder nodes as acceptable future cleanup once they are reachable from runtime surfaces.**
+
+### Empirical Evidence Driving The Directive
+
+| Area | Evidence | Backlog Consequence |
+|---|---|---|
+| Canonical runnable path | `src/solstein/research/pipeline.py` is the only end-to-end path that actually executes discovery, gather, scoring, analysis, and export stages. | Salvage legacy first instead of building new orchestration layers blindly. |
+| Incomplete graph runtime | `src/solstein/research/graph/topology.py` still returns empty `resolved_facts`, `confidence_scores`, and `company_scores` in core nodes. | LangGraph remains non-canonical until parity is demonstrated. |
+| Runtime alias drift | `src/solstein/research/pipeline_async.py` exports `run_market_intelligence = run_market_intelligence_async`; `src/solstein/adapters/registry.py` switches behavior via `feature_new_unified_loader`; `src/solstein/domain/payload_compat.py` and `src/solstein/data/converters/company.py` preserve legacy aliases. | Add explicit runtime-canonicalization and alias-deletion backlog work. |
+| Placeholder contamination | `src/solstein/data/enrichment_service.py` contains placeholder enrichment methods; `src/solstein/api/routers/jobs.py` and `src/solstein/analytics/workflows.py` still expose disabled Temporal/stub workflow surfaces; `src/solstein/tenant/services.py`, `src/solstein/tenant/context.py`, and `src/solstein/tenant/monitoring.py` still contain mock return paths. | Add release gates that block placeholder and mock paths from being treated as production features. |
+| Weak type gates | `pyproject.toml` keeps `mypy` non-strict (`strict = false`, `disallow_untyped_defs = false`) and the runtime is overwhelmingly Python while TypeScript currently exists only for AST tooling in `package.json`. | Enforce Python-first contract strictness now, with generated JSON Schema/Zod artifacts for any future TS control plane. |
+| Provider drift | `src/solstein/research/graph/nodes/news_node.py` still centers Google Custom Search, while `docs/quality-and-fixes/COMPREHENSIVE-UPDATE.md` calls for provider consolidation and deprecation of replaceable surfaces. | Add provider-surface consolidation backlog before any new connector expansion. |
+
+### Consolidation Program
+
+The active remediation program is now:
+
+1. **EPIC-067**: publish the runtime-depth inventory, choose one runtime, and freeze compatibility branching.
+2. **EPIC-068**: establish strict canonical schemas and type gates at every boundary.
+3. **EPIC-069**: consolidate provider surfaces, collapse orphan/duplicate surfaces, and delete compatibility wrappers.
+4. **EPIC-070**: prove behavior with provider contracts, golden runs, and a save-vs-rebuild decision gate.
+
+### Documentation-First Requirements For Consolidation
+
+Before any further migration or compatibility work, the backlog now requires:
+
+- a canonical runtime ownership map
+- a wired vs unwired component inventory
+- an orphan object and placeholder reachability inventory
+- a LOC/file duplication ledger for any temporarily retained dual-system surface
+- a time-bounded deletion plan for every non-canonical runtime or adapter family left in the tree
+
+### Explicit Pause List
+
+The following backlog areas are **blocked by consolidation** unless a story is explicitly required to support the canonical legacy runtime:
+
+- EPIC-022 LangGraph Agent Orchestration
+- EPIC-024 Supabase Realtime Job Status
+- EPIC-029 Frontend Dashboard
+- EPIC-038 through EPIC-042 business-domain expansion epics
+- EPIC-054 Durable Research Control Plane
+- EPIC-055 Safe Connector Runtime Contracts
+- EPIC-057 Human Review Control Plane
+- EPIC-061 Adaptive Research Planning
+
+These epics are not deleted. They are sequenced behind empirical proof that one research system works reliably.
 
 ---
 
@@ -52,7 +107,11 @@ Following architectural review, the team adopted **Path B (Migrate Directly)** �
 EPIC-002: Configuration Integrity
   └─► EPIC-020: Supabase Auth Migration
         ├─► EPIC-003: Core Product Correctness
-        └─► EPIC-004: Data Integrity & Atomicity
+        ├─► EPIC-004: Data Integrity & Atomicity
+        └─► EPIC-067: Legacy Runtime Canonicalization
+              ├─► EPIC-068: Boundary Schemas and Type Gates
+              ├─► EPIC-069: Provider Surface Rationalization
+              └─► EPIC-070: Empirical Golden Runs and Rebuild Gate
 ```
 
 > **Ordering rationale:** Do not begin EPIC-020 until `config.py` is clean. Authentication migration built on broken configuration is not a migration. It is a migration that inherits the defects of its foundation and will need to be re-done when the foundation is repaired.
@@ -141,13 +200,18 @@ EPIC-002: Configuration Integrity
 | [EPIC-063](EPICS/EPIC-063-documentation-topology-source-of-truth/README.md) | Documentation Topology and Source-of-Truth Governance | P1 | 4 | 🔴 Open |
 | [EPIC-064](EPICS/EPIC-064-markdown-integrity-registry-correctness/README.md) | Markdown Integrity and Registry Correctness | P0 | 4 | 🔴 Open |
 | [EPIC-065](EPICS/EPIC-065-documentation-lifecycle-automation-ci-enforcement/README.md) | Documentation Lifecycle Automation and CI Enforcement | P1 | 4 | 🔴 Open |
+| [EPIC-066](EPICS/EPIC-066-architectural-boundaries-and-cycle-elimination/README.md) | Architectural Boundaries and Cycle Elimination | P1 | 4 | 🔴 Open |
+| [EPIC-067](EPICS/EPIC-067-legacy-runtime-canonicalization/README.md) | Legacy Runtime Canonicalization | P0 | 5 | 🔴 Open |
+| [EPIC-068](EPICS/EPIC-068-boundary-schemas-and-type-gates/README.md) | Boundary Schemas and Type Gates | P0 | 4 | 🔴 Open |
+| [EPIC-069](EPICS/EPIC-069-provider-surface-rationalization/README.md) | Provider Surface Rationalization | P0 | 4 | 🔴 Open |
+| [EPIC-070](EPICS/EPIC-070-empirical-golden-runs-and-rebuild-gate/README.md) | Empirical Golden Runs and Rebuild Gate | P0 | 4 | 🔴 Open |
 
 ---
 
 ## Story Index
 
 <details>
-<summary>Click to expand full story index (205 stories)</summary>
+<summary>Click to expand historical story index snapshot (not yet regenerated after 2026-03-31 consolidation)</summary>
 
 ### P0 — Ship Blockers (15 stories)
 
@@ -163,9 +227,9 @@ EPIC-002: Configuration Integrity
 | [STORY-013](EPICS/EPIC-004-data-integrity-atomicity/STORIES/STORY-013-fix-conflict-resolution-logic.md) | Fix Conflict Resolution Logic | EPIC-004 | 🔴 Open |
 | [STORY-014](EPICS/EPIC-004-data-integrity-atomicity/STORIES/STORY-014-remove-hardcoded-date-path.md) | Remove Hardcoded Date Path from Data Loader | EPIC-004 | 🔴 Open |
 | [STORY-067](EPICS/EPIC-020-supabase-auth-migration/STORIES/STORY-067-migrate-to-supabase-auth.md) | Migrate Authentication to Supabase Auth | EPIC-020 | 🔴 Open |
-| [STORY-068](EPICS/EPIC-020-supabase-auth-migration/STORIES/STORY-068-remove-auth-bypass.md) | Remove Auth Bypass and Wire Supabase JWT Middleware | EPIC-020 | 🔴 Open |
+| [STORY-068](EPICS/EPIC-020-supabase-auth-migration/STORIES/STORY-068-supabase-jwt-middleware.md) | Remove Auth Bypass and Wire Supabase JWT Middleware | EPIC-020 | 🔴 Open |
 | [STORY-069](EPICS/EPIC-020-supabase-auth-migration/STORIES/STORY-069-error-handling-sanitization.md) | Migrate Error Handling and Input Sanitization | EPIC-020 | 🔴 Open |
-| [STORY-070](EPICS/EPIC-020-supabase-auth-migration/STORIES/STORY-070-ssrf-fix.md) | Fix SSRF Vulnerability in Web and Website Agents | EPIC-020 | 🔴 Open |
+| [STORY-070](EPICS/EPIC-020-supabase-auth-migration/STORIES/STORY-070-ssrf-prevention.md) | Fix SSRF Vulnerability in Web and Website Agents | EPIC-020 | 🔴 Open |
 
 ### P1 — Current Sprint (62 stories)
 
@@ -198,16 +262,16 @@ EPIC-002: Configuration Integrity
 | STORY-060 | Define Environment Configuration via IaC | EPIC-018 | 🔴 Open |
 | STORY-061 | Build CI Pipeline with Quality Gates | EPIC-018 | 🔴 Open |
 | STORY-062 | Implement Pre-commit Hooks and Linting Automation | EPIC-018 | 🔴 Open |
-| [STORY-063](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-063-tenant-model.md) | Define Tenant Model and Domain Object Scoping | EPIC-019 | 🔴 Open |
-| [STORY-064](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-064-supabase-rls.md) | Implement Supabase RLS for All Tables | EPIC-019 | 🔴 Open |
-| [STORY-065](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-065-tenant-api-keys.md) | Add Tenant-Scoped API Key Management | EPIC-019 | 🔴 Open |
-| [STORY-066](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-066-tenant-research-jobs.md) | Enforce Tenant Isolation in Research Jobs | EPIC-019 | 🔴 Open |
-| [STORY-071](EPICS/EPIC-021-modern-llm-stack/STORIES/STORY-071-anthropic-sdk.md) | Replace Custom LLM Client with Anthropic SDK | EPIC-021 | 🔴 Open |
+| [STORY-063](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-063-define-tenant-model.md) | Define Tenant Model and Domain Object Scoping | EPIC-019 | 🔴 Open |
+| [STORY-064](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-064-supabase-rls-policies.md) | Implement Supabase RLS for All Tables | EPIC-019 | 🔴 Open |
+| [STORY-065](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-065-tenant-api-key-management.md) | Add Tenant-Scoped API Key Management | EPIC-019 | 🔴 Open |
+| [STORY-066](EPICS/EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-066-tenant-isolation-research-jobs.md) | Enforce Tenant Isolation in Research Jobs | EPIC-019 | 🔴 Open |
+| [STORY-071](EPICS/EPIC-021-modern-llm-stack/STORIES/STORY-071-anthropic-sdk-migration.md) | Replace Custom LLM Client with Anthropic SDK | EPIC-021 | 🔴 Open |
 | [STORY-072](EPICS/EPIC-021-modern-llm-stack/STORIES/STORY-072-instructor-structured-outputs.md) | Implement Structured LLM Outputs with Instructor | EPIC-021 | 🔴 Open |
 | [STORY-073](EPICS/EPIC-021-modern-llm-stack/STORIES/STORY-073-langfuse-integration.md) | Integrate Langfuse for Cost Tracking and Prompt Management | EPIC-021 | 🔴 Open |
 | [STORY-075](EPICS/EPIC-021-modern-llm-stack/STORIES/STORY-075-multi-provider-fallback.md) | Implement Multi-Provider Fallback via SDK | EPIC-021 | 🔴 Open |
-| [STORY-086](EPICS/EPIC-014-observability-telemetry/STORIES/STORY-086-audit-trail.md) | Enforce Universal Audit Trail Across All Endpoints | EPIC-014 | 🔴 Open |
-| [STORY-087](EPICS/EPIC-018-infrastructure-cicd/STORIES/STORY-087-celery-dlq.md) | Implement Celery Dead Letter Queue | EPIC-018 | 🔴 Open |
+| [STORY-086](EPICS/EPIC-014-observability-telemetry/STORIES/STORY-086-enforce-universal-audit-trail.md) | Enforce Universal Audit Trail Across All Endpoints | EPIC-014 | 🔴 Open |
+| [STORY-087](EPICS/EPIC-018-infrastructure-cicd/STORIES/STORY-087-celery-dead-letter-queue.md) | Implement Celery Dead Letter Queue | EPIC-018 | 🔴 Open |
 | [STORY-088](EPICS/EPIC-025-worker-reliability/STORIES/STORY-088-persistent-dead-letter-queue.md) | Fix In-Memory DLQ — Persist to PostgreSQL | EPIC-025 | 🔴 Open |
 | [STORY-089](EPICS/EPIC-025-worker-reliability/STORIES/STORY-089-task-acks-late-configuration.md) | Set task_acks_late and task_reject_on_worker_lost | EPIC-025 | 🔴 Open |
 | [STORY-090](EPICS/EPIC-025-worker-reliability/STORIES/STORY-090-task-idempotency-deduplication.md) | Implement Task Idempotency via Deduplication Lock | EPIC-025 | 🔴 Open |
