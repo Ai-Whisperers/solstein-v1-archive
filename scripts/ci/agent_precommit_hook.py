@@ -7,7 +7,7 @@ Runs quality checks before allowing commits.
 
 from __future__ import annotations
 
-import ast
+import ast as _ast
 import subprocess
 import sys
 from pathlib import Path
@@ -30,7 +30,7 @@ def check_function_sizes(files: list[Path], max_lines: int = 100) -> bool:
             )
             if result.returncode != 0:
                 violations.append(f"{file}: Function size violation")
-        except Exception:  # noqa: broad-except — hook must not crash on unexpected file content
+        except Exception:  # noqa: broad-except
             pass
 
     if violations:
@@ -57,11 +57,13 @@ def check_bare_excepts(files: list[Path]) -> bool:
                 stripped = line.strip()
                 # Check for bare except
                 if (
-                    stripped in ("except:", "except Exception:", "except Exception as e:")
+                    stripped == "except:"
+                    or stripped == "except Exception:"
+                    or stripped == "except Exception as e:"
                     and "# noqa" not in line
                 ):
                     violations.append(f"{file}:{i}: {line.strip()}")
-        except Exception:  # noqa: broad-except — hook must not crash on unexpected file content
+        except Exception:  # noqa: broad-except
             pass
 
     if violations:
@@ -96,11 +98,8 @@ def check_lazy_imports(files: list[Path]) -> bool:
                     function_indent = len(line) - len(line.lstrip())
                     continue
 
-                # Check for imports inside functions (skip lines with # noqa)
-                if in_function and (
-                    stripped.startswith("import ")
-                    or (stripped.startswith("from ") and " import " in stripped)
-                ):
+                # Check for imports inside functions
+                if in_function and (stripped.startswith("import ") or (stripped.startswith("from ") and " import " in line)):
                     current_indent = len(line) - len(line.lstrip())
                     if current_indent > function_indent and "# noqa" not in line:
                         violations.append(f"{file}:{i}: Lazy import: {line.strip()}")
@@ -111,7 +110,7 @@ def check_lazy_imports(files: list[Path]) -> bool:
                     if current_indent <= function_indent:
                         in_function = False
 
-        except Exception:  # noqa: broad-except — hook must not crash on unexpected file content
+        except Exception:  # noqa: broad-except
             pass
 
     if violations:
@@ -133,14 +132,14 @@ def check_banned_imports(files: list[Path]) -> bool:
 
         try:
             content = file.read_text()
-            tree = ast.parse(content)
+            tree = _ast.parse(content)
 
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
+            for node in _ast.walk(tree):
+                if isinstance(node, _ast.Import):
                     for alias in node.names:
                         if alias.name in BANNED:
                             violations.append(f"{file}:{node.lineno}: `import {alias.name}` is banned (use httpx)")
-                elif isinstance(node, ast.ImportFrom):
+                elif isinstance(node, _ast.ImportFrom):
                     if node.module and node.module.split(".")[0] in BANNED:
                         violations.append(
                             f"{file}:{node.lineno}: `from {node.module} import ...` is banned (use httpx)"
@@ -169,7 +168,7 @@ def check_file_size(files: list[Path], max_lines: int = 500) -> bool:
             lines = len(content.splitlines())
             if lines > max_lines:
                 violations.append(f"{file}: {lines} lines (max: {max_lines})")
-        except Exception:  # noqa: broad-except — hook must not crash on unexpected file content
+        except Exception:  # noqa: broad-except
             pass
 
     if violations:
@@ -213,10 +212,10 @@ def check_parameter_counts(files: list[Path], max_params: int = 5) -> bool:
 
         try:
             content = file.read_text()
-            tree = ast.parse(content)
+            tree = _ast.parse(content)
 
-            for node in ast.walk(tree):
-                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            for node in _ast.walk(tree):
+                if isinstance(node, (_ast.FunctionDef, _ast.AsyncFunctionDef)):
                     # Count parameters (excluding self/cls)
                     args = node.args
                     param_count = len(args.args) + len(args.kwonlyargs)
@@ -237,7 +236,7 @@ def check_parameter_counts(files: list[Path], max_params: int = 5) -> bool:
 
         except SyntaxError:
             pass
-        except Exception:  # noqa: broad-except — hook must not crash on unexpected file content
+        except Exception:  # noqa: broad-except
             pass
 
     if violations:
@@ -258,10 +257,10 @@ def check_class_sizes(files: list[Path], max_lines: int = 300, max_methods: int 
 
         try:
             content = file.read_text()
-            tree = ast.parse(content)
+            tree = _ast.parse(content)
 
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
+            for node in _ast.walk(tree):
+                if isinstance(node, _ast.ClassDef):
                     # Count lines
                     start_line = node.lineno
                     end_line = getattr(node, 'end_lineno', start_line)
@@ -270,7 +269,7 @@ def check_class_sizes(files: list[Path], max_lines: int = 300, max_methods: int 
                     # Count methods
                     methods = [
                         n for n in node.body
-                        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                        if isinstance(n, (_ast.FunctionDef, _ast.AsyncFunctionDef))
                     ]
                     method_count = len(methods)
 
@@ -288,7 +287,7 @@ def check_class_sizes(files: list[Path], max_lines: int = 300, max_methods: int 
 
         except SyntaxError as e:
             violations.append(f"{file}: Syntax error - {e}")
-        except Exception:  # noqa: broad-except — hook must not crash on unexpected file content
+        except Exception:  # noqa: broad-except
             pass
 
     if violations:
@@ -309,7 +308,7 @@ def get_staged_python_files() -> list[Path]:
         )
         files = [Path(f) for f in result.stdout.strip().split("\n") if f.endswith(".py")]
         return files
-    except Exception:  # noqa: broad-except — hook must not crash
+    except Exception:  # noqa: broad-except
         return []
 
 
