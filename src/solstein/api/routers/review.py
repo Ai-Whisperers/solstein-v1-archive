@@ -20,7 +20,7 @@ from typing import Any
 
 from fastapi import APIRouter, Body, HTTPException, status
 from loguru import logger
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from solstein.review_queue import ReviewQueueEntry, ReviewStatus, get_review_store
 
@@ -35,12 +35,16 @@ router = APIRouter(prefix="/review", tags=["Human Review Queue"])
 class ApproveRequest(BaseModel):
     """Optional body for the approve endpoint."""
 
+    model_config = ConfigDict(extra="forbid")
+
     reviewer_id: str | None = None
     """Identifier of the approving analyst (email, username, etc.)."""
 
 
 class RejectRequest(BaseModel):
     """Required body for the reject endpoint."""
+
+    model_config = ConfigDict(extra="forbid")
 
     reviewer_id: str | None = None
     """Identifier of the rejecting analyst."""
