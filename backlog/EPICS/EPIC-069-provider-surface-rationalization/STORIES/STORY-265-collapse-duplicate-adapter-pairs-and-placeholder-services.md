@@ -13,7 +13,7 @@
 
 ## Problem Statement
 
-The repo still contains paired provider implementations (`news` and `news_unified`, `funding` and `funding_unified`, `website` and `website_unified`, plus similar families) while `src/solstein/data/enrichment_service.py` preserves placeholder provider methods. This keeps the team fixing wrappers instead of fixing the real surface.
+The repo still contains paired provider implementations (`news` and `news_unified`, `funding` and `funding_unified`, `website` and `website_unified`, plus similar families) while `src/solstein/adapters/registry.py` branches between them via `feature_new_unified_loader` and `src/solstein/data/enrichment_service.py` preserves placeholder SEC, Companies House, and News provider methods. This keeps the team fixing wrappers instead of fixing the real surface.
 
 ## Acceptance Criteria
 
@@ -23,6 +23,7 @@ The repo still contains paired provider implementations (`news` and `news_unifie
 - [ ] Contract tests cover the surviving canonical implementations.
 - [ ] Orphan or unwired provider objects are inventoried and either retired or marked non-runtime.
 - [ ] The implementation records before/after file counts and LOC for each collapsed family.
+- [ ] The collapse plan names every feature flag, alias, and placeholder method currently keeping both provider families alive.
 
 ## Tasks
 
@@ -31,3 +32,4 @@ The repo still contains paired provider implementations (`news` and `news_unifie
 - [ ] Choose the canonical implementation per family.
 - [ ] Remove placeholders from the active runtime.
 - [ ] Record measured file/LOC reduction after collapse.
+- [ ] Document how `build_default_registry()` changes source selection today and what code disappears once one family is canonical.
