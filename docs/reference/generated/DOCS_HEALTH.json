@@ -4,20 +4,20 @@
     "available": true,
     "blocking_gates": 5,
     "ci_script_gate_count": 8,
-    "generated_on": "2026-03-30"
+    "generated_on": "2026-03-31"
   },
   "audit_index": {
     "available": true,
     "closed_issues": 0,
-    "generated_on": "2026-03-30",
+    "generated_on": "2026-03-31",
     "open_issues": 270,
     "total_issues": 271
   },
   "freshness": {
     "available": false,
-    "error": "Command '['/tmp/solstein-safe-push/.venv/bin/python3', '/tmp/solstein-safe-push/scripts/docs/check_generated_docs.py']' timed out after 60 seconds"
+    "error": "Command '['/d1/AI WHISPERERS/AGENTIC/solstein/.venv/bin/python3', '/d1/AI WHISPERERS/AGENTIC/solstein/scripts/docs/check_generated_docs.py']' timed out after 60 seconds"
   },
-  "generated_on": "2026-03-30",
+  "generated_on": "2026-03-31",
   "quality_gate": {
     "available": true,
     "paths": {
@@ -41,6 +41,6 @@
     "allowlisted_stale": 0,
     "available": true,
     "status": "pass",
-    "total_scanned": 1005
+    "total_scanned": 1006
   }
 }

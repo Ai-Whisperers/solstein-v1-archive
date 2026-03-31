@@ -1,7 +1,7 @@
 # EPIC-059: Input Validation & Graceful Degradation
 
 > **Priority**: P1 – High (prevents silent data corruption)  
-> **Stories**: 5 (STORY-206 through STORY-210)  
+> **Stories**: 6 (STORY-206 through STORY-210, STORY-251)  
 > **Effort**: M (3–4 days total)  
 > **Dependencies**: EPIC-047 (Data Loading Fidelity), EPIC-046 (Scoring Engine Correctness)  
 > **Status**: 🔴 Not Started
@@ -48,6 +48,7 @@ The data pipeline silently accepts incomplete or invalid data, passes it through
 | STORY-208 | Extract and apply metric_lineage confidence to signal_confidences | P1 | M | Confidence 0.72→weight 0.72 applied to score component |
 | STORY-209 | Add conversion output validation before Company construction | P1 | S | Fail fast if conversion loses too many fields |
 | STORY-210 | Implement graceful degradation mode for incomplete data | P2 | M | Score with warnings instead of blocking export |
+| STORY-251 | Enforce strict boundary schemas for connector, API, and domain ingress | P1 | M | Reject undeclared fields at high-risk boundaries while preserving explicit legacy aliases |
 
 ---
 
@@ -60,6 +61,7 @@ The data pipeline silently accepts incomplete or invalid data, passes it through
 - [ ] Converter validates output and fails fast if critical fields lost
 - [ ] Scoring produces consistent thresholds even with partial data
 - [ ] All conversion and scoring tests pass with real data
+- [ ] Critical ingress boundaries define and test explicit extra-field policy instead of silently allowing or ignoring unknown keys
 
 ---
 
@@ -147,6 +149,7 @@ Add test fixtures for:
 
 - `tests/unit/test_story209_validation_before_scoring.py` already exists and should be treated as a real boundary-validation anchor rather than a future placeholder.
 - `STORY-206` through `STORY-210` already encode Pydantic `ValidationError` expectations and conversion/scoring validation behavior in a machine-checkable way.
+- The 2026-03-31 audit found connector and API ingress paths still accepting or silently discarding undeclared keys; `STORY-251` is the follow-up hardening item for those boundaries.
 - Future work should extend these validation-before-scoring contracts, not create a second detached validation pass.
 
 ### Next Agent Action

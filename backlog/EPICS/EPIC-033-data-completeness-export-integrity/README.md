@@ -67,6 +67,7 @@ This epic addresses the full scope of the data completeness failure: restoring d
 | [STORY-126](STORIES/STORY-126-export-schema-validation.md) | Add Export Schema Validation | P1 | 🔴 Not Started |
 | [STORY-127](STORIES/STORY-127-deduplicate-fields.md) | Deduplicate profit_margin and employee Fields | P1 | 🔴 Not Started |
 | [STORY-128](STORIES/STORY-128-document-field-lineage.md) | Document Field Lineage from Ingestion to Export | P2 | 🔴 Not Started |
+| [STORY-250](STORIES/STORY-250-reconcile-export-schema-with-workbook-output.md) | Reconcile Export Schema Contract with Workbook Output | P1 | 🔴 Not Started |
 
 ---
 
@@ -98,6 +99,7 @@ STORY-128 (Field Lineage Docs)
 | Export schema validation coverage | 0% | 100% |
 | Field lineage documentation coverage | 0% | 100% |
 | CI detection of field drops | None | Automated |
+| Exporter passes its own schema gate | No | Yes |
 
 ---
 
@@ -136,6 +138,7 @@ The fix is not just adding 20 fields. The fix is establishing the contract that 
 
 - `planning/QUEUE.md` already records merged work for `STORY-125`, `STORY-126`, and `STORY-127`, plus field-lineage and strict-mode CI deliverables.
 - `STORY-126` and `STORY-128` are already the canonical contract references for export schema validation and lineage closure; do not re-specify them with weaker mock validation language.
+- The 2026-03-31 audit found the current exporter failing its own schema gate; `STORY-250` is the remediation follow-up and should be treated as contract repair, not optional enhancement.
 - Future agents should treat this epic as the existing schema-contract backbone for export surfaces, not as an untouched greenfield backlog item.
 
 ### Next Agent Action

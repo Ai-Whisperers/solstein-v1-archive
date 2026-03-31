@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-03-28 | Updated By | Autonomous worker (M12 queuing — EPIC-065 + EPIC-066) |
+| Last Updated | 2026-03-31 | Updated By | Codex audit remediation queue update |
 
 ## Status Key
 
@@ -25,6 +25,37 @@ The first worker run MUST do a verification pass before starting implementation 
 2. For each P0 epic (EPIC-002, 003, 004), verify actual code state matches claims
 3. Update this queue with accurate statuses
 4. Then proceed to pick up the first READY story
+
+---
+
+## Audit Remediation Hotfixes (2026-03-31)
+
+These stories were added after a live audit found schema-enforcement gaps, a failing export-schema gate, and tests that passed on source inspection while missing runtime regressions. They take priority over the older READY inventory below until the contract defects are repaired.
+
+### EPIC-013: Test Suite Integrity (Audit Hotfix)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 0a | STORY-254 | Remove Test Collection Side Effects and Env-Coupled Imports | READY | Added 2026-03-31: isolated pytest currently needs manual `DATABASE__URL` injection |
+| 0b | STORY-253 | Replace Structural Source-Inspection Tests with Behavioral Contract Tests | READY | Added 2026-03-31: runtime regressions escaped source-text tests |
+
+### EPIC-033: Data Completeness & Export Integrity (Audit Hotfix)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 0c | STORY-250 | Reconcile Export Schema Contract with Workbook Output | READY | Added 2026-03-31: exporter currently fails its own schema gate |
+
+### EPIC-059: Input Validation & Graceful Degradation (Audit Hotfix)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 0d | STORY-251 | Enforce Strict Boundary Schemas for Connector, API, and Domain Ingress | READY | Added 2026-03-31: extra fields still survive or disappear silently at ingress |
+
+### EPIC-021: Modern LLM Stack Migration (Audit Hotfix)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 0e | STORY-252 | Tighten Structured LLM Contracts and Reject Empty Extraction Successes | READY | Added 2026-03-31: empty structured payloads still validate as success |
 
 ---
 

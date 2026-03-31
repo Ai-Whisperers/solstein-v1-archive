@@ -4,7 +4,7 @@
 |-------|-------|
 | Priority | **P1** |
 | Status | 🔴 Open |
-| Stories | 5 |
+| Stories | 6 |
 | Created | 2026-02-28 |
 | Supersedes | Partially supersedes STORY-048, STORY-055, STORY-056 in existing epics |
 | Depends On | [EPIC-002](../EPIC-002-configuration-integrity/README.md) |
@@ -32,6 +32,7 @@ This epic deletes 661 lines of custom client code and replaces them with three w
 | [STORY-073](STORIES/STORY-073-langfuse-integration.md) | Integrate Langfuse for Cost Tracking and Prompt Management | STORY-048, STORY-055 | HIGH |
 | [STORY-074](STORIES/STORY-074-langfuse-evaluation.md) | Migrate LLM Evaluation to Langfuse | STORY-056 | MEDIUM |
 | [STORY-075](STORIES/STORY-075-multi-provider-fallback.md) | Implement Provider Fallback and Circuit Breaking via SDK | — | MEDIUM |
+| [STORY-252](STORIES/STORY-252-tighten-structured-llm-contracts.md) | Tighten Structured LLM Contracts and Reject Empty Extraction Successes | — | HIGH |
 
 ## Definition of Done
 
@@ -39,6 +40,7 @@ This epic deletes 661 lines of custom client code and replaces them with three w
 - [ ] All LLM calls are traced in Langfuse with token counts and cost estimates
 - [ ] All prompt templates are managed in Langfuse — none inline in code
 - [ ] LLM response schema violations raise at the call site, not downstream
+- [ ] Empty or unknown-only structured payloads do not count as successful extractions
 - [ ] Provider fallback is implemented using SDK-native mechanisms
 
 ## Autonomous Continuation Notes
