@@ -157,3 +157,66 @@ Primary repo references used to compile this list:
 - `src/solstein/llm/provider_strategies.py`
 - `src/solstein/notifications/channels.py`
 
+## Runtime Consumption Notes
+
+The APIs above are not consumed uniformly by the two research/orchestration
+paths currently present in the repository.
+
+### Shared or Near-Shared Research Integrations
+
+- **GitHub REST API**: used by graph collection nodes via `GitHubAgent`; similar
+  engineering-signal behavior also exists in the broader legacy research stack.
+- **SEC EDGAR APIs**: used directly by graph `sec_filings` and also by legacy
+  enrichment/connectors.
+- **Companies House Public Data API**: used directly by graph
+  `companies_house` and also by legacy enrichment/connectors.
+
+### Primarily Legacy Stage-Pipeline / Registry-Driven Integrations
+
+- **Exa Search API**
+- **Yahoo Finance via `yfinance`**
+- **Crunchbase Data API**
+- **NewsAPI**
+- **OpenCorporates API**
+- **OpenFIGI API**
+- **PatentsView**
+
+These are wired mainly through the adapter registry, unified adapters, and
+legacy enrichment/discovery flows. They are not currently exposed through the
+LangGraph runtime as a single shared integration layer.
+
+### Primarily Graph-Path Search Runtime
+
+- **SearXNG**
+- **Google Custom Search JSON API**
+
+These power the newer graph-oriented web search path via `WebSearchAgent`
+and its search backend dispatcher. Their usage pattern is not the same as the
+legacy Exa-centric discovery/enrichment path.
+
+### Platform-Wide Rather Than Pipeline-Specific
+
+- **Supabase**
+- **Langfuse**
+- **Slack Incoming Webhooks**
+- **Supported LLM provider APIs**
+
+These are cross-cutting platform dependencies. They support the wider product
+runtime and observability surface, but they are not evidence that the legacy
+pipeline and graph runtime share one canonical data-integration stack.
+
+## Commit Review Cross-Reference (2026-03-31)
+
+- Latest remote commit reviewed: `68cd20e` (`docs: add external API inventory summary`).
+  - This file remains the canonical external-integration inventory produced by that commit.
+
+- Session hardening commit reviewed: `eed7ff2` (`audit: harden validation schema strictness at boundaries`).
+  - Boundary strictness work in API/router/schema layers depends on accurate external contract boundaries documented here.
+  - This commit-to-doc linkage is intentional: strict request schemas should be derived from provider contracts in this inventory, not inferred ad hoc.
+
+- Immediate historical baseline reviewed: `8562cb0` (`chore(lint): enforce full ruff compliance across src and tests`).
+  - Quality-only baseline commit; used here as the pre-boundary-hardening reference point.
+
+- Migration drift note:
+  - The inventory includes APIs consumed by both legacy stage-pipeline and graph-path runtimes.
+  - Contract governance should converge through adapter boundaries so both runtimes normalize to one canonical internal shape.

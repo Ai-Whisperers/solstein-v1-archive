@@ -159,6 +159,51 @@ when retrying a failed research job.
 | Story | Status | Description |
 |-------|--------|-------------|
 | STORY-076 | ✅ Done | This document + `state.py` + `topology.py` |
-| STORY-077 | 🔴 Ready | Wire `coordinator_agent.py` to use this graph |
-| STORY-078 | 🔴 Blocked | Replace stub nodes with real API integrations |
-| STORY-079 | 🔴 Blocked | Add MemorySaver checkpointing + human interrupt |
+| STORY-077 | ✅ Landed | `GraphExecutor`, request deduplication, and node error isolation are present in `src/solstein/research/graph/executor.py` |
+| STORY-078 | ✅ Partially Landed | Stub agents were deleted and five collection nodes now call real integrations, but downstream fan-in/scoring/export behavior is not yet parity-complete |
+| STORY-079 | ✅ Partially Landed | Checkpointer factory, interrupt-driven review queue, and review API are present, but the graph still does not replace the mature end-to-end research pipeline |
+
+---
+
+## Current Branch Reality
+
+As of `origin/develop` on 2026-03-31, the LangGraph runtime is the intended
+successor orchestration model, but it is not yet the canonical end-to-end
+research execution path.
+
+- The graph runtime exists and is structurally real: topology, executor,
+  checkpointing, review queue, and five data-collection nodes are implemented.
+- The legacy stage pipeline in `src/solstein/research/pipeline.py` remains the
+  more complete behavioral implementation for discovery, enrichment, gating,
+  scoring, analysis, and export.
+- The graph should therefore be treated as a migration target and architectural
+  direction, while the stage pipeline remains the practical reference for
+  expected output semantics until feature parity is reached.
+
+This distinction is important for engineering standards: avoid extending both
+orchestration paths in parallel. Port mature business behavior from the stage
+pipeline into graph-owned services, then retire the legacy runtime instead of
+adding more long-lived compatibility seams.
+
+---
+
+## Commit Reality Review (origin/develop)
+
+Reviewed commit trail relevant to graph migration reality:
+
+1. `7ac122a` — STORY-076 LangGraph architecture/state foundations.
+2. `4be64bc` — STORY-077 GraphExecutor + dedup + node isolation seam.
+3. `43c4999` — STORY-078 real collection-node integrations replacing stubs.
+4. `a99bf24` — STORY-079 checkpointing + human-review interrupt path.
+
+Current branch-check interpretation (validated against current code, not only messages):
+
+- Migration intent is explicit and sequential in commit history.
+- Runtime parity is still incomplete because downstream business nodes in graph topology are placeholders while stage-pipeline behavior remains mature.
+- Therefore the architecture standard remains: use adapters/canonical contracts to migrate behavior into graph-owned paths, and avoid adding new long-lived retro-compat patch layers.
+
+Additional reviewed reference commits:
+
+- `8562cb0` — broad quality baseline before strict boundary audit work.
+- `eed7ff2` — validation strictness hardening commit tied to boundary documentation.
+- `68cd20e` — external API inventory commit that anchors provider-contract boundary governance.
