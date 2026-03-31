@@ -19,6 +19,9 @@ The project still lacks executable proof that the canonical runtime works reliab
 
 Without this epic, the repo can continue producing convincing artifacts without trustworthy evidence.
 
+Current baseline artifact:
+- [`docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md`](../../../docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md) defines the current placeholder, mock, disabled, and duplicate surfaces that golden runs must reject or retire.
+
 ---
 
 ## Scope
