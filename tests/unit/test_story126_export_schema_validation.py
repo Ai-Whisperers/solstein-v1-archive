@@ -9,13 +9,12 @@ Validates that:
 """
 
 from pathlib import Path
-from typing import Any
-from unittest.mock import patch
 
 import pytest
 from openpyxl import load_workbook
 
 from solstein.domain.models import Company, FinancialMetric
+from solstein.exporters.excel_improved import ImprovedExcelExporter
 from solstein.exporters.export_schema import (
     EXPORT_SCHEMA,
     EXPORT_SCHEMA_VERSION,
@@ -25,7 +24,6 @@ from solstein.exporters.export_schema import (
     get_schema_by_sheet,
     validate_export,
 )
-from solstein.exporters.excel_improved import ImprovedExcelExporter
 
 
 def _make_full_company() -> Company:
@@ -110,7 +108,7 @@ class TestExportSchemaDefinition:
 
     def test_all_fields_have_required_attributes(self) -> None:
         for spec in EXPORT_SCHEMA:
-            assert spec.name, f"Field spec missing name"
+            assert spec.name, "Field spec missing name"
             assert spec.header, f"Field {spec.name} missing header"
             assert spec.sheet, f"Field {spec.name} missing sheet"
             assert spec.data_type in {
@@ -141,13 +139,6 @@ class TestValidationFails:
         """Deliberately removing a required header causes validation to fail."""
         company = _make_full_company()
         exporter = ImprovedExcelExporter()
-
-        # Patch add_executive_summary to skip tech_stack column
-        original_headers = [
-            "Company", "Industry", "Revenue (€M)", "Growth", "AI Score", "Tier", "Threat Level",
-            "Tech Stack", "Key Customers", "Open Positions", "Data Availability",
-        ]
-        broken_headers = [h for h in original_headers if h != "Tech Stack"]
 
         # Create the export normally first, then tamper with the file
         exporter.create_dashboard([company], export_path)

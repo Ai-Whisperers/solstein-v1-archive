@@ -15,9 +15,10 @@ import inspect
 import os
 from unittest.mock import patch
 
+from pydantic import ValidationError
+
 import solstein.celery_config as celery_cfg
 import solstein.config as cfg_mod
-from pydantic import ValidationError
 from solstein._config_timeouts import CeleryTimingConfig
 from solstein.config import Settings, get_settings
 

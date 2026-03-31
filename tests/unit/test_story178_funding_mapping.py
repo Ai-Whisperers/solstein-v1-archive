@@ -15,7 +15,6 @@ import pytest
 
 from solstein.data.converters.company import convert_to_domain_company
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

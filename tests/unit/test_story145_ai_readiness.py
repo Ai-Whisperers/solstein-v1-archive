@@ -11,8 +11,6 @@ Validates:
 
 from __future__ import annotations
 
-import pytest
-
 from solstein.analytics.ai_readiness import (
     AIReadinessConfig,
     AIReadinessResult,
@@ -20,7 +18,6 @@ from solstein.analytics.ai_readiness import (
     AIReadinessTier,
 )
 from solstein.domain.models import AIMaturity, Company, FinancialMetric
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

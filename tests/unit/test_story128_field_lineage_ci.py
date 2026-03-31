@@ -12,13 +12,12 @@ from pathlib import Path
 from textwrap import dedent
 
 import pytest
-
 from scripts.ci.check_field_lineage import (
-    extract_documented_fields,
-    extract_model_fields,
-    check_field_lineage,
     LINEAGE_DOC,
     MODELS_FILE,
+    check_field_lineage,
+    extract_documented_fields,
+    extract_model_fields,
 )
 
 

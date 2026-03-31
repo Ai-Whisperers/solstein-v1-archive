@@ -239,8 +239,6 @@ class TestBackwardCompatibility:
         """llm/__init__.py still exports all expected symbols."""
         from solstein.llm import (
             EnhancedLLMClient,
-            LLMGenerationError,
-            get_enhanced_llm_client,
         )
         assert EnhancedLLMClient is not None
 
@@ -309,6 +307,7 @@ class TestFailoverModule:
 class TestJsonParsing:
     def test_parse_json_string(self):
         from pydantic import BaseModel
+
         from solstein.llm.json_parsing import parse_json_string
 
         class Simple(BaseModel):
@@ -319,6 +318,7 @@ class TestJsonParsing:
 
     def test_parse_json_with_markdown_fences(self):
         from pydantic import BaseModel
+
         from solstein.llm.json_parsing import parse_json_string
 
         class Simple(BaseModel):
@@ -329,6 +329,7 @@ class TestJsonParsing:
 
     def test_parse_structured_result_string(self):
         from pydantic import BaseModel
+
         from solstein.llm.json_parsing import parse_structured_result
 
         class Simple(BaseModel):
@@ -340,6 +341,7 @@ class TestJsonParsing:
 
     def test_parse_structured_result_invalid_returns_none(self):
         from pydantic import BaseModel
+
         from solstein.llm.json_parsing import parse_structured_result
 
         class Simple(BaseModel):
@@ -362,7 +364,7 @@ class TestNoRawHTTPAST:
             if isinstance(node, ast.Constant) and isinstance(node.value, str):
                 if "api.anthropic.com" in node.value:
                     # Find which class this belongs to
-                    assert False, (
+                    raise AssertionError(
                         f"Found 'api.anthropic.com' string literal at line {node.lineno} "
                         "in provider_strategies.py — should use native Anthropic SDK"
                     )

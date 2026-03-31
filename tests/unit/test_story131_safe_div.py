@@ -8,7 +8,6 @@ Verifies that:
 - safe_avg handles None values and empty lists
 """
 
-import math
 
 import pytest
 

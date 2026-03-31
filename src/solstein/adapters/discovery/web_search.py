@@ -7,8 +7,6 @@ Requires the ``exa_py`` package and an Exa API key.
 
 from __future__ import annotations
 
-from loguru import logger
-
 from solstein.adapters.logging import log_adapter_error
 
 

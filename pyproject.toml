@@ -172,6 +172,11 @@ ignore = [
     "W293",   # Whitespace in blank lines — auto-fixable but noisy
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "TRY002",  # raise Exception(...) in test stubs/mocks is idiomatic — no need for custom exception classes
+]
+
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = false

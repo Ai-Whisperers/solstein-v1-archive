@@ -194,17 +194,17 @@ class TestBackwardCompatibility:
     def test_getattr_profit_margin(self):
         """getattr(company, 'profit_margin') works."""
         company = Company(id="TEST-050", name="Test Corp", profit_margin=0.12)
-        assert getattr(company, "profit_margin") == 0.12
+        assert company.profit_margin == 0.12
 
     def test_getattr_employees(self):
         """getattr(company, 'employees') works."""
         company = Company(id="TEST-051", name="Test Corp", employees=100)
-        assert getattr(company, "employees") == 100
+        assert company.employees == 100
 
     def test_getattr_employee_count(self):
         """getattr(company, 'employee_count') works."""
         company = Company(id="TEST-052", name="Test Corp", employees=100)
-        assert getattr(company, "employee_count") == 100
+        assert company.employee_count == 100
 
     def test_safe_get_pattern(self):
         """Common safe_get pattern still works: getattr(obj, field, default)."""

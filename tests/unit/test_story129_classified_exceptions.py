@@ -16,7 +16,6 @@ import pytest
 from solstein.llm.health.errors import ErrorClassifier
 from solstein.llm.health.models import ProviderErrorType
 
-
 # ---------------------------------------------------------------------------
 # ErrorClassifier unit tests
 # ---------------------------------------------------------------------------
