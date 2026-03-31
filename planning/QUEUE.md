@@ -36,7 +36,7 @@ These stories were added after a live audit found schema-enforcement gaps, a fai
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0a | STORY-254 | Remove Test Collection Side Effects and Env-Coupled Imports | IN_PROGRESS | Added 2026-03-31: isolated pytest currently needs manual `DATABASE__URL` injection |
+| 0a | STORY-254 | Remove Test Collection Side Effects and Env-Coupled Imports | DONE | PR #217 | Added 2026-03-31: isolated pytest currently needs manual `DATABASE__URL` injection |
 | 0b | STORY-253 | Replace Structural Source-Inspection Tests with Behavioral Contract Tests | READY | Added 2026-03-31: runtime regressions escaped source-text tests |
 
 ### EPIC-033: Data Completeness & Export Integrity (Audit Hotfix)
