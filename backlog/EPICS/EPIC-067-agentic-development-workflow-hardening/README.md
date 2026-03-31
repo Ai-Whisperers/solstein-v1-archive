@@ -1,0 +1,69 @@
+# EPIC-067: Agentic Development Workflow Hardening
+
+> **Priority**: P1 - High
+> **Stories**: 6 (STORY-250 through STORY-255)
+> **Effort**: L (2-4 weeks)
+> **Dependencies**: EPIC-013, EPIC-014, EPIC-017, EPIC-021, EPIC-022, EPIC-054, EPIC-055, EPIC-061, EPIC-065, EPIC-066
+> **Status**: 🔴 Not Started
+
+---
+
+## Problem
+
+Solstein now has stricter tests, AST rules, generated docs, and audit indexes, but the repository is still not fully optimized for repeated Claude/Codex-style agent work.
+
+The core gap is that the backlog heavily covers runtime multi-agent orchestration, but only partially covers the *developer-agent workflow* needed to navigate and modify this repo safely:
+
+- no canonical capability matrix for real vs deprecated agents/nodes
+- no deterministic `agent-ready` bootstrap
+- no single focused regression pack for agent edits
+- no generated boundary/state ownership registry for critical nodes
+- no standard handoff artifact bundle between sessions
+- no maintained ownership/locking surface for concurrent agent work
+
+Without these, every new agent session still spends too much effort rediscovering context and too little applying verified changes.
+
+---
+
+## Scope
+
+| Category | Action |
+|---|---|
+| Bootstrap | Make agent setup deterministic and one-command |
+| Context Surfaces | Generate token-cheap capability, boundary, and ownership indexes |
+| Regression Safety | Build a maintained focused gate pack for iterative agent edits |
+| Handoffs | Standardize compact session handoff artifacts |
+| Coordination | Replace stale ownership/locking docs with maintained surfaces |
+
+---
+
+## Stories
+
+| Story | Title | Priority | Size | Status |
+|---|---|---|---|---|
+| STORY-250 | Generate agent capability matrix and coverage ledger | P1 | M | 🔴 Open |
+| STORY-251 | Build deterministic `make agent-ready` bootstrap | P1 | S | 🔴 Open |
+| STORY-252 | Create focused agent-safe regression and gate pack | P1 | M | 🔴 Open |
+| STORY-253 | Generate boundary and state ownership registries | P1 | L | 🔴 Open |
+| STORY-254 | Standardize agent handoff artifact bundle and checkpoint docs | P1 | M | 🔴 Open |
+| STORY-255 | Refresh file ownership and locking model into maintained docs | P2 | M | 🔴 Open |
+
+---
+
+## Architectural Requirements
+
+- **REQ-1**: Agent bootstrap must be deterministic and idempotent.
+- **REQ-2**: Generated context surfaces must be derived from source code, tests, and audit artifacts rather than handwritten summaries.
+- **REQ-3**: The focused regression pack must cover commercially critical paths without requiring the entire test suite.
+- **REQ-4**: Handoff artifacts must be compact enough for fast agent reuse and detailed enough to prevent context drift.
+- **REQ-5**: Ownership/locking guidance must be current, not historical.
+
+---
+
+## Success Criteria
+
+- A new agent session can run one command and know whether the repo is ready for safe work.
+- An agent can answer "what is real, what is deprecated, what is covered, and what is risky" from generated docs first.
+- Iterative edits can be validated with a focused gate pack in minutes, not the full suite in hours.
+- Session handoffs are queryable and compact.
+- Ownership/locking guidance aligns with current critical-path modules and active epics.
