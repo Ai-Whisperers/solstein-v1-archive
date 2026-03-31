@@ -1,5 +1,10 @@
 """LangGraph-based research pipeline graph.
 
+.. warning:: FROZEN — STORY-255 (2026-03-31)
+
+   This entire ``research/graph/`` package is **frozen**. Bug fixes and
+   security patches only. See ``topology.py`` docstring for full notice.
+
 STORY-076: Defines the typed ResearchState and the explicit graph topology.
 STORY-077: Adds GraphExecutor with request deduplication and node error isolation.
 STORY-079: Adds durable SqliteSaver checkpointing and human-in-the-loop interruption.
