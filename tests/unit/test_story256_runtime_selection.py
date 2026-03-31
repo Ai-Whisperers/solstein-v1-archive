@@ -9,8 +9,6 @@ Verify that:
 
 import warnings
 
-import pytest
-
 
 class TestCanonicalRuntimeSelection:
     """Verify the canonical pipeline is the sole synchronous entry-point."""
