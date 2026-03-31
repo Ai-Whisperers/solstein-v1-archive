@@ -156,7 +156,7 @@ class TestAdapterUsesSettingsTimeout:
             patch("solstein.adapters.enrichment.website_unified.get_settings", return_value=mock_settings),
             patch("requests.get", side_effect=fake_get),
         ):
-            from solstein.adapters.enrichment.website_unified import WebsiteUnifiedAdapter
+            from solstein.adapters.enrichment._retired.website_unified import WebsiteUnifiedAdapter
 
             adapter = WebsiteUnifiedAdapter.__new__(WebsiteUnifiedAdapter)
             adapter._scrape_website("https://example.com")

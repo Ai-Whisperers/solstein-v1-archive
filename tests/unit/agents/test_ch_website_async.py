@@ -20,7 +20,7 @@ import pytest
 import solstein.adapters.enrichment.website_unified as website_adapter_mod
 import solstein.agents.companies_house_agent as ch_mod
 import solstein.agents.website_agent as web_mod
-from solstein.adapters.enrichment.website_unified import WebsiteUnifiedAdapter
+from solstein.adapters.enrichment._retired.website_unified import WebsiteUnifiedAdapter
 from solstein.agents.companies_house_agent import CompaniesHouseAgent
 from solstein.agents.website_agent import WebsiteAgent
 

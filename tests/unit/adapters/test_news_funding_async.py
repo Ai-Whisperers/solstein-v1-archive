@@ -20,8 +20,8 @@ import pytest
 
 import solstein.adapters.enrichment.funding_unified as funding_mod
 import solstein.adapters.enrichment.news_unified as news_mod
-from solstein.adapters.enrichment.funding_unified import FundingUnifiedAdapter
-from solstein.adapters.enrichment.news_unified import NewsUnifiedAdapter
+from solstein.adapters.enrichment._retired.funding_unified import FundingUnifiedAdapter
+from solstein.adapters.enrichment._retired.news_unified import NewsUnifiedAdapter
 
 # ---------------------------------------------------------------------------
 # 1. No `requests` import
