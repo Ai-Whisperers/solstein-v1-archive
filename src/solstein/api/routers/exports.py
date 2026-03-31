@@ -19,7 +19,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
 from loguru import logger
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from ..dependencies import get_current_tenant
 from .exports_helpers import (
@@ -34,14 +34,28 @@ from .exports_helpers import (
 router = APIRouter(prefix="/api/v1/exports", tags=["Exports"])
 
 # Valid export formats
-_VALID_FORMATS = frozenset({
-    "excel", "csv", "json", "markdown", "llm", "pdf",
-})
+_VALID_FORMATS = frozenset(
+    {
+        "excel",
+        "csv",
+        "json",
+        "markdown",
+        "llm",
+        "pdf",
+    }
+)
 
 # Valid status values for filtering
-_VALID_STATUSES = frozenset({
-    "queued", "processing", "completed", "failed", "cancelled", "expired",
-})
+_VALID_STATUSES = frozenset(
+    {
+        "queued",
+        "processing",
+        "completed",
+        "failed",
+        "cancelled",
+        "expired",
+    }
+)
 
 
 class ExportRequest(BaseModel):
@@ -59,6 +73,8 @@ class ExportRequest(BaseModel):
         None,
         description="Optional industry filter",
     )
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
 
 class ExportJobResponse(BaseModel):
@@ -111,8 +127,7 @@ async def create_export(
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={
-                "detail": f"Invalid format '{body.format}'. "
-                f"Valid formats: {', '.join(sorted(_VALID_FORMATS))}",
+                "detail": f"Invalid format '{body.format}'. Valid formats: {', '.join(sorted(_VALID_FORMATS))}",
             },
         )
 
@@ -204,8 +219,7 @@ async def list_exports(
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={
-                "detail": f"Invalid status '{status_filter}'. "
-                f"Valid: {', '.join(sorted(_VALID_STATUSES))}",
+                "detail": f"Invalid status '{status_filter}'. Valid: {', '.join(sorted(_VALID_STATUSES))}",
             },
         )
 

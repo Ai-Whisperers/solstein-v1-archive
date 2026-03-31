@@ -12,7 +12,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from supabase_auth.errors import AuthApiError
 
 from ...core.supabase_client import get_supabase
@@ -25,29 +25,35 @@ class LoginRequest(BaseModel):
     """Request model for login endpoint."""
 
     email: EmailStr
-    password: str
+    password: str = Field(min_length=8, max_length=256)
 
-    class Config:
-        json_schema_extra = {"example": {"email": "user@example.com", "password": "securepassword123"}}
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={"example": {"email": "user@example.com", "password": "securepassword123"}},
+    )
 
 
 class SignupRequest(BaseModel):
     """Request model for signup endpoint."""
 
     email: EmailStr
-    password: str
+    password: str = Field(min_length=8, max_length=256)
 
-    class Config:
-        json_schema_extra = {"example": {"email": "newuser@example.com", "password": "securepassword123"}}
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={"example": {"email": "newuser@example.com", "password": "securepassword123"}},
+    )
 
 
 class RefreshRequest(BaseModel):
     """Request model for token refresh endpoint."""
 
-    refresh_token: str
+    refresh_token: str = Field(min_length=1, max_length=4096)
 
-    class Config:
-        json_schema_extra = {"example": {"refresh_token": "your-refresh-token-here"}}
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={"example": {"refresh_token": "your-refresh-token-here"}},
+    )
 
 
 class AuthTokenResponse(BaseModel):

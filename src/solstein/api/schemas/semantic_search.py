@@ -6,7 +6,7 @@ endpoint. Follows typed envelope conventions — no loose dicts cross boundaries
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class SemanticSearchRequest(BaseModel):
@@ -51,6 +51,16 @@ class SemanticSearchRequest(BaseModel):
         le=1.0,
         description="Minimum cosine similarity threshold. Results below this are excluded.",
     )
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    @model_validator(mode="after")
+    def validate_exactly_one_query_source(self) -> "SemanticSearchRequest":
+        has_query = bool(self.query)
+        has_company_id = bool(self.company_id)
+        if has_query == has_company_id:
+            raise ValueError("Exactly one of 'query' or 'company_id' must be provided")
+        return self
 
 
 class SemanticSearchResultItem(BaseModel):
