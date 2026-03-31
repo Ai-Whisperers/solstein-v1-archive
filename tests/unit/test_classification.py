@@ -33,7 +33,7 @@ class TestClassifyCompanyBalanced:
 
     def test_lead_low_score(self):
         """Test Lead classification for low scores."""
-        assert classify_company_balanced(5.49) == "Lead"
+        assert classify_company_balanced(4.49) == "Lead"
         assert classify_company_balanced(4.0) == "Lead"
         assert classify_company_balanced(0.0) == "Lead"
 
@@ -44,8 +44,8 @@ class TestClassifyCompanyBalanced:
 
     def test_boundary_salt_lead(self):
         """Test boundary between Salt and Lead."""
-        assert classify_company_balanced(5.49) == "Lead"
-        assert classify_company_balanced(5.5) == "Salt"
+        assert classify_company_balanced(4.49) == "Lead"
+        assert classify_company_balanced(4.5) == "Salt"
 
     def test_none_score(self):
         """Test None score defaults to Salt."""
