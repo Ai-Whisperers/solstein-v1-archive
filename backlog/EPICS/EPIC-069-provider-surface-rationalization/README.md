@@ -19,9 +19,6 @@ Provider integration surfaces are fragmented across duplicate adapters, placehol
 
 Until there is one canonical provider surface per capability, debugging source quality is guesswork.
 
-Current baseline artifact:
-- [`docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md`](../../../docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md) records the current 12-file, 1,859 LOC duplicate-provider-family footprint and the registry branching that keeps both families alive.
-
 ---
 
 ## Scope

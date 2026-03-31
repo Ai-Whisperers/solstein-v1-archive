@@ -31,9 +31,6 @@ This is exactly the condition that keeps producing compatibility patches instead
 | Graph Freeze | Explicitly mark incomplete graph surfaces as non-production and remove misleading entrypoints |
 | Decision Gate | Define the empirical criteria that would force a legacy rebuild instead of continued salvage |
 
-Current evidence artifact:
-- [`docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md`](../../../docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md)
-
 ---
 
 ## Stories

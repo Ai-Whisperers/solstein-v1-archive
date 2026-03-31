@@ -36,26 +36,26 @@ These stories were added after a live audit found schema-enforcement gaps, a fai
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0a | STORY-254 | Remove Test Collection Side Effects and Env-Coupled Imports | DONE | PR #205 |
-| 0b | STORY-253 | Replace Structural Source-Inspection Tests with Behavioral Contract Tests | DONE | PR #206 |
+| 0a | STORY-254 | Remove Test Collection Side Effects and Env-Coupled Imports | READY | Added 2026-03-31: isolated pytest currently needs manual `DATABASE__URL` injection |
+| 0b | STORY-253 | Replace Structural Source-Inspection Tests with Behavioral Contract Tests | READY | Added 2026-03-31: runtime regressions escaped source-text tests |
 
 ### EPIC-033: Data Completeness & Export Integrity (Audit Hotfix)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0c | STORY-250 | Reconcile Export Schema Contract with Workbook Output | DONE | PR #207 |
+| 0c | STORY-250 | Reconcile Export Schema Contract with Workbook Output | READY | Added 2026-03-31: exporter currently fails its own schema gate |
 
 ### EPIC-059: Input Validation & Graceful Degradation (Audit Hotfix)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0d | STORY-251 | Enforce Strict Boundary Schemas for Connector, API, and Domain Ingress | DONE | PR #208 |
+| 0d | STORY-251 | Enforce Strict Boundary Schemas for Connector, API, and Domain Ingress | READY | Added 2026-03-31: extra fields still survive or disappear silently at ingress |
 
 ### EPIC-021: Modern LLM Stack Migration (Audit Hotfix)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0e | STORY-252 | Tighten Structured LLM Contracts and Reject Empty Extraction Successes | DONE | PR #209 |
+| 0e | STORY-252 | Tighten Structured LLM Contracts and Reject Empty Extraction Successes | READY | Added 2026-03-31: empty structured payloads still validate as success |
 
 ---
 
@@ -67,9 +67,9 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0f | STORY-271 | Publish Runtime Depth, Wiring, and Duplication Ledger | DONE | PR #210; full ledger at `docs/architecture/runtime-depth-ledger.md` + audit artifact at `docs/audit/` |
-| 0g | STORY-255 | Freeze Graph Runtime and Declare Legacy Pipeline Canonical | DONE | PR #211; ADR-009 + FROZEN/CANONICAL notices |
-| 0h | STORY-256 | Delete Runtime Aliases and Feature-Flag Branching Around Orchestration | DONE | PR #214 | Unblocked: STORY-271 (DONE) + STORY-255 (DONE) |
+| 0f | STORY-271 | Publish Runtime Depth, Wiring, and Duplication Ledger | READY | Added 2026-03-31: document wired vs unwired surfaces, orphan objects, and dual-system LOC/file bloat before more migration work |
+| 0g | STORY-255 | Freeze Graph Runtime and Declare Legacy Pipeline Canonical | READY | Added 2026-03-31: commit history shows graph intent, runtime reality still favors legacy path |
+| 0h | STORY-256 | Delete Runtime Aliases and Feature-Flag Branching Around Orchestration | BLOCKED | Depends on STORY-271 and STORY-255 so deletion is evidence-driven rather than ad-hoc |
 | 0i | STORY-257 | Repair Legacy Entrypoints to Share One Registry and One Converter | BLOCKED | Depends on STORY-271 and STORY-256 |
 | 0j | STORY-258 | Define Salvage-vs-Rebuild Trigger for the Legacy Runtime | BLOCKED | Depends on STORY-271 and EPIC-070 evidence work |
 
@@ -77,10 +77,10 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0k | STORY-263 | Build Provider Scorecard and Enforcement Matrix | DONE | PR #212; scorecard at `docs/architecture/provider-scorecard.md` |
-| 0l | STORY-265 | Collapse Duplicate Adapter Pairs and Placeholder Services | DONE | PR #215 | Unblocked: STORY-263 (DONE); cite scorecard section 4 |
-| 0m | STORY-264 | Remove Replaceable Providers from the Canonical Runtime | IN_PROGRESS | Unblocked: STORY-263 (DONE) + EPIC-067 canonical runtime (STORY-255 DONE) |
-| 0n | STORY-266 | Ban New Compatibility Patches at Provider Boundaries | DONE | PR #213; adapter freeze check in `scripts/ci/adapter_freeze_check.py` |
+| 0k | STORY-263 | Build Provider Scorecard and Enforcement Matrix | READY | Added 2026-03-31: one provider ownership matrix before more adapter churn |
+| 0l | STORY-265 | Collapse Duplicate Adapter Pairs and Placeholder Services | BLOCKED | Depends on STORY-263 so collapse decisions cite one scorecard and include orphan/LOC reduction accounting |
+| 0m | STORY-264 | Remove Replaceable Providers from the Canonical Runtime | BLOCKED | Depends on STORY-263 and EPIC-067 canonical-runtime decision |
+| 0n | STORY-266 | Ban New Compatibility Patches at Provider Boundaries | READY | Added 2026-03-31: stop net-new wrapper growth during consolidation |
 
 ### EPIC-070: Empirical Golden Runs and Rebuild Gate (Consolidation)
 

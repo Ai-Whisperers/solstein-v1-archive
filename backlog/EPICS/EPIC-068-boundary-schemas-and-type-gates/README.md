@@ -19,9 +19,6 @@ The codebase still allows loose dictionaries, alias transforms, and weak type ga
 
 The result is that the system can appear to work while silently accepting malformed or legacy-shaped data.
 
-Current baseline artifact:
-- [`docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md`](../../../docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md) identifies the currently retained runtime seams, placeholder control-plane paths, and alias-heavy boundaries this epic must harden.
-
 ---
 
 ## Scope
