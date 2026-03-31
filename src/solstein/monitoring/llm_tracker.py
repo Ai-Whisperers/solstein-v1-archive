@@ -32,7 +32,6 @@ from loguru import logger
 
 from solstein.monitoring.metrics import track_llm_call
 
-
 # Token costs per 1K tokens (approximate, update regularly)
 TOKEN_COSTS = {
     "openai": {

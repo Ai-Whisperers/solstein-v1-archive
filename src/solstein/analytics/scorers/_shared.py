@@ -20,7 +20,7 @@ def confidence_to_level(confidence: float) -> ConfidenceLevel:
 
 def merge_facts_into_financials(
     financials: FinancialMetric,
-    fact_repo: "FactRepository",
+    fact_repo: FactRepository,
     company_id: str,
 ) -> FinancialMetric:
     try:

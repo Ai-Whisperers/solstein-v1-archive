@@ -6,9 +6,7 @@ Orchestrates loading and merging of company data from multiple sources.
 
 from __future__ import annotations
 
-import logging
 import os
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import cast
 
@@ -25,9 +23,7 @@ from .batch_outcomes import BatchEnrichmentOutcome
 from .company import UnifiedCompany
 from .enrichment import enrich_batch as _enrich_batch
 from .enrichment import enrich_from_connectors
-from .merger import merge_companies, convert_to_unified
-
-logger = logging.getLogger(__name__)
+from .merger import convert_to_unified, merge_companies
 
 
 class UnifiedCompanyLoader:

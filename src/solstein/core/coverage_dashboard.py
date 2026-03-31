@@ -93,7 +93,7 @@ class CoverageCollector:
     def run_coverage(self) -> dict[str, Any]:
         """Run pytest with coverage and return JSON report."""
         try:
-            result = subprocess.run(
+            subprocess.run(
                 [
                     "python",
                     "-m",

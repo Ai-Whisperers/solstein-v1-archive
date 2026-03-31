@@ -4,20 +4,18 @@ Ensure no production-ready output bypasses authenticity policy.
 Part of EPIC-017 Wave 2 Testing Hardening.
 """
 
-import pytest
-from datetime import datetime
 from unittest.mock import Mock, patch
 
-from solstein.domain.models import Company
+import pytest
+
+from solstein.data.report_release_gate import ReportReleaseGate
 from solstein.data.synthetic_data_safety import (
     DataAuthenticity,
     DataSourceType,
     SyntheticDataBlocker,
-    SyntheticDataError,
     create_authenticity_label,
-    BlockerCheckResult,
 )
-from solstein.data.report_release_gate import ReportReleaseGate
+from solstein.domain.models import Company
 
 
 class TestSyntheticModeGate:

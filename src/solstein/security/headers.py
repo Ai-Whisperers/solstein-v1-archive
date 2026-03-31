@@ -3,7 +3,7 @@
 Adds security headers to all HTTP responses.
 """
 
-from fastapi import Request, Response
+from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
 

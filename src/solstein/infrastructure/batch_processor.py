@@ -7,8 +7,9 @@ and error isolation.
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, Coroutine, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from loguru import logger
 

@@ -16,7 +16,7 @@ Usage:
     companies = CompanyFactory.create_batch(10)
 """
 
-from typing import Any, TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING, Any, Optional, cast
 from uuid import uuid4
 
 from factory.base import Factory
@@ -31,19 +31,20 @@ else:
         pass
 
 
-from factory.helpers import post_generation
 from factory.declarations import Iterator, List, Sequence, SubFactory
 from factory.faker import Faker
+from factory.helpers import post_generation
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from solstein.domain.facts import Fact, FactSource, GatheringBatch
 from solstein.domain.models import (
+    AIMaturity,
     Company,
     CompanyTier,
-    AIMaturity,
-    ThreatLevel,
-    FinancialMetric,
     ConfidenceLevel,
+    FinancialMetric,
+    ThreatLevel,
 )
-from solstein.domain.facts import Fact, FactSource, GatheringBatch
 
 
 class FinancialMetricFactory(Factory[FinancialMetric]):
@@ -98,14 +99,14 @@ class CompanyFactory(Factory[Company]):
     geographic_presence = List([Faker("country") for _ in range(3)])
 
     @post_generation
-    def set_composite_score(obj, create, extracted, **kwargs):
+    def set_composite_score(self, create, extracted, **kwargs):
         """Calculate composite score after creation."""
-        growth_score = cast(Optional[float], getattr(obj, "growth_score", None))
-        financial_health_score = cast(Optional[float], getattr(obj, "financial_health_score", None))
-        competitive_position_score = cast(Optional[float], getattr(obj, "competitive_position_score", None))
+        growth_score = cast(float | None, getattr(self, "growth_score", None))
+        financial_health_score = cast(float | None, getattr(self, "financial_health_score", None))
+        competitive_position_score = cast(float | None, getattr(self, "competitive_position_score", None))
         if growth_score is not None and financial_health_score is not None and competitive_position_score is not None:
             composite_score = growth_score * 0.4 + financial_health_score * 0.3 + competitive_position_score * 0.3
-            setattr(obj, "composite_score", composite_score)
+            self.composite_score = composite_score
 
 
 class CompanyFactoryHighGrowth(CompanyFactory):

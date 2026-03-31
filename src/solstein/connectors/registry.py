@@ -4,48 +4,38 @@ Connector Registry - Central registry for all data source connectors.
 This module provides a unified interface for accessing all connectors.
 """
 
-import asyncio
 import logging
-from typing import Any, Optional
 
-from .base import BaseConnector, ConnectorResult, SourceConfig
-from .financial import *
 from .academic import *
-from .news import *
-from .product import *
-from .government import *
-from .social import *
-from .financial import *
-from .academic import *
-from .news import *
-from .product import *
-from .government import *
-from .social import *
-from .financial.yahoo_finance import YahooFinanceConnector
 from .academic.arxiv import ArxivConnector
-from .news.hacker_news import HackerNewsConnector
-from .product.github import GitHubConnector
-from .government.patentsview import PatentsViewConnector
-from .social.reddit import RedditConnector
-from .product.stackoverflow import StackOverflowConnector
-from .social.youtube import YouTubeConnector
-from .product.npm import NPMConnector
-from .product.pypi import PyPIConnector
+from .base import BaseConnector, SourceConfig
+from .financial import *
 from .financial.crunchbase import CrunchbaseConnector
-from .social.linkedin import LinkedInConnector
+from .financial.yahoo_finance import YahooFinanceConnector
+from .government import *
+from .government.patentsview import PatentsViewConnector
+from .government.whois import WHOISConnector
+from .news import *
+from .news.hacker_news import HackerNewsConnector
+from .news.newsapi import NewsAPIConnector
+from .product import *
 from .product.appstore import AppStoreConnector
+from .product.dockerhub import DockerHubConnector
+from .product.g2 import G2Connector
+from .product.github import GitHubConnector
+from .product.gitlab import GitLabConnector
 from .product.googleplay import GooglePlayConnector
 from .product.maven import MavenCentralConnector
-from .product.dockerhub import DockerHubConnector
-from .product.gitlab import GitLabConnector
-from .product.g2 import G2Connector
-from .news.newsapi import NewsAPIConnector
-from .government.whois import WHOISConnector
+from .product.npm import NPMConnector
+from .product.pypi import PyPIConnector
+from .product.stackoverflow import StackOverflowConnector
+from .social import *
 from .social.glassdoor import GlassdoorConnector
+from .social.linkedin import LinkedInConnector
+from .social.reddit import RedditConnector
 from .social.trustpilot import TrustpilotConnector
-from .product.dockerhub import DockerHubConnector
-from .product.gitlab import GitLabConnector
-from .product.g2 import G2Connector
+from .social.youtube import YouTubeConnector
+
 logger = logging.getLogger(__name__)
 
 
@@ -61,7 +51,7 @@ class ConnectorRegistry:
         self._connectors[name] = connector
         logger.info(f"Registered connector: {name}")
 
-    def get(self, name: str) -> Optional[BaseConnector]:
+    def get(self, name: str) -> BaseConnector | None:
         """Get a connector by name."""
         return self._connectors.get(name)
 
@@ -80,7 +70,7 @@ class ConnectorRegistry:
 
 
 # Global registry instance
-_registry: Optional[ConnectorRegistry] = None
+_registry: ConnectorRegistry | None = None
 
 
 def get_registry() -> ConnectorRegistry:

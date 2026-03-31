@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class YahooFinanceConnector(BaseConnector):
     """Connector for Yahoo Finance data (via yfinance)."""
 
-    def __init__(self, config: Optional[SourceConfig] = None):
+    def __init__(self, config: SourceConfig | None = None):
         if config is None:
             config = SourceConfig(
                 name="yahoo_finance",
@@ -122,7 +122,7 @@ class AlphaVantageConnector(BaseConnector):
 
     BASE_URL = "https://www.alphavantage.co/query"
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         config = SourceConfig(
             name="alpha_vantage",
             base_url=self.BASE_URL,
@@ -267,8 +267,8 @@ __all__.extend([
     "F6SConnector",
 ])
 
-from .opencorporates import OpenCorporatesConnector
 from .betalist import BetaListConnector
+from .opencorporates import OpenCorporatesConnector
 
 __all__.extend([
     "OpenCorporatesConnector",

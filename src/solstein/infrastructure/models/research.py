@@ -12,17 +12,15 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
 
 from sqlalchemy import (
+    JSON,
     Boolean,
-    Column,
     DateTime,
     Float,
     ForeignKey,
     Index,
     Integer,
-    JSON,
     String,
     Text,
     UniqueConstraint,
@@ -31,9 +29,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
-
-if TYPE_CHECKING:
-    pass
 
 
 class ResearchRunRecord(Base):
@@ -55,13 +50,13 @@ class ResearchRunRecord(Base):
     summary: Mapped[object | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
-    stages: Mapped[list["ResearchStageRecord"]] = relationship(
+    stages: Mapped[list[ResearchStageRecord]] = relationship(
         "ResearchStageRecord", back_populates="run", cascade="all, delete-orphan"
     )
-    artifacts: Mapped[list["ResearchArtifactRecord"]] = relationship(
+    artifacts: Mapped[list[ResearchArtifactRecord]] = relationship(
         "ResearchArtifactRecord", back_populates="run", cascade="all, delete-orphan"
     )
-    sources: Mapped[list["SourceDocumentRecord"]] = relationship(
+    sources: Mapped[list[SourceDocumentRecord]] = relationship(
         "SourceDocumentRecord", back_populates="run", cascade="all, delete-orphan"
     )
 
@@ -84,7 +79,7 @@ class ResearchStageRecord(Base):
     metrics: Mapped[object | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
-    run: Mapped["ResearchRunRecord"] = relationship("ResearchRunRecord", back_populates="stages")
+    run: Mapped[ResearchRunRecord] = relationship("ResearchRunRecord", back_populates="stages")
 
     __table_args__ = (
         UniqueConstraint("run_id", "stage_name", name="uq_research_stage_run_name"),
@@ -109,7 +104,7 @@ class ResearchArtifactRecord(Base):
     payload: Mapped[object | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
-    run: Mapped["ResearchRunRecord"] = relationship("ResearchRunRecord", back_populates="artifacts")
+    run: Mapped[ResearchRunRecord] = relationship("ResearchRunRecord", back_populates="artifacts")
 
     __table_args__ = (
         UniqueConstraint(
@@ -142,7 +137,7 @@ class SourceDocumentRecord(Base):
     content_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
     extract_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
-    run: Mapped["ResearchRunRecord"] = relationship("ResearchRunRecord", back_populates="sources")
+    run: Mapped[ResearchRunRecord] = relationship("ResearchRunRecord", back_populates="sources")
 
     __table_args__ = (
         UniqueConstraint(
@@ -244,7 +239,7 @@ class ContradictionRecord(Base):
     ignored_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
-    transitions: Mapped[list["ContradictionTransitionRecord"]] = relationship(
+    transitions: Mapped[list[ContradictionTransitionRecord]] = relationship(
         "ContradictionTransitionRecord",
         back_populates="contradiction",
         cascade="all, delete-orphan",
@@ -279,4 +274,4 @@ class ContradictionTransitionRecord(Base):
     changed_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    contradiction: Mapped["ContradictionRecord"] = relationship("ContradictionRecord", back_populates="transitions")
+    contradiction: Mapped[ContradictionRecord] = relationship("ContradictionRecord", back_populates="transitions")

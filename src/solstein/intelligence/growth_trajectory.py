@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Optional
 
 from .financial_models import (
     ConfidenceLevel,
@@ -21,8 +20,8 @@ class TrajectoryAnalysis:
     """Result of trajectory analysis."""
 
     direction: TrajectoryDirection
-    cagr_3yr: Optional[float]
-    cagr_5yr: Optional[float]
+    cagr_3yr: float | None
+    cagr_5yr: float | None
     consistency_score: float
     volatility_index: float
     narrative: str
@@ -37,7 +36,7 @@ class GrowthTrajectoryAnalyzer:
     def analyze(
         self,
         revenue_timeline: list[RevenuePoint],
-        current_growth_rate: Optional[float] = None,
+        current_growth_rate: float | None = None,
     ) -> TrajectoryAnalysis:
         """Analyze growth trajectory from revenue timeline.
 
@@ -84,7 +83,7 @@ class GrowthTrajectoryAnalyzer:
             narrative=narrative,
         )
 
-    def _calculate_cagr(self, timeline: list[RevenuePoint], years: int) -> Optional[float]:
+    def _calculate_cagr(self, timeline: list[RevenuePoint], years: int) -> float | None:
         """Calculate compound annual growth rate.
 
         Args:
@@ -200,8 +199,8 @@ class GrowthTrajectoryAnalyzer:
     def _determine_direction(
         self,
         timeline: list[RevenuePoint],
-        cagr_3yr: Optional[float],
-        current_growth_rate: Optional[float],
+        cagr_3yr: float | None,
+        current_growth_rate: float | None,
     ) -> TrajectoryDirection:
         """Determine growth trajectory direction.
 
@@ -262,8 +261,8 @@ class GrowthTrajectoryAnalyzer:
     def _generate_narrative(
         self,
         direction: TrajectoryDirection,
-        cagr_3yr: Optional[float],
-        cagr_5yr: Optional[float],
+        cagr_3yr: float | None,
+        cagr_5yr: float | None,
         consistency_score: float,
         timeline: list[RevenuePoint],
     ) -> str:

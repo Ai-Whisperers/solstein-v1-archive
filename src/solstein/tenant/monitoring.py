@@ -12,9 +12,7 @@ Usage:
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
-
-from loguru import logger
+from typing import Any
 
 from solstein.infrastructure.cache import get_cache
 
@@ -43,7 +41,7 @@ class TenantHealth:
     api_error_rate: float
     avg_latency_ms: float
     quota_usage_pct: float
-    last_activity: Optional[datetime] = None
+    last_activity: datetime | None = None
     alerts: list[str] = field(default_factory=list)
 
 
@@ -94,7 +92,7 @@ class TenantMonitor:
         await self.cache.incr(key, 1)
         await self.cache.expire(key, 86400 * 60)  # 60 days
 
-    async def get_daily_usage(self, tenant_id: str, date: Optional[str] = None) -> dict[str, Any]:
+    async def get_daily_usage(self, tenant_id: str, date: str | None = None) -> dict[str, Any]:
         """Get daily usage for tenant.
 
         Args:
@@ -117,7 +115,7 @@ class TenantMonitor:
             "error_rate": api_errors / max(api_requests, 1),
         }
 
-    async def get_monthly_usage(self, tenant_id: str, month: Optional[str] = None) -> dict[str, Any]:
+    async def get_monthly_usage(self, tenant_id: str, month: str | None = None) -> dict[str, Any]:
         """Get monthly usage for tenant.
 
         Args:

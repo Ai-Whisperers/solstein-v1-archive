@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -16,7 +16,7 @@ class TwitterConnector(BaseConnector):
 
     BASE_URL = "https://api.twitter.com/2"
 
-    def __init__(self, bearer_token: Optional[str] = None):
+    def __init__(self, bearer_token: str | None = None):
         config = SourceConfig(
             name="twitter",
             base_url=self.BASE_URL,
@@ -34,11 +34,10 @@ class TwitterConnector(BaseConnector):
             return False
 
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self.config.base_url}/users/by/username/twitter", headers=self._headers
-                ) as response:
-                    return response.status in [200, 404]  # 404 means API works
+            async with aiohttp.ClientSession() as session, session.get(
+                f"{self.config.base_url}/users/by/username/twitter", headers=self._headers
+            ) as response:
+                return response.status in [200, 404]  # 404 means API works
         except Exception as e:
             logger.error(f"Failed to connect to Twitter: {e}")
             return False

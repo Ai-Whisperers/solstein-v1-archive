@@ -6,7 +6,6 @@ Logs all SQL queries with timing information for performance analysis.
 from __future__ import annotations
 
 import time
-from collections.abc import Callable
 from typing import Any
 
 from loguru import logger

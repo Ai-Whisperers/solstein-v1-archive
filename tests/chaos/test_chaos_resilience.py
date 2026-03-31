@@ -5,8 +5,7 @@ Tests system resilience under failure conditions.
 
 import asyncio
 import random
-from typing import Any
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -140,7 +139,7 @@ class TestEnrichmentPipelineResilience:
 
         # Should complete without waiting 10 seconds
         start = asyncio.get_event_loop().time()
-        result = await pipeline.enrich("test", "Test Company")
+        await pipeline.enrich("test", "Test Company")
         elapsed = asyncio.get_event_loop().time() - start
 
         assert elapsed < 5  # Should timeout much sooner

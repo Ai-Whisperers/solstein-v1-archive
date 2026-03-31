@@ -1,10 +1,10 @@
 """Product and developer connectors."""
 
 from .github import GitHubConnector
-from .stackoverflow import StackOverflowConnector
-from .producthunt import ProductHuntConnector
 from .npm import NPMConnector
+from .producthunt import ProductHuntConnector
 from .pypi import PyPIConnector
+from .stackoverflow import StackOverflowConnector
 
 __all__ = [
     "GitHubConnector",
@@ -24,10 +24,10 @@ __all__.extend([
 ])
 
 
-from .maven import MavenCentralConnector
 from .dockerhub import DockerHubConnector
-from .gitlab import GitLabConnector
 from .g2 import G2Connector
+from .gitlab import GitLabConnector
+from .maven import MavenCentralConnector
 
 __all__.extend([
     "MavenCentralConnector",

@@ -1,7 +1,6 @@
 """G2 connector for software reviews."""
 
 import logging
-from datetime import datetime
 from typing import Any
 
 import aiohttp
@@ -25,9 +24,8 @@ class G2Connector(BaseConnector):
     async def connect(self) -> bool:
         """Test connection."""
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(self.config.base_url) as response:
-                    return response.status == 200
+            async with aiohttp.ClientSession() as session, session.get(self.config.base_url) as response:
+                return response.status == 200
         except Exception as e:
             logger.error(f"Failed to connect to G2: {e}")
             return False

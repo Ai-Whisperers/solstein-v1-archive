@@ -3,9 +3,9 @@
 L1: Tests for synthetic-only interim safety controls.
 """
 
-import pytest
-from datetime import datetime
 from unittest.mock import Mock
+
+import pytest
 
 from solstein.data.synthetic_data_safety import (
     AuthenticityLabel,
@@ -295,8 +295,7 @@ class TestSyntheticDataBlocker:
         assert "synthetic" in str(exc_info.value).lower()
         assert exc_info.value.code == "SYNTHETIC_DATA_BLOCKED"
 
-    def test_get_authenticity_summary(self) -> None:
-
+    def test_ensure_safe_blocks_synthetic(self) -> None:
         blocker = SyntheticDataBlocker()
 
         company = Mock()
@@ -306,20 +305,9 @@ class TestSyntheticDataBlocker:
         with pytest.raises(SyntheticDataError) as exc_info:
             blocker.ensure_safe([company])
 
-        # Error message should indicate synthetic data was blocked
         assert "synthetic" in str(exc_info.value).lower()
         assert exc_info.value.code == "SYNTHETIC_DATA_BLOCKED"
-        blocker = SyntheticDataBlocker()
-
-        company = Mock()
-        company.name = "TestCo"
-        company.data_source_type = "synthetic"
-
-        with pytest.raises(SyntheticDataError) as exc_info:
-            blocker.ensure_safe([company])
-
         assert "TestCo" in str(exc_info.value)
-        assert exc_info.value.code == "SYNTHETIC_DATA_BLOCKED"
 
     def test_get_authenticity_summary(self) -> None:
         blocker = SyntheticDataBlocker()

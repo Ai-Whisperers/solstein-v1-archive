@@ -25,8 +25,8 @@ except ModuleNotFoundError as exc:
     raise
 
 from solstein.config import get_settings
+from solstein.database_config import convert_to_async_url, get_test_database_url
 from solstein.domain.models import AIMaturity
-from solstein.database_config import get_test_database_url, convert_to_async_url
 
 
 def _load_api_test_dependencies():
@@ -112,8 +112,8 @@ def patch_competitor_data_loader(monkeypatch):
     This ensures ALL tests that use UnifiedCompanyLoader will get mock data
     instead of trying to load from the missing data/input/competitor_data.json file.
     """
-    from solstein.domain.models import Company
     from solstein.data.loaders import CompetitorDataLoader
+    from solstein.domain.models import Company
 
     # Create comprehensive test companies with all required financial fields
     test_companies = [

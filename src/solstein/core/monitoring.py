@@ -15,8 +15,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-from loguru import logger
-
 from .health_checks import (
     ApiHealthCheck,
     ConfigurationHealthCheck,

@@ -3,12 +3,16 @@
 Pydantic models for request validation and response serialization.
 """
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from solstein.domain.constants import ALLOWED_SEARCH_FIELDS, INDUSTRY_VALID_VALUES
 
 
-class SearchRequest(BaseModel):
+class StrictRequestModel(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+
+class SearchRequest(StrictRequestModel):
     """Search request with validation."""
 
     field: str = Field(..., min_length=1, max_length=50, description="Field to search on")
@@ -17,16 +21,18 @@ class SearchRequest(BaseModel):
 
     @field_validator("field")
     @classmethod
-    def validate_field(cls, v: str, info) -> str:
-        """Ensure field is in allowed list."""
+    def validate_field(cls, v: str) -> str:
+        """Ensure field is not empty."""
         if not v or not v.strip():
             raise ValueError("field cannot be empty or whitespace")
-        model_type = info.data.get("model_type", "company")
-        allowed = ALLOWED_SEARCH_FIELDS.get(model_type, set())
-
-        if v not in allowed:
-            raise ValueError(f"Invalid field '{v}' for {model_type}. Allowed: {sorted(allowed)}")
         return v.strip()
+
+    @model_validator(mode="after")
+    def validate_field_for_model_type(self) -> "SearchRequest":
+        allowed = ALLOWED_SEARCH_FIELDS.get(self.model_type, set())
+        if self.field not in allowed:
+            raise ValueError(f"Invalid field '{self.field}' for {self.model_type}. Allowed: {sorted(allowed)}")
+        return self
 
     @field_validator("value")
     @classmethod
@@ -47,7 +53,7 @@ class SearchRequest(BaseModel):
         return v.strip()
 
 
-class PaginationParams(BaseModel):
+class PaginationParams(StrictRequestModel):
     """Pagination parameters with validation."""
 
     page: int = Field(default=1, ge=1, description="Page number (1-indexed)")
@@ -59,7 +65,7 @@ class PaginationParams(BaseModel):
         return (self.page - 1) * self.page_size
 
 
-class CompanyFilterRequest(BaseModel):
+class CompanyFilterRequest(StrictRequestModel):
     """Company filter request with validation."""
 
     industry: str | None = Field(default=None, min_length=2, max_length=100, description="Industry name")
@@ -99,7 +105,7 @@ class CompanyFilterRequest(BaseModel):
         return v
 
 
-class MarketAnalysisRequest(BaseModel):
+class MarketAnalysisRequest(StrictRequestModel):
     """Market analysis request with validation."""
 
     industry: str = Field(..., min_length=2, max_length=100, description="Industry to analyze")
@@ -126,7 +132,7 @@ class MarketAnalysisRequest(BaseModel):
         return v
 
 
-class ScoreUpdateRequest(BaseModel):
+class ScoreUpdateRequest(StrictRequestModel):
     """Score update request with validation."""
 
     ai_score: float = Field(..., ge=0.0, le=1.0, description="AI maturity score")
@@ -142,7 +148,7 @@ class ScoreUpdateRequest(BaseModel):
         return round(v, 4)  # Round to 4 decimal places
 
 
-class CompanyCreateRequest(BaseModel):
+class CompanyCreateRequest(StrictRequestModel):
     """Company creation request with validation."""
 
     name: str = Field(..., min_length=2, max_length=255, description="Company name")

@@ -16,7 +16,7 @@ Usage:
 import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Protocol
+from typing import Protocol
 
 from loguru import logger
 
@@ -347,6 +347,5 @@ class SecretRotationScheduler:
         """Rotate all LLM API keys."""
         providers = ["openai", "anthropic", "groq", "gemini"]
         for provider in providers:
-            path = f"llm/{provider}/api_key"
             logger.info(f"Scheduling rotation for {provider}")
             # Actual rotation would call provider APIs

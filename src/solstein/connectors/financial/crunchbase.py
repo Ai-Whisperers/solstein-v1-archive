@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -16,7 +16,7 @@ class CrunchbaseConnector(BaseConnector):
 
     BASE_URL = "https://api.crunchbase.com/api/v4"
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         config = SourceConfig(
             name="crunchbase",
             base_url=self.BASE_URL,
@@ -34,11 +34,10 @@ class CrunchbaseConnector(BaseConnector):
             return False
 
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self.config.base_url}/entities/organizations/tesla", headers=self._headers
-                ) as response:
-                    return response.status in [200, 404]  # 404 means API works but entity not found
+            async with aiohttp.ClientSession() as session, session.get(
+                f"{self.config.base_url}/entities/organizations/tesla", headers=self._headers
+            ) as response:
+                return response.status in [200, 404]  # 404 means API works but entity not found
         except Exception as e:
             logger.error(f"Failed to connect to Crunchbase: {e}")
             return False

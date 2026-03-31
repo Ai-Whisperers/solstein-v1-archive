@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -16,7 +16,7 @@ class NewsAPIConnector(BaseConnector):
 
     BASE_URL = "https://newsapi.org/v2"
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         config = SourceConfig(
             name="newsapi",
             base_url=self.BASE_URL,

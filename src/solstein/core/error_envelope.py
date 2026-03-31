@@ -74,7 +74,7 @@ class ErrorEnvelope:
     # Technical details
     details: dict[str, Any] = field(default_factory=dict)
     stack_trace: str | None = None
-    cause: "ErrorEnvelope | None" = None
+    cause: ErrorEnvelope | None = None
 
     # Metadata
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -139,7 +139,7 @@ class ErrorEnvelope:
         message: str | None = None,
         context: ErrorContext | None = None,
         include_stack_trace: bool = True,
-    ) -> "ErrorEnvelope":
+    ) -> ErrorEnvelope:
         """Create an error envelope from an exception.
 
         Args:
@@ -185,7 +185,7 @@ class ErrorEnvelope:
         field: str | None = None,
         value: Any = None,
         context: ErrorContext | None = None,
-    ) -> "ErrorEnvelope":
+    ) -> ErrorEnvelope:
         """Create a validation error envelope."""
         details = {}
         if field:
@@ -207,7 +207,7 @@ class ErrorEnvelope:
         resource_type: str,
         resource_id: str,
         context: ErrorContext | None = None,
-    ) -> "ErrorEnvelope":
+    ) -> ErrorEnvelope:
         """Create a not found error envelope."""
         return cls(
             code="NOT_FOUND",
@@ -223,7 +223,7 @@ class ErrorEnvelope:
         service: str,
         message: str,
         context: ErrorContext | None = None,
-    ) -> "ErrorEnvelope":
+    ) -> ErrorEnvelope:
         """Create an external service error envelope."""
         return cls(
             code="EXTERNAL_SERVICE_ERROR",
@@ -246,62 +246,62 @@ class ErrorEnvelopeBuilder:
         self._stack_trace: str | None = None
         self._cause: ErrorEnvelope | None = None
 
-    def code(self, code: str) -> "ErrorEnvelopeBuilder":
+    def code(self, code: str) -> ErrorEnvelopeBuilder:
         """Set error code."""
         self._code = code
         return self
 
-    def message(self, message: str) -> "ErrorEnvelopeBuilder":
+    def message(self, message: str) -> ErrorEnvelopeBuilder:
         """Set error message."""
         self._message = message
         return self
 
-    def level(self, level: ErrorLevel) -> "ErrorEnvelopeBuilder":
+    def level(self, level: ErrorLevel) -> ErrorEnvelopeBuilder:
         """Set error level."""
         self._level = level
         return self
 
-    def request_id(self, request_id: str) -> "ErrorEnvelopeBuilder":
+    def request_id(self, request_id: str) -> ErrorEnvelopeBuilder:
         """Set request ID."""
         self._context.request_id = request_id
         return self
 
-    def user_id(self, user_id: str) -> "ErrorEnvelopeBuilder":
+    def user_id(self, user_id: str) -> ErrorEnvelopeBuilder:
         """Set user ID."""
         self._context.user_id = user_id
         return self
 
-    def company_id(self, company_id: str) -> "ErrorEnvelopeBuilder":
+    def company_id(self, company_id: str) -> ErrorEnvelopeBuilder:
         """Set company ID."""
         self._context.company_id = company_id
         return self
 
-    def operation(self, operation: str) -> "ErrorEnvelopeBuilder":
+    def operation(self, operation: str) -> ErrorEnvelopeBuilder:
         """Set operation name."""
         self._context.operation = operation
         return self
 
-    def source(self, source: str) -> "ErrorEnvelopeBuilder":
+    def source(self, source: str) -> ErrorEnvelopeBuilder:
         """Set error source."""
         self._context.source = source
         return self
 
-    def detail(self, key: str, value: Any) -> "ErrorEnvelopeBuilder":
+    def detail(self, key: str, value: Any) -> ErrorEnvelopeBuilder:
         """Add a detail field."""
         self._details[key] = value
         return self
 
-    def details(self, **kwargs: Any) -> "ErrorEnvelopeBuilder":
+    def details(self, **kwargs: Any) -> ErrorEnvelopeBuilder:
         """Add multiple detail fields."""
         self._details.update(kwargs)
         return self
 
-    def caused_by(self, cause: ErrorEnvelope) -> "ErrorEnvelopeBuilder":
+    def caused_by(self, cause: ErrorEnvelope) -> ErrorEnvelopeBuilder:
         """Set the cause error."""
         self._cause = cause
         return self
 
-    def with_stack_trace(self, exc: Exception) -> "ErrorEnvelopeBuilder":
+    def with_stack_trace(self, exc: Exception) -> ErrorEnvelopeBuilder:
         """Capture stack trace from exception."""
         self._stack_trace = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
         return self

@@ -1,10 +1,10 @@
 """Social media connectors."""
 
-from .reddit import RedditConnector
-from .youtube import YouTubeConnector
-from .linkedin import LinkedInConnector
 from .glassdoor import GlassdoorConnector
+from .linkedin import LinkedInConnector
+from .reddit import RedditConnector
 from .trustpilot import TrustpilotConnector
+from .youtube import YouTubeConnector
 
 __all__ = [
     "RedditConnector",

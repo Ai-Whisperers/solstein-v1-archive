@@ -6,19 +6,19 @@ Handles enrichment from SEC EDGAR, Companies House, and News Signals.
 
 from __future__ import annotations
 
-import time
 import asyncio
-from datetime import datetime, timezone
-from typing import Mapping, Protocol
+import time
+from collections.abc import Mapping
+from datetime import datetime
+from typing import Protocol
 
 from loguru import logger
 
-from solstein.domain.models import ConfidenceLevel
 from solstein.data.enrichment_orchestrator import EnrichmentConfig, EnrichmentOrchestrator, EnrichmentSource
 
 from .batch_outcomes import BatchEnrichmentOutcome, BatchEnrichmentStatus
 from .company import UnifiedCompany
-from .error_tracking import format_enrichment_error, build_error_context
+from .error_tracking import build_error_context, format_enrichment_error
 from .sec_edgar_helpers import (
     _handle_sec_edgar_error,
     _store_additional_metrics,

@@ -10,11 +10,10 @@ import json
 import logging
 import warnings
 from pathlib import Path
-from typing import Any
 
 from solstein.config import get_settings
-from solstein.domain.models import Company
 from solstein.data.converters import convert_to_domain_company
+from solstein.domain.models import Company
 
 logger = logging.getLogger(__name__)
 

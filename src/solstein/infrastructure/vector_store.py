@@ -25,8 +25,8 @@ from __future__ import annotations
 from typing import Any
 
 from loguru import logger
-from sqlalchemy import Column, Float, Index, String, Text, func, select, text
-from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy import Column, Index, String, Text, func, select, text
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.types import UserDefinedType

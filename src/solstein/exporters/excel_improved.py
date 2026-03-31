@@ -12,9 +12,9 @@ Components are now modularized in the excel/ package:
 - sheets.py: Sheet generator functions
 """
 
+import json
 from pathlib import Path
 from typing import Any
-import json
 
 from loguru import logger
 from openpyxl import Workbook

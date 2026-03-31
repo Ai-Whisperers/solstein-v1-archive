@@ -356,7 +356,7 @@ class BatchLoader:
         records = result.scalars().all()
 
         # Build mapping
-        latest_map: dict[str, ScoringRecord | None] = {cid: None for cid in company_ids}
+        latest_map: dict[str, ScoringRecord | None] = dict.fromkeys(company_ids)
         for record in records:
             latest_map[record.company_id] = record
 

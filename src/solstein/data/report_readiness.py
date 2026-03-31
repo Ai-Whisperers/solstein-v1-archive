@@ -2,9 +2,8 @@ from typing import Any
 
 from loguru import logger
 
-from solstein.domain.models import Company
 from solstein.data.report_release_gate import ReportReleaseGate
-
+from solstein.domain.models import Company
 
 REQUIRED_FINANCIAL_FIELDS = ("revenue", "employees", "growth_rate", "profit_margin")
 REQUIRED_PE_FIELDS = (

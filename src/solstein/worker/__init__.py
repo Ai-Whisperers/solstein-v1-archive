@@ -12,8 +12,19 @@ from .base import (
     store_facts,
 )
 
+# Enrichment tasks
+from .enrichment_tasks import (
+    EnrichmentTask,
+    enrich_companies_batch_async,
+    enrich_company_async,
+)
+
+# Orchestration
+from .orchestration import refresh_all_sources
+
 # Refresh tasks (all 12 sources)
 from .refresh_tasks import (
+    create_refresh_task,
     refresh_companies_house,
     refresh_funding,
     refresh_github,
@@ -26,18 +37,7 @@ from .refresh_tasks import (
     refresh_web_search,
     refresh_website,
     refresh_yahoo_finance,
-    create_refresh_task,
 )
-
-# Enrichment tasks
-from .enrichment_tasks import (
-    EnrichmentTask,
-    enrich_company_async,
-    enrich_companies_batch_async,
-)
-
-# Orchestration
-from .orchestration import refresh_all_sources
 
 
 def run_worker():

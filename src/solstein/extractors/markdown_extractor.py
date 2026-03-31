@@ -140,8 +140,8 @@ class MarkdownExtractor:
 
         # Parse confidence levels
         confidence_levels = extracted_data.get("confidence_levels", {})
-        revenue_confidence = self._converter.parse_confidence(confidence_levels.get("revenue"))
-        growth_confidence = self._converter.parse_confidence(confidence_levels.get("growth_rate"))
+        self._converter.parse_confidence(confidence_levels.get("revenue"))
+        self._converter.parse_confidence(confidence_levels.get("growth_rate"))
 
         # Create company profile using actual Company field names
         return Company(

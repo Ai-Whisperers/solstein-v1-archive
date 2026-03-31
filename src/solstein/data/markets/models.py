@@ -95,7 +95,7 @@ class GlobalStockData(BaseModel):
     discount_to_intrinsic_pct: float | None = None
     valuation_classification: str | None = None
 
-    def convert_currency(self, converter: "CurrencyConverter", target: Currency) -> "GlobalStockData":
+    def convert_currency(self, converter: CurrencyConverter, target: Currency) -> GlobalStockData:
         """Convert currency using provided converter."""
         if self.source_currency == target:
             return self

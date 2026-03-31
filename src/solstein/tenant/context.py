@@ -12,15 +12,13 @@ Usage:
 
 import hashlib
 import secrets
-from contextlib import asynccontextmanager
 from contextvars import ContextVar
-from typing import Optional
 
-from fastapi import Request, HTTPException, status
+from fastapi import HTTPException, Request, status
 from loguru import logger
 
 # Context variable for current tenant
-current_tenant_var: ContextVar[Optional[str]] = ContextVar("current_tenant", default=None)
+current_tenant_var: ContextVar[str | None] = ContextVar("current_tenant", default=None)
 
 
 class TenantContext:
@@ -53,7 +51,7 @@ class TenantContext:
         logger.debug(f"Exited tenant context: {self.tenant_id[:8]}...")
 
 
-def get_current_tenant() -> Optional[str]:
+def get_current_tenant() -> str | None:
     """Get current tenant ID from context.
 
     Returns:
@@ -111,7 +109,7 @@ class TenantIsolationMiddleware:
         else:
             await self.app(scope, receive, send)
 
-    async def _extract_tenant_id(self, request: Request) -> Optional[str]:
+    async def _extract_tenant_id(self, request: Request) -> str | None:
         """Extract tenant ID from request.
 
         Args:
@@ -133,7 +131,7 @@ class TenantIsolationMiddleware:
 
         return None
 
-    async def _validate_api_key(self, api_key: str) -> Optional[str]:
+    async def _validate_api_key(self, api_key: str) -> str | None:
         """Validate API key and return tenant ID.
 
         Args:
@@ -143,14 +141,14 @@ class TenantIsolationMiddleware:
             Tenant ID if valid, None otherwise.
         """
         # Hash the API key for lookup
-        key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+        hashlib.sha256(api_key.encode()).hexdigest()
 
         # In production, query database
         # For now, return a mock tenant ID
         # This should query your tenant repository
         return None
 
-    async def _validate_jwt(self, token: str) -> Optional[str]:
+    async def _validate_jwt(self, token: str) -> str | None:
         """Validate JWT and extract tenant ID.
 
         Args:
@@ -174,7 +172,7 @@ class TenantAwareRepository:
     All queries automatically include tenant_id filter.
     """
 
-    def __init__(self, session, tenant_id: Optional[str] = None):
+    def __init__(self, session, tenant_id: str | None = None):
         """Initialize repository.
 
         Args:

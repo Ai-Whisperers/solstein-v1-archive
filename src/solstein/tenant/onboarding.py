@@ -13,13 +13,11 @@ Usage:
     )
 """
 
-from datetime import datetime
-from typing import Optional
 
 from loguru import logger
 
-from solstein.tenant.models import Tenant, TenantPlan, TenantConfig, TenantUser, get_default_config
 from solstein.tenant.context import generate_api_key, hash_api_key
+from solstein.tenant.models import Tenant, TenantConfig, TenantPlan, TenantUser, get_default_config
 
 
 class TenantOnboardingService:
@@ -33,8 +31,8 @@ class TenantOnboardingService:
         self,
         name: str,
         plan: TenantPlan = TenantPlan.STARTER,
-        admin_email: Optional[str] = None,
-        settings: Optional[dict] = None,
+        admin_email: str | None = None,
+        settings: dict | None = None,
     ) -> tuple[Tenant, str]:
         """Create new tenant with onboarding.
 

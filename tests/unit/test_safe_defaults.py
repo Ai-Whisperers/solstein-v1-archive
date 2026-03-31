@@ -3,13 +3,13 @@
 E4: Tests for safe factory patterns.
 """
 
-import pytest
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from solstein.data.safe_defaults import (
     SafeDefault,
     SafeDefaultsMixin,
     copy_with_safe_defaults,
+    dict_factory,
     ensure_bool,
     ensure_dict,
     ensure_float,
@@ -18,9 +18,8 @@ from solstein.data.safe_defaults import (
     ensure_set,
     ensure_str,
     list_factory,
-    dict_factory,
-    set_factory,
     merge_safe,
+    set_factory,
 )
 
 

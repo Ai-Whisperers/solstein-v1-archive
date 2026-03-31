@@ -22,7 +22,7 @@ class GitHubRepo:
     updated_at: str | None = None
 
     @classmethod
-    def from_api(cls, data: dict[str, Any]) -> "GitHubRepo":
+    def from_api(cls, data: dict[str, Any]) -> GitHubRepo:
         """Create from GitHub API response."""
         return cls(
             name=data.get("name", ""),

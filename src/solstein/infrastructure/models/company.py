@@ -10,15 +10,11 @@ Contains ORM models for:
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, JSON, String
+from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base import Base
-
-if TYPE_CHECKING:
-    pass
 
 
 class CompanyRecord(Base):

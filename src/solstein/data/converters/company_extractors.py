@@ -11,8 +11,8 @@ from typing import Any
 
 from loguru import logger
 
-from solstein.domain.models import AIMaturity, ConfidenceLevel, ThreatLevel
 from solstein.data.parsers.confidence import convert_confidence
+from solstein.domain.models import AIMaturity, ConfidenceLevel, ThreatLevel
 
 
 def extract_revenue_data(raw_data: dict[str, Any]) -> dict[str, Any]:
@@ -318,7 +318,7 @@ def determine_ai_maturity(
     saas_score: int,
 ) -> AIMaturity:
     """Determine AI maturity level from various signals."""
-    has_ai_derivation_signal = any(
+    any(
         [
             bool(ai_maturity_str),
             ai_signal_level is not None,

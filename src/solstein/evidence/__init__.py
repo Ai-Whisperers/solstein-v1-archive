@@ -11,23 +11,22 @@ All components use FREE tools:
 - sentence-transformers (embeddings)
 """
 
+from .crawler import CrawlResult, EvidenceCrawler, SimpleCrawler
+from .graph import EvidenceGraph
 from .models import (
-    Claim,
-    ClaimStatus,
-    SourceDocument,
-    SourceType,
-    Contradiction,
-    EvidenceReadiness,
-    ConfidenceComponent,
-    create_claim,
     COMPANY_METRIC_FIELDS,
     CRITICAL_FIELDS,
+    Claim,
+    ClaimStatus,
+    ConfidenceComponent,
+    Contradiction,
+    EvidenceReadiness,
+    SourceDocument,
+    SourceType,
+    create_claim,
 )
-
-from .graph import EvidenceGraph
-from .vector_store import EvidenceVectorStore
-from .crawler import EvidenceCrawler, CrawlResult, SimpleCrawler
 from .service import EvidenceService, get_evidence_service
+from .vector_store import EvidenceVectorStore
 
 __all__ = [
     # Models

@@ -6,14 +6,12 @@ This module provides the high-level API for EPIC-042.
 
 from __future__ import annotations
 
-import asyncio
 import logging
-from typing import Optional
 
-from .models import Claim, ClaimStatus, EvidenceReadiness, SourceDocument
+from .crawler import EvidenceCrawler
 from .graph import EvidenceGraph
+from .models import Claim, ClaimStatus, EvidenceReadiness
 from .vector_store import EvidenceVectorStore
-from .crawler import EvidenceCrawler, CrawlResult
 
 logger = logging.getLogger(__name__)
 
@@ -201,8 +199,8 @@ class EvidenceService:
     def get_claims(
         self,
         company_id: str,
-        field: Optional[str] = None,
-        status: Optional[ClaimStatus] = None,
+        field: str | None = None,
+        status: ClaimStatus | None = None,
     ) -> list[dict]:
         """Get claims for a company."""
         if not self._initialized:
@@ -213,7 +211,7 @@ class EvidenceService:
     def search_claims(
         self,
         query: str,
-        company_id: Optional[str] = None,
+        company_id: str | None = None,
         limit: int = 10,
     ) -> list[dict]:
         """Search claims semantically."""
@@ -235,7 +233,7 @@ class EvidenceService:
 
 
 # Singleton instance for easy access
-_evidence_service: Optional[EvidenceService] = None
+_evidence_service: EvidenceService | None = None
 
 
 def get_evidence_service() -> EvidenceService:

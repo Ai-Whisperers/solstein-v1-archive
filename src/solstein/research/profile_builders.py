@@ -7,7 +7,7 @@ Each builder creates a Company profile for a specific scenario.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from solstein.domain.models import (
     AIMaturity,

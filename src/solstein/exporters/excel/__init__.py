@@ -4,11 +4,10 @@ EPIC-022: Modularized Excel export functionality.
 """
 
 from pathlib import Path
-from typing import Any
-from typing import cast
+from typing import Any, cast
 
 from ...domain.models import Company
-
+from ..excel_improved import ImprovedExcelExporter
 from .sheets import (
     add_executive_summary,
     add_financial_intelligence,
@@ -24,7 +23,6 @@ from .utils import (
     safe_get,
     safe_get_financial,
 )
-from ..excel_improved import ImprovedExcelExporter
 
 
 class ExcelExporter(ImprovedExcelExporter):

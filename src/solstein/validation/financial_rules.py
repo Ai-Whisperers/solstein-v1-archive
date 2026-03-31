@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-
 FINANCIAL_VALIDATION_RULES = {
     "revenue": {
         "min": 0.0,

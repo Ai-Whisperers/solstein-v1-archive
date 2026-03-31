@@ -12,9 +12,6 @@ Acceptance Criteria:
 """
 
 import logging
-from unittest.mock import patch
-
-import pytest
 
 from solstein.data.converters.company import (
     _validate_financial_conversion,

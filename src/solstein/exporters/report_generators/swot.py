@@ -65,7 +65,7 @@ Each list should have 4-6 items. Be specific and data-driven."""
         Returns:
             Fallback SWOT dict
         """
-        name = getattr(company, "name", "Company")
+        getattr(company, "name", "Company")
         ai_score = getattr(company, "ai_score", 0)
         growth = getattr(company, "growth_rate_pct", 0)
         revenue = getattr(company, "revenue_eur_m", 0)

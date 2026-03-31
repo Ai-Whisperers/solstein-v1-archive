@@ -1,5 +1,6 @@
-import pytest
 from types import SimpleNamespace
+
+import pytest
 
 from solstein.analytics.constants import derive_threat_level
 from solstein.analytics.scorers.competitive_position import CompetitivePositionScorer

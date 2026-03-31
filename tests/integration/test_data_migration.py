@@ -46,7 +46,7 @@ async def db_session() -> AsyncSession:
             settings.database = settings.database.model_copy(update={"url": "sqlite+aiosqlite:///test_integration.db"})
         else:
             settings.database.url = "sqlite+aiosqlite:///test_integration.db"
-        
+
     db_manager = DatabaseManager(settings)
     db_manager.init_async()
     await db_manager.create_tables()

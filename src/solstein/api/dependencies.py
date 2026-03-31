@@ -6,14 +6,13 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..config import get_settings
+from ..api.services.drill_down_service import DrillDownService
 from ..infrastructure.company_repository import CompanyRepository
-from ..infrastructure.repositories import FactRepository
 from ..infrastructure.database import db_manager
 from ..infrastructure.database_service import DatabaseService
 from ..infrastructure.enrichment_repositories import EnrichmentAuditRepository, EnrichmentCacheRepository
-from ..api.services.drill_down_service import DrillDownService
-from ..security.jwt_handler import jwt_handler, UserPayload
+from ..infrastructure.repositories import FactRepository
+from ..security.jwt_handler import UserPayload, jwt_handler
 
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
@@ -97,7 +96,7 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from None
 
 
 async def get_current_tenant(request: Request) -> dict[str, Any]:

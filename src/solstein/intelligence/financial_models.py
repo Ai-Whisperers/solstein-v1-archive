@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 
 class TrajectoryDirection(str, Enum):
@@ -64,11 +64,11 @@ class FundingRound:
     """Detailed funding round information."""
 
     round_name: str  # Series A, B, Seed, etc.
-    amount: Optional[float] = None  # In millions EUR
-    date: Optional[date] = None
-    lead_investor: Optional[str] = None
+    amount: float | None = None  # In millions EUR
+    date: date | None = None
+    lead_investor: str | None = None
     co_investors: list[str] = field(default_factory=list)
-    valuation: Optional[float] = None  # Post-money in millions EUR
+    valuation: float | None = None  # Post-money in millions EUR
     valuation_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
     source: str = "unknown"
 
@@ -95,17 +95,17 @@ class FinancialIntelligence:
     revenue_timeline: list[RevenuePoint] = field(default_factory=list)
     growth_trajectory: TrajectoryDirection = TrajectoryDirection.UNKNOWN
     growth_consistency_score: float = 0.0  # 0-10 volatility measure
-    cagr_3yr: Optional[float] = None  # 3-year compound annual growth rate
-    cagr_5yr: Optional[float] = None  # 5-year compound annual growth rate
+    cagr_3yr: float | None = None  # 3-year compound annual growth rate
+    cagr_5yr: float | None = None  # 5-year compound annual growth rate
     trajectory_narrative: str = ""
 
     # Funding Intelligence
     funding_rounds_enhanced: list[FundingRound] = field(default_factory=list)
-    total_funding_raised: Optional[float] = None  # In millions EUR
+    total_funding_raised: float | None = None  # In millions EUR
     investor_quality_score: float = 0.0  # 0-10 based on lead investors
     funding_velocity: FundingVelocity = FundingVelocity.SPARSE
-    runway_estimate_months: Optional[int] = None  # Calculated from burn rate
-    last_funding_date: Optional[date] = None
+    runway_estimate_months: int | None = None  # Calculated from burn rate
+    last_funding_date: date | None = None
     funding_narrative: str = ""
 
     # Growth Vectors
@@ -113,12 +113,12 @@ class FinancialIntelligence:
     growth_vector_confidence: dict[str, float] = field(default_factory=dict)
 
     # Trajectory Projection
-    projected_revenue_12mo: Optional[float] = None  # LLM-assisted projection
+    projected_revenue_12mo: float | None = None  # LLM-assisted projection
     projection_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
     projection_rationale: str = ""
 
     # Financial Health Summary
-    financial_health_score: Optional[float] = None  # 0-10
+    financial_health_score: float | None = None  # 0-10
     health_assessment: str = ""
     key_strengths: list[str] = field(default_factory=list)
     key_risks: list[str] = field(default_factory=list)
@@ -179,7 +179,7 @@ class FinancialIntelligence:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "FinancialIntelligence":
+    def from_dict(cls, data: dict[str, Any]) -> FinancialIntelligence:
         """Create from dictionary."""
         fi = cls()
 

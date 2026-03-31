@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -16,7 +16,7 @@ class StackOverflowConnector(BaseConnector):
 
     BASE_URL = "https://api.stackexchange.com/2.3"
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         config = SourceConfig(
             name="stackoverflow",
             base_url=self.BASE_URL,

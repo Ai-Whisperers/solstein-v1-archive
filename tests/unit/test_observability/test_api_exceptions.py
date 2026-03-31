@@ -1,13 +1,13 @@
 """Tests for secure error response handling."""
 
-import pytest
 from unittest.mock import Mock, patch
-from fastapi import FastAPI, APIRouter
+
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
 
 from solstein.api.exceptions import APIError, setup_exception_handlers
-from solstein.exceptions import ValidationError, NotFoundError
+from solstein.exceptions import NotFoundError
 
 # Create a test app
 app = FastAPI()

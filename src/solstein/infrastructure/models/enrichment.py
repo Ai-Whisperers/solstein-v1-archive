@@ -10,14 +10,11 @@ Contains ORM models for:
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional, cast
+from typing import cast
 
-from sqlalchemy import Column, DateTime, Float, Index, Integer, JSON, String, Text
+from sqlalchemy import JSON, Column, DateTime, Float, Index, Integer, String, Text
 
 from .base import Base
-
-if TYPE_CHECKING:
-    pass
 
 
 class EnrichmentAuditRecord(Base):
@@ -105,7 +102,7 @@ class EnrichmentCacheRecord(Base):
 
     def is_expired(self) -> bool:
         """Check if cache entry has expired."""
-        expires_at = cast(Optional[datetime], cast(object, self.expires_at))
+        expires_at = cast(datetime | None, cast(object, self.expires_at))
         if expires_at is None:
             return False
         comparison = datetime.now(timezone.utc) > expires_at

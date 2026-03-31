@@ -99,10 +99,10 @@ def reconcile_research_run(
     EPIC-020: Refactored from 170-line function to use helper functions.
     """
     from .reconciliation_helpers import (
-        resolve_run_and_output_dir,
-        extract_artifact_hashes,
-        compare_artifacts,
         build_reconciliation_report,
+        compare_artifacts,
+        extract_artifact_hashes,
+        resolve_run_and_output_dir,
     )
 
     # Resolve run_id and output_dir

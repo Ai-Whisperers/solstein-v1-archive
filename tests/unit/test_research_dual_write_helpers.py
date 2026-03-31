@@ -8,7 +8,7 @@ from sqlalchemy.sql.schema import Table
 
 from solstein.infrastructure.database_models import OutboxRecord
 from solstein.infrastructure.research_dual_write import JsonValue, record_outbox_failure
-from solstein.infrastructure.research_outbox_helpers import load_research_artifacts, OutboxEvent
+from solstein.infrastructure.research_outbox_helpers import OutboxEvent, load_research_artifacts
 
 
 def test_load_research_artifacts_reads_stage_report_and_known_artifacts(tmp_path) -> None:

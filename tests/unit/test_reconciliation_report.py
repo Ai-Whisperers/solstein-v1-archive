@@ -11,14 +11,13 @@ from sqlalchemy.orm import Session
 if TYPE_CHECKING:
     from pathlib import Path
 
-from solstein.infrastructure.database_models import Base
 from solstein.infrastructure.database_models import (
+    Base,
     OutboxRecord,
     ResearchArtifactRecord,
     ResearchRunRecord,
 )
 from solstein.infrastructure.reconcile_runs import (
-    ReconciliationError,
     reconcile_research_run,
 )
 from solstein.research.hashing import canonical_json_dumps
@@ -62,8 +61,6 @@ def _write_required_artifacts(
 
 
 def _create_session() -> Session:
-    import solstein.infrastructure.database_models  # Ensure all tables are registered
-    import solstein.domain.facts
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(bind=engine)
     return Session(engine)

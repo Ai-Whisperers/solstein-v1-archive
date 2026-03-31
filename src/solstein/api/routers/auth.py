@@ -3,15 +3,11 @@
 Phase 1, Item 1.2: JWT Authentication Endpoints
 """
 
-
-
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
-
-
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 from ...config import get_settings
 from ...security.jwt_handler import TokenResponse, UserPayload, jwt_handler
@@ -24,20 +20,24 @@ security = HTTPBearer()
 class LoginRequest(BaseModel):
     """Request model for login endpoint."""
 
-    email: str
-    password: str
+    email: str = Field(min_length=3, max_length=320)
+    password: str = Field(min_length=8, max_length=256)
 
-    class Config:
-        json_schema_extra = {"example": {"email": "user@example.com", "password": "securepassword123"}}
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={"example": {"email": "user@example.com", "password": "securepassword123"}},
+    )
 
 
 class RefreshRequest(BaseModel):
     """Request model for token refresh endpoint."""
 
-    refresh_token: str
+    refresh_token: str = Field(min_length=1, max_length=4096)
 
-    class Config:
-        json_schema_extra = {"example": {"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}}
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={"example": {"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}},
+    )
 
 
 @router.post("/auth/login", response_model=TokenResponse)
@@ -160,7 +160,6 @@ async def get_me(current_user: UserPayload = Depends(get_current_user)) -> UserP
     """
     logger.info(f"User info requested for: {current_user.email}")
     return current_user
-
 
 
 def hash_password(password: str) -> str:

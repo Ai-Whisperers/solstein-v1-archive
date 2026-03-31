@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import Any, Callable, List, Optional
+from collections.abc import Callable
+from typing import Any
 
 from ...domain.models import ConfidenceLevel
 from ..source_policy import SourceTier, default_source_policy_catalog
@@ -34,7 +35,7 @@ class EnrichmentOrchestrator:
     Policies handle enrichment decisions and source ordering.
     """
 
-    def __init__(self, config: Optional[EnrichmentConfig] = None):
+    def __init__(self, config: EnrichmentConfig | None = None):
         """Initialize orchestrator with configuration and policies.
 
         Args:
@@ -42,7 +43,7 @@ class EnrichmentOrchestrator:
         """
         self.config = config or EnrichmentConfig()
         self.source_policies = default_source_policy_catalog()
-        self._progress_callbacks: List[Callable[[str, int, int], None]] = []
+        self._progress_callbacks: list[Callable[[str, int, int], None]] = []
 
         # Initialize policies
         self._decision_policy = EnrichmentPolicy(self.config)
@@ -61,15 +62,15 @@ class EnrichmentOrchestrator:
                 logger.warning(f"Progress callback failed: {e}")
 
     # Delegate to decision policy
-    def should_skip_enrichment(self, company: "EnrichableCompany") -> bool:
+    def should_skip_enrichment(self, company: EnrichableCompany) -> bool:
         """Determine if enrichment should be skipped."""
         return self._decision_policy.should_skip_enrichment(company)
 
-    def _is_data_complete(self, company: "EnrichableCompany") -> bool:
+    def _is_data_complete(self, company: EnrichableCompany) -> bool:
         """Check if company data is already complete."""
         return self._decision_policy.is_data_complete(company)
 
-    def get_fields_to_enrich(self, company: "EnrichableCompany") -> List[EnrichmentField]:
+    def get_fields_to_enrich(self, company: EnrichableCompany) -> list[EnrichmentField]:
         """Get list of fields that need enrichment."""
         return self._decision_policy.get_fields_to_enrich(company)
 
@@ -93,27 +94,27 @@ class EnrichmentOrchestrator:
     # Delegate to ordering policy
     def get_enrichment_order(
         self,
-        company: "EnrichableCompany",
+        company: EnrichableCompany,
         stage: SourceTier = SourceTier.FREE,
-    ) -> List[EnrichmentSource]:
+    ) -> list[EnrichmentSource]:
         """Get prioritized enrichment order for company."""
         return self._ordering_policy.get_enrichment_order(company, stage)
 
-    def get_paid_escalation_order(self, company: "EnrichableCompany") -> List[EnrichmentSource]:
+    def get_paid_escalation_order(self, company: EnrichableCompany) -> list[EnrichmentSource]:
         """Get order for paid escalation."""
         return self._ordering_policy.get_paid_escalation_order(company)
 
     # Utility methods
-    def create_enrichment_copy(self, company: "EnrichableCompany") -> "EnrichableCompany":
+    def create_enrichment_copy(self, company: EnrichableCompany) -> EnrichableCompany:
         """Create a deep copy of company for enrichment."""
         return copy.deepcopy(company)
 
     def rollback_on_error(
         self,
-        original: "EnrichableCompany",
-        modified: "EnrichableCompany",
+        original: EnrichableCompany,
+        modified: EnrichableCompany,
         error: str,
-    ) -> "EnrichableCompany":
+    ) -> EnrichableCompany:
         """Rollback enrichment on error."""
         logger.error(f"Enrichment error for {original.name}: {error}. Rolling back.")
         return original
@@ -121,12 +122,12 @@ class EnrichmentOrchestrator:
     # Execution methods
     def enrich_batch(
         self,
-        companies: List["EnrichableCompany"],
+        companies: list[EnrichableCompany],
         enrichment_fn: Callable[
-            ["EnrichableCompany", EnrichmentSource, List[EnrichmentField]],
-            "EnrichableCompany",
+            [EnrichableCompany, EnrichmentSource, list[EnrichmentField]],
+            EnrichableCompany,
         ],
-    ) -> List[EnrichmentResult]:
+    ) -> list[EnrichmentResult]:
         """Enrich multiple companies efficiently."""
         results = []
         total = len(companies)
@@ -146,10 +147,10 @@ class EnrichmentOrchestrator:
 
     def enrich_single(
         self,
-        company: "EnrichableCompany",
+        company: EnrichableCompany,
         enrichment_fn: Callable[
-            ["EnrichableCompany", EnrichmentSource, List[EnrichmentField]],
-            "EnrichableCompany",
+            [EnrichableCompany, EnrichmentSource, list[EnrichmentField]],
+            EnrichableCompany,
         ],
     ) -> EnrichmentResult:
         """Enrich single company with orchestration logic."""
@@ -214,7 +215,7 @@ class EnrichmentOrchestrator:
         api_calls: int = 1,
         duration_ms: float = 0.0,
         success: bool = True,
-        error: Optional[str] = None,
+        error: str | None = None,
     ) -> EnrichmentCost:
         """Track cost of enrichment operation."""
         cost = EnrichmentCost(

@@ -13,8 +13,8 @@ FREE tools used:
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from enum import Enum, auto
-from typing import Any, Optional
+from enum import Enum
+from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
@@ -75,19 +75,19 @@ class Claim(BaseModel):
     entity_type: str = "company"  # company, market, product, person
     field: str  # e.g., "revenue", "employee_count", "funding_round"
     value: Any  # The actual value
-    unit: Optional[str] = None  # e.g., "USD", "employees", "percent"
+    unit: str | None = None  # e.g., "USD", "employees", "percent"
 
     # Source information
     source_url: str
     source_type: SourceType
-    source_title: Optional[str] = None
-    source_published_date: Optional[datetime] = None
-    source_author: Optional[str] = None
+    source_title: str | None = None
+    source_published_date: datetime | None = None
+    source_author: str | None = None
 
     # Evidence location
     snippet: str  # The exact text snippet supporting the claim
-    snippet_location: Optional[str] = None  # e.g., "paragraph 3", "table row 5"
-    page_section: Optional[str] = None  # e.g., "About Us", "Investor Relations"
+    snippet_location: str | None = None  # e.g., "paragraph 3", "table row 5"
+    page_section: str | None = None  # e.g., "About Us", "Investor Relations"
 
     # Extraction metadata
     extracted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -96,9 +96,9 @@ class Claim(BaseModel):
 
     # Status and lifecycle
     status: ClaimStatus = ClaimStatus.PENDING
-    reviewed_at: Optional[datetime] = None
-    reviewed_by: Optional[str] = None
-    review_notes: Optional[str] = None
+    reviewed_at: datetime | None = None
+    reviewed_by: str | None = None
+    review_notes: str | None = None
 
     # Confidence (decomposed)
     confidence_components: list[ConfidenceComponent] = Field(default_factory=list)
@@ -139,18 +139,18 @@ class SourceDocument(BaseModel):
 
     id: UUID = Field(default_factory=uuid4)
     url: str
-    title: Optional[str] = None
+    title: str | None = None
     source_type: SourceType
 
     # Content
-    raw_content: Optional[str] = None  # Raw HTML/text
-    cleaned_content: Optional[str] = None  # Cleaned text
+    raw_content: str | None = None  # Raw HTML/text
+    cleaned_content: str | None = None  # Cleaned text
 
     # Metadata
     domain: str
-    published_date: Optional[datetime] = None
+    published_date: datetime | None = None
     scraped_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    content_hash: Optional[str] = None  # For change detection
+    content_hash: str | None = None  # For change detection
 
     # Quality signals
     word_count: int = 0
@@ -159,7 +159,7 @@ class SourceDocument(BaseModel):
 
     # Crawl metadata
     crawl_depth: int = 0
-    referrer_url: Optional[str] = None
+    referrer_url: str | None = None
     user_agent: str = "SolsteinBot/1.0"
 
     class Config:
@@ -184,12 +184,12 @@ class Contradiction(BaseModel):
 
     # Resolution
     status: str = "open"  # open, resolved, false_positive
-    resolution_strategy: Optional[str] = None
-    resolved_claim_id: Optional[UUID] = None  # Which claim was accepted
+    resolution_strategy: str | None = None
+    resolved_claim_id: UUID | None = None  # Which claim was accepted
 
     # Metadata
     detected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    resolved_at: Optional[datetime] = None
+    resolved_at: datetime | None = None
 
     class Config:
         json_encoders = {

@@ -18,7 +18,7 @@ class EnrichmentRequest(BaseModel):
     """Request to enrich a single company."""
 
     sources: list[str] | None = Field(
-        default=["SEC_EDGAR", "COMPANIES_HOUSE", "NEWS_SIGNALS"],
+        default_factory=lambda: ["SEC_EDGAR", "COMPANIES_HOUSE", "NEWS_SIGNALS"],
         min_length=1,
         max_length=10,
         description="Data sources to use for enrichment",
@@ -40,7 +40,9 @@ class EnrichmentRequest(BaseModel):
         return v
 
     model_config = ConfigDict(
-        json_schema_extra={"example": {"sources": ["SEC_EDGAR", "COMPANIES_HOUSE"], "dry_run": False}}
+        extra="forbid",
+        str_strip_whitespace=True,
+        json_schema_extra={"example": {"sources": ["SEC_EDGAR", "COMPANIES_HOUSE"], "dry_run": False}},
     )
 
 
@@ -76,9 +78,11 @@ class BatchEnrichmentRequest(BaseModel):
         return v
 
     model_config = ConfigDict(
+        extra="forbid",
+        str_strip_whitespace=True,
         json_schema_extra={
             "example": {"company_ids": ["001", "002", "003"], "batch_size": 10, "use_cache": True, "dry_run": False}
-        }
+        },
     )
 
 

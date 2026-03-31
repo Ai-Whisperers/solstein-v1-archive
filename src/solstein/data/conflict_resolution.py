@@ -139,7 +139,7 @@ class RecencyResolver(ConflictResolver):
                 return ResolutionResult(
                     resolved_value=conflict.existing_value,
                     strategy_used=ConflictStrategy.RECENCY_WINS,
-                    notes=f"Existing data is newer or same age",
+                    notes="Existing data is newer or same age",
                 )
 
         # Fall back to confidence scores
@@ -153,7 +153,7 @@ class RecencyResolver(ConflictResolver):
         return ResolutionResult(
             resolved_value=conflict.existing_value,
             strategy_used=ConflictStrategy.RECENCY_WINS,
-            notes=f"Using confidence fallback: existing has higher or equal confidence",
+            notes="Using confidence fallback: existing has higher or equal confidence",
         )
 
 

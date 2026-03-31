@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from loguru import logger
-
 from typing import TYPE_CHECKING, Any
+
+from loguru import logger
 
 from ...core.scoring_config import ScoringSettings
 from ...domain.models import FinancialMetric, ScoreComponent, ScoringExplanation
@@ -10,7 +10,6 @@ from ...domain.models import FinancialMetric, ScoreComponent, ScoringExplanation
 if TYPE_CHECKING:
     from ...infrastructure.repositories import FactRepository
 from ._shared import merge_facts_into_financials
-
 
 _STAGNANT_GROWTH_UPPER: float = 5.0
 _BELOW_AVERAGE_GROWTH_UPPER: float = 10.0
@@ -32,7 +31,7 @@ class GrowthMomentumScorer:
     def score(
         self,
         financials: FinancialMetric,
-        fact_repo: "FactRepository | None" = None,
+        fact_repo: FactRepository | None = None,
         company_id: str | None = None,
     ) -> tuple[float, ScoringExplanation]:
         """Calculate growth momentum score (0-10) with explanation.

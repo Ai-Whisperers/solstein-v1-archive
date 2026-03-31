@@ -9,8 +9,8 @@ Provides visibility into outbound dependency performance:
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from ..dependencies import require_admin
 from ...utils.tracing import get_tracer
+from ..dependencies import require_admin
 
 router = APIRouter(prefix="/metrics", tags=["metrics"])
 

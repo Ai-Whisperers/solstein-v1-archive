@@ -2,7 +2,6 @@
 Scoring Deduplication Verification Tests
 Verifies that all duplicate scoring logic has been eliminated.
 """
-import pytest
 import subprocess
 
 
@@ -35,14 +34,14 @@ class TestScoringDeduplication:
 
     def test_scorer_files_import_from_shared(self):
         """All scorer files should import helpers from _shared."""
-        from solstein.analytics.scorers.financial_health import merge_facts_into_financials
-        from solstein.analytics.scorers.growth_momentum import merge_facts_into_financials
-
-        from solstein.analytics.scorers._shared import merge_facts_into_financials as shared_merge
         from solstein.analytics.scorers._shared import confidence_to_level
+        from solstein.analytics.scorers._shared import merge_facts_into_financials as shared_merge
+        from solstein.analytics.scorers.financial_health import merge_facts_into_financials as fh_merge
+        from solstein.analytics.scorers.growth_momentum import merge_facts_into_financials as gm_merge
 
         # Verify they are the same functions (not duplicates)
-        assert merge_facts_into_financials is shared_merge
+        assert fh_merge is shared_merge
+        assert gm_merge is shared_merge
         assert confidence_to_level.__name__ == "confidence_to_level"
 
 

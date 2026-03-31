@@ -1,4 +1,4 @@
-from solstein.data.report_release_gate import ReportGateResult, ReportReleaseGate, GateReason, determine_quality_tier
+from solstein.data.report_release_gate import GateReason, ReportGateResult, ReportReleaseGate, determine_quality_tier
 from solstein.domain.models import Company, ConfidenceLevel
 
 

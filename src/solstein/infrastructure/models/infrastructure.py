@@ -9,15 +9,11 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, DateTime, Index, Integer, JSON, String, Uuid
+from sqlalchemy import JSON, Boolean, Column, DateTime, Index, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
-
-if TYPE_CHECKING:
-    pass
 
 
 class OutboxRecord(Base):
@@ -74,9 +70,9 @@ class TenantRecord(Base):
     )
 
     def to_dict(self) -> dict[str, object]:
-        from typing import Optional, cast
+        from typing import cast
 
-        created_at = cast(Optional[datetime], cast(object, self.created_at))
+        created_at = cast(datetime | None, cast(object, self.created_at))
         created_at_value = created_at.isoformat() if created_at is not None else None
         return {
             "id": str(self.id),

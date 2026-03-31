@@ -5,9 +5,10 @@ when external APIs (LinkedIn, Crunchbase, etc.) are unavailable.
 """
 
 import time
+from collections.abc import Callable
 from enum import Enum
 from functools import wraps
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, TypeVar
 
 from loguru import logger
 
@@ -51,7 +52,7 @@ class CircuitBreaker:
         self._state = CircuitState.CLOSED
         self._failure_count = 0
         self._success_count = 0
-        self._last_failure_time: Optional[float] = None
+        self._last_failure_time: float | None = None
         self._half_open_calls = 0
 
     @property
@@ -134,7 +135,7 @@ class CircuitBreaker:
                 result = await func(*args, **kwargs)
                 self._record_success()
                 return result
-            except self.expected_exception as e:
+            except self.expected_exception:
                 self._record_failure()
                 raise
 
@@ -152,7 +153,7 @@ class CircuitBreaker:
                 result = func(*args, **kwargs)
                 self._record_success()
                 return result
-            except self.expected_exception as e:
+            except self.expected_exception:
                 self._record_failure()
                 raise
 

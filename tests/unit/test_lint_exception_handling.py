@@ -4,15 +4,8 @@ F4: Tests for policy lint check.
 """
 
 import ast
-import tempfile
 from pathlib import Path
 from typing import Any
-
-import pytest
-import tempfile
-from pathlib import Path
-
-import pytest
 
 from scripts.lint_exception_handling import (
     ExceptionHandlingChecker,
@@ -159,7 +152,7 @@ except Exception:
         test_file = tmp_path / "test.py"
         test_file.write_bytes(b"\xff\xfe invalid utf-8")
 
-        violations = check_file(test_file)
+        check_file(test_file)
 
         # Should not crash, may or may not have violations depending on content
 
@@ -243,7 +236,7 @@ class TestMain:
 
         assert result == 1
 
-    def test_critical_only_mode(self, tmp_path: Path) -> None:
+    def test_bare_except_fails(self, tmp_path: Path) -> None:
         test_file = tmp_path / "dirty.py"
         test_file.write_text("try:\n    pass\nexcept:\n    pass")
 

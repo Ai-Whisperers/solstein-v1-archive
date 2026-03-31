@@ -23,19 +23,19 @@ from typing import Any
 import httpx
 from loguru import logger
 
-from .contracts import ConnectorRequest, ConnectorResponse
 from .constants import (
     HTTP_STATUS_RATE_LIMITED,
     NEWS_SIGNAL_DAILY_QUERY_LIMIT,
     NEWS_SIGNAL_REQUEST_TIMEOUT_S,
 )
+from .contracts import ConnectorRequest, ConnectorResponse
+from .runtime import ConnectorRuntime
 from .signal_detectors import (
     FundingSignalDetector,
     KeyHireSignalDetector,
     PartnershipSignalDetector,
     Signal,
 )
-from .runtime import ConnectorRuntime
 
 
 class NewsSignalDetector:

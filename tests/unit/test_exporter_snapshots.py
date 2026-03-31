@@ -4,17 +4,15 @@ Schema and visual consistency tests for exporters.
 Part of EPIC-017 Wave 2 Testing Hardening.
 """
 
-import pytest
-import json
 import csv
-import io
-from pathlib import Path
 from datetime import datetime
 
-from solstein.domain.models import Company, FinancialMetric
+import pytest
+
+from solstein.domain.models import Company
 from solstein.exporters.csv import CSVExporter
+from solstein.exporters.excel.styles import ColorPalette, LayoutConstants
 from solstein.exporters.excel_improved import ImprovedExcelExporter
-from solstein.exporters.excel.styles import LayoutConstants, ColorPalette
 
 
 class TestCSVExporterSnapshots:
@@ -52,7 +50,7 @@ class TestCSVExporterSnapshots:
         exporter.export(sample_companies, output_path)
 
         # Read and verify CSV structure
-        with open(output_path, 'r', newline='') as f:
+        with open(output_path, newline='') as f:
             reader = csv.reader(f)
             rows = list(reader)
 
@@ -75,7 +73,7 @@ class TestCSVExporterSnapshots:
         exporter.export(sample_companies, output_path2)
 
         # Read both files
-        with open(output_path1, 'r') as f1, open(output_path2, 'r') as f2:
+        with open(output_path1) as f1, open(output_path2) as f2:
             reader1 = csv.reader(f1)
             reader2 = csv.reader(f2)
             header1 = next(reader1)

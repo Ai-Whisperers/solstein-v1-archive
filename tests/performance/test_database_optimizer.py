@@ -13,7 +13,6 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from solstein.monitoring.database_optimizer import (
@@ -276,7 +275,7 @@ class TestOptimizedTransaction:
         mock_session = AsyncMock(spec=AsyncSession)
 
         with pytest.raises(ValueError):
-            async with optimized_transaction(mock_session) as session:
+            async with optimized_transaction(mock_session):
                 raise ValueError("Test error")
 
         mock_session.rollback.assert_called_once()

@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -17,7 +17,7 @@ class RedditConnector(BaseConnector):
     BASE_URL = "https://www.reddit.com"
     OAUTH_URL = "https://oauth.reddit.com"
 
-    def __init__(self, client_id: Optional[str] = None, client_secret: Optional[str] = None):
+    def __init__(self, client_id: str | None = None, client_secret: str | None = None):
         config = SourceConfig(
             name="reddit",
             base_url=self.BASE_URL,
@@ -32,11 +32,10 @@ class RedditConnector(BaseConnector):
         """Test connection to Reddit."""
         try:
             # Reddit is accessible without auth for read-only
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self.config.base_url}/r/technology.json", headers={"User-Agent": "Solstein-Research/1.0"}
-                ) as response:
-                    return response.status == 200
+            async with aiohttp.ClientSession() as session, session.get(
+                f"{self.config.base_url}/r/technology.json", headers={"User-Agent": "Solstein-Research/1.0"}
+            ) as response:
+                return response.status == 200
         except Exception as e:
             logger.error(f"Failed to connect to Reddit: {e}")
             return False

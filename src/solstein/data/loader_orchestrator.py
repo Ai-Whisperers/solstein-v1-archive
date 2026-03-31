@@ -12,8 +12,8 @@ from typing import Any, Protocol
 
 from loguru import logger
 
+from solstein.data.conflict_resolution import FieldConflict
 from solstein.domain.models import Company
-from solstein.data.conflict_resolution import FieldConflict, CompositeResolver
 
 
 class DataSourceAdapter(Protocol):

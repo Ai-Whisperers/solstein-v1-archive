@@ -117,7 +117,7 @@ async def get_refresh_status(job_id: str):
     except ImportError as exc:
         raise HTTPException(status_code=500, detail="Celery is not installed") from exc
 
-    AsyncResult = getattr(module, "AsyncResult")
+    AsyncResult = module.AsyncResult
     result = AsyncResult(job_id)
     return {
         "job_id": job_id,

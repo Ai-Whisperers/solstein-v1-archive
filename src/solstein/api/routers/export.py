@@ -8,8 +8,8 @@ from loguru import logger
 from ...analytics.scoring import GrowthScorer
 from ...config import get_settings
 from ...core.repositories import CompanyFilter
-from ...exporters import ExcelExporter
 from ...data.report_release_gate import ReportReleaseGate, build_export_metadata
+from ...exporters import ExcelExporter
 from ..dependencies import get_company_repository, get_current_tenant
 from ..exceptions import APIError
 
@@ -22,7 +22,7 @@ excel_exporter = ExcelExporter()
 async def _run_excel_export(repo: Any, filters: dict[str, Any], filename: str) -> None:  # noqa: E501
     """Background task to generate excel report."""
     # Extract non-CompanyFilter keys before constructing the filter
-    include_charts: bool = filters.pop("include_charts", True)
+    filters.pop("include_charts", True)
     company_filter = CompanyFilter(**filters) if filters else None
     companies = cast(list[Any], await repo.get_all(filters=company_filter) or [])
 

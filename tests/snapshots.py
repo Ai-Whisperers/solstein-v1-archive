@@ -11,8 +11,6 @@ Usage:
         assert response == snapshot
 """
 
-import json
-from pathlib import Path
 from typing import Any
 
 import pytest
@@ -121,8 +119,9 @@ class ExcelSnapshot(SnapshotMixin):
             Structure snapshot (not binary data).
         """
         try:
-            import openpyxl
             from io import BytesIO
+
+            import openpyxl
 
             wb = openpyxl.load_workbook(BytesIO(excel_data))
             structure = {"sheets": list(wb.sheetnames), "sheet_data": {}}
@@ -154,8 +153,9 @@ class PDFSnapshot(SnapshotMixin):
             PDF metadata snapshot.
         """
         try:
-            from pypdf import PdfReader
             from io import BytesIO
+
+            from pypdf import PdfReader
 
             reader = PdfReader(BytesIO(pdf_data))
             return {

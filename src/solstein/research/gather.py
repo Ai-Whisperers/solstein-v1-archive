@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 from loguru import logger
@@ -12,7 +11,6 @@ from solstein.domain.models import (
     Company,
     CompanyTier,
     ConfidenceLevel,
-    FinancialMetric,
     RawDataRecord,
     SignalExtraction,
     SignalExtractionRecord,
@@ -84,10 +82,10 @@ def build_company_profile(candidate: DiscoveryCandidate) -> Company:
     EPIC-020: Refactored from 188-line function to use builder functions.
     """
     from .profile_builders import (
-        build_company_profile_no_ticker,
-        build_company_profile_yfinance_missing,
-        build_company_profile_ticker_failed,
         build_company_profile_from_ticker,
+        build_company_profile_no_ticker,
+        build_company_profile_ticker_failed,
+        build_company_profile_yfinance_missing,
     )
 
     # No ticker available

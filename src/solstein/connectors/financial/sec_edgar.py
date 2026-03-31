@@ -1,8 +1,7 @@
 """SEC EDGAR connector for company filings."""
 
 import logging
-from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -28,11 +27,10 @@ class SECEdgarConnector(BaseConnector):
     async def connect(self) -> bool:
         """Test connection to SEC EDGAR."""
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self.config.base_url}/Archives/edgar/daily-index/form-idx", headers=self._headers
-                ) as response:
-                    return response.status == 200
+            async with aiohttp.ClientSession() as session, session.get(
+                f"{self.config.base_url}/Archives/edgar/daily-index/form-idx", headers=self._headers
+            ) as response:
+                return response.status == 200
         except Exception as e:
             logger.error(f"Failed to connect to SEC EDGAR: {e}")
             return False

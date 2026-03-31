@@ -13,10 +13,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
-from urllib.parse import parse_qsl
-from urllib.parse import urlencode
-from urllib.parse import urlunparse
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import httpx
 from bs4 import BeautifulSoup
@@ -894,7 +891,7 @@ class AIResearchOrchestrator:
             "metadata": report.metadata,
             "errors": report.errors,
         }
-        known_urls = {url for url in self._previous_urls(report.company_name)}
+        known_urls = set(self._previous_urls(report.company_name))
         for source in report.data_sources:
             url = source.get("url") if isinstance(source, dict) else None
             if isinstance(url, str) and url:

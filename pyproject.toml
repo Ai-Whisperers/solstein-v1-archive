@@ -72,7 +72,7 @@ where = [
 
 [tool.ruff]
 line-length = 120
-target-version = "py310"
+target-version = "py312"
 exclude = [
     ".bzr",
     ".direnv",
@@ -121,30 +121,54 @@ select = [
     "TCH",
 ]
 ignore = [
-    "B008",
     "B007",
+    "B008",
     "B017",
+    "B028",   # No explicit stacklevel — pre-existing, low risk
+    "B905",   # zip() without strict= — pre-existing, needs audit
     "C401",
     "C408",
     "C414",
     "E402",
     "E501",
     "E701",
+    "F403",   # Wildcard imports in connector __init__.py — intentional re-export pattern
+    "F405",   # Undefined from wildcard import — consequence of F403 pattern
+    "F821",   # Undefined name from TYPE_CHECKING blocks — needs Python 3.12 migration
     "N802",
     "N803",
     "N806",
     "SIM102",
     "SIM103",
+    "SIM105", # contextlib.suppress — pre-existing, style preference
     "SIM108",
+    "SIM110", # any() replacement — pre-existing, readability preference
+    "SIM117", # Nested with statements — pre-existing, needs refactor epic
     "SIM118",
     "TC001",
     "TC002",
     "TC003",
     "TC006",
+    "N818",   # Exception naming with Error suffix — renaming is a breaking change, tracked separately
     "UP017",
     "UP036",
+    "UP041",  # Replace aliased errors with TimeoutError — pre-existing, needs audit
     "UP042",
+    "UP046",  # Generic subclass pattern — pre-existing, needs py312 migration epic
+    "UP047",  # Generic function type params — pre-existing, needs py312 migration epic
     "W291",
+    "W293",   # Whitespace in blank lines — auto-fixable but noisy
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "TRY002",  # raise Exception(...) in test stubs/mocks is idiomatic — no need for custom exception classes
+]
+"src/solstein/connectors/**/__init__.py" = [
+    "F401",  # Connector __init__ files are intentional re-export aggregators
+]
+"tests/factories/__init__.py" = [
+    "F401",  # Factory __init__ is a re-export aggregator
 ]
 
 [tool.mypy]

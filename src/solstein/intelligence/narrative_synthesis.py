@@ -7,7 +7,7 @@ bringing them to the same depth as Epic 6 (AI Assessment) reports.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from loguru import logger
 
@@ -48,7 +48,7 @@ class NarrativeSynthesisEngine:
 
     async def generate_financial_thesis(
         self,
-        financial_intelligence: "FinancialIntelligence",
+        financial_intelligence: FinancialIntelligence,
         context: NarrativeContext,
     ) -> dict[str, str]:
         """Generate investment thesis narrative for financial analysis.
@@ -132,7 +132,7 @@ Be realistic about data limitations."""
 
     async def generate_genealogy_narrative(
         self,
-        genealogy: "CorporateGenealogy",
+        genealogy: CorporateGenealogy,
         context: NarrativeContext,
     ) -> dict[str, str]:
         """Generate narrative for corporate genealogy analysis.
@@ -188,7 +188,7 @@ If limited data, focus on what the absence of M&A activity might imply."""
 
     async def generate_protocol_narrative(
         self,
-        protocol_map: "ProtocolMap",
+        protocol_map: ProtocolMap,
         context: NarrativeContext,
     ) -> dict[str, str]:
         """Generate narrative for market protocol analysis.
@@ -242,7 +242,7 @@ Format as bulleted list with bold headers."""
             logger.error(f"Error generating protocol narrative: {e}")
             return self._fallback_protocol_narratives(protocol_map, context)
 
-    def _summarize_financial_data(self, fi: "FinancialIntelligence") -> str:
+    def _summarize_financial_data(self, fi: FinancialIntelligence) -> str:
         """Create text summary of financial data for LLM prompt."""
         lines = []
 
@@ -278,7 +278,7 @@ Format as bulleted list with bold headers."""
 
         return "\n".join(lines) if lines else "- Limited financial data available"
 
-    def _summarize_genealogy_data(self, genealogy: "CorporateGenealogy") -> str:
+    def _summarize_genealogy_data(self, genealogy: CorporateGenealogy) -> str:
         """Create text summary of genealogy data for LLM prompt."""
         lines = [
             f"- Ownership Type: {genealogy.ownership_type}",
@@ -306,7 +306,7 @@ Format as bulleted list with bold headers."""
 
         return "\n".join(lines)
 
-    def _summarize_protocol_data(self, protocol_map: "ProtocolMap") -> str:
+    def _summarize_protocol_data(self, protocol_map: ProtocolMap) -> str:
         """Create text summary of protocol data for LLM prompt."""
         lines = [
             f"- Total Countries: {protocol_map.total_countries}",
@@ -341,7 +341,7 @@ Format as bulleted list with bold headers."""
 
     # Fallback methods for when LLM is unavailable
 
-    def _fallback_financial_thesis(self, fi: "FinancialIntelligence", context: NarrativeContext) -> str:
+    def _fallback_financial_thesis(self, fi: FinancialIntelligence, context: NarrativeContext) -> str:
         """Generate fallback financial thesis without LLM."""
         if fi.growth_trajectory.value == "accelerating":
             growth_desc = "demonstrating strong momentum with accelerating growth"
@@ -372,7 +372,7 @@ Based on available data, the company presents {"an attractive" if fi.growth_cons
 
 *Recommendations will be refined as additional data becomes available.*"""
 
-    def _fallback_financial_narratives(self, fi: "FinancialIntelligence", context: NarrativeContext) -> dict[str, str]:
+    def _fallback_financial_narratives(self, fi: FinancialIntelligence, context: NarrativeContext) -> dict[str, str]:
         """Generate all fallback financial narratives."""
         return {
             "investment_thesis": self._fallback_financial_thesis(fi, context),
@@ -380,7 +380,7 @@ Based on available data, the company presents {"an attractive" if fi.growth_cons
             "competitive_context": "*Competitive analysis requires additional market data. Please supplement with industry benchmarks and peer comparisons.*",
         }
 
-    def _fallback_genealogy_narrative(self, genealogy: "CorporateGenealogy", context: NarrativeContext) -> str:
+    def _fallback_genealogy_narrative(self, genealogy: CorporateGenealogy, context: NarrativeContext) -> str:
         """Generate fallback genealogy narrative."""
         if genealogy.ownership_type == "independent":
             ownership_desc = "independently owned, suggesting operational autonomy"
@@ -400,7 +400,7 @@ Based on available data, the company presents {"an attractive" if fi.growth_cons
 *Detailed ownership implications would benefit from cap table analysis and shareholder agreement review.*"""
 
     def _fallback_genealogy_narratives(
-        self, genealogy: "CorporateGenealogy", context: NarrativeContext
+        self, genealogy: CorporateGenealogy, context: NarrativeContext
     ) -> dict[str, str]:
         """Generate all fallback genealogy narratives."""
         return {
@@ -408,7 +408,7 @@ Based on available data, the company presents {"an attractive" if fi.growth_cons
             "ma_narrative": "*Detailed M&A analysis requires transaction-level data and post-merger integration assessments.*",
         }
 
-    def _fallback_protocol_narrative(self, protocol_map: "ProtocolMap", context: NarrativeContext) -> str:
+    def _fallback_protocol_narrative(self, protocol_map: ProtocolMap, context: NarrativeContext) -> str:
         """Generate fallback protocol narrative."""
         diversification = protocol_map.geographic_diversification_score
 
@@ -427,7 +427,7 @@ The market maturity mix indicates {"balanced exposure" if protocol_map.geographi
 
 *Strategic assessment would benefit from market-by-market revenue contribution analysis and competitive positioning review.*"""
 
-    def _fallback_expansion_analysis(self, protocol_map: "ProtocolMap") -> str:
+    def _fallback_expansion_analysis(self, protocol_map: ProtocolMap) -> str:
         """Generate fallback expansion analysis."""
         if not protocol_map.expansion_opportunities:
             return "*Expansion opportunities to be identified based on market analysis and competitive landscape assessment.*"
@@ -438,7 +438,7 @@ The market maturity mix indicates {"balanced exposure" if protocol_map.geographi
 
         return "\n".join(lines)
 
-    def _fallback_protocol_narratives(self, protocol_map: "ProtocolMap", context: NarrativeContext) -> dict[str, str]:
+    def _fallback_protocol_narratives(self, protocol_map: ProtocolMap, context: NarrativeContext) -> dict[str, str]:
         """Generate all fallback protocol narratives."""
         return {
             "market_entry_narrative": self._fallback_protocol_narrative(protocol_map, context),

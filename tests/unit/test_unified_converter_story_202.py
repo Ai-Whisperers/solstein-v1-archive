@@ -96,4 +96,4 @@ def test_converter_no_duplicate_logic():
     """Verify converter is centralized (no custom duplicate logic in scripts)."""
     # This test passes if the import succeeds and function is callable
     # It ensures the unified converter is being used everywhere
-    assert hasattr(convert_to_domain_company, "__call__")
+    assert callable(convert_to_domain_company)

@@ -6,8 +6,8 @@ request_id, correlation_id, tenant_id, and user_id across async boundaries.
 
 import asyncio
 import contextvars
-from typing import Any
 from functools import wraps
+from typing import Any
 from uuid import uuid4
 
 # Context variables for request-scoped data

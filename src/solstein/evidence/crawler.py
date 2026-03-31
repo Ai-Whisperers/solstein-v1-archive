@@ -14,15 +14,15 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Optional, Callable
 from urllib.parse import urljoin, urlparse
 
-from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, CacheMode
+from crawl4ai import AsyncWebCrawler, CacheMode, CrawlerRunConfig
 from crawl4ai.content_filter_strategy import PruningContentFilter
 from crawl4ai.markdown_generation_strategy import DefaultMarkdownGenerator
 
-from .models import Claim, SourceDocument, SourceType, create_claim
+from .models import Claim, SourceType, create_claim
 
 logger = logging.getLogger(__name__)
 
@@ -33,13 +33,13 @@ class CrawlResult:
 
     url: str
     success: bool
-    title: Optional[str] = None
-    content: Optional[str] = None
-    markdown: Optional[str] = None
+    title: str | None = None
+    content: str | None = None
+    markdown: str | None = None
     links: list[str] = field(default_factory=list)
-    error: Optional[str] = None
+    error: str | None = None
     word_count: int = 0
-    content_hash: Optional[str] = None
+    content_hash: str | None = None
 
 
 class EvidenceCrawler:
@@ -67,8 +67,8 @@ class EvidenceCrawler:
         self,
         company_id: str,
         start_url: str,
-        page_types: Optional[list[str]] = None,
-        on_page_crawled: Optional[Callable[[CrawlResult], None]] = None,
+        page_types: list[str] | None = None,
+        on_page_crawled: Callable[[CrawlResult], None] | None = None,
     ) -> list[CrawlResult]:
         """
         Crawl a company website starting from the given URL.
@@ -135,7 +135,7 @@ class EvidenceCrawler:
         url: str,
         company_id: str,
         depth: int = 0,
-        on_page_crawled: Optional[Callable[[CrawlResult], None]] = None,
+        on_page_crawled: Callable[[CrawlResult], None] | None = None,
     ) -> CrawlResult:
         """Crawl a single page."""
         if url in self._crawled_urls:
@@ -238,7 +238,6 @@ class EvidenceCrawler:
                 return []
 
             discovered = []
-            base_domain = urlparse(start_url).netloc
 
             for link in result.links.get("internal", []):
                 href = link.get("href", "")
@@ -269,7 +268,7 @@ class EvidenceCrawler:
         self,
         crawl_result: CrawlResult,
         company_id: str,
-        extraction_rules: Optional[dict] = None,
+        extraction_rules: dict | None = None,
     ) -> list[Claim]:
         """
         Extract claims from crawled content using regex patterns.
@@ -302,7 +301,7 @@ class EvidenceCrawler:
 
         import re
 
-        for field, patterns in rules.items():
+        for field_name, patterns in rules.items():
             for pattern in patterns:
                 matches = re.finditer(pattern, content, re.IGNORECASE)
                 for match in matches:
@@ -311,7 +310,7 @@ class EvidenceCrawler:
                     # Create claim
                     claim = create_claim(
                         entity_id=company_id,
-                        field=field,
+                        field=field_name,
                         value=value,
                         source_url=crawl_result.url,
                         snippet=match.group(0),

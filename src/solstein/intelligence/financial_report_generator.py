@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .financial_models import FinancialIntelligence, FundingRound, GrowthVector
+    from .financial_models import FinancialIntelligence
 
 
 class FinancialGrowthReportGenerator:
@@ -21,7 +21,7 @@ class FinancialGrowthReportGenerator:
     def generate(
         self,
         company_name: str,
-        financial_intelligence: "FinancialIntelligence",
+        financial_intelligence: FinancialIntelligence,
     ) -> str:
         """Generate complete financial growth report.
 
@@ -47,7 +47,7 @@ class FinancialGrowthReportGenerator:
     def generate_and_save(
         self,
         company_name: str,
-        financial_intelligence: "FinancialIntelligence",
+        financial_intelligence: FinancialIntelligence,
         output_path: Path,
     ) -> Path:
         """Generate and save report to file.
@@ -72,7 +72,7 @@ class FinancialGrowthReportGenerator:
 
 ---"""
 
-    def _generate_growth_trajectory(self, fi: "FinancialIntelligence") -> str:
+    def _generate_growth_trajectory(self, fi: FinancialIntelligence) -> str:
         """Generate growth trajectory section."""
         sections = ["## Growth Trajectory"]
 
@@ -124,7 +124,7 @@ class FinancialGrowthReportGenerator:
 
         return "\n".join(sections)
 
-    def _generate_funding_intelligence(self, fi: "FinancialIntelligence") -> str:
+    def _generate_funding_intelligence(self, fi: FinancialIntelligence) -> str:
         """Generate funding intelligence section."""
         sections = ["## Funding Intelligence"]
 
@@ -185,7 +185,7 @@ class FinancialGrowthReportGenerator:
 
         return "\n".join(sections)
 
-    def _generate_growth_vectors(self, fi: "FinancialIntelligence") -> str:
+    def _generate_growth_vectors(self, fi: FinancialIntelligence) -> str:
         """Generate growth vectors section."""
         sections = ["## Growth Vectors"]
 
@@ -219,7 +219,7 @@ class FinancialGrowthReportGenerator:
 
         return "\n".join(sections)
 
-    def _generate_projection(self, fi: "FinancialIntelligence") -> str:
+    def _generate_projection(self, fi: FinancialIntelligence) -> str:
         """Generate projection section."""
         sections = ["## 12-Month Projection"]
 
@@ -249,7 +249,7 @@ class FinancialGrowthReportGenerator:
 
         return "\n".join(sections)
 
-    def _generate_health_assessment(self, fi: "FinancialIntelligence") -> str:
+    def _generate_health_assessment(self, fi: FinancialIntelligence) -> str:
         """Generate health assessment section."""
         sections = ["## Financial Health Assessment"]
 
@@ -302,7 +302,7 @@ class BatchFinancialReportGenerator:
 
     def generate_batch(
         self,
-        results: list[tuple[str, "FinancialIntelligence"]],
+        results: list[tuple[str, FinancialIntelligence]],
         output_dir: Path,
     ) -> list[Path]:
         """Generate reports for multiple companies.
@@ -333,7 +333,7 @@ class BatchFinancialReportGenerator:
 
     def generate_summary_table(
         self,
-        results: list[tuple[str, "FinancialIntelligence"]],
+        results: list[tuple[str, FinancialIntelligence]],
     ) -> str:
         """Generate summary table of all analyses.
 
@@ -375,7 +375,7 @@ class BatchFinancialReportGenerator:
     async def generate_narratives(
         self,
         company_name: str,
-        financial_intelligence: "FinancialIntelligence",
+        financial_intelligence: FinancialIntelligence,
         industry: str = "energy software",
         region: str = "Europe",
     ) -> dict[str, str]:
@@ -392,7 +392,7 @@ class BatchFinancialReportGenerator:
     def generate_with_narratives(
         self,
         company_name: str,
-        financial_intelligence: "FinancialIntelligence",
+        financial_intelligence: FinancialIntelligence,
         narratives: dict[str, str],
     ) -> str:
         sections = [

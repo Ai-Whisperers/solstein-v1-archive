@@ -3,10 +3,11 @@ Classification Boundary Tests
 Verifies that classification thresholds are unified and consistent across all code paths.
 """
 import pytest
+
 from solstein.analytics.classification import classify_company_balanced
 from solstein.analytics.classification_service import ClassificationService, classify_company
+from solstein.analytics.constants import LEAD_SCORE_THRESHOLD, PHOENIX_SCORE_THRESHOLD, SALT_SCORE_THRESHOLD
 from solstein.analytics.scoring import classify_company as scoring_classify
-from solstein.analytics.constants import PHOENIX_SCORE_THRESHOLD, SALT_SCORE_THRESHOLD, LEAD_SCORE_THRESHOLD
 
 
 class TestClassificationBoundaries:

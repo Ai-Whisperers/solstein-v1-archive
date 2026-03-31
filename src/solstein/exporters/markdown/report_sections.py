@@ -6,8 +6,9 @@ Each method generates one section of the competitive analysis report.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, Callable, Protocol
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from solstein.domain.models import Company
@@ -30,9 +31,9 @@ class ReportSectionGenerator:
 
     def generate_executive_summary(
         self,
-        client: "Company",
-        competitors: list["Company"],
-        threats: list["Company"],
+        client: Company,
+        competitors: list[Company],
+        threats: list[Company],
         ai_market_avg: float | None,
         warning: str | None,
     ) -> str:
@@ -64,13 +65,13 @@ companies in the {client.industry or "energy software"} market.
 
     def generate_client_profile(
         self,
-        client: "Company",
-        competitors: list["Company"],
-        rank_revenue_fn: Callable[["Company", list["Company"]], object],
-        rank_growth_fn: Callable[["Company", list["Company"]], object],
-        rank_score_fn: Callable[["Company", list["Company"]], object],
-        rank_ai_fn: Callable[["Company", list["Company"]], object],
-        rank_saas_fn: Callable[["Company", list["Company"]], object],
+        client: Company,
+        competitors: list[Company],
+        rank_revenue_fn: Callable[[Company, list[Company]], object],
+        rank_growth_fn: Callable[[Company, list[Company]], object],
+        rank_score_fn: Callable[[Company, list[Company]], object],
+        rank_ai_fn: Callable[[Company, list[Company]], object],
+        rank_saas_fn: Callable[[Company, list[Company]], object],
     ) -> str:
         """Generate client profile section."""
         return f"""## Client Profile
@@ -88,8 +89,8 @@ companies in the {client.industry or "energy software"} market.
 
     def generate_competitive_positioning(
         self,
-        client: "Company",
-        competitors: list["Company"],
+        client: Company,
+        competitors: list[Company],
         growth_market_avg: float | None,
         growth_top: float | None,
         health_market_avg: float | None,
@@ -128,8 +129,8 @@ companies in the {client.industry or "energy software"} market.
 
     def generate_direct_competitors(
         self,
-        client: "Company",
-        direct: list["Company"],
+        client: Company,
+        direct: list[Company],
     ) -> str:
         """Generate direct competitors section."""
         section = """## Direct Competitors
@@ -146,8 +147,8 @@ These companies operate in the same tier with similar market positioning:
 
     def generate_competitor_details(
         self,
-        client: "Company",
-        direct: list["Company"],
+        client: Company,
+        direct: list[Company],
     ) -> str:
         """Generate detailed competitor analysis."""
         if not direct:
@@ -184,8 +185,8 @@ These companies operate in the same tier with similar market positioning:
 
     def generate_competitive_threats(
         self,
-        client: "Company",
-        threats: list["Company"],
+        client: Company,
+        threats: list[Company],
     ) -> str:
         """Generate competitive threats section."""
         section = """## Competitive Threats
@@ -207,8 +208,8 @@ Companies with superior composite scores that could disrupt market position:
 
     def generate_competitive_landscape(
         self,
-        client: "Company",
-        sorted_comp: list["Company"],
+        client: Company,
+        sorted_comp: list[Company],
     ) -> str:
         """Generate competitive landscape section."""
         section = """## Competitive Landscape
@@ -233,11 +234,11 @@ All competitors ranked by composite score:
 
     def generate_strategic_recommendations(
         self,
-        client: "Company",
-        competitors: list["Company"],
-        threats: list["Company"],
-        strengths_fn: Callable[["Company", list["Company"]], str],
-        weaknesses_fn: Callable[["Company", list["Company"]], str],
+        client: Company,
+        competitors: list[Company],
+        threats: list[Company],
+        strengths_fn: Callable[[Company, list[Company]], str],
+        weaknesses_fn: Callable[[Company, list[Company]], str],
     ) -> str:
         """Generate strategic recommendations section."""
         return f"""## Strategic Recommendations
@@ -266,7 +267,7 @@ All competitors ranked by composite score:
 
     def generate_appendix(
         self,
-        sorted_comp: list["Company"],
+        sorted_comp: list[Company],
         derive_threat_level_fn: Callable[[str | None, float], str],
     ) -> str:
         """Generate appendix section."""

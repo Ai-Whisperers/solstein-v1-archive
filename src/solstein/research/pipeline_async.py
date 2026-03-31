@@ -5,29 +5,15 @@ EPIC-023 Story 5: Converted from synchronous to async pipeline for better perfor
 
 from __future__ import annotations
 
-import asyncio
-import hashlib
 import json
-import time
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
 
 from loguru import logger
 
-from solstein.analytics.scoring import GrowthScorer
 from solstein.config import Settings
-from solstein.domain.models import Company, MarketAnalysis
-from solstein.exporters.excel import ExcelExporter
-from solstein.extractors.markdown_extractor import BatchExtractor
-from solstein.infrastructure.database import db_manager
-from solstein.infrastructure.research_dual_write import persist_research_run
 
-from .contracts import StageName, build_config_hash, build_stage_artifact
-from .discovery import DiscoveryCandidate, discover_companies
-from .evidence import evaluate_market_evidence
-from .gather import enrich_company
+from .contracts import build_config_hash
 from .hashing import sha256_canonical_json
 from .pipeline_stages import (
     AnalysisStage,
@@ -41,10 +27,7 @@ from .pipeline_stages import (
     ProvenanceValidationStage,
     ScoringStage,
     SourceVolumeGate,
-    StageResult,
 )
-from .reconcile import detect_market_contradictions
-from .sources import canonicalize_url
 
 
 async def run_market_intelligence_async(

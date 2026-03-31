@@ -13,6 +13,7 @@ This module provides connectors to various open data sources:
            Maven Central, Docker Hub, GitLab, G2
 """
 
+from .academic import *
 from .base import (
     BaseConnector,
     ConnectorResult,
@@ -20,18 +21,16 @@ from .base import (
     SourceConfig,
 )
 
+# Import all connectors from submodules
+from .financial import *
+from .government import *
+from .news import *
+from .product import *
 from .registry import (
     ConnectorRegistry,
     get_registry,
     initialize_default_connectors,
 )
-
-# Import all connectors from submodules
-from .financial import *
-from .academic import *
-from .news import *
-from .product import *
-from .government import *
 from .social import *
 
 __all__ = [

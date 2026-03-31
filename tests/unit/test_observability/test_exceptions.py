@@ -6,29 +6,27 @@ This module tests the new exception hierarchy that provides:
 - Backwards compatibility
 """
 
-import pytest
-from http import HTTPStatus
 
 from solstein.exceptions import (
-    SolsteinError,
-    DomainError,
-    ValidationError,
-    NotFoundError,
-    StateError,
-    ConflictError,
-    PermissionError,
     AuthenticationError,
-    RateLimitError,
-    InfrastructureError,
-    DatabaseError,
-    LLMError,
-    ExternalServiceError,
     ConfigurationError,
+    ConflictError,
+    DatabaseError,
     # Backwards compatibility
     DataLoadError,
-    ScoringError,
+    DomainError,
     ExportError,
+    ExternalServiceError,
+    InfrastructureError,
     LLMAvailabilityError,
+    LLMError,
+    NotFoundError,
+    PermissionError,
+    RateLimitError,
+    ScoringError,
+    SolsteinError,
+    StateError,
+    ValidationError,
 )
 
 

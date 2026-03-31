@@ -1,4 +1,3 @@
-from .openclaw_evaluator import OpenClawAPI, OpenClawEvaluation, OpenClawEvaluator
 from .community_prioritization import (
     APISuggestion,
     CommunityPrioritizer,
@@ -6,6 +5,7 @@ from .community_prioritization import (
     PrioritizedSuggestion,
     VoteType,
 )
+from .openclaw_evaluator import OpenClawAPI, OpenClawEvaluation, OpenClawEvaluator
 from .quality import QualityScorer, ReliabilityMetrics, ReliabilityMonitor, SourceQualityScores
 
 __all__ = [

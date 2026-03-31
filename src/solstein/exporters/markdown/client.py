@@ -6,26 +6,14 @@ Generates comprehensive client reports with competitive analysis.
 
 from __future__ import annotations
 
-from datetime import datetime
 from pathlib import Path
 
 from loguru import logger
 
-from solstein.domain.models import Company
 from solstein.analytics.constants import derive_threat_level
+from solstein.domain.models import Company
 
-from .base import BaseReportGenerator, ReportFormatter
 from .company import CompanyReportGenerator
-from .helpers import (
-    score_funding,
-    score_employee_growth,
-    score_geographic,
-    score_ma,
-    interpret_funding,
-    interpret_employee_growth,
-    interpret_geographic,
-    interpret_ma,
-)
 
 
 class ClientReportGenerator(CompanyReportGenerator):
@@ -65,17 +53,17 @@ class ClientReportGenerator(CompanyReportGenerator):
         sorted_comp = sorted(competitors, key=lambda c: c.composite_score or 0, reverse=True)
 
         # Find direct competitors (similar tier/score)
-        direct = [c for c in sorted_comp if c.tier == client.tier and c.id != client.id][:5]
+        [c for c in sorted_comp if c.tier == client.tier and c.id != client.id][:5]
 
         # Find threats (higher score competitors)
-        threats = [c for c in sorted_comp if (c.composite_score or 0) > (client.composite_score or 0)][:5]
+        [c for c in sorted_comp if (c.composite_score or 0) > (client.composite_score or 0)][:5]
 
         def _fmt_float(value: float | None) -> str:
             if value is None:
                 return "N/A"
             return f"{value:.1f}"
 
-        ai_market_avg = self._avg([c.ai_score for c in competitors if c.ai_score is not None]) if competitors else None
+        self._avg([c.ai_score for c in competitors if c.ai_score is not None]) if competitors else None
 
     def _generate_competitive_analysis(
         self,

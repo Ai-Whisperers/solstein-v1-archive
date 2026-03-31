@@ -3,14 +3,15 @@
 Provides comprehensive test fixtures for different company scenarios.
 """
 
+
 import pytest
-from datetime import datetime
+
 from solstein.domain.models import (
-    Company,
-    FinancialMetric,
-    CompanyTier,
     AIMaturity,
+    Company,
     CompanyClassification,
+    CompanyTier,
+    FinancialMetric,
 )
 
 

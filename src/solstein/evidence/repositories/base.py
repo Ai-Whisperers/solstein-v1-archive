@@ -4,7 +4,6 @@ EPIC-022: Extracted from EvidenceGraph for modularity.
 """
 
 import logging
-from typing import Optional
 
 from neo4j import Driver, GraphDatabase, Session
 from neo4j.exceptions import Neo4jError
@@ -28,7 +27,7 @@ class EvidenceGraphRepository:
         self.uri = uri
         self.user = user
         self.password = password
-        self._driver: Optional[Driver] = None
+        self._driver: Driver | None = None
 
     def connect(self) -> None:
         """Connect to Neo4j database."""

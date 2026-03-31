@@ -4,7 +4,6 @@ Gathers information from web search, news articles, and press releases
 to extract facts about company growth, funding, and announcements.
 """
 
-import asyncio
 from datetime import datetime, timezone
 
 import httpx

@@ -3,6 +3,7 @@ Performance and load tests for database operations.
 """
 
 import os
+
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///file:testdb?mode=memory&cache=shared"
 os.environ["SYNC_DATABASE_URL"] = "sqlite:///file:testdb?mode=memory&cache=shared"
 

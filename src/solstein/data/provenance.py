@@ -41,7 +41,7 @@ class ProvenanceConfidenceLevel(Enum):
         self.label = label
 
     @classmethod
-    def from_score(cls, score: float) -> "ProvenanceConfidenceLevel":
+    def from_score(cls, score: float) -> ProvenanceConfidenceLevel:
         """Convert numeric score to confidence level.
 
         H3: Deterministic confidence level mapping.

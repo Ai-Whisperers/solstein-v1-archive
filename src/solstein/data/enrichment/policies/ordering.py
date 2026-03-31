@@ -3,7 +3,7 @@
 EPIC-022: Extracted from EnrichmentOrchestrator for modularity.
 """
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..models import EnrichableCompany
@@ -29,7 +29,7 @@ class SourceOrderingPolicy:
         self,
         company: "EnrichableCompany",
         stage: "SourceTier" = None,
-    ) -> List["EnrichmentSource"]:
+    ) -> list["EnrichmentSource"]:
         """Get prioritized enrichment order for company.
 
         Args:
@@ -63,7 +63,7 @@ class SourceOrderingPolicy:
 
         return order
 
-    def get_paid_escalation_order(self, company: "EnrichableCompany") -> List["EnrichmentSource"]:
+    def get_paid_escalation_order(self, company: "EnrichableCompany") -> list["EnrichmentSource"]:
         """Get order for paid escalation.
 
         Args:

@@ -2,9 +2,8 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
-import aiohttp
 import feedparser
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig
@@ -17,7 +16,7 @@ class ArxivConnector(BaseConnector):
 
     BASE_URL = "http://export.arxiv.org/api/query"
 
-    def __init__(self, config: Optional[SourceConfig] = None):
+    def __init__(self, config: SourceConfig | None = None):
         if config is None:
             config = SourceConfig(
                 name="arxiv",

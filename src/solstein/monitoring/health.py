@@ -276,7 +276,6 @@ class HealthChecker:
 
         start = time.time()
         try:
-            from celery import Celery
 
             # This would check actual Celery workers
             # For now, return a placeholder

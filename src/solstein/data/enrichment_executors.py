@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from .enrichment_orchestrator import EnrichmentOrchestrator
     from .enrichment_service import EnrichmentService
     from .enrichment_types import EnrichableCompany
-    from .source_policy import SourceTier as SourceTierEnum
 
 
 class FreeEnrichmentExecutor:
@@ -197,9 +196,9 @@ class PaidEscalationSkipHandler:
         fields: list,
     ) -> None:
         """Log and audit skipped paid escalation."""
-        from .enrichment_service import _append_enrichment_audit
-
         import logging
+
+        from .enrichment_service import _append_enrichment_audit
 
         logger = logging.getLogger(__name__)
 

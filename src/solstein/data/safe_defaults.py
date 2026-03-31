@@ -17,8 +17,9 @@ Pattern this module enables:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar("T")
 
@@ -184,9 +185,12 @@ class SafeDefault:
 
 
 # Convenience instances for common use cases
-SafeList = lambda: SafeDefault(list)
-SafeDict = lambda: SafeDefault(dict)
-SafeSet = lambda: SafeDefault(set)
+def SafeList():
+    return SafeDefault(list)
+def SafeDict():
+    return SafeDefault(dict)
+def SafeSet():
+    return SafeDefault(set)
 
 
 @dataclass

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TypeVar
 
 from _pytest.monkeypatch import MonkeyPatch
+
 from solstein.api.routers import export as export_router
 from solstein.data.report_release_gate import GateReason, ReportGateResult
 from solstein.domain.models import Company, FinancialMetric

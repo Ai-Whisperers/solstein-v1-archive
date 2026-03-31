@@ -7,14 +7,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from typing import Any, Optional
+from typing import Any
 
 from .financial_models import (
-    ConfidenceLevel,
     FundingRound,
     FundingVelocity,
 )
-
 
 # Tier 1 venture capital firms - prestigious lead investors
 TIER_1_INVESTORS = {
@@ -101,11 +99,11 @@ class FundingAnalysis:
     """Result of funding intelligence analysis."""
 
     rounds: list[FundingRound]
-    total_raised: Optional[float]
+    total_raised: float | None
     investor_quality_score: float
     funding_velocity: FundingVelocity
-    runway_estimate_months: Optional[int]
-    last_funding_date: Optional[date]
+    runway_estimate_months: int | None
+    last_funding_date: date | None
     narrative: str
 
 
@@ -121,9 +119,9 @@ class FundingIntelligenceAnalyzer:
     def analyze(
         self,
         funding_rounds: list[dict[str, Any]],
-        total_funding: Optional[float] = None,
-        current_revenue: Optional[float] = None,
-        employee_count: Optional[int] = None,
+        total_funding: float | None = None,
+        current_revenue: float | None = None,
+        employee_count: int | None = None,
     ) -> FundingAnalysis:
         """Analyze funding data.
 
@@ -215,7 +213,7 @@ class FundingIntelligenceAnalyzer:
 
         return parsed
 
-    def _parse_amount(self, value: Any) -> Optional[float]:
+    def _parse_amount(self, value: Any) -> float | None:
         """Parse amount from various formats (returns millions)."""
         if value is None:
             return None
@@ -251,7 +249,7 @@ class FundingIntelligenceAnalyzer:
 
         return None
 
-    def _parse_date(self, value: Any) -> Optional[date]:
+    def _parse_date(self, value: Any) -> date | None:
         """Parse date from various formats."""
         if value is None:
             return None
@@ -342,7 +340,7 @@ class FundingIntelligenceAnalyzer:
         else:
             return FundingVelocity.SPARSE
 
-    def _get_last_funding_date(self, rounds: list[FundingRound]) -> Optional[date]:
+    def _get_last_funding_date(self, rounds: list[FundingRound]) -> date | None:
         """Get most recent funding date."""
         dates = [r.date for r in rounds if r.date]
         return max(dates) if dates else None
@@ -350,10 +348,10 @@ class FundingIntelligenceAnalyzer:
     def _estimate_runway(
         self,
         rounds: list[FundingRound],
-        current_revenue: Optional[float],
-        employee_count: Optional[int],
-        total_funding: Optional[float],
-    ) -> Optional[int]:
+        current_revenue: float | None,
+        employee_count: int | None,
+        total_funding: float | None,
+    ) -> int | None:
         """Estimate runway in months."""
         if not total_funding or total_funding <= 0:
             return None
@@ -392,10 +390,10 @@ class FundingIntelligenceAnalyzer:
     def _generate_narrative(
         self,
         rounds: list[FundingRound],
-        total_funding: Optional[float],
+        total_funding: float | None,
         investor_quality: float,
         velocity: FundingVelocity,
-        runway: Optional[int],
+        runway: int | None,
     ) -> str:
         """Generate funding narrative."""
         parts = []

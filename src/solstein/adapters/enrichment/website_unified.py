@@ -13,8 +13,9 @@ import requests
 from loguru import logger
 
 from solstein.domain.models import RawDataSource
-from solstein.infrastructure.database import DatabaseManager, db_manager as default_db_manager
 from solstein.infrastructure.conflict_resolution import SourceAuthority
+from solstein.infrastructure.database import DatabaseManager
+from solstein.infrastructure.database import db_manager as default_db_manager
 from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
 

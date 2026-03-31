@@ -1,7 +1,6 @@
 """Capterra connector for software reviews."""
 
 import logging
-from datetime import datetime
 from typing import Any
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig
@@ -25,9 +24,8 @@ class CapterraConnector(BaseConnector):
         try:
             import aiohttp
 
-            async with aiohttp.ClientSession() as session:
-                async with session.get(self.config.base_url) as response:
-                    return response.status == 200
+            async with aiohttp.ClientSession() as session, session.get(self.config.base_url) as response:
+                return response.status == 200
         except Exception as e:
             logger.error(f"Failed to connect to Capterra: {e}")
             return False

@@ -3,17 +3,16 @@
 F1: Tests for global exception taxonomy.
 """
 
-import pytest
 
 from solstein.core.error_taxonomy import (
+    ERROR_CLASSIFICATION,
     ErrorCategory,
     ErrorSeverity,
     RetryPolicy,
     classify_error,
+    get_exception_standards,
     get_http_status,
     is_retryable,
-    get_exception_standards,
-    ERROR_CLASSIFICATION,
 )
 
 

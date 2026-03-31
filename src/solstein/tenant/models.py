@@ -11,7 +11,7 @@ Usage:
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -53,8 +53,8 @@ class Tenant(BaseModel):
     status: TenantStatus = TenantStatus.ACTIVE
     created_at: datetime = Field(default_factory=datetime.utcnow)
     settings: dict[str, Any] = Field(default_factory=dict)
-    api_key_hash: Optional[str] = None
-    stripe_customer_id: Optional[str] = None
+    api_key_hash: str | None = None
+    stripe_customer_id: str | None = None
 
     class Config:
         use_enum_values = True
@@ -113,7 +113,7 @@ class TenantConfig(BaseModel):
     scoring_weights: dict[str, float] = Field(default_factory=dict)
 
     # Branding
-    logo_url: Optional[str] = None
+    logo_url: str | None = None
     primary_color: str = "#1976d2"
 
     # Integrations
@@ -213,7 +213,7 @@ class TenantUser(BaseModel):
     email: str
     role: str = "member"  # admin, member, viewer
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_login: Optional[datetime] = None
+    last_login: datetime | None = None
     mfa_enabled: bool = False
 
 

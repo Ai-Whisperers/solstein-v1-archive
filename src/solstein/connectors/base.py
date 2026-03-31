@@ -7,7 +7,7 @@ This module defines the contract that all data source connectors must implement.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -16,7 +16,7 @@ class SourceConfig:
 
     name: str
     base_url: str
-    api_key: Optional[str] = None
+    api_key: str | None = None
     rate_limit: int = 60  # requests per minute
     cache_ttl: int = 3600  # seconds
     timeout: int = 30  # seconds
@@ -40,9 +40,9 @@ class ConnectorResult:
 
     success: bool
     data: list[RawData]
-    error_message: Optional[str] = None
+    error_message: str | None = None
     total_found: int = 0
-    rate_limit_remaining: Optional[int] = None
+    rate_limit_remaining: int | None = None
 
 
 class BaseConnector(ABC):
@@ -77,10 +77,9 @@ class BaseConnector(ABC):
         if self._session:
             await self._session.close()
 
-    def _handle_rate_limit(self, response_headers: dict) -> None:
+    def _handle_rate_limit(self, response_headers: dict) -> None:  # noqa: B027
         """Handle rate limiting based on response headers."""
         # Override in subclasses for source-specific rate limit handling
-        pass
 
     def _cache_key(self, query: str, **kwargs) -> str:
         """Generate cache key for a query."""

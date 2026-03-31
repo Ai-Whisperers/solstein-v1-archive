@@ -15,7 +15,6 @@ from solstein.data.benchmarks import (
     PerformanceBenchmark,
     benchmark_operation,
     get_benchmark,
-    log_benchmark_summary,
     reset_benchmark,
 )
 

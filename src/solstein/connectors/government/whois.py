@@ -1,7 +1,6 @@
 """WHOIS connector for domain data."""
 
 import logging
-from datetime import datetime
 from typing import Any
 
 from ..base import BaseConnector, ConnectorResult, RawData, SourceConfig

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import re
 from datetime import date
-from typing import Optional
 
 from .genealogy_models import (
     CorporateGenealogy,
@@ -202,7 +201,7 @@ class GenealogyAnalyzer:
 
         return self._deduplicate_transactions(transactions)
 
-    def _classify_transaction_type(self, text: str) -> Optional[TransactionType]:
+    def _classify_transaction_type(self, text: str) -> TransactionType | None:
         text_lower = text.lower()
 
         for signal in self.acquisition_signals:
@@ -223,7 +222,7 @@ class GenealogyAnalyzer:
 
         return None
 
-    def _extract_date(self, text: str) -> Optional[date]:
+    def _extract_date(self, text: str) -> date | None:
         year_patterns = [
             r"\b(20\d{2})\b",
             r"\b(19\d{2})\b",
@@ -243,7 +242,7 @@ class GenealogyAnalyzer:
         text: str,
         company_name: str,
         trans_type: TransactionType,
-    ) -> tuple[Optional[str], Optional[str]]:
+    ) -> tuple[str | None, str | None]:
         target = None
         acquirer = None
 
@@ -274,7 +273,7 @@ class GenealogyAnalyzer:
 
         return target, acquirer
 
-    def _extract_value(self, text: str) -> Optional[float]:
+    def _extract_value(self, text: str) -> float | None:
         value_patterns = [
             r"€(\d+(?:\.\d+)?)\s*million",
             r"€(\d+(?:\.\d+)?)\s*mn",
@@ -338,7 +337,7 @@ class GenealogyAnalyzer:
                         acquisition_date=None,
                     )
                 )
-        parent_pattern = rf"(?:subsidiary|owned|part)\s+of\s+([A-Za-z][A-Za-z\s]+?)(?:\.|,|\s)"
+        parent_pattern = r"(?:subsidiary|owned|part)\s+of\s+([A-Za-z][A-Za-z\s]+?)(?:\.|,|\s)"
         match = re.search(parent_pattern, text.lower())
         if match:
             parent = match.group(1).strip().title()
@@ -357,7 +356,7 @@ class GenealogyAnalyzer:
         self,
         text: str,
         owner: str,
-    ) -> Optional[float]:
+    ) -> float | None:
         owner_pos = text.lower().find(owner)
         if owner_pos == -1:
             return None

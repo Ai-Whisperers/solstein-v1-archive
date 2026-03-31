@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from solstein.intelligence.ai_assessment_engine import (
-    AICapability,
-    AICapabilityType,
     AIAssessment,
     AISignalLevel,
 )
@@ -19,7 +17,7 @@ class AIAssessmentReportGenerator:
     def __init__(self):
         """Initialize report generator."""
         self.citation_counter = 0
-        self.citations: Dict[int, Dict[str, Any]] = {}
+        self.citations: dict[int, dict[str, Any]] = {}
 
     def generate(self, assessment: AIAssessment) -> str:
         """Generate complete AI assessment report.
@@ -472,7 +470,7 @@ For investment-grade confidence, supplement this assessment with:
             return "**LOW RISK**: Minor capability gaps are normal; most companies focus on specific AI domains aligned with their value proposition."
         return "**MINIMAL RISK**: Comprehensive AI capability coverage suggests mature, well-rounded AI organization."
 
-    def to_dict(self, assessment: AIAssessment) -> Dict[str, Any]:
+    def to_dict(self, assessment: AIAssessment) -> dict[str, Any]:
         """Export assessment to dictionary.
 
         Args:
@@ -502,7 +500,7 @@ class AIAssessmentExporter:
         """
         return self.report_generator.generate(assessment)
 
-    def to_dict(self, assessment: AIAssessment) -> Dict[str, Any]:
+    def to_dict(self, assessment: AIAssessment) -> dict[str, Any]:
         """Export assessment to dictionary.
 
         Args:
@@ -513,7 +511,7 @@ class AIAssessmentExporter:
         """
         return self.report_generator.to_dict(assessment)
 
-    def generate_comparison_table(self, assessments: List[AIAssessment]) -> str:
+    def generate_comparison_table(self, assessments: list[AIAssessment]) -> str:
         """Generate comparison table for multiple companies.
 
         Args:

@@ -12,13 +12,13 @@ Usage:
         pass
 """
 
+from collections.abc import Callable
 from enum import Enum
 from functools import wraps
-from typing import Any, Callable
+from typing import Any
 
-from fastapi import Depends, HTTPException, Request, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
 
 
@@ -143,7 +143,7 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from None
 
 
 async def get_current_active_user(

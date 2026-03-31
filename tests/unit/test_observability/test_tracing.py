@@ -4,11 +4,11 @@ This module tests the DependencyTracer that tracks outbound calls
 to databases, LLMs, and external services with timing and metrics.
 """
 
-import pytest
 import asyncio
-from unittest.mock import patch
 
-from solstein.utils.tracing import DependencyTracer, DependencyCall, tracer, get_tracer
+import pytest
+
+from solstein.utils.tracing import DependencyCall, DependencyTracer, get_tracer, tracer
 
 
 class TestDependencyTracer:

@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -16,7 +16,7 @@ class GitLabConnector(BaseConnector):
 
     BASE_URL = "https://gitlab.com/api/v4"
 
-    def __init__(self, private_token: Optional[str] = None):
+    def __init__(self, private_token: str | None = None):
         config = SourceConfig(
             name="gitlab",
             base_url=self.BASE_URL,
@@ -82,28 +82,27 @@ class GitLabConnector(BaseConnector):
 
     async def get_by_id(self, entity_id: str) -> ConnectorResult:
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self.config.base_url}/projects/{entity_id}", headers=self._headers
-                ) as response:
-                    if response.status == 404:
-                        return ConnectorResult(success=True, data=[], total_found=0)
+            async with aiohttp.ClientSession() as session, session.get(
+                f"{self.config.base_url}/projects/{entity_id}", headers=self._headers
+            ) as response:
+                if response.status == 404:
+                    return ConnectorResult(success=True, data=[], total_found=0)
 
-                    project = await response.json()
+                project = await response.json()
 
-                    raw_data = RawData(
-                        source_name=self.config.name,
-                        source_url=project.get("web_url"),
-                        raw_content=project,
-                        extracted_at=datetime.now(timezone.utc),
-                        metadata={
-                            "project_id": project.get("id"),
-                            "namespace": project.get("namespace", {}).get("name"),
-                            "source_type": "code_repository",
-                        },
-                    )
+                raw_data = RawData(
+                    source_name=self.config.name,
+                    source_url=project.get("web_url"),
+                    raw_content=project,
+                    extracted_at=datetime.now(timezone.utc),
+                    metadata={
+                        "project_id": project.get("id"),
+                        "namespace": project.get("namespace", {}).get("name"),
+                        "source_type": "code_repository",
+                    },
+                )
 
-                    return ConnectorResult(success=True, data=[raw_data], total_found=1)
+                return ConnectorResult(success=True, data=[raw_data], total_found=1)
         except Exception as e:
             return ConnectorResult(success=False, data=[], error_message=str(e))
 

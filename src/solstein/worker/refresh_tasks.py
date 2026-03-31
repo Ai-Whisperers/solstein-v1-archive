@@ -7,8 +7,8 @@ Provides Celery tasks for refreshing data from 12 sources.
 from __future__ import annotations
 
 import traceback
+from collections.abc import Callable
 from datetime import datetime, timedelta
-from typing import Callable
 
 from celery import shared_task
 from celery.exceptions import MaxRetriesExceededError

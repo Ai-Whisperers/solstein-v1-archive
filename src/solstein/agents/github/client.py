@@ -7,7 +7,7 @@ from typing import Any
 import httpx
 from loguru import logger
 
-from ..resilience import GITHUB_RETRY_CONFIG, CircuitBreaker, call_with_retry
+from ..resilience import CircuitBreaker
 
 
 class GitHubClient:

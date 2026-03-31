@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Any
 
 import pytest
 
@@ -67,7 +66,7 @@ class TestResearchPipelinePerformance:
     @pytest.mark.slow
     async def test_concurrent_enrichment_timing(self):
         """Concurrent enrichment should be faster than sequential."""
-        from solstein.research.discovery import DiscoveryCandidate, discover_companies
+        from solstein.research.discovery import discover_companies
         from solstein.research.gather import enrich_company, enrich_company_async
         from solstein.research.sources import SourceRegistry
 
@@ -107,7 +106,7 @@ class TestDatabasePerformance:
         repo = CompanyRepository(db_session)
 
         start = time.perf_counter()
-        companies = await repo.get_all()
+        await repo.get_all()
         elapsed_ms = (time.perf_counter() - start) * 1000
 
         assert elapsed_ms < 50, f"Company query took {elapsed_ms:.2f}ms"

@@ -1,7 +1,6 @@
 """Enrichment utilities for eneve competitive intelligence pipeline."""
 
-from typing import Optional
-from loguru import logger
+
 
 from ..domain.models import Company
 
@@ -106,7 +105,7 @@ class EnveEnrichmentService:
         return len(sources)
 
     @staticmethod
-    def validate_enriched_data(company: Company) -> tuple[bool, Optional[str]]:
+    def validate_enriched_data(company: Company) -> tuple[bool, str | None]:
         """Validate enriched company data.
 
         Args:

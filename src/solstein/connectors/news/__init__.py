@@ -24,7 +24,7 @@ class HackerNewsConnector(BaseConnector):
 
     BASE_URL = "https://hacker-news.firebaseio.com/v0"
 
-    def __init__(self, config: Optional[SourceConfig] = None):
+    def __init__(self, config: SourceConfig | None = None):
         if config is None:
             config = SourceConfig(
                 name="hacker_news",

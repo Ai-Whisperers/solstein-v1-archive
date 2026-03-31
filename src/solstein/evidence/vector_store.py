@@ -11,20 +11,18 @@ FREE tools used:
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
-from uuid import UUID
 
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
-    VectorParams,
-    PointStruct,
-    Filter,
     FieldCondition,
+    Filter,
     MatchValue,
+    PointStruct,
+    VectorParams,
 )
 
-from .models import Claim, SourceDocument
+from .models import Claim
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +41,11 @@ class EvidenceVectorStore:
         self,
         host: str = "localhost",
         port: int = 6333,
-        embedding_model: Optional[str] = None,
+        embedding_model: str | None = None,
     ):
         self.host = host
         self.port = port
-        self.client: Optional[QdrantClient] = None
+        self.client: QdrantClient | None = None
         self._embedding_model = embedding_model
         self._embedder = None
 
@@ -141,8 +139,8 @@ class EvidenceVectorStore:
     def search_similar_claims(
         self,
         query: str,
-        entity_id: Optional[str] = None,
-        field: Optional[str] = None,
+        entity_id: str | None = None,
+        field: str | None = None,
         min_confidence: float = 0.0,
         limit: int = 10,
     ) -> list[dict]:
@@ -170,8 +168,7 @@ class EvidenceVectorStore:
             )
 
         # Search
-        from qdrant_client.models import SearchRequest
-        
+
         results = self.client.query_points(
             collection_name=self.COLLECTION_NAME,
             query=query_vector,
@@ -251,7 +248,7 @@ if __name__ == "__main__":
     store.init_collection()
 
     # Test indexing
-    from .models import create_claim, SourceType
+    from .models import SourceType, create_claim
 
     claim = create_claim(
         entity_id="test-company-002",

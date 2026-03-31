@@ -12,7 +12,6 @@ Security:
 - Full error details always logged server-side
 """
 
-import sys
 import traceback
 from typing import Any
 

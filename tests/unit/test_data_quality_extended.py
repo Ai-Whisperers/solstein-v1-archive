@@ -4,12 +4,9 @@ Field-level and pipeline-level data quality validation.
 Part of EPIC-017 Wave 2 Testing Hardening.
 """
 
-import pytest
-from decimal import Decimal
-from typing import Any
 
-from solstein.domain.models import Company, FinancialMetric
 from solstein.analytics.completeness import DataQualityTier
+from solstein.domain.models import Company, FinancialMetric
 from solstein.presentation.data_quality_indicators import DataQualityIndicators
 
 

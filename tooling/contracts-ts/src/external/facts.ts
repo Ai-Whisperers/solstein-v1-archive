@@ -9,7 +9,7 @@ const ConnectorFactBaseSchema = z.object({
   extracted_at: z.string().datetime().nullable().optional(),
   metadata: z.record(z.unknown()).nullable().optional(),
   _hash: z.string().min(1).optional(),
-}).passthrough();
+}).strict();
 
 export const ConnectorFactInputSchema = ConnectorFactBaseSchema.superRefine((payload, ctx) => {
   if (!payload.fact_type && !payload.type) {
@@ -20,9 +20,13 @@ export const ConnectorFactInputSchema = ConnectorFactBaseSchema.superRefine((pay
     });
   }
 }).transform((payload) => ({
-  ...payload,
+  company_id: payload.company_id,
   fact_type: payload.fact_type ?? payload.type!,
+  value: payload.value,
+  confidence: payload.confidence,
+  extracted_at: payload.extracted_at,
   metadata: payload.metadata ?? {},
+  _hash: payload._hash,
 }));
 
 export const ConnectorFactSchema = z.object({
@@ -33,7 +37,7 @@ export const ConnectorFactSchema = z.object({
   extracted_at: z.string().datetime().nullable().optional(),
   metadata: z.record(z.unknown()).default({}),
   _hash: z.string().min(1).optional(),
-}).passthrough();
+}).strict();
 
 export type ConnectorFactInput = z.input<typeof ConnectorFactInputSchema>;
 export type ConnectorFact = z.infer<typeof ConnectorFactSchema>;
