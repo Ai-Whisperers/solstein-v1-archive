@@ -1,0 +1,8 @@
+# Mark agent tooling directories as linguist-vendored (excluded from language stats)
+.antigravity/** linguist-vendored
+.claude/** linguist-vendored
+.cursor/** linguist-vendored
+.opencode/** linguist-vendored
+
+# Mark generated docs
+docs/reference/generated/** linguist-generated

@@ -1,254 +1,355 @@
-# 🚀 Getting Started with Solstein
+# Solstein Development Guide
 
-**Your guide to navigating the competitive intelligence platform — from zero to scored companies in five minutes.**
+> **EPIC-028**: Developer Experience - One-command local development setup
 
----
+## Quick Start
 
-## Table of Contents
-
-- [Welcome](#welcome)
-- [Five-Minute Quickstart](#five-minute-quickstart)
-- [Recommended Reading Order](#recommended-reading-order)
-- [Key Concepts](#key-concepts)
-- [Common Tasks](#common-tasks)
-- [Next Steps](#next-steps)
-
----
-
-## Welcome
-
-Solstein is an AI-powered competitive intelligence platform built for PE/VC professionals. It replaces the traditional 90-day, EUR 500K consulting engagement with automated market intelligence delivered in days. Feed it a market universe of companies, and Solstein scores, classifies, and ranks them across growth, financial health, and competitive position — producing an interactive **Attractiveness Board** where every score is traceable to its underlying signal. No black boxes, no "trust the algorithm."
-
-> For the full business context, see the [Executive Brief](../PITCH/executive-brief.md) or the [Origin Story](../LORE/origin.md).
-
----
-
-## Five-Minute Quickstart
-
-**Goal**: Get the API running locally and verify it responds.
-
-**Prerequisites**: Python 3.10+, Redis 5.0+ (see [Developer Guide](developer.md#redis-dependency) for Redis setup options).
-
-### 1. Clone and install
+Get the development environment running in under 15 minutes:
 
 ```bash
-git clone <repo-url> && cd solstein
-python -m venv venv && source venv/bin/activate
-pip install -e ".[dev]"
+# Clone and setup
+git clone <repo-url>
+cd solstein
+
+# Option 1: Docker (Recommended)
+make dev-setup
+make dev
+
+# Option 2: Local (if you have Python 3.11+, PostgreSQL, Redis)
+uv sync
+source .venv/bin/activate
+export PYTHONPATH=src
+make run
 ```
 
-### 2. Start Redis (if not already running)
+## Development Environments
+
+### Docker Development (Recommended)
+
+The Docker setup provides a complete, isolated environment:
 
 ```bash
-# Docker (recommended)
-docker run -d -p 6379:6379 redis:7-alpine
+# Start all services with hot reload
+make dev
 
-# Verify
-redis-cli ping   # Expected: PONG
+# Services available:
+# - API: http://localhost:8000
+# - API Docs: http://localhost:8000/docs
+# - PostgreSQL: localhost:5432
+# - Redis: localhost:6379
+# - PGAdmin: http://localhost:5050 (with --profile tools)
+# - Redis Commander: http://localhost:8081 (with --profile tools)
+
+# Useful commands
+make dev-shell        # Enter API container
+make dev-logs         # Follow all logs
+make dev-stop         # Stop all services
+make dev-clean        # Stop and remove volumes
+make dev-tools        # Start with admin tools
+make dev-test         # Run tests in container
+make dev-reset-db     # Reset database
+make dev-seed         # Seed with test data
 ```
 
-### 3. Start the API
+### Local Development
+
+If you prefer local development:
+
+**Prerequisites:**
+- Python 3.11+
+- PostgreSQL 15+
+- Redis 7+
+- uv (package manager)
 
 ```bash
-PYTHONPATH=src uvicorn solstein.api.main:app --reload
+# Install dependencies
+uv sync
+source .venv/bin/activate
+
+# Set environment
+export PYTHONPATH=src
+export ENVIRONMENT=development
+export DATABASE__URL=postgresql://postgres:postgres@localhost:5432/solstein
+export REDIS__URL=redis://localhost:6379/0
+
+# Initialize database
+python -c "import asyncio; from solstein.infrastructure.database import init_db; asyncio.run(init_db())"
+
+# Start services
+make run              # Start API
+make worker           # Start Celery worker
+make beat             # Start Celery beat
+
+# Or start all with hot reload
+make dev-local
 ```
 
-### 4. Verify it's alive
+## Hot Reload
+
+Both Docker and local environments support hot reload:
+
+- **API**: Uvicorn with `--reload` automatically restarts on code changes
+- **Celery**: `watchfiles` monitors and restarts workers on changes
+- **Database**: Migrations must be run manually
+
+## VS Code Setup
+
+Open the project in VS Code for the best experience:
 
 ```bash
-curl http://localhost:8000/health
+code .
 ```
 
-Expected response:
+**Recommended Extensions** (auto-suggested):
+- Python, Pylance
+- Ruff, Mypy
+- Docker
+- GitLens
 
-```json
-{
-  "status": "healthy",
-  "timestamp": "2026-02-26T10:00:00Z"
-}
-```
+**Debugging** (F5 or Run > Start Debugging):
+- `Python: FastAPI (Local)` - Debug local API
+- `Python: FastAPI (Docker)` - Attach to Docker container
+- `Python: Celery Worker` - Debug worker tasks
+- `Python: Pytest Current File` - Debug tests
 
-### 5. Open interactive docs
+See `.vscode/launch.json` for all configurations.
 
-Navigate to **http://localhost:8000/docs** in your browser to explore all endpoints via Swagger UI.
+## Testing
 
-> **Optional**: Start a Celery worker in a separate terminal for background tasks:
-> ```bash
-> celery -A solstein.worker worker --loglevel=info
-> ```
-
-**Estimated time**: ~5 minutes (including Redis setup).
-
----
-
-## Recommended Reading Order
-
-Pick the path that matches your role. Each path builds knowledge progressively.
-
-### 🔌 API Users — "I want to integrate with Solstein"
-
-| Order | Document | What You'll Learn | Time |
-|-------|----------|-------------------|------|
-| 1 | **[Getting Started](getting-started.md)** (this page) | Overview, quickstart, key concepts | 5 min |
-| 2 | **[API Reference](../api/reference.md)** | All endpoints, request/response schemas, error codes | 15 min |
-| 3 | **[Rate Limiting Guide](rate-limiting.md)** | Request limits, client identification, 429 handling | 5 min |
-| 4 | **[Health Checks Guide](health-checks.md)** | Liveness/readiness probes for monitoring | 5 min |
-
-### 👨‍💻 Developers — "I want to contribute or extend Solstein"
-
-| Order | Document | What You'll Learn | Time |
-|-------|----------|-------------------|------|
-| 1 | **[Getting Started](getting-started.md)** (this page) | Overview, quickstart, key concepts | 5 min |
-| 2 | **[Developer Guide](developer.md)** | Full setup, testing, architecture, contribution workflow | 20 min |
-| 3 | **[Async Patterns Guide](async-patterns.md)** | Celery tasks, async/await, task chaining | 15 min |
-| 4 | **[Connector Enrichment Guide](connector-enrichment.md)** | Data sources, enrichment pipeline, adding connectors | 10 min |
-| 5 | **[Extending Solstein](extending-solstein.md)** | Add scoring dimensions, exporters, data sources | 15 min |
-| 6 | **[Architecture Decisions](../architecture/decisions.md)** | Why FastAPI, Celery, JSON files, 6-layer testing | 10 min |
-
-### 👨‍✈️ Operators — "I need to deploy and monitor Solstein"
-
-| Order | Document | What You'll Learn | Time |
-|-------|----------|-------------------|------|
-| 1 | **[Getting Started](getting-started.md)** (this page) | Overview, quickstart, key concepts | 5 min |
-| 2 | **[Operator Guide](operator.md)** | Deployment, Docker, environment variables, monitoring | 20 min |
-| 3 | **[Health Checks Guide](health-checks.md)** | Kubernetes probes, health endpoints, alerting | 5 min |
-| 4 | **[Database Guide](database.md)** | PostgreSQL/Supabase setup, migrations, backups | 15 min |
-| 5 | **[Troubleshooting Guide](troubleshooting.md)** | Diagnostic flowcharts for common issues | 10 min |
-
-### 👨‍💼 Business Stakeholders — "I want to understand the platform"
-
-| Order | Document | What You'll Learn | Time |
-|-------|----------|-------------------|------|
-| 1 | **[Executive Brief](../PITCH/executive-brief.md)** | One-page investment thesis | 3 min |
-| 2 | **[Case Study](../PITCH/case-study.md)** | Live proof: 29 companies scored in 3 days | 10 min |
-| 3 | **[Origin Story](../LORE/origin.md)** | The vision — Gravity of Legacy, the Sunstone | 10 min |
-| 4 | **[Business Model](../PITCH/business-model.md)** | Pricing tiers and commercial strategy | 5 min |
-
----
-
-## Key Concepts
-
-Understanding these three concepts is essential before working with Solstein.
-
-### Scoring
-
-Every company is scored across three dimensions on a 0–10 scale:
-
-| Dimension | What It Measures | Key Signals |
-|-----------|-----------------|-------------|
-| **Growth Score** | Revenue trajectory, margin health | Revenue growth rate, gross margin trends |
-| **Financial Health Score** | Scale, funding cushion, efficiency | Total revenue, cash reserves, burn rate |
-| **Competitive Position Score** | AI maturity, SaaS adoption, tech depth | Technology stack, AI integration, SaaS metrics |
-
-Scores are combined into an overall **Attractiveness Score** used for ranking. Every score exposes its full signal chain — you can drill down to see exactly which data points contributed to each number.
-
-> Deep dive: [API Reference — Scoring Endpoints](../api/reference.md)
-
-### Classification
-
-Based on the overall score, each company receives one of three classifications:
-
-| Classification | Score Range | Meaning |
-|---------------|-------------|---------|
-| 🔥 **Phoenix** | ≥ 7.0 | High-growth, AI-native. Top acquisition targets. |
-| 🧂 **Salt** | 4.0 – 7.0 | Stable players. Watch for directional signals. |
-| ⚖️ **Lead** | ≤ 4.0 | Legacy weight. Hidden diamonds or transformation targets. |
-
-> See the classification system in action: [Case Study](../PITCH/case-study.md)
-
-### Enrichment
-
-Solstein fills gaps in company data using external connectors:
-
-| Connector | Data Source | What It Provides |
-|-----------|------------|-----------------|
-| **SEC EDGAR** | US public filings | Revenue, margins, financial statements |
-| **Companies House** | UK company registry | Registration data, financial filings |
-| **News Signals** | Real-time news | Funding rounds, partnerships, key hires |
-
-The enrichment pipeline runs automatically during data loading, or can be triggered manually via the async API.
-
-> Deep dive: [Connector Enrichment Guide](connector-enrichment.md) · [Async Patterns Guide](async-patterns.md)
-
----
-
-## Common Tasks
-
-Quick links to the most frequently needed operations.
-
-### How do I score a company?
+### Fast Test Execution
 
 ```bash
-curl -X POST http://localhost:8000/scoring/company/{company-id}/score
+# Run all tests (parallel by default)
+pytest
+
+# Run fast tests only
+make test-fast
+
+# Run with coverage
+pytest --cov=solstein --cov-report=html
+
+# Run specific test categories
+pytest -m unit          # Unit tests only
+pytest -m integration   # Integration tests
+pytest -m "not slow"    # Skip slow tests
+
+# Run in parallel (4 workers)
+pytest -n 4
+
+# Run with verbose output
+pytest -xvs tests/test_specific.py
 ```
 
-> Full details: [API Reference — Score a Company](../api/reference.md)
+### Test Configuration
 
-### How do I enrich company data?
+- **pytest-xdist**: Parallel execution enabled
+- **pytest-asyncio**: Async test support
+- **pytest-randomly**: Randomized test order
+- **5-minute timeout**: Per-test limit
+
+## Debugging
+
+### Local Debugging
+
+```python
+# Add breakpoint
+import ipdb; ipdb.set_trace()
+
+# Or use built-in breakpoint
+breakpoint()
+```
+
+### Docker Debugging
 
 ```bash
-# Start async enrichment
-curl -X POST http://localhost:8000/async/enrich/single \
-  -H "Content-Type: application/json" \
-  -d '{"company_id": "company-id"}'
+# Attach to running container
+docker-compose -f docker-compose.dev.yml exec api bash
 
-# Check job status
-curl http://localhost:8000/async/jobs/{job_id}/status
+# Check logs
+docker-compose -f docker-compose.dev.yml logs api -f
+
+# Inspect database
+docker-compose -f docker-compose.dev.yml exec db psql -U postgres -d solstein
 ```
 
-> Full details: [Connector Enrichment Guide](connector-enrichment.md) · [API Reference — Async Endpoints](../api/reference.md)
+## Code Quality
 
-### How do I export results?
+All code must pass quality checks before committing:
 
 ```bash
-# Export as Excel dashboard
-curl http://localhost:8000/export/excel --output report.xlsx
+# Run all checks
+python scripts/ci/quality_check.py --only-required
 
-# Export as JSON
-curl http://localhost:8000/export/json --output report.json
+# Check specific file
+python scripts/ci/code_smell_detector.py src/solstein/your_file.py
+
+# Format and lint
+make format
+make lint
+make typecheck
 ```
 
-> Full details: [API Reference — Export Endpoints](../api/reference.md)
+See [docs/developers/code-quality.md](code-quality.md) for details.
 
-### How do I deploy Solstein?
+## CLI Tools
+
+### Solstein CLI
 
 ```bash
-# Docker Compose (recommended)
-docker compose -f docker/docker-compose.yml up -d
+# Main CLI
+solstein --help
 
-# Verify deployment
-curl http://your-server:8000/health
+# Development commands
+solstein dev db-reset
+solstein dev db-seed --count 100
+solstein dev api-client
 ```
 
-> Full details: [Operator Guide](operator.md) · [Health Checks Guide](health-checks.md)
-
-### How do I run the test suite?
+### Development Scripts
 
 ```bash
-pytest tests/ --cov=src/solstein
+# Database
+python scripts/db_manager.py reset
+python scripts/db_manager.py seed --companies 1000
+
+# API client generation
+python scripts/generate_api_client.py
+
+# Maintenance
+python scripts/maintenance_tasks.py cleanup-cache
+python scripts/maintenance_tasks.py vacuum-db
 ```
 
-> Full details: [Developer Guide — Testing](developer.md)
+## Project Structure
 
-### How do I add a new data source or scoring dimension?
+```
+solstein/
+├── src/solstein/          # Application code
+│   ├── api/               # FastAPI routes, middleware
+│   ├── domain/            # Business logic, models
+│   ├── infrastructure/    # Database, external services
+│   └── ...
+├── tests/                 # Test suite
+│   ├── unit/              # Unit tests
+│   ├── integration/       # Integration tests
+│   └── fixtures/          # Test data
+├── scripts/               # Development scripts
+├── docker-compose.dev.yml # Docker dev config
+├── Dockerfile.dev         # Dev container
+├── Makefile               # Development commands
+└── docs/developers/       # Documentation
+```
 
-> See: [Extending Solstein](extending-solstein.md)
+## Environment Variables
 
----
+Key environment variables for development:
 
-## Next Steps
+```bash
+# Required
+export PYTHONPATH=src
+export ENVIRONMENT=development
+export DATABASE__URL=postgresql://postgres:postgres@localhost:5432/solstein
+export REDIS__URL=redis://localhost:6379/0
 
-Now that you have the basics, explore the full documentation:
+# API
+export API__HOST=0.0.0.0
+export API__PORT=8000
 
-| Category | Documents |
-|----------|-----------|
-| **API & Integration** | [API Reference](../api/reference.md) · [Rate Limiting](rate-limiting.md) · [Retry Logic](retry-logic.md) |
-| **Development** | [Developer Guide](developer.md) · [Async Patterns](async-patterns.md) · [Extending Solstein](extending-solstein.md) |
-| **Operations** | [Operator Guide](operator.md) · [Health Checks](health-checks.md) · [Database Guide](database.md) · [Troubleshooting](troubleshooting.md) |
-| **Architecture** | [Architecture Decisions](../architecture/decisions.md) · [Data Gathering Stages](data-gathering-stages.md) |
-| **Business** | [Executive Brief](../PITCH/executive-brief.md) · [Case Study](../PITCH/case-study.md) · [Business Model](../PITCH/business-model.md) |
-| **Lore** | [Origin Story](../LORE/origin.md) · [The Strategic Play](../LORE/the-play.md) · [The Grimoire](../LORE/grimoire.md) |
+# LLM (at least one provider)
+export OPENAI_API_KEY=sk-...
+export ANTHROPIC_API_KEY=sk-ant-...
 
----
+# Optional
+export LOG_LEVEL=DEBUG
+export CELERY_LOG_LEVEL=info
+```
 
-*Built by* **AI Whisperers** *— finding the diamonds nobody knew were there.*
+## Troubleshooting
+
+### Common Issues
+
+**Database connection fails:**
+```bash
+# Check PostgreSQL is running
+pg_isready -h localhost -p 5432
+
+# Reset database
+make dev-reset-db
+```
+
+**Import errors:**
+```bash
+# Ensure PYTHONPATH is set
+export PYTHONPATH=src
+
+# Or use editable install
+pip install -e .
+```
+
+**Celery worker not starting:**
+```bash
+# Check Redis
+redis-cli ping
+
+# Start worker manually
+celery -A solstein.celery_config worker --loglevel=debug
+```
+
+**Hot reload not working:**
+```bash
+# Docker: Check volume mounts
+docker-compose -f docker-compose.dev.yml config
+
+# Local: Check file watching
+uvicorn solstein.api.main:app --reload --reload-dir src
+```
+
+## Performance Tips
+
+### Fast Test Execution
+
+1. **Use parallel execution**: `pytest -n auto`
+2. **Reuse database**: Tests use transactions
+3. **Skip slow tests**: `pytest -m "not slow"`
+4. **Use fast fixtures**: See `tests/fixtures/`
+
+### IDE Performance
+
+1. **Exclude large directories**: Already configured in `.vscode/settings.json`
+2. **Use Pylance**: Faster than default Python language server
+3. **Disable unused extensions**: Keep only essential ones
+
+## Contributing
+
+### Before Committing
+
+```bash
+# Run checks
+python scripts/ci/quality_check.py --only-required
+
+# Run tests
+pytest -m "not slow"
+
+# Format code
+make format
+```
+
+### PR Guidelines
+
+- Max 500 lines changed per PR
+- Max 20 functions per file
+- All checks must pass
+- Tests included for new features
+
+## Resources
+
+- [FastAPI Docs](https://fastapi.tiangolo.com/)
+- [SQLAlchemy 2.0](https://docs.sqlalchemy.org/en/20/)
+- [Celery Docs](https://docs.celeryq.dev/)
+- [EPIC-028 Details](../../backlog/EPICS/EPIC-028-external-service-consolidation/README.md)
+
+## Support
+
+- **Issues**: Create GitHub issue
+- **Questions**: Ask in #dev channel
+- **Code Review**: Request review on PR
