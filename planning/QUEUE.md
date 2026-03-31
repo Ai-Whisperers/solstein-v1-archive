@@ -67,7 +67,7 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0f | STORY-271 | Publish Runtime Depth, Wiring, and Duplication Ledger | IN_PROGRESS | Ledger artifact created in `docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md`; continue caller inventory, deletion budget, and parity-gap follow-through |
+| 0f | STORY-271 | Publish Runtime Depth, Wiring, and Duplication Ledger | DONE | PR #210; full ledger at `docs/architecture/runtime-depth-ledger.md` + audit artifact at `docs/audit/` |
 | 0g | STORY-255 | Freeze Graph Runtime and Declare Legacy Pipeline Canonical | READY | Added 2026-03-31: commit history shows graph intent, runtime reality still favors legacy path, and current evidence shows graph resume wiring without a confirmed normal production caller |
 | 0h | STORY-256 | Delete Runtime Aliases and Feature-Flag Branching Around Orchestration | BLOCKED | Depends on STORY-271 and STORY-255 so deletion is evidence-driven rather than ad-hoc |
 | 0i | STORY-257 | Repair Legacy Entrypoints to Share One Registry and One Converter | BLOCKED | Depends on STORY-271 and STORY-256 |
