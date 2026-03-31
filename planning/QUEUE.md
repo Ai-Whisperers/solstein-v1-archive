@@ -43,7 +43,7 @@ These stories were added after a live audit found schema-enforcement gaps, a fai
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0c | STORY-250 | Reconcile Export Schema Contract with Workbook Output | READY | Added 2026-03-31: exporter currently fails its own schema gate |
+| 0c | STORY-250 | Reconcile Export Schema Contract with Workbook Output | DONE | PR #219 |
 
 ### EPIC-059: Input Validation & Graceful Degradation (Audit Hotfix)
 
