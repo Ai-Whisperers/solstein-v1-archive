@@ -11,6 +11,7 @@ from typing import Any
 from loguru import logger
 
 from ...domain.models import Company
+from ...exporters.export_schema import get_headers_for_sheet
 from .sheets import add_title_banner, write_headers
 from .styles import ExcelStyles, LayoutConstants
 from .utils import auto_adjust_columns, format_number, safe_get
@@ -77,8 +78,8 @@ def add_revenue_history(ws: Any, styles: ExcelStyles, profiles: list[Company]) -
     # Title
     add_title_banner(ws, styles, "Revenue History", "Historical Revenue Time Series", num_columns=4)
 
-    # Headers
-    headers = ["Company", "Year", "Revenue (EUR M)", "Source"]
+    # STORY-250: Headers derived from single authoritative schema — drift-proof
+    headers = get_headers_for_sheet("Revenue History")
     write_headers(ws, styles, headers)
 
     # Data rows — one row per company-year
@@ -176,17 +177,8 @@ def add_advanced_data(ws: Any, styles: ExcelStyles, profiles: list[Company]) -> 
         ws, styles, "Advanced Data", "Corporate Structure, Provenance & Notes", num_columns=8
     )
 
-    # Headers
-    headers = [
-        "Company",
-        "Parent Company",
-        "Subsidiaries",
-        "Acquisitions",
-        "Notes",
-        "Source Links",
-        "Data Sources Per Field",
-        "Merge Conflicts",
-    ]
+    # STORY-250: Headers derived from single authoritative schema — drift-proof
+    headers = get_headers_for_sheet("Advanced Data")
     write_headers(ws, styles, headers)
 
     # Data rows
