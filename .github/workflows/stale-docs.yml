@@ -81,5 +81,5 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "To suppress a false positive, add an entry to \`scripts/ci/stale-docs-allowlist.json\`." >> $GITHUB_STEP_SUMMARY
           else
-            echo "✅ No stale docs found." >> $GITHUB_STEP_SUMMARY
+            echo "No stale docs found." >> $GITHUB_STEP_SUMMARY
           fi

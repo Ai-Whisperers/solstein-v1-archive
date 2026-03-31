@@ -63,5 +63,5 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Run locally:**" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "make docs-quality-check" >> $GITHUB_STEP_SUMMARY
+          echo "make docsquality-check" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
