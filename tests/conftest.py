@@ -1,11 +1,16 @@
+"""Root conftest for the Solstein test suite.
+
+STORY-254: All heavy imports (config, database, loaders) are deferred to
+fixture time so that ``pytest --collect-only`` succeeds in a minimal
+environment without DATABASE__URL or a running database.
+"""
+
 import os
 import sys
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SRC_ROOT = PROJECT_ROOT / "src"
@@ -17,6 +22,12 @@ _ = os.environ.setdefault("DATABASE__URL", "postgresql+asyncpg://test:test@local
 _ = os.environ.setdefault("SECURITY__SECRET_KEY", "test-secret-key-for-unit-tests-32chars!")
 _ = os.environ.setdefault("COMPANIES_HOUSE_API_KEY", "test-ch-api-key-12345")
 
+# ---------------------------------------------------------------------------
+# Lightweight imports only — everything below is safe at collection time.
+# Heavy imports (config, database, loaders, API app) are deferred into the
+# fixtures that actually need them.
+# ---------------------------------------------------------------------------
+
 try:
     from tests.factories import make_company
 except ModuleNotFoundError as exc:
@@ -27,32 +38,25 @@ except ModuleNotFoundError as exc:
         ) from exc
     raise
 
-from solstein.config import get_settings
-from solstein.data.loaders import CompetitorDataLoader
-from solstein.database_config import convert_to_async_url, get_test_database_url
-from tests.test_data import make_test_companies
-
-# API imports are optional — the import chain may fail if AuthenticationMiddleware
-# is missing. Tests that don't need the API client should still be collectable.
-try:
-    from solstein.api.dependencies import get_company_repository, get_current_tenant, get_current_user
-    from solstein.api.main import app as _api_app
-
-    _API_DEPS_AVAILABLE = True
-except ImportError:
-    _API_DEPS_AVAILABLE = False
-
 
 def _load_api_test_dependencies():
     """Return API app and dependency objects for test fixtures.
 
-    Raises ImportError if API dependencies could not be loaded at module level.
+    Lazy import: only triggers config/database access when a test actually
+    needs the API client.
     """
-    if not _API_DEPS_AVAILABLE:
-        raise ImportError(
-            "API dependencies not available — solstein.api.main failed to import. "
-            "Check that AuthenticationMiddleware exists in solstein.api.middleware.security."
+    try:
+        from solstein.api.dependencies import (  # noqa: lazy-import
+            get_company_repository,
+            get_current_tenant,
+            get_current_user,
         )
+        from solstein.api.main import app as _api_app  # noqa: lazy-import
+    except ImportError as exc:
+        raise ImportError(
+            "API dependencies not available -- solstein.api.main failed to import. "
+            "Check that AuthenticationMiddleware exists in solstein.api.middleware.security."
+        ) from exc
     return _api_app, get_company_repository, get_current_tenant, get_current_user
 
 
@@ -85,6 +89,10 @@ def mock_repo(mock_company):
 @pytest.fixture
 def client(mock_repo):
     """Provides an authenticated TestClient with dependency overrides."""
+    from fastapi.testclient import TestClient  # noqa: lazy-import
+
+    from solstein.config import get_settings  # noqa: lazy-import
+
     app, get_company_repository, get_current_tenant, get_current_user = _load_api_test_dependencies()
     settings = get_settings()
     previous_require_api_key = settings.api.require_api_key
@@ -118,6 +126,8 @@ def unauthenticated_client():
     receive an 'anonymous' user rather than a 401. This fixture exists
     to explicitly test this design behaviour.
     """
+    from fastapi.testclient import TestClient  # noqa: lazy-import
+
     app, _, _, _ = _load_api_test_dependencies()
     with TestClient(app) as test_client:
         yield test_client
@@ -137,6 +147,9 @@ def mock_competitor_data(monkeypatch):
             # CompetitorDataLoader.load_companies() returns 3 test companies
             ...
     """
+    from solstein.data.loaders import CompetitorDataLoader  # noqa: lazy-import
+    from tests.test_data import make_test_companies  # noqa: lazy-import
+
     test_companies = make_test_companies()
 
     def mock_load_companies(self, limit=None):
@@ -163,6 +176,10 @@ async def db_engine():
     - pool_recycle=3600: Recycle connections after 1 hour
     - pool_pre_ping=True: Test connections before using them
     """
+    from sqlalchemy.ext.asyncio import create_async_engine  # noqa: lazy-import
+
+    from solstein.database_config import convert_to_async_url, get_test_database_url  # noqa: lazy-import
+
     db_url = get_test_database_url()
     async_url = convert_to_async_url(db_url)
 
@@ -194,6 +211,8 @@ async def db_session(db_engine):
             # db_session is an AsyncSession
             result = await db_session.execute(...)
     """
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker  # noqa: lazy-import
+
     async_session = async_sessionmaker(
         db_engine,
         class_=AsyncSession,

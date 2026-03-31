@@ -27,6 +27,12 @@ run:
 dashboard:
 	cd dashboard && npm run dev
 
+# STORY-254: Verify test collection succeeds without DATABASE__URL
+test-collect:
+	@echo "Verifying hermetic test collection..."
+	env -u DATABASE__URL -u DATABASE_URL $(BIN)/pytest tests/unit/test_collection_hermetic.py -v --tb=short
+	@echo "Collection is hermetic."
+
 # Run all tests (Unit, Integration, Data Quality)
 test:
 	$(BIN)/pytest tests/unit tests/integration tests/data_quality --cov=src
