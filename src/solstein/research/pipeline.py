@@ -1,5 +1,12 @@
 """Research pipeline for market intelligence.
 
+.. note:: CANONICAL RUNTIME — STORY-255 (2026-03-31)
+
+   This sequential pipeline is the **canonical production runtime**.
+   All new feature work, bug fixes, and optimizations target this path.
+   The LangGraph graph runtime (``research/graph/``) is frozen and
+   receives only security patches. See ``docs/architecture/decisions.md``.
+
 EPIC-020: Refactored from 505-line monolithic function to Pipeline Stage pattern.
 Uses composition of stage classes for better testability and maintainability.
 """

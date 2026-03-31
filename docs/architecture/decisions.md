@@ -150,3 +150,54 @@ return scored
 This was deferred to avoid the dataclass `replace()` boilerplate until a proper mapper layer is designed.
 
 ---
+
+## ADR-009: Freeze Graph Runtime, Declare Legacy Pipeline Canonical
+
+**Date:** 2026-03-31
+**Status:** Accepted
+**Story:** STORY-255 (EPIC-067: Legacy Runtime Canonicalization)
+
+**Context:** The codebase contains two parallel execution runtimes for the
+research pipeline:
+
+1. **Legacy sequential pipeline** (`research/pipeline.py` +
+   `research/pipeline_stages.py`) -- 10 stages, 909 LOC, used by CLI and API
+   entrypoints for all production runs.
+2. **LangGraph graph runtime** (`research/graph/`) -- parallel DAG with 5
+   fan-out nodes, ~1046 LOC, designed for future parallelism and
+   human-in-the-loop review.
+
+Evidence from the runtime ledger (`docs/architecture/runtime-depth-ledger.md`)
+shows:
+
+- The graph runtime's `interrupt()`/resume machinery is exercised only on the
+  review-resume path. There is no confirmed production caller that uses the
+  full graph from START to END as the primary execution path.
+- The legacy pipeline is the actual production runtime used by all CLI commands
+  and API endpoints.
+- Maintaining two runtimes doubles the surface area for bugs, adapter
+  registration, and testing.
+
+**Decision:** Declare the legacy sequential pipeline as the **canonical
+production runtime**. Freeze the graph runtime: no new features, nodes, or
+wiring changes. Bug fixes and security patches only.
+
+**Rationale:**
+
+- Reduces cognitive overhead: one path to understand, test, and debug
+- Eliminates duplication risk: new features go to exactly one place
+- Preserves optionality: the graph code remains intact for future evaluation
+- Unblocks STORY-256 (delete runtime aliases) and STORY-257 (repair
+  entrypoints) with a clear decision to cite
+
+**Consequences:**
+
+- All new pipeline feature work targets `research/pipeline.py` and
+  `research/pipeline_stages.py`
+- The `research/graph/` package receives only critical bug fixes
+- The feature flag `feature_new_unified_loader` in `adapters/registry.py`
+  remains until STORY-256 removes it
+- If the graph runtime proves necessary in the future, this ADR can be
+  superseded with a new ADR citing specific evidence
+
+---

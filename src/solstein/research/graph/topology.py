@@ -1,5 +1,17 @@
 """LangGraph research pipeline topology definition.
 
+.. warning:: FROZEN — STORY-255 (2026-03-31)
+
+   This graph runtime is **frozen**. No new features, nodes, or wiring
+   changes should be made here. The legacy sequential pipeline
+   (``research/pipeline.py`` + ``research/pipeline_stages.py``) is the
+   **canonical production runtime**. See ADR in
+   ``docs/architecture/decisions.md`` and the runtime ledger at
+   ``docs/architecture/runtime-depth-ledger.md`` for rationale.
+
+   Permitted changes: bug fixes, security patches, and dependency updates
+   only. Feature work targets the legacy pipeline.
+
 STORY-076: This file is the authoritative documentation of the research
 pipeline architecture. The execution order and parallelism model are
 readable directly from the graph definition below — no implicit sequencing.

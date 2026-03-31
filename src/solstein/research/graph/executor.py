@@ -1,5 +1,11 @@
 """LangGraph graph executor with request deduplication and node error isolation.
 
+.. warning:: FROZEN — STORY-255 (2026-03-31)
+
+   This graph executor is **frozen**. See ``topology.py`` docstring and
+   ``docs/architecture/decisions.md`` for rationale. Bug fixes and security
+   patches only; no new features.
+
 STORY-077: Provides the execution layer for the research pipeline graph.
 
 Key responsibilities:
