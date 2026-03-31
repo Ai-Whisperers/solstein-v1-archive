@@ -65,7 +65,7 @@ DATA__EXPORT_DIR=exports
 # Feature flags (safe cutover controls)
 # FEATURE_NEW_CLASSIFIER=false
 # FEATURE_NEW_READINESS_GATE=false
-# FEATURE_NEW_UNIFIED_LOADER=false
+# FEATURE_NEW_UNIFIED_LOADER=false  # DEPRECATED (STORY-256): ignored by registry
 
 # LLM Runtime (optional)
 # LLM_PROVIDER=auto  # auto|ollama|fireworks|openai|groq|none
