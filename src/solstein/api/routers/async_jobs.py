@@ -11,7 +11,7 @@ import logging
 import uuid
 
 from fastapi import APIRouter, HTTPException, Request, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/async", tags=["async-jobs"])
@@ -39,6 +39,8 @@ from ..exceptions import APIError
 class AsyncEnrichmentRequest(BaseModel):
     """Request to enrich a company asynchronously."""
 
+    model_config = ConfigDict(extra="forbid")
+
     company_id: str
     company_name: str | None = None
     sources: list[str] | None = None
@@ -47,6 +49,8 @@ class AsyncEnrichmentRequest(BaseModel):
 
 class AsyncBatchEnrichmentRequest(BaseModel):
     """Request to enrich multiple companies asynchronously."""
+
+    model_config = ConfigDict(extra="forbid")
 
     companies: list[dict]  # List of {id, name} dicts
     sources: list[str] | None = None

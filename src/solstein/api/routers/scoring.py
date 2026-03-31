@@ -4,7 +4,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Query, status
 from loguru import logger
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from solstein.analytics.classification_service import ClassificationService
 from solstein.analytics.company_loader import unified_score_loader
@@ -30,6 +30,10 @@ def _legacy_classification_from_growth(growth_score: float) -> str:
 
 
 class AdjudicationRequest(BaseModel):
+    """Request to adjudicate a scoring metric."""
+
+    model_config = ConfigDict(extra="forbid")
+
     metric: str
     decision: str
     actor: str
@@ -72,7 +76,7 @@ async def score_company(
         return _build_score_response(company_id, scored_company, classification, legacy_cls, canonical_cls)
     except APIError:
         raise
-    except Exception as e:
+    except Exception as e:  # noqa: broad-except
         logger.error(f"Error scoring company {company_id}: {e}")
         raise APIError(
             code="INTERNAL_ERROR",
@@ -120,7 +124,7 @@ async def adjudicate_company_claim(
         }
     except APIError:
         raise
-    except Exception as e:
+    except Exception as e:  # noqa: broad-except
         logger.error(f"Error adjudicating company {company_id}: {e}")
         raise APIError(
             code="INTERNAL_ERROR",
@@ -166,7 +170,7 @@ async def get_statistics(
             "growth_classification": class_counts,
             "calculated_at": datetime.now().isoformat(),
         }
-    except Exception as e:
+    except Exception as e:  # noqa: broad-except
         logger.error(f"Error calculating statistics: {e}")
         raise APIError(
             code="INTERNAL_ERROR",
