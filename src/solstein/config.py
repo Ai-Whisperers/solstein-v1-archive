@@ -238,6 +238,10 @@ class Settings(BaseSettings):
 
     feature_new_classifier: bool = Field(default=False)
     feature_new_readiness_gate: bool = Field(default=False)
+    # DEPRECATED (STORY-256): feature_new_unified_loader is no longer read by
+    # build_default_registry.  The legacy enrichment path is canonical.
+    # Kept for config-file backward compatibility; will be removed in a
+    # future cleanup pass.  Deletion trigger: EPIC-067 complete.
     feature_new_unified_loader: bool = Field(default=False)
 
     # LLM APIs

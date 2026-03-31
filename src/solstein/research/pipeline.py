@@ -2,6 +2,12 @@
 
 EPIC-020: Refactored from 505-line monolithic function to Pipeline Stage pattern.
 Uses composition of stage classes for better testability and maintainability.
+
+CANONICAL RUNTIME (STORY-256 / EPIC-067)
+-----------------------------------------
+This module is the **sole canonical production runtime**.  All CLI and API
+research entry-points must resolve to ``run_market_intelligence`` defined here.
+The graph runtime (``research/graph/``) is frozen for new features.
 """
 
 from __future__ import annotations

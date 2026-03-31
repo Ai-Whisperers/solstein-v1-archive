@@ -91,55 +91,44 @@ def build_default_registry(settings: Settings) -> SourceRegistry:
     registry.register_enrichment(YahooFinanceEnrichment())
     registry.register_enrichment(GlobalMarketEnrichment())
 
-    use_unified_enrichment = settings.feature_new_unified_loader
-
+    # -- Discovery: requires API key --
     if settings.exa_api_key:
         from solstein.adapters.discovery.web_search import WebSearchDiscoverySource
 
         registry.register_discovery(WebSearchDiscoverySource(exa_api_key=settings.exa_api_key))
 
-    if use_unified_enrichment:
-        from solstein.adapters.enrichment.funding_unified import FundingUnifiedAdapter
-        from solstein.adapters.enrichment.linkedin_unified import LinkedInUnifiedAdapter
-        from solstein.adapters.enrichment.news_unified import NewsUnifiedAdapter
-        from solstein.adapters.enrichment.patents_unified import PatentsUnifiedAdapter
-        from solstein.adapters.enrichment.web_search_unified import WebSearchUnifiedAdapter
-        from solstein.adapters.enrichment.website_unified import WebsiteUnifiedAdapter
+    # -- Enrichment: canonical legacy path (STORY-256) --
+    # The feature_new_unified_loader branching has been collapsed.
+    # The legacy enrichment adapters are the canonical production path.
+    # Unified adapters remain in the codebase for future evaluation but
+    # are no longer wired through this registry.
+    from solstein.adapters.enrichment.linkedin import LinkedInEnrichment
+    from solstein.adapters.enrichment.patents import PatentEnrichment
+    from solstein.adapters.enrichment.website import WebsiteEnrichment
 
-        registry.register_enrichment(PatentsUnifiedAdapter())
-        registry.register_enrichment(NewsUnifiedAdapter(news_api_key=settings.news_api_key))
-        registry.register_enrichment(FundingUnifiedAdapter(crunchbase_api_key=settings.crunchbase_api_key))
-        registry.register_enrichment(LinkedInUnifiedAdapter(news_api_key=settings.news_api_key))
-        registry.register_enrichment(WebsiteUnifiedAdapter())
-        registry.register_enrichment(WebSearchUnifiedAdapter())
-    else:
-        from solstein.adapters.enrichment.linkedin import LinkedInEnrichment
-        from solstein.adapters.enrichment.patents import PatentEnrichment
-        from solstein.adapters.enrichment.website import WebsiteEnrichment
+    registry.register_enrichment(PatentEnrichment())
 
-        registry.register_enrichment(PatentEnrichment())
+    if settings.news_api_key:
+        from solstein.adapters.enrichment.news import NewsEnrichment
 
-        if settings.news_api_key:
-            from solstein.adapters.enrichment.news import NewsEnrichment
+        registry.register_enrichment(NewsEnrichment(news_api_key=settings.news_api_key))
 
-            registry.register_enrichment(NewsEnrichment(news_api_key=settings.news_api_key))
+    if settings.crunchbase_api_key:
+        from solstein.adapters.enrichment.funding import FundingEnrichment
 
-        if settings.crunchbase_api_key:
-            from solstein.adapters.enrichment.funding import FundingEnrichment
-
-            registry.register_enrichment(
-                FundingEnrichment(
-                    crunchbase_api_key=settings.crunchbase_api_key,
-                    news_api_key=settings.news_api_key,
-                )
+        registry.register_enrichment(
+            FundingEnrichment(
+                crunchbase_api_key=settings.crunchbase_api_key,
+                news_api_key=settings.news_api_key,
             )
+        )
 
-        if settings.exa_api_key:
-            from solstein.adapters.enrichment.web_search_news import WebSearchNewsEnrichment
+    if settings.exa_api_key:
+        from solstein.adapters.enrichment.web_search_news import WebSearchNewsEnrichment
 
-            registry.register_enrichment(WebSearchNewsEnrichment())
+        registry.register_enrichment(WebSearchNewsEnrichment())
 
-        registry.register_enrichment(LinkedInEnrichment(news_api_key=settings.news_api_key))
-        registry.register_enrichment(WebsiteEnrichment())
+    registry.register_enrichment(LinkedInEnrichment(news_api_key=settings.news_api_key))
+    registry.register_enrichment(WebsiteEnrichment())
 
     return registry
