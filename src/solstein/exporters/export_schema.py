@@ -5,7 +5,7 @@ structure. Any structural change to the export (adding, removing, moving, or
 renaming a field) requires an explicit version bump here.
 
 Usage:
-    from solstein.exporters.export_schema import validate_export, EXPORT_SCHEMA_VERSION
+    from solstein.exporters.export_schema import validate_export, EXPORT_SCHEMA_VERSION, get_headers_for_sheet
 """
 
 from __future__ import annotations
@@ -189,6 +189,32 @@ def get_schema_by_sheet() -> dict[str, list[FieldSpec]]:
     for spec in EXPORT_SCHEMA:
         result.setdefault(spec.sheet, []).append(spec)
     return result
+
+
+def get_headers_for_sheet(sheet_name: str) -> list[str]:
+    """Return the ordered list of column headers for a given sheet.
+
+    This is the SINGLE authoritative source for worksheet headers.
+    Sheet generators MUST call this instead of hardcoding header lists,
+    ensuring headers and schema stay drift-proof (STORY-250).
+
+    Args:
+        sheet_name: Exact sheet name (e.g. "Executive Summary")
+
+    Returns:
+        Ordered list of header strings
+
+    Raises:
+        ValueError: If no schema fields are defined for the sheet
+    """
+    by_sheet = get_schema_by_sheet()
+    specs = by_sheet.get(sheet_name)
+    if specs is None:
+        raise ValueError(
+            f"No schema fields defined for sheet '{sheet_name}'. "
+            f"Known sheets: {sorted(by_sheet.keys())}"
+        )
+    return [spec.header for spec in specs]
 
 
 def generate_schema_docs() -> str:

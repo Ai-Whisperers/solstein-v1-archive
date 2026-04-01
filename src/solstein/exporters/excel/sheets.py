@@ -9,6 +9,7 @@ from typing import Any
 from loguru import logger
 
 from ...domain.models import Company
+from ...exporters.export_schema import get_headers_for_sheet
 from .styles import ExcelStyles, LayoutConstants
 from .utils import auto_adjust_columns, format_number, format_percentage, safe_get, safe_get_financial
 
@@ -185,15 +186,8 @@ def add_executive_summary(ws: Any, styles: ExcelStyles, profiles: list[Company])
     # Title
     add_title_banner(ws, styles, "Executive Summary", "Market Intelligence Dashboard", num_columns=16)
 
-    # Headers — STORY-125: tech_stack, key_customers, open_positions, data_availability
-    # STORY-250: AI Readiness + Transformation Readiness fields (reconcile with export schema)
-    headers = [
-        "Company", "Industry", "Revenue (€M)", "Growth", "AI Score",
-        "AI Readiness", "AI Readiness Tier",
-        "Tier", "Threat Level",
-        "Tech Stack", "Key Customers", "Open Positions", "Data Availability",
-        "Transform Time (mo)", "Transform Cost (EUR)", "Transform Risk",
-    ]
+    # STORY-250: Headers derived from single authoritative schema — drift-proof
+    headers = get_headers_for_sheet("Executive Summary")
     write_headers(ws, styles, headers)
 
     # Data rows
@@ -219,8 +213,8 @@ def add_market_rankings(ws: Any, styles: ExcelStyles, profiles: list[Company]) -
     # Title
     add_title_banner(ws, styles, "Market Rankings", "Competitive Position Analysis")
 
-    # Headers
-    headers = ["Rank", "Company", "Market Share", "Competitive Score", "Growth Rate", "Employees"]
+    # STORY-250: Headers derived from single authoritative schema — drift-proof
+    headers = get_headers_for_sheet("Market Rankings")
     write_headers(ws, styles, headers)
 
     # Sort by competitive score
@@ -382,14 +376,8 @@ def add_financial_intelligence(ws: Any, styles: ExcelStyles, profiles: list[Comp
     # Title
     add_title_banner(ws, styles, "Financial Intelligence", "Revenue, Funding & Valuation", num_columns=12)
 
-    # Headers — STORY-125: added funding_rounds, funding_war_chest, revenue_cagr_5yr,
-    # revenue_per_employee_eur_k, employee_cagr_3yr
-    headers = [
-        "Company", "Revenue (€M)", "Growth Rate", "Profit Margin",
-        "Total Funding", "Latest Valuation", "Investors",
-        "Funding Rounds", "Funding War Chest",
-        "Revenue CAGR 5yr", "Revenue/Employee (€K)", "Employee CAGR 3yr",
-    ]
+    # STORY-250: Headers derived from single authoritative schema — drift-proof
+    headers = get_headers_for_sheet("Financial Intelligence")
     write_headers(ws, styles, headers)
 
     # Data rows
