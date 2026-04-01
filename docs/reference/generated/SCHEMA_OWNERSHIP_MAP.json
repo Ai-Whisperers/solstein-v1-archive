@@ -1,0 +1,3398 @@
+[
+  {
+    "class_name": "HttpTimeoutsConfig",
+    "file": "_config_timeouts.py",
+    "line": 10,
+    "layer": "_config_timeouts.py",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 15,
+    "fields": [
+      "default",
+      "github",
+      "companies_house",
+      "news_api",
+      "sec_edgar",
+      "exa",
+      "web_research",
+      "patent",
+      "website_scraper",
+      "funding",
+      "opencorporates",
+      "openfigi",
+      "web_search_agent",
+      "evidence_crawler",
+      "health_celery_inspect"
+    ]
+  },
+  {
+    "class_name": "CircuitBreakerConfig",
+    "file": "_config_timeouts.py",
+    "line": 104,
+    "layer": "_config_timeouts.py",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "failure_threshold",
+      "recovery_timeout",
+      "half_open_max_calls",
+      "cooldown_seconds"
+    ]
+  },
+  {
+    "class_name": "CeleryTimingConfig",
+    "file": "_config_timeouts.py",
+    "line": 143,
+    "layer": "_config_timeouts.py",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "task_time_limit",
+      "task_soft_time_limit",
+      "result_expires"
+    ]
+  },
+  {
+    "class_name": "AgentTaskResult",
+    "file": "agents/base_agent.py",
+    "line": 16,
+    "layer": "agents",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 8,
+    "fields": [
+      "agent_name",
+      "source_type",
+      "success",
+      "raw_sources",
+      "extracted_facts",
+      "execution_time_seconds",
+      "error_message",
+      "coverage_gaps"
+    ]
+  },
+  {
+    "class_name": "FilterResponse",
+    "file": "analytics/filters/llm.py",
+    "line": 18,
+    "layer": "analytics",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 2,
+    "fields": [
+      "matches",
+      "reasoning"
+    ]
+  },
+  {
+    "class_name": "Signal",
+    "file": "analytics/signals/base.py",
+    "line": 26,
+    "layer": "analytics",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "name",
+      "category",
+      "description",
+      "weight",
+      "data_sources",
+      "validation_rules"
+    ]
+  },
+  {
+    "class_name": "ValuationContext",
+    "file": "analytics/valuation/models.py",
+    "line": 23,
+    "layer": "analytics",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 9,
+    "fields": [
+      "ticker",
+      "current_price",
+      "eps_ttm",
+      "estimated_growth_rate",
+      "bond_yield",
+      "graham_intrinsic_value",
+      "price_to_intrinsic_ratio",
+      "discount_to_intrinsic_pct",
+      "valuation_classification"
+    ]
+  },
+  {
+    "class_name": "SP500Membership",
+    "file": "analytics/valuation/models.py",
+    "line": 199,
+    "layer": "analytics",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "ticker",
+      "date_added",
+      "date_removed"
+    ]
+  },
+  {
+    "class_name": "UserPayload",
+    "file": "api/dependencies.py",
+    "line": 72,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "user_id",
+      "email",
+      "role"
+    ]
+  },
+  {
+    "class_name": "DLQEntryResponse",
+    "file": "api/routers/admin_dlq.py",
+    "line": 52,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 11,
+    "fields": [
+      "task_id",
+      "task_name",
+      "queue_name",
+      "error_message",
+      "traceback",
+      "retry_count",
+      "tenant_id",
+      "created_at",
+      "last_attempted_at",
+      "resolved_at",
+      "resolved_by"
+    ]
+  },
+  {
+    "class_name": "DLQListResponse",
+    "file": "api/routers/admin_dlq.py",
+    "line": 68,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "entries",
+      "total",
+      "limit",
+      "offset"
+    ]
+  },
+  {
+    "class_name": "ResolveResponse",
+    "file": "api/routers/admin_dlq.py",
+    "line": 77,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "task_id",
+      "resolved",
+      "message"
+    ]
+  },
+  {
+    "class_name": "AsyncEnrichmentRequest",
+    "file": "api/routers/async_jobs.py",
+    "line": 39,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "company_id",
+      "company_name",
+      "sources",
+      "use_cache"
+    ]
+  },
+  {
+    "class_name": "AsyncBatchEnrichmentRequest",
+    "file": "api/routers/async_jobs.py",
+    "line": 50,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "companies",
+      "sources",
+      "batch_size"
+    ]
+  },
+  {
+    "class_name": "JobStatusResponse",
+    "file": "api/routers/async_jobs.py",
+    "line": 60,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 12,
+    "fields": [
+      "job_id",
+      "company_id",
+      "company_name",
+      "job_type",
+      "status",
+      "progress",
+      "created_at",
+      "started_at",
+      "completed_at",
+      "duration_ms",
+      "result_data",
+      "error_message"
+    ]
+  },
+  {
+    "class_name": "JobResultResponse",
+    "file": "api/routers/async_jobs.py",
+    "line": 77,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "job_id",
+      "status",
+      "result_data",
+      "error_message"
+    ]
+  },
+  {
+    "class_name": "LoginRequest",
+    "file": "api/routers/auth.py",
+    "line": 24,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 2,
+    "fields": [
+      "email",
+      "password"
+    ]
+  },
+  {
+    "class_name": "SignupRequest",
+    "file": "api/routers/auth.py",
+    "line": 36,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 2,
+    "fields": [
+      "email",
+      "password"
+    ]
+  },
+  {
+    "class_name": "RefreshRequest",
+    "file": "api/routers/auth.py",
+    "line": 48,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 1,
+    "fields": [
+      "refresh_token"
+    ]
+  },
+  {
+    "class_name": "AuthTokenResponse",
+    "file": "api/routers/auth.py",
+    "line": 59,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "access_token",
+      "refresh_token",
+      "token_type",
+      "expires_in",
+      "user"
+    ]
+  },
+  {
+    "class_name": "UserInfoResponse",
+    "file": "api/routers/auth.py",
+    "line": 69,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "user_id",
+      "email",
+      "role"
+    ]
+  },
+  {
+    "class_name": "ExportRequest",
+    "file": "api/routers/exports.py",
+    "line": 61,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "format",
+      "company_id",
+      "industry"
+    ]
+  },
+  {
+    "class_name": "ExportJobResponse",
+    "file": "api/routers/exports.py",
+    "line": 80,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 10,
+    "fields": [
+      "job_id",
+      "status",
+      "format",
+      "file_url",
+      "file_size_bytes",
+      "error_message",
+      "progress_pct",
+      "created_at",
+      "completed_at",
+      "expires_at"
+    ]
+  },
+  {
+    "class_name": "ExportListResponse",
+    "file": "api/routers/exports.py",
+    "line": 95,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "items",
+      "total",
+      "page",
+      "page_size",
+      "has_more"
+    ]
+  },
+  {
+    "class_name": "ResearchJobResponse",
+    "file": "api/routers/research_jobs.py",
+    "line": 27,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 11,
+    "fields": [
+      "id",
+      "tenant_id",
+      "company_id",
+      "company_name",
+      "status",
+      "progress_pct",
+      "current_stage",
+      "error_message",
+      "created_at",
+      "started_at",
+      "completed_at"
+    ]
+  },
+  {
+    "class_name": "ResearchJobListResponse",
+    "file": "api/routers/research_jobs.py",
+    "line": 45,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 2,
+    "fields": [
+      "items",
+      "total"
+    ]
+  },
+  {
+    "class_name": "ApproveRequest",
+    "file": "api/routers/review.py",
+    "line": 35,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 1,
+    "fields": [
+      "reviewer_id"
+    ]
+  },
+  {
+    "class_name": "RejectRequest",
+    "file": "api/routers/review.py",
+    "line": 44,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 2,
+    "fields": [
+      "reviewer_id",
+      "rationale"
+    ]
+  },
+  {
+    "class_name": "ReviewQueueEntryResponse",
+    "file": "api/routers/review.py",
+    "line": 56,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 11,
+    "fields": [
+      "id",
+      "run_id",
+      "created_at",
+      "updated_at",
+      "status",
+      "confidence_scores",
+      "company_scores",
+      "low_confidence_companies",
+      "conflict_flag_count",
+      "reviewer_id",
+      "reviewer_rationale"
+    ]
+  },
+  {
+    "class_name": "AdjudicationRequest",
+    "file": "api/routers/scoring.py",
+    "line": 32,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "metric",
+      "decision",
+      "actor",
+      "reason",
+      "status",
+      "value"
+    ]
+  },
+  {
+    "class_name": "EnrichmentRequest",
+    "file": "api/schemas/enrichment.py",
+    "line": 17,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 2,
+    "fields": [
+      "sources",
+      "dry_run"
+    ]
+  },
+  {
+    "class_name": "BatchEnrichmentRequest",
+    "file": "api/schemas/enrichment.py",
+    "line": 49,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "company_ids",
+      "batch_size",
+      "use_cache",
+      "dry_run"
+    ]
+  },
+  {
+    "class_name": "HealthCheckResponse",
+    "file": "api/schemas/enrichment.py",
+    "line": 94,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "status",
+      "timestamp",
+      "version",
+      "components"
+    ]
+  },
+  {
+    "class_name": "ReadinessCheckResponse",
+    "file": "api/schemas/enrichment.py",
+    "line": 128,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "ready",
+      "timestamp",
+      "checks"
+    ]
+  },
+  {
+    "class_name": "MetricsResponse",
+    "file": "api/schemas/enrichment.py",
+    "line": 146,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "timestamp",
+      "enrichment",
+      "cache",
+      "rate_limiting"
+    ]
+  },
+  {
+    "class_name": "EnrichmentResultData",
+    "file": "api/schemas/enrichment.py",
+    "line": 172,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "revenue",
+      "employees",
+      "growth_rate",
+      "profit_margin",
+      "funding_raised",
+      "valuation"
+    ]
+  },
+  {
+    "class_name": "EnrichmentResponse",
+    "file": "api/schemas/enrichment.py",
+    "line": 212,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "company_id",
+      "company_name",
+      "status",
+      "enrichment",
+      "data"
+    ]
+  },
+  {
+    "class_name": "BatchEnrichmentResult",
+    "file": "api/schemas/enrichment.py",
+    "line": 263,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "company_id",
+      "status",
+      "duration_ms",
+      "source",
+      "error"
+    ]
+  },
+  {
+    "class_name": "BatchEnrichmentResponse",
+    "file": "api/schemas/enrichment.py",
+    "line": 298,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 7,
+    "fields": [
+      "status",
+      "batch_id",
+      "total_companies",
+      "enriched_count",
+      "failed_count",
+      "results",
+      "metrics"
+    ]
+  },
+  {
+    "class_name": "AuditEntry",
+    "file": "api/schemas/enrichment.py",
+    "line": 358,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 7,
+    "fields": [
+      "timestamp",
+      "operation",
+      "source",
+      "fields",
+      "duration_ms",
+      "user_id",
+      "status"
+    ]
+  },
+  {
+    "class_name": "AuditTrailResponse",
+    "file": "api/schemas/enrichment.py",
+    "line": 370,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "company_id",
+      "company_name",
+      "audit_entries",
+      "summary"
+    ]
+  },
+  {
+    "class_name": "CacheCheckResponse",
+    "file": "api/schemas/enrichment.py",
+    "line": 399,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "company_id",
+      "cached",
+      "cache_key",
+      "ttl_remaining_hours",
+      "cached_data"
+    ]
+  },
+  {
+    "class_name": "CacheClearResponse",
+    "file": "api/schemas/enrichment.py",
+    "line": 421,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "status",
+      "message",
+      "entries_cleared"
+    ]
+  },
+  {
+    "class_name": "ErrorResponse",
+    "file": "api/schemas/enrichment.py",
+    "line": 444,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "error",
+      "message",
+      "code",
+      "details"
+    ]
+  },
+  {
+    "class_name": "RateLimitErrorResponse",
+    "file": "api/schemas/enrichment.py",
+    "line": 480,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "error",
+      "message",
+      "retry_after_seconds",
+      "code"
+    ]
+  },
+  {
+    "class_name": "ServiceUnavailableErrorResponse",
+    "file": "api/schemas/enrichment.py",
+    "line": 516,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "error",
+      "message",
+      "affected_sources",
+      "code"
+    ]
+  },
+  {
+    "class_name": "ErrorDetail",
+    "file": "api/schemas/errors.py",
+    "line": 41,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "code",
+      "message",
+      "details",
+      "timestamp",
+      "request_id"
+    ]
+  },
+  {
+    "class_name": "ErrorResponse",
+    "file": "api/schemas/errors.py",
+    "line": 64,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 1,
+    "fields": [
+      "error"
+    ]
+  },
+  {
+    "class_name": "PaginatedResponse",
+    "file": "api/schemas/pagination.py",
+    "line": 25,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel",
+      "?"
+    ],
+    "field_count": 4,
+    "fields": [
+      "items",
+      "total",
+      "limit",
+      "offset"
+    ]
+  },
+  {
+    "class_name": "CursorPage",
+    "file": "api/schemas/pagination.py",
+    "line": 83,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel",
+      "?"
+    ],
+    "field_count": 3,
+    "fields": [
+      "items",
+      "next_cursor",
+      "prev_cursor"
+    ]
+  },
+  {
+    "class_name": "SemanticSearchRequest",
+    "file": "api/schemas/semantic_search.py",
+    "line": 12,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "query",
+      "company_id",
+      "limit",
+      "offset",
+      "min_similarity"
+    ]
+  },
+  {
+    "class_name": "SemanticSearchResultItem",
+    "file": "api/schemas/semantic_search.py",
+    "line": 66,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 11,
+    "fields": [
+      "company_id",
+      "name",
+      "industry",
+      "description",
+      "similarity_score",
+      "classification",
+      "tier",
+      "revenue_eur_m",
+      "employee_count",
+      "composite_score",
+      "has_embedding"
+    ]
+  },
+  {
+    "class_name": "SemanticSearchResponse",
+    "file": "api/schemas/semantic_search.py",
+    "line": 100,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "items",
+      "total",
+      "limit",
+      "offset",
+      "has_next",
+      "query_type"
+    ]
+  },
+  {
+    "class_name": "StrictRequestModel",
+    "file": "api/schemas/validation.py",
+    "line": 11,
+    "layer": "api",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "DatabaseConfig",
+    "file": "config.py",
+    "line": 21,
+    "layer": "config.py",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "url",
+      "pool_size",
+      "echo"
+    ]
+  },
+  {
+    "class_name": "RedisConfig",
+    "file": "config.py",
+    "line": 39,
+    "layer": "config.py",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 2,
+    "fields": [
+      "url",
+      "cache_ttl"
+    ]
+  },
+  {
+    "class_name": "SupabaseConfig",
+    "file": "config.py",
+    "line": 68,
+    "layer": "config.py",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "url",
+      "key",
+      "anon_key",
+      "db_url"
+    ]
+  },
+  {
+    "class_name": "APIConfig",
+    "file": "config.py",
+    "line": 77,
+    "layer": "config.py",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 8,
+    "fields": [
+      "host",
+      "port",
+      "debug",
+      "cors_origins",
+      "cors_methods",
+      "cors_headers",
+      "api_prefix",
+      "require_api_key"
+    ]
+  },
+  {
+    "class_name": "SecurityConfig",
+    "file": "config.py",
+    "line": 101,
+    "layer": "config.py",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "secret_key",
+      "algorithm",
+      "access_token_expire_minutes"
+    ]
+  },
+  {
+    "class_name": "LoggingConfig",
+    "file": "config.py",
+    "line": 119,
+    "layer": "config.py",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "level",
+      "format",
+      "file_path",
+      "rotation",
+      "retention"
+    ]
+  },
+  {
+    "class_name": "DataConfig",
+    "file": "config.py",
+    "line": 138,
+    "layer": "config.py",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "data_dir",
+      "cache_dir",
+      "export_dir",
+      "market_data_dir"
+    ]
+  },
+  {
+    "class_name": "Settings",
+    "file": "config.py",
+    "line": 172,
+    "layer": "config.py",
+    "type": "pydantic",
+    "bases": [
+      "BaseSettings"
+    ],
+    "field_count": 76,
+    "fields": [
+      "environment",
+      "debug",
+      "debug_errors",
+      "http_timeouts",
+      "circuit_breaker",
+      "celery_timing",
+      "database",
+      "api",
+      "security",
+      "logging",
+      "data",
+      "supabase",
+      "openai_api_key",
+      "perplexity_api_key",
+      "github_token",
+      "companies_house_api_key",
+      "google_api_key",
+      "google_search_engine_id",
+      "sec_user_agent",
+      "searxng_url"
+    ]
+  },
+  {
+    "class_name": "GrowthScoringConfig",
+    "file": "core/scoring_config.py",
+    "line": 17,
+    "layer": "core",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 16,
+    "fields": [
+      "base_score",
+      "revenue_growth_divisor",
+      "revenue_growth_cap",
+      "efficiency_high_threshold",
+      "efficiency_high_bonus",
+      "efficiency_med_threshold",
+      "efficiency_med_bonus",
+      "funding_high_threshold",
+      "funding_high_bonus",
+      "funding_med_threshold",
+      "funding_med_bonus",
+      "margin_high_threshold",
+      "margin_high_bonus",
+      "margin_med_threshold",
+      "margin_med_bonus",
+      "margin_negative_penalty"
+    ]
+  },
+  {
+    "class_name": "FinancialHealthConfig",
+    "file": "core/scoring_config.py",
+    "line": 46,
+    "layer": "core",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 24,
+    "fields": [
+      "base_score",
+      "revenue_large_threshold",
+      "revenue_large_bonus",
+      "revenue_med_threshold",
+      "revenue_med_bonus",
+      "revenue_small_threshold",
+      "revenue_small_penalty",
+      "margin_high_threshold",
+      "margin_high_bonus",
+      "margin_med_threshold",
+      "margin_med_bonus",
+      "margin_negative_penalty",
+      "efficiency_exceptional_threshold",
+      "efficiency_exceptional_bonus",
+      "efficiency_good_threshold",
+      "efficiency_good_bonus",
+      "efficiency_low_threshold",
+      "efficiency_low_penalty",
+      "cushion_high_ratio",
+      "cushion_high_bonus"
+    ]
+  },
+  {
+    "class_name": "CompetitivePositionConfig",
+    "file": "core/scoring_config.py",
+    "line": 86,
+    "layer": "core",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 11,
+    "fields": [
+      "base_score",
+      "tier_scores",
+      "ai_maturity_scores",
+      "geo_global_count",
+      "geo_global_bonus",
+      "geo_regional_count",
+      "geo_regional_bonus",
+      "geo_single_penalty",
+      "tech_diverse_count",
+      "tech_diverse_bonus",
+      "tech_none_penalty"
+    ]
+  },
+  {
+    "class_name": "CompositeScoringConfig",
+    "file": "core/scoring_config.py",
+    "line": 125,
+    "layer": "core",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "growth_weight",
+      "financial_weight",
+      "competitive_weight",
+      "saas_recurring_revenue_bonus",
+      "saas_high_margin_threshold",
+      "saas_high_margin_bonus"
+    ]
+  },
+  {
+    "class_name": "AIReadinessScoringConfig",
+    "file": "core/scoring_config.py",
+    "line": 160,
+    "layer": "core",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "data_infrastructure_weight",
+      "technical_debt_weight",
+      "ai_literacy_weight",
+      "process_automation_weight",
+      "classification_influence_weight"
+    ]
+  },
+  {
+    "class_name": "ScoringSettings",
+    "file": "core/scoring_config.py",
+    "line": 185,
+    "layer": "core",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "growth",
+      "financial",
+      "competitive",
+      "composite",
+      "ai_readiness"
+    ]
+  },
+  {
+    "class_name": "CompanyLeadership",
+    "file": "data/company_research.py",
+    "line": 29,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "ceo",
+      "cfo",
+      "cto",
+      "board",
+      "founders"
+    ]
+  },
+  {
+    "class_name": "CompanyFinancials",
+    "file": "data/company_research.py",
+    "line": 39,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 9,
+    "fields": [
+      "revenue",
+      "revenue_growth_yoy",
+      "ebitda",
+      "net_income",
+      "profit_margin",
+      "total_assets",
+      "total_liabilities",
+      "cash_position",
+      "debt"
+    ]
+  },
+  {
+    "class_name": "CompanyProducts",
+    "file": "data/company_research.py",
+    "line": 53,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "description",
+      "products",
+      "services",
+      "target_markets",
+      "competitors"
+    ]
+  },
+  {
+    "class_name": "CompanyTechnology",
+    "file": "data/company_research.py",
+    "line": 63,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "industry",
+      "sector",
+      "sub_industry",
+      "technology_stack",
+      "deployment_model",
+      "cloud_provider"
+    ]
+  },
+  {
+    "class_name": "CompanyGrowthSignals",
+    "file": "data/company_research.py",
+    "line": 74,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 7,
+    "fields": [
+      "employee_count",
+      "employee_growth",
+      "job_postings_count",
+      "job_postings_growth",
+      "ai_related_jobs",
+      "recent_hires",
+      "office_expansion"
+    ]
+  },
+  {
+    "class_name": "CompanyAIAssessment",
+    "file": "data/company_research.py",
+    "line": 86,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 8,
+    "fields": [
+      "ai_score",
+      "ai_signal_strength",
+      "ai_products",
+      "ai_partnerships",
+      "ai_acquisitions",
+      "ai_team_mentioned",
+      "ml_products",
+      "autonomous_features"
+    ]
+  },
+  {
+    "class_name": "CompanyNews",
+    "file": "data/company_research.py",
+    "line": 99,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "headlines",
+      "press_releases",
+      "earnings_calls",
+      "mergers_acquisitions",
+      "regulatory_filings"
+    ]
+  },
+  {
+    "class_name": "CompanyResearch",
+    "file": "data/company_research.py",
+    "line": 109,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 23,
+    "fields": [
+      "ticker",
+      "name",
+      "exchange",
+      "description",
+      "founded",
+      "headquarters",
+      "website",
+      "leadership",
+      "employees",
+      "financials",
+      "market_cap",
+      "pe_ratio",
+      "dividend_yield",
+      "products",
+      "technology",
+      "growth",
+      "ai",
+      "news",
+      "scorecard",
+      "composite_score"
+    ]
+  },
+  {
+    "class_name": "StockExchange",
+    "file": "data/markets/models.py",
+    "line": 42,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "code",
+      "name",
+      "region",
+      "currency",
+      "suffix"
+    ]
+  },
+  {
+    "class_name": "MarketIndex",
+    "file": "data/markets/models.py",
+    "line": 56,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "symbol",
+      "name",
+      "region",
+      "currency",
+      "yahoo_symbol"
+    ]
+  },
+  {
+    "class_name": "CurrencyRate",
+    "file": "data/markets/models.py",
+    "line": 66,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "from_currency",
+      "to_currency",
+      "rate",
+      "timestamp"
+    ]
+  },
+  {
+    "class_name": "GlobalStockData",
+    "file": "data/markets/models.py",
+    "line": 78,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 13,
+    "fields": [
+      "ticker",
+      "exchange",
+      "source_currency",
+      "current_price",
+      "price_date",
+      "currency_adjusted_price",
+      "target_currency",
+      "eps_ttm",
+      "revenue",
+      "market_cap",
+      "graham_intrinsic_value",
+      "discount_to_intrinsic_pct",
+      "valuation_classification"
+    ]
+  },
+  {
+    "class_name": "MarketDataPoint",
+    "file": "data/markets/models.py",
+    "line": 127,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "symbol",
+      "value",
+      "currency",
+      "timestamp",
+      "source"
+    ]
+  },
+  {
+    "class_name": "IndexData",
+    "file": "data/markets/models.py",
+    "line": 137,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 8,
+    "fields": [
+      "index_symbol",
+      "name",
+      "current_value",
+      "previous_close",
+      "change_pct",
+      "currency",
+      "timestamp",
+      "history"
+    ]
+  },
+  {
+    "class_name": "NewsArticle",
+    "file": "data/sources/models.py",
+    "line": 10,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "title",
+      "description",
+      "source",
+      "url",
+      "published_at",
+      "sentiment"
+    ]
+  },
+  {
+    "class_name": "PressCoverage",
+    "file": "data/sources/models.py",
+    "line": 21,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "articles",
+      "total_articles",
+      "positive_count",
+      "negative_count",
+      "neutral_count",
+      "sentiment_score"
+    ]
+  },
+  {
+    "class_name": "LinkedInData",
+    "file": "data/sources/models.py",
+    "line": 32,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 7,
+    "fields": [
+      "company_name",
+      "employee_count",
+      "employee_growth_pct",
+      "open_positions",
+      "ai_related_positions",
+      "recent_hires",
+      "company_size"
+    ]
+  },
+  {
+    "class_name": "FundingData",
+    "file": "data/sources/models.py",
+    "line": 44,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 8,
+    "fields": [
+      "company_name",
+      "total_raised",
+      "last_round_amount",
+      "last_round_date",
+      "last_round_stage",
+      "last_round_valuation",
+      "investors",
+      "num_rounds"
+    ]
+  },
+  {
+    "class_name": "PatentData",
+    "file": "data/sources/models.py",
+    "line": 57,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "company_name",
+      "total_patents",
+      "recent_patents",
+      "ai_related_patents",
+      "top_patent_categories"
+    ]
+  },
+  {
+    "class_name": "ProductInfo",
+    "file": "data/sources/models.py",
+    "line": 67,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "company_name",
+      "main_products",
+      "features",
+      "pricing_model",
+      "target_customers",
+      "tech_stack"
+    ]
+  },
+  {
+    "class_name": "BatchEnrichmentOutcome",
+    "file": "data/unified/batch_outcomes.py",
+    "line": 14,
+    "layer": "data",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "company",
+      "status",
+      "errors",
+      "from_cache"
+    ]
+  },
+  {
+    "class_name": "GatheringBatch",
+    "file": "domain/facts.py",
+    "line": 25,
+    "layer": "domain",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 5,
+    "fields": [
+      "batch_id",
+      "company_id",
+      "created_at",
+      "status",
+      "facts"
+    ]
+  },
+  {
+    "class_name": "Fact",
+    "file": "domain/facts.py",
+    "line": 54,
+    "layer": "domain",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 11,
+    "fields": [
+      "fact_id",
+      "company_id",
+      "batch_id",
+      "fact_type",
+      "value",
+      "value_str",
+      "value_date",
+      "confidence",
+      "extracted_at",
+      "batch",
+      "sources"
+    ]
+  },
+  {
+    "class_name": "FactSource",
+    "file": "domain/facts.py",
+    "line": 113,
+    "layer": "domain",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 7,
+    "fields": [
+      "source_id",
+      "fact_id",
+      "source_type",
+      "source_url",
+      "extraction_timestamp",
+      "raw_content",
+      "fact"
+    ]
+  },
+  {
+    "class_name": "RefreshMetadata",
+    "file": "domain/facts.py",
+    "line": 144,
+    "layer": "domain",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 11,
+    "fields": [
+      "id",
+      "source_name",
+      "source_type",
+      "last_refresh_time",
+      "last_refresh_status",
+      "last_refresh_job_id",
+      "next_scheduled_time",
+      "refresh_interval_seconds",
+      "enabled",
+      "created_at",
+      "updated_at"
+    ]
+  },
+  {
+    "class_name": "DataSourceConflict",
+    "file": "domain/facts.py",
+    "line": 178,
+    "layer": "domain",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 22,
+    "fields": [
+      "id",
+      "company_id",
+      "metric_key",
+      "period",
+      "source1_name",
+      "source1_value",
+      "source1_confidence",
+      "source1_url",
+      "source2_name",
+      "source2_value",
+      "source2_confidence",
+      "source2_url",
+      "contradiction_detected",
+      "resolution_strategy",
+      "chosen_value",
+      "chosen_source",
+      "flagged_for_review",
+      "analyst_notes",
+      "resolved_at",
+      "resolved_by"
+    ]
+  },
+  {
+    "class_name": "ConfidenceCalibration",
+    "file": "domain/facts.py",
+    "line": 240,
+    "layer": "domain",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 15,
+    "fields": [
+      "id",
+      "source_name",
+      "metric_key",
+      "company_id",
+      "predicted_value",
+      "confidence_original",
+      "actual_value",
+      "actual_source",
+      "actual_observed_at",
+      "is_correct",
+      "accuracy_tolerance_pct",
+      "calibration_factor",
+      "confidence_adjusted",
+      "created_at",
+      "updated_at"
+    ]
+  },
+  {
+    "class_name": "Company",
+    "file": "domain/models/company_refactored.py",
+    "line": 124,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "CompanyMixin",
+      "CompanyPropertyMixin",
+      "CompanySyncMixin",
+      "BaseModel"
+    ],
+    "field_count": 85,
+    "fields": [
+      "id",
+      "name",
+      "company_name",
+      "industry",
+      "description",
+      "website",
+      "headquarters",
+      "founded_year",
+      "last_updated",
+      "data_source",
+      "notes",
+      "source_links",
+      "metric_sources",
+      "metric_justifications",
+      "metric_observations",
+      "signal_confidences",
+      "tier",
+      "threat_level",
+      "classification",
+      "ai_maturity"
+    ]
+  },
+  {
+    "class_name": "FinancialMetric",
+    "file": "domain/models.py",
+    "line": 89,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 15,
+    "fields": [
+      "allow_empty_primary",
+      "revenue",
+      "revenue_confidence",
+      "growth_rate",
+      "growth_confidence",
+      "employees",
+      "employees_confidence",
+      "profit_margin",
+      "margin_confidence",
+      "ebitda_margin",
+      "recurring_revenue_pct",
+      "funding_raised",
+      "funding_confidence",
+      "valuation",
+      "valuation_confidence"
+    ]
+  },
+  {
+    "class_name": "Company",
+    "file": "domain/models.py",
+    "line": 151,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 97,
+    "fields": [
+      "id",
+      "tenant_id",
+      "name",
+      "company_name",
+      "industry",
+      "description",
+      "website",
+      "headquarters",
+      "founded_year",
+      "last_updated",
+      "data_source",
+      "notes",
+      "source_links",
+      "metric_sources",
+      "metric_justifications",
+      "metric_observations",
+      "signal_confidences",
+      "tier",
+      "threat_level",
+      "ai_maturity"
+    ]
+  },
+  {
+    "class_name": "MarketAnalysis",
+    "file": "domain/models.py",
+    "line": 749,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 11,
+    "fields": [
+      "market_name",
+      "analysis_date",
+      "companies",
+      "total_market_size",
+      "growth_rate",
+      "concentration_ratio",
+      "barriers_to_entry",
+      "key_trends",
+      "regulatory_environment",
+      "swot_analysis",
+      "recommendations"
+    ]
+  },
+  {
+    "class_name": "ScoreComponent",
+    "file": "domain/models.py",
+    "line": 794,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "name",
+      "value",
+      "formula",
+      "reasoning",
+      "confidence_weight"
+    ]
+  },
+  {
+    "class_name": "ScoringExplanation",
+    "file": "domain/models.py",
+    "line": 806,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "base_score",
+      "components",
+      "final_score",
+      "data_confidence",
+      "data_warnings"
+    ]
+  },
+  {
+    "class_name": "CompetitiveOverlap",
+    "file": "domain/models.py",
+    "line": 842,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "company_a_id",
+      "company_b_id",
+      "overlap_score",
+      "overlap_areas",
+      "competitive_intensity",
+      "notes"
+    ]
+  },
+  {
+    "class_name": "RawDataSource",
+    "file": "domain/models.py",
+    "line": 882,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 11,
+    "fields": [
+      "source_type",
+      "source_name",
+      "raw_content",
+      "url",
+      "retrieval_timestamp",
+      "publication_date",
+      "confidence",
+      "relevance_score",
+      "metadata",
+      "extraction_method",
+      "notes"
+    ]
+  },
+  {
+    "class_name": "RawDataRecord",
+    "file": "domain/models.py",
+    "line": 900,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "company_id",
+      "gathering_batch_id",
+      "timestamp",
+      "sources",
+      "total_sources_found",
+      "notes"
+    ]
+  },
+  {
+    "class_name": "AggregatedFact",
+    "file": "domain/models.py",
+    "line": 921,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 13,
+    "fields": [
+      "fact_type",
+      "value",
+      "confidence",
+      "year",
+      "sources_used",
+      "source_agreement_percentage",
+      "source_credibility_scores",
+      "contradictions_detected",
+      "contradiction_notes",
+      "extracted_at",
+      "last_updated",
+      "is_verified",
+      "verification_notes"
+    ]
+  },
+  {
+    "class_name": "AggregatedDataRecord",
+    "file": "domain/models.py",
+    "line": 947,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 8,
+    "fields": [
+      "company_id",
+      "gathering_batch_id",
+      "timestamp",
+      "facts",
+      "total_facts",
+      "verified_facts",
+      "average_confidence",
+      "data_completeness_percentage"
+    ]
+  },
+  {
+    "class_name": "SignalExtraction",
+    "file": "domain/models.py",
+    "line": 971,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 9,
+    "fields": [
+      "signal_name",
+      "signal_value",
+      "signal_confidence",
+      "source_facts",
+      "calculation_method",
+      "calculation_formula",
+      "reasoning",
+      "why_it_matters",
+      "extracted_at"
+    ]
+  },
+  {
+    "class_name": "SignalExtractionRecord",
+    "file": "domain/models.py",
+    "line": 993,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "company_id",
+      "gathering_batch_id",
+      "timestamp",
+      "signals"
+    ]
+  },
+  {
+    "class_name": "GatheringBatch",
+    "file": "domain/models.py",
+    "line": 1004,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 17,
+    "fields": [
+      "batch_id",
+      "market_name",
+      "requested_at",
+      "started_at",
+      "completed_at",
+      "companies_requested",
+      "data_sources_enabled",
+      "refresh_mode",
+      "status",
+      "companies_completed",
+      "companies_failed",
+      "confidence_threshold",
+      "api_keys_used",
+      "total_sources_gathered",
+      "average_facts_per_company",
+      "average_confidence",
+      "errors"
+    ]
+  },
+  {
+    "class_name": "CompanyAnalysisAuditTrail",
+    "file": "domain/models.py",
+    "line": 1036,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 19,
+    "fields": [
+      "company_id",
+      "gathering_batch_id",
+      "company_name",
+      "raw_data",
+      "aggregated_facts",
+      "extracted_signals",
+      "growth_score",
+      "financial_health_score",
+      "competitive_position_score",
+      "classification",
+      "scoring_breakdown",
+      "analysis_started_at",
+      "analysis_completed_at",
+      "analysis_duration_seconds",
+      "data_completeness",
+      "confidence_level",
+      "quality_notes",
+      "errors",
+      "warnings"
+    ]
+  },
+  {
+    "class_name": "ApiKey",
+    "file": "domain/models.py",
+    "line": 1090,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 11,
+    "fields": [
+      "id",
+      "tenant_id",
+      "name",
+      "key_prefix",
+      "key_hash",
+      "scope",
+      "is_active",
+      "last_used_at",
+      "created_at",
+      "expires_at",
+      "revoked_at"
+    ]
+  },
+  {
+    "class_name": "MarketCondition",
+    "file": "domain/simulation.py",
+    "line": 31,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "type",
+      "name",
+      "impact_factor",
+      "description",
+      "affected_industries"
+    ]
+  },
+  {
+    "class_name": "Scenario",
+    "file": "domain/simulation.py",
+    "line": 43,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "id",
+      "name",
+      "description",
+      "conditions",
+      "created_at"
+    ]
+  },
+  {
+    "class_name": "SimulationResult",
+    "file": "domain/simulation.py",
+    "line": 55,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 9,
+    "fields": [
+      "company_id",
+      "company_name",
+      "base_valuation",
+      "simulated_valuation",
+      "valuation_change_pct",
+      "base_growth_score",
+      "simulated_growth_score",
+      "growth_score_change",
+      "notes"
+    ]
+  },
+  {
+    "class_name": "CompanyValidator",
+    "file": "domain/validators.py",
+    "line": 14,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "name",
+      "revenue",
+      "employees",
+      "growth_rate",
+      "valuation"
+    ]
+  },
+  {
+    "class_name": "ScoringInputValidator",
+    "file": "domain/validators.py",
+    "line": 65,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "revenue",
+      "revenue_cagr",
+      "employees",
+      "employee_cagr",
+      "profit_margin"
+    ]
+  },
+  {
+    "class_name": "Money",
+    "file": "domain/value_objects.py",
+    "line": 56,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 2,
+    "fields": [
+      "amount",
+      "currency"
+    ]
+  },
+  {
+    "class_name": "Percentage",
+    "file": "domain/value_objects.py",
+    "line": 110,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 1,
+    "fields": [
+      "value"
+    ]
+  },
+  {
+    "class_name": "Score",
+    "file": "domain/value_objects.py",
+    "line": 141,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 1,
+    "fields": [
+      "value"
+    ]
+  },
+  {
+    "class_name": "DateRange",
+    "file": "domain/value_objects.py",
+    "line": 200,
+    "layer": "domain",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 2,
+    "fields": [
+      "start",
+      "end"
+    ]
+  },
+  {
+    "class_name": "ConfidenceComponent",
+    "file": "evidence/models.py",
+    "line": 53,
+    "layer": "evidence",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "name",
+      "score",
+      "explanation",
+      "weight"
+    ]
+  },
+  {
+    "class_name": "Claim",
+    "file": "evidence/models.py",
+    "line": 62,
+    "layer": "evidence",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 27,
+    "fields": [
+      "id",
+      "entity_id",
+      "entity_type",
+      "field",
+      "value",
+      "unit",
+      "source_url",
+      "source_type",
+      "source_title",
+      "source_published_date",
+      "source_author",
+      "snippet",
+      "snippet_location",
+      "page_section",
+      "extracted_at",
+      "extraction_method",
+      "extractor_version",
+      "status",
+      "reviewed_at",
+      "reviewed_by"
+    ]
+  },
+  {
+    "class_name": "SourceDocument",
+    "file": "evidence/models.py",
+    "line": 135,
+    "layer": "evidence",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 16,
+    "fields": [
+      "id",
+      "url",
+      "title",
+      "source_type",
+      "raw_content",
+      "cleaned_content",
+      "domain",
+      "published_date",
+      "scraped_at",
+      "content_hash",
+      "word_count",
+      "has_structured_data",
+      "language",
+      "crawl_depth",
+      "referrer_url",
+      "user_agent"
+    ]
+  },
+  {
+    "class_name": "Contradiction",
+    "file": "evidence/models.py",
+    "line": 172,
+    "layer": "evidence",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 10,
+    "fields": [
+      "id",
+      "claim_ids",
+      "field",
+      "values",
+      "severity",
+      "status",
+      "resolution_strategy",
+      "resolved_claim_id",
+      "detected_at",
+      "resolved_at"
+    ]
+  },
+  {
+    "class_name": "EvidenceReadiness",
+    "file": "evidence/models.py",
+    "line": 201,
+    "layer": "evidence",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 13,
+    "fields": [
+      "entity_id",
+      "entity_type",
+      "total_claims",
+      "claims_by_field",
+      "claims_by_source_type",
+      "avg_confidence",
+      "pending_claims",
+      "conflicting_claims",
+      "stale_claims",
+      "level",
+      "missing_critical_fields",
+      "recommended_sources",
+      "calculated_at"
+    ]
+  },
+  {
+    "class_name": "SWOTAnalysis",
+    "file": "exporters/report_generators/base.py",
+    "line": 12,
+    "layer": "exporters",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "strengths",
+      "weaknesses",
+      "opportunities",
+      "threats"
+    ]
+  },
+  {
+    "class_name": "StrategicRecommendations",
+    "file": "exporters/report_generators/base.py",
+    "line": 21,
+    "layer": "exporters",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 1,
+    "fields": [
+      "recommendations"
+    ]
+  },
+  {
+    "class_name": "ConnectorFactPayload",
+    "file": "infrastructure/fact_payloads.py",
+    "line": 12,
+    "layer": "infrastructure",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 7,
+    "fields": [
+      "company_id",
+      "fact_type",
+      "value",
+      "confidence",
+      "extracted_at",
+      "metadata",
+      "value_hash"
+    ]
+  },
+  {
+    "class_name": "DataAccessAuditRecord",
+    "file": "infrastructure/models/audit.py",
+    "line": 20,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "Base",
+    "file": "infrastructure/models/base.py",
+    "line": 6,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "DeclarativeBase"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "CompanyRecord",
+    "file": "infrastructure/models/company.py",
+    "line": 21,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "ScoringRecord",
+    "file": "infrastructure/models/company.py",
+    "line": 168,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "SignalRecord",
+    "file": "infrastructure/models/company.py",
+    "line": 214,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "MarketSnapshot",
+    "file": "infrastructure/models/company.py",
+    "line": 252,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "AuditTrailRecord",
+    "file": "infrastructure/models/company.py",
+    "line": 293,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "EnrichmentAuditRecord",
+    "file": "infrastructure/models/enrichment.py",
+    "line": 20,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "EnrichmentCacheRecord",
+    "file": "infrastructure/models/enrichment.py",
+    "line": 77,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "EnrichmentJobRecord",
+    "file": "infrastructure/models/enrichment.py",
+    "line": 129,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "ReleaseGateAuditRecord",
+    "file": "infrastructure/models/enrichment.py",
+    "line": 191,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "ExportJobRecord",
+    "file": "infrastructure/models/export.py",
+    "line": 34,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 14,
+    "fields": [
+      "id",
+      "tenant_id",
+      "user_id",
+      "company_id",
+      "format",
+      "status",
+      "file_url",
+      "file_size_bytes",
+      "error_message",
+      "progress_pct",
+      "retry_count",
+      "created_at",
+      "completed_at",
+      "expires_at"
+    ]
+  },
+  {
+    "class_name": "OutboxRecord",
+    "file": "infrastructure/models/infrastructure.py",
+    "line": 19,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 10,
+    "fields": [
+      "id",
+      "event_key",
+      "event_type",
+      "status",
+      "payload",
+      "attempt_count",
+      "available_at",
+      "created_at",
+      "updated_at",
+      "last_error"
+    ]
+  },
+  {
+    "class_name": "TenantRecord",
+    "file": "infrastructure/models/infrastructure.py",
+    "line": 40,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "ApiKeyRecord",
+    "file": "infrastructure/models/infrastructure.py",
+    "line": 87,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 11,
+    "fields": [
+      "id",
+      "tenant_id",
+      "name",
+      "key_prefix",
+      "key_hash",
+      "scope",
+      "is_active",
+      "last_used_at",
+      "created_at",
+      "expires_at",
+      "revoked_at"
+    ]
+  },
+  {
+    "class_name": "ApiKeyUsageRecord",
+    "file": "infrastructure/models/infrastructure.py",
+    "line": 135,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 7,
+    "fields": [
+      "id",
+      "api_key_id",
+      "tenant_id",
+      "endpoint",
+      "method",
+      "status_code",
+      "timestamp"
+    ]
+  },
+  {
+    "class_name": "ResearchRunRecord",
+    "file": "infrastructure/models/research.py",
+    "line": 34,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 15,
+    "fields": [
+      "id",
+      "tenant_id",
+      "run_id",
+      "market",
+      "seed_company",
+      "status",
+      "strict_provenance",
+      "min_readiness_score",
+      "max_contradictions",
+      "min_total_sources",
+      "summary",
+      "created_at",
+      "stages",
+      "artifacts",
+      "sources"
+    ]
+  },
+  {
+    "class_name": "ResearchStageRecord",
+    "file": "infrastructure/models/research.py",
+    "line": 65,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 8,
+    "fields": [
+      "id",
+      "run_id",
+      "stage_name",
+      "stage_order",
+      "status",
+      "metrics",
+      "created_at",
+      "run"
+    ]
+  },
+  {
+    "class_name": "ResearchArtifactRecord",
+    "file": "infrastructure/models/research.py",
+    "line": 91,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 7,
+    "fields": [
+      "id",
+      "run_id",
+      "artifact_name",
+      "artifact_path",
+      "payload",
+      "created_at",
+      "run"
+    ]
+  },
+  {
+    "class_name": "SourceDocumentRecord",
+    "file": "infrastructure/models/research.py",
+    "line": 119,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 12,
+    "fields": [
+      "id",
+      "run_id",
+      "company_id",
+      "source_url",
+      "source_domain",
+      "source_type",
+      "observed_at",
+      "status",
+      "fetched_at",
+      "content_hash",
+      "extract_hash",
+      "run"
+    ]
+  },
+  {
+    "class_name": "MetricObservationRecord",
+    "file": "infrastructure/models/research.py",
+    "line": 153,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 8,
+    "fields": [
+      "id",
+      "run_id",
+      "company_id",
+      "metric_key",
+      "metric_value",
+      "metric_value_raw",
+      "source_url",
+      "created_at"
+    ]
+  },
+  {
+    "class_name": "EvidenceReadinessRecord",
+    "file": "infrastructure/models/research.py",
+    "line": 189,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 12,
+    "fields": [
+      "id",
+      "run_id",
+      "company_id",
+      "company_name",
+      "readiness_score",
+      "readiness_level",
+      "source_count",
+      "source_domain_count",
+      "metric_source_coverage",
+      "metric_explainability",
+      "unsupported_metrics",
+      "created_at"
+    ]
+  },
+  {
+    "class_name": "ContradictionRecord",
+    "file": "infrastructure/models/research.py",
+    "line": 221,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 12,
+    "fields": [
+      "id",
+      "run_id",
+      "company_id",
+      "metric_key",
+      "contradiction_type",
+      "details",
+      "status",
+      "updated_at",
+      "resolved_at",
+      "ignored_at",
+      "created_at",
+      "transitions"
+    ]
+  },
+  {
+    "class_name": "ContradictionTransitionRecord",
+    "file": "infrastructure/models/research.py",
+    "line": 260,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 8,
+    "fields": [
+      "id",
+      "contradiction_id",
+      "from_status",
+      "to_status",
+      "changed_at",
+      "changed_by",
+      "reason",
+      "contradiction"
+    ]
+  },
+  {
+    "class_name": "ResearchJobRecord",
+    "file": "infrastructure/models/research.py",
+    "line": 281,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 13,
+    "fields": [
+      "id",
+      "tenant_id",
+      "company_id",
+      "company_name",
+      "status",
+      "progress_pct",
+      "current_stage",
+      "error_message",
+      "job_metadata",
+      "created_at",
+      "started_at",
+      "completed_at",
+      "VALID_TRANSITIONS"
+    ]
+  },
+  {
+    "class_name": "EmbeddingRecord",
+    "file": "infrastructure/vector_store.py",
+    "line": 69,
+    "layer": "infrastructure",
+    "type": "sqlalchemy",
+    "bases": [
+      "Base"
+    ],
+    "field_count": 0,
+    "fields": []
+  },
+  {
+    "class_name": "EneveCapability",
+    "file": "intelligence/capability_overlap.py",
+    "line": 23,
+    "layer": "intelligence",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "code",
+      "name",
+      "description",
+      "keywords",
+      "weight"
+    ]
+  },
+  {
+    "class_name": "CapabilityMatch",
+    "file": "intelligence/capability_overlap.py",
+    "line": 33,
+    "layer": "intelligence",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "capability_code",
+      "overlap_level",
+      "evidence",
+      "confidence",
+      "keyword_matches"
+    ]
+  },
+  {
+    "class_name": "CapabilityOverlapMatrix",
+    "file": "intelligence/capability_overlap.py",
+    "line": 167,
+    "layer": "intelligence",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 8,
+    "fields": [
+      "entity_id",
+      "entity_name",
+      "matches",
+      "overall_overlap_score",
+      "matching_capabilities",
+      "high_overlap_capabilities",
+      "strongest_matches",
+      "gaps"
+    ]
+  },
+  {
+    "class_name": "SearchQueryItem",
+    "file": "llm/schemas/research.py",
+    "line": 15,
+    "layer": "llm",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "query",
+      "priority",
+      "intent"
+    ]
+  },
+  {
+    "class_name": "ResearchPlanResponse",
+    "file": "llm/schemas/research.py",
+    "line": 25,
+    "layer": "llm",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 2,
+    "fields": [
+      "queries",
+      "estimated_sources"
+    ]
+  },
+  {
+    "class_name": "CompanyExtractionResponse",
+    "file": "llm/schemas/research.py",
+    "line": 53,
+    "layer": "llm",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 15,
+    "fields": [
+      "company_name",
+      "website",
+      "description",
+      "industry",
+      "headquarters",
+      "founded_year",
+      "employees",
+      "revenue",
+      "revenue_currency",
+      "funding_raised",
+      "valuation",
+      "funding_rounds",
+      "key_executives",
+      "products",
+      "is_public"
+    ]
+  },
+  {
+    "class_name": "StageRequestEnvelope",
+    "file": "research/contracts.py",
+    "line": 24,
+    "layer": "research",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "stage",
+      "payload",
+      "artifact_schema_version",
+      "model_version",
+      "prompt_version",
+      "config_hash"
+    ]
+  },
+  {
+    "class_name": "StageResponseEnvelope",
+    "file": "research/contracts.py",
+    "line": 33,
+    "layer": "research",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 8,
+    "fields": [
+      "stage",
+      "payload",
+      "artifact_schema_version",
+      "model_version",
+      "prompt_version",
+      "config_hash",
+      "status",
+      "description"
+    ]
+  },
+  {
+    "class_name": "PipelineRunState",
+    "file": "research/contracts.py",
+    "line": 67,
+    "layer": "research",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "run_id",
+      "state",
+      "current_stage",
+      "reason"
+    ]
+  },
+  {
+    "class_name": "ResearchState",
+    "file": "research/graph/state.py",
+    "line": 40,
+    "layer": "research",
+    "type": "typed_dict_or_namedtuple",
+    "bases": [
+      "TypedDict"
+    ],
+    "field_count": 20,
+    "fields": [
+      "run_id",
+      "company_identifiers",
+      "config",
+      "raw_github_facts",
+      "raw_companies_house_facts",
+      "raw_news_facts",
+      "raw_sec_facts",
+      "raw_web_facts",
+      "data_collection_errors",
+      "conflict_flags",
+      "resolved_facts",
+      "confidence_scores",
+      "company_scores",
+      "market_analysis",
+      "export_path",
+      "export_status",
+      "export_errors",
+      "completed_nodes",
+      "pipeline_errors",
+      "human_review_required"
+    ]
+  },
+  {
+    "class_name": "ReviewQueueEntry",
+    "file": "review_queue/models.py",
+    "line": 29,
+    "layer": "review_queue",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 11,
+    "fields": [
+      "id",
+      "run_id",
+      "created_at",
+      "updated_at",
+      "status",
+      "confidence_scores",
+      "company_scores",
+      "conflict_flags",
+      "low_confidence_companies",
+      "reviewer_id",
+      "reviewer_rationale"
+    ]
+  },
+  {
+    "class_name": "UserPayload",
+    "file": "security/jwt_handler.py",
+    "line": 14,
+    "layer": "security",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 4,
+    "fields": [
+      "user_id",
+      "email",
+      "role",
+      "exp"
+    ]
+  },
+  {
+    "class_name": "TokenResponse",
+    "file": "security/jwt_handler.py",
+    "line": 23,
+    "layer": "security",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 3,
+    "fields": [
+      "access_token",
+      "token_type",
+      "expires_in"
+    ]
+  },
+  {
+    "class_name": "Tenant",
+    "file": "tenant/models.py",
+    "line": 36,
+    "layer": "tenant",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 8,
+    "fields": [
+      "id",
+      "name",
+      "plan",
+      "status",
+      "created_at",
+      "settings",
+      "api_key_hash",
+      "stripe_customer_id"
+    ]
+  },
+  {
+    "class_name": "TenantLimits",
+    "file": "tenant/models.py",
+    "line": 63,
+    "layer": "tenant",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 5,
+    "fields": [
+      "max_companies",
+      "max_api_calls_per_day",
+      "max_reports_per_month",
+      "max_users",
+      "max_storage_gb"
+    ]
+  },
+  {
+    "class_name": "TenantFeatures",
+    "file": "tenant/models.py",
+    "line": 81,
+    "layer": "tenant",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "ai_enrichment",
+      "advanced_scoring",
+      "api_access",
+      "custom_branding",
+      "webhooks",
+      "sso"
+    ]
+  },
+  {
+    "class_name": "TenantConfig",
+    "file": "tenant/models.py",
+    "line": 101,
+    "layer": "tenant",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 11,
+    "fields": [
+      "tenant_id",
+      "limits",
+      "features",
+      "custom_fields",
+      "scoring_weights",
+      "logo_url",
+      "primary_color",
+      "enabled_integrations",
+      "integration_configs",
+      "default_market",
+      "allowed_export_formats"
+    ]
+  },
+  {
+    "class_name": "TenantUser",
+    "file": "tenant/models.py",
+    "line": 199,
+    "layer": "tenant",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 7,
+    "fields": [
+      "id",
+      "tenant_id",
+      "email",
+      "role",
+      "created_at",
+      "last_login",
+      "mfa_enabled"
+    ]
+  },
+  {
+    "class_name": "TenantUsage",
+    "file": "tenant/models.py",
+    "line": 220,
+    "layer": "tenant",
+    "type": "pydantic",
+    "bases": [
+      "BaseModel"
+    ],
+    "field_count": 6,
+    "fields": [
+      "tenant_id",
+      "date",
+      "api_calls",
+      "reports_generated",
+      "storage_gb",
+      "companies_tracked"
+    ]
+  }
+]
