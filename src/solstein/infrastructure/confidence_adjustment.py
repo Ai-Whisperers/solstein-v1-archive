@@ -1,7 +1,7 @@
 """Confidence adjustment algorithm for data source calibration."""
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from loguru import logger
@@ -90,7 +90,7 @@ class ConfidenceAdjuster:
 
         # Record in history with time decay
         record = {
-            "timestamp": datetime.now(),
+            "timestamp": datetime.now(tz=timezone.utc),
             "predicted_confidence": predicted_confidence,
             "was_correct": was_correct,
             "metadata": metadata or {},
@@ -109,7 +109,7 @@ class ConfidenceAdjuster:
 
     def _prune_history(self, metrics: ConfidenceMetrics) -> None:
         """Remove history entries older than window."""
-        cutoff = datetime.now() - timedelta(days=self.history_window_days)
+        cutoff = datetime.now(tz=timezone.utc) - timedelta(days=self.history_window_days)
         metrics.history = [h for h in metrics.history if h["timestamp"] > cutoff]
 
     def _update_confidence(self, metrics: ConfidenceMetrics) -> None:
@@ -121,7 +121,7 @@ class ConfidenceAdjuster:
         weighted_correct = 0.0
         weighted_total = 0.0
 
-        now = datetime.now()
+        now = datetime.now(tz=timezone.utc)
         max_age = timedelta(days=self.history_window_days)
 
         for record in metrics.history:
@@ -155,7 +155,7 @@ class ConfidenceAdjuster:
             metrics.calibration_factor = new_confidence / metrics.current_confidence
 
         metrics.current_confidence = new_confidence
-        metrics.last_updated = datetime.now()
+        metrics.last_updated = datetime.now(tz=timezone.utc)
 
         logger.info(
             f"Updated confidence for {metrics.source_name}: "

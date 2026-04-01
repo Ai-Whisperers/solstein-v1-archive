@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from loguru import logger
 
@@ -26,7 +26,7 @@ class CurrencyConverter:
         for (from_curr, to_curr), rate in rates.items():
             key = f"{from_curr.value}_{to_curr.value}"
             self._rates[key] = rate
-        self._last_update = datetime.now()
+        self._last_update = datetime.now(tz=timezone.utc)
 
     def convert(
         self,

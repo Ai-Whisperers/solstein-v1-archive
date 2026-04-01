@@ -10,7 +10,7 @@ for concurrent per-company fetches.
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import httpx
@@ -76,7 +76,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
         if not self.news_api_key:
             return []
 
-        from_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
+        from_date = (datetime.now(tz=timezone.utc) - timedelta(days=days_back)).strftime("%Y-%m-%d")
 
         url = "https://newsapi.org/v2/everything"
         params = {
@@ -106,7 +106,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
                         "description": article.get("description"),
                         "source": article.get("source", {}).get("name", "Unknown"),
                         "url": article.get("url", ""),
-                        "published_at": published or datetime.now(),
+                        "published_at": published or datetime.now(tz=timezone.utc),
                         "sentiment": sentiment,
                     }
                 )
@@ -127,7 +127,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
         if not self.news_api_key:
             return []
 
-        from_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
+        from_date = (datetime.now(tz=timezone.utc) - timedelta(days=days_back)).strftime("%Y-%m-%d")
 
         url = "https://newsapi.org/v2/everything"
         params = {
@@ -158,7 +158,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
                         "description": article.get("description"),
                         "source": article.get("source", {}).get("name", "Unknown"),
                         "url": article.get("url", ""),
-                        "published_at": published or datetime.now(),
+                        "published_at": published or datetime.now(tz=timezone.utc),
                         "sentiment": sentiment,
                     }
                 )
@@ -233,7 +233,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
         return RawDataSource(
             source_name=self.source_name,
             source_type=self.source_type,
-            retrieval_timestamp=datetime.now(),
+            retrieval_timestamp=datetime.now(tz=timezone.utc),
             raw_content={
                 "articles": articles,
                 "total_articles": total,
@@ -274,7 +274,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
                         "article_count": len(articles),
                     },
                     "confidence": self.confidence,
-                    "extracted_at": datetime.now(),
+                    "extracted_at": datetime.now(tz=timezone.utc),
                     "source": self.source_name,
                 }
             return None
