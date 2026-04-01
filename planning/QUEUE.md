@@ -482,7 +482,7 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 | 128 | STORY-239 | Add Stale-Doc Detection and Ownership Alerts | DONE | PR #194 |
 | 129 | STORY-240 | Introduce Docs Review Checklist and Change-Control Workflow | DONE | PR #195 |
 | 130 | STORY-241 | Publish Docs Health Dashboard and Weekly Audit Automation | DONE | PR #196 |
-| 131 | STORY-245 | Expand Generated API Docs and Schema Registries | READY | |
+| 131 | STORY-245 | Expand Generated API Docs and Schema Registries | IN_PROGRESS | |
 
 ### EPIC-031: Shared Library and Architecture (P2)
 
