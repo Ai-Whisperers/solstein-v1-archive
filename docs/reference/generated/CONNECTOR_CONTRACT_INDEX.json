@@ -1,0 +1,4846 @@
+[
+  {
+    "class_name": "SemanticScholarConnector",
+    "file": "connectors/academic/__init__.py",
+    "line": 23,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 37,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 64,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 112,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 156,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "ArXivConnector",
+    "file": "connectors/academic/__init__.py",
+    "line": 177,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 191,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 203,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 278,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 282,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "ArxivConnector",
+    "file": "connectors/academic/arxiv.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 28,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 36,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 67,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 87,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "BaseConnector",
+    "file": "connectors/base.py",
+    "line": 48,
+    "bases": [
+      "ABC"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 56,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 61,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 66,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 71,
+        "args": [
+          "raw_data"
+        ]
+      },
+      {
+        "name": "close",
+        "async": true,
+        "line": 75,
+        "args": []
+      }
+    ],
+    "method_count": 5,
+    "has_async": true
+  },
+  {
+    "class_name": "YahooFinanceConnector",
+    "file": "connectors/financial/__init__.py",
+    "line": 24,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 36,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 51,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 96,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 100,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "AlphaVantageConnector",
+    "file": "connectors/financial/__init__.py",
+    "line": 120,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 134,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 155,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 208,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 212,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "AngelListConnector",
+    "file": "connectors/financial/angellist.py",
+    "line": 11,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 22,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 34,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 39,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 42,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "BetaListConnector",
+    "file": "connectors/financial/betalist.py",
+    "line": 11,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 22,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 34,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 39,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 42,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "CrunchbaseConnector",
+    "file": "connectors/financial/crunchbase.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 31,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 46,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 87,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 90,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "SECEdgarConnector",
+    "file": "connectors/financial/extra.py",
+    "line": 20,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 34,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 46,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 53,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 59,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "OpenCorporatesConnectorLegacy",
+    "file": "connectors/financial/extra.py",
+    "line": 71,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 85,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 99,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 147,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 185,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "F6SConnector",
+    "file": "connectors/financial/f6s.py",
+    "line": 11,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 22,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 34,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 39,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 42,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "OpenCorporatesConnector",
+    "file": "connectors/financial/opencorporates.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 28,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 41,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 79,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 109,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "SECEdgarConnector",
+    "file": "connectors/financial/sec_edgar.py",
+    "line": 13,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 27,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 39,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 46,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 52,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "YahooFinanceConnector",
+    "file": "connectors/financial/yahoo_finance.py",
+    "line": 13,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 25,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 39,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 64,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 67,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "DNSConnector",
+    "file": "connectors/government/dns.py",
+    "line": 12,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 23,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 35,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 73,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 76,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "PatentsViewConnector",
+    "file": "connectors/government/patentsview.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 27,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 37,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 79,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 106,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "USAspendingConnector",
+    "file": "connectors/government/usaspending.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 27,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 36,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 68,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 71,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "WaybackMachineConnector",
+    "file": "connectors/government/wayback.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 28,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 37,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 84,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 88,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "WHOISConnector",
+    "file": "connectors/government/whois.py",
+    "line": 11,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 22,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 34,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 39,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 43,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "HackerNewsConnector",
+    "file": "connectors/news/__init__.py",
+    "line": 22,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 36,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 46,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 97,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 123,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "NewsAPIConnector",
+    "file": "connectors/news/__init__.py",
+    "line": 140,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 154,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 168,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 237,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 245,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "RSSFeedConnector",
+    "file": "connectors/news/__init__.py",
+    "line": 263,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 275,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 284,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 330,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 338,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "GDELTArticle",
+    "file": "connectors/news/gdelt.py",
+    "line": 30,
+    "bases": [],
+    "methods": [
+      {
+        "name": "to_dict",
+        "async": false,
+        "line": 42,
+        "args": []
+      }
+    ],
+    "method_count": 1,
+    "has_async": false
+  },
+  {
+    "class_name": "GDELTConnector",
+    "file": "connectors/news/gdelt.py",
+    "line": 56,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 76,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 96,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 180,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 188,
+        "args": [
+          "raw_data"
+        ]
+      },
+      {
+        "name": "normalize_to_article",
+        "async": false,
+        "line": 208,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 5,
+    "has_async": true
+  },
+  {
+    "class_name": "HackerNewsConnector",
+    "file": "connectors/news/hacker_news.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 28,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 37,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 75,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 96,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "NewsAPIConnector",
+    "file": "connectors/news/newsapi.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 28,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 42,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 97,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 100,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "RSSFeedConnector",
+    "file": "connectors/news/rss.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 26,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 35,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 72,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 79,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "AppStoreConnector",
+    "file": "connectors/product/appstore.py",
+    "line": 12,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 25,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 37,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 80,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 110,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "BitbucketConnector",
+    "file": "connectors/product/bitbucket.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 32,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 41,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 78,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 81,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "CapterraConnector",
+    "file": "connectors/product/capterra.py",
+    "line": 11,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 22,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 34,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 39,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 42,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "DockerHubConnector",
+    "file": "connectors/product/dockerhub.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 27,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 36,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 71,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 96,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "G2Connector",
+    "file": "connectors/product/g2.py",
+    "line": 13,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 24,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 34,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 39,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 42,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "GitHubConnector",
+    "file": "connectors/product/github.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 34,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 43,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 90,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 116,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "GitLabConnector",
+    "file": "connectors/product/gitlab.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 31,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 40,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 83,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 110,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "GooglePlayConnector",
+    "file": "connectors/product/googleplay.py",
+    "line": 11,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 22,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 34,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 39,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 43,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "MavenCentralConnector",
+    "file": "connectors/product/maven.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 27,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 37,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 74,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 111,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "NPMConnector",
+    "file": "connectors/product/npm.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 27,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 36,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 70,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 95,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "ProductHuntConnector",
+    "file": "connectors/product/producthunt.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 31,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 46,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 117,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 120,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "PyPIConnector",
+    "file": "connectors/product/pypi.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 27,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 36,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 41,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 67,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "StackOverflowConnector",
+    "file": "connectors/product/stackoverflow.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 28,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 42,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 84,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 88,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "ConnectorRegistry",
+    "file": "connectors/registry.py",
+    "line": 42,
+    "bases": [],
+    "methods": [
+      {
+        "name": "register",
+        "async": false,
+        "line": 49,
+        "args": [
+          "name",
+          "connector"
+        ]
+      },
+      {
+        "name": "get",
+        "async": false,
+        "line": 54,
+        "args": [
+          "name"
+        ]
+      },
+      {
+        "name": "list_connectors",
+        "async": false,
+        "line": 58,
+        "args": []
+      },
+      {
+        "name": "close_all",
+        "async": true,
+        "line": 62,
+        "args": []
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "SearchResult",
+    "file": "connectors/search/searxng.py",
+    "line": 28,
+    "bases": [],
+    "methods": [
+      {
+        "name": "to_dict",
+        "async": false,
+        "line": 38,
+        "args": []
+      }
+    ],
+    "method_count": 1,
+    "has_async": false
+  },
+  {
+    "class_name": "SearXNGConnector",
+    "file": "connectors/search/searxng.py",
+    "line": 50,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 72,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 85,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 170,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 178,
+        "args": [
+          "raw_data"
+        ]
+      },
+      {
+        "name": "normalize_to_search_result",
+        "async": false,
+        "line": 198,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 5,
+    "has_async": true
+  },
+  {
+    "class_name": "GlassdoorConnector",
+    "file": "connectors/social/glassdoor.py",
+    "line": 11,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 22,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 34,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 39,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 42,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "LinkedInConnector",
+    "file": "connectors/social/linkedin.py",
+    "line": 11,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 28,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 43,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 52,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 56,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "PodcastIndexConnector",
+    "file": "connectors/social/podcastindex.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 29,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 39,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 75,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 78,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "RedditConnector",
+    "file": "connectors/social/reddit.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 31,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 44,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 89,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 93,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "TrustpilotConnector",
+    "file": "connectors/social/trustpilot.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 31,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 44,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 81,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 84,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "TwitterConnector",
+    "file": "connectors/social/twitter.py",
+    "line": 14,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 31,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 46,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 95,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 98,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "YouTubeConnector",
+    "file": "connectors/social/youtube.py",
+    "line": 12,
+    "bases": [
+      "BaseConnector"
+    ],
+    "methods": [
+      {
+        "name": "connect",
+        "async": true,
+        "line": 26,
+        "args": []
+      },
+      {
+        "name": "search",
+        "async": true,
+        "line": 42,
+        "args": [
+          "query"
+        ]
+      },
+      {
+        "name": "get_by_id",
+        "async": true,
+        "line": 84,
+        "args": [
+          "entity_id"
+        ]
+      },
+      {
+        "name": "normalize",
+        "async": false,
+        "line": 87,
+        "args": [
+          "raw_data"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "CompaniesHouseConnector",
+    "file": "data/connectors/companies_house_connector.py",
+    "line": 23,
+    "bases": [],
+    "methods": [
+      {
+        "name": "search_company_by_name",
+        "async": false,
+        "line": 41,
+        "args": [
+          "company_name"
+        ]
+      },
+      {
+        "name": "fetch_company_details",
+        "async": false,
+        "line": 63,
+        "args": [
+          "company_number"
+        ]
+      },
+      {
+        "name": "get_company_metrics",
+        "async": false,
+        "line": 70,
+        "args": [
+          "company_number"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "ConnectorResponse",
+    "file": "data/connectors/contracts.py",
+    "line": 19,
+    "bases": [
+      "?"
+    ],
+    "methods": [
+      {
+        "name": "success",
+        "async": false,
+        "line": 29,
+        "args": [
+          "request",
+          "payload",
+          "metadata"
+        ]
+      },
+      {
+        "name": "degraded",
+        "async": false,
+        "line": 43,
+        "args": [
+          "request",
+          "payload",
+          "error",
+          "metadata"
+        ]
+      },
+      {
+        "name": "failure",
+        "async": false,
+        "line": 59,
+        "args": [
+          "request",
+          "error",
+          "metadata"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "GitHubConnector",
+    "file": "data/connectors/github_connector.py",
+    "line": 23,
+    "bases": [],
+    "methods": [
+      {
+        "name": "get_user_repositories",
+        "async": true,
+        "line": 50,
+        "args": [
+          "username",
+          "per_page"
+        ]
+      },
+      {
+        "name": "get_recent_commits",
+        "async": true,
+        "line": 90,
+        "args": [
+          "username",
+          "per_page"
+        ]
+      },
+      {
+        "name": "get_repository_activity",
+        "async": true,
+        "line": 137,
+        "args": [
+          "username",
+          "per_page"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": true
+  },
+  {
+    "class_name": "IdentifierLookupService",
+    "file": "data/connectors/lookup_service.py",
+    "line": 33,
+    "bases": [],
+    "methods": [
+      {
+        "name": "available_strategies",
+        "async": false,
+        "line": 71,
+        "args": []
+      },
+      {
+        "name": "resolve_identifiers",
+        "async": true,
+        "line": 75,
+        "args": [
+          "company_name",
+          "headquarters",
+          "use_cache"
+        ]
+      },
+      {
+        "name": "resolve_identifiers_enveloped",
+        "async": true,
+        "line": 142,
+        "args": [
+          "company_name",
+          "headquarters",
+          "use_cache"
+        ]
+      },
+      {
+        "name": "clear_cache",
+        "async": false,
+        "line": 247,
+        "args": []
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "LookupStrategy",
+    "file": "data/connectors/lookup_strategies/base.py",
+    "line": 10,
+    "bases": [
+      "ABC"
+    ],
+    "methods": [
+      {
+        "name": "name",
+        "async": false,
+        "line": 19,
+        "args": []
+      },
+      {
+        "name": "is_available",
+        "async": false,
+        "line": 25,
+        "args": []
+      },
+      {
+        "name": "lookup",
+        "async": true,
+        "line": 30,
+        "args": [
+          "company_name"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": true
+  },
+  {
+    "class_name": "DuckDuckGoStrategy",
+    "file": "data/connectors/lookup_strategies/duckduckgo.py",
+    "line": 16,
+    "bases": [
+      "LookupStrategy"
+    ],
+    "methods": [
+      {
+        "name": "name",
+        "async": false,
+        "line": 37,
+        "args": []
+      },
+      {
+        "name": "is_available",
+        "async": false,
+        "line": 41,
+        "args": []
+      },
+      {
+        "name": "lookup",
+        "async": true,
+        "line": 56,
+        "args": [
+          "company_name"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": true
+  },
+  {
+    "class_name": "OpenCorporatesStrategy",
+    "file": "data/connectors/lookup_strategies/opencorporates.py",
+    "line": 16,
+    "bases": [
+      "LookupStrategy"
+    ],
+    "methods": [
+      {
+        "name": "name",
+        "async": false,
+        "line": 23,
+        "args": []
+      },
+      {
+        "name": "is_available",
+        "async": false,
+        "line": 27,
+        "args": []
+      },
+      {
+        "name": "lookup",
+        "async": true,
+        "line": 30,
+        "args": [
+          "company_name"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": true
+  },
+  {
+    "class_name": "OpenFIGIStrategy",
+    "file": "data/connectors/lookup_strategies/openfigi.py",
+    "line": 17,
+    "bases": [
+      "LookupStrategy"
+    ],
+    "methods": [
+      {
+        "name": "name",
+        "async": false,
+        "line": 24,
+        "args": []
+      },
+      {
+        "name": "is_available",
+        "async": false,
+        "line": 28,
+        "args": []
+      },
+      {
+        "name": "lookup",
+        "async": true,
+        "line": 31,
+        "args": [
+          "company_name"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": true
+  },
+  {
+    "class_name": "NewsSignalDetector",
+    "file": "data/connectors/news_signal_detector.py",
+    "line": 44,
+    "bases": [],
+    "methods": [
+      {
+        "name": "detect_signals",
+        "async": true,
+        "line": 171,
+        "args": [
+          "company_name",
+          "signal_types"
+        ]
+      },
+      {
+        "name": "detect_signals_enveloped",
+        "async": true,
+        "line": 214,
+        "args": [
+          "company_name",
+          "signal_types"
+        ]
+      },
+      {
+        "name": "detect_funding_signal",
+        "async": true,
+        "line": 240,
+        "args": [
+          "company_name"
+        ]
+      },
+      {
+        "name": "detect_partnership_signal",
+        "async": true,
+        "line": 244,
+        "args": [
+          "company_name"
+        ]
+      },
+      {
+        "name": "detect_key_hire_signal",
+        "async": true,
+        "line": 248,
+        "args": [
+          "company_name"
+        ]
+      },
+      {
+        "name": "get_rate_limit_status",
+        "async": false,
+        "line": 252,
+        "args": []
+      },
+      {
+        "name": "clear_seen_signals",
+        "async": false,
+        "line": 266,
+        "args": []
+      }
+    ],
+    "method_count": 7,
+    "has_async": true
+  },
+  {
+    "class_name": "ConnectorRuntime",
+    "file": "data/connectors/runtime.py",
+    "line": 19,
+    "bases": [],
+    "methods": [
+      {
+        "name": "run",
+        "async": true,
+        "line": 38,
+        "args": []
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "FilingProtocol",
+    "file": "data/connectors/sec_edgar_connector.py",
+    "line": 26,
+    "bases": [
+      "Protocol"
+    ],
+    "methods": [
+      {
+        "name": "obj",
+        "async": false,
+        "line": 31,
+        "args": []
+      }
+    ],
+    "method_count": 1,
+    "has_async": false
+  },
+  {
+    "class_name": "StatementProtocol",
+    "file": "data/connectors/sec_edgar_connector.py",
+    "line": 35,
+    "bases": [
+      "Protocol"
+    ],
+    "methods": [
+      {
+        "name": "to_dataframe",
+        "async": false,
+        "line": 36,
+        "args": []
+      }
+    ],
+    "method_count": 1,
+    "has_async": false
+  },
+  {
+    "class_name": "FinancialsProtocol",
+    "file": "data/connectors/sec_edgar_connector.py",
+    "line": 40,
+    "bases": [
+      "Protocol"
+    ],
+    "methods": [
+      {
+        "name": "income_statement",
+        "async": false,
+        "line": 41,
+        "args": []
+      },
+      {
+        "name": "balance_sheet",
+        "async": false,
+        "line": 43,
+        "args": []
+      }
+    ],
+    "method_count": 2,
+    "has_async": false
+  },
+  {
+    "class_name": "SECEdgarConnector",
+    "file": "data/connectors/sec_edgar_connector.py",
+    "line": 53,
+    "bases": [],
+    "methods": [
+      {
+        "name": "fetch_filing",
+        "async": false,
+        "line": 75,
+        "args": [
+          "ticker",
+          "year",
+          "form_type"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": false
+  },
+  {
+    "class_name": "SignalDetector",
+    "file": "data/connectors/signal_detectors/base.py",
+    "line": 25,
+    "bases": [
+      "ABC"
+    ],
+    "methods": [
+      {
+        "name": "signal_type",
+        "async": false,
+        "line": 34,
+        "args": []
+      },
+      {
+        "name": "confidence",
+        "async": false,
+        "line": 40,
+        "args": []
+      },
+      {
+        "name": "patterns",
+        "async": false,
+        "line": 46,
+        "args": []
+      },
+      {
+        "name": "detect",
+        "async": false,
+        "line": 51,
+        "args": [
+          "article",
+          "company_name"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": false
+  },
+  {
+    "class_name": "FundingSignalDetector",
+    "file": "data/connectors/signal_detectors/funding.py",
+    "line": 12,
+    "bases": [
+      "SignalDetector"
+    ],
+    "methods": [
+      {
+        "name": "signal_type",
+        "async": false,
+        "line": 16,
+        "args": []
+      },
+      {
+        "name": "confidence",
+        "async": false,
+        "line": 20,
+        "args": []
+      },
+      {
+        "name": "patterns",
+        "async": false,
+        "line": 24,
+        "args": []
+      },
+      {
+        "name": "detect",
+        "async": false,
+        "line": 35,
+        "args": [
+          "article",
+          "company_name"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": false
+  },
+  {
+    "class_name": "KeyHireSignalDetector",
+    "file": "data/connectors/signal_detectors/key_hire.py",
+    "line": 12,
+    "bases": [
+      "SignalDetector"
+    ],
+    "methods": [
+      {
+        "name": "signal_type",
+        "async": false,
+        "line": 16,
+        "args": []
+      },
+      {
+        "name": "confidence",
+        "async": false,
+        "line": 20,
+        "args": []
+      },
+      {
+        "name": "patterns",
+        "async": false,
+        "line": 24,
+        "args": []
+      },
+      {
+        "name": "detect",
+        "async": false,
+        "line": 34,
+        "args": [
+          "article",
+          "company_name"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": false
+  },
+  {
+    "class_name": "PartnershipSignalDetector",
+    "file": "data/connectors/signal_detectors/partnership.py",
+    "line": 12,
+    "bases": [
+      "SignalDetector"
+    ],
+    "methods": [
+      {
+        "name": "signal_type",
+        "async": false,
+        "line": 16,
+        "args": []
+      },
+      {
+        "name": "confidence",
+        "async": false,
+        "line": 20,
+        "args": []
+      },
+      {
+        "name": "patterns",
+        "async": false,
+        "line": 24,
+        "args": []
+      },
+      {
+        "name": "detect",
+        "async": false,
+        "line": 36,
+        "args": [
+          "article",
+          "company_name"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": false
+  },
+  {
+    "class_name": "CompaniesHouseRefreshConnector",
+    "file": "infrastructure/connectors/companies_house_refresh.py",
+    "line": 12,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 24,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "FundingRefreshConnector",
+    "file": "infrastructure/connectors/funding_refresh.py",
+    "line": 17,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 43,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 121,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 125,
+        "args": []
+      }
+    ],
+    "method_count": 3,
+    "has_async": true
+  },
+  {
+    "class_name": "GitHubRefreshConnector",
+    "file": "infrastructure/connectors/github_refresh.py",
+    "line": 12,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 24,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "GlobalMarketRefreshConnector",
+    "file": "infrastructure/connectors/global_market_refresh.py",
+    "line": 18,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 40,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 115,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 119,
+        "args": []
+      }
+    ],
+    "method_count": 3,
+    "has_async": true
+  },
+  {
+    "class_name": "LinkedInRefreshConnector",
+    "file": "infrastructure/connectors/linkedin_refresh.py",
+    "line": 18,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 40,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 111,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 115,
+        "args": []
+      }
+    ],
+    "method_count": 3,
+    "has_async": true
+  },
+  {
+    "class_name": "NewsRefreshConnector",
+    "file": "infrastructure/connectors/news_refresh.py",
+    "line": 18,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 40,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 131,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 135,
+        "args": []
+      }
+    ],
+    "method_count": 3,
+    "has_async": true
+  },
+  {
+    "class_name": "NewsSignalRefreshConnector",
+    "file": "infrastructure/connectors/news_signal_refresh.py",
+    "line": 13,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 25,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "PatentsRefreshConnector",
+    "file": "infrastructure/connectors/patents_refresh.py",
+    "line": 18,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 38,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 115,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 119,
+        "args": []
+      }
+    ],
+    "method_count": 3,
+    "has_async": true
+  },
+  {
+    "class_name": "SECEDGARRefreshConnector",
+    "file": "infrastructure/connectors/sec_edgar_refresh.py",
+    "line": 12,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 24,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "WebSearchRefreshConnector",
+    "file": "infrastructure/connectors/web_search_refresh.py",
+    "line": 17,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 38,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 95,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 99,
+        "args": []
+      }
+    ],
+    "method_count": 3,
+    "has_async": true
+  },
+  {
+    "class_name": "WebsiteRefreshConnector",
+    "file": "infrastructure/connectors/website_refresh.py",
+    "line": 17,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 38,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "fetch_facts_with_websites",
+        "async": true,
+        "line": 83,
+        "args": [
+          "company_website_map",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 148,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 152,
+        "args": []
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "YahooFinanceRefreshConnector",
+    "file": "infrastructure/connectors/yahoo_finance_refresh.py",
+    "line": 18,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 39,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 190,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 194,
+        "args": []
+      }
+    ],
+    "method_count": 3,
+    "has_async": true
+  },
+  {
+    "class_name": "BaseDataSourceAdapter",
+    "file": "adapters/base.py",
+    "line": 25,
+    "bases": [
+      "ABC"
+    ],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 51,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 56,
+        "args": []
+      },
+      {
+        "name": "discover",
+        "async": false,
+        "line": 64,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 77,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      },
+      {
+        "name": "refresh",
+        "async": false,
+        "line": 87,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_confidence",
+        "async": false,
+        "line": 103,
+        "args": []
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 107,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 111,
+        "args": []
+      },
+      {
+        "name": "is_healthy",
+        "async": false,
+        "line": 118,
+        "args": []
+      }
+    ],
+    "method_count": 9,
+    "has_async": false
+  },
+  {
+    "class_name": "CompetitorJsonSource",
+    "file": "adapters/discovery/competitor_json.py",
+    "line": 20,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 24,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 28,
+        "args": []
+      },
+      {
+        "name": "discover",
+        "async": false,
+        "line": 31,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 76,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      },
+      {
+        "name": "refresh",
+        "async": false,
+        "line": 92,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_confidence",
+        "async": false,
+        "line": 101,
+        "args": []
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 105,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 109,
+        "args": []
+      },
+      {
+        "name": "supports_discovery",
+        "async": false,
+        "line": 113,
+        "args": []
+      }
+    ],
+    "method_count": 9,
+    "has_async": false
+  },
+  {
+    "class_name": "StaticCatalogSource",
+    "file": "adapters/discovery/static_catalog.py",
+    "line": 21,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 25,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 29,
+        "args": []
+      },
+      {
+        "name": "discover",
+        "async": false,
+        "line": 32,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 63,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      },
+      {
+        "name": "refresh",
+        "async": false,
+        "line": 79,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_confidence",
+        "async": false,
+        "line": 88,
+        "args": []
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 92,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 96,
+        "args": []
+      },
+      {
+        "name": "supports_discovery",
+        "async": false,
+        "line": 100,
+        "args": []
+      }
+    ],
+    "method_count": 9,
+    "has_async": false
+  },
+  {
+    "class_name": "WebSearchDiscoverySource",
+    "file": "adapters/discovery/web_search.py",
+    "line": 13,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 20,
+        "args": []
+      },
+      {
+        "name": "discover",
+        "async": false,
+        "line": 23,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      }
+    ],
+    "method_count": 2,
+    "has_async": false
+  },
+  {
+    "class_name": "FundingUnifiedAdapter",
+    "file": "adapters/enrichment/_retired/funding_unified.py",
+    "line": 30,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "discover",
+        "async": false,
+        "line": 145,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 181,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      },
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 217,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_confidence",
+        "async": false,
+        "line": 256,
+        "args": []
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 259,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 262,
+        "args": []
+      },
+      {
+        "name": "supports_discovery",
+        "async": false,
+        "line": 265,
+        "args": []
+      }
+    ],
+    "method_count": 7,
+    "has_async": true
+  },
+  {
+    "class_name": "LinkedInUnifiedAdapter",
+    "file": "adapters/enrichment/_retired/linkedin_unified.py",
+    "line": 22,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "discover",
+        "async": false,
+        "line": 88,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 101,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      },
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 124,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_confidence",
+        "async": false,
+        "line": 150,
+        "args": []
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 153,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 156,
+        "args": []
+      },
+      {
+        "name": "supports_discovery",
+        "async": false,
+        "line": 159,
+        "args": []
+      }
+    ],
+    "method_count": 7,
+    "has_async": true
+  },
+  {
+    "class_name": "NewsUnifiedAdapter",
+    "file": "adapters/enrichment/_retired/news_unified.py",
+    "line": 53,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "discover",
+        "async": false,
+        "line": 177,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 214,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      },
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 255,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_confidence",
+        "async": false,
+        "line": 296,
+        "args": []
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 299,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 302,
+        "args": []
+      },
+      {
+        "name": "supports_discovery",
+        "async": false,
+        "line": 305,
+        "args": []
+      }
+    ],
+    "method_count": 7,
+    "has_async": true
+  },
+  {
+    "class_name": "PatentsUnifiedAdapter",
+    "file": "adapters/enrichment/_retired/patents_unified.py",
+    "line": 25,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "discover",
+        "async": false,
+        "line": 50,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 92,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      },
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 126,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_confidence",
+        "async": false,
+        "line": 192,
+        "args": []
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 195,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 198,
+        "args": []
+      },
+      {
+        "name": "supports_discovery",
+        "async": false,
+        "line": 201,
+        "args": []
+      }
+    ],
+    "method_count": 7,
+    "has_async": true
+  },
+  {
+    "class_name": "WebSearchUnifiedAdapter",
+    "file": "adapters/enrichment/_retired/web_search_unified.py",
+    "line": 31,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "discover",
+        "async": false,
+        "line": 49,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 119,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      },
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 192,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_confidence",
+        "async": false,
+        "line": 272,
+        "args": []
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 279,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 287,
+        "args": []
+      },
+      {
+        "name": "supports_discovery",
+        "async": false,
+        "line": 294,
+        "args": []
+      }
+    ],
+    "method_count": 7,
+    "has_async": true
+  },
+  {
+    "class_name": "WebsiteUnifiedAdapter",
+    "file": "adapters/enrichment/_retired/website_unified.py",
+    "line": 29,
+    "bases": [
+      "BaseRefreshConnector"
+    ],
+    "methods": [
+      {
+        "name": "discover",
+        "async": false,
+        "line": 138,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 148,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      },
+      {
+        "name": "fetch_facts",
+        "async": true,
+        "line": 231,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_confidence",
+        "async": false,
+        "line": 271,
+        "args": []
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 274,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 277,
+        "args": []
+      },
+      {
+        "name": "supports_discovery",
+        "async": false,
+        "line": 280,
+        "args": []
+      }
+    ],
+    "method_count": 7,
+    "has_async": true
+  },
+  {
+    "class_name": "FundingEnrichment",
+    "file": "adapters/enrichment/funding.py",
+    "line": 14,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 22,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 26,
+        "args": []
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 29,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "GlobalMarketEnrichment",
+    "file": "adapters/enrichment/global_market.py",
+    "line": 15,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 19,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 23,
+        "args": []
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 26,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "LinkedInEnrichment",
+    "file": "adapters/enrichment/linkedin.py",
+    "line": 15,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 22,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 26,
+        "args": []
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 29,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "NewsEnrichment",
+    "file": "adapters/enrichment/news.py",
+    "line": 14,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 21,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 25,
+        "args": []
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 30,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "PatentEnrichment",
+    "file": "adapters/enrichment/patents.py",
+    "line": 25,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 29,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 33,
+        "args": []
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 36,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "WebSearchNewsEnrichment",
+    "file": "adapters/enrichment/web_search_news.py",
+    "line": 15,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 19,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 23,
+        "args": []
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 26,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "WebsiteEnrichment",
+    "file": "adapters/enrichment/website.py",
+    "line": 14,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 18,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 22,
+        "args": []
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 25,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "YahooFinanceEnrichment",
+    "file": "adapters/enrichment/yahoo_finance.py",
+    "line": 15,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 19,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 23,
+        "args": []
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 26,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "InstrumentedEnrichmentSource",
+    "file": "adapters/instrumented.py",
+    "line": 37,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 45,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 49,
+        "args": []
+      },
+      {
+        "name": "health_records",
+        "async": false,
+        "line": 53,
+        "args": []
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 56,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": false
+  },
+  {
+    "class_name": "InstrumentedDiscoverySource",
+    "file": "adapters/instrumented.py",
+    "line": 105,
+    "bases": [],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 113,
+        "args": []
+      },
+      {
+        "name": "health_records",
+        "async": false,
+        "line": 117,
+        "args": []
+      },
+      {
+        "name": "discover",
+        "async": false,
+        "line": 120,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "DiscoverySource",
+    "file": "adapters/protocols.py",
+    "line": 29,
+    "bases": [
+      "Protocol"
+    ],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 39,
+        "args": []
+      },
+      {
+        "name": "discover",
+        "async": false,
+        "line": 43,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      }
+    ],
+    "method_count": 2,
+    "has_async": false
+  },
+  {
+    "class_name": "EnrichmentSource",
+    "file": "adapters/protocols.py",
+    "line": 55,
+    "bases": [
+      "Protocol"
+    ],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 65,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 70,
+        "args": []
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 74,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "FactAggregator",
+    "file": "adapters/protocols.py",
+    "line": 91,
+    "bases": [
+      "Protocol"
+    ],
+    "methods": [
+      {
+        "name": "aggregate",
+        "async": false,
+        "line": 100,
+        "args": [
+          "company_id",
+          "raw_record"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": false
+  },
+  {
+    "class_name": "UnifiedDataSource",
+    "file": "adapters/protocols.py",
+    "line": 110,
+    "bases": [
+      "Protocol"
+    ],
+    "methods": [
+      {
+        "name": "source_name",
+        "async": false,
+        "line": 129,
+        "args": []
+      },
+      {
+        "name": "source_type",
+        "async": false,
+        "line": 134,
+        "args": []
+      },
+      {
+        "name": "discover",
+        "async": false,
+        "line": 138,
+        "args": [
+          "market",
+          "seed_company",
+          "max_results",
+          "extra_keywords"
+        ]
+      },
+      {
+        "name": "enrich",
+        "async": false,
+        "line": 148,
+        "args": [
+          "company_id",
+          "company_name",
+          "ticker",
+          "website"
+        ]
+      },
+      {
+        "name": "refresh",
+        "async": false,
+        "line": 158,
+        "args": [
+          "company_ids",
+          "start_date",
+          "end_date"
+        ]
+      },
+      {
+        "name": "get_confidence",
+        "async": false,
+        "line": 167,
+        "args": []
+      },
+      {
+        "name": "get_authority",
+        "async": false,
+        "line": 171,
+        "args": []
+      },
+      {
+        "name": "supports_incremental",
+        "async": false,
+        "line": 175,
+        "args": []
+      },
+      {
+        "name": "supports_discovery",
+        "async": false,
+        "line": 179,
+        "args": []
+      }
+    ],
+    "method_count": 9,
+    "has_async": false
+  },
+  {
+    "class_name": "SourceRegistry",
+    "file": "adapters/registry.py",
+    "line": 27,
+    "bases": [],
+    "methods": [
+      {
+        "name": "register_discovery",
+        "async": false,
+        "line": 34,
+        "args": [
+          "source"
+        ]
+      },
+      {
+        "name": "register_enrichment",
+        "async": false,
+        "line": 37,
+        "args": [
+          "source"
+        ]
+      },
+      {
+        "name": "register_unified",
+        "async": false,
+        "line": 40,
+        "args": [
+          "source"
+        ]
+      },
+      {
+        "name": "discovery_sources",
+        "async": false,
+        "line": 45,
+        "args": []
+      },
+      {
+        "name": "enrichment_sources",
+        "async": false,
+        "line": 49,
+        "args": []
+      },
+      {
+        "name": "unified_sources",
+        "async": false,
+        "line": 53,
+        "args": []
+      },
+      {
+        "name": "all_enrichment_sources",
+        "async": false,
+        "line": 58,
+        "args": []
+      }
+    ],
+    "method_count": 7,
+    "has_async": false
+  },
+  {
+    "class_name": "BaseDataGatheringAgent",
+    "file": "agents/base_agent.py",
+    "line": 29,
+    "bases": [
+      "ABC"
+    ],
+    "methods": [
+      {
+        "name": "gather",
+        "async": true,
+        "line": 48,
+        "args": [
+          "company_name",
+          "context"
+        ]
+      },
+      {
+        "name": "log_info",
+        "async": false,
+        "line": 108,
+        "args": [
+          "message"
+        ]
+      },
+      {
+        "name": "log_warning",
+        "async": false,
+        "line": 112,
+        "args": [
+          "message"
+        ]
+      },
+      {
+        "name": "log_error",
+        "async": false,
+        "line": 116,
+        "args": [
+          "message"
+        ]
+      }
+    ],
+    "method_count": 4,
+    "has_async": true
+  },
+  {
+    "class_name": "CompaniesHouseAgent",
+    "file": "agents/companies_house_agent.py",
+    "line": 21,
+    "bases": [
+      "BaseDataGatheringAgent"
+    ],
+    "methods": [
+      {
+        "name": "gather",
+        "async": true,
+        "line": 39,
+        "args": [
+          "company_name",
+          "context"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "SourceHealthStatus",
+    "file": "agents/financial_backends.py",
+    "line": 44,
+    "bases": [],
+    "methods": [
+      {
+        "name": "record_success",
+        "async": false,
+        "line": 53,
+        "args": []
+      },
+      {
+        "name": "record_failure",
+        "async": false,
+        "line": 64,
+        "args": [
+          "reason"
+        ]
+      }
+    ],
+    "method_count": 2,
+    "has_async": false
+  },
+  {
+    "class_name": "FinancialBackendDispatcher",
+    "file": "agents/financial_backends.py",
+    "line": 114,
+    "bases": [],
+    "methods": [
+      {
+        "name": "search",
+        "async": true,
+        "line": 138,
+        "args": [
+          "ticker"
+        ]
+      },
+      {
+        "name": "get_health_status",
+        "async": false,
+        "line": 219,
+        "args": []
+      }
+    ],
+    "method_count": 2,
+    "has_async": true
+  },
+  {
+    "class_name": "TechStackAnalyzer",
+    "file": "agents/github/analyzers.py",
+    "line": 17,
+    "bases": [],
+    "methods": [
+      {
+        "name": "analyze",
+        "async": false,
+        "line": 47,
+        "args": [
+          "repos"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": false
+  },
+  {
+    "class_name": "VelocityAnalyzer",
+    "file": "agents/github/analyzers.py",
+    "line": 74,
+    "bases": [],
+    "methods": [
+      {
+        "name": "analyze",
+        "async": false,
+        "line": 80,
+        "args": [
+          "org_name",
+          "repos"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": false
+  },
+  {
+    "class_name": "AISignalAnalyzer",
+    "file": "agents/github/analyzers.py",
+    "line": 95,
+    "bases": [],
+    "methods": [
+      {
+        "name": "analyze",
+        "async": false,
+        "line": 111,
+        "args": [
+          "repos"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": false
+  },
+  {
+    "class_name": "DependencyAnalyzer",
+    "file": "agents/github/analyzers.py",
+    "line": 136,
+    "bases": [],
+    "methods": [
+      {
+        "name": "analyze",
+        "async": true,
+        "line": 142,
+        "args": [
+          "org_name",
+          "repos"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "GitHubClient",
+    "file": "agents/github/client.py",
+    "line": 20,
+    "bases": [],
+    "methods": [
+      {
+        "name": "get",
+        "async": true,
+        "line": 51,
+        "args": [
+          "url"
+        ]
+      },
+      {
+        "name": "fetch_file",
+        "async": true,
+        "line": 78,
+        "args": [
+          "org",
+          "repo",
+          "path"
+        ]
+      }
+    ],
+    "method_count": 2,
+    "has_async": true
+  },
+  {
+    "class_name": "GitHubRepo",
+    "file": "agents/github/models.py",
+    "line": 10,
+    "bases": [],
+    "methods": [
+      {
+        "name": "from_api",
+        "async": false,
+        "line": 25,
+        "args": [
+          "cls",
+          "data"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": false
+  },
+  {
+    "class_name": "GitHubOrgSearcher",
+    "file": "agents/github/search.py",
+    "line": 15,
+    "bases": [],
+    "methods": [
+      {
+        "name": "search",
+        "async": true,
+        "line": 21,
+        "args": [
+          "company_name"
+        ]
+      },
+      {
+        "name": "fetch_repos",
+        "async": true,
+        "line": 55,
+        "args": [
+          "org_name",
+          "max_repos"
+        ]
+      }
+    ],
+    "method_count": 2,
+    "has_async": true
+  },
+  {
+    "class_name": "GitHubAgent",
+    "file": "agents/github_agent.py",
+    "line": 26,
+    "bases": [
+      "BaseDataGatheringAgent"
+    ],
+    "methods": [
+      {
+        "name": "gather",
+        "async": true,
+        "line": 44,
+        "args": [
+          "company_name",
+          "context"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "NewsBackendDispatcher",
+    "file": "agents/news_backends.py",
+    "line": 29,
+    "bases": [],
+    "methods": [
+      {
+        "name": "search",
+        "async": true,
+        "line": 56,
+        "args": [
+          "query"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "ExponentialBackoff",
+    "file": "agents/resilience.py",
+    "line": 63,
+    "bases": [],
+    "methods": [
+      {
+        "name": "get_delay",
+        "async": false,
+        "line": 94,
+        "args": [
+          "attempt"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": false
+  },
+  {
+    "class_name": "CircuitBreaker",
+    "file": "agents/resilience.py",
+    "line": 119,
+    "bases": [],
+    "methods": [
+      {
+        "name": "can_execute",
+        "async": false,
+        "line": 150,
+        "args": []
+      },
+      {
+        "name": "record_success",
+        "async": false,
+        "line": 166,
+        "args": []
+      },
+      {
+        "name": "record_failure",
+        "async": false,
+        "line": 178,
+        "args": []
+      },
+      {
+        "name": "get_state",
+        "async": false,
+        "line": 199,
+        "args": []
+      }
+    ],
+    "method_count": 4,
+    "has_async": false
+  },
+  {
+    "class_name": "SearchBackendDispatcher",
+    "file": "agents/search_backends.py",
+    "line": 28,
+    "bases": [],
+    "methods": [
+      {
+        "name": "search",
+        "async": true,
+        "line": 63,
+        "args": [
+          "query"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "SeedMarkdownAgent",
+    "file": "agents/seed_markdown_agent.py",
+    "line": 13,
+    "bases": [
+      "BaseDataGatheringAgent"
+    ],
+    "methods": [
+      {
+        "name": "gather",
+        "async": true,
+        "line": 18,
+        "args": [
+          "company_name",
+          "context"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "WebSearchAgent",
+    "file": "agents/web_search_agent.py",
+    "line": 27,
+    "bases": [
+      "BaseDataGatheringAgent"
+    ],
+    "methods": [
+      {
+        "name": "gather",
+        "async": true,
+        "line": 56,
+        "args": [
+          "company_name",
+          "context"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "WebsiteAgent",
+    "file": "agents/website_agent.py",
+    "line": 19,
+    "bases": [
+      "BaseDataGatheringAgent"
+    ],
+    "methods": [
+      {
+        "name": "gather",
+        "async": true,
+        "line": 23,
+        "args": [
+          "company_name",
+          "context"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": true
+  },
+  {
+    "class_name": "CommunityPrioritizer",
+    "file": "data_sources/community_prioritization.py",
+    "line": 42,
+    "bases": [],
+    "methods": [
+      {
+        "name": "rank",
+        "async": false,
+        "line": 47,
+        "args": [
+          "suggestions",
+          "votes"
+        ]
+      }
+    ],
+    "method_count": 1,
+    "has_async": false
+  },
+  {
+    "class_name": "OpenClawEvaluator",
+    "file": "data_sources/openclaw_evaluator.py",
+    "line": 25,
+    "bases": [],
+    "methods": [
+      {
+        "name": "evaluate",
+        "async": false,
+        "line": 34,
+        "args": [
+          "api"
+        ]
+      },
+      {
+        "name": "rank_apis",
+        "async": false,
+        "line": 56,
+        "args": [
+          "apis"
+        ]
+      },
+      {
+        "name": "top_candidates",
+        "async": false,
+        "line": 60,
+        "args": [
+          "apis",
+          "limit",
+          "min_score"
+        ]
+      }
+    ],
+    "method_count": 3,
+    "has_async": false
+  },
+  {
+    "class_name": "QualityScorer",
+    "file": "data_sources/quality/models.py",
+    "line": 24,
+    "bases": [],
+    "methods": [
+      {
+        "name": "calculate_overall",
+        "async": false,
+        "line": 32,
+        "args": [
+          "scores"
+        ]
+      },
+      {
+        "name": "with_computed_overall",
+        "async": false,
+        "line": 41,
+        "args": []
+      }
+    ],
+    "method_count": 2,
+    "has_async": false
+  },
+  {
+    "class_name": "ReliabilityMonitor",
+    "file": "data_sources/quality/reliability_monitor.py",
+    "line": 20,
+    "bases": [],
+    "methods": [
+      {
+        "name": "record_request",
+        "async": false,
+        "line": 28,
+        "args": []
+      },
+      {
+        "name": "snapshot",
+        "async": false,
+        "line": 40,
+        "args": []
+      }
+    ],
+    "method_count": 2,
+    "has_async": false
+  }
+]
