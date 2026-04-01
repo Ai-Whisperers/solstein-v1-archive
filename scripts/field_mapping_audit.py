@@ -198,8 +198,8 @@ from typing import Any
 # Setup PYTHONPATH so solstein package is importable when run directly
 sys.path.insert(0, str(_Path(__file__).resolve().parent.parent / "src"))
 
-from solstein.data.loaders import convert_to_domain_company
 from solstein.domain.models import Company
+from solstein.runtime import convert_raw as convert_to_domain_company
 
 
 @dataclass

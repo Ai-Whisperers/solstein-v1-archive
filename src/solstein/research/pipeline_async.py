@@ -39,30 +39,49 @@ async def run_market_intelligence_async(
     seed_company: str,
     market: str,
     output_dir: Path,
-    max_companies: int = 25,
-    extra_keywords: list[str] | None = None,
-    strict_provenance: bool = True,
-    min_readiness_score: float | None = None,
-    max_contradictions: int | None = None,
-    min_total_sources: int | None = None,
-    min_sources_per_company: int | None = None,
-    db_dual_write: bool = False,
-    max_concurrent: int = 5,
+    options: dict[str, object] | None = None,
+    **legacy_kwargs: object,
 ) -> dict[str, object]:
     """Execute async market intelligence research pipeline.
 
     EPIC-023: Converted to async for improved performance through concurrent execution.
+    STORY-257: Refactored to use options dict (matches sync pipeline signature).
 
     Args:
-        max_concurrent: Maximum number of concurrent operations per stage
+        seed_company: Name of the seed company to research.
+        market: Market vertical to analyze.
+        output_dir: Directory for pipeline output artifacts.
+        options: Pipeline options dict. Supported keys:
+            max_companies (int): Max companies to discover (default: 25).
+            extra_keywords (list[str]): Additional search keywords.
+            strict_provenance (bool): Enforce provenance validation (default: True).
+            min_readiness_score (float): Minimum evidence readiness score.
+            max_contradictions (int): Maximum allowed contradictions.
+            min_total_sources (int): Minimum total source count gate.
+            min_sources_per_company (int): Minimum sources per company gate.
+            db_dual_write (bool): Enable database dual-write (default: False).
+            max_concurrent (int): Max concurrent operations per stage (default: 5).
+        **legacy_kwargs: Backward-compatible keyword arguments (merged into options).
     """
+    merged: dict[str, object] = dict(options or {})
+    merged.update(legacy_kwargs)
+
+    max_companies: int = int(merged.get("max_companies", 25))  # type: ignore[arg-type]
+    extra_keywords: list[str] | None = merged.get("extra_keywords")  # type: ignore[assignment]
+    strict_provenance: bool = bool(merged.get("strict_provenance", True))
+    min_readiness_score: float | None = merged.get("min_readiness_score")  # type: ignore[assignment]
+    max_contradictions: int | None = merged.get("max_contradictions")  # type: ignore[assignment]
+    min_total_sources: int | None = merged.get("min_total_sources")  # type: ignore[assignment]
+    min_sources_per_company: int | None = merged.get("min_sources_per_company")  # type: ignore[assignment]
+    db_dual_write: bool = bool(merged.get("db_dual_write", False))
+
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Build adapter registry from settings
-    from solstein.adapters.registry import build_default_registry
+    from solstein.runtime import get_registry
 
     settings = Settings.load()
-    registry = build_default_registry(settings)
+    registry = get_registry(settings)
     batch_id = uuid.uuid4().hex[:12]
     logger.info(
         "Async pipeline run batch_id={}, registry has {} discovery + {} enrichment sources",

@@ -51,14 +51,14 @@ class SECEDGARRefreshConnector(BaseRefreshConnector):
                         fact = self._convert_filing_to_fact(result)
                         facts.append(fact)
 
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         logger.warning(f"Failed to fetch {ticker} {year} 10-K: {e}")
                         continue
 
                 # Fetch 10-Q filings for the last quarter
                 try:
-                    current_year = datetime.now().year
-                    current_quarter = (datetime.now().month - 1) // 3 + 1
+                    current_year = datetime.now(tz=timezone.utc).year
+                    current_quarter = (datetime.now(tz=timezone.utc).month - 1) // 3 + 1
 
                     for quarter in range(current_quarter, 0, -1):
                         # SEC EDGAR doesn't support quarter-based fetching directly,
@@ -68,11 +68,11 @@ class SECEDGARRefreshConnector(BaseRefreshConnector):
                         facts.append(fact)
                         break  # Only need most recent
 
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning(f"Failed to fetch {ticker} recent 10-Q: {e}")
                     continue
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"Failed to process company {company_id}: {e}")
                 continue
 
@@ -97,7 +97,7 @@ class SECEDGARRefreshConnector(BaseRefreshConnector):
             "fact_type": "financial_report",
             "value": metrics,
             "confidence": filing.get("confidence", 0.95),
-            "extracted_at": datetime.now(),
+            "extracted_at": datetime.now(tz=timezone.utc),
             "source": "sec_edgar",
             "metadata": {
                 "accession_no": filing.get("accession_no"),
@@ -121,7 +121,7 @@ class SECEDGARRefreshConnector(BaseRefreshConnector):
                     report_dt = datetime.fromisoformat(report_date)
                     if report_dt > since:
                         filtered_facts.append(fact)
-                except Exception:
+                except Exception:  # noqa: BLE001
                     # If date parsing fails, include the fact
                     filtered_facts.append(fact)
             else:

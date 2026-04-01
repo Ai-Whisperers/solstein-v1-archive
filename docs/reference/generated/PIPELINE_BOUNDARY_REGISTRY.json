@@ -1,0 +1,2732 @@
+[
+  {
+    "source_file": "adapters/base.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 20
+  },
+  {
+    "source_file": "adapters/base.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.conflict_resolution.SourceAuthority",
+    "line": 21
+  },
+  {
+    "source_file": "adapters/base.py",
+    "source_layer": "adapters",
+    "target_layer": "research",
+    "imported": "solstein.research.discovery.DiscoveryCandidate",
+    "line": 22
+  },
+  {
+    "source_file": "adapters/discovery/competitor_json.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 16
+  },
+  {
+    "source_file": "adapters/discovery/competitor_json.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.conflict_resolution.SourceAuthority",
+    "line": 17
+  },
+  {
+    "source_file": "adapters/discovery/competitor_json.py",
+    "source_layer": "adapters",
+    "target_layer": "research",
+    "imported": "solstein.research.discovery.DiscoveryCandidate",
+    "line": 38
+  },
+  {
+    "source_file": "adapters/discovery/competitor_json.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.loaders.CompetitorDataLoader",
+    "line": 41
+  },
+  {
+    "source_file": "adapters/discovery/static_catalog.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 16
+  },
+  {
+    "source_file": "adapters/discovery/static_catalog.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.conflict_resolution.SourceAuthority",
+    "line": 17
+  },
+  {
+    "source_file": "adapters/discovery/static_catalog.py",
+    "source_layer": "adapters",
+    "target_layer": "research",
+    "imported": "solstein.research.discovery.DiscoveryCandidate",
+    "line": 18
+  },
+  {
+    "source_file": "adapters/discovery/web_search.py",
+    "source_layer": "adapters",
+    "target_layer": "research",
+    "imported": "solstein.research.discovery.DiscoveryCandidate",
+    "line": 30
+  },
+  {
+    "source_file": "adapters/discovery/web_search.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.web_search_client.search_company_info",
+    "line": 33
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/funding_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 20
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/funding_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.additional_sources.AdditionalDataSources",
+    "line": 21
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/funding_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 22
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/funding_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.conflict_resolution.SourceAuthority",
+    "line": 23
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/funding_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.DatabaseManager",
+    "line": 24
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/funding_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.db_manager",
+    "line": 25
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/funding_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.refresh.BaseRefreshConnector",
+    "line": 26
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/funding_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "research",
+    "imported": "solstein.research.discovery.DiscoveryCandidate",
+    "line": 27
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/linkedin_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.RawDataSource",
+    "line": 16
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/linkedin_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.conflict_resolution.SourceAuthority",
+    "line": 17
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/linkedin_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.refresh.BaseRefreshConnector",
+    "line": 18
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/linkedin_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "research",
+    "imported": "solstein.research.discovery.DiscoveryCandidate",
+    "line": 19
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/linkedin_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.additional_sources.AdditionalDataSources",
+    "line": 44
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/news_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 20
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/news_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.RawDataSource",
+    "line": 21
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/news_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.conflict_resolution.SourceAuthority",
+    "line": 22
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/news_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.DatabaseManager",
+    "line": 23
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/news_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.db_manager",
+    "line": 24
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/news_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.refresh.BaseRefreshConnector",
+    "line": 25
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/news_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "research",
+    "imported": "solstein.research.discovery.DiscoveryCandidate",
+    "line": 26
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/patents_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.patent_client.search_company_patents",
+    "line": 18
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/patents_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 19
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/patents_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.conflict_resolution.SourceAuthority",
+    "line": 20
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/patents_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.refresh.BaseRefreshConnector",
+    "line": 21
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/patents_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "research",
+    "imported": "solstein.research.discovery.DiscoveryCandidate",
+    "line": 22
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/web_search_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.web_search_client.search_company_info",
+    "line": 19
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/web_search_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 23
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/web_search_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.conflict_resolution.SourceAuthority",
+    "line": 24
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/web_search_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.DatabaseManager",
+    "line": 25
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/web_search_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.db_manager",
+    "line": 26
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/web_search_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.refresh.BaseRefreshConnector",
+    "line": 27
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/web_search_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "research",
+    "imported": "solstein.research.discovery.DiscoveryCandidate",
+    "line": 28
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/website_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 20
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/website_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.RawDataSource",
+    "line": 21
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/website_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.conflict_resolution.SourceAuthority",
+    "line": 22
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/website_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.DatabaseManager",
+    "line": 23
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/website_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.db_manager",
+    "line": 24
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/website_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.refresh.BaseRefreshConnector",
+    "line": 25
+  },
+  {
+    "source_file": "adapters/enrichment/_retired/website_unified.py",
+    "source_layer": "adapters",
+    "target_layer": "research",
+    "imported": "solstein.research.discovery.DiscoveryCandidate",
+    "line": 26
+  },
+  {
+    "source_file": "adapters/enrichment/funding.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 11
+  },
+  {
+    "source_file": "adapters/enrichment/funding.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.additional_sources.AdditionalDataSources",
+    "line": 36
+  },
+  {
+    "source_file": "adapters/enrichment/global_market.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 12
+  },
+  {
+    "source_file": "adapters/enrichment/global_market.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.fetchers.GlobalMarketLoader",
+    "line": 36
+  },
+  {
+    "source_file": "adapters/enrichment/linkedin.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 12
+  },
+  {
+    "source_file": "adapters/enrichment/linkedin.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.additional_sources.AdditionalDataSources",
+    "line": 36
+  },
+  {
+    "source_file": "adapters/enrichment/news.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 11
+  },
+  {
+    "source_file": "adapters/enrichment/news.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.additional_sources.AdditionalDataSources",
+    "line": 37
+  },
+  {
+    "source_file": "adapters/enrichment/patents.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 15
+  },
+  {
+    "source_file": "adapters/enrichment/patents.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.patent_client.search_company_patents",
+    "line": 43
+  },
+  {
+    "source_file": "adapters/enrichment/web_search_news.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 12
+  },
+  {
+    "source_file": "adapters/enrichment/web_search_news.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.web_search_client.search_company_news",
+    "line": 33
+  },
+  {
+    "source_file": "adapters/enrichment/website.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 11
+  },
+  {
+    "source_file": "adapters/enrichment/website.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.additional_sources.AdditionalDataSources",
+    "line": 35
+  },
+  {
+    "source_file": "adapters/enrichment/yahoo_finance.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 12
+  },
+  {
+    "source_file": "adapters/enrichment/yahoo_finance.py",
+    "source_layer": "adapters",
+    "target_layer": "data",
+    "imported": "solstein.data.company_research.CompanyResearcher",
+    "line": 36
+  },
+  {
+    "source_file": "adapters/instrumented.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.DataSourceType",
+    "line": 17
+  },
+  {
+    "source_file": "adapters/instrumented.py",
+    "source_layer": "adapters",
+    "target_layer": "research",
+    "imported": "solstein.research.discovery.DiscoveryCandidate",
+    "line": 18
+  },
+  {
+    "source_file": "adapters/protocols.py",
+    "source_layer": "adapters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.AggregatedDataRecord",
+    "line": 18
+  },
+  {
+    "source_file": "adapters/protocols.py",
+    "source_layer": "adapters",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.conflict_resolution.SourceAuthority",
+    "line": 24
+  },
+  {
+    "source_file": "adapters/protocols.py",
+    "source_layer": "adapters",
+    "target_layer": "research",
+    "imported": "solstein.research.discovery.DiscoveryCandidate",
+    "line": 25
+  },
+  {
+    "source_file": "adapters/registry.py",
+    "source_layer": "adapters",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 19
+  },
+  {
+    "source_file": "agents/companies_house_agent.py",
+    "source_layer": "agents",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 14
+  },
+  {
+    "source_file": "agents/financial_backends.py",
+    "source_layer": "agents",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 20
+  },
+  {
+    "source_file": "agents/financial_backends.py",
+    "source_layer": "agents",
+    "target_layer": "connectors",
+    "imported": "solstein.connectors.base.RawData",
+    "line": 21
+  },
+  {
+    "source_file": "agents/financial_backends.py",
+    "source_layer": "agents",
+    "target_layer": "connectors",
+    "imported": "solstein.connectors.financial.yahoo_finance.YahooFinanceConnector",
+    "line": 173
+  },
+  {
+    "source_file": "agents/financial_backends.py",
+    "source_layer": "agents",
+    "target_layer": "connectors",
+    "imported": "solstein.connectors.financial.AlphaVantageConnector",
+    "line": 206
+  },
+  {
+    "source_file": "agents/github/client.py",
+    "source_layer": "agents",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 15
+  },
+  {
+    "source_file": "agents/github_agent.py",
+    "source_layer": "agents",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 11
+  },
+  {
+    "source_file": "agents/news_backends.py",
+    "source_layer": "agents",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 13
+  },
+  {
+    "source_file": "agents/news_backends.py",
+    "source_layer": "agents",
+    "target_layer": "connectors",
+    "imported": "solstein.connectors.base.RawData",
+    "line": 14
+  },
+  {
+    "source_file": "agents/news_backends.py",
+    "source_layer": "agents",
+    "target_layer": "connectors",
+    "imported": "solstein.connectors.news.gdelt.GDELTConnector",
+    "line": 15
+  },
+  {
+    "source_file": "agents/news_backends.py",
+    "source_layer": "agents",
+    "target_layer": "connectors",
+    "imported": "solstein.connectors.news.rss.RSSFeedConnector",
+    "line": 16
+  },
+  {
+    "source_file": "agents/news_backends.py",
+    "source_layer": "agents",
+    "target_layer": "connectors",
+    "imported": "solstein.connectors.news.newsapi.NewsAPIConnector",
+    "line": 132
+  },
+  {
+    "source_file": "agents/resilience.py",
+    "source_layer": "agents",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 22
+  },
+  {
+    "source_file": "agents/search_backends.py",
+    "source_layer": "agents",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 14
+  },
+  {
+    "source_file": "agents/search_backends.py",
+    "source_layer": "agents",
+    "target_layer": "connectors",
+    "imported": "solstein.connectors.search.searxng.SearchResult",
+    "line": 15
+  },
+  {
+    "source_file": "agents/web_search_agent.py",
+    "source_layer": "agents",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 18
+  },
+  {
+    "source_file": "analytics/ai_readiness.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 39
+  },
+  {
+    "source_file": "analytics/ai_transformation_calculator.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 34
+  },
+  {
+    "source_file": "analytics/classification.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 19
+  },
+  {
+    "source_file": "analytics/classification_service.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 23
+  },
+  {
+    "source_file": "analytics/competitive_mapping.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 22
+  },
+  {
+    "source_file": "analytics/confidence_integration.py",
+    "source_layer": "analytics",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.confidence_adjustment.ConfidenceAdjuster",
+    "line": 11
+  },
+  {
+    "source_file": "analytics/confidence_weighting.py",
+    "source_layer": "analytics",
+    "target_layer": "core",
+    "imported": "solstein.core.scoring_utils.confidence_level_to_weight",
+    "line": 7
+  },
+  {
+    "source_file": "analytics/confidence_weighting.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 11
+  },
+  {
+    "source_file": "analytics/energy_compliance.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 28
+  },
+  {
+    "source_file": "analytics/energy_grid_infrastructure.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 31
+  },
+  {
+    "source_file": "analytics/energy_market_forecasting.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 28
+  },
+  {
+    "source_file": "analytics/energy_sector.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 21
+  },
+  {
+    "source_file": "analytics/energy_trading_infrastructure.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 30
+  },
+  {
+    "source_file": "analytics/equity_analysis.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 26
+  },
+  {
+    "source_file": "analytics/signals/extractors.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.SignalExtraction",
+    "line": 9
+  },
+  {
+    "source_file": "analytics/tam_analysis.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 27
+  },
+  {
+    "source_file": "analytics/tier_classification.py",
+    "source_layer": "analytics",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 9
+  },
+  {
+    "source_file": "api/exceptions.py",
+    "source_layer": "api",
+    "target_layer": "exceptions",
+    "imported": "solstein.exceptions.SolsteinError",
+    "line": 27
+  },
+  {
+    "source_file": "api/main.py",
+    "source_layer": "api",
+    "target_layer": "config",
+    "imported": "solstein.config.ConfigurationError",
+    "line": 27
+  },
+  {
+    "source_file": "api/main.py",
+    "source_layer": "api",
+    "target_layer": "core",
+    "imported": "solstein.core.production_hardening.FeatureFlagManager",
+    "line": 28
+  },
+  {
+    "source_file": "api/main.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.cache_warming.warm_cache",
+    "line": 34
+  },
+  {
+    "source_file": "api/main.py",
+    "source_layer": "api",
+    "target_layer": "monitoring",
+    "imported": "solstein.monitoring.profiling.dashboard.router",
+    "line": 187
+  },
+  {
+    "source_file": "api/main.py",
+    "source_layer": "api",
+    "target_layer": "monitoring",
+    "imported": "solstein.monitoring.metrics.PrometheusMiddleware",
+    "line": 192
+  },
+  {
+    "source_file": "api/main.py",
+    "source_layer": "api",
+    "target_layer": "observability",
+    "imported": "solstein.observability.tracing.init_tracing",
+    "line": 98
+  },
+  {
+    "source_file": "api/main.py",
+    "source_layer": "api",
+    "target_layer": "monitoring",
+    "imported": "solstein.monitoring.profiler.enable_profiling",
+    "line": 112
+  },
+  {
+    "source_file": "api/main.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.cache.CacheManager",
+    "line": 121
+  },
+  {
+    "source_file": "api/middleware/audit.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.get_async_engine",
+    "line": 160
+  },
+  {
+    "source_file": "api/middleware/audit.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.audit.DataAccessAuditRecord",
+    "line": 161
+  },
+  {
+    "source_file": "api/middleware/security.py",
+    "source_layer": "api",
+    "target_layer": "core",
+    "imported": "solstein.core.supabase_client.get_supabase",
+    "line": 146
+  },
+  {
+    "source_file": "api/middleware/tenant.py",
+    "source_layer": "api",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 32
+  },
+  {
+    "source_file": "api/middleware/tenant.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.get_async_engine",
+    "line": 165
+  },
+  {
+    "source_file": "api/middleware/tenant.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database_models.TenantRecord",
+    "line": 166
+  },
+  {
+    "source_file": "api/routers/admin_dlq.py",
+    "source_layer": "api",
+    "target_layer": "worker",
+    "imported": "solstein.worker.dlq.list_failed_tasks",
+    "line": 26
+  },
+  {
+    "source_file": "api/routers/admin_dlq.py",
+    "source_layer": "api",
+    "target_layer": "celery_config",
+    "imported": "solstein.celery_config.celery_app",
+    "line": 191
+  },
+  {
+    "source_file": "api/routers/async_jobs.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.security_hardening.input_validator",
+    "line": 29
+  },
+  {
+    "source_file": "api/routers/async_jobs.py",
+    "source_layer": "api",
+    "target_layer": "tenant",
+    "imported": "solstein.tenant.context.get_current_tenant",
+    "line": 30
+  },
+  {
+    "source_file": "api/routers/async_jobs.py",
+    "source_layer": "api",
+    "target_layer": "celery_config",
+    "imported": "solstein.celery_config.celery_app",
+    "line": 21
+  },
+  {
+    "source_file": "api/routers/dashboard.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.get_async_session",
+    "line": 20
+  },
+  {
+    "source_file": "api/routers/dashboard.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database_models.CompanyRecord",
+    "line": 21
+  },
+  {
+    "source_file": "api/routers/drill_down.py",
+    "source_layer": "api",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.CompanyAnalysisAuditTrail",
+    "line": 3
+  },
+  {
+    "source_file": "api/routers/enrichment_audit.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.security_hardening.audit_logger",
+    "line": 13
+  },
+  {
+    "source_file": "api/routers/enrichment_base.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.unified_loader.unified_loader",
+    "line": 13
+  },
+  {
+    "source_file": "api/routers/enrichment_base.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.db_manager",
+    "line": 14
+  },
+  {
+    "source_file": "api/routers/enrichment_base.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.enrichment_repositories.EnrichmentAuditRepository",
+    "line": 15
+  },
+  {
+    "source_file": "api/routers/enrichment_batch.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.security_hardening.input_validator",
+    "line": 18
+  },
+  {
+    "source_file": "api/routers/enrichment_batch.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.unified_loader.UnifiedCompany",
+    "line": 19
+  },
+  {
+    "source_file": "api/routers/enrichment_cache.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.security_hardening.rate_limiter",
+    "line": 13
+  },
+  {
+    "source_file": "api/routers/enrichment_health.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.security_hardening.rate_limiter",
+    "line": 13
+  },
+  {
+    "source_file": "api/routers/enrichment_metrics.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.security_hardening.rate_limiter",
+    "line": 13
+  },
+  {
+    "source_file": "api/routers/enrichment_single.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.security_hardening.audit_logger",
+    "line": 13
+  },
+  {
+    "source_file": "api/routers/enrichment_single.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.unified_loader.UnifiedCompany",
+    "line": 14
+  },
+  {
+    "source_file": "api/routers/exports_helpers.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.get_async_engine",
+    "line": 26
+  },
+  {
+    "source_file": "api/routers/exports_helpers.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.export.ExportJobRecord",
+    "line": 27
+  },
+  {
+    "source_file": "api/routers/exports_helpers.py",
+    "source_layer": "api",
+    "target_layer": "worker",
+    "imported": "solstein.worker.export_tasks.generate_export",
+    "line": 50
+  },
+  {
+    "source_file": "api/routers/exports_helpers.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.get_async_engine",
+    "line": 66
+  },
+  {
+    "source_file": "api/routers/exports_helpers.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.export.ExportJobRecord",
+    "line": 67
+  },
+  {
+    "source_file": "api/routers/exports_helpers.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.get_async_engine",
+    "line": 94
+  },
+  {
+    "source_file": "api/routers/exports_helpers.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.export.ExportJobRecord",
+    "line": 95
+  },
+  {
+    "source_file": "api/routers/exports_helpers.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.get_async_engine",
+    "line": 143
+  },
+  {
+    "source_file": "api/routers/exports_helpers.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.export.ExportJobRecord",
+    "line": 144
+  },
+  {
+    "source_file": "api/routers/exports_helpers.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.get_async_engine",
+    "line": 191
+  },
+  {
+    "source_file": "api/routers/exports_helpers.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.export.ExportJobRecord",
+    "line": 192
+  },
+  {
+    "source_file": "api/routers/exports_helpers.py",
+    "source_layer": "api",
+    "target_layer": "celery_config",
+    "imported": "solstein.celery_config.celery_app",
+    "line": 172
+  },
+  {
+    "source_file": "api/routers/health.py",
+    "source_layer": "api",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 174
+  },
+  {
+    "source_file": "api/routers/review.py",
+    "source_layer": "api",
+    "target_layer": "review_queue",
+    "imported": "solstein.review_queue.ReviewQueueEntry",
+    "line": 25
+  },
+  {
+    "source_file": "api/routers/review.py",
+    "source_layer": "api",
+    "target_layer": "research",
+    "imported": "solstein.research.graph.executor._get_default_executor",
+    "line": 165
+  },
+  {
+    "source_file": "api/routers/scoring.py",
+    "source_layer": "api",
+    "target_layer": "analytics",
+    "imported": "solstein.analytics.classification_service.ClassificationService",
+    "line": 9
+  },
+  {
+    "source_file": "api/routers/scoring.py",
+    "source_layer": "api",
+    "target_layer": "analytics",
+    "imported": "solstein.analytics.company_loader.unified_score_loader",
+    "line": 10
+  },
+  {
+    "source_file": "api/routers/scoring.py",
+    "source_layer": "api",
+    "target_layer": "analytics",
+    "imported": "solstein.analytics.constants.PHOENIX_SCORE_THRESHOLD",
+    "line": 11
+  },
+  {
+    "source_file": "api/routers/scoring.py",
+    "source_layer": "api",
+    "target_layer": "analytics",
+    "imported": "solstein.analytics.scoring.GrowthScorer",
+    "line": 12
+  },
+  {
+    "source_file": "api/routers/scoring.py",
+    "source_layer": "api",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 15
+  },
+  {
+    "source_file": "api/routers/scoring.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.adjudication.AdjudicationDecision",
+    "line": 16
+  },
+  {
+    "source_file": "api/routers/scoring.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.report_release_gate.ReportReleaseGate",
+    "line": 17
+  },
+  {
+    "source_file": "api/schemas/validation.py",
+    "source_layer": "api",
+    "target_layer": "domain",
+    "imported": "solstein.domain.constants.ALLOWED_SEARCH_FIELDS",
+    "line": 8
+  },
+  {
+    "source_file": "api/services/enrichment_service.py",
+    "source_layer": "api",
+    "target_layer": "data",
+    "imported": "solstein.data.unified_loader.UnifiedCompany",
+    "line": 11
+  },
+  {
+    "source_file": "api/services/enrichment_service.py",
+    "source_layer": "api",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.enrichment_repositories.EnrichmentAuditRepository",
+    "line": 12
+  },
+  {
+    "source_file": "api/websocket/realtime_listener.py",
+    "source_layer": "api",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 102
+  },
+  {
+    "source_file": "application/agents/__init__.py",
+    "source_layer": "application",
+    "target_layer": "agents",
+    "imported": "solstein.agents.base_agent.AgentTaskResult",
+    "line": 1
+  },
+  {
+    "source_file": "application/agents/__init__.py",
+    "source_layer": "application",
+    "target_layer": "agents",
+    "imported": "solstein.agents.companies_house_agent.CompaniesHouseAgent",
+    "line": 2
+  },
+  {
+    "source_file": "application/agents/__init__.py",
+    "source_layer": "application",
+    "target_layer": "agents",
+    "imported": "solstein.agents.github_agent.GitHubAgent",
+    "line": 3
+  },
+  {
+    "source_file": "application/agents/__init__.py",
+    "source_layer": "application",
+    "target_layer": "agents",
+    "imported": "solstein.agents.resilience.COMPANIES_HOUSE_RETRY_CONFIG",
+    "line": 4
+  },
+  {
+    "source_file": "application/agents/__init__.py",
+    "source_layer": "application",
+    "target_layer": "agents",
+    "imported": "solstein.agents.web_search_agent.WebSearchAgent",
+    "line": 11
+  },
+  {
+    "source_file": "application/agents/base_agent.py",
+    "source_layer": "application",
+    "target_layer": "agents",
+    "imported": "solstein.agents.base_agent.AgentTaskResult",
+    "line": 1
+  },
+  {
+    "source_file": "application/agents/companies_house_agent.py",
+    "source_layer": "application",
+    "target_layer": "agents",
+    "imported": "solstein.agents.companies_house_agent.CompaniesHouseAgent",
+    "line": 1
+  },
+  {
+    "source_file": "application/agents/github_agent.py",
+    "source_layer": "application",
+    "target_layer": "agents",
+    "imported": "solstein.agents.github_agent.GitHubAgent",
+    "line": 1
+  },
+  {
+    "source_file": "application/agents/resilience.py",
+    "source_layer": "application",
+    "target_layer": "agents",
+    "imported": "solstein.agents.resilience.COMPANIES_HOUSE_RETRY_CONFIG",
+    "line": 1
+  },
+  {
+    "source_file": "application/agents/web_search_agent.py",
+    "source_layer": "application",
+    "target_layer": "agents",
+    "imported": "solstein.agents.web_search_agent.WebSearchAgent",
+    "line": 1
+  },
+  {
+    "source_file": "application/analytics/filters/llm.py",
+    "source_layer": "application",
+    "target_layer": "analytics",
+    "imported": "solstein.analytics.filters.llm.FilterResponse",
+    "line": 1
+  },
+  {
+    "source_file": "application/due_diligence/checklist.py",
+    "source_layer": "application",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 14
+  },
+  {
+    "source_file": "application/due_diligence/engine.py",
+    "source_layer": "application",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 26
+  },
+  {
+    "source_file": "application/due_diligence/red_flags.py",
+    "source_layer": "application",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 15
+  },
+  {
+    "source_file": "application/enrichment_pipeline.py",
+    "source_layer": "application",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.registry.SourceRegistry",
+    "line": 29
+  },
+  {
+    "source_file": "application/enrichment_pipeline.py",
+    "source_layer": "application",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.AggregatedDataRecord",
+    "line": 30
+  },
+  {
+    "source_file": "application/exporters/llm.py",
+    "source_layer": "application",
+    "target_layer": "exporters",
+    "imported": "solstein.exporters.llm.LLMReportEnhancer",
+    "line": 1
+  },
+  {
+    "source_file": "application/roadmap_generator.py",
+    "source_layer": "application",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 28
+  },
+  {
+    "source_file": "application/services/semantic_search_service.py",
+    "source_layer": "application",
+    "target_layer": "api",
+    "imported": "solstein.api.schemas.semantic_search.SemanticSearchRequest",
+    "line": 22
+  },
+  {
+    "source_file": "application/services/semantic_search_service.py",
+    "source_layer": "application",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.embedding_repository.SimilaritySearchParams",
+    "line": 27
+  },
+  {
+    "source_file": "application/services/semantic_search_service.py",
+    "source_layer": "application",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 30
+  },
+  {
+    "source_file": "application/services/semantic_search_service.py",
+    "source_layer": "application",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.embedding_repository.EmbeddingRepository",
+    "line": 31
+  },
+  {
+    "source_file": "application/services/semantic_search_service.py",
+    "source_layer": "application",
+    "target_layer": "llm",
+    "imported": "solstein.llm.embeddings.generate_embedding",
+    "line": 174
+  },
+  {
+    "source_file": "celery_config.py",
+    "source_layer": "celery_config.py",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 22
+  },
+  {
+    "source_file": "config.py",
+    "source_layer": "config.py",
+    "target_layer": "_config_timeouts",
+    "imported": "solstein._config_timeouts.CeleryTimingConfig",
+    "line": 11
+  },
+  {
+    "source_file": "config.py",
+    "source_layer": "config.py",
+    "target_layer": "utils",
+    "imported": "solstein.utils.logging.setup_logging",
+    "line": 12
+  },
+  {
+    "source_file": "config.py",
+    "source_layer": "config.py",
+    "target_layer": "config_template",
+    "imported": "solstein.config_template.ENV_TEMPLATE",
+    "line": 469
+  },
+  {
+    "source_file": "core/feature_flags.py",
+    "source_layer": "core",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 12
+  },
+  {
+    "source_file": "core/scoring_utils.py",
+    "source_layer": "core",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 11
+  },
+  {
+    "source_file": "core/supabase_client.py",
+    "source_layer": "core",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 18
+  },
+  {
+    "source_file": "data/adjudication.py",
+    "source_layer": "data",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 8
+  },
+  {
+    "source_file": "data/competitor_loader.py",
+    "source_layer": "data",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 14
+  },
+  {
+    "source_file": "data/competitor_loader.py",
+    "source_layer": "data",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 16
+  },
+  {
+    "source_file": "data/connectors/companies_house_connector.py",
+    "source_layer": "data",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 34
+  },
+  {
+    "source_file": "data/connectors/github_connector.py",
+    "source_layer": "data",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 38
+  },
+  {
+    "source_file": "data/connectors/lookup_service.py",
+    "source_layer": "data",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 21
+  },
+  {
+    "source_file": "data/connectors/lookup_service.py",
+    "source_layer": "data",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.retry_policy.CircuitBreaker",
+    "line": 22
+  },
+  {
+    "source_file": "data/connectors/news_signal_detector.py",
+    "source_layer": "data",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 26
+  },
+  {
+    "source_file": "data/connectors/news_signal_detector.py",
+    "source_layer": "data",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.retry_policy.CircuitBreaker",
+    "line": 27
+  },
+  {
+    "source_file": "data/connectors/runtime.py",
+    "source_layer": "data",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 7
+  },
+  {
+    "source_file": "data/connectors/runtime.py",
+    "source_layer": "data",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.retry_policy.CircuitBreaker",
+    "line": 8
+  },
+  {
+    "source_file": "data/connectors/sec_edgar_connector.py",
+    "source_layer": "data",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 65
+  },
+  {
+    "source_file": "data/converters/company.py",
+    "source_layer": "data",
+    "target_layer": "core",
+    "imported": "solstein.core.scoring_utils.populate_signal_confidences",
+    "line": 17
+  },
+  {
+    "source_file": "data/converters/company.py",
+    "source_layer": "data",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.AIMaturity",
+    "line": 19
+  },
+  {
+    "source_file": "data/converters/company_extractors.py",
+    "source_layer": "data",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.AIMaturity",
+    "line": 15
+  },
+  {
+    "source_file": "data/eneve_enrichment_integration.py",
+    "source_layer": "data",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.registry.build_default_registry",
+    "line": 16
+  },
+  {
+    "source_file": "data/eneve_enrichment_integration.py",
+    "source_layer": "data",
+    "target_layer": "application",
+    "imported": "solstein.application.enrichment_pipeline.EnrichmentPipeline",
+    "line": 17
+  },
+  {
+    "source_file": "data/eneve_enrichment_integration.py",
+    "source_layer": "data",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 18
+  },
+  {
+    "source_file": "data/eneve_enrichment_integration.py",
+    "source_layer": "data",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.RawDataSource",
+    "line": 19
+  },
+  {
+    "source_file": "data/loader_orchestrator.py",
+    "source_layer": "data",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 16
+  },
+  {
+    "source_file": "data/parsers/confidence.py",
+    "source_layer": "data",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.ConfidenceLevel",
+    "line": 8
+  },
+  {
+    "source_file": "data/report_readiness.py",
+    "source_layer": "data",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 6
+  },
+  {
+    "source_file": "data/seed_db.py",
+    "source_layer": "data",
+    "target_layer": "core",
+    "imported": "solstein.core.scoring_utils.GrowthScorer",
+    "line": 5
+  },
+  {
+    "source_file": "data/unified/company.py",
+    "source_layer": "data",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 10
+  },
+  {
+    "source_file": "data/unified/merger.py",
+    "source_layer": "data",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 13
+  },
+  {
+    "source_file": "data/unified/merger.py",
+    "source_layer": "data",
+    "target_layer": "core",
+    "imported": "solstein.core.scoring_config.CompetitivePositionConfig",
+    "line": 178
+  },
+  {
+    "source_file": "data/unified/sec_edgar_helpers.py",
+    "source_layer": "data",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.ConfidenceLevel",
+    "line": 11
+  },
+  {
+    "source_file": "data/unified/unified.py",
+    "source_layer": "data",
+    "target_layer": "core",
+    "imported": "solstein.core.scoring_utils.populate_signal_confidences",
+    "line": 15
+  },
+  {
+    "source_file": "data/unified/unified.py",
+    "source_layer": "data",
+    "target_layer": "extractors",
+    "imported": "solstein.extractors.markdown_extractor.MarkdownExtractor",
+    "line": 18
+  },
+  {
+    "source_file": "data/unified/unified.py",
+    "source_layer": "data",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 88
+  },
+  {
+    "source_file": "data/web_research_pipeline.py",
+    "source_layer": "data",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.FinancialMetric",
+    "line": 300
+  },
+  {
+    "source_file": "domain/facts.py",
+    "source_layer": "domain",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database_models.Base",
+    "line": 22
+  },
+  {
+    "source_file": "domain/value_objects.py",
+    "source_layer": "domain",
+    "target_layer": "analytics",
+    "imported": "solstein.analytics.constants.MAX_SCORE",
+    "line": 24
+  },
+  {
+    "source_file": "domain/value_objects.py",
+    "source_layer": "domain",
+    "target_layer": "analytics",
+    "imported": "solstein.analytics.constants.PHOENIX_SCORE_THRESHOLD",
+    "line": 160
+  },
+  {
+    "source_file": "domain/value_objects.py",
+    "source_layer": "domain",
+    "target_layer": "analytics",
+    "imported": "solstein.analytics.constants.LEAD_SCORE_THRESHOLD",
+    "line": 165
+  },
+  {
+    "source_file": "exporters/csv.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 26
+  },
+  {
+    "source_file": "exporters/markdown/client.py",
+    "source_layer": "exporters",
+    "target_layer": "analytics",
+    "imported": "solstein.analytics.constants.derive_threat_level",
+    "line": 13
+  },
+  {
+    "source_file": "exporters/markdown/client.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 14
+  },
+  {
+    "source_file": "exporters/markdown/company.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 15
+  },
+  {
+    "source_file": "exporters/markdown/generator.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 19
+  },
+  {
+    "source_file": "exporters/markdown/generator.py",
+    "source_layer": "exporters",
+    "target_layer": "exceptions",
+    "imported": "solstein.exceptions.SyntheticDataBlockingError",
+    "line": 20
+  },
+  {
+    "source_file": "exporters/markdown/helpers.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 9
+  },
+  {
+    "source_file": "exporters/markdown/llm_enhanced.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 14
+  },
+  {
+    "source_file": "exporters/markdown/market.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 14
+  },
+  {
+    "source_file": "exporters/markdown/report_sections.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 14
+  },
+  {
+    "source_file": "exporters/markdown/report_strategies/base.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 10
+  },
+  {
+    "source_file": "exporters/markdown/report_strategies/corporate_history.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 8
+  },
+  {
+    "source_file": "exporters/markdown/report_strategies/deep_analysis.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 8
+  },
+  {
+    "source_file": "exporters/markdown/report_strategies/financial_growth.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 6
+  },
+  {
+    "source_file": "exporters/pdf.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 33
+  },
+  {
+    "source_file": "exporters/pdf_sections.py",
+    "source_layer": "exporters",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 19
+  },
+  {
+    "source_file": "exporters/storage.py",
+    "source_layer": "exporters",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 173
+  },
+  {
+    "source_file": "exporters/storage.py",
+    "source_layer": "exporters",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 222
+  },
+  {
+    "source_file": "exporters/storage.py",
+    "source_layer": "exporters",
+    "target_layer": "core",
+    "imported": "solstein.core.supabase_client.get_supabase",
+    "line": 80
+  },
+  {
+    "source_file": "infrastructure/cache_warming.py",
+    "source_layer": "infrastructure",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 48
+  },
+  {
+    "source_file": "infrastructure/circuit_breaker.py",
+    "source_layer": "infrastructure",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 15
+  },
+  {
+    "source_file": "infrastructure/connectors/companies_house_refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "data",
+    "imported": "solstein.data.connectors.companies_house_connector.CompaniesHouseConnector",
+    "line": 7
+  },
+  {
+    "source_file": "infrastructure/connectors/funding_refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "data",
+    "imported": "solstein.data.additional_sources.AdditionalDataSources",
+    "line": 12
+  },
+  {
+    "source_file": "infrastructure/connectors/github_refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "data",
+    "imported": "solstein.data.connectors.github_connector.GitHubConnector",
+    "line": 7
+  },
+  {
+    "source_file": "infrastructure/connectors/global_market_refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "data",
+    "imported": "solstein.data.fetchers.GlobalMarketLoader",
+    "line": 13
+  },
+  {
+    "source_file": "infrastructure/connectors/linkedin_refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "data",
+    "imported": "solstein.data.additional_sources.AdditionalDataSources",
+    "line": 13
+  },
+  {
+    "source_file": "infrastructure/connectors/news_refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "data",
+    "imported": "solstein.data.additional_sources.AdditionalDataSources",
+    "line": 13
+  },
+  {
+    "source_file": "infrastructure/connectors/news_signal_refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "data",
+    "imported": "solstein.data.connectors.news_signal_detector.NewsSignalDetector",
+    "line": 8
+  },
+  {
+    "source_file": "infrastructure/connectors/patents_refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "data",
+    "imported": "solstein.data.patent_client.search_company_patents",
+    "line": 13
+  },
+  {
+    "source_file": "infrastructure/connectors/sec_edgar_refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "data",
+    "imported": "solstein.data.connectors.sec_edgar_connector.SECEdgarConnector",
+    "line": 7
+  },
+  {
+    "source_file": "infrastructure/connectors/web_search_refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "data",
+    "imported": "solstein.data.web_search_client.search_company_info",
+    "line": 66
+  },
+  {
+    "source_file": "infrastructure/connectors/website_refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "data",
+    "imported": "solstein.data.additional_sources.AdditionalDataSources",
+    "line": 12
+  },
+  {
+    "source_file": "infrastructure/connectors/yahoo_finance_refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "data",
+    "imported": "solstein.data.company_research.CompanyResearcher",
+    "line": 13
+  },
+  {
+    "source_file": "infrastructure/outbox_worker.py",
+    "source_layer": "infrastructure",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 16
+  },
+  {
+    "source_file": "infrastructure/reconcile_runs.py",
+    "source_layer": "infrastructure",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 10
+  },
+  {
+    "source_file": "infrastructure/reconcile_runs.py",
+    "source_layer": "infrastructure",
+    "target_layer": "research",
+    "imported": "solstein.research.hashing.canonical_json_dumps",
+    "line": 12
+  },
+  {
+    "source_file": "infrastructure/refresh.py",
+    "source_layer": "infrastructure",
+    "target_layer": "domain",
+    "imported": "solstein.domain.facts.Fact",
+    "line": 13
+  },
+  {
+    "source_file": "infrastructure/repositories.py",
+    "source_layer": "infrastructure",
+    "target_layer": "domain",
+    "imported": "solstein.domain.facts.Fact",
+    "line": 11
+  },
+  {
+    "source_file": "infrastructure/research_dual_write.py",
+    "source_layer": "infrastructure",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 236
+  },
+  {
+    "source_file": "infrastructure/research_persistence.py",
+    "source_layer": "infrastructure",
+    "target_layer": "research",
+    "imported": "solstein.research.sources.canonicalize_url",
+    "line": 14
+  },
+  {
+    "source_file": "infrastructure/test_cleanup.py",
+    "source_layer": "infrastructure",
+    "target_layer": "domain",
+    "imported": "solstein.domain.facts.Fact",
+    "line": 10
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.protocols.DiscoverySource",
+    "line": 11
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 16
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.discovery.competitor_json.CompetitorJsonSource",
+    "line": 175
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.discovery.static_catalog.StaticCatalogSource",
+    "line": 176
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.enrichment.global_market.GlobalMarketEnrichment",
+    "line": 177
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.enrichment.linkedin.LinkedInEnrichment",
+    "line": 178
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.enrichment.patents.PatentEnrichment",
+    "line": 179
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.enrichment.website.WebsiteEnrichment",
+    "line": 180
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.enrichment.yahoo_finance.YahooFinanceEnrichment",
+    "line": 181
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.enrichment.news.NewsEnrichment",
+    "line": 196
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.enrichment.funding.FundingEnrichment",
+    "line": 201
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.discovery.web_search.WebSearchDiscoverySource",
+    "line": 211
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.enrichment.web_search_news.WebSearchNewsEnrichment",
+    "line": 212
+  },
+  {
+    "source_file": "infrastructure/unified_registry.py",
+    "source_layer": "infrastructure",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 244
+  },
+  {
+    "source_file": "intelligence/deep_analyzer.py",
+    "source_layer": "intelligence",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 12
+  },
+  {
+    "source_file": "intelligence/report_generator.py",
+    "source_layer": "intelligence",
+    "target_layer": "evidence",
+    "imported": "solstein.evidence.models.Claim",
+    "line": 9
+  },
+  {
+    "source_file": "llm/embeddings.py",
+    "source_layer": "llm",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 23
+  },
+  {
+    "source_file": "llm/embeddings.py",
+    "source_layer": "llm",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 24
+  },
+  {
+    "source_file": "llm/health/checker.py",
+    "source_layer": "llm",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 8
+  },
+  {
+    "source_file": "llm/health/clients.py",
+    "source_layer": "llm",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 7
+  },
+  {
+    "source_file": "llm/query/ollama.py",
+    "source_layer": "llm",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 11
+  },
+  {
+    "source_file": "migrations/load_competitor_data.py",
+    "source_layer": "migrations",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database_models.CompanyRecord",
+    "line": 21
+  },
+  {
+    "source_file": "migrations/load_competitor_data.py",
+    "source_layer": "migrations",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 175
+  },
+  {
+    "source_file": "monitoring/business_metrics.py",
+    "source_layer": "monitoring",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database_models.CompanyRecord",
+    "line": 18
+  },
+  {
+    "source_file": "presentation/adaptive_templates.py",
+    "source_layer": "presentation",
+    "target_layer": "analytics",
+    "imported": "solstein.analytics.completeness.CompletenessCalculator",
+    "line": 11
+  },
+  {
+    "source_file": "presentation/adaptive_templates.py",
+    "source_layer": "presentation",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 12
+  },
+  {
+    "source_file": "presentation/data_quality_indicators.py",
+    "source_layer": "presentation",
+    "target_layer": "analytics",
+    "imported": "solstein.analytics.completeness.CompletenessCalculator",
+    "line": 10
+  },
+  {
+    "source_file": "presentation/data_quality_indicators.py",
+    "source_layer": "presentation",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 11
+  },
+  {
+    "source_file": "presentation/narrative_consistency_checker.py",
+    "source_layer": "presentation",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.AIMaturity",
+    "line": 8
+  },
+  {
+    "source_file": "research/aggregate.py",
+    "source_layer": "research",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.AggregatedDataRecord",
+    "line": 20
+  },
+  {
+    "source_file": "research/aggregate.py",
+    "source_layer": "research",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.conflict_resolution.ConflictResolutionEngine",
+    "line": 27
+  },
+  {
+    "source_file": "research/company_builder.py",
+    "source_layer": "research",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.AIMaturity",
+    "line": 11
+  },
+  {
+    "source_file": "research/discovery.py",
+    "source_layer": "research",
+    "target_layer": "data",
+    "imported": "solstein.data.loaders.CompetitorDataLoader",
+    "line": 8
+  },
+  {
+    "source_file": "research/discovery.py",
+    "source_layer": "research",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.registry.SourceRegistry",
+    "line": 11
+  },
+  {
+    "source_file": "research/evidence.py",
+    "source_layer": "research",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 5
+  },
+  {
+    "source_file": "research/gather.py",
+    "source_layer": "research",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.AggregatedDataRecord",
+    "line": 7
+  },
+  {
+    "source_file": "research/gather.py",
+    "source_layer": "research",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.registry.SourceRegistry",
+    "line": 23
+  },
+  {
+    "source_file": "research/graph/executor.py",
+    "source_layer": "research",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 32
+  },
+  {
+    "source_file": "research/graph/nodes/companies_house_node.py",
+    "source_layer": "research",
+    "target_layer": "agents",
+    "imported": "solstein.agents.companies_house_agent.CompaniesHouseAgent",
+    "line": 98
+  },
+  {
+    "source_file": "research/graph/nodes/github_node.py",
+    "source_layer": "research",
+    "target_layer": "agents",
+    "imported": "solstein.agents.github_agent.GitHubAgent",
+    "line": 103
+  },
+  {
+    "source_file": "research/graph/nodes/news_node.py",
+    "source_layer": "research",
+    "target_layer": "agents",
+    "imported": "solstein.agents.web_search_agent.WebSearchAgent",
+    "line": 94
+  },
+  {
+    "source_file": "research/graph/nodes/news_node.py",
+    "source_layer": "research",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 95
+  },
+  {
+    "source_file": "research/graph/nodes/sec_filings_node.py",
+    "source_layer": "research",
+    "target_layer": "data",
+    "imported": "solstein.data.connectors.sec_edgar_connector.CompanyNotFoundError",
+    "line": 50
+  },
+  {
+    "source_file": "research/graph/nodes/web_profile_node.py",
+    "source_layer": "research",
+    "target_layer": "agents",
+    "imported": "solstein.agents.website_agent.WebsiteAgent",
+    "line": 99
+  },
+  {
+    "source_file": "research/graph/topology.py",
+    "source_layer": "research",
+    "target_layer": "review_queue",
+    "imported": "solstein.review_queue.store.get_review_store",
+    "line": 79
+  },
+  {
+    "source_file": "research/pipeline.py",
+    "source_layer": "research",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 30
+  },
+  {
+    "source_file": "research/pipeline.py",
+    "source_layer": "research",
+    "target_layer": "data",
+    "imported": "solstein.data.report_release_gate.ReportReleaseGate",
+    "line": 31
+  },
+  {
+    "source_file": "research/pipeline.py",
+    "source_layer": "research",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.registry.build_default_registry",
+    "line": 224
+  },
+  {
+    "source_file": "research/pipeline_async.py",
+    "source_layer": "research",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 19
+  },
+  {
+    "source_file": "research/pipeline_async.py",
+    "source_layer": "research",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.registry.build_default_registry",
+    "line": 62
+  },
+  {
+    "source_file": "research/pipeline_context.py",
+    "source_layer": "research",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 13
+  },
+  {
+    "source_file": "research/pipeline_context.py",
+    "source_layer": "research",
+    "target_layer": "adapters",
+    "imported": "solstein.adapters.registry.SourceRegistry",
+    "line": 16
+  },
+  {
+    "source_file": "research/pipeline_stages.py",
+    "source_layer": "research",
+    "target_layer": "analytics",
+    "imported": "solstein.analytics.scoring.GrowthScorer",
+    "line": 19
+  },
+  {
+    "source_file": "research/pipeline_stages.py",
+    "source_layer": "research",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 20
+  },
+  {
+    "source_file": "research/pipeline_stages.py",
+    "source_layer": "research",
+    "target_layer": "exporters",
+    "imported": "solstein.exporters.excel.ExcelExporter",
+    "line": 21
+  },
+  {
+    "source_file": "research/pipeline_stages.py",
+    "source_layer": "research",
+    "target_layer": "extractors",
+    "imported": "solstein.extractors.markdown_extractor.BatchExtractor",
+    "line": 22
+  },
+  {
+    "source_file": "research/pipeline_stages.py",
+    "source_layer": "research",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.research_dual_write.persist_research_run",
+    "line": 491
+  },
+  {
+    "source_file": "research/profile_builders.py",
+    "source_layer": "research",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.AIMaturity",
+    "line": 12
+  },
+  {
+    "source_file": "research/reconcile.py",
+    "source_layer": "research",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 3
+  },
+  {
+    "source_file": "research/signals.py",
+    "source_layer": "research",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.AggregatedDataRecord",
+    "line": 14
+  },
+  {
+    "source_file": "review_queue/store.py",
+    "source_layer": "review_queue",
+    "target_layer": "config",
+    "imported": "solstein.config.Settings",
+    "line": 24
+  },
+  {
+    "source_file": "security/jwt.py",
+    "source_layer": "security",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 13
+  },
+  {
+    "source_file": "security/jwt_handler.py",
+    "source_layer": "security",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 11
+  },
+  {
+    "source_file": "tenant/api_key_service.py",
+    "source_layer": "tenant",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.infrastructure.ApiKeyRecord",
+    "line": 87
+  },
+  {
+    "source_file": "tenant/api_key_service.py",
+    "source_layer": "tenant",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.infrastructure.ApiKeyRecord",
+    "line": 127
+  },
+  {
+    "source_file": "tenant/api_key_service.py",
+    "source_layer": "tenant",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.infrastructure.ApiKeyRecord",
+    "line": 150
+  },
+  {
+    "source_file": "tenant/api_key_service.py",
+    "source_layer": "tenant",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.infrastructure.ApiKeyRecord",
+    "line": 192
+  },
+  {
+    "source_file": "tenant/api_key_service.py",
+    "source_layer": "tenant",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.infrastructure.ApiKeyRecord",
+    "line": 239
+  },
+  {
+    "source_file": "tenant/api_key_service.py",
+    "source_layer": "tenant",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.infrastructure.ApiKeyUsageRecord",
+    "line": 282
+  },
+  {
+    "source_file": "tenant/context.py",
+    "source_layer": "tenant",
+    "target_layer": "security",
+    "imported": "solstein.security.jwt.verify_token",
+    "line": 161
+  },
+  {
+    "source_file": "tenant/monitoring.py",
+    "source_layer": "tenant",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.cache.get_cache",
+    "line": 17
+  },
+  {
+    "source_file": "tenant/quotas.py",
+    "source_layer": "tenant",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.cache.get_cache",
+    "line": 18
+  },
+  {
+    "source_file": "tenant/services.py",
+    "source_layer": "tenant",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database_models.CompanyRecord",
+    "line": 18
+  },
+  {
+    "source_file": "validation/data_remediation.py",
+    "source_layer": "validation",
+    "target_layer": "domain",
+    "imported": "solstein.domain.models.Company",
+    "line": 11
+  },
+  {
+    "source_file": "worker/base.py",
+    "source_layer": "worker",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 18
+  },
+  {
+    "source_file": "worker/base.py",
+    "source_layer": "worker",
+    "target_layer": "domain",
+    "imported": "solstein.domain.facts.Fact",
+    "line": 19
+  },
+  {
+    "source_file": "worker/base.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.DatabaseManager",
+    "line": 20
+  },
+  {
+    "source_file": "worker/base.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database_models.CompanyRecord",
+    "line": 21
+  },
+  {
+    "source_file": "worker/base.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.fact_payloads.ConnectorFactPayload",
+    "line": 22
+  },
+  {
+    "source_file": "worker/base.py",
+    "source_layer": "worker",
+    "target_layer": "monitoring",
+    "imported": "solstein.monitoring.errors.global_error_tracker",
+    "line": 23
+  },
+  {
+    "source_file": "worker/dlq.py",
+    "source_layer": "worker",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 28
+  },
+  {
+    "source_file": "worker/enrichment_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "celery_config",
+    "imported": "solstein.celery_config.celery_app",
+    "line": 17
+  },
+  {
+    "source_file": "worker/enrichment_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "data",
+    "imported": "solstein.data.unified_loader.UnifiedCompany",
+    "line": 162
+  },
+  {
+    "source_file": "worker/enrichment_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "data",
+    "imported": "solstein.data.unified_loader.UnifiedCompany",
+    "line": 250
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.get_async_engine",
+    "line": 139
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.export.ExportJobRecord",
+    "line": 140
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "exporters",
+    "imported": "solstein.exporters.storage.get_storage_backend",
+    "line": 259
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "exporters",
+    "imported": "solstein.exporters.excel_streaming.StreamingExcelExporter",
+    "line": 337
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "exporters",
+    "imported": "solstein.exporters.pdf.PDFExporter",
+    "line": 359
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "exporters",
+    "imported": "solstein.exporters.csv.CSVExporter",
+    "line": 377
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "exporters",
+    "imported": "solstein.exporters.markdown.generator.generate_enhanced_report",
+    "line": 400
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "exporters",
+    "imported": "solstein.exporters.LLMReportEnhancer",
+    "line": 414
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "exporters",
+    "imported": "solstein.exporters.pdf.PDFExporter",
+    "line": 432
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.get_async_engine",
+    "line": 453
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database_models.CompanyRecord",
+    "line": 454
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.database.get_async_engine",
+    "line": 501
+  },
+  {
+    "source_file": "worker/export_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.models.export.ExportJobRecord",
+    "line": 502
+  },
+  {
+    "source_file": "worker/idempotency.py",
+    "source_layer": "worker",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 53
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "config",
+    "imported": "solstein.config.get_settings",
+    "line": 27
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.connectors.companies_house_refresh.CompaniesHouseRefreshConnector",
+    "line": 28
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.connectors.funding_refresh.FundingRefreshConnector",
+    "line": 31
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.connectors.github_refresh.GitHubRefreshConnector",
+    "line": 32
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.connectors.global_market_refresh.GlobalMarketRefreshConnector",
+    "line": 33
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.connectors.linkedin_refresh.LinkedInRefreshConnector",
+    "line": 36
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.connectors.news_refresh.NewsRefreshConnector",
+    "line": 37
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.connectors.news_signal_refresh.NewsSignalRefreshConnector",
+    "line": 38
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.connectors.patents_refresh.PatentsRefreshConnector",
+    "line": 41
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.connectors.sec_edgar_refresh.SECEDGARRefreshConnector",
+    "line": 42
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.connectors.web_search_refresh.WebSearchRefreshConnector",
+    "line": 43
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.connectors.website_refresh.WebsiteRefreshConnector",
+    "line": 44
+  },
+  {
+    "source_file": "worker/refresh_tasks.py",
+    "source_layer": "worker",
+    "target_layer": "infrastructure",
+    "imported": "solstein.infrastructure.connectors.yahoo_finance_refresh.YahooFinanceRefreshConnector",
+    "line": 45
+  },
+  {
+    "source_file": "worker/tenant_isolation.py",
+    "source_layer": "worker",
+    "target_layer": "utils",
+    "imported": "solstein.utils.context.reset_context",
+    "line": 24
+  },
+  {
+    "source_file": "worker_tasks.py",
+    "source_layer": "worker_tasks.py",
+    "target_layer": "worker",
+    "imported": "solstein.worker.base.DeadLetterQueue",
+    "line": 49
+  },
+  {
+    "source_file": "worker_tasks.py",
+    "source_layer": "worker_tasks.py",
+    "target_layer": "worker",
+    "imported": "solstein.worker.enrichment_tasks.EnrichmentTask",
+    "line": 58
+  },
+  {
+    "source_file": "worker_tasks.py",
+    "source_layer": "worker_tasks.py",
+    "target_layer": "worker",
+    "imported": "solstein.worker.export_tasks.generate_export",
+    "line": 65
+  },
+  {
+    "source_file": "worker_tasks.py",
+    "source_layer": "worker_tasks.py",
+    "target_layer": "worker",
+    "imported": "solstein.worker.orchestration.refresh_all_sources",
+    "line": 68
+  },
+  {
+    "source_file": "worker_tasks.py",
+    "source_layer": "worker_tasks.py",
+    "target_layer": "worker",
+    "imported": "solstein.worker.refresh_tasks.create_refresh_task",
+    "line": 71
+  },
+  {
+    "source_file": "worker_tasks.py",
+    "source_layer": "worker_tasks.py",
+    "target_layer": "worker",
+    "imported": "solstein.worker.tenant_isolation.TenantIsolationError",
+    "line": 88
+  }
+]

@@ -192,10 +192,10 @@ def build_default_registry(settings: Settings) -> UnifiedRegistry:
     registry.register_adapter(GlobalMarketEnrichment())
 
     # -- Enrichment: conditional on API keys --
-    if settings.news_api_key:
-        from solstein.adapters.enrichment.news import NewsEnrichment
-
-        registry.register_adapter(NewsEnrichment(news_api_key=settings.news_api_key))
+    # STORY-264: NewsEnrichment (NewsAPI) and WebSearchNewsEnrichment (Exa)
+    # removed — replaceable by GDELT and SearXNG respectively.
+    # WebSearchDiscoverySource (Exa) also removed.
+    # Adapters moved to adapters/{enrichment,discovery}/_retired/.
 
     if settings.crunchbase_api_key:
         from solstein.adapters.enrichment.funding import FundingEnrichment
@@ -206,13 +206,6 @@ def build_default_registry(settings: Settings) -> UnifiedRegistry:
                 news_api_key=settings.news_api_key,
             )
         )
-
-    if settings.exa_api_key:
-        from solstein.adapters.discovery.web_search import WebSearchDiscoverySource
-        from solstein.adapters.enrichment.web_search_news import WebSearchNewsEnrichment
-
-        registry.register_adapter(WebSearchDiscoverySource(exa_api_key=settings.exa_api_key))
-        registry.register_adapter(WebSearchNewsEnrichment())
 
     # -- Refresh Connectors: will be added in subsequent tasks --
     # These will be registered as they are implemented:

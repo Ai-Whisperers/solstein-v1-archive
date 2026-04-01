@@ -9,7 +9,8 @@ import json
 
 from click.testing import CliRunner
 
-from solstein.cli import cli
+import solstein.cli_legacy as cli_module
+from solstein.cli_legacy import cli
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -200,8 +201,6 @@ def test_compare_rejects_unknown_object_format(tmp_path):
 
 
 def test_export_excel_accepts_flat_list(tmp_path, monkeypatch):
-    import solstein.cli as cli_module
-
     class DummyExporter:
         def __init__(self, template_path=None):
             pass
@@ -220,8 +219,6 @@ def test_export_excel_accepts_flat_list(tmp_path, monkeypatch):
 
 
 def test_export_excel_accepts_wrapped_competitors(tmp_path, monkeypatch):
-    import solstein.cli as cli_module
-
     class DummyExporter:
         def __init__(self, template_path=None):
             pass

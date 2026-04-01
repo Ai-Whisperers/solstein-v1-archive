@@ -6,7 +6,7 @@ reporting and competitive landscape analysis.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from loguru import logger
@@ -56,7 +56,7 @@ class MarketReportGenerator(BaseReportGenerator):
 
         report = f"""# {title}
 
-**Report Date**: {datetime.now().strftime("%B %Y")}
+**Report Date**: {datetime.now(tz=timezone.utc).strftime("%B %Y")}
 **Companies Analyzed**: {len(companies)}
 **Data Source**: SolStein Competitive Intelligence Platform
 

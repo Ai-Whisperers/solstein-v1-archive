@@ -14,7 +14,7 @@ Usage:
 
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -62,7 +62,7 @@ class RealDataLoader:
                 "data_sources": result.data_sources,
                 "collection_method": "web_research",
                 "is_synthetic": False,
-                "last_validated": datetime.now().isoformat(),
+                "last_validated": datetime.now(tz=timezone.utc).isoformat(),
             }
 
             valid_companies.append(company_data)
@@ -191,7 +191,7 @@ class RealDataLoader:
             "competitors": real_data,
             "metadata": {
                 "data_source": "web_research",
-                "collection_date": datetime.now().isoformat(),
+                "collection_date": datetime.now(tz=timezone.utc).isoformat(),
                 "is_synthetic": False,
                 "real_data_percentage": "100%",
                 "validation_passed": True,

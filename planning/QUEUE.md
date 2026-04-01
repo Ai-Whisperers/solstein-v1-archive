@@ -208,7 +208,10 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 26 | — | See EPIC-052 README for stories | BLOCKED | No story files in STORIES/ dir — cannot implement without acceptance criteria |
+| 26a | STORY-198 | Enforce provenance completeness at write boundary | READY | Story files created 2026-04-01, P0 ship blocker |
+| 26b | STORY-199 | Confidence calibration per source tier | READY | Story files created 2026-04-01 |
+| 26c | STORY-200 | Quality gate before scoring and export | READY | Story files created 2026-04-01, P0 ship blocker |
+| 26d | STORY-201 | Provenance dashboard and audit trail | READY | Story files created 2026-04-01 |
 
 ### EPIC-058: Data Conversion Pipeline Consolidation (P0)
 
@@ -480,8 +483,8 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 |---|-------|-------|--------|-------|
 | 120 | STORY-055 | Centralize LLM Prompt Templates into Managed Registry | DONE | PR #190 |
 | 121 | STORY-056 | Build LLM Output Evaluation Harness | DONE | PR #191 |
-| 122 | STORY-057 | Automate Local Development Setup | BLOCKED | Dep: STORY-059 (Dockerfile exists via EPIC-026, verify fully satisfies) |
-| 123 | STORY-058 | Write Developer Onboarding Documentation | BLOCKED | Dep: STORY-039 (not done) |
+| 122 | STORY-057 | Automate Local Development Setup | READY | UNBLOCKED: Dockerfile, Dockerfile.dev, docker-compose.yml all exist (EPIC-026 DONE) |
+| 123 | STORY-058 | Write Developer Onboarding Documentation | READY | UNBLOCKED: scoring rationale documented in docs/architecture/scoring-rationale.md (satisfies STORY-039) |
 
 ---
 

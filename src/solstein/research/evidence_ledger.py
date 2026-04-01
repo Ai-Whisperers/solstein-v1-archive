@@ -37,7 +37,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from .numeric_normalization import (
@@ -183,7 +183,7 @@ def build_field_evidence(
         normalized: Optional NormalizedValue metadata.
         contradictions: Optional contradiction flags for this field.
     """
-    now = datetime.now().isoformat()
+    now = datetime.now(tz=timezone.utc).isoformat()
 
     candidates: list[EvidenceCandidate] = []
     for item in validated_items:
@@ -302,7 +302,7 @@ def _build_synthetic_run(report: dict[str, Any], timestamp: str) -> dict[str, An
                 "value": value,
                 "source_url": "migrated_from_v1",
                 "confidence": 0.5,
-                "extraction_timestamp": timestamp or datetime.now().isoformat(),
+                "extraction_timestamp": timestamp or datetime.now(tz=timezone.utc).isoformat(),
                 "normalization": {},
                 "is_ambiguous": False,
                 "ambiguity_reason": "",
@@ -320,7 +320,7 @@ def _build_synthetic_run(report: dict[str, Any], timestamp: str) -> dict[str, An
 
     return {
         "run_id": f"migrated-{uuid.uuid4().hex[:8]}",
-        "timestamp": timestamp or datetime.now().isoformat(),
+        "timestamp": timestamp or datetime.now(tz=timezone.utc).isoformat(),
         "sources_used": source_urls,
         "field_evidence": field_evidence,
     }

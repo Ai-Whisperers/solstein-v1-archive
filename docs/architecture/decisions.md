@@ -201,3 +201,35 @@ wiring changes. Bug fixes and security patches only.
   superseded with a new ADR citing specific evidence
 
 ---
+
+## ADR-010: Salvage Decision from Golden-Run Evidence
+
+**Date:** 2026-03-31
+**Status:** Accepted
+**Story:** STORY-270 (EPIC-070: Empirical Golden Runs and Rebuild Gate)
+
+**Context:** EPIC-067 through EPIC-070 produced empirical evidence to determine
+whether to salvage the legacy runtime or trigger a full rebuild. 88 golden-run
+tests across provider contracts (30), full-market regressions (17), placeholder
+guards (28), and salvage criteria (13) all pass. No rebuild triggers are active.
+
+**Decision:** Salvage the legacy runtime. Delete the graph runtime progressively
+after placeholder value is migrated. Rebuild only if red-flag triggers fire.
+
+**Rationale:**
+
+- All 6 salvage conditions are met (measured in STORY-258)
+- 0 defects in 88 golden-run tests
+- 5 failure classes identified and resolved (router bypass, placeholders,
+  duplicates, entrypoint fragmentation, feature-flag branching)
+- All 6 rebuild triggers evaluated — none currently active
+
+**Consequences:**
+
+- All new features target the legacy pipeline exclusively
+- Graph runtime code remains frozen (ADR-009) and will be deleted
+- The 88-test golden-run suite is the regression gate for all runtime changes
+- Next backlog wave scoped to 5-6 stories on proven failure surfaces only
+- Full decision record: `docs/architecture/ADR-010-SALVAGE-DECISION-FROM-GOLDEN-RUN-EVIDENCE.md`
+
+---

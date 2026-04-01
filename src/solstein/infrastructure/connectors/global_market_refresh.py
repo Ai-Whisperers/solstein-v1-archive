@@ -5,7 +5,7 @@ Implements incremental refresh for global stock data.
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -76,7 +76,7 @@ class GlobalMarketRefreshConnector(BaseRefreshConnector):
                             "revenue": stock_data.revenue,
                         },
                         "confidence": self.confidence,
-                        "extracted_at": datetime.now(),
+                        "extracted_at": datetime.now(tz=timezone.utc),
                         "source": self.source_name,
                         "metadata": {
                             "ticker": stock_data.ticker,
@@ -97,7 +97,7 @@ class GlobalMarketRefreshConnector(BaseRefreshConnector):
                             "normalized_to_usd": source_currency != "USD",
                         },
                         "confidence": self.confidence,
-                        "extracted_at": datetime.now(),
+                        "extracted_at": datetime.now(tz=timezone.utc),
                         "source": self.source_name,
                         "metadata": {
                             "ticker": ticker,
@@ -106,7 +106,7 @@ class GlobalMarketRefreshConnector(BaseRefreshConnector):
                     }
                 )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Failed to fetch global market data for {ticker}: {e}")
                 continue
 

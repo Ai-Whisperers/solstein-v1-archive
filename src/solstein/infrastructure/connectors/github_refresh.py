@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -59,11 +59,11 @@ class GitHubRefreshConnector(BaseRefreshConnector):
                         fact = self._convert_activity_to_fact(activity_item)
                         facts.append(fact)
 
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning(f"Failed to fetch GitHub data for {github_username}: {e}")
                     continue
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"Failed to process company {company_id}: {e}")
                 continue
 
@@ -91,7 +91,7 @@ class GitHubRefreshConnector(BaseRefreshConnector):
             "fact_type": "github_repository",
             "value": repo_metrics,
             "confidence": 0.85,
-            "extracted_at": datetime.now(),
+            "extracted_at": datetime.now(tz=timezone.utc),
             "source": "github",
             "metadata": {
                 "repo_name": repo.get("name"),
@@ -127,7 +127,7 @@ class GitHubRefreshConnector(BaseRefreshConnector):
             "fact_type": "github_commit",
             "value": commit_metrics,
             "confidence": 0.85,
-            "extracted_at": datetime.now(),
+            "extracted_at": datetime.now(tz=timezone.utc),
             "source": "github",
             "metadata": {
                 "sha": commit.get("sha"),
@@ -160,7 +160,7 @@ class GitHubRefreshConnector(BaseRefreshConnector):
             "fact_type": "github_activity",
             "value": activity_metrics,
             "confidence": 0.85,
-            "extracted_at": datetime.now(),
+            "extracted_at": datetime.now(tz=timezone.utc),
             "source": "github",
             "metadata": {
                 "type": activity.get("type"),
@@ -196,7 +196,7 @@ class GitHubRefreshConnector(BaseRefreshConnector):
                         if fact_date > since:
                             filtered_facts.append(fact)
                             break
-                    except Exception:
+                    except Exception:  # noqa: BLE001
                         # If date parsing fails, include the fact
                         filtered_facts.append(fact)
                         break

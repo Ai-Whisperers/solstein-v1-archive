@@ -7,7 +7,7 @@ Fetches real-time data from:
 - Currency conversion support
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Any
 
 import pandas as pd
@@ -52,7 +52,7 @@ class YahooFinanceFetcher:
 
             return info
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Error fetching quote for {ticker}: {e}")
             return None
 
@@ -78,7 +78,7 @@ class YahooFinanceFetcher:
 
             return df
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Error fetching historical for {ticker}: {e}")
             return pd.DataFrame()
 
@@ -119,10 +119,10 @@ class YahooFinanceFetcher:
                 previous_close=previous_close,
                 change_pct=change_pct,
                 currency=index.currency,
-                timestamp=datetime.now(),
+                timestamp=datetime.now(tz=timezone.utc),
             )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Error fetching index {index_symbol}: {e}")
             return None
 
@@ -163,7 +163,7 @@ class CurrencyRateFetcher:
                     rates[(currency, base_currency)] = rate
 
         self._cached_rates = {f"{k[0].value}_{k[1].value}": v for k, v in rates.items()}
-        self._last_fetch = datetime.now()
+        self._last_fetch = datetime.now(tz=timezone.utc)
 
         return rates
 
@@ -315,7 +315,7 @@ def get_market_summary() -> dict[str, Any]:
     indices = loader.get_all_major_indices()
 
     summary = {
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
         "markets": {},
     }
 

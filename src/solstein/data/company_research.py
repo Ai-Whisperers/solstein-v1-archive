@@ -18,7 +18,7 @@ Data Sources:
 - Web scraping (products, technology)
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import yfinance as yf
@@ -173,7 +173,7 @@ class CompanyResearcher:
 
             return self._build_profile(ticker, ticker_obj, info)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Error researching {ticker}: {e}")
             return CompanyResearch(ticker=ticker, name=ticker, exchange="Unknown")
 
@@ -244,7 +244,7 @@ class CompanyResearcher:
         # Scorecard (calculated from available data)
         profile.scorecard = self._calculate_scorecard(info)
 
-        profile.last_updated = datetime.now()
+        profile.last_updated = datetime.now(tz=timezone.utc)
         profile.data_sources = ["Yahoo Finance"]
 
         return profile
@@ -323,7 +323,7 @@ class CompanyResearcher:
                     for n in news[:10]
                 ]
                 news_data.headlines = headlines
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug(f"Could not fetch news: {e}")
 
         return news_data

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
@@ -168,7 +168,7 @@ class ManualReviewQueue:
             logger.warning(f"Review record not found: {review_id}")
             return None
         record.status = status
-        record.resolved_at = datetime.now()
+        record.resolved_at = datetime.now(tz=timezone.utc)
         record.resolved_by = resolved_by
         logger.info(f"Review {review_id} marked as {status} by {resolved_by}")
         return record
@@ -241,7 +241,7 @@ class ConflictResolutionEngine:
                     existing_fact=existing_fact,
                     new_fact=new_fact,
                     conflict_type="value_mismatch",
-                    detected_at=datetime.now(),
+                    detected_at=datetime.now(tz=timezone.utc),
                 )
                 conflicts.append(conflict)
                 logger.info(
@@ -282,7 +282,7 @@ class ConflictResolutionEngine:
             winning_fact=winning_fact,
             strategy_used=strategy,
             reason=self._get_resolution_reason(conflict, strategy),
-            resolved_at=datetime.now(),
+            resolved_at=datetime.now(tz=timezone.utc),
         )
 
         self.resolution_log.append(resolution)

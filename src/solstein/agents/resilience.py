@@ -307,8 +307,21 @@ async def call_with_retry(
 
 
 def _build_retry_configs() -> tuple["RetryConfig", "RetryConfig", "RetryConfig"]:
-    """Build preset retry configurations using settings-driven timeouts."""
-    _settings = get_settings()
+    """Build preset retry configurations using settings-driven timeouts.
+
+    Falls back to sensible defaults if settings cannot be loaded (e.g. during
+    test collection without DATABASE__URL).
+    """
+    try:
+        _settings = get_settings()
+    except Exception:
+        # Provide safe defaults so import succeeds without full config
+        class _Defaults:
+            class http_timeouts:  # noqa: N801
+                github = 30.0
+                companies_house = 30.0
+                web_search_agent = 20.0
+        _settings = _Defaults()
     github = RetryConfig(
         max_attempts=4,
         base_delay=2.0,
@@ -333,5 +346,25 @@ def _build_retry_configs() -> tuple["RetryConfig", "RetryConfig", "RetryConfig"]
     return github, companies_house, web_search
 
 
-# Preset configurations for common services — built from config rather than hardcoded literals.
-GITHUB_RETRY_CONFIG, COMPANIES_HOUSE_RETRY_CONFIG, WEB_SEARCH_RETRY_CONFIG = _build_retry_configs()
+# Preset configurations for common services — lazily built from config on first access
+# to avoid import-time side effects (STORY-254 compliance).
+_RETRY_CONFIGS: tuple["RetryConfig", "RetryConfig", "RetryConfig"] | None = None
+
+
+def _get_retry_configs() -> tuple["RetryConfig", "RetryConfig", "RetryConfig"]:
+    global _RETRY_CONFIGS
+    if _RETRY_CONFIGS is None:
+        _RETRY_CONFIGS = _build_retry_configs()
+    return _RETRY_CONFIGS
+
+
+def __getattr__(name: str):
+    """Module-level lazy attribute access for retry configs."""
+    _map = {
+        "GITHUB_RETRY_CONFIG": 0,
+        "COMPANIES_HOUSE_RETRY_CONFIG": 1,
+        "WEB_SEARCH_RETRY_CONFIG": 2,
+    }
+    if name in _map:
+        return _get_retry_configs()[_map[name]]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

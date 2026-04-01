@@ -6,8 +6,8 @@ import json
 
 from click.testing import CliRunner
 
-import solstein.cli as cli_module
-from solstein.cli import cli
+import solstein.cli_legacy as cli_module
+from solstein.cli_legacy import cli
 from solstein.exceptions import ScoringError
 
 

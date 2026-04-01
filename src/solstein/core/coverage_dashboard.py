@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import subprocess
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -117,7 +118,7 @@ class CoverageCollector:
                 logger.error("Coverage JSON file not generated")
                 return {}
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to run coverage", error=str(e))
             return {}
 
@@ -199,9 +200,7 @@ class CoverageDashboard:
         """Generate complete coverage report."""
         coverage_data = self.collector.run_coverage()
         report = self.collector.parse_coverage(coverage_data)
-        from datetime import datetime
-
-        report.timestamp = datetime.now().isoformat()
+        report.timestamp = datetime.now(tz=timezone.utc).isoformat()
         return report
 
     def print_summary(self, report: CoverageReport | None = None) -> None:

@@ -38,6 +38,9 @@ dependencies = [
     "pytest-asyncio>=1.3.0",
     "redis>=5.0",
     "aiohttp>=3.9.0",
+    "feedparser>=6.0",  # STORY-254: Required by connectors.news at import time
+    "email-validator>=2.0",  # STORY-254: Required by Pydantic email fields in API models
+    "fpdf2>=2.7",  # STORY-114: PDF report generation
     "bcrypt>=5.0.0",
     "celery>=5.3.0",
     "anthropic>=0.40.0",  # EPIC-021: Native Anthropic SDK for LLM calls
@@ -70,6 +73,7 @@ dev = [
 
 [project.scripts]
 solstein = "solstein.cli:main"
+solstein-legacy = "solstein.cli_legacy:main"
 
 [build-system]
 requires = [

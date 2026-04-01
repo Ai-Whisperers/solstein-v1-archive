@@ -1,0 +1,84 @@
+{
+  "description": "Golden baseline for full-market run with 5 benchmark companies",
+  "story": "STORY-268",
+  "epic": "EPIC-070",
+  "adapters": ["YahooFinanceEnrichment", "GlobalMarketEnrichment", "PatentEnrichment"],
+  "total_companies": 5,
+  "total_facts": 13,
+  "average_completeness": 86.67,
+  "companies": [
+    {
+      "company_id": "bench-001",
+      "company_name": "TechGiant Inc.",
+      "adapter_count": 3,
+      "successful_adapters": 3,
+      "failed_adapters": 0,
+      "total_facts": 3,
+      "average_confidence": 0.7667,
+      "data_completeness_percentage": 100.0,
+      "fact_types": ["yahoo_finance", "yahoo_finance", "uspto"],
+      "notes": "Large-cap with ticker: all 3 adapters succeed"
+    },
+    {
+      "company_id": "bench-002",
+      "company_name": "MidScale Corp.",
+      "adapter_count": 3,
+      "successful_adapters": 3,
+      "failed_adapters": 0,
+      "total_facts": 3,
+      "average_confidence": 0.7667,
+      "data_completeness_percentage": 100.0,
+      "fact_types": ["yahoo_finance", "yahoo_finance", "uspto"],
+      "notes": "Mid-cap with ticker: all 3 adapters succeed"
+    },
+    {
+      "company_id": "bench-003",
+      "company_name": "PrivateSoft LLC",
+      "adapter_count": 3,
+      "successful_adapters": 1,
+      "failed_adapters": 2,
+      "total_facts": 1,
+      "average_confidence": 0.4,
+      "data_completeness_percentage": 33.33,
+      "fact_types": ["google_patents"],
+      "notes": "Private (no ticker): Yahoo Finance + GlobalMarket raise, only Patents succeeds with fallback backend"
+    },
+    {
+      "company_id": "bench-004",
+      "company_name": "PatentKing AG",
+      "adapter_count": 3,
+      "successful_adapters": 3,
+      "failed_adapters": 0,
+      "total_facts": 3,
+      "average_confidence": 0.7667,
+      "data_completeness_percentage": 100.0,
+      "fact_types": ["yahoo_finance", "yahoo_finance", "uspto"],
+      "notes": "Patent-heavy company: all 3 adapters succeed, high patent count"
+    },
+    {
+      "company_id": "bench-005",
+      "company_name": "FreshStart AI",
+      "adapter_count": 3,
+      "successful_adapters": 3,
+      "failed_adapters": 0,
+      "total_facts": 3,
+      "average_confidence": 0.6667,
+      "data_completeness_percentage": 100.0,
+      "fact_types": ["yahoo_finance", "yahoo_finance", "patents"],
+      "notes": "Startup with zero patents: all adapters succeed but patent source='none' gives lower confidence"
+    }
+  ],
+  "regression_thresholds": {
+    "min_total_facts": 13,
+    "min_average_completeness": 80.0,
+    "max_completeness_drop_pct": 10,
+    "max_confidence_drop_pct": 20,
+    "required_fact_types_per_company": {
+      "bench-001": ["yahoo_finance", "uspto"],
+      "bench-002": ["yahoo_finance", "uspto"],
+      "bench-003": ["google_patents"],
+      "bench-004": ["yahoo_finance", "uspto"],
+      "bench-005": ["yahoo_finance", "patents"]
+    }
+  }
+}

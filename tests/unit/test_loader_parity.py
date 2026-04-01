@@ -14,9 +14,10 @@ import json
 import warnings
 from pathlib import Path
 
+import click
 import pytest
 
-from solstein.cli import _load_companies_for_report
+from solstein.cli_legacy import _load_companies_for_report
 from solstein.domain.models import Company
 
 # ---------------------------------------------------------------------------
@@ -98,8 +99,6 @@ def test_load_companies_for_report_handles_wrapped_competitors(tmp_path: Path) -
 
 def test_load_companies_for_report_missing_default_raises_usage_error(monkeypatch) -> None:
     """When called without input_path and no default file exists, raises UsageError."""
-    import click
-
     # Point settings data_dir to a temp dir with no competitor_data.json
     class MockDataConfig:
         data_dir = Path("/tmp/nonexistent-solstein-test-dir-xyz")
@@ -107,7 +106,7 @@ def test_load_companies_for_report_missing_default_raises_usage_error(monkeypatc
     class MockSettings:
         data = MockDataConfig()
 
-    monkeypatch.setattr("solstein.cli.get_settings", lambda: MockSettings())
+    monkeypatch.setattr("solstein.cli_legacy.get_settings", lambda: MockSettings())
 
     with pytest.raises(click.UsageError, match="Default data file not found"):
         _load_companies_for_report()

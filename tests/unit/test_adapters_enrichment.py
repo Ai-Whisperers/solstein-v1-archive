@@ -1,10 +1,14 @@
-"""Tests for enrichment adapters (funding, news, web_search_news)."""
+"""Tests for enrichment adapters (funding, news, web_search_news).
+
+STORY-264: NewsEnrichment and WebSearchNewsEnrichment have been retired
+(replaceable providers).  Their tests now import from the _retired path.
+"""
 
 from unittest.mock import MagicMock, patch
 
+from solstein.adapters.enrichment._retired.news import NewsEnrichment
+from solstein.adapters.enrichment._retired.web_search_news import WebSearchNewsEnrichment
 from solstein.adapters.enrichment.funding import FundingEnrichment
-from solstein.adapters.enrichment.news import NewsEnrichment
-from solstein.adapters.enrichment.web_search_news import WebSearchNewsEnrichment
 from solstein.domain.models import DataSourceType
 
 
