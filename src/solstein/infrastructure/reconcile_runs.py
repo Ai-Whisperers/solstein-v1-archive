@@ -9,7 +9,7 @@ from sqlalchemy import select
 
 from solstein.config import Settings
 from solstein.infrastructure.database import db_manager
-from solstein.research.hashing import canonical_json_dumps
+from solstein.shared.canonicalize import canonical_json_dumps  # STORY-247
 
 from .database_models import OutboxRecord, ResearchArtifactRecord, ResearchRunRecord
 from .research_dual_write import JsonValue

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import select
 
-from solstein.research.sources import canonicalize_url
+from solstein.shared.canonicalize import canonicalize_url  # STORY-247
 
 from .database_models import (
     ContradictionRecord,
