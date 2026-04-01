@@ -22,7 +22,6 @@ from solstein.data.converters import convert_to_domain_company
 from solstein.domain.models import Company
 from solstein.runtime import convert_raw, get_registry
 
-
 # ---------------------------------------------------------------------------
 # Fixture: minimal Settings with no API keys
 # ---------------------------------------------------------------------------

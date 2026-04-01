@@ -15,12 +15,12 @@ from . import __version__
 from .analytics.scoring import GrowthScorer
 from .cli_validators import validate_company_exists, validate_input_file, validate_output_dir
 from .config import get_settings
-from .runtime import convert_raw as convert_to_domain_company
 from .data.report_readiness import assert_client_report_ready, assert_report_ready
 from .domain.models import Company, MarketAnalysis
 from .exporters.excel import ExcelExporter
 from .exporters.markdown.generator import ClientReportGenerator, LLMEnhancedReportGenerator
 from .extractors.markdown_extractor import BatchExtractor
+from .runtime import convert_raw as convert_to_domain_company
 
 
 @click.group()
