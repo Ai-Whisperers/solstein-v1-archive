@@ -490,8 +490,8 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 136 | STORY-116 | Centralize All Retry/Backoff in core/retry_policy.py | IN_PROGRESS | |
-| 137 | STORY-117 | Fix Circular Import Risk — Introduce shared/ Package | READY | |
+| 136 | STORY-116 | Centralize All Retry/Backoff in core/retry_policy.py | DONE | PR #225 | |
+| 137 | STORY-117 | Fix Circular Import Risk — Introduce shared/ Package | IN_PROGRESS | |
 | 138 | STORY-118 | Formalize CLI as Proper Package Entrypoint | READY | |
 | 139 | STORY-119 | Split unified_loader.py into Separate Modules | READY | |
 | 140 | STORY-120 | Enforce UTC Timezone Policy Across All Modules | READY | |
