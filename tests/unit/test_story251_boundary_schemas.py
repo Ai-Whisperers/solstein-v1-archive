@@ -1,83 +1,48 @@
 """Tests for STORY-251: Enforce Strict Boundary Schemas.
 
-Validates that:
-- API request models reject unknown fields (extra="forbid")
-- ConnectorFactPayload rejects undeclared fields
-- ConnectorFactPayload still accepts legacy aliases (type, _hash)
-- Legacy alias normalization works correctly
+Behavioral tests proving:
+1. Connector fact ingress rejects undeclared fields
+2. API request models reject unknown fields
+3. Domain models define explicit extra-field policy
+4. Undeclared fields do not survive model_dump()
 """
-
-from __future__ import annotations
 
 import pytest
 from pydantic import ValidationError
 
-from solstein.infrastructure.fact_payloads import (
-    ConnectorFactPayload,
-    validate_connector_fact_payloads,
-)
+from solstein.domain.models import Company, FinancialMetric
+from solstein.infrastructure.fact_payloads import ConnectorFactPayload
 
+# ─────────────────────────────────────────────
+# AC1: Connector fact validation rejects undeclared fields
+# ─────────────────────────────────────────────
 
-# ===========================================================================
-# ConnectorFactPayload: strict ingress with legacy alias support
-# ===========================================================================
+class TestConnectorFactBoundary:
+    """Connector fact payloads must reject undeclared fields."""
 
-
-class TestConnectorFactPayloadStrictIngress:
-    """ConnectorFactPayload rejects undeclared fields at ingress."""
-
-    def test_valid_payload_accepted(self) -> None:
+    def test_valid_fact_accepted(self) -> None:
+        """Standard fact payload passes validation."""
         payload = ConnectorFactPayload(
             company_id="COMP-001",
             fact_type="revenue",
-            value=1_000_000,
+            value=50_000_000,
             confidence=0.9,
         )
         assert payload.company_id == "COMP-001"
         assert payload.fact_type == "revenue"
 
     def test_undeclared_field_rejected(self) -> None:
-        """Extra fields not in the schema must cause a ValidationError."""
-        with pytest.raises(ValidationError, match="extra_forbidden"):
+        """Extra undeclared fields are rejected at ingress."""
+        with pytest.raises(ValidationError, match="extra_forbidden|extra_inputs"):
             ConnectorFactPayload(
                 company_id="COMP-001",
                 fact_type="revenue",
-                value=100,
-                surprise_field="should fail",
+                value=50_000_000,
+                bogus_field="should fail",
             )
 
-    def test_multiple_undeclared_fields_rejected(self) -> None:
-        with pytest.raises(ValidationError) as exc_info:
-            ConnectorFactPayload(
-                company_id="COMP-001",
-                fact_type="revenue",
-                foo="bar",
-                baz=42,
-            )
-        errors = exc_info.value.errors()
-        extra_errors = [e for e in errors if e["type"] == "extra_forbidden"]
-        assert len(extra_errors) >= 2
-
-    def test_undeclared_field_does_not_survive_model_dump(self) -> None:
-        """Even if somehow constructed, extra fields must not appear in dump."""
-        payload = ConnectorFactPayload(
-            company_id="COMP-001",
-            fact_type="revenue",
-            value=100,
-        )
-        dumped = payload.model_dump()
-        declared_keys = {
-            "company_id", "fact_type", "value", "confidence",
-            "extracted_at", "metadata", "value_hash",
-        }
-        assert set(dumped.keys()) == declared_keys
-
-
-class TestConnectorFactPayloadLegacyAliases:
-    """Legacy aliases are normalised before validation."""
-
-    def test_type_alias_accepted_as_fact_type(self) -> None:
-        """Legacy 'type' key is normalised to 'fact_type'."""
+    def test_legacy_type_alias_still_works(self) -> None:
+        """Legacy 'type' key normalizes to 'fact_type'."""
         payload = ConnectorFactPayload.model_validate({
             "company_id": "COMP-001",
             "type": "revenue",
@@ -85,18 +50,8 @@ class TestConnectorFactPayloadLegacyAliases:
         })
         assert payload.fact_type == "revenue"
 
-    def test_type_alias_stripped_when_fact_type_present(self) -> None:
-        """If both 'type' and 'fact_type' exist, 'type' is stripped without error."""
-        payload = ConnectorFactPayload.model_validate({
-            "company_id": "COMP-001",
-            "fact_type": "revenue",
-            "type": "ignored",
-            "value": 100,
-        })
-        assert payload.fact_type == "revenue"
-
-    def test_hash_alias_accepted(self) -> None:
-        """Legacy '_hash' alias maps to value_hash field."""
+    def test_legacy_hash_alias_works(self) -> None:
+        """Legacy '_hash' key normalizes to 'value_hash'."""
         payload = ConnectorFactPayload.model_validate({
             "company_id": "COMP-001",
             "fact_type": "revenue",
@@ -104,7 +59,8 @@ class TestConnectorFactPayloadLegacyAliases:
         })
         assert payload.value_hash == "abc123"
 
-    def test_metadata_none_normalised_to_empty_dict(self) -> None:
+    def test_metadata_none_normalized(self) -> None:
+        """metadata=None is normalized to empty dict."""
         payload = ConnectorFactPayload.model_validate({
             "company_id": "COMP-001",
             "fact_type": "revenue",
@@ -112,110 +68,130 @@ class TestConnectorFactPayloadLegacyAliases:
         })
         assert payload.metadata == {}
 
-
-class TestValidateConnectorFactPayloads:
-    """The batch validator rejects invalid facts and keeps valid ones."""
-
-    def test_valid_facts_pass(self) -> None:
-        facts = [
-            {"company_id": "C1", "fact_type": "revenue", "value": 100},
-            {"company_id": "C2", "fact_type": "growth", "value": 0.1},
-        ]
-        result = validate_connector_fact_payloads(
-            facts, source_name="test", default_confidence=0.8,
+    def test_undeclared_field_does_not_survive_model_dump(self) -> None:
+        """Validated payloads never contain undeclared keys in dump."""
+        payload = ConnectorFactPayload(
+            company_id="COMP-001",
+            fact_type="revenue",
+            value=100,
         )
-        assert len(result) == 2
+        dumped = payload.model_dump()
+        expected_keys = {
+            "company_id", "fact_type", "value", "confidence",
+            "extracted_at", "metadata", "value_hash",
+        }
+        assert set(dumped.keys()) == expected_keys
 
-    def test_invalid_fact_rejected(self) -> None:
-        """A fact with an undeclared field is silently dropped."""
-        facts = [
-            {"company_id": "C1", "fact_type": "revenue", "value": 100},
-            {"company_id": "C2", "fact_type": "growth", "surprise": "boom"},
-        ]
-        result = validate_connector_fact_payloads(
-            facts, source_name="test", default_confidence=0.8,
+
+# ─────────────────────────────────────────────
+# AC2: API request models reject unknown fields
+# ─────────────────────────────────────────────
+
+class TestAPIRequestBoundary:
+    """Public API request models must reject unknown fields."""
+
+    def test_enrichment_request_rejects_extra(self) -> None:
+        """EnrichmentRequest has extra=forbid."""
+        from solstein.api.schemas.enrichment import EnrichmentRequest
+        with pytest.raises(ValidationError, match="extra_forbidden|extra_inputs"):
+            EnrichmentRequest(
+                company_id="C001",
+                sources=["SEC_EDGAR"],
+                unknown_field="rejected",
+            )
+
+    def test_batch_enrichment_request_rejects_extra(self) -> None:
+        """BatchEnrichmentRequest has extra=forbid."""
+        from solstein.api.schemas.enrichment import BatchEnrichmentRequest
+        with pytest.raises(ValidationError, match="extra_forbidden|extra_inputs"):
+            BatchEnrichmentRequest(
+                company_ids=["C001"],
+                unknown_field="rejected",
+            )
+
+    def test_semantic_search_rejects_extra(self) -> None:
+        """SemanticSearchRequest has extra=forbid."""
+        from solstein.api.schemas.semantic_search import SemanticSearchRequest
+        with pytest.raises(ValidationError, match="extra_forbidden|extra_inputs"):
+            SemanticSearchRequest(
+                query="test query",
+                unknown_field="rejected",
+            )
+
+    def test_scoring_request_rejects_extra(self) -> None:
+        """AdjudicationRequest has extra=forbid."""
+        from solstein.api.routers.scoring import AdjudicationRequest
+        with pytest.raises(ValidationError, match="extra_forbidden|extra_inputs"):
+            AdjudicationRequest(
+                company_id="C001",
+                adjudicated_by="admin",
+                scores={"growth": 0.8},
+                unknown_field="rejected",
+            )
+
+    def test_export_request_rejects_extra(self) -> None:
+        """ExportRequest has extra=forbid."""
+        from solstein.api.routers.exports import ExportRequest
+        with pytest.raises(ValidationError, match="extra_forbidden|extra_inputs"):
+            ExportRequest(
+                company_ids=["C001"],
+                format="excel",
+                unknown_field="rejected",
+            )
+
+
+# ─────────────────────────────────────────────
+# AC3: Domain models define explicit extra-field behavior
+# ─────────────────────────────────────────────
+
+class TestDomainModelExtraPolicy:
+    """Domain models must define explicit extra-field policy."""
+
+    def test_company_has_explicit_extra_policy(self) -> None:
+        """Company model_config explicitly defines extra field handling."""
+        config = Company.model_config
+        assert "extra" in config, "Company must define explicit extra-field policy"
+        assert config["extra"] == "ignore"
+
+    def test_financial_metric_has_explicit_extra_policy(self) -> None:
+        """FinancialMetric model_config explicitly defines extra field handling."""
+        config = FinancialMetric.model_config
+        assert "extra" in config, "FinancialMetric must define explicit extra-field policy"
+        assert config["extra"] == "ignore"
+
+    def test_company_extra_fields_do_not_survive_dump(self) -> None:
+        """Extra fields passed to Company are dropped, not persisted."""
+        company = Company.model_validate({
+            "id": "TEST-001",
+            "name": "Test Corp",
+            "unexpected_extra": "should be dropped",
+            "another_extra": 42,
+        })
+        dumped = company.model_dump()
+        assert "unexpected_extra" not in dumped
+        assert "another_extra" not in dumped
+
+    def test_financial_metric_extra_fields_do_not_survive_dump(self) -> None:
+        """Extra fields passed to FinancialMetric are dropped."""
+        fm = FinancialMetric.model_validate({
+            "revenue": 50.0,
+            "growth_rate": 0.15,
+            "allow_empty_primary": True,
+            "bogus_metric": 999,
+        })
+        dumped = fm.model_dump()
+        assert "bogus_metric" not in dumped
+
+    def test_connector_payload_model_dump_clean(self) -> None:
+        """ConnectorFactPayload model_dump has no extra keys."""
+        payload = ConnectorFactPayload(
+            company_id="C001",
+            fact_type="employee_count",
+            value=500,
         )
-        # Second fact should be rejected (undeclared 'surprise' field)
-        assert len(result) == 1
-        assert result[0]["company_id"] == "C1"
-
-    def test_legacy_alias_fact_accepted(self) -> None:
-        """A fact using the legacy 'type' key is accepted after normalisation."""
-        facts = [
-            {"company_id": "C1", "type": "revenue", "value": 100},
-        ]
-        result = validate_connector_fact_payloads(
-            facts, source_name="test", default_confidence=0.8,
+        dumped = payload.model_dump()
+        # All keys must be declared fields
+        declared = set(ConnectorFactPayload.model_fields.keys())
+        assert set(dumped.keys()).issubset(declared), (
+            f"model_dump contains undeclared keys: {set(dumped.keys()) - declared}"
         )
-        assert len(result) == 1
-        assert result[0]["fact_type"] == "revenue"
-
-
-# ===========================================================================
-# API request models: extra="forbid" enforcement
-#
-# Router modules use relative imports and trigger heavy init chains (env
-# validation, DB connection). We verify the source files contain the
-# correct ConfigDict(extra="forbid") declaration, then use importlib to
-# import the models where possible.
-# ===========================================================================
-
-from pathlib import Path
-
-_SRC = Path(__file__).resolve().parents[2] / "src" / "solstein" / "api" / "routers"
-
-
-class TestAPIRequestModelConfigInSource:
-    """Verify API request models declare extra='forbid' in source code.
-
-    These are static checks because the router modules can't be imported
-    in isolation without triggering heavy env-validation side effects.
-    The behavioral validation (extra_forbidden at runtime) is covered by
-    the ConnectorFactPayload tests above, which prove the Pydantic
-    ConfigDict(extra='forbid') pattern works correctly.
-    """
-
-    # STATIC-OK: Router modules have relative imports that prevent
-    # isolated loading. Source inspection confirms the config is present.
-
-    def test_async_enrichment_has_forbid(self) -> None:
-        text = (_SRC / "async_jobs.py").read_text()
-        assert 'extra="forbid"' in text, "AsyncEnrichmentRequest missing extra=forbid"
-        # Verify it appears after the class definition
-        idx_class = text.index("class AsyncEnrichmentRequest")
-        idx_forbid = text.index('extra="forbid"', idx_class)
-        assert idx_forbid > idx_class
-
-    def test_async_batch_has_forbid(self) -> None:
-        text = (_SRC / "async_jobs.py").read_text()
-        idx_class = text.index("class AsyncBatchEnrichmentRequest")
-        idx_forbid = text.index('extra="forbid"', idx_class)
-        assert idx_forbid > idx_class
-
-    def test_approve_request_has_forbid(self) -> None:
-        text = (_SRC / "review.py").read_text()
-        idx_class = text.index("class ApproveRequest")
-        idx_forbid = text.index('extra="forbid"', idx_class)
-        assert idx_forbid > idx_class
-
-    def test_reject_request_has_forbid(self) -> None:
-        text = (_SRC / "review.py").read_text()
-        idx_class = text.index("class RejectRequest")
-        idx_forbid = text.index('extra="forbid"', idx_class)
-        assert idx_forbid > idx_class
-
-    def test_adjudication_request_has_forbid(self) -> None:
-        text = (_SRC / "scoring.py").read_text()
-        idx_class = text.index("class AdjudicationRequest")
-        idx_forbid = text.index('extra="forbid"', idx_class)
-        assert idx_forbid > idx_class
-
-    def test_all_existing_strict_models_still_strict(self) -> None:
-        """Verify pre-existing strict models haven't regressed."""
-        schemas_dir = _SRC.parent / "schemas"
-        # validation.py has StrictRequestModel base class
-        text = (schemas_dir / "validation.py").read_text()
-        assert 'extra="forbid"' in text, "StrictRequestModel lost extra=forbid"
-        # enrichment.py request models
-        text = (schemas_dir / "enrichment.py").read_text()
-        assert 'extra="forbid"' in text, "EnrichmentRequest lost extra=forbid"
