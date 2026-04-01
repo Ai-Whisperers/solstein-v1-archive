@@ -1,5 +1,15 @@
 """Tests for STORY-067: Migrate Authentication to Supabase Auth.
 
+STORY-253 NOTE: These are STRUCTURAL source-inspection tests that verify
+auth migration by reading source files. They are intentionally retained as
+a secondary defense layer alongside the behavioral contract tests in
+test_behavioral_auth_contracts.py which exercise runtime behavior.
+
+Structural tests here catch: accidental re-introduction of legacy patterns
+(bcrypt imports, jwt.encode, hash_password functions, demo comments).
+They do NOT verify that auth actually works at runtime — see the behavioral
+tests for that coverage.
+
 Verifies that:
 - Auth endpoints delegate to Supabase Auth SDK
 - No custom password hashing exists in auth code

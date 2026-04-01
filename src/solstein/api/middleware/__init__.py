@@ -14,11 +14,12 @@ from .rate_limit import (
     setup_rate_limiting,
 )
 from .security import (
-    SupabaseJWTMiddleware as AuthenticationMiddleware,
-)
-from .security import (
+    SupabaseJWTMiddleware,
     setup_security_middleware,
 )
+
+# Backward-compatible alias
+AuthenticationMiddleware = SupabaseJWTMiddleware
 from .tracing import (
     PerformanceMetricsMiddleware,
     RequestTracingMiddleware,

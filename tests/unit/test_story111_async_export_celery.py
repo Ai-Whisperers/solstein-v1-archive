@@ -3,11 +3,11 @@
 .. deprecated:: STORY-253
    The source-inspection tests in this file (85.7% of assertions read source
    with ``Path.read_text()``) have been superseded by behavioral contract
-   tests in ``test_behavioral_contracts.py`` which verify runtime metadata,
+   tests in ``test_behavioral_auth_contracts.py`` which verify runtime metadata,
    route registration, Celery task attributes, and Pydantic model fields.
 
-   This file is retained for backward-compatibility during the transition.
-   New export-related contract tests should go in ``test_behavioral_contracts.py``.
+   This file is retained as a secondary defense against pattern regressions.
+   New export-related contract tests should go in ``test_behavioral_auth_contracts.py``.
 
 Validates:
 - REQ-1: POST /api/v1/exports returns 202 with job_id within 1s

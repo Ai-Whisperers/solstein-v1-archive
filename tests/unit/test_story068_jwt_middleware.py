@@ -1,5 +1,11 @@
 """Tests for STORY-068: Remove Auth Bypass and Wire Supabase JWT Middleware.
 
+STORY-253 NOTE: These are STRUCTURAL source-inspection tests. Behavioral
+contract tests in test_behavioral_auth_contracts.py now cover runtime
+middleware behavior (public path classification, 401/503 responses, token
+format validation). These structural checks are retained as a secondary
+defense against re-introduction of legacy bypass patterns.
+
 Verifies that:
 - No auth bypass exists for /companies or /enrichment
 - Public paths are limited to genuinely public routes
