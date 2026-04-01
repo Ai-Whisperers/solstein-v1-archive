@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-04-01 | Updated By | gestalt — sync assessment, STORY-273/274/275 queued, ruff burn-down plan complete |
+| Last Updated | 2026-04-01 | Updated By | gestalt — ruff gate DONE (0 errors), STORY-276 queued for develop→master merge |
 
 ## Status Key
 
@@ -95,7 +95,7 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 ## Develop Lint Gate Signal Restoration (2026-04-01)
 
-The canonical `develop` branch still has substantial real Ruff debt. Do not treat older queue notes that say "ruff clean" as repository-wide truth unless they explicitly scoped the claim to touched files. The 2026-04-01 pass removed invalid suppression noise from active files first; repo-wide `ruff check .` still reports **207** errors and must be handled as bounded follow-up work on `develop`, not via `master` lint-commit replay.
+**STATUS: COMPLETE (2026-04-01).** `ruff check . --output-format concise` → 0 errors on `develop`. Commit `b007cdde` on `work/develop-lint-gate-signal-2026-04-01`. No new pyproject.toml ignore entries. The develop→master merge (STORY-276) is now unblocked.
 
 **Branch/master sync assessment (2026-04-01):** `develop` is 611 commits ahead of `master`. `master` has 7 commits not on `develop`. A full cherry-pick review confirmed none of those 7 commits require porting: the M0 functional fix (`01f94def`) is already materially present on `develop`; the ruff compliance commit (`755eab6c`) added broad ignores that are not appropriate for `develop`'s current clean state. `develop` is and remains the canonical branch. No cherry-picks needed. See `docs/audit/MASTER_ONLY_CHERRY_PICK_EXECUTION_2026-04-01.md` for evidence.
 
@@ -103,10 +103,11 @@ The canonical `develop` branch still has substantial real Ruff debt. Do not trea
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0s | STORY-272 | Restore Ruff Gate Signal Integrity on Current Develop | IN_PROGRESS | Branch `work/develop-lint-gate-signal-2026-04-01`; scripts/ci/ clean; repo-wide 260→207; follow-up slice plan in STORY-273/274/275 |
-| 0t | STORY-273 | Ruff Bounded Slice — scripts/ Legacy Helpers | READY | 168 errors; 166 auto-fixable; 1 manual SIM201; see STORY-273 for exact commands |
-| 0u | STORY-274 | Ruff Bounded Slice — alembic/versions/ | READY | 21 errors; all auto-fixable via `ruff check alembic/versions/ --fix` |
-| 0v | STORY-275 | Ruff Bounded Slice — .claude/, tests/unit/, bin/, src/research/ | READY (after 273+274) | 18 errors; 3 × E722 manual; closes STORY-272 and unblocks STORY-061 |
+| 0s | STORY-272 | Restore Ruff Gate Signal Integrity on Current Develop | DONE | `ruff check .` → 0 errors. Commit `b007cdde` on `work/develop-lint-gate-signal-2026-04-01` |
+| 0t | STORY-273 | Ruff Bounded Slice — scripts/ Legacy Helpers | DONE | Merged into STORY-272 completion pass |
+| 0u | STORY-274 | Ruff Bounded Slice — alembic/versions/ | DONE | Merged into STORY-272 completion pass |
+| 0v | STORY-275 | Ruff Bounded Slice — .claude/, tests/unit/, bin/, src/research/ | DONE | Merged into STORY-272 completion pass. STORY-061 now unblocked |
+| 0w | STORY-276 | Merge develop into master — Production Sync | READY | Ruff gate clean; pyproject.toml conflict resolution documented in STORY-276; run on release branch |
 
 ---
 
