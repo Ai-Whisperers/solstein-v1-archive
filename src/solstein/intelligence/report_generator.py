@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 try:
@@ -74,7 +74,7 @@ class CitedReportGenerator:
 | **Classification** | {classification} |
 | **Tier** | {tier} |
 | **Capability Overlap** | {report.capability_matrix.overall_overlap_score:.0%} |
-| **Analysis Date** | {datetime.now().strftime("%Y-%m-%d")} |
+| **Analysis Date** | {datetime.now(tz=timezone.utc).strftime("%Y-%m-%d")} |
 """
 
     def _generate_executive_assessment(self, report: DeepAnalysisReport) -> str:

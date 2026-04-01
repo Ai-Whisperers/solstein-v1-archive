@@ -9,7 +9,7 @@ Updated to implement UnifiedDataSource protocol.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from solstein.adapters.logging import log_adapter_error
@@ -42,7 +42,7 @@ class CompetitorJsonSource:
 
             loader = CompetitorDataLoader()
             companies = loader.load_companies()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             log_adapter_error(
                 component="CompetitorJsonSource",
                 operation="discover",
@@ -85,7 +85,7 @@ class CompetitorJsonSource:
             source_type=DataSourceType.COMPETITOR_JSON,
             source_name=self.source_name,
             raw_content={"company_id": company_id, "company_name": company_name},
-            retrieval_timestamp=datetime.now(),
+            retrieval_timestamp=datetime.now(tz=timezone.utc),
             confidence=0.5,
         )
 

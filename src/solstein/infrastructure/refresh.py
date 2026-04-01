@@ -125,7 +125,7 @@ class BaseRefreshConnector(ABC):
             if row and row[0]:
                 return row[0]
             # Default to 30 days ago if no previous refresh
-            return datetime.now() - timedelta(days=30)
+            return datetime.now(tz=timezone.utc) - timedelta(days=30)
 
     async def _filter_delta(self, facts: list[dict[str, Any]], since: datetime) -> list[dict[str, Any]]:
         """Filter facts to only return changed data since last refresh.
@@ -213,7 +213,7 @@ class BaseRefreshConnector(ABC):
             status="in_progress",
         )
 
-        refresh_time = datetime.now()
+        refresh_time = datetime.now(tz=timezone.utc)
         stored_count = 0
 
         async with self._require_db_manager().get_session() as session:
@@ -248,7 +248,7 @@ class BaseRefreshConnector(ABC):
                     session.add(fact)
                     stored_count += 1
 
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error(f"Failed to store fact for {self.source_name}: {e}")
 
             batch.status = "completed" if stored_count > 0 else "failed"

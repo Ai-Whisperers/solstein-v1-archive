@@ -10,7 +10,7 @@ for concurrent per-company fetches.
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import httpx
@@ -164,7 +164,7 @@ class WebsiteUnifiedAdapter(BaseRefreshConnector):
         return RawDataSource(
             source_name=self.source_name,
             source_type=self.source_type,
-            retrieval_timestamp=datetime.now(),
+            retrieval_timestamp=datetime.now(tz=timezone.utc),
             raw_content=data,
             metadata={
                 "website": website,
@@ -249,7 +249,7 @@ class WebsiteUnifiedAdapter(BaseRefreshConnector):
                     "fact_type": "website_info",
                     "value": data,
                     "confidence": self.confidence,
-                    "extracted_at": datetime.now(),
+                    "extracted_at": datetime.now(tz=timezone.utc),
                     "source": self.source_name,
                 }
             return None

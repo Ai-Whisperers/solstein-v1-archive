@@ -1,13 +1,13 @@
 import importlib
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
 
 
 def _current_year() -> str:
-    return str(datetime.now().year)
+    return str(datetime.now(tz=timezone.utc).year)
 
 
 def _ddg_search_fallback(query: str, max_results: int = 20) -> list[dict[str, Any]]:
@@ -20,11 +20,11 @@ def _ddg_search_fallback(query: str, max_results: int = 20) -> list[dict[str, An
     try:
         ddgs_module = importlib.import_module("duckduckgo_search")
         ddgs_cls = ddgs_module.DDGS
-    except Exception:
+    except Exception:  # noqa: BLE001
         try:
             ddgs_module = importlib.import_module("ddgs")
             ddgs_cls = ddgs_module.DDGS
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"DuckDuckGo module not available: {e}")
             return []
 
@@ -48,7 +48,7 @@ def _ddg_search_fallback(query: str, max_results: int = 20) -> list[dict[str, An
                 }
             )
         return items
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"DDG search error: {e}")
         return []
     try:
@@ -71,7 +71,7 @@ def _ddg_search_fallback(query: str, max_results: int = 20) -> list[dict[str, An
                 }
             )
         return items
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"DDG search error: {e}")
         return []
 
@@ -102,7 +102,7 @@ def _google_search_fallback(company_name: str, max_results: int = 20) -> list[di
 
     except ImportError:
         logger.warning("Google search not available")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"Google search error: {e}")
 
     return []
@@ -146,7 +146,7 @@ def search_company_news(company_name: str, max_results: int = 20) -> list[dict[s
 
     except ImportError:
         logger.warning("Exa not installed, trying fallback chain")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"Exa search error: {e}")
 
     google_results = _google_search_fallback(company_name, max_results)
@@ -204,7 +204,7 @@ def search_company_info(company_name: str, query_type: str = "general") -> list[
 
     except ImportError:
         logger.warning("Exa not installed for company info search")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"Company info search error: {e}")
 
     ddg_results = _ddg_search_fallback(query, max_results=10)

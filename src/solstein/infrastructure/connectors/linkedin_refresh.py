@@ -5,7 +5,7 @@ Implements incremental refresh with hiring signal detection.
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -74,7 +74,7 @@ class LinkedInRefreshConnector(BaseRefreshConnector):
                             "has_hiring_activity": ai_related_positions > 0,
                         },
                         "confidence": 0.3,  # Lower confidence for news-derived data
-                        "extracted_at": datetime.now(),
+                        "extracted_at": datetime.now(tz=timezone.utc),
                         "source": self.source_name,
                         "metadata": {
                             "company_name": company_name,
@@ -94,7 +94,7 @@ class LinkedInRefreshConnector(BaseRefreshConnector):
                                 "signal_strength": min(ai_related_positions / 10, 1.0),
                             },
                             "confidence": 0.3,
-                            "extracted_at": datetime.now(),
+                            "extracted_at": datetime.now(tz=timezone.utc),
                             "source": self.source_name,
                             "metadata": {
                                 "company_name": company_name,
@@ -102,7 +102,7 @@ class LinkedInRefreshConnector(BaseRefreshConnector):
                         }
                     )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Failed to fetch LinkedIn data for {company_name}: {e}")
                 continue
 

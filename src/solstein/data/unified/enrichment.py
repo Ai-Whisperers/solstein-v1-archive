@@ -7,9 +7,10 @@ Handles enrichment from SEC EDGAR, Companies House, and News Signals.
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
 import time
 from collections.abc import Mapping
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Protocol
 
 from loguru import logger
@@ -133,8 +134,6 @@ def fill_identifiers_from_lookup(loader, company: UnifiedCompany) -> UnifiedComp
             loop = None
 
         if loop and loop.is_running():
-            import concurrent.futures
-
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 response = pool.submit(
                     asyncio.run,
@@ -315,7 +314,7 @@ def fill_nulls_from_sec_edgar(loader, company: UnifiedCompany) -> UnifiedCompany
 
     try:
         # Try to fetch 10-K for current year first, then previous years
-        current_year = datetime.now().year
+        current_year = datetime.now(tz=timezone.utc).year
         filing_data = None
 
         for year_offset in range(0, 3):  # Try current year and 2 previous years
@@ -446,8 +445,6 @@ def attach_news_signals(loader, company: UnifiedCompany) -> UnifiedCompany:
             loop = None
 
         if loop and loop.is_running():
-            import concurrent.futures
-
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 response = pool.submit(
                     asyncio.run,

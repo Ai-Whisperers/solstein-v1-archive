@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import uvicorn
@@ -262,7 +262,7 @@ async def custom_swagger_ui_html() -> Any:
 @app.get("/healthz", tags=["Health"], include_in_schema=False)
 async def health_check_alias() -> dict[str, Any]:
     """Health check alias for K8s."""
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+    return {"status": "healthy", "timestamp": datetime.now(tz=timezone.utc).isoformat()}
 
 
 if __name__ == "__main__":
