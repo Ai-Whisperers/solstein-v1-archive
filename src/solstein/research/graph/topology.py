@@ -236,7 +236,9 @@ def _human_review_router(state: ResearchState) -> str:
         state.get("config", {}).get("human_review_confidence_threshold", 0.5)
     )
     confidence_scores: dict[str, float] = state.get("confidence_scores") or {}
-    if confidence_scores and any(v < threshold for v in confidence_scores.values()):
+    # STORY-269: Empty confidence_scores means scoring produced no results —
+    # this MUST trigger human review, not silently bypass it.
+    if not confidence_scores or any(v < threshold for v in confidence_scores.values()):
         return "human_review_gate"
 
     return "analysis"
