@@ -13,9 +13,9 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
+from solstein.domain.discovery import DiscoveryCandidate, _catalog_for_market, _slugify  # STORY-246
 from solstein.domain.models import DataSourceType, RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
-from solstein.research.discovery import DiscoveryCandidate, _catalog_for_market, _slugify
 
 
 class StaticCatalogSource:

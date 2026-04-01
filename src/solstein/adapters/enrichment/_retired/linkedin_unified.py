@@ -13,10 +13,10 @@ from typing import Any
 from loguru import logger
 
 from solstein.adapters.logging import log_adapter_error
+from solstein.domain.discovery import DiscoveryCandidate  # STORY-246
 from solstein.domain.models import RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
-from solstein.research.discovery import DiscoveryCandidate
 
 
 class LinkedInUnifiedAdapter(BaseRefreshConnector):

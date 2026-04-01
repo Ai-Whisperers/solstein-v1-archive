@@ -1,50 +1,22 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from loguru import logger
 
 from solstein.data.loaders import CompetitorDataLoader
 
+# STORY-246: DiscoveryCandidate, _slugify, _catalog_for_market moved to
+# solstein.domain.discovery to break import cycles.  Re-exported here for
+# backward compatibility.
+from solstein.domain.discovery import (  # noqa: F401
+    DiscoveryCandidate,
+    _catalog_for_market,
+    _slugify,
+)
+
 if TYPE_CHECKING:
     from solstein.adapters.registry import SourceRegistry
-
-
-@dataclass
-class DiscoveryCandidate:
-    company_id: str
-    name: str
-    market: str
-    ticker: str | None
-    industry: str
-    region: str
-    tags: list[str]
-    seed_relevance: float
-    discovery_reason: str
-    source_links: list[str]
-
-
-def _slugify(name: str) -> str:
-    out = []
-    for ch in name.lower():
-        if ch.isalnum():
-            out.append(ch)
-        elif out and out[-1] != "-":
-            out.append("-")
-    slug = "".join(out).strip("-")
-    return slug or "unknown-company"
-
-
-def _catalog_for_market(market: str) -> list[dict[str, object]]:
-    """Get company catalog for a given market.
-
-    EPIC-020: Refactored from 429-line function to data-driven approach.
-    Catalog data moved to market_catalogs.py module.
-    """
-    from .market_catalogs import get_catalog_for_market
-
-    return get_catalog_for_market(market)
 
 
 def _score_candidate(

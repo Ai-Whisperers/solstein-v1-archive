@@ -18,12 +18,12 @@ from loguru import logger
 
 from solstein.adapters.logging import log_adapter_error
 from solstein.config import get_settings
+from solstein.domain.discovery import DiscoveryCandidate  # STORY-246
 from solstein.domain.models import RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.database import DatabaseManager
 from solstein.infrastructure.database import db_manager as default_db_manager
 from solstein.infrastructure.refresh import BaseRefreshConnector
-from solstein.research.discovery import DiscoveryCandidate
 
 
 class WebsiteUnifiedAdapter(BaseRefreshConnector):

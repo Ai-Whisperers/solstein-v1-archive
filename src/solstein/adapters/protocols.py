@@ -15,6 +15,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Protocol, runtime_checkable
 
+from solstein.domain.discovery import DiscoveryCandidate  # STORY-246: lower-layer import
 from solstein.domain.models import (
     AggregatedDataRecord,
     DataSourceType,
@@ -22,7 +23,6 @@ from solstein.domain.models import (
     RawDataSource,
 )
 from solstein.infrastructure.conflict_resolution import SourceAuthority
-from solstein.research.discovery import DiscoveryCandidate
 
 
 @runtime_checkable

@@ -14,8 +14,8 @@ from typing import Any
 
 from solstein.adapters.logging import log_adapter_error
 from solstein.adapters.protocols import DiscoverySource, EnrichmentSource
+from solstein.domain.discovery import DiscoveryCandidate  # STORY-246
 from solstein.domain.models import DataSourceType, RawDataSource
-from solstein.research.discovery import DiscoveryCandidate
 
 
 @dataclass

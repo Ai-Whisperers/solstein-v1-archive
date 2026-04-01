@@ -17,9 +17,9 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any
 
+from solstein.domain.discovery import DiscoveryCandidate  # STORY-246
 from solstein.domain.models import DataSourceType, RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
-from solstein.research.discovery import DiscoveryCandidate
 
 
 class BaseDataSourceAdapter(ABC):

@@ -14,7 +14,6 @@ from urllib.parse import urlparse
 import httpx
 from bs4 import BeautifulSoup
 from loguru import logger
-
 from pydantic import ValidationError
 
 from ..llm.enhanced_client import EnhancedLLMClient

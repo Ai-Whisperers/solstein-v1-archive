@@ -35,7 +35,7 @@ class CompetitorJsonSource:
         max_results: int = 50,
         extra_keywords: list[str] | None = None,
     ) -> list[DiscoveryCandidate]:
-        from solstein.research.discovery import DiscoveryCandidate, _slugify
+        from solstein.domain.discovery import DiscoveryCandidate, _slugify  # STORY-246
 
         try:
             from solstein.data.loaders import CompetitorDataLoader
