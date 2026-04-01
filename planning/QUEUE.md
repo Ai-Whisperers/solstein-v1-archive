@@ -55,7 +55,7 @@ These stories were added after a live audit found schema-enforcement gaps, a fai
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0e | STORY-252 | Tighten Structured LLM Contracts and Reject Empty Extraction Successes | READY | Added 2026-03-31: empty structured payloads still validate as success |
+| 0e | STORY-252 | Tighten Structured LLM Contracts and Reject Empty Extraction Successes | IN_PROGRESS | Added 2026-03-31: empty structured payloads still validate as success |
 
 ---
 
