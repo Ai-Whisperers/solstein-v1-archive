@@ -502,7 +502,7 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 || 141 | STORY-246 | Break patents_unified / discovery / registry cycle | DONE | PR branch pushed — 4 import cycles → 0. DiscoveryCandidate moved to domain.discovery |
-|| 142 | STORY-247 | Move canonicalization and hashing helpers to lower shared boundary | READY | Dep: EPIC-065 DONE, EPIC-031 DONE |
+|| 142 | STORY-247 | Move canonicalization and hashing helpers to lower shared boundary | DONE | PR branch pushed — shared/canonicalize.py created, infra no longer imports from research |
 || 143 | STORY-248 | Decouple domain value objects from analytics constants | READY | Dep: EPIC-065 DONE, EPIC-031 DONE |
 || 144 | STORY-249 | Enforce import-cycle and module-boundary checks in maintained gates | READY | Dep: STORY-246 DONE, EPIC-065 DONE, EPIC-031 DONE |
 
@@ -521,6 +521,7 @@ Worker and checker append timestamped entries here:
 - **Queue**: EPIC-066: STORY-246 DONE, STORY-247/248/249 unblocked → READY
 - **Dependencies unblocked**: STORY-247, STORY-248, STORY-249 (EPIC-065 + EPIC-031 both DONE)
 - **Pre-existing failures**: 313 failed + 149 errors in full suite (baseline, not caused by this change)
+- **STORY-247**: Also completed — canonicalize_url + canonical_json_dumps moved to shared/canonicalize.py. Branch `feature/STORY-247-move-canonicalization-helpers` pushed.
 
 ### [2026-03-30 08:35 AEST] Work Checker Run
 - **PRs merged**: 0 — no open PRs
