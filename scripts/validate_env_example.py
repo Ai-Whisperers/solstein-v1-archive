@@ -55,9 +55,9 @@ def extract_settings_fields(config_path: Path) -> list[str]:
     """
     text = config_path.read_text(encoding="utf-8")
 
-    # Isolate the Settings class body (stop at next top-level class or EOF)
+    # Isolate the Settings class body (stop at next top-level class/def or EOF)
     settings_match = re.search(
-        r"^class Settings\(BaseSettings\):(.*?)^(?=class |\Z)",
+        r"^class Settings\(BaseSettings\):(.*?)^(?=class |def |\Z)",
         text,
         re.DOTALL | re.MULTILINE,
     )
