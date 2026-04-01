@@ -26,7 +26,6 @@ from pathlib import Path
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Helpers: load modules that have deep import chains
 # ---------------------------------------------------------------------------
@@ -116,7 +115,7 @@ class TestExportTaskCeleryConfig:
     def _load(self):
         # Ensure export_tasks loaded first so task is registered
         _load_export_tasks()
-        from solstein.celery_config import celery_app  # noqa: lazy-import
+        from solstein.celery_config import celery_app  # noqa: PLC0415
         self.app = celery_app
 
     def test_export_tasks_in_includes(self):
@@ -215,7 +214,7 @@ class TestExportJobRecordModel:
 
     @pytest.fixture(autouse=True)
     def _load(self):
-        from solstein.infrastructure.models.export import ExportJobRecord  # noqa: lazy-import
+        from solstein.infrastructure.models.export import ExportJobRecord  # noqa: PLC0415
         self.model = ExportJobRecord
 
     def test_table_name(self):
@@ -258,7 +257,7 @@ class TestExportJobRecordModel:
 
     def test_model_importable_from_package(self):
         """ExportJobRecord must be importable from models package."""
-        from solstein.infrastructure.models import ExportJobRecord as FromPkg  # noqa: lazy-import
+        from solstein.infrastructure.models import ExportJobRecord as FromPkg  # noqa: PLC0415
         assert FromPkg is self.model
 
 
@@ -329,7 +328,7 @@ class TestHealthCheckResult:
 
     @pytest.fixture(autouse=True)
     def _load(self):
-        from solstein.monitoring.health import HealthCheckResult  # noqa: lazy-import
+        from solstein.monitoring.health import HealthCheckResult  # noqa: PLC0415
         self.result_cls = HealthCheckResult
 
     @pytest.mark.parametrize("field", [

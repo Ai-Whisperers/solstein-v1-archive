@@ -46,12 +46,12 @@ def _load_api_test_dependencies():
     needs the API client.
     """
     try:
-        from solstein.api.dependencies import (  # noqa: lazy-import
+        from solstein.api.dependencies import (  # noqa: PLC0415
             get_company_repository,
             get_current_tenant,
             get_current_user,
         )
-        from solstein.api.main import app as _api_app  # noqa: lazy-import
+        from solstein.api.main import app as _api_app  # noqa: PLC0415
     except ImportError as exc:
         raise ImportError(
             "API dependencies not available -- solstein.api.main failed to import. "
@@ -89,9 +89,9 @@ def mock_repo(mock_company):
 @pytest.fixture
 def client(mock_repo):
     """Provides an authenticated TestClient with dependency overrides."""
-    from fastapi.testclient import TestClient  # noqa: lazy-import
+    from fastapi.testclient import TestClient  # noqa: PLC0415
 
-    from solstein.config import get_settings  # noqa: lazy-import
+    from solstein.config import get_settings  # noqa: PLC0415
 
     app, get_company_repository, get_current_tenant, get_current_user = _load_api_test_dependencies()
     settings = get_settings()
@@ -126,7 +126,7 @@ def unauthenticated_client():
     receive an 'anonymous' user rather than a 401. This fixture exists
     to explicitly test this design behaviour.
     """
-    from fastapi.testclient import TestClient  # noqa: lazy-import
+    from fastapi.testclient import TestClient  # noqa: PLC0415
 
     app, _, _, _ = _load_api_test_dependencies()
     with TestClient(app) as test_client:
@@ -147,8 +147,8 @@ def mock_competitor_data(monkeypatch):
             # CompetitorDataLoader.load_companies() returns 3 test companies
             ...
     """
-    from solstein.data.loaders import CompetitorDataLoader  # noqa: lazy-import
-    from tests.test_data import make_test_companies  # noqa: lazy-import
+    from solstein.data.loaders import CompetitorDataLoader  # noqa: PLC0415
+    from tests.test_data import make_test_companies  # noqa: PLC0415
 
     test_companies = make_test_companies()
 
@@ -176,9 +176,9 @@ async def db_engine():
     - pool_recycle=3600: Recycle connections after 1 hour
     - pool_pre_ping=True: Test connections before using them
     """
-    from sqlalchemy.ext.asyncio import create_async_engine  # noqa: lazy-import
+    from sqlalchemy.ext.asyncio import create_async_engine  # noqa: PLC0415
 
-    from solstein.database_config import convert_to_async_url, get_test_database_url  # noqa: lazy-import
+    from solstein.database_config import convert_to_async_url, get_test_database_url  # noqa: PLC0415
 
     db_url = get_test_database_url()
     async_url = convert_to_async_url(db_url)
@@ -211,7 +211,7 @@ async def db_session(db_engine):
             # db_session is an AsyncSession
             result = await db_session.execute(...)
     """
-    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker  # noqa: lazy-import
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker  # noqa: PLC0415
 
     async_session = async_sessionmaker(
         db_engine,

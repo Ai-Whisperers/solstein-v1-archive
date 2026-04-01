@@ -30,7 +30,7 @@ def check_function_sizes(files: list[Path], max_lines: int = 100) -> bool:
             )
             if result.returncode != 0:
                 violations.append(f"{file}: Function size violation")
-        except Exception:  # noqa: broad-except
+        except Exception:  # noqa: BLE001
             pass
 
     if violations:
@@ -63,7 +63,7 @@ def check_bare_excepts(files: list[Path]) -> bool:
                     and "# noqa" not in line
                 ):
                     violations.append(f"{file}:{i}: {line.strip()}")
-        except Exception:  # noqa: broad-except
+        except Exception:  # noqa: BLE001
             pass
 
     if violations:
@@ -110,7 +110,7 @@ def check_lazy_imports(files: list[Path]) -> bool:
                     if current_indent <= function_indent:
                         in_function = False
 
-        except Exception:  # noqa: broad-except
+        except Exception:  # noqa: BLE001
             pass
 
     if violations:
@@ -168,7 +168,7 @@ def check_file_size(files: list[Path], max_lines: int = 500) -> bool:
             lines = len(content.splitlines())
             if lines > max_lines:
                 violations.append(f"{file}: {lines} lines (max: {max_lines})")
-        except Exception:  # noqa: broad-except
+        except Exception:  # noqa: BLE001
             pass
 
     if violations:
@@ -236,7 +236,7 @@ def check_parameter_counts(files: list[Path], max_params: int = 5) -> bool:
 
         except SyntaxError:
             pass
-        except Exception:  # noqa: broad-except
+        except Exception:  # noqa: BLE001
             pass
 
     if violations:
@@ -287,7 +287,7 @@ def check_class_sizes(files: list[Path], max_lines: int = 300, max_methods: int 
 
         except SyntaxError as e:
             violations.append(f"{file}: Syntax error - {e}")
-        except Exception:  # noqa: broad-except
+        except Exception:  # noqa: BLE001
             pass
 
     if violations:
@@ -308,7 +308,7 @@ def get_staged_python_files() -> list[Path]:
         )
         files = [Path(f) for f in result.stdout.strip().split("\n") if f.endswith(".py")]
         return files
-    except Exception:  # noqa: broad-except
+    except Exception:  # noqa: BLE001
         return []
 
 
