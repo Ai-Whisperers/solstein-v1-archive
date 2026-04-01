@@ -501,10 +501,10 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 141 | STORY-246 | Break patents_unified / discovery / registry cycle | BLOCKED | Dep: EPIC-065 (STORY-245 pending), EPIC-031 (not started) |
-| 142 | STORY-247 | Move canonicalization and hashing helpers to lower shared boundary | BLOCKED | Dep: EPIC-065 (STORY-245 pending), EPIC-031 (not started) |
-| 143 | STORY-248 | Decouple domain value objects from analytics constants | BLOCKED | Dep: EPIC-065 (STORY-245 pending), EPIC-031 (not started) |
-| 144 | STORY-249 | Enforce import-cycle and module-boundary checks in maintained gates | BLOCKED | Dep: EPIC-065 (STORY-245 pending), EPIC-031 (not started) |
+|| 141 | STORY-246 | Break patents_unified / discovery / registry cycle | DONE | PR branch pushed — 4 import cycles → 0. DiscoveryCandidate moved to domain.discovery |
+|| 142 | STORY-247 | Move canonicalization and hashing helpers to lower shared boundary | READY | Dep: EPIC-065 DONE, EPIC-031 DONE |
+|| 143 | STORY-248 | Decouple domain value objects from analytics constants | READY | Dep: EPIC-065 DONE, EPIC-031 DONE |
+|| 144 | STORY-249 | Enforce import-cycle and module-boundary checks in maintained gates | READY | Dep: STORY-246 DONE, EPIC-065 DONE, EPIC-031 DONE |
 
 ---
 
@@ -513,6 +513,14 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-04-01 02:20 BRT] Worker Morning Shift
+- **Stories completed**: STORY-246 (Break patents_unified/discovery/registry import cycle)
+- **Branch**: `feature/STORY-246-break-discovery-import-cycle` pushed
+- **Metrics**: 4304 tests collected (unchanged), 0 lint errors (was 1), LOC delta +20, import cycles 4→0, files 636→637
+- **Queue**: EPIC-066: STORY-246 DONE, STORY-247/248/249 unblocked → READY
+- **Dependencies unblocked**: STORY-247, STORY-248, STORY-249 (EPIC-065 + EPIC-031 both DONE)
+- **Pre-existing failures**: 313 failed + 149 errors in full suite (baseline, not caused by this change)
 
 ### [2026-03-30 08:35 AEST] Work Checker Run
 - **PRs merged**: 0 — no open PRs
