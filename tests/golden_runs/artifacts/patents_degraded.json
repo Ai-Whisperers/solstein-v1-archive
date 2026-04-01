@@ -1,0 +1,27 @@
+{
+  "_meta": {
+    "provider": "patents",
+    "scenario": "degraded",
+    "description": "Contract shape for patent enrichment fallback and degradation paths",
+    "story": "STORY-267",
+    "generated": "2026-03-31"
+  },
+  "contract": {
+    "fallback_cascade": {
+      "description": "Patents adapter falls back: USPTO PEDS -> Google Patents -> DuckDuckGo",
+      "expected_behavior": "returns_result_with_lower_confidence",
+      "confidence_drops": {
+        "primary_failure": {"from": 0.7, "to": 0.4},
+        "all_backends_fail": "propagates_exception"
+      }
+    },
+    "empty_company_name": {
+      "expected_behavior": "may_return_zero_patents",
+      "description": "Patent search with empty/nonsense name returns zero-count result rather than error"
+    },
+    "backend_metadata_preserved": {
+      "description": "Fallback backend identity is preserved in metadata.backend and raw_content.source_backend",
+      "assertion": "metadata.backend == raw_content.source_backend"
+    }
+  }
+}
