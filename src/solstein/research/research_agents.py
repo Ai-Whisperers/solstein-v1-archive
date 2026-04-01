@@ -15,6 +15,8 @@ import httpx
 from bs4 import BeautifulSoup
 from loguru import logger
 
+from pydantic import ValidationError
+
 from ..llm.enhanced_client import EnhancedLLMClient
 from ..llm.instructor_client import InstructorClient
 from ..llm.prompts import get_system_prompt
@@ -153,6 +155,20 @@ class ContentExtractorAgent:
                 return ExtractedData(url, "error", {}, 0.0, "fetch_too_short", raw_content="")
 
             data = await self._llm_extract(text[:8000], company_name, url)
+
+            # STORY-252: None means the LLM returned an empty/non-informative
+            # payload that failed minimum-validity checks. Surface this as a
+            # schema failure rather than a silent success with empty data.
+            if data is None:
+                return ExtractedData(
+                    source_url=url,
+                    source_type=classify_source(url),
+                    data={"_fetch_metadata": fetch_result.to_metadata()},
+                    confidence=0.0,
+                    extraction_method="schema_failure:empty_payload",
+                    raw_content=text[:2000],
+                )
+
             source_type = classify_source(url)
             confidence = self._calculate_confidence(data)
             data["_fetch_metadata"] = fetch_result.to_metadata()
@@ -226,11 +242,23 @@ class ContentExtractorAgent:
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
         return "\n".join(chunk for chunk in chunks if chunk)
 
-    async def _llm_extract(self, text: str, company_name: str, url: str) -> dict[str, Any]:
+    async def _llm_extract(self, text: str, company_name: str, url: str) -> dict[str, Any] | None:
         """Extract structured company data using Instructor schema validation.
 
         STORY-072: Replaces ad-hoc JSON parsing with Instructor. Schema violations
         are caught at the call site rather than propagating as KeyError downstream.
+
+        STORY-252: Distinguishes empty/non-informative extraction payloads
+        (EmptyExtractionError via ValidationError) from other failures. Returns
+        None when the LLM produced a payload that fails minimum-validity checks,
+        allowing the caller to surface it as a schema failure rather than silent
+        success.
+
+        Returns:
+            Extracted data dict on success, None on empty-payload schema failure.
+
+        Raises:
+            Exception: Re-raises unexpected errors after logging.
         """
         prompt = (
             f"Extract structured company information from this content.\n"
@@ -244,6 +272,21 @@ class ContentExtractorAgent:
                 system_prompt=get_system_prompt("system_company_extractor"),
             )
             return extraction.model_dump(exclude_none=False)
+        except ValidationError as error:
+            # STORY-252: Check if this is an empty-payload rejection
+            is_empty_payload = any(
+                "empty or non-informative" in str(e) for e in error.errors()
+            )
+            if is_empty_payload:
+                logger.warning(
+                    f"[ContentExtractor] Empty extraction payload rejected for {url}: {error}",
+                )
+                return None
+            # Other schema validation failures (e.g., wrong types) — log and return empty
+            logger.error(
+                f"[ContentExtractor] Schema validation failed for {url}: {error}",
+            )
+            return {}
         except Exception as error:  # noqa: BLE001
             logger.error(f"[ContentExtractor] Instructor extraction failed for {url}: {error}")
             return {}

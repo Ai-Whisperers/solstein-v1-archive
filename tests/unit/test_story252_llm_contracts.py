@@ -6,12 +6,15 @@ Validates that:
 - The is_minimal property correctly identifies identity-only payloads
 - ResearchPlanResponse still enforces min_length=1 on queries
 - EmptyExtractionError is raised (not generic ValidationError)
+- Agent-level fallback distinguishes schema failure from generic errors
 """
 
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from pydantic import ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 from solstein.llm.schemas import (
     CompanyExtractionResponse,
@@ -19,6 +22,8 @@ from solstein.llm.schemas import (
     ResearchPlanResponse,
     SearchQueryItem,
 )
+from solstein.research.fetch_policy import FetchResult
+from solstein.research.research_agents import ContentExtractorAgent
 
 
 class TestCompanyExtractionMinimumPayload:
@@ -140,3 +145,146 @@ class TestExtractionModelDump:
         dumped = extraction.model_dump(exclude_none=True)
         assert "company_name" in dumped
         assert "revenue" not in dumped
+
+
+# ===========================================================================
+# Agent-level fallback: _llm_extract distinguishes schema failure
+# ===========================================================================
+
+
+class TestContentExtractorAgentEmptyPayloadFallback:
+    """STORY-252: Agent-level fallback surfaces schema failure, not silent success.
+
+    These tests verify that ContentExtractorAgent._llm_extract returns None
+    when the LLM produces an empty/non-informative payload, and that
+    extract() surfaces this as extraction_method='schema_failure:empty_payload'.
+    """
+
+    @pytest.fixture()
+    def extractor(self) -> ContentExtractorAgent:
+        """Create a ContentExtractorAgent with mocked dependencies."""
+        mock_llm = MagicMock()
+        mock_instructor = MagicMock()
+        agent = ContentExtractorAgent(
+            llm_client=mock_llm,
+            instructor_client=mock_instructor,
+        )
+        return agent
+
+    @pytest.mark.asyncio()
+    async def test_llm_extract_returns_none_on_empty_payload(
+        self, extractor: ContentExtractorAgent,
+    ) -> None:
+        """_llm_extract returns None when LLM yields empty payload."""
+        # Make instructor.extract raise ValidationError from empty payload
+        extractor.instructor.extract = AsyncMock(
+            side_effect=_make_empty_payload_validation_error(),
+        )
+        result = await extractor._llm_extract("some text", "Acme Corp", "https://acme.com")
+        assert result is None
+
+    @pytest.mark.asyncio()
+    async def test_llm_extract_returns_empty_dict_on_other_validation_error(
+        self, extractor: ContentExtractorAgent,
+    ) -> None:
+        """_llm_extract returns {} on non-empty-payload ValidationError."""
+        # A schema error that is NOT about empty payloads (e.g., wrong type)
+        extractor.instructor.extract = AsyncMock(
+            side_effect=_make_type_validation_error(),
+        )
+        result = await extractor._llm_extract("some text", "Acme Corp", "https://acme.com")
+        assert result == {}
+
+    @pytest.mark.asyncio()
+    async def test_llm_extract_returns_empty_dict_on_generic_exception(
+        self, extractor: ContentExtractorAgent,
+    ) -> None:
+        """_llm_extract returns {} on unexpected exceptions (e.g., network)."""
+        extractor.instructor.extract = AsyncMock(
+            side_effect=RuntimeError("LLM provider timeout"),
+        )
+        result = await extractor._llm_extract("some text", "Acme Corp", "https://acme.com")
+        assert result == {}
+
+    @pytest.mark.asyncio()
+    async def test_llm_extract_returns_dict_on_success(
+        self, extractor: ContentExtractorAgent,
+    ) -> None:
+        """_llm_extract returns a dict with data on success."""
+        valid_extraction = CompanyExtractionResponse(
+            company_name="Acme Corp", revenue=100.0,
+        )
+        extractor.instructor.extract = AsyncMock(return_value=valid_extraction)
+        result = await extractor._llm_extract("some text", "Acme Corp", "https://acme.com")
+        assert isinstance(result, dict)
+        assert result["company_name"] == "Acme Corp"
+        assert result["revenue"] == 100.0
+
+    @pytest.mark.asyncio()
+    async def test_extract_surfaces_schema_failure_on_empty_payload(
+        self, extractor: ContentExtractorAgent,
+    ) -> None:
+        """extract() returns extraction_method='schema_failure:empty_payload'
+        when LLM returns an empty payload.
+        """
+        # Mock _fetch_page to return a successful fetch
+        mock_fetch_result = MagicMock(spec=FetchResult)
+        mock_fetch_result.success = True
+        mock_fetch_result.content = "<html><body>" + "x" * 200 + "</body></html>"
+        mock_fetch_result.to_metadata.return_value = {"status": 200}
+        extractor._fetch_page = AsyncMock(return_value=mock_fetch_result)
+
+        # Mock _llm_extract to return None (empty payload)
+        extractor._llm_extract = AsyncMock(return_value=None)
+
+        result = await extractor.extract("https://acme.com", "Acme Corp")
+        assert result.extraction_method == "schema_failure:empty_payload"
+        assert result.confidence == 0.0
+
+    @pytest.mark.asyncio()
+    async def test_extract_surfaces_llm_parsing_on_success(
+        self, extractor: ContentExtractorAgent,
+    ) -> None:
+        """extract() returns extraction_method='llm_parsing' on valid extraction."""
+        mock_fetch_result = MagicMock(spec=FetchResult)
+        mock_fetch_result.success = True
+        mock_fetch_result.content = "<html><body>" + "x" * 200 + "</body></html>"
+        mock_fetch_result.to_metadata.return_value = {"status": 200}
+        extractor._fetch_page = AsyncMock(return_value=mock_fetch_result)
+
+        # Mock _llm_extract to return valid data
+        extractor._llm_extract = AsyncMock(return_value={
+            "company_name": "Acme Corp",
+            "revenue": 100.0,
+        })
+
+        result = await extractor.extract("https://acme.com", "Acme Corp")
+        assert result.extraction_method == "llm_parsing"
+        assert result.confidence > 0.0
+
+
+# ---------------------------------------------------------------------------
+# Helpers for constructing realistic ValidationErrors
+# ---------------------------------------------------------------------------
+
+def _make_empty_payload_validation_error() -> ValidationError:
+    """Create a ValidationError matching the empty-payload rejection pattern."""
+    try:
+        CompanyExtractionResponse()
+    except ValidationError as e:
+        return e
+    raise AssertionError("Expected ValidationError from empty CompanyExtractionResponse")  # pragma: no cover
+
+
+def _make_type_validation_error() -> ValidationError:
+    """Create a ValidationError from a type mismatch (not empty-payload)."""
+
+    class StrictModel(BaseModel):
+        model_config = ConfigDict(strict=True)  # type: ignore[misc]
+        value: int
+
+    try:
+        StrictModel(value="not_an_int")  # type: ignore[arg-type]
+    except ValidationError as e:
+        return e
+    raise AssertionError("Expected ValidationError from type mismatch")  # pragma: no cover
