@@ -86,7 +86,7 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0o | STORY-267 | Add Provider-Level Golden Contract Runs | BLOCKED | Depends on canonical provider/runtime decisions from EPIC-067 and EPIC-069 |
+| 0o | STORY-267 | Add Provider-Level Golden Contract Runs | IN_PROGRESS | Unblocked: EPIC-069 all DONE + EPIC-067 canonical decisions made (STORY-255/256/257 DONE) |
 | 0p | STORY-268 | Add Full-Market Golden Run with Artifact Diffing | BLOCKED | Depends on STORY-267 and canonical runtime path |
 | 0q | STORY-269 | Block Empty, Placeholder, and Mock Success Paths | BLOCKED | Depends on STORY-271 inventory and golden-run failure criteria |
 | 0r | STORY-270 | Make Save-vs-Rebuild Decision from Golden-Run Evidence | BLOCKED | Final consolidation gate after EPIC-067 through EPIC-070 evidence is collected |
