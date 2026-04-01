@@ -108,6 +108,7 @@ class PipelineStage(ABC):
     async def _run_async(self, context: PipelineContext) -> StageResult:
         """Implement async stage logic. Default delegates to sync version."""
         import asyncio
+
         return await asyncio.to_thread(self._run, context)
 
     def build_artifact(
@@ -506,7 +507,6 @@ class ExportStage(PipelineStage):
             },
         )
 
-
     async def _run_async(self, context: PipelineContext) -> StageResult:
         """Async version with concurrent enrichment."""
         import asyncio
@@ -523,10 +523,9 @@ class ExportStage(PipelineStage):
         # Concurrent enrichment using asyncio.gather
         from .gather import enrich_company_async
 
-        companies: list[Company] = await asyncio.gather(*[
-            enrich_company_async(candidate, context.registry, context.batch_id)
-            for candidate in candidates
-        ])
+        companies: list[Company] = await asyncio.gather(
+            *[enrich_company_async(candidate, context.registry, context.batch_id) for candidate in candidates]
+        )
         context.companies = companies
 
         extracted_payload = [company.model_dump(mode="json") for company in companies]

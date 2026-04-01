@@ -8,10 +8,9 @@ one failing source never blocks the rest.
 Usage::
 
     from solstein.application.enrichment_pipeline import EnrichmentPipeline
-    from solstein.adapters.registry import build_default_registry
-    from solstein.config import get_settings
+    from solstein.runtime import get_registry
 
-    registry = build_default_registry(get_settings())
+    registry = get_registry()
     pipeline = EnrichmentPipeline(registry)
 
     record = await pipeline.enrich("stripe-inc", "Stripe")

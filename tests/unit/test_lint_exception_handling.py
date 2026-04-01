@@ -251,7 +251,7 @@ class TestMain:
 
         assert result == 1
 
-    def test_critical_only_mode(self, tmp_path: Path) -> None:
+    def test_critical_only_mode_non_critical_file(self, tmp_path: Path) -> None:
         # Create non-critical file with violation
         test_file = tmp_path / "utils.py"
         test_file.write_text("try:\n    pass\nexcept Exception:\n    pass")

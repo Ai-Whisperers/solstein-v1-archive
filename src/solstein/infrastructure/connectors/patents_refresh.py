@@ -5,7 +5,7 @@ Implements incremental refresh with patent count-based delta detection.
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -73,7 +73,7 @@ class PatentsRefreshConnector(BaseRefreshConnector):
                             "source_backend": result.source,
                         },
                         "confidence": confidence,
-                        "extracted_at": datetime.now(),
+                        "extracted_at": datetime.now(tz=timezone.utc),
                         "source": self.source_name,
                         "metadata": {
                             "backend": result.source,
@@ -97,7 +97,7 @@ class PatentsRefreshConnector(BaseRefreshConnector):
                                 ),
                             },
                             "confidence": confidence,
-                            "extracted_at": datetime.now(),
+                            "extracted_at": datetime.now(tz=timezone.utc),
                             "source": self.source_name,
                             "metadata": {
                                 "backend": result.source,
@@ -106,7 +106,7 @@ class PatentsRefreshConnector(BaseRefreshConnector):
                         }
                     )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Failed to fetch patent data for {company_name}: {e}")
                 continue
 

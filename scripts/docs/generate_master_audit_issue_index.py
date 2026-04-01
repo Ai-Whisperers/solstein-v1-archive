@@ -8,7 +8,6 @@ import re
 from datetime import date
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 MASTER_AUDIT = ROOT / "docs" / "audit" / "18-03-2026_MASTER_AUDIT.md"
 OUTPUT_DIR = ROOT / "docs" / "audit" / "generated"
@@ -115,6 +114,10 @@ def _write_json(
             "The audit tracker reports 284 total issues found, while the source file exposes 267 distinct ISSUE-* identifiers.",
             "The generated index follows concrete issue identifiers and preserves the source audit without rewriting its aggregate tracker totals.",
         ],
+        "reconciliation_protocol": (
+            "Fix-verification audits must confirm every claimed ISSUE-* fix exists in this index, "
+            "reference this file in their header, and update the source audit + regenerate when status changes."
+        ),
         "issues": issue_list,
     }
     OUTPUT_JSON.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -139,6 +142,20 @@ def _write_markdown(
         f"- Parsed issue table rows: `{row_count}`",
         "",
         "The declared audit tracker total is higher than the distinct issue-id count because the source audit also tracks false positives, corrected entries, and pass-level aggregate accounting.",
+        "",
+        "## Fix-Verification Reconciliation Protocol",
+        "",
+        "Fix-verification audits (ad-hoc docs in `docs/audit/`) must reconcile their scope against this index.",
+        "For each issue a verification audit claims to have fixed:",
+        "",
+        "1. Confirm the `ISSUE-*` identifier exists in the Issue Index table below.",
+        "2. Reference this file by path (`docs/audit/generated/MASTER_AUDIT_ISSUE_INDEX.md`) in the verification doc header.",
+        "3. If the fix changes the issue's `status`, update the source audit (`docs/audit/18-03-2026_MASTER_AUDIT.md`)",
+        "   and re-run `make docs-generate` so this index reflects the new status.",
+        "4. If a verification audit claims issues **not** found in this index, those are either",
+        "   mislabelled (check the source audit) or new issues that need to be added to the source audit first.",
+        "",
+        "Machine consumers may use `docs/audit/generated/MASTER_AUDIT_ISSUE_INDEX.json` for programmatic reconciliation.",
         "",
         "## Issue Index",
         "",

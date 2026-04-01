@@ -156,8 +156,7 @@ class FinancialGrowthReportGenerator:
 
             # Check if we have detailed round data or just summary
             has_detailed_rounds = any(
-                r.date is not None or r.lead_investor is not None
-                for r in fi.funding_rounds_enhanced
+                r.date is not None or r.lead_investor is not None for r in fi.funding_rounds_enhanced
             )
 
             if has_detailed_rounds:
@@ -168,7 +167,9 @@ class FinancialGrowthReportGenerator:
                     amount_str = self.currency_format.format(round_data.amount) if round_data.amount else "Undisclosed"
                     date_str = round_data.date.isoformat() if round_data.date else "Unknown"
                     lead_str = round_data.lead_investor or "Unknown"
-                    val_str = self.currency_format.format(round_data.valuation) if round_data.valuation else "Undisclosed"
+                    val_str = (
+                        self.currency_format.format(round_data.valuation) if round_data.valuation else "Undisclosed"
+                    )
 
                     sections.append(f"| {round_data.round_name} | {amount_str} | {date_str} | {lead_str} | {val_str} |")
             else:
@@ -370,8 +371,6 @@ class BatchFinancialReportGenerator:
 
         return "\n".join(lines)
 
-
-
     async def generate_narratives(
         self,
         company_name: str,
@@ -380,6 +379,7 @@ class BatchFinancialReportGenerator:
         region: str = "Europe",
     ) -> dict[str, str]:
         from .narrative_synthesis import NarrativeContext, NarrativeSynthesisEngine
+
         context = NarrativeContext(
             company_name=company_name,
             industry=industry,

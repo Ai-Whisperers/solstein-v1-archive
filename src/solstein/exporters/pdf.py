@@ -1,10 +1,11 @@
 """PDF exporter for competitive intelligence reports.
 
-Generates a structured PDF report from company profiles.
+STORY-114: Full-featured PDF export with structured sections, source
+citations as footnotes, revenue charts, financial overview, and
+configurable page sizes (A4 / Letter).
 
-**Dependency approach**:
-- Uses ``fpdf2`` (``pip install fpdf2``) when available — rich formatted output
-- Falls back to a plain-text ``.txt`` file when fpdf2 is not installed
+Uses ``fpdf2`` (``pip install fpdf2``) for PDF generation. Falls back
+to a plain-text ``.txt`` file when fpdf2 is not installed.
 
 Usage::
 
@@ -12,8 +13,11 @@ Usage::
     from solstein.exporters.pdf import PDFExporter
 
     exporter = PDFExporter()
-    path = exporter.export(companies, title="Q1 2026 Market Intelligence Report")
-    logger.info(f"Report written to {path}")
+    path = exporter.export(
+        companies,
+        title="Q1 2026 Market Intelligence Report",
+        page_format="a4",
+    )
 """
 
 from __future__ import annotations
@@ -22,6 +26,7 @@ import textwrap
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from loguru import logger
 
@@ -35,9 +40,21 @@ try:
 except ImportError:
     _FPDF_AVAILABLE = False
 
+# Supported page formats
+SUPPORTED_PAGE_FORMATS = frozenset({"a4", "letter"})
+DEFAULT_PAGE_FORMAT = "a4"
+
+
+def is_fpdf_available() -> bool:
+    """Check whether fpdf2 is installed (useful for tests)."""
+    return _FPDF_AVAILABLE
+
 
 class PDFExporter:
     """Generates competitive intelligence PDF reports from Company objects.
+
+    Supports configurable page size (A4 or Letter) and optional
+    progress callbacks for async export tracking.
 
     When fpdf2 is not installed, falls back to a plain-text report
     with ``.txt`` extension so callers always get a usable file.
@@ -48,6 +65,8 @@ class PDFExporter:
         companies: Sequence[Company],
         output_path: Path | None = None,
         title: str = "Solstein Competitive Intelligence Report",
+        page_format: str = DEFAULT_PAGE_FORMAT,
+        progress_callback: Any | None = None,
     ) -> Path:
         """Write the report to *output_path*.
 
@@ -55,106 +74,121 @@ class PDFExporter:
             companies: Companies to include in the report.
             output_path: Destination path.  Defaults to ``./report.pdf``.
             title: Report title shown on the cover page.
+            page_format: Page size - ``"a4"`` or ``"letter"``.
+            progress_callback: Optional ``(pct: int) -> None`` for progress.
 
         Returns:
             Resolved path to the written file.
         """
-        if _FPDF_AVAILABLE:
-            return self._export_pdf(companies, output_path or Path("report.pdf"), title)
-        else:
-            txt_path = (output_path or Path("report.pdf")).with_suffix(".txt")
+        fmt = page_format.lower()
+        if fmt not in SUPPORTED_PAGE_FORMATS:
             logger.warning(
-                "fpdf2 not installed \u2014 generating plain-text report instead. "
-                "Install fpdf2 for PDF output: pip install fpdf2",
-                output=str(txt_path),
+                "[PDFExporter] Unknown page format '%s', defaulting to A4",
+                page_format,
             )
-            return self._export_text(companies, txt_path, title)
+            fmt = DEFAULT_PAGE_FORMAT
+
+        if _FPDF_AVAILABLE:
+            return self._export_pdf(
+                companies,
+                output_path or Path("report.pdf"),
+                title,
+                fmt,
+                progress_callback,
+            )
+
+        txt_path = (output_path or Path("report.pdf")).with_suffix(".txt")
+        logger.warning(
+            "fpdf2 not installed — generating plain-text report instead. "
+            "Install fpdf2 for PDF output: pip install fpdf2",
+            output=str(txt_path),
+        )
+        return self._export_text(companies, txt_path, title)
 
     # ------------------------------------------------------------------
     # fpdf2 implementation
     # ------------------------------------------------------------------
 
-    def _export_pdf(self, companies: Sequence[Company], path: Path, title: str) -> Path:
-        """Generate a PDF report using fpdf2."""
-        pdf = FPDF()
+    def _export_pdf(
+        self,
+        companies: Sequence[Company],
+        path: Path,
+        title: str,
+        page_format: str,
+        progress_callback: Any | None,
+    ) -> Path:
+        """Generate a structured PDF report using fpdf2."""
+        from .pdf_sections import (
+            render_company_profile,
+            render_cover_page,
+            render_executive_summary,
+            render_financial_overview,
+            render_footnotes,
+            render_revenue_chart,
+            render_scoring_methodology,
+        )
+
+        pdf = FPDF(format=page_format)
         pdf.set_auto_page_break(auto=True, margin=15)
 
-        # Cover page
-        pdf.add_page()
-        pdf.set_font("Helvetica", "B", 24)
-        pdf.cell(0, 40, title, ln=True, align="C")
-        pdf.set_font("Helvetica", size=12)
-        pdf.cell(
-            0,
-            10,
-            f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}  |  Companies: {len(companies)}",
-            ln=True,
-            align="C",
-        )
-        pdf.ln(20)
+        _notify(progress_callback, 5)
 
-        # Executive summary
-        pdf.set_font("Helvetica", "B", 16)
-        pdf.cell(0, 10, "Executive Summary", ln=True)
-        pdf.set_font("Helvetica", size=11)
+        # 1. Cover page
+        render_cover_page(pdf, title, len(companies), page_format)
+        _notify(progress_callback, 10)
 
-        phoenix_count = sum(1 for c in companies if str(getattr(c, "tier", "")).lower() == "phoenix")
-        salt_count = sum(1 for c in companies if str(getattr(c, "tier", "")).lower() == "salt")
-        lead_count = sum(1 for c in companies if str(getattr(c, "tier", "")).lower() == "lead")
-        scores = [s for c in companies if (s := getattr(c, "composite_score", None)) is not None]
-        avg_score = sum(scores) / len(scores) if scores else 0.0
+        # 2. Executive summary
+        render_executive_summary(pdf, companies)
+        _notify(progress_callback, 20)
 
-        pdf.multi_cell(
-            0,
-            7,
-            f"Total companies analysed: {len(companies)}\n"
-            f"Phoenix tier: {phoenix_count}  |  Salt tier: {salt_count}  |  Lead tier: {lead_count}\n"
-            f"Average composite score: {avg_score:.2f} / 10.0",
-        )
-        pdf.ln(10)
+        # 3. Financial overview table
+        render_financial_overview(pdf, companies)
+        _notify(progress_callback, 30)
 
-        # Company profiles
-        pdf.set_font("Helvetica", "B", 16)
-        pdf.cell(0, 10, "Company Profiles", ln=True)
+        # 4. Revenue chart
+        render_revenue_chart(pdf, companies)
+        _notify(progress_callback, 40)
 
+        # 5. Company profiles with source citations
+        footnotes: list[tuple[int, str]] = []
+        total = len(companies)
         for rank, company in enumerate(companies, 1):
-            if pdf.get_y() > 240:
-                pdf.add_page()
+            render_company_profile(pdf, company, rank, footnotes)
+            if total > 0:
+                pct = 40 + int((rank / total) * 40)  # 40-80%
+                _notify(progress_callback, min(pct, 80))
 
-            pdf.set_font("Helvetica", "B", 13)
-            pdf.cell(0, 8, f"{rank}. {company.name}", ln=True)
-            pdf.set_font("Helvetica", size=10)
+        # 6. Scoring methodology
+        render_scoring_methodology(pdf)
+        _notify(progress_callback, 85)
 
-            tier = getattr(company, "tier", "N/A")
-            tier_str = tier.value if hasattr(tier, "value") else str(tier)
-            score = getattr(company, "composite_score", 0.0) or 0.0
-            industry = getattr(company, "industry", "N/A") or "N/A"
-            headquarters = getattr(company, "headquarters", "N/A") or "N/A"
+        # 7. Footnotes / endnotes
+        render_footnotes(pdf, footnotes)
+        _notify(progress_callback, 90)
 
-            pdf.multi_cell(
-                0,
-                6,
-                f"Tier: {tier_str}  |  Score: {score:.2f}  |  Industry: {industry}\nHeadquarters: {headquarters}",
-            )
-
-            description = getattr(company, "description", "") or ""
-            if description:
-                excerpt = textwrap.shorten(description, width=300, placeholder="...")
-                pdf.set_text_color(80, 80, 80)
-                pdf.multi_cell(0, 6, excerpt)
-                pdf.set_text_color(0, 0, 0)
-            pdf.ln(5)
-
+        # Write file
         path.parent.mkdir(parents=True, exist_ok=True)
         pdf.output(str(path))
-        logger.info("PDF report generated", path=str(path), companies=len(companies))
+        _notify(progress_callback, 99)
+
+        logger.info(
+            "[PDFExporter] PDF report generated",
+            path=str(path),
+            companies=len(companies),
+            page_format=page_format,
+        )
         return path.resolve()
 
     # ------------------------------------------------------------------
     # Plain-text fallback
     # ------------------------------------------------------------------
 
-    def _export_text(self, companies: Sequence[Company], path: Path, title: str) -> Path:
+    def _export_text(
+        self,
+        companies: Sequence[Company],
+        path: Path,
+        title: str,
+    ) -> Path:
         """Write a plain-text intelligence report (fpdf2 not available)."""
         lines: list[str] = []
         sep = "=" * 80
@@ -188,3 +222,12 @@ class PDFExporter:
         path.write_text("\n".join(lines), encoding="utf-8")
         logger.info("Text report generated (fpdf2 not available)", path=str(path))
         return path.resolve()
+
+
+def _notify(callback: Any | None, pct: int) -> None:
+    """Call the progress callback if provided."""
+    if callback is not None:
+        try:
+            callback(pct)
+        except Exception:  # noqa: BLE001
+            pass  # Progress updates are best-effort

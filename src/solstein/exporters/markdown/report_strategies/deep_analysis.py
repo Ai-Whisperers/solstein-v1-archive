@@ -1,6 +1,8 @@
 """Deep analysis report strategy.
 
 EPIC-022: Extracted from CompanyReportGenerator for modularity.
+STORY-184: Enhanced with signal-based strengths/weaknesses using all
+available company dimensions (AI, SaaS, CAGR, funding, margins).
 """
 
 from solstein.domain.models import Company
@@ -46,7 +48,7 @@ class DeepAnalysisStrategy(ReportStrategy):
 | Financial Health | {formatter.format_score(company.financial_health_score)} | {interpreter.interpret_health(company.financial_health_score)} |
 | Competitive Position | {formatter.format_score(company.competitive_position_score)} | {interpreter.interpret_position(company.competitive_position_score)} |
 
-## Strategic Analysis
+## Signal Analysis
 
 ### Strengths
 {self._generate_strengths(company)}
@@ -63,53 +65,138 @@ class DeepAnalysisStrategy(ReportStrategy):
 """
 
     def _generate_strengths(self, company: Company) -> str:
-        """Generate strengths section."""
-        strengths = []
+        """Generate signal-based strengths from all company dimensions."""
+        strengths: list[str] = []
+        score = company.composite_score or 0
 
-        if (company.composite_score or 0) >= 7:
-            strengths.append("- Strong overall competitive position")
-        if (getattr(company.financials, "growth_rate", 0) or 0) >= 20:
-            strengths.append("- High revenue growth rate")
-        if (getattr(company, "ai_score", 0) or 0) >= 7:
-            strengths.append("- Advanced AI capabilities")
+        # Composite score signals
+        if score >= 8:
+            strengths.append(f"- **Market leader** — Composite {score:.2f}/10 places company in top tier")
+        elif score >= 7:
+            strengths.append(f"- **Strong competitor** — Composite {score:.2f}/10 (Phoenix threshold)")
+
+        # Sub-dimension signals
+        if (company.growth_score or 0) >= 7:
+            strengths.append(f"- **High growth trajectory** — Growth score {company.growth_score:.2f}/10")
+        if (company.financial_health_score or 0) >= 7:
+            strengths.append(f"- **Robust financial health** — Health score {company.financial_health_score:.2f}/10")
+        if (company.competitive_position_score or 0) >= 7:
+            strengths.append(f"- **Strong competitive moat** — Position score {company.competitive_position_score:.2f}/10")
+
+        # Revenue growth signal
+        cagr = company.revenue_cagr_3yr
+        if cagr is not None and cagr >= 20:
+            strengths.append(f"- **Rapid revenue expansion** — {cagr:.1f}% 3-year CAGR")
+        elif cagr is not None and cagr >= 10:
+            strengths.append(f"- **Healthy revenue growth** — {cagr:.1f}% 3-year CAGR")
+
+        # AI maturity signal
+        ai = company.ai_score
+        if ai is not None and ai >= 7:
+            strengths.append(f"- **Advanced AI capabilities** — AI score {ai:.1f}/10")
+        elif ai is not None and ai >= 5:
+            strengths.append(f"- **Solid AI adoption** — AI score {ai:.1f}/10")
+
+        # SaaS maturity signal
+        saas = company.saas_maturity
+        if saas is not None and saas >= 7:
+            strengths.append(f"- **Mature SaaS platform** — SaaS maturity {saas}/10")
+
+        # Profitability signal
+        margin = getattr(company.financials, "profit_margin", None)
+        if margin is not None and margin > 15:
+            strengths.append(f"- **Strong profitability** — {margin:.1f}% profit margin")
+
+        # Funding signal
+        if company.total_funding_raised_eur and company.total_funding_raised_eur > 10:
+            strengths.append(f"- **Well-funded** — {company.total_funding_raised_eur:.1f}M total raised")
 
         if not strengths:
-            strengths.append("- No dominant strengths identified")
+            strengths.append("- No dominant strengths identified — insufficient signal data")
 
         return "\n".join(strengths)
 
     def _generate_weaknesses(self, company: Company) -> str:
-        """Generate weaknesses section."""
-        weaknesses = []
+        """Generate signal-based weaknesses from all company dimensions."""
+        weaknesses: list[str] = []
         score = company.composite_score or 0
 
-        if score < 7:
-            weaknesses.append(f"- **Below Phoenix threshold** — Composite score {score:.2f}/10 (needs ≥7.0)")
+        # Composite score signals
         if score < 5:
-            weaknesses.append(f"- **Low competitive position** — Score {score:.2f}/10 indicates significant pressure")
+            weaknesses.append(f"- **Critical position** — Composite {score:.2f}/10 indicates significant competitive pressure")
+        elif score < 7:
+            weaknesses.append(f"- **Below Phoenix threshold** — Composite {score:.2f}/10 (needs >=7.0)")
 
-        growth_rate = getattr(company.financials, "growth_rate", 0) or 0
-        if growth_rate < 10:
-            weaknesses.append(f"- **Low growth** — {growth_rate:.1f}% growth rate (below 10% threshold)")
+        # Sub-dimension signals
+        if (company.growth_score or 0) < 4:
+            weaknesses.append(f"- **Stagnant growth** — Growth score {company.growth_score or 0:.2f}/10")
+        if (company.financial_health_score or 0) < 4:
+            weaknesses.append(f"- **Financial fragility** — Health score {company.financial_health_score or 0:.2f}/10")
+        if (company.competitive_position_score or 0) < 4:
+            weaknesses.append(f"- **Weak competitive moat** — Position score {company.competitive_position_score or 0:.2f}/10")
 
-        ai_score = getattr(company, "ai_score", 0) or 0
-        if ai_score < 5:
-            weaknesses.append(f"- **Limited AI** — AI score {ai_score:.1f}/10 (below 5.0 threshold)")
+        # Revenue growth signal
+        cagr = company.revenue_cagr_3yr
+        if cagr is not None and cagr < 5:
+            weaknesses.append(f"- **Low growth trajectory** — {cagr:.1f}% 3-year CAGR (below 5% threshold)")
+
+        # AI gap signal
+        ai = company.ai_score
+        if ai is not None and ai < 3:
+            weaknesses.append(f"- **Minimal AI adoption** — AI score {ai:.1f}/10 (significant gap)")
+        elif ai is not None and ai < 5:
+            weaknesses.append(f"- **Below-average AI maturity** — AI score {ai:.1f}/10")
+
+        # SaaS maturity signal
+        saas = company.saas_maturity
+        if saas is not None and saas < 4:
+            weaknesses.append(f"- **Legacy technology stack** — SaaS maturity {saas}/10")
+
+        # Profitability signal
+        margin = getattr(company.financials, "profit_margin", None)
+        if margin is not None and margin < 0:
+            weaknesses.append(f"- **Unprofitable** — {margin:.1f}% profit margin")
+
+        # Funding gap signal
+        if not company.total_funding_raised_eur:
+            weaknesses.append("- **Unfunded/bootstrapped** — No disclosed funding (limits scaling options)")
 
         if not weaknesses:
-            weaknesses.append(f"- **Strong position** — Score {score:.2f}/10 with no major weaknesses")
+            weaknesses.append(f"- **Strong position** — {score:.2f}/10 with no major weaknesses identified")
 
         return "\n".join(weaknesses)
 
     def _generate_strategic_assessment(self, company: Company) -> str:
-        """Generate strategic assessment."""
+        """Generate strategic assessment based on classification and score."""
         score = company.composite_score or 0
+        classification = company.classification or "Unclassified"
 
-        if score >= 8:
-            return f"{company.name} is a market leader with strong fundamentals."
-        elif score >= 6:
-            return f"{company.name} demonstrates solid competitive positioning."
-        elif score >= 4:
-            return f"{company.name} faces competitive pressures but has viable position."
+        if classification == "Phoenix":
+            if score >= 8:
+                return (
+                    f"{company.name} is a Phoenix-class market leader ({score:.1f}/10). "
+                    f"Priority: defend position through continued innovation and AI investment."
+                )
+            return (
+                f"{company.name} holds Phoenix classification ({score:.1f}/10). "
+                f"Priority: accelerate growth to consolidate market leadership."
+            )
 
-        return f"{company.name} requires strategic repositioning."
+        if classification == "Salt":
+            return (
+                f"{company.name} is Salt-class ({score:.1f}/10) — stable but at risk of disruption. "
+                f"Priority: invest in AI/SaaS transformation to move toward Phoenix tier."
+            )
+
+        if classification == "Lead":
+            return (
+                f"{company.name} is Lead-class ({score:.1f}/10) — legacy positioning. "
+                f"Priority: strategic pivot required — modernise technology stack and business model."
+            )
+
+        # Unclassified fallback
+        if score >= 6:
+            return f"{company.name} demonstrates solid competitive positioning ({score:.1f}/10)."
+        if score >= 4:
+            return f"{company.name} faces competitive pressures but has viable position ({score:.1f}/10)."
+        return f"{company.name} requires strategic repositioning ({score:.1f}/10)."

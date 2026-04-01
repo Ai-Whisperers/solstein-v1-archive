@@ -5,8 +5,8 @@ Test script for EPIC-008: Replace Synthetic with Real Data
 Validates that the real data integration system works correctly.
 """
 
-import sys
 import asyncio
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -31,7 +31,7 @@ async def test_real_data_integration():
         # Create real data loader
         print("\nInitializing RealDataLoader...")
         loader = RealDataLoader(min_confidence=0.3)
-        print(f"✓ RealDataLoader created")
+        print("✓ RealDataLoader created")
         print(f"  - Min confidence: {loader.min_confidence}")
 
         # Test validation of existing data
@@ -43,7 +43,7 @@ async def test_real_data_integration():
             print(f"\n\nValidating existing data: {test_data_path}")
             validation = await loader.validate_existing_data(test_data_path)
 
-            print(f"\n  Validation Results:")
+            print("\n  Validation Results:")
             print(f"    - Total companies: {validation['total_companies']}")
             print(f"    - Synthetic count: {validation['synthetic_count']}")
             print(f"    - Real count: {validation['real_count']}")
@@ -74,11 +74,11 @@ async def test_real_data_integration():
                     print(f"      - Data sources: {data_quality.get('data_sources', [])}")
                     print(f"      - Is synthetic: {data_quality.get('is_synthetic', True)}")
             else:
-                print(f"\n  ⚠ No real data loaded (web search may not be available)")
+                print("\n  ⚠ No real data loaded (web search may not be available)")
 
         except Exception as e:
             print(f"\n  ⚠ Web research failed: {e}")
-            print(f"     (This is expected without duckduckgo_search or web search API)")
+            print("     (This is expected without duckduckgo_search or web search API)")
 
         print("\n" + "=" * 60)
         print("✓ EPIC-008: Real Data Integration components verified")

@@ -16,27 +16,23 @@ Usage:
 import argparse
 import json
 import logging
+import sys
 from pathlib import Path
 from typing import Any
 
-import sys
-
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from solstein.intelligence.capability_overlap import OverlapAnalyzer
-from solstein.intelligence.deep_analyzer import DeepAnalysisGenerator
-from solstein.intelligence.report_generator import CitedReportGenerator
 from solstein.intelligence.ai_assessment_engine import AIAssessmentEngine
 from solstein.intelligence.ai_report_generator import AIAssessmentReportGenerator
-
+from solstein.intelligence.capability_overlap import OverlapAnalyzer
+from solstein.intelligence.deep_analyzer import DeepAnalysisGenerator
 from solstein.intelligence.financial_analyzer import FinancialGrowthAnalyzer
 from solstein.intelligence.financial_report_generator import FinancialGrowthReportGenerator
-
 from solstein.intelligence.genealogy_analyzer import GenealogyAnalyzer
 from solstein.intelligence.genealogy_report_generator import GenealogyReportGenerator
-
 from solstein.intelligence.protocol_mapper import ProtocolMapper
 from solstein.intelligence.protocol_report_generator import ProtocolReportGenerator
+from solstein.intelligence.report_generator import CitedReportGenerator
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -45,7 +41,7 @@ logger = logging.getLogger(__name__)
 def load_research_data(filepath: Path) -> list[dict]:
     """Load company data from research results JSON."""
     logger.info(f"Loading research data from {filepath}")
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         data = json.load(f)
     return data.get("companies", [])
 
@@ -318,8 +314,8 @@ def generate_unified_report(company: dict, epic_results: dict[str, Any]) -> str:
     # Company overview
     sections.append("## Company Overview")
     sections.append("")
-    sections.append(f"| Attribute | Value |")
-    sections.append(f"|-----------|-------|")
+    sections.append("| Attribute | Value |")
+    sections.append("|-----------|-------|")
     sections.append(f"| **Company** | {company_name} |")
     sections.append(f"| **Headquarters** | {basic.get('headquarters', 'Unknown')} |")
     sections.append(f"| **Employees** | {basic.get('employees', 'Unknown')} |")
@@ -344,8 +340,8 @@ def generate_unified_report(company: dict, epic_results: dict[str, Any]) -> str:
         if overlap:
             sections.append("### Capability Overlap with Eneve")
             sections.append("")
-            sections.append(f"| Metric | Value |")
-            sections.append(f"|--------|-------|")
+            sections.append("| Metric | Value |")
+            sections.append("|--------|-------|")
             sections.append(f"| **Overall Score** | {overlap.overall_overlap_score:.1%} |")
             sections.append(f"| **Matching Capabilities** | {overlap.matching_capabilities}/8 |")
             sections.append(f"| **High Overlap** | {overlap.high_overlap_capabilities}/8 |")
@@ -679,7 +675,7 @@ def main():
         json.dump(summary, f, indent=2, default=str)
 
     logger.info(f"\n{'=' * 60}")
-    logger.info(f"UNIFIED PIPELINE COMPLETE!")
+    logger.info("UNIFIED PIPELINE COMPLETE!")
     logger.info(f"{'=' * 60}")
     logger.info(f"Generated {len(results)} unified reports in {args.output_dir}")
     logger.info(f"Summary saved to: {summary_path}")

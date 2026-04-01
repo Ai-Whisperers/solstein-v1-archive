@@ -7,7 +7,7 @@
 | Severity | HIGH |
 | Epic | [EPIC-018: Infrastructure-as-Code & CI/CD](../README.md) |
 | Created | 2026-02-28 |
-| Dependencies | [STORY-059: Dockerize Application](STORY-059-dockerize-application.md) |
+| Dependencies | [STORY-059: Dockerize Application](STORY-059-dockerize-application.md), [STORY-275](STORY-275-ruff-slice-tooling-and-bin.md) (ruff gate must be clean before wiring CI lint stage) |
 
 ---
 
@@ -67,3 +67,14 @@ Without CI, the quality guarantees documented in this backlog (test coverage, ty
 
 ## Notes
 This is the enforcement mechanism for every other quality improvement in this backlog. Without CI, test coverage improvements (EPIC-013), type safety improvements (EPIC-012), and linting standards are all voluntary. This story should be prioritised highly — not because it delivers user-facing value directly, but because it protects every other improvement from regression. The pipeline should use the Docker image from STORY-059 to ensure CI runs in the same environment as production, eliminating "works in CI but not in production" failures.
+
+## 2026-04-01 Empirical Update
+
+Current `develop` evidence shows the CI/lint problem is not theoretical:
+
+- [tests/conftest.py](/home/gestalt/Desktop/solstein/solstein/tests/conftest.py) contained invalid `# noqa: lazy-import` directives at multiple lazy-import boundaries.
+- [tests/unit/test_behavioral_contracts.py](/home/gestalt/Desktop/solstein/solstein/tests/unit/test_behavioral_contracts.py) contained the same invalid suppression pattern.
+- [src/solstein/api/routers/scoring.py](/home/gestalt/Desktop/solstein/solstein/src/solstein/api/routers/scoring.py) used invalid `# noqa: broad-except` labels on active API error-handling paths.
+- [scripts/ci/agent_precommit_hook.py](/home/gestalt/Desktop/solstein/solstein/scripts/ci/agent_precommit_hook.py) used the same invalid `# noqa: broad-except` pattern inside the local gate itself.
+
+As of the 2026-04-01 review, `ruff check . --output-format concise` reports 207 real repo-wide errors on `develop` after removing invalid-suppression noise and cleaning `scripts/ci/`. A three-story burn-down plan (STORY-273 → STORY-274 → STORY-275) will bring this to 0 without new global ignore expansions. This story depends on STORY-275 completing first — the CI lint stage should only be wired once the gate is trustworthy (0 errors).

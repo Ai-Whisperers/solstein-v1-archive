@@ -251,7 +251,7 @@
 
 | Commit | Date | Phase | Issues | Key Changes | Priority |
 |--------|------|-------|--------|-------------|----------|
-| b1601f5 | 2026-03-23 | Config | TBD | Classification boundaries | 🔴 HIGH |
+| b1601f5 | 2026-03-23 | Config | unverified | Classification boundaries | 🔴 HIGH |
 | 7aac536 | 2026-03-20 | Pipeline | Implicit | RawDataSource field mapping | 🔴 HIGH |
 | 8c3b34c | 2026-03-20 | Phase 3 | 237-239,160,220 | Market/scoring/drill_down/evidence | 🔴 HIGH |
 | 550d7ef | 2026-03-20 | Phase 0-2 | 224,105-107,152-154,230-231,250,258,265-267 | Import + construction fixes | 🔴 HIGH |

@@ -15,19 +15,20 @@ Usage:
 import argparse
 import json
 import logging
-from pathlib import Path
-from typing import Any
 
 # Add src to path for imports
 import sys
+from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from solstein.intelligence.capability_overlap import OverlapAnalyzer
 from solstein.intelligence.deep_analyzer import DeepAnalysisGenerator
 from solstein.intelligence.report_generator import CitedReportGenerator, DeepAnalysisExporter
+
 try:
-    from solstein.evidence.models import Claim, SourceType, ConfidenceComponent, create_claim
+    from solstein.evidence.models import Claim, ConfidenceComponent, SourceType, create_claim
 except ImportError:
     # Evidence system requires Neo4j which may not be available
     Claim = None
@@ -42,7 +43,7 @@ logger = logging.getLogger(__name__)
 def load_research_data(filepath: Path) -> list[dict]:
     """Load company data from research results JSON."""
     logger.info(f"Loading research data from {filepath}")
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         data = json.load(f)
     return data.get("companies", [])
 
@@ -181,7 +182,7 @@ def main():
     overlap_analyzer = OverlapAnalyzer()
     deep_analyzer = DeepAnalysisGenerator()
     report_gen = CitedReportGenerator()
-    exporter = DeepAnalysisExporter()
+    DeepAnalysisExporter()
 
     # Load data
     companies = load_research_data(args.data_file)

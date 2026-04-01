@@ -55,3 +55,31 @@ Recommended execution order: STORY-036 → STORY-038, with STORY-037 executable 
 ## Relationship to Other Epics
 
 This epic overlaps with EPIC-007 (DDD Migration) through STORY-036/STORY-027 — the service extraction work. It overlaps with EPIC-009 (Data Layer Consolidation) through STORY-037/STORY-034 — pagination requires database-level filtering. These overlaps are intentional: the same architectural principle (separation of concerns) manifests differently in the domain layer, the data layer, and the API layer.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This epic currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently schedule this epic, treat it as triage-required backlog inventory instead of self-startable work.
+
+### Develop-Relevant Evidence
+
+- `src/solstein/api/schemas/enrichment.py` now contains stricter typed response contracts for the batch-enrichment path.
+- That means typed API response enforcement is no longer purely theoretical here; future agents should build on real schema surfaces already in `develop` instead of describing response typing abstractly.
+
+### Next Agent Action
+
+- Reconcile this epic against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before selecting a story.
+- Do not start implementation from this README alone unless the queue or a fresh planning decision activates the epic.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Prefer narrow, machine-checkable progress over broad narrative backlog churn.
+
+### Minimum Verification For Future Agents
+
+- If this epic is reactivated, update the queue or controlling planning artifact first.
+- Then execute one story at a time with the relevant tests, gates, and generated references for the touched surface.

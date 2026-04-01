@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import uvicorn
@@ -51,7 +51,10 @@ from .routers import (
     health,
     jobs,
     market,
+    research_jobs,
+    review,
     scoring,
+    semantic_search,
     simulation,
 )
 
@@ -90,6 +93,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     logger.info("Production hardening components initialized")
 
+    # STORY-050: Initialize OpenTelemetry distributed tracing
+    try:
+        from solstein.observability.tracing import init_tracing, instrument_fastapi
+
+        tracing_enabled = init_tracing(
+            service_name="solstein",
+            otlp_endpoint=settings.otlp_endpoint,
+        )
+        if tracing_enabled:
+            instrument_fastapi(app)
+            logger.info("OpenTelemetry tracing active")
+    except Exception as _otel_exc:  # noqa: BLE001 — tracing is non-critical
+        logger.warning("OpenTelemetry init failed — tracing disabled", error=str(_otel_exc))
+
     # EPIC-023: Enable performance profiling if configured
     if settings.environment == "development":
         from solstein.monitoring.profiler import enable_profiling
@@ -109,7 +126,27 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as _exc:
         logger.warning("Cache warming could not start", error=str(_exc))
 
+    # EPIC-024 / STORY-084: Start Supabase Realtime listener
+    try:
+        from solstein.api.websocket.realtime_listener import start_realtime_listener
+
+        await start_realtime_listener()
+        logger.info("Supabase Realtime listener started")
+    except (ImportError, ConnectionError, OSError) as _rt_exc:
+        logger.warning(
+            "Supabase Realtime listener could not start",
+            error=str(_rt_exc),
+        )
+
     yield
+
+    # EPIC-024: Stop Realtime listener before shutdown
+    try:
+        from solstein.api.websocket.realtime_listener import stop_realtime_listener
+
+        await stop_realtime_listener()
+    except (ImportError, RuntimeError) as _rt_exc:
+        logger.warning("Realtime listener stop error", error=str(_rt_exc))
 
     logger.info("Executing graceful shutdown sequence")
     await graceful_shutdown.shutdown()
@@ -151,6 +188,21 @@ from solstein.monitoring.profiling.dashboard import router as profiling_router
 
 app.include_router(profiling_router, prefix="/admin")
 
+# STORY-051: Prometheus metrics collection middleware
+from solstein.monitoring.metrics import (
+    PrometheusMiddleware,  # noqa: E402, F811
+    set_app_info,  # noqa: E402, F811
+)
+
+app.add_middleware(PrometheusMiddleware, app_name="solstein")
+set_app_info(version="1.0.0", environment=settings.environment)
+
+# STORY-086: Data access audit trail (must be added BEFORE TenantMiddleware
+# so it executes AFTER tenant_id is set on request.state)
+from .middleware.audit import AuditMiddleware  # noqa: E402
+
+app.add_middleware(AuditMiddleware)
+
 # Multi-tenancy
 app.add_middleware(TenantMiddleware)
 
@@ -167,11 +219,34 @@ app.include_router(jobs.router, prefix="/jobs")
 app.include_router(drill_down.router)
 app.include_router(simulation.router, prefix="/simulation")
 app.include_router(async_jobs.router)
+app.include_router(research_jobs.router, prefix="/jobs")
+app.include_router(semantic_search.router)
+app.include_router(review.router, prefix="/api/v1")
+
+# STORY-111: Async export endpoints
+from .routers.exports import router as exports_router
+
+app.include_router(exports_router)
+
+# STORY-088: Admin DLQ endpoint — list, inspect, resolve, re-queue failed tasks
+from .routers.admin_dlq import router as admin_dlq_router  # noqa: E402
+
+app.include_router(admin_dlq_router)
+
+# WebSocket realtime endpoints (EPIC-024)
+from .websocket.routes import router as ws_router
+
+app.include_router(ws_router)
 
 # Dashboard API
 from .routers.dashboard import router as dashboard_router
 
 app.include_router(dashboard_router)
+
+# STORY-051: Prometheus scrape endpoint (unauthenticated by design)
+from .routers.prometheus import router as prometheus_router
+
+app.include_router(prometheus_router)
 
 
 @app.get("/docs", include_in_schema=False)
@@ -187,7 +262,7 @@ async def custom_swagger_ui_html() -> Any:
 @app.get("/healthz", tags=["Health"], include_in_schema=False)
 async def health_check_alias() -> dict[str, Any]:
     """Health check alias for K8s."""
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+    return {"status": "healthy", "timestamp": datetime.now(tz=timezone.utc).isoformat()}
 
 
 if __name__ == "__main__":

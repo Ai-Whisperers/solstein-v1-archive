@@ -8,6 +8,8 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
+from loguru import logger
+
 from .source_policy import SourceTier
 
 if TYPE_CHECKING:
@@ -35,32 +37,25 @@ class FreeEnrichmentExecutor:
         Returns:
             Tuple of (enriched_company, sources_used, errors, remaining_fields)
         """
-        from .enrichment_orchestrator import EnrichmentSource
 
         sources_used = []
         errors = []
 
         for source in sources_free:
-            try:
-                if source == EnrichmentSource.SEC_EDGAR:
-                    enriched = self.service._enrich_from_sec(enriched)
-                elif source == EnrichmentSource.COMPANIES_HOUSE:
-                    enriched = self.service._enrich_from_companies_house(enriched)
-                elif source == EnrichmentSource.NEWS_SIGNALS:
-                    enriched = self.service._enrich_from_news_signals(enriched)
+            # STORY-265: Placeholder provider methods (_enrich_from_sec,
+            # _enrich_from_companies_house, _enrich_from_news_signals) were
+            # removed.  When real provider integration is added, dispatch
+            # logic should go here.
+            logger.debug(
+                "[FreeSourceExecutor] Skipping unimplemented source %s for %s",
+                source,
+                company.name,
+            )
+            sources_used.append(source)
+            fields = self.orchestrator.get_fields_to_enrich(enriched)
 
-                sources_used.append(source)
-                fields = self.orchestrator.get_fields_to_enrich(enriched)
-
-                if not fields:
-                    break
-            except Exception as e:
-                error_msg = self.service.error_handler.handle_enrichment_error(
-                    company.name,
-                    str(source),
-                    e,
-                )
-                errors.append(error_msg)
+            if not fields:
+                break
 
                 if self.service.config.rollback_on_error:
                     enriched = self.orchestrator.rollback_on_error(company, enriched, str(e))
@@ -89,7 +84,6 @@ class PaidEscalationExecutor:
         Returns:
             Tuple of (enriched_company, sources_used, errors, remaining_fields)
         """
-        from .enrichment_orchestrator import EnrichmentSource
         from .enrichment_service import _append_enrichment_audit
 
         unresolved_fields = [field.value for field in fields]
@@ -128,12 +122,14 @@ class PaidEscalationExecutor:
                     continue
 
             try:
-                if source == EnrichmentSource.SEC_EDGAR:
-                    enriched = self.service._enrich_from_sec(enriched)
-                elif source == EnrichmentSource.COMPANIES_HOUSE:
-                    enriched = self.service._enrich_from_companies_house(enriched)
-                elif source == EnrichmentSource.NEWS_SIGNALS:
-                    enriched = self.service._enrich_from_news_signals(enriched)
+                # STORY-265: Placeholder provider methods removed.
+                # When real paid provider integration is added, dispatch
+                # logic should go here.
+                logger.debug(
+                    "[PaidEscalationExecutor] Skipping unimplemented source %s for %s",
+                    source,
+                    company.name,
+                )
 
                 sources_used.append(source)
                 paid_attempts += 1

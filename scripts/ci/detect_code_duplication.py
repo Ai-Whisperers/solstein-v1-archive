@@ -12,9 +12,8 @@ import argparse
 import ast
 import hashlib
 import sys
-from pathlib import Path
-from typing import Dict, List, Set, Tuple
 from collections import defaultdict
+from pathlib import Path
 
 
 class CodeBlock:
@@ -49,8 +48,8 @@ class DuplicationDetector:
     def __init__(self, min_lines: int = 5, similarity_threshold: float = 0.8):
         self.min_lines = min_lines
         self.similarity_threshold = similarity_threshold
-        self.blocks: List[CodeBlock] = []
-        self.duplicates: List[Tuple[CodeBlock, CodeBlock, float]] = []
+        self.blocks: list[CodeBlock] = []
+        self.duplicates: list[tuple[CodeBlock, CodeBlock, float]] = []
 
     def scan_directory(self, directory: Path) -> None:
         """Scan all Python files in directory for duplicates."""
@@ -83,10 +82,7 @@ class DuplicationDetector:
 
         for node in ast.walk(tree):
             # Extract function definitions
-            if isinstance(node, ast.FunctionDef):
-                self._extract_block(node, file_path)
-            # Extract class definitions
-            elif isinstance(node, ast.ClassDef):
+            if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
                 self._extract_block(node, file_path)
             # Extract if/else blocks
             elif isinstance(node, (ast.If, ast.For, ast.While, ast.With)):
@@ -102,10 +98,10 @@ class DuplicationDetector:
             block = CodeBlock(node, file_path, start_line, end_line)
             self.blocks.append(block)
 
-    def find_duplicates(self) -> List[Tuple[CodeBlock, CodeBlock, float]]:
+    def find_duplicates(self) -> list[tuple[CodeBlock, CodeBlock, float]]:
         """Find duplicate/similar code blocks."""
         # Group blocks by hash
-        hash_groups: Dict[str, List[CodeBlock]] = defaultdict(list)
+        hash_groups: dict[str, list[CodeBlock]] = defaultdict(list)
         for block in self.blocks:
             hash_groups[block.hash].append(block)
 

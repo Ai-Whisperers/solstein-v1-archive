@@ -11,7 +11,7 @@ import logging
 import uuid
 
 from fastapi import APIRouter, HTTPException, Request, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/async", tags=["async-jobs"])
@@ -27,6 +27,7 @@ except ImportError:
     logger.warning("Celery not installed - async job endpoints will return 503 Service Unavailable")
 
 from solstein.data.security_hardening import input_validator, rate_limiter
+from solstein.tenant.context import get_current_tenant
 
 from ..exceptions import APIError
 
@@ -38,6 +39,8 @@ from ..exceptions import APIError
 class AsyncEnrichmentRequest(BaseModel):
     """Request to enrich a company asynchronously."""
 
+    model_config = ConfigDict(extra="forbid")
+
     company_id: str
     company_name: str | None = None
     sources: list[str] | None = None
@@ -46,6 +49,8 @@ class AsyncEnrichmentRequest(BaseModel):
 
 class AsyncBatchEnrichmentRequest(BaseModel):
     """Request to enrich multiple companies asynchronously."""
+
+    model_config = ConfigDict(extra="forbid")
 
     companies: list[dict]  # List of {id, name} dicts
     sources: list[str] | None = None
@@ -127,12 +132,22 @@ async def enrich_single_async(request_data: AsyncEnrichmentRequest, request: Req
     if not is_valid:
         raise HTTPException(status_code=400, detail=error)
 
+    # STORY-066: Extract tenant_id from request context
+    tenant_id = get_current_tenant()
+    if not tenant_id:
+        raise APIError(
+            code="TENANT_REQUIRED",
+            message="Tenant context required for async enrichment. Authenticate with a tenant-scoped credential.",
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
     # Submit async task (send_task blocks on broker I/O; run in thread pool)
     task_id = str(uuid.uuid4())
     task = await asyncio.to_thread(
         celery_app.send_task,
         "solstein.worker_tasks.enrich_company_async",
         args=[
+            tenant_id,
             request_data.company_id,
             request_data.company_name,
             request_data.sources,
@@ -141,7 +156,7 @@ async def enrich_single_async(request_data: AsyncEnrichmentRequest, request: Req
         task_id=task_id,
     )
 
-    logger.info(f"📨 Submitted async enrichment job {task.id} for {request_data.company_id}")
+    logger.info(f"Submitted async enrichment job {task.id} for {request_data.company_id} (tenant={tenant_id[:8]}...)")
 
     return {
         "job_id": task.id,
@@ -172,12 +187,22 @@ async def enrich_batch_async(request_data: AsyncBatchEnrichmentRequest, request:
     if len(request_data.companies) > 1000:
         raise HTTPException(status_code=400, detail="Batch size limited to 1000 companies")
 
+    # STORY-066: Extract tenant_id from request context
+    tenant_id = get_current_tenant()
+    if not tenant_id:
+        raise APIError(
+            code="TENANT_REQUIRED",
+            message="Tenant context required for async batch enrichment. Authenticate with a tenant-scoped credential.",
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
     # Submit async task (send_task blocks on broker I/O; run in thread pool)
     batch_task_id = str(uuid.uuid4())
     task = await asyncio.to_thread(
         celery_app.send_task,
         "solstein.worker_tasks.enrich_companies_batch_async",
         args=[
+            tenant_id,
             request_data.companies,
             request_data.sources,
             request_data.batch_size,
@@ -186,7 +211,9 @@ async def enrich_batch_async(request_data: AsyncBatchEnrichmentRequest, request:
         task_id=batch_task_id,
     )
 
-    logger.info(f"📨 Submitted async batch enrichment job {task.id} for {len(request_data.companies)} companies")
+    logger.info(
+        f"Submitted async batch enrichment job {task.id} for {len(request_data.companies)} companies (tenant={tenant_id[:8]}...)"
+    )
 
     return {
         "job_id": task.id,

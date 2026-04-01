@@ -19,6 +19,8 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, TypeVar
 
+from solstein.config import get_settings
+
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
@@ -42,6 +44,8 @@ class RetryConfig:
     max_delay: float = 60.0
     jitter: bool = True
     timeout: float = 30.0
+    retryable_exceptions: tuple = (Exception,)
+    non_retryable_exceptions: tuple = ()
 
     def __post_init__(self):
         if self.max_attempts < 1:
@@ -198,27 +202,22 @@ class CircuitBreaker:
 
 
 async def call_with_retry(
-    func: Callable[..., Any],
-    *args: Any,
+    func: Callable[[], Any],
+    *,
     retry_config: RetryConfig | None = None,
     circuit_breaker: CircuitBreaker | None = None,
-    retryable_exceptions: tuple = (Exception,),
-    non_retryable_exceptions: tuple = (),
     name: str = "call",
-    **kwargs: Any,
 ) -> Any:
     """
-    Execute async function with retry logic, circuit breaker, and timeout.
+    Execute a zero-argument async callable with retry logic, circuit breaker, and timeout.
 
     Args:
-        func: Async callable to execute.
-        *args: Positional arguments to pass to func.
-        retry_config: Retry configuration (default: RetryConfig()).
+        func: Zero-argument async callable. Use ``functools.partial`` or a lambda to
+              bind positional/keyword arguments before passing.
+        retry_config: Retry configuration (default: RetryConfig()). Also carries
+                      ``retryable_exceptions`` and ``non_retryable_exceptions``.
         circuit_breaker: Optional CircuitBreaker instance.
-        retryable_exceptions: Tuple of exceptions to retry on.
-        non_retryable_exceptions: Tuple of exceptions to NOT retry (fail immediately).
         name: Name for logging.
-        **kwargs: Keyword arguments to pass to func.
 
     Returns:
         Result of func() call.
@@ -228,6 +227,9 @@ async def call_with_retry(
     """
     if retry_config is None:
         retry_config = RetryConfig()
+
+    retryable_exceptions = retry_config.retryable_exceptions
+    non_retryable_exceptions = retry_config.non_retryable_exceptions
 
     # Check circuit breaker first
     if circuit_breaker and not circuit_breaker.can_execute():
@@ -240,7 +242,7 @@ async def call_with_retry(
             logger.debug(f"[{name}] Attempt {attempt + 1}/{retry_config.max_attempts}")
 
             # Execute with timeout
-            result = await asyncio.wait_for(func(*args, **kwargs), timeout=retry_config.timeout)
+            result = await asyncio.wait_for(func(), timeout=retry_config.timeout)
 
             # Success: record and return
             if circuit_breaker:
@@ -248,7 +250,7 @@ async def call_with_retry(
             logger.debug(f"[{name}] Success on attempt {attempt + 1}")
             return result
 
-        except non_retryable_exceptions as e:
+        except non_retryable_exceptions as e:  # noqa: BLE001
             # Non-retryable: fail immediately
             if circuit_breaker:
                 circuit_breaker.record_failure()
@@ -270,7 +272,7 @@ async def call_with_retry(
                 logger.info(f"[{name}] Waiting {delay:.2f}s before retry")
                 await asyncio.sleep(delay)
 
-        except retryable_exceptions as e:
+        except retryable_exceptions as e:  # noqa: BLE001
             # Retryable: log and retry if attempts remain
             last_exception = e
             logger.warning(f"[{name}] Retryable exception on attempt {attempt + 1}: {type(e).__name__}: {e}")
@@ -304,13 +306,65 @@ async def call_with_retry(
     raise RuntimeError(f"[{name}] Unknown failure after {retry_config.max_attempts} attempts")
 
 
-# Preset configurations for common services
-GITHUB_RETRY_CONFIG = RetryConfig(max_attempts=4, base_delay=2.0, exponential_base=2.0, max_delay=30.0, timeout=15.0)
+def _build_retry_configs() -> tuple["RetryConfig", "RetryConfig", "RetryConfig"]:
+    """Build preset retry configurations using settings-driven timeouts.
 
-COMPANIES_HOUSE_RETRY_CONFIG = RetryConfig(
-    max_attempts=3, base_delay=3.0, exponential_base=2.0, max_delay=30.0, timeout=20.0
-)
+    Falls back to sensible defaults if settings cannot be loaded (e.g. during
+    test collection without DATABASE__URL).
+    """
+    try:
+        _settings = get_settings()
+    except Exception:
+        # Provide safe defaults so import succeeds without full config
+        class _Defaults:
+            class http_timeouts:  # noqa: N801
+                github = 30.0
+                companies_house = 30.0
+                web_search_agent = 20.0
+        _settings = _Defaults()
+    github = RetryConfig(
+        max_attempts=4,
+        base_delay=2.0,
+        exponential_base=2.0,
+        max_delay=30.0,
+        timeout=float(_settings.http_timeouts.github),
+    )
+    companies_house = RetryConfig(
+        max_attempts=3,
+        base_delay=3.0,
+        exponential_base=2.0,
+        max_delay=30.0,
+        timeout=float(_settings.http_timeouts.companies_house),
+    )
+    web_search = RetryConfig(
+        max_attempts=3,
+        base_delay=1.0,
+        exponential_base=2.0,
+        max_delay=20.0,
+        timeout=float(_settings.http_timeouts.web_search_agent),
+    )
+    return github, companies_house, web_search
 
-WEB_SEARCH_RETRY_CONFIG = RetryConfig(
-    max_attempts=3, base_delay=1.0, exponential_base=2.0, max_delay=20.0, timeout=15.0
-)
+
+# Preset configurations for common services — lazily built from config on first access
+# to avoid import-time side effects (STORY-254 compliance).
+_RETRY_CONFIGS: tuple["RetryConfig", "RetryConfig", "RetryConfig"] | None = None
+
+
+def _get_retry_configs() -> tuple["RetryConfig", "RetryConfig", "RetryConfig"]:
+    global _RETRY_CONFIGS
+    if _RETRY_CONFIGS is None:
+        _RETRY_CONFIGS = _build_retry_configs()
+    return _RETRY_CONFIGS
+
+
+def __getattr__(name: str):
+    """Module-level lazy attribute access for retry configs."""
+    _map = {
+        "GITHUB_RETRY_CONFIG": 0,
+        "COMPANIES_HOUSE_RETRY_CONFIG": 1,
+        "WEB_SEARCH_RETRY_CONFIG": 2,
+    }
+    if name in _map:
+        return _get_retry_configs()[_map[name]]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

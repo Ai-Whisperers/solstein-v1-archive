@@ -6,7 +6,7 @@
 | Priority | P1 |
 | Severity | CRITICAL |
 | Epic | [EPIC-020: Supabase Auth Migration](../README.md) |
-| Supersedes | [STORY-002](../../EPIC-001-security-restoration/STORIES/STORY-002-remove-auth-bypass.md) |
+| Supersedes | [STORY-002](../../../archive/superseded/STORY-002-remove-auth-bypass.md) |
 | Created | 2026-02-28 |
 | Dependencies | [STORY-067](STORY-067-migrate-to-supabase-auth.md) |
 

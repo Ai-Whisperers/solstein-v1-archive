@@ -1,0 +1,74 @@
+name: Weekly Maintenance
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Monday 6 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  maintenance:
+    name: Weekly Health Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: solstein_test
+        ports: [5432:5432]
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      PYTHONPATH: src
+      DATABASE__URL: postgresql://postgres:postgres@localhost:5432/solstein_test
+      SECURITY__SECRET_KEY: test-secret-key-minimum-32-characters-long
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/workflows/composite/setup-python
+      - uses: ./.github/workflows/composite/setup-uv
+      - uses: ./.github/workflows/composite/install-deps
+        with:
+          extras: dev
+
+      - name: Weekly report
+        run: |
+          echo "# Weekly Health Report" >> $GITHUB_STEP_SUMMARY
+          echo "Generated: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## Test Suite" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          pytest tests/unit/ -q --tb=no 2>&1 | tail -5 >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          echo "## Lint" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ruff check src/ --statistics 2>&1 | tail -10 >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          echo "## TODOs/FIXMEs" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          grep -rn "TODO\|FIXME\|HACK\|XXX" src/solstein/ --include="*.py" | wc -l >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          echo "## God Files (>300 lines)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          find src -name "*.py" -exec wc -l {} + | sort -rn | awk '$1>300 && $1<100000{print}' | head -10 >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          echo "## Dead Code" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          python scripts/ci/detect_dead_code.py src/solstein 2>&1 | tail -10 >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          echo "## Source Stats" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "Python files: $(find src -name '*.py' | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo "Test files: $(find tests -name '*.py' | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo "Source LOC: $(find src -name '*.py' -exec cat {} + | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

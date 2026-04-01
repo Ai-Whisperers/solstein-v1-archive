@@ -33,12 +33,14 @@ from solstein.infrastructure.database_models import (
 async def db_session() -> AsyncSession:
     """Provide a database session for tests."""
     settings = Settings.load()
-    if not hasattr(settings, 'database'):
+    if not hasattr(settings, "database"):
         from pydantic import BaseModel
+
         class DBConf(BaseModel):
             url: str = "sqlite+aiosqlite:///test_integration.db"
             pool_size: int = 5
             echo: bool = False
+
         settings.database = DBConf()
     else:
         # Pydantic v2 support
@@ -106,7 +108,6 @@ class TestDataMigration:
         assert fetched is not None
         assert fetched.run_id == run_id
         assert fetched.status == "completed"
-
 
     @pytest.mark.asyncio
     async def test_signal_migration(self, db_session: AsyncSession):
@@ -247,7 +248,6 @@ class TestDataIntegrity:
         result = await db_session.execute(text("SELECT COUNT(*) FROM companies WHERE name IS NULL OR name = ''"))
         null_names = result.scalar()
         assert null_names == 0, f"Found {null_names} companies with null/empty name"
-
 
 
 if __name__ == "__main__":

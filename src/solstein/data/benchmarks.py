@@ -348,5 +348,3 @@ class LoaderPerformanceMonitor:
         """Log the benchmark summary."""
         summary = self.benchmark.to_dict()
         logger.info("Loader performance summary", **summary)
-
-

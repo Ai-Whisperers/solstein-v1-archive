@@ -1,7 +1,6 @@
-import sys
 
 # Read the file
-with open("src/solstein/connectors/registry.py", "r") as f:
+with open("src/solstein/connectors/registry.py") as f:
     lines = f.readlines()
 
 # Keep only up to line 214 (before the duplicate code)

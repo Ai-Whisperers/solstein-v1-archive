@@ -99,9 +99,9 @@ class CompletenessCalculator:
 
         # Fields whose default value does not represent actual data
         ENUM_DEFAULT_FIELDS = {
-            "ai_maturity": "NONE",        # AIMaturity.NONE is the default
-            "threat_level": "MEDIUM",     # ThreatLevel.MEDIUM is the default
-            "tier": "TIER_3",             # CompanyTier.TIER_3 is the default
+            "ai_maturity": "NONE",  # AIMaturity.NONE is the default
+            "threat_level": "MEDIUM",  # ThreatLevel.MEDIUM is the default
+            "tier": "TIER_3",  # CompanyTier.TIER_3 is the default
         }
 
         # Check each tracked field

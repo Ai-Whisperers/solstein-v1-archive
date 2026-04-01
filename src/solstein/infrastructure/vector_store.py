@@ -52,6 +52,7 @@ class PgVector(UserDefinedType):
             if isinstance(value, list):
                 return str(value)
             return value
+
         return process
 
     def result_processor(self, dialect, coltype):
@@ -61,6 +62,7 @@ class PgVector(UserDefinedType):
             if isinstance(value, str):
                 return [float(x) for x in value.strip("[]").split(",")]
             return value
+
         return process
 
 

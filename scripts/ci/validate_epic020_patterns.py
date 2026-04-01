@@ -286,7 +286,7 @@ class EPIC020PatternValidator:
         print("  • Extractor Pattern: Functions starting with '_extract_' should be pure")
         print("  • Helper Naming: Helper modules should have docstrings")
 
-        has_violations = self.validate_all()
+        self.validate_all()
 
         if self.violations:
             print(f"\n❌ VIOLATIONS ({len(self.violations)} found):")

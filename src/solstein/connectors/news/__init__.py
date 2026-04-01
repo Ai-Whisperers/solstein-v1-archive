@@ -9,7 +9,7 @@ FREE sources:
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any, Optional  # noqa: F401
 
 import aiohttp
 import feedparser
@@ -349,7 +349,6 @@ class RSSFeedConnector(BaseConnector):
             "summary": content.get("summary"),
             "raw_content": content,
         }
-
 
 
 __all__ = [

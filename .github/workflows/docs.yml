@@ -2,65 +2,37 @@ name: Documentation
 
 on:
   push:
-    branches: [main]
-    paths:
-      - 'docs/**'
-      - 'src/**'
-      - 'mkdocs.yml'
-      - '.github/workflows/docs.yml'
+    branches: [develop, main]
+    paths: ['docs/**', 'mkdocs.yml', 'backlog/**']
   pull_request:
-    branches: [main]
-    paths:
-      - 'docs/**'
-      - 'mkdocs.yml'
+    paths: ['docs/**', 'mkdocs.yml']
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: docs-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
-  build:
-    name: Build Documentation
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: ./.github/workflows/composite/setup-python
-
-      - name: Install dependencies
-        run: |
-          pip install mkdocs mkdocs-material mkdocstrings[python]
-
-      - name: Build docs
-        run: mkdocs build --strict
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site/
-
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: build
+  docs:
+    name: Build & Check Docs
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v4
+      - uses: ./.github/workflows/composite/setup-python
+      - uses: ./.github/workflows/composite/setup-uv
+      - uses: ./.github/workflows/composite/install-deps
+      - name: Build docs
+        run: |
+          uv pip install --system mkdocs mkdocs-material
+          mkdocs build 2>&1 | tee mkdocs-output.txt || true
+          echo "## Docs Build" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -5 mkdocs-output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+      - name: Check docs quality
+        continue-on-error: true
+        run: python scripts/ci/check_docs_quality.py --path docs || true

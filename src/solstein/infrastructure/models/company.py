@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import JSON, Column, DateTime, Float, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import relationship
 
@@ -82,6 +83,11 @@ class CompanyRecord(Base):
     composite_score = Column(Float, nullable=True)
     scoring_breakdown = Column(JSON, nullable=True)
 
+    # Embedding (EPIC-023: pgvector semantic search)
+    profile_embedding = Column(Vector(1536), nullable=True)
+    embedding_model = Column(String(100), nullable=True)
+    embedding_updated_at = Column(DateTime, nullable=True)
+
     # Metadata
     last_updated = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
@@ -149,6 +155,11 @@ class CompanyRecord(Base):
             "competitive_position_score": self.competitive_position_score,
             "composite_score": self.composite_score,
             "scoring_breakdown": self.scoring_breakdown,
+            "has_embedding": self.profile_embedding is not None,
+            "embedding_model": self.embedding_model,
+            "embedding_updated_at": (
+                self.embedding_updated_at.isoformat() if self.embedding_updated_at is not None else None
+            ),
             "last_updated": (self.last_updated.isoformat() if self.last_updated is not None else None),
             "created_at": (self.created_at.isoformat() if self.created_at is not None else None),
         }
@@ -161,6 +172,7 @@ class ScoringRecord(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(String(255), index=True, nullable=False)
+    tenant_id = Column(String(255), index=True, nullable=True)  # EPIC-019
     company_name = Column(String(500), nullable=False)
 
     growth_score = Column(Float, nullable=False)
@@ -179,12 +191,14 @@ class ScoringRecord(Base):
         Index("ix_company_scored_at", "company_id", "scored_at"),
         Index("ix_overall_score", "overall_score"),
         Index("ix_classification", "classification"),
+        Index("ix_scoring_tenant", "tenant_id"),  # EPIC-019
     )
 
     def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "company_id": self.company_id,
+            "tenant_id": self.tenant_id,
             "company_name": self.company_name,
             "growth_score": self.growth_score,
             "financial_health_score": self.financial_health_score,
@@ -241,6 +255,7 @@ class MarketSnapshot(Base):
     __tablename__ = "market_snapshots"
 
     id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(String(255), index=True, nullable=True)  # EPIC-019
     snapshot_date = Column(DateTime, nullable=False, index=True, default=lambda: datetime.now(timezone.utc))
 
     total_companies_scored = Column(Integer, nullable=False)
@@ -254,11 +269,15 @@ class MarketSnapshot(Base):
 
     market_metadata = Column(JSON, nullable=True)
 
-    __table_args__ = (Index("ix_snapshot_date", "snapshot_date"),)
+    __table_args__ = (
+        Index("ix_snapshot_date", "snapshot_date"),
+        Index("ix_market_snapshot_tenant", "tenant_id"),  # EPIC-019
+    )
 
     def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
+            "tenant_id": self.tenant_id,
             "snapshot_date": (self.snapshot_date.isoformat() if self.snapshot_date is not None else None),
             "total_companies_scored": self.total_companies_scored,
             "average_growth_score": self.average_growth_score,
@@ -277,6 +296,7 @@ class AuditTrailRecord(Base):
     __tablename__ = "audit_trails"
 
     id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(String(255), index=True, nullable=True)  # EPIC-019
     company_id = Column(String(255), index=True, nullable=False)
     gathering_batch_id = Column(String(255), index=True, nullable=False)
     company_name = Column(String(500), nullable=False)

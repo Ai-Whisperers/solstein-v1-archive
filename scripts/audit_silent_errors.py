@@ -17,14 +17,13 @@ Exit codes:
 import ast
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 
 class SilentExceptionVisitor(ast.NodeVisitor):
     """Find silent exception handlers."""
 
     def __init__(self):
-        self.silent_handlers: List[Tuple[int, str]] = []
+        self.silent_handlers: list[tuple[int, str]] = []
 
     def visit_ExceptHandler(self, node: ast.ExceptHandler):
         # Check for bare 'except:' or 'except Exception:'
@@ -76,7 +75,7 @@ class SilentExceptionVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def audit_file(filepath: Path) -> List[Tuple[int, str]]:
+def audit_file(filepath: Path) -> list[tuple[int, str]]:
     """Audit a single file for silent exception handling."""
     try:
         tree = ast.parse(filepath.read_text())

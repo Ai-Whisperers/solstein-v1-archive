@@ -4,7 +4,7 @@ Uses web scraping to fetch product and tech stack information.
 Implements incremental refresh with content-based delta detection.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -71,7 +71,7 @@ class WebsiteRefreshConnector(BaseRefreshConnector):
                 for row in result.fetchall():
                     if row[1]:
                         company_website_map[row[0]] = row[1]
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to look up company websites from DB: {e}")
 
         if not company_website_map:
@@ -112,7 +112,7 @@ class WebsiteRefreshConnector(BaseRefreshConnector):
                             "products_count": len(info.main_products),
                         },
                         "confidence": self.confidence,
-                        "extracted_at": datetime.now(),
+                        "extracted_at": datetime.now(tz=timezone.utc),
                         "source": self.source_name,
                         "metadata": {
                             "website": website,
@@ -130,7 +130,7 @@ class WebsiteRefreshConnector(BaseRefreshConnector):
                             "tech_count": len(info.tech_stack),
                         },
                         "confidence": self.confidence,
-                        "extracted_at": datetime.now(),
+                        "extracted_at": datetime.now(tz=timezone.utc),
                         "source": self.source_name,
                         "metadata": {
                             "website": website,
@@ -139,7 +139,7 @@ class WebsiteRefreshConnector(BaseRefreshConnector):
                     }
                 )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Failed to fetch website data for {company_name}: {e}")
                 continue
 

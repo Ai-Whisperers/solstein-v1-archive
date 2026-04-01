@@ -21,7 +21,6 @@ except ImportError:
     AsyncRedis = None  # type: ignore
 
 
-
 class CacheManager:
     """Redis-based caching with fallback to in-memory cache."""
 

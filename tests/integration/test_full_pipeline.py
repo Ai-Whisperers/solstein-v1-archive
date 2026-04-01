@@ -90,7 +90,7 @@ class TestWebSearchDiscovery:
     """WebSearchDiscoverySource: requires EXA_API_KEY."""
 
     def test_discovers_companies_via_web_search(self) -> None:
-        from solstein.adapters.discovery.web_search import WebSearchDiscoverySource
+        from solstein.adapters.discovery._retired.web_search import WebSearchDiscoverySource
 
         source = WebSearchDiscoverySource(exa_api_key=os.environ["EXA_API_KEY"])
         candidates = source.discover(
@@ -225,7 +225,7 @@ class TestNewsEnrichment:
     """NewsEnrichment: requires NEWS_API_KEY."""
 
     def test_enriches_known_company(self) -> None:
-        from solstein.adapters.enrichment.news import NewsEnrichment
+        from solstein.adapters.enrichment._retired.news import NewsEnrichment
 
         adapter = NewsEnrichment(news_api_key=os.environ["NEWS_API_KEY"])
         result = adapter.enrich(TEST_COMPANY_ID, TEST_COMPANY_NAME)

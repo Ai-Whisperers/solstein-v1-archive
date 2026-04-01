@@ -194,7 +194,7 @@ class TestSyntheticDataAuditTrail:
         synthetic_company.name = "Synthetic Co"
 
         # Should log the blocked attempt
-        with patch('solstein.data.synthetic_data_safety.logger') as mock_logger:
+        with patch("solstein.data.synthetic_data_safety.logger") as mock_logger:
             blocker.check_company(synthetic_company)
             # Should have logged a warning or error
             assert mock_logger.warning.called or mock_logger.error.called

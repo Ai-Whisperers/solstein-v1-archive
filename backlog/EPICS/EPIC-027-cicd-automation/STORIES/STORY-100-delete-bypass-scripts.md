@@ -75,10 +75,10 @@ The CLI (`scripts/solstein_cli.py`) has the same problem: Click commands that im
 
 | Script Operation | API Endpoint | Status |
 |-----------------|--------------|--------|
-| `run_research.py` — trigger research for company | `POST /api/v1/research/{company_id}` | TBD |
-| `run_research.py` — batch research for company list | `POST /api/v1/research/batch` | TBD |
-| `run_market_pipeline.py` — trigger market data refresh | `POST /api/v1/market/refresh` | TBD |
-| `run_market_pipeline.py` — trigger pipeline for sector | `POST /api/v1/market/pipeline/{sector}` | TBD |
+| `run_research.py` — trigger research for company | `POST /api/v1/research/{company_id}` | not-yet-verified |
+| `run_research.py` — batch research for company list | `POST /api/v1/research/batch` | not-yet-verified |
+| `run_market_pipeline.py` — trigger market data refresh | `POST /api/v1/market/refresh` | not-yet-verified |
+| `run_market_pipeline.py` — trigger pipeline for sector | `POST /api/v1/market/pipeline/{sector}` | not-yet-verified |
 
 If any operation lacks an API endpoint, that endpoint must be created BEFORE the script is deleted. Deleting the script before the API covers the operation means losing the capability entirely.
 

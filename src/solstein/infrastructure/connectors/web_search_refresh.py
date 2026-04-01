@@ -5,7 +5,7 @@ Implements incremental refresh for discovery data.
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -77,7 +77,7 @@ class WebSearchRefreshConnector(BaseRefreshConnector):
                                 "has_recent_content": len(results) > 0,
                             },
                             "confidence": self.confidence,
-                            "extracted_at": datetime.now(),
+                            "extracted_at": datetime.now(tz=timezone.utc),
                             "source": self.source_name,
                             "metadata": {
                                 "company_name": company_name,
@@ -86,7 +86,7 @@ class WebSearchRefreshConnector(BaseRefreshConnector):
                         }
                     )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Failed to fetch web search data for {company_name}: {e}")
                 continue
 

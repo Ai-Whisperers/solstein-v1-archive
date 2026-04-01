@@ -10,11 +10,10 @@ This script:
 """
 
 import json
+import logging
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -130,12 +129,12 @@ def main():
 
     # Summary
     logger.info("\n" + "=" * 60)
-    logger.info(f"INGEST COMPLETE")
+    logger.info("INGEST COMPLETE")
     logger.info("=" * 60)
     logger.info(f"Companies processed: {len(ingested['competitors'])}")
     logger.info(f"Output location: {solstein_input}")
-    logger.info(f"\nNext step: Run ENEVE pipeline")
-    logger.info(f"  PYTHONPATH=src python3 scripts/run_eneve_199.py --warn-mode")
+    logger.info("\nNext step: Run ENEVE pipeline")
+    logger.info("  PYTHONPATH=src python3 scripts/run_eneve_199.py --warn-mode")
     logger.info("=" * 60)
 
 

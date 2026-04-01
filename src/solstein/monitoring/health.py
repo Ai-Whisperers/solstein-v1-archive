@@ -276,7 +276,6 @@ class HealthChecker:
 
         start = time.time()
         try:
-
             # This would check actual Celery workers
             # For now, return a placeholder
             elapsed = (time.time() - start) * 1000

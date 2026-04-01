@@ -11,7 +11,6 @@ sys.path.insert(0, "src")
 
 from solstein.analytics.scorers.financial_health import FinancialHealthScorer
 from solstein.domain.models import FinancialMetric
-from solstein.core.scoring_config import ScoringSettings
 
 
 def test_revenue_scoring():
@@ -146,7 +145,7 @@ def test_all_companies_scenario():
     medium = sum(1 for s in scores if 4.0 <= s < 7.0)
     high = sum(1 for s in scores if s >= 7.0)
 
-    print(f"\nDistribution:")
+    print("\nDistribution:")
     print(f"  Low (<4):    {low} companies ({low / 199 * 100:.1f}%)")
     print(f"  Medium (4-7): {medium} companies ({medium / 199 * 100:.1f}%)")
     print(f"  High (>=7):   {high} companies ({high / 199 * 100:.1f}%)")

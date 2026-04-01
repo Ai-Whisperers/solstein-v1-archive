@@ -77,9 +77,11 @@ class BaseConnector(ABC):
         if self._session:
             await self._session.close()
 
-    def _handle_rate_limit(self, response_headers: dict) -> None:  # noqa: B027
+    @abstractmethod
+    def _handle_rate_limit(self, response_headers: dict) -> None:
         """Handle rate limiting based on response headers."""
         # Override in subclasses for source-specific rate limit handling
+        pass
 
     def _cache_key(self, query: str, **kwargs) -> str:
         """Generate cache key for a query."""

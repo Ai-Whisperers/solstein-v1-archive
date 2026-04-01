@@ -15,7 +15,7 @@ import sys
 from datetime import datetime, timezone
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
 if sys.version_info >= (3, 11):  # noqa: UP036
     from enum import StrEnum
@@ -81,10 +81,20 @@ class ErrorSeverity(StrEnum):
     INFO = "INFO"
 
 
-class FinancialMetric(BaseModel):
-    """Financial metrics domain entity."""
+# EPIC-019: Default tenant for backward compatibility during migration.
+# All existing data is backfilled to this tenant. New code MUST pass an explicit tenant_id.
+DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000000"
 
-    model_config = ConfigDict(validate_assignment=True)
+
+class FinancialMetric(BaseModel):
+    """Financial metrics domain entity.
+
+    STORY-251: extra="ignore" is the explicit policy for domain models.
+    Extra fields are silently dropped rather than persisted, ensuring
+    model_dump() never contains undeclared keys.
+    """
+
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")
 
     allow_empty_primary: bool = Field(default=False, exclude=True)
     revenue: float | None = None
@@ -125,14 +135,39 @@ class FinancialMetric(BaseModel):
             raise ValueError("Employees cannot be negative")
         return v
 
+    # STORY-206: Range validators for financial fields
+    @field_validator("revenue")
+    @classmethod
+    def validate_revenue_range(cls, v: float | None) -> float | None:
+        """Revenue must be positive when provided."""
+        if v is not None and v < 0:
+            raise ValueError(f"revenue must be >= 0, got: {v}")
+        return v
+
+    @field_validator("growth_rate")
+    @classmethod
+    def validate_growth_rate_range(cls, v: float | None) -> float | None:
+        """Growth rate must be in reasonable range when provided (percentage points)."""
+        if v is not None and (v < -100 or v > 1000):
+            raise ValueError(f"growth_rate must be in [-100, 1000], got: {v}")
+        return v
 
 
 class Company(BaseModel):
-    """Company domain entity."""
+    """Company domain entity.
 
-    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
+    STORY-251: extra="ignore" is the explicit policy. Extra fields are
+    silently dropped at construction so model_dump() never leaks undeclared
+    keys downstream.
+    """
+
+    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True, extra="ignore")
 
     id: str = Field(..., description="Unique company identifier")
+    tenant_id: str = Field(
+        default=DEFAULT_TENANT_ID,
+        description="Owning tenant identifier (EPIC-019). Defaults to migration tenant.",
+    )
     name: str
     company_name: str | None = None
     industry: str = "Energy Software"
@@ -161,6 +196,17 @@ class Company(BaseModel):
             raise ValueError("Company ID must be at least 3 characters")
         if " " in v:
             raise ValueError("Company ID cannot contain spaces")
+        return v.strip()
+
+    @field_validator("tenant_id")
+    @classmethod
+    def validate_tenant_id(cls, v: str) -> str:
+        """Validate tenant_id is present (EPIC-019).
+
+        Every business entity must belong to a tenant.
+        """
+        if not v or not v.strip():
+            raise ValueError("tenant_id is required — no business entity may exist without a tenant owner")
         return v.strip()
 
     @classmethod
@@ -195,11 +241,12 @@ class Company(BaseModel):
     tech_stack: list[str] = Field(default_factory=list)
 
     # Financials
+    # STORY-127: FinancialMetric is the canonical source of truth for all financial metrics.
+    # profit_margin, employees, and employee_count are computed properties delegating to financials.
+    # Direct assignment to these fields will raise AttributeError — write to financials instead.
     financials: FinancialMetric | None = Field(default_factory=lambda: FinancialMetric(allow_empty_primary=True))
     revenue: float | None = None
-    employees: int | None = None
     growth_rate: float | None = None
-    profit_margin: float | None = None
     funding: float | None = None
     valuation: float | None = None
 
@@ -255,6 +302,107 @@ class Company(BaseModel):
     revenue_cagr_3yr: float | None = None
     revenue_cagr_5yr: float | None = None
 
+    # STORY-149: Energy Compliance (EPIC-039)
+    energy_compliance_score: float | None = None  # 0-100 composite
+    energy_compliance_risk: str | None = None  # high / medium / low
+    energy_control_tier: str | None = None  # advanced / standard / legacy / unknown
+    energy_compliance_breakdown: dict[str, Any] = Field(default_factory=dict)
+
+    # STORY-146: AI Transformation Readiness (EPIC-038)
+    transformation_time_months: float | None = None  # estimated months to AI-Ready
+    transformation_cost_eur: float | None = None  # estimated investment EUR
+    transformation_efficiency_gain_pct: float | None = None  # expected efficiency gain %
+    transformation_risk_level: str | None = None  # high / medium / low
+    transformation_breakdown: dict[str, Any] = Field(default_factory=dict)
+
+    # STORY-150: Energy Market Forecasting (EPIC-039)
+    energy_market_score: float | None = None  # 0-100 composite
+    energy_market_positioning: str | None = None  # leader / aligned / transitioning / misaligned / unknown
+    energy_market_segments: list[str] = Field(default_factory=list)
+    energy_market_breakdown: dict[str, Any] = Field(default_factory=dict)
+
+    # STORY-151: Trading Platform & Digital Infrastructure (EPIC-039)
+    energy_trading_score: float | None = None  # 0-100 composite
+    energy_platform_maturity: str | None = None  # advanced / intermediate / basic / unknown
+    energy_infrastructure_tier: str | None = None  # cloud_native / hybrid / legacy / unknown
+    energy_trading_breakdown: dict[str, Any] = Field(default_factory=dict)
+
+    # STORY-152: Grid Integration & Smart Infrastructure (EPIC-039)
+    energy_grid_score: float | None = None  # 0-100 composite
+    energy_grid_readiness: str | None = None  # advanced / developing / basic / unknown
+    energy_smart_infra_level: str | None = None  # intelligent / connected / traditional / unknown
+    energy_grid_breakdown: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="before")
+    @classmethod
+    def route_deprecated_fields_to_financials(cls, data: Any) -> Any:
+        """STORY-127: Route deprecated Company-level financial fields to FinancialMetric.
+
+        Fields `profit_margin`, `employees`, and `employee_count` are no longer stored
+        on Company. When passed in constructor kwargs, they are forwarded to the
+        `financials` sub-model (FinancialMetric), which is the canonical source of truth.
+        """
+        if not isinstance(data, dict):
+            return data
+
+        financials = data.get("financials")
+
+        # Extract deprecated fields from top-level
+        pm = data.pop("profit_margin", None)
+        emp = data.pop("employees", None)
+        emp_count = data.pop("employee_count", None)
+
+        # If no deprecated fields were passed, nothing to route
+        if pm is None and emp is None and emp_count is None:
+            return data
+
+        # Route into financials (handle both dict and FinancialMetric)
+        if isinstance(financials, FinancialMetric):
+            if pm is not None and financials.profit_margin is None:
+                financials.profit_margin = pm
+            if emp is not None and financials.employees is None:
+                financials.employees = emp
+            if emp_count is not None and financials.employees is None:
+                financials.employees = emp_count
+        elif isinstance(financials, dict):
+            if pm is not None and financials.get("profit_margin") is None:
+                financials["profit_margin"] = pm
+            if emp is not None and financials.get("employees") is None:
+                financials["employees"] = emp
+            if emp_count is not None and financials.get("employees") is None:
+                financials["employees"] = emp_count
+        else:
+            # No financials yet — create a dict for Pydantic to validate
+            fin_data: dict[str, Any] = {"allow_empty_primary": True}
+            if pm is not None:
+                fin_data["profit_margin"] = pm
+            if emp is not None:
+                fin_data["employees"] = emp
+            elif emp_count is not None:
+                fin_data["employees"] = emp_count
+            data["financials"] = fin_data
+
+        return data
+
+    # STORY-127: Computed properties — canonical source is FinancialMetric
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def profit_margin(self) -> float | None:
+        """Read-only. Canonical source: FinancialMetric.profit_margin."""
+        return self.financials.profit_margin if self.financials else None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def employees(self) -> int | None:
+        """Read-only. Canonical source: FinancialMetric.employees."""
+        return self.financials.employees if self.financials else None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def employee_count(self) -> int | None:
+        """Read-only alias for employees. Canonical source: FinancialMetric.employees."""
+        return self.financials.employees if self.financials else None
+
     @model_validator(mode="after")
     def sync_financial_fields(self) -> "Company":
         if self.company_name is None:
@@ -272,9 +420,10 @@ class Company(BaseModel):
                 setattr(self.financials, financial_name, value)
 
         sync_field("revenue", "revenue")
-        sync_field("employees", "employees")
+        # STORY-127: employees and profit_margin are now computed properties reading from
+        # FinancialMetric. They are no longer synced bidirectionally — FinancialMetric is
+        # the single source of truth.
         sync_field("growth_rate", "growth_rate")
-        sync_field("profit_margin", "profit_margin")
         sync_field("valuation", "valuation")
 
         funding_value = self.funding
@@ -296,9 +445,8 @@ class Company(BaseModel):
         if self.financials is not None and getattr(self.financials, "allow_empty_primary", False):
             return self
         revenue = self.revenue if self.revenue is not None else (self.financials.revenue if self.financials else None)
-        employees = (
-            self.employees if self.employees is not None else (self.financials.employees if self.financials else None)
-        )
+        # STORY-127: employees is now always read from financials (canonical source)
+        employees = self.financials.employees if self.financials else None
         if revenue is None and employees is None:
             raise ValueError("At least revenue OR employees required")
         return self
@@ -396,7 +544,48 @@ class Company(BaseModel):
 
         return (filled / len(key_fields)) * 100 if key_fields else 0.0
 
-    profit_margin: float | None = None
+    # STORY-206: Scoring readiness validation
+    def validate_scoring_readiness(self) -> list[str]:
+        """Check if company has sufficient data for scoring.
+
+        Returns a list of warning messages for missing or suspicious fields.
+        Empty list means company is fully ready for scoring.
+        """
+        warnings: list[str] = []
+        fin = self.financials
+
+        # Primary indicators
+        if fin is None:
+            warnings.append("financials is None - no financial data available")
+            return warnings
+
+        if fin.revenue is None:
+            warnings.append("revenue is None - growth and financial scoring will be incomplete")
+        elif fin.revenue == 0:
+            warnings.append("revenue is 0 - may indicate missing data rather than zero revenue")
+
+        if fin.employees is None:
+            warnings.append("employees is None - efficiency scoring will be skipped")
+        elif fin.employees == 0:
+            warnings.append("employees is 0 - may indicate missing data")
+
+        if fin.growth_rate is None:
+            warnings.append("growth_rate is None - growth momentum scoring will be incomplete")
+
+        if fin.profit_margin is None:
+            warnings.append("profit_margin is None - profitability scoring will use penalty")
+
+        if fin.funding_raised is None:
+            warnings.append("funding_raised is None - funding momentum scoring will be skipped")
+
+        # Confidence check
+        if not self.signal_confidences:
+            warnings.append("signal_confidences is empty - confidence weighting unavailable")
+
+        return warnings
+
+    # STORY-127: profit_margin removed as field — now a computed_field from financials.
+    # STORY-127: employee_count removed as field — now a computed_field from financials.
     ebitda_margin: float | None = None
     recurring_revenue_pct: float | None = None
     revenue_per_employee_eur_k: float | None = None
@@ -408,7 +597,6 @@ class Company(BaseModel):
     lead_investors: list[str] = Field(default_factory=list)
     funding_war_chest: str | None = None
 
-    employee_count: int | None = None
     employee_cagr_3yr: float | None = None
     open_positions: int | None = None
 
@@ -417,6 +605,11 @@ class Company(BaseModel):
     ai_key_capabilities: str | None = None
     ai_in_production: bool | None = None
 
+    # STORY-145: AI Readiness Assessment (EPIC-038)
+    ai_readiness_score: float | None = None  # 0-100 composite score
+    ai_readiness_tier: str | None = None  # AI-Ready / AI-Capable / AI-Challenged / AI-Resistant
+    ai_readiness_breakdown: dict[str, float] = Field(default_factory=dict)  # per-dimension scores
+
     data_availability: str | None = None
 
     @field_validator("ai_score")
@@ -424,6 +617,23 @@ class Company(BaseModel):
     def validate_ai_score_value(cls, v: float | None) -> float | None:
         if v is not None and (v < 0 or v > 10):
             raise ValueError("AI score must be between 0 and 10")
+        return v
+
+    # STORY-206: Range validators for Company-level financial fields
+    @field_validator("revenue")
+    @classmethod
+    def validate_revenue_range(cls, v: float | None) -> float | None:
+        """Revenue must be non-negative when provided."""
+        if v is not None and v < 0:
+            raise ValueError(f"revenue must be >= 0, got: {v}")
+        return v
+
+    @field_validator("growth_rate")
+    @classmethod
+    def validate_growth_rate_range(cls, v: float | None) -> float | None:
+        """Growth rate must be in reasonable range when provided (percentage points)."""
+        if v is not None and (v < -100 or v > 1000):
+            raise ValueError(f"growth_rate must be in [-100, 1000], got: {v}")
         return v
 
     @field_validator("saas_maturity")
@@ -440,18 +650,20 @@ class Company(BaseModel):
             raise ValueError("CAGR cannot be less than -100%")
         return v
 
-    @field_validator("profit_margin", "ebitda_margin", "recurring_revenue_pct")
+    # STORY-127: profit_margin validation is now on FinancialMetric only (canonical source)
+    @field_validator("ebitda_margin", "recurring_revenue_pct")
     @classmethod
     def validate_percentage(cls, v: float | None) -> float | None:
         if v is not None and (v < -100 or v > 100):
             raise ValueError("Percentage must be between -100 and 100")
         return v
 
-    @field_validator("employee_count", "open_positions")
+    # STORY-127: employee_count validation is now on FinancialMetric only (canonical source)
+    @field_validator("open_positions")
     @classmethod
     def validate_positive_int(cls, v: int | None) -> int | None:
         if v is not None and v < 0:
-            raise ValueError("Employee count cannot be negative")
+            raise ValueError("Open positions cannot be negative")
         return v
 
     @field_validator("ticker")
@@ -547,7 +759,7 @@ class Company(BaseModel):
 class MarketAnalysis(BaseModel):
     """Market-level analysis domain entity."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     market_name: str
     analysis_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -592,7 +804,7 @@ class MarketAnalysis(BaseModel):
 class ScoreComponent(BaseModel):
     """A single component of a score calculation."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     name: str
     value: float
@@ -604,17 +816,43 @@ class ScoreComponent(BaseModel):
 class ScoringExplanation(BaseModel):
     """Detailed explanation of how a final score was calculated."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     base_score: float
     components: list[ScoreComponent] = Field(default_factory=list)
     final_score: float = 0.0
+    # STORY-207: Data confidence tracking
+    data_confidence: float = 1.0  # 0.0 to 1.0 — reduced when fields are None
+    data_warnings: list[str] = Field(default_factory=list)  # human-readable warnings
+
+    # STORY-208: Narrative formatting with confidence info
+    def format_narrative(self) -> str:
+        """Format scoring explanation as human-readable narrative with confidence.
+
+        Returns text like:
+            Score: 7.20 (data confidence: 85%)
+            - Revenue Growth: +2.50 (60% confident)
+            - Employee Efficiency: +1.00 (100% confident)
+        """
+        conf_pct = int(self.data_confidence * 100)
+        lines = [f"Score: {self.final_score:.2f} (data confidence: {conf_pct}%)"]
+        for comp in self.components:
+            weight_pct = int(comp.confidence_weight * 100)
+            sign = "+" if comp.value >= 0 else ""
+            lines.append(
+                f"  {comp.name}: {sign}{comp.value:.2f} ({weight_pct}% confident)"
+            )
+        if self.data_warnings:
+            lines.append("  Warnings:")
+            for warning in self.data_warnings:
+                lines.append(f"    - {warning}")
+        return "\n".join(lines)
 
 
 class CompetitiveOverlap(BaseModel):
     """Competitive overlap domain entity."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     company_a_id: str
     company_b_id: str
@@ -654,7 +892,7 @@ class DataSourceType(StrEnum):
 class RawDataSource(BaseModel):
     """A single raw source document (article, filing, etc.)."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     source_type: DataSourceType
     source_name: str  # e.g., "TechCrunch", "Companies House", "GitHub"
@@ -672,7 +910,7 @@ class RawDataSource(BaseModel):
 class RawDataRecord(BaseModel):
     """Collection of raw sources for a single company analysis."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     company_id: str
     gathering_batch_id: str
@@ -693,7 +931,7 @@ class RawDataRecord(BaseModel):
 class AggregatedFact(BaseModel):
     """A single deduplicated fact extracted from multiple sources."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     fact_type: str  # e.g., "revenue", "employee_count", "ai_maturity"
     value: Any  # The extracted value (can be number, string, enum, etc.)
@@ -719,7 +957,7 @@ class AggregatedFact(BaseModel):
 class AggregatedDataRecord(BaseModel):
     """Collection of aggregated facts for a company."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     company_id: str
     gathering_batch_id: str
@@ -743,7 +981,7 @@ class AggregatedDataRecord(BaseModel):
 class SignalExtraction(BaseModel):
     """A business signal extracted from facts (bridges facts → scoring)."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     signal_name: str  # e.g., "revenue_growth_rate", "ai_maturity", "geographic_reach"
     signal_value: Any  # Processed value (number, enum, etc.)
@@ -765,7 +1003,7 @@ class SignalExtraction(BaseModel):
 class SignalExtractionRecord(BaseModel):
     """Collection of signals for a company."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     company_id: str
     gathering_batch_id: str
@@ -776,7 +1014,7 @@ class SignalExtractionRecord(BaseModel):
 class GatheringBatch(BaseModel):
     """Metadata about a data gathering analysis."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     batch_id: str  # e.g., "batch_20250220_001"
     market_name: str
@@ -808,7 +1046,7 @@ class GatheringBatch(BaseModel):
 class CompanyAnalysisAuditTrail(BaseModel):
     """Complete audit trail for one company analysis."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
 
     company_id: str
     gathering_batch_id: str
@@ -841,3 +1079,90 @@ class CompanyAnalysisAuditTrail(BaseModel):
     # Errors/warnings
     errors: list[str] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# EPIC-019: API Key Management (STORY-065)
+# ---------------------------------------------------------------------------
+
+
+class ApiKeyScope(StrEnum):
+    """Scope levels for API keys.
+
+    Controls what operations an API key can perform.
+    """
+
+    READ_ONLY = "read_only"
+    READ_WRITE = "read_write"
+    ADMIN = "admin"
+
+
+class ApiKey(BaseModel):
+    """Domain entity for tenant-scoped API keys.
+
+    STORY-065: API keys provide programmatic access for system-to-system
+    integration. The full key value is shown only once at creation time;
+    only the hash is stored.
+    """
+
+    model_config = ConfigDict(validate_assignment=True, extra="ignore")  # STORY-251
+
+    id: str = Field(default="", description="Unique identifier for the key")
+    tenant_id: str = Field(
+        ...,
+        description="Owning tenant identifier",
+    )
+    name: str = Field(
+        ...,
+        min_length=1,
+        max_length=255,
+        description="Human-readable label for the key",
+    )
+    key_prefix: str = Field(
+        default="",
+        description="First 8 chars of the key for identification (e.g. sk_live_Ab)",
+    )
+    key_hash: str = Field(
+        default="",
+        description="SHA-256 hash of the full API key (stored, never the plaintext)",
+    )
+    scope: ApiKeyScope = Field(
+        default=ApiKeyScope.READ_ONLY,
+        description="Permission scope for this key",
+    )
+    is_active: bool = Field(
+        default=True,
+        description="Whether the key is currently active",
+    )
+    last_used_at: datetime | None = Field(
+        default=None,
+        description="Timestamp of last successful authentication with this key",
+    )
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="When the key was created",
+    )
+    expires_at: datetime | None = Field(
+        default=None,
+        description="Optional expiry time for the key",
+    )
+    revoked_at: datetime | None = Field(
+        default=None,
+        description="When the key was revoked (None if active)",
+    )
+
+    @field_validator("tenant_id")
+    @classmethod
+    def validate_api_key_tenant_id(cls, v: str) -> str:
+        """Ensure tenant_id is not empty."""
+        if not v or not v.strip():
+            raise ValueError("API key must be associated with a tenant")
+        return v.strip()
+
+    @field_validator("name")
+    @classmethod
+    def validate_api_key_name(cls, v: str) -> str:
+        """Ensure name is not empty."""
+        if not v or not v.strip():
+            raise ValueError("API key name is required")
+        return v.strip()

@@ -194,7 +194,7 @@ def main():
 
     exporter.create_dashboard(companies, output_path, metadata=metadata)
     print(f"\n✅ Dashboard saved to: {output_path}")
-    print(f"   Sheets: Executive Summary, Market Rankings, Financial Intelligence, Export Metadata")
+    print("   Sheets: Executive Summary, Market Rankings, Financial Intelligence, Export Metadata")
 
 
 if __name__ == "__main__":

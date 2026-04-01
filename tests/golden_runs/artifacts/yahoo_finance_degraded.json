@@ -1,0 +1,23 @@
+{
+  "_meta": {
+    "provider": "yahoo_finance",
+    "scenario": "degraded",
+    "description": "Contract shape for Yahoo Finance enrichment failure modes",
+    "story": "STORY-267",
+    "generated": "2026-03-31"
+  },
+  "contract": {
+    "missing_ticker": {
+      "expected_exception": "ValueError",
+      "message_pattern": "requires a ticker"
+    },
+    "empty_ticker": {
+      "expected_exception": "ValueError",
+      "message_pattern": "requires a ticker"
+    },
+    "invalid_ticker": {
+      "expected_behavior": "propagates_sdk_error",
+      "description": "yfinance SDK error propagates to caller; no silent fallback"
+    }
+  }
+}

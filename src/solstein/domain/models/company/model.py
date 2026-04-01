@@ -65,6 +65,11 @@ class Company(CompanyUtilityMixin, CompanyPropertyMixin, CompanySyncMixin):
     ai_key_capabilities: str | None = None
     ai_in_production: bool | None = None
 
+    # STORY-145: AI Readiness Assessment (EPIC-038)
+    ai_readiness_score: float | None = None  # 0-100 composite score
+    ai_readiness_tier: str | None = None  # AI-Ready / AI-Capable / AI-Challenged / AI-Resistant
+    ai_readiness_breakdown: dict[str, float] = Field(default_factory=dict)
+
     # Identifiers
     ticker: str | None = None
     company_number: str | None = None
@@ -115,6 +120,38 @@ class Company(CompanyUtilityMixin, CompanyPropertyMixin, CompanySyncMixin):
     # Data quality
     data_availability: str | None = None
     confidence_scores: dict[str, float] = Field(default_factory=dict)
+
+    # STORY-146: AI Transformation Readiness (EPIC-038)
+    transformation_time_months: float | None = None
+    transformation_cost_eur: float | None = None
+    transformation_efficiency_gain_pct: float | None = None
+    transformation_risk_level: str | None = None
+    transformation_breakdown: dict[str, Any] = Field(default_factory=dict)
+
+    # STORY-149: Energy Compliance (EPIC-039)
+    energy_compliance_score: float | None = None  # 0-100 composite
+    energy_compliance_risk: str | None = None  # high / medium / low
+    energy_control_tier: str | None = None  # advanced / standard / legacy / unknown
+    energy_compliance_breakdown: dict[str, Any] = Field(default_factory=dict)
+
+    # STORY-150: Energy Market Forecasting (EPIC-039)
+    energy_market_score: float | None = None  # 0-100 composite
+    energy_market_positioning: str | None = None
+    energy_market_segments: list[str] = Field(default_factory=list)
+    energy_market_breakdown: dict[str, Any] = Field(default_factory=dict)
+
+    # STORY-151: Trading Platform & Digital Infrastructure (EPIC-039)
+    energy_trading_score: float | None = None
+    energy_platform_maturity: str | None = None
+    energy_infrastructure_tier: str | None = None
+    energy_trading_breakdown: dict[str, Any] = Field(default_factory=dict)
+
+    # STORY-152: Grid Integration & Smart Infrastructure (EPIC-039)
+    energy_grid_score: float | None = None
+    energy_grid_readiness: str | None = None
+    energy_smart_infra_level: str | None = None
+    energy_grid_breakdown: dict[str, Any] = Field(default_factory=dict)
+
 
     # Aliases for backward compatibility
     @property

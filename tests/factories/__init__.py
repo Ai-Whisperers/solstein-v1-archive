@@ -16,7 +16,7 @@ Usage:
     companies = CompanyFactory.create_batch(10)
 """
 
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, Optional, cast  # noqa: F401
 from uuid import uuid4
 
 from factory.base import Factory

@@ -11,6 +11,8 @@ This package contains all SQLAlchemy ORM models organized by domain:
 All models are re-exported from this package for convenience.
 """
 
+# Audit models (STORY-086)
+from .audit import DataAccessAuditRecord
 from .base import Base
 
 # Company and scoring models
@@ -30,8 +32,11 @@ from .enrichment import (
     ReleaseGateAuditRecord,
 )
 
+# Export models (STORY-111)
+from .export import ExportJobRecord
+
 # Infrastructure models
-from .infrastructure import OutboxRecord, TenantRecord
+from .infrastructure import ApiKeyRecord, ApiKeyUsageRecord, OutboxRecord, TenantRecord
 
 # Research models
 from .research import (
@@ -40,6 +45,7 @@ from .research import (
     EvidenceReadinessRecord,
     MetricObservationRecord,
     ResearchArtifactRecord,
+    ResearchJobRecord,
     ResearchRunRecord,
     ResearchStageRecord,
     SourceDocumentRecord,
@@ -67,6 +73,8 @@ __all__ = [
     "EvidenceReadinessRecord",
     "ContradictionRecord",
     "ContradictionTransitionRecord",
+    # Research Jobs (STORY-083)
+    "ResearchJobRecord",
     # Enrichment
     "EnrichmentAuditRecord",
     "EnrichmentCacheRecord",
@@ -75,4 +83,11 @@ __all__ = [
     "ReleaseGateAuditRecord",
     # Tenant
     "TenantRecord",
+    # API Keys (EPIC-019)
+    "ApiKeyRecord",
+    "ApiKeyUsageRecord",
+    # Data Access Audit (STORY-086)
+    "DataAccessAuditRecord",
+    # Export Jobs (STORY-111)
+    "ExportJobRecord",
 ]

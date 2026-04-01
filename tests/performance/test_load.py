@@ -29,12 +29,14 @@ from solstein.infrastructure.database_models import CompanyRecord
 async def db_session() -> AsyncSession:
     """Provide database session."""
     settings = Settings.load()
-    if not hasattr(settings, 'database'):
+    if not hasattr(settings, "database"):
         from pydantic import BaseModel
+
         class DBConf(BaseModel):
             url: str = "sqlite+aiosqlite:///test_perf.sqlite3"
             pool_size: int = 5
             echo: bool = False
+
         settings.database = DBConf()
     else:
         if hasattr(settings.database, "model_copy"):
@@ -61,9 +63,7 @@ class TestDatabaseLoad:
 
         companies = []
         for i in range(num_records):
-            company = CompanyRecord(
-                company_id=f"load-test-{i}", name=f"Load Test Company {i}"
-            )
+            company = CompanyRecord(company_id=f"load-test-{i}", name=f"Load Test Company {i}")
             companies.append(company)
 
         db_session.add_all(companies)
@@ -72,8 +72,6 @@ class TestDatabaseLoad:
         duration = time.time() - start_time
         print(f"\nBulk insert {num_records} companies took {duration:.4f}s")
         assert duration < 5.0  # Should be fast
-
-
 
     @pytest.mark.asyncio
     async def test_query_performance_companies(self, db_session: AsyncSession):
@@ -100,7 +98,7 @@ class TestDatabaseLoad:
         start_time = time.time()
         # Query companies with their latest facts (simplified)
         query = text("""
-            SELECT c.name, f.fact_type, f.value 
+            SELECT c.name, f.fact_type, f.value
             FROM companies c
             LEFT JOIN facts f ON c.company_id = f.company_id
             LIMIT 100

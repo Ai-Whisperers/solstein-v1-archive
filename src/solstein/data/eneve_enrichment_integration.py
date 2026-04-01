@@ -7,7 +7,7 @@ automatic enrichment of company data from multiple sources.
 import asyncio
 import hashlib
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -55,7 +55,7 @@ class EnrichmentCache:
 
             # Check if cache is expired
             cached_time = datetime.fromisoformat(cached["timestamp"])
-            if datetime.now() - cached_time > self.ttl:
+            if datetime.now(tz=timezone.utc) - cached_time > self.ttl:
                 logger.debug(f"Cache expired for {company_name}")
                 cache_path.unlink()
                 return None
@@ -63,7 +63,7 @@ class EnrichmentCache:
             logger.debug(f"Cache hit for {company_name}")
             return cached["sources"]
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to read cache for {company_name}: {e}")
             return None
 
@@ -88,7 +88,7 @@ class EnrichmentCache:
                 sources_data.append(source_dict)
 
             cache_data = {
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(tz=timezone.utc).isoformat(),
                 "company_name": company_name,
                 "params": params,
                 "sources": sources_data,
@@ -99,7 +99,7 @@ class EnrichmentCache:
 
             logger.debug(f"Cached enrichment for {company_name}")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to write cache for {company_name}: {e}")
 
     def clear(self) -> int:
@@ -125,7 +125,7 @@ class EnrichmentCache:
                 with open(cache_file) as f:
                     cached = json.load(f)
                 cached_time = datetime.fromisoformat(cached["timestamp"])
-                if datetime.now() - cached_time > self.ttl:
+                if datetime.now(tz=timezone.utc) - cached_time > self.ttl:
                     expired_count += 1
             except (OSError, ValueError, KeyError, TypeError) as error:
                 logger.debug(f"Skipping cache stats for unreadable file {cache_file}: {error}")
@@ -188,7 +188,7 @@ class EneveEnricher:
                 enriched.append(enriched_company)
                 logger.info(f"✅ Enriched {company_name} with {len(raw_sources)} sources")
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"⚠️  Failed to enrich {company_name}: {e}")
                 # Return original data if enrichment fails
                 enriched.append(company_data)
@@ -237,7 +237,6 @@ class EneveEnricher:
                 company_id=company_name.lower().replace(" ", "-"),
                 company_name=company_name,
                 website=params["website"],
-
             )
 
             if result and result.facts:
@@ -266,7 +265,7 @@ class EneveEnricher:
                 logger.warning(f"⚠️ Pipeline returned no sources for {company_name}, using fallback")
                 sources = await self._fallback_enrichment(company_data)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"❌ Pipeline enrichment failed for {company_name}: {e}")
             logger.info(f"🔄 Using fallback enrichment for {company_name}")
             sources = await self._fallback_enrichment(company_data)
@@ -293,7 +292,7 @@ class EneveEnricher:
                 if source_result:
                     sources.append(source_result)
                     logger.debug(f"✅ Fallback source added: {source_result.source_name}")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug(f"⚠️ Fallback source {source} failed: {e}")
                 continue
 
@@ -332,7 +331,9 @@ class EneveEnricher:
         if raw_sources:
             confidences = [getattr(s, "confidence", None) for s in raw_sources]
             valid_confidences = [c for c in confidences if isinstance(c, (int, float)) and 0.0 <= c <= 1.0]
-            company_data["data_quality_score"] = round(sum(valid_confidences) / len(valid_confidences), 3) if valid_confidences else 0.0
+            company_data["data_quality_score"] = (
+                round(sum(valid_confidences) / len(valid_confidences), 3) if valid_confidences else 0.0
+            )
         else:
             company_data["data_quality_score"] = 0.0
 

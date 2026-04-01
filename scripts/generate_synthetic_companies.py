@@ -9,7 +9,7 @@ In production, this would be replaced with real data collection.
 import json
 import random
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any
 
 
 class SyntheticCompanyGenerator:
@@ -184,7 +184,7 @@ class SyntheticCompanyGenerator:
 
         return template.format(industry=industry, focus_area=focus_area, target_market=target_market)
 
-    def generate_revenue_timeline(self, base_revenue: float, growth_rate: float) -> List[Dict[str, Any]]:
+    def generate_revenue_timeline(self, base_revenue: float, growth_rate: float) -> list[dict[str, Any]]:
         """Generate 4-year revenue timeline."""
         timeline = []
         current_revenue = base_revenue / ((1 + growth_rate / 100) ** 3)
@@ -204,7 +204,7 @@ class SyntheticCompanyGenerator:
 
         return timeline
 
-    def generate_company(self, tier: Optional[str] = None) -> Dict[str, Any]:
+    def generate_company(self, tier: str | None = None) -> dict[str, Any]:
         """Generate a complete synthetic company profile."""
         # Determine company tier based on target distribution
         if tier is None:
@@ -322,7 +322,7 @@ class SyntheticCompanyGenerator:
 
         return company
 
-    def generate_companies(self, count: int = 196) -> List[Dict[str, Any]]:
+    def generate_companies(self, count: int = 196) -> list[dict[str, Any]]:
         """Generate specified number of synthetic companies."""
         companies = []
 

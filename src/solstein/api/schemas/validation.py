@@ -3,7 +3,7 @@
 Pydantic models for request validation and response serialization.
 """
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from solstein.domain.constants import ALLOWED_SEARCH_FIELDS, INDUSTRY_VALID_VALUES
 
@@ -21,18 +21,16 @@ class SearchRequest(StrictRequestModel):
 
     @field_validator("field")
     @classmethod
-    def validate_field(cls, v: str) -> str:
-        """Ensure field is not empty."""
+    def validate_field(cls, v: str, info) -> str:
+        """Ensure field is in allowed list."""
         if not v or not v.strip():
             raise ValueError("field cannot be empty or whitespace")
-        return v.strip()
+        model_type = info.data.get("model_type", "company")
+        allowed = ALLOWED_SEARCH_FIELDS.get(model_type, set())
 
-    @model_validator(mode="after")
-    def validate_field_for_model_type(self) -> "SearchRequest":
-        allowed = ALLOWED_SEARCH_FIELDS.get(self.model_type, set())
-        if self.field not in allowed:
-            raise ValueError(f"Invalid field '{self.field}' for {self.model_type}. Allowed: {sorted(allowed)}")
-        return self
+        if v not in allowed:
+            raise ValueError(f"Invalid field '{v}' for {model_type}. Allowed: {sorted(allowed)}")
+        return v.strip()
 
     @field_validator("value")
     @classmethod

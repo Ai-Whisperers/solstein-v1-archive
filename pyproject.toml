@@ -18,8 +18,10 @@ dependencies = [
     "python-dotenv>=1.0",
     "click>=8.1",
     "fastapi>=0.104,<1.0",
+    "starlette>=0.37.0,<1.0",  # Pinned: starlette 1.0+ requires fastapi>=0.115.0 which has breaking changes
     "uvicorn[standard]>=0.24",
     "sqlalchemy>=2.0,<3.0",
+    "pgvector>=0.4,<1.0",
     "alembic>=1.12",
     "psycopg[binary]>=3.1",
     "aiosqlite>=0.19",
@@ -30,12 +32,26 @@ dependencies = [
     "yfinance>=0.2",
     "langgraph>=1.0.10",  # Fixes CVE-2025-64439, CVE-2026-28277 - requires >=1.0.10 for checkpoint 4.x compatibility
     "langgraph-checkpoint>=4.0.1",  # Fixes CVE-2026-28277 - unsafe msgpack deserialization
+    "langchain-core>=0.3.29",  # Fixes path traversal in legacy load()
+    "PyJWT>=2.10.0",  # Fixes unknown crit header acceptance
     "asyncpg>=0.31.0",
     "pytest-asyncio>=1.3.0",
     "redis>=5.0",
     "aiohttp>=3.9.0",
+    "feedparser>=6.0",  # STORY-254: Required by connectors.news at import time
+    "email-validator>=2.0",  # STORY-254: Required by Pydantic email fields in API models
+    "fpdf2>=2.7",  # STORY-114: PDF report generation
     "bcrypt>=5.0.0",
     "celery>=5.3.0",
+    "anthropic>=0.40.0",  # EPIC-021: Native Anthropic SDK for LLM calls
+    "openai>=1.0",  # EPIC-021: OpenAI-compatible SDK for multi-provider support
+    "instructor>=1.0",  # STORY-072: Pydantic schema validation for structured LLM outputs
+    "langfuse>=2.0",  # STORY-073: LLM observability, cost tracking, prompt management
+    "opentelemetry-api>=1.20",  # STORY-050: Distributed tracing
+    "opentelemetry-sdk>=1.20",  # STORY-050: OTel SDK
+    "opentelemetry-exporter-otlp-proto-http>=1.20",  # STORY-050: OTLP HTTP exporter
+    "opentelemetry-instrumentation-fastapi>=0.40b0",  # STORY-050: FastAPI auto-instrumentation
+    "prometheus-client>=0.20",  # STORY-051: Prometheus metrics endpoint
 ]
 
 [project.license]
@@ -48,7 +64,7 @@ dev = [
     "pytest-asyncio>=0.21",
     "pytest-httpx",
     "factory-boy>=3.3",
-    "black>=23.0",
+    "black>=24.4",
     "ruff>=0.1",
     "mypy>=1.6",
     "pre-commit>=3.5",
@@ -57,6 +73,7 @@ dev = [
 
 [project.scripts]
 solstein = "solstein.cli:main"
+solstein-legacy = "solstein.cli_legacy:main"
 
 [build-system]
 requires = [
@@ -119,10 +136,11 @@ select = [
     "N",
     "SIM",
     "TCH",
+    "TRY",   # STORY-132: Exception handling lint rules
 ]
 ignore = [
-    "B007",
     "B008",
+    "B007",
     "B017",
     "B028",   # No explicit stacklevel — pre-existing, low risk
     "B905",   # zip() without strict= — pre-existing, needs audit
@@ -149,6 +167,11 @@ ignore = [
     "TC002",
     "TC003",
     "TC006",
+    "TRY003",  # STORY-132: raise-vanilla-args — 351 pre-existing, gradual cleanup
+    "TRY300",  # STORY-132: try-consider-else — 97 pre-existing, style preference
+    "TRY301",  # STORY-132: raise-within-try — 18 pre-existing, gradual cleanup
+    "TRY004",  # STORY-132: type-check-without-type-error — 8 pre-existing, style preference
+    "TRY400",  # STORY-132: error-instead-of-exception — 75 pre-existing, gradual cleanup
     "N818",   # Exception naming with Error suffix — renaming is a breaking change, tracked separately
     "UP017",
     "UP036",

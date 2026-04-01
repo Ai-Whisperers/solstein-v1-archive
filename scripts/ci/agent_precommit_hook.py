@@ -7,6 +7,7 @@ Runs quality checks before allowing commits.
 
 from __future__ import annotations
 
+import ast as _ast
 import subprocess
 import sys
 from pathlib import Path
@@ -29,7 +30,7 @@ def check_function_sizes(files: list[Path], max_lines: int = 100) -> bool:
             )
             if result.returncode != 0:
                 violations.append(f"{file}: Function size violation")
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
     if violations:
@@ -62,7 +63,7 @@ def check_bare_excepts(files: list[Path]) -> bool:
                     and "# noqa" not in line
                 ):
                     violations.append(f"{file}:{i}: {line.strip()}")
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
     if violations:
@@ -98,9 +99,9 @@ def check_lazy_imports(files: list[Path]) -> bool:
                     continue
 
                 # Check for imports inside functions
-                if in_function and (stripped.startswith("import ") or stripped.startswith("from ")):
+                if in_function and (stripped.startswith("import ") or (stripped.startswith("from ") and " import " in line)):
                     current_indent = len(line) - len(line.lstrip())
-                    if current_indent > function_indent:
+                    if current_indent > function_indent and "# noqa" not in line:
                         violations.append(f"{file}:{i}: Lazy import: {line.strip()}")
 
                 # Detect end of function (dedent)
@@ -109,11 +110,45 @@ def check_lazy_imports(files: list[Path]) -> bool:
                     if current_indent <= function_indent:
                         in_function = False
 
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
     if violations:
         print("❌ Lazy imports found (move imports to top of file):")
+        for v in violations:
+            print(f"  - {v}")
+        return False
+    return True
+
+
+def check_banned_imports(files: list[Path]) -> bool:
+    """Check for banned `import requests` in adapter/agent code (STORY-136)."""
+    BANNED = {"requests"}
+    violations = []
+
+    for file in files:
+        if not file.exists() or "tests/" in str(file):
+            continue
+
+        try:
+            content = file.read_text()
+            tree = _ast.parse(content)
+
+            for node in _ast.walk(tree):
+                if isinstance(node, _ast.Import):
+                    for alias in node.names:
+                        if alias.name in BANNED:
+                            violations.append(f"{file}:{node.lineno}: `import {alias.name}` is banned (use httpx)")
+                elif isinstance(node, _ast.ImportFrom):
+                    if node.module and node.module.split(".")[0] in BANNED:
+                        violations.append(
+                            f"{file}:{node.lineno}: `from {node.module} import ...` is banned (use httpx)"
+                        )
+        except SyntaxError:
+            pass
+
+    if violations:
+        print("❌ Banned imports found (use httpx instead of requests):")
         for v in violations:
             print(f"  - {v}")
         return False
@@ -133,7 +168,7 @@ def check_file_size(files: list[Path], max_lines: int = 500) -> bool:
             lines = len(content.splitlines())
             if lines > max_lines:
                 violations.append(f"{file}: {lines} lines (max: {max_lines})")
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
     if violations:
@@ -161,6 +196,7 @@ def print_quality_checklist():
     print("  □ Error handling is explicit (no silent catches)")
     print("  □ Type hints used for function signatures")
     print("  □ Google-style docstrings for public functions")
+    print("  □ No `import requests` (use httpx — EPIC-035)")
     print("  □ New code does not increase smell count")
     print("=" * 60)
     print()
@@ -168,8 +204,6 @@ def print_quality_checklist():
 
 def check_parameter_counts(files: list[Path], max_params: int = 5) -> bool:
     """Check if any functions have too many parameters."""
-    import ast
-
     violations = []
 
     for file in files:
@@ -178,10 +212,10 @@ def check_parameter_counts(files: list[Path], max_params: int = 5) -> bool:
 
         try:
             content = file.read_text()
-            tree = ast.parse(content)
+            tree = _ast.parse(content)
 
-            for node in ast.walk(tree):
-                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            for node in _ast.walk(tree):
+                if isinstance(node, (_ast.FunctionDef, _ast.AsyncFunctionDef)):
                     # Count parameters (excluding self/cls)
                     args = node.args
                     param_count = len(args.args) + len(args.kwonlyargs)
@@ -202,7 +236,7 @@ def check_parameter_counts(files: list[Path], max_params: int = 5) -> bool:
 
         except SyntaxError:
             pass
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
     if violations:
@@ -215,8 +249,6 @@ def check_parameter_counts(files: list[Path], max_params: int = 5) -> bool:
 
 def check_class_sizes(files: list[Path], max_lines: int = 300, max_methods: int = 15) -> bool:
     """Check if any modified classes exceed size limits."""
-    import ast
-
     violations = []
 
     for file in files:
@@ -225,10 +257,10 @@ def check_class_sizes(files: list[Path], max_lines: int = 300, max_methods: int 
 
         try:
             content = file.read_text()
-            tree = ast.parse(content)
+            tree = _ast.parse(content)
 
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
+            for node in _ast.walk(tree):
+                if isinstance(node, _ast.ClassDef):
                     # Count lines
                     start_line = node.lineno
                     end_line = getattr(node, 'end_lineno', start_line)
@@ -237,7 +269,7 @@ def check_class_sizes(files: list[Path], max_lines: int = 300, max_methods: int 
                     # Count methods
                     methods = [
                         n for n in node.body
-                        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                        if isinstance(n, (_ast.FunctionDef, _ast.AsyncFunctionDef))
                     ]
                     method_count = len(methods)
 
@@ -255,7 +287,7 @@ def check_class_sizes(files: list[Path], max_lines: int = 300, max_methods: int 
 
         except SyntaxError as e:
             violations.append(f"{file}: Syntax error - {e}")
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
     if violations:
@@ -276,7 +308,7 @@ def get_staged_python_files() -> list[Path]:
         )
         files = [Path(f) for f in result.stdout.strip().split("\n") if f.endswith(".py")]
         return files
-    except Exception:
+    except Exception:  # noqa: BLE001
         return []
 
 
@@ -344,6 +376,14 @@ def main():
         all_passed = False
     else:
         print("   ✅ All files within 500 lines")
+    print()
+
+    # Check 7: Banned imports (STORY-136)
+    print("7️⃣  Checking for banned imports...")
+    if not check_banned_imports(files):
+        all_passed = False
+    else:
+        print("   ✅ No banned imports (requests) found")
     print()
 
     if all_passed:

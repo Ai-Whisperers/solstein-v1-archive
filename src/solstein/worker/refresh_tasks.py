@@ -2,18 +2,29 @@
 
 Extracted from worker_tasks.py as part of EPIC-021 file splitting.
 Provides Celery tasks for refreshing data from 12 sources.
+
+STORY-092: This module is the canonical location for all 12 Beat-scheduled refresh
+tasks.  It incorporates:
+  - STORY-088: DLQ persistence (via dead_letter_queue.record_failure)
+  - STORY-089: at-least-once delivery (task_acks_late / task_reject_on_worker_lost
+               configured in celery_config.py)
+  - STORY-090: idempotency deduplication lock (via deduplicate wrapper applied in
+               create_refresh_task factory with task_name_override per task)
 """
 
 from __future__ import annotations
 
+import asyncio
+import contextlib
 import traceback
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from celery import shared_task
 from celery.exceptions import MaxRetriesExceededError
 from loguru import logger
 
+from solstein.config import get_settings
 from solstein.infrastructure.connectors.companies_house_refresh import (
     CompaniesHouseRefreshConnector,
 )
@@ -36,23 +47,51 @@ from solstein.infrastructure.connectors.yahoo_finance_refresh import (
 )
 
 from .base import dead_letter_queue, get_db_manager, get_tracked_company_ids, store_facts
+from .idempotency import deduplicate
+from .tenant_isolation import task_tenant_context, validate_task_tenant_id
 
 
 def _run_in_dedicated_loop(coro):
     """Run a coroutine in a short-lived event loop owned by this task."""
-    import asyncio
-
     loop = asyncio.new_event_loop()
     try:
         asyncio.set_event_loop(loop)
         return loop.run_until_complete(coro)
     finally:
-        try:
+        with contextlib.suppress(Exception):
             loop.run_until_complete(loop.shutdown_asyncgens())
-        except Exception:
-            pass
         asyncio.set_event_loop(None)
         loop.close()
+
+
+def _handle_retry_or_dlq(
+    task_self,
+    exc: Exception,
+    task_name: str,
+    source_name: str,
+) -> None:
+    """Apply exponential back-off retry; persist to DLQ on MaxRetriesExceededError.
+
+    STORY-088: DLQ persistence. Phase 13.4: backoff = 5 * 2^(attempt-1) seconds.
+    Extracted from create_refresh_task to keep the factory under the 100-line limit.
+    """
+    countdown = 5 * (2**task_self.request.retries)
+    logger.info(
+        f"[RETRY-ATTEMPT-{task_self.request.retries + 1}] {source_name} refresh will retry in {countdown}s"
+    )
+    try:
+        raise task_self.retry(exc=exc, countdown=countdown)  # noqa: B904
+    except MaxRetriesExceededError:
+        tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+        dead_letter_queue.record_failure(
+            task_name.split(".")[-1],
+            task_self.request.id,
+            exc,
+            task_self.request.retries + 1,
+            traceback_text=tb,
+            context={"source_name": source_name},
+        )
+        raise
 
 
 def create_refresh_task(
@@ -61,31 +100,45 @@ def create_refresh_task(
     source_name: str,
     get_date_range: Callable[[], tuple[datetime, datetime]] | None = None,
 ):
-    """Factory function to create a refresh task with retry logic.
+    """Factory: create a Celery refresh task wired with EPIC-025 reliability guarantees.
+
+    Incorporates STORY-066 (tenant isolation), STORY-088 (DLQ), STORY-089
+    (at-least-once via celery_config.py), and STORY-090 (idempotency dedup lock).
+    Lock TTL = task_time_limit; fail-open on Redis unavailability.
 
     Args:
         task_name: Full Celery task name (e.g., "solstein.worker_tasks.refresh_sec_edgar")
         connector_class: Connector class to instantiate
-        source_name: Source name for logging (e.g., "SEC EDGAR")
-        get_date_range: Optional function to get (start_date, end_date) tuple
+        source_name: Human-readable source label used in logs (e.g., "SEC EDGAR")
+        get_date_range: Optional callable returning ``(start_date, end_date)``
 
     Returns:
-        Configured Celery task function
+        Celery shared_task guarded by idempotency dedup lock
     """
+    _settings = get_settings()
+    _task_ttl: int = _settings.celery_timing.task_time_limit
 
-    @shared_task(name=task_name, bind=True, max_retries=3)
-    def refresh_task(self):
-        """Refresh data for all tracked companies."""
-        logger.info(f"Starting {source_name} refresh task")
+    def _refresh_task_body(self, tenant_id: str):
+        """Refresh all tracked companies for tenant_id (STORY-066: tenant_id required)."""
+        validated_tenant = validate_task_tenant_id(tenant_id, task_name=task_name)
+        logger.info(f"Starting {source_name} refresh task for tenant {validated_tenant[:8]}...")
 
         try:
+
             async def _refresh():
                 db_manager = get_db_manager()
-                company_ids = await get_tracked_company_ids(db_manager)
+                company_ids = await get_tracked_company_ids(db_manager, tenant_id=validated_tenant)
 
                 if not company_ids:
-                    logger.warning(f"No tracked companies found for {source_name} refresh")
-                    return {"status": "completed", "source": source_name.lower().replace(" ", "_"), "facts_fetched": 0}
+                    logger.warning(
+                        f"No tracked companies found for {source_name} refresh (tenant={validated_tenant[:8]}...)"
+                    )
+                    return {
+                        "status": "completed",
+                        "source": source_name.lower().replace(" ", "_"),
+                        "facts_fetched": 0,
+                        "tenant_id": validated_tenant,
+                    }
 
                 connector = connector_class(db_manager)
 
@@ -95,33 +148,40 @@ def create_refresh_task(
                 else:
                     facts = await connector.fetch_facts(company_ids)
 
-                stored = await store_facts(db_manager, facts, source_name.lower().replace(" ", "_"))
-
-                logger.info(f"{source_name} refresh completed: {stored} facts stored")
-                return {"status": "completed", "source": source_name.lower().replace(" ", "_"), "facts_fetched": stored}
-
-            return _run_in_dedicated_loop(_refresh())
-
-        except Exception as exc:
-            logger.error(f"{source_name} refresh failed: {exc}")
-            # Phase 13.4: Exponential backoff - 5 * (2^(attempt-1))
-            countdown = 5 * (2**self.request.retries)
-            logger.info(f"[RETRY-ATTEMPT-{self.request.retries + 1}] {source_name} refresh will retry in {countdown}s")
-
-            try:
-                raise self.retry(exc=exc, countdown=countdown)  # noqa: B904
-            except MaxRetriesExceededError:
-                tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
-                dead_letter_queue.record_failure(
-                    task_name.split(".")[-1],
-                    self.request.id,
-                    exc,
-                    self.request.retries + 1,
-                    traceback_text=tb,
-                    context={"source_name": source_name},
+                stored = await store_facts(
+                    db_manager, facts, source_name.lower().replace(" ", "_"), tenant_id=validated_tenant
                 )
-                raise
 
+                logger.info(
+                    f"{source_name} refresh completed: {stored} facts stored (tenant={validated_tenant[:8]}...)"
+                )
+                return {
+                    "status": "completed",
+                    "source": source_name.lower().replace(" ", "_"),
+                    "facts_fetched": stored,
+                    "tenant_id": validated_tenant,
+                }
+
+            with task_tenant_context(validated_tenant):
+                return _run_in_dedicated_loop(_refresh())
+
+        except Exception as exc:  # noqa: BLE001
+            logger.error(f"{source_name} refresh failed: {exc}")
+            _handle_retry_or_dlq(self, exc, task_name, source_name)
+
+    # STORY-090/STORY-092: Apply idempotency dedup lock with the full task_name
+    # as the lock discriminator so each of the 12 tasks gets a unique Redis key.
+    # TTL matches task_time_limit — ensures the lock is held for the maximum
+    # allowed task duration and releases before the next schedule window.
+    _body_with_dedup = deduplicate(ttl=_task_ttl, task_name_override=task_name)(
+        _refresh_task_body
+    )
+
+    # Register as a Celery shared_task. bind=True injects `self` (task instance)
+    # as the first argument so retries can call self.retry().
+    refresh_task = shared_task(name=task_name, bind=True, max_retries=3)(
+        _body_with_dedup
+    )
     return refresh_task
 
 
@@ -134,7 +194,7 @@ refresh_sec_edgar = create_refresh_task(
     "solstein.worker_tasks.refresh_sec_edgar",
     SECEDGARRefreshConnector,
     "SEC EDGAR",
-    lambda: (datetime.now() - timedelta(days=365), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(days=365), datetime.now(tz=timezone.utc)),
 )
 
 # Companies House: 90 days lookback
@@ -142,7 +202,7 @@ refresh_companies_house = create_refresh_task(
     "solstein.worker_tasks.refresh_companies_house",
     CompaniesHouseRefreshConnector,
     "Companies House",
-    lambda: (datetime.now() - timedelta(days=90), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(days=90), datetime.now(tz=timezone.utc)),
 )
 
 # News Signals: 24 hours lookback
@@ -150,7 +210,7 @@ refresh_news_signals = create_refresh_task(
     "solstein.worker_tasks.refresh_news_signals",
     NewsSignalRefreshConnector,
     "News Signals",
-    lambda: (datetime.now() - timedelta(hours=24), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(hours=24), datetime.now(tz=timezone.utc)),
 )
 
 # GitHub: 7 days lookback
@@ -158,7 +218,7 @@ refresh_github = create_refresh_task(
     "solstein.worker_tasks.refresh_github",
     GitHubRefreshConnector,
     "GitHub",
-    lambda: (datetime.now() - timedelta(days=7), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(days=7), datetime.now(tz=timezone.utc)),
 )
 
 # ============================================================================
@@ -177,7 +237,7 @@ refresh_patents = create_refresh_task(
     "solstein.worker_tasks.refresh_patents",
     PatentsRefreshConnector,
     "Patents",
-    lambda: (datetime.now() - timedelta(days=30), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(days=30), datetime.now(tz=timezone.utc)),
 )
 
 # News: 6 hours lookback
@@ -185,7 +245,7 @@ refresh_news = create_refresh_task(
     "solstein.worker_tasks.refresh_news",
     NewsRefreshConnector,
     "News",
-    lambda: (datetime.now() - timedelta(hours=6), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(hours=6), datetime.now(tz=timezone.utc)),
 )
 
 # Website: no date range needed
@@ -207,7 +267,7 @@ refresh_funding = create_refresh_task(
     "solstein.worker_tasks.refresh_funding",
     FundingRefreshConnector,
     "Funding",
-    lambda: (datetime.now() - timedelta(days=30), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(days=30), datetime.now(tz=timezone.utc)),
 )
 
 # Global Market: no date range needed
@@ -222,5 +282,5 @@ refresh_web_search = create_refresh_task(
     "solstein.worker_tasks.refresh_web_search",
     WebSearchRefreshConnector,
     "Web Search",
-    lambda: (datetime.now() - timedelta(hours=12), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(hours=12), datetime.now(tz=timezone.utc)),
 )

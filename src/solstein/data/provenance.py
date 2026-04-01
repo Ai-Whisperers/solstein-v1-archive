@@ -52,6 +52,9 @@ class ProvenanceConfidenceLevel(Enum):
         return cls.UNCERTAIN
 
 
+ConfidenceLevel = ProvenanceConfidenceLevel
+
+
 class ValidationMode(Enum):
     """Validation strictness mode."""
 

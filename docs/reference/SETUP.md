@@ -1,3 +1,6 @@
+> **Moved**: This guide has been consolidated into [`docs/guides/setup.md`](../guides/setup.md).
+> Please update your bookmarks. This file is kept for backward compatibility.
+
 # Solstein - Supabase Database Setup Guide
 
 This guide walks you through setting up the Solstein project with Supabase PostgreSQL for testing.

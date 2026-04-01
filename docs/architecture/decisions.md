@@ -150,3 +150,86 @@ return scored
 This was deferred to avoid the dataclass `replace()` boilerplate until a proper mapper layer is designed.
 
 ---
+
+## ADR-009: Freeze Graph Runtime, Declare Legacy Pipeline Canonical
+
+**Date:** 2026-03-31
+**Status:** Accepted
+**Story:** STORY-255 (EPIC-067: Legacy Runtime Canonicalization)
+
+**Context:** The codebase contains two parallel execution runtimes for the
+research pipeline:
+
+1. **Legacy sequential pipeline** (`research/pipeline.py` +
+   `research/pipeline_stages.py`) -- 10 stages, 909 LOC, used by CLI and API
+   entrypoints for all production runs.
+2. **LangGraph graph runtime** (`research/graph/`) -- parallel DAG with 5
+   fan-out nodes, ~1046 LOC, designed for future parallelism and
+   human-in-the-loop review.
+
+Evidence from the runtime ledger (`docs/architecture/runtime-depth-ledger.md`)
+shows:
+
+- The graph runtime's `interrupt()`/resume machinery is exercised only on the
+  review-resume path. There is no confirmed production caller that uses the
+  full graph from START to END as the primary execution path.
+- The legacy pipeline is the actual production runtime used by all CLI commands
+  and API endpoints.
+- Maintaining two runtimes doubles the surface area for bugs, adapter
+  registration, and testing.
+
+**Decision:** Declare the legacy sequential pipeline as the **canonical
+production runtime**. Freeze the graph runtime: no new features, nodes, or
+wiring changes. Bug fixes and security patches only.
+
+**Rationale:**
+
+- Reduces cognitive overhead: one path to understand, test, and debug
+- Eliminates duplication risk: new features go to exactly one place
+- Preserves optionality: the graph code remains intact for future evaluation
+- Unblocks STORY-256 (delete runtime aliases) and STORY-257 (repair
+  entrypoints) with a clear decision to cite
+
+**Consequences:**
+
+- All new pipeline feature work targets `research/pipeline.py` and
+  `research/pipeline_stages.py`
+- The `research/graph/` package receives only critical bug fixes
+- The feature flag `feature_new_unified_loader` in `adapters/registry.py`
+  remains until STORY-256 removes it
+- If the graph runtime proves necessary in the future, this ADR can be
+  superseded with a new ADR citing specific evidence
+
+---
+
+## ADR-010: Salvage Decision from Golden-Run Evidence
+
+**Date:** 2026-03-31
+**Status:** Accepted
+**Story:** STORY-270 (EPIC-070: Empirical Golden Runs and Rebuild Gate)
+
+**Context:** EPIC-067 through EPIC-070 produced empirical evidence to determine
+whether to salvage the legacy runtime or trigger a full rebuild. 88 golden-run
+tests across provider contracts (30), full-market regressions (17), placeholder
+guards (28), and salvage criteria (13) all pass. No rebuild triggers are active.
+
+**Decision:** Salvage the legacy runtime. Delete the graph runtime progressively
+after placeholder value is migrated. Rebuild only if red-flag triggers fire.
+
+**Rationale:**
+
+- All 6 salvage conditions are met (measured in STORY-258)
+- 0 defects in 88 golden-run tests
+- 5 failure classes identified and resolved (router bypass, placeholders,
+  duplicates, entrypoint fragmentation, feature-flag branching)
+- All 6 rebuild triggers evaluated — none currently active
+
+**Consequences:**
+
+- All new features target the legacy pipeline exclusively
+- Graph runtime code remains frozen (ADR-009) and will be deleted
+- The 88-test golden-run suite is the regression gate for all runtime changes
+- Next backlog wave scoped to 5-6 stories on proven failure surfaces only
+- Full decision record: `docs/architecture/ADR-010-SALVAGE-DECISION-FROM-GOLDEN-RUN-EVIDENCE.md`
+
+---

@@ -36,33 +36,34 @@ class NPMConnector(BaseConnector):
     async def search(self, query: str, **kwargs) -> ConnectorResult:
         try:
             # npm search API
-            async with aiohttp.ClientSession() as session, session.get(
-                "https://registry.npmjs.org/-/v1/search", params={"text": query, "size": kwargs.get("limit", 10)}
-            ) as response:
-                data = await response.json()
-                packages = data.get("objects", [])
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    "https://registry.npmjs.org/-/v1/search", params={"text": query, "size": kwargs.get("limit", 10)}
+                ) as response:
+                    data = await response.json()
+                    packages = data.get("objects", [])
 
-                raw_data_list = []
-                for pkg in packages:
-                    package = pkg.get("package", {})
-                    raw_data = RawData(
-                        source_name=self.config.name,
-                        source_url=f"https://npmjs.com/package/{package.get('name')}",
-                        raw_content=package,
-                        extracted_at=datetime.now(timezone.utc),
-                        metadata={
-                            "package_name": package.get("name"),
-                            "version": package.get("version"),
-                            "source_type": "package_registry",
-                        },
+                    raw_data_list = []
+                    for pkg in packages:
+                        package = pkg.get("package", {})
+                        raw_data = RawData(
+                            source_name=self.config.name,
+                            source_url=f"https://npmjs.com/package/{package.get('name')}",
+                            raw_content=package,
+                            extracted_at=datetime.now(timezone.utc),
+                            metadata={
+                                "package_name": package.get("name"),
+                                "version": package.get("version"),
+                                "source_type": "package_registry",
+                            },
+                        )
+                        raw_data_list.append(raw_data)
+
+                    return ConnectorResult(
+                        success=True,
+                        data=raw_data_list,
+                        total_found=data.get("total", 0),
                     )
-                    raw_data_list.append(raw_data)
-
-                return ConnectorResult(
-                    success=True,
-                    data=raw_data_list,
-                    total_found=data.get("total", 0),
-                )
         except Exception as e:
             return ConnectorResult(success=False, data=[], error_message=str(e))
 

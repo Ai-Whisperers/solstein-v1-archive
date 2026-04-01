@@ -13,11 +13,14 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+# Resolve project root dynamically: bin/agents/critiquer.py → project root
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
 
 class CritiquerAgent:
     def __init__(self, cycle_num):
         self.cycle_num = cycle_num
-        self.project_root = Path("/home/ai-whisperers/solstein")
+        self.project_root = _PROJECT_ROOT
         self.logs_dir = self.project_root / "logs"
 
     def analyze_results(self):

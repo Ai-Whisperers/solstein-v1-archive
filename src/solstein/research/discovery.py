@@ -38,12 +38,14 @@ def _slugify(name: str) -> str:
 
 def _catalog_for_market(market: str) -> list[dict[str, object]]:
     """Get company catalog for a given market.
-    
+
     EPIC-020: Refactored from 429-line function to data-driven approach.
     Catalog data moved to market_catalogs.py module.
     """
     from .market_catalogs import get_catalog_for_market
+
     return get_catalog_for_market(market)
+
 
 def _score_candidate(
     candidate: DiscoveryCandidate,
@@ -230,7 +232,6 @@ def _discover_legacy(
     return scored[:max_companies]
 
 
-
 async def discover_companies_async(
     seed_company: str,
     market: str,
@@ -243,6 +244,7 @@ async def discover_companies_async(
     Runs the synchronous discovery in a thread pool for non-blocking execution.
     """
     import asyncio
+
     return await asyncio.to_thread(
         discover_companies,
         seed_company,

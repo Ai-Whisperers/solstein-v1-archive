@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, cast
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
@@ -33,7 +33,7 @@ async def _run_excel_export(repo: Any, filters: dict[str, Any], filename: str) -
             try:
                 scored = growth_scorer.calculate_scores(company)
                 scored_companies.append(scored)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Failed to score company {company.name}: {e}")
                 scored_companies.append(company)
         companies = scored_companies
@@ -60,7 +60,7 @@ async def export_to_excel(
         if industry:
             filters["industry"] = industry
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
         if industry:
             filename = f"solstein_{industry.lower().replace(' ', '_')}_{timestamp}.xlsx"
         else:
@@ -73,7 +73,7 @@ async def export_to_excel(
             "filename": filename,
             "status": "processing",
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"Error triggering export: {e}")
         raise APIError(
             code="INTERNAL_ERROR",
@@ -122,7 +122,7 @@ async def export_to_json(
 
         # Create output
         export_data: dict[str, Any] = {
-            "exported_at": datetime.now().isoformat(),
+            "exported_at": datetime.now(tz=timezone.utc).isoformat(),
             "total_companies": len(companies_data),
             "companies": companies_data,
             "release_gate": gate_result.to_dict(),
@@ -132,7 +132,7 @@ async def export_to_json(
         return JSONResponse(content=export_data)
     except APIError:
         raise
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"Error exporting to JSON: {e}")
         raise APIError(
             code="INTERNAL_ERROR",

@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 """Rate limiting and caching to avoid Hostinger API throttling"""
 import json
+import os
+import tempfile
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+# Default cache directory: STATE_DIR env var → platform temp dir → sub-dir named "solstein-cache"
+_DEFAULT_CACHE_DIR = Path(os.environ.get("STATE_DIR", tempfile.gettempdir())) / "solstein-cache"
+
 
 class RateLimiter:
-    def __init__(self, cache_dir="/home/ai-whisperers/solstein/.cache"):
-        self.cache_dir = Path(cache_dir)
+    def __init__(self, cache_dir: str | None = None):
+        self.cache_dir = Path(cache_dir) if cache_dir else _DEFAULT_CACHE_DIR
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.cache_ttl = 300  # 5 minutes
 

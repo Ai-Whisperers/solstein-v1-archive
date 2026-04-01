@@ -50,14 +50,14 @@ class TestCSVExporterSnapshots:
         exporter.export(sample_companies, output_path)
 
         # Read and verify CSV structure
-        with open(output_path, newline='') as f:
+        with open(output_path, newline="") as f:
             reader = csv.reader(f)
             rows = list(reader)
 
         # Verify header row exists and has expected columns
         assert len(rows) > 0
         header = rows[0]
-        assert 'Name' in header or 'Industry' in header
+        assert "Name" in header or "Industry" in header
 
         # Verify data rows match header count
         for row in rows[1:]:
@@ -162,13 +162,13 @@ class TestExportSchemaValidation:
     """Export schema validation tests."""
 
     EXPECTED_COMPANY_FIELDS = [
-        'id',
-        'name',
-        'industry',
-        'revenue',
-        'growth_rate',
-        'employees',
-        'classification',
+        "id",
+        "name",
+        "industry",
+        "revenue",
+        "growth_rate",
+        "employees",
+        "classification",
     ]
 
     def test_company_export_schema_completeness(self):

@@ -112,6 +112,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         "/health",
         "/ready",
         "/metrics",
+        "/metrics/prometheus",
         "/docs",
         "/openapi.json",
         "/redoc",

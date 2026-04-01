@@ -29,7 +29,19 @@ celery_app = Celery(
     backend=settings.celery_result_backend or "redis://localhost:6379/1",
     include=[
         "solstein.worker_tasks",
+        "solstein.worker.export_tasks",  # STORY-111: Async export tasks
     ],
+)
+
+# STORY-091: Resolve result TTL — top-level CELERY_RESULT_EXPIRES_SECONDS overrides the
+# nested CELERY_TIMING__RESULT_EXPIRES if both are set. Default is 86400s (24 hours).
+# Polling contract: callers must read AsyncResult.status within this window.
+# After expiry, a PENDING status is returned for completed tasks — this is misleading,
+# not a bug. Size the TTL to exceed your longest expected polling delay.
+_result_expires: int = (
+    settings.celery_result_expires_seconds
+    if settings.celery_result_expires_seconds is not None
+    else settings.celery_timing.result_expires
 )
 
 celery_app.conf.update(
@@ -39,12 +51,58 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     task_track_started=True,
-    # Phase 13.4: Timeout configuration for single vs batch tasks
-    task_time_limit=30,  # 30 seconds hard limit for single tasks
-    task_soft_time_limit=25,  # 25 seconds soft limit for graceful shutdown
+    task_time_limit=settings.celery_timing.task_time_limit,
+    task_soft_time_limit=settings.celery_timing.task_soft_time_limit,
+    # Result TTL — see STORY-091. Default: 86400s (24h). Set via:
+    #   CELERY_RESULT_EXPIRES_SECONDS=86400  (top-level alias)
+    #   CELERY_TIMING__RESULT_EXPIRES=86400  (nested config)
+    # Pollers must read results within this window or accept expiry.
+    result_expires=_result_expires,
+    # STORY-089: At-least-once delivery semantics.
+    #
+    # task_acks_late=True — tasks are acknowledged to the broker AFTER execution
+    # completes, not on receipt. If a worker is killed between receipt and
+    # completion (OOM, SIGKILL, pod eviction), the broker re-queues the task
+    # automatically. Without this, a worker crash silently drops the task.
+    #
+    # task_reject_on_worker_lost=True — when the worker connection is lost (not
+    # just an application-level exception), the task is rejected back to the
+    # broker (nack'd) rather than acked. This completes the acks_late guarantee:
+    # even a hard connection loss triggers re-queue.
+    #
+    # IMPORTANT: acks_late creates at-least-once semantics. Tasks MAY execute
+    # more than once (e.g. on Beat scheduler restart or worker eviction mid-task).
+    # All 12 Beat-scheduled tasks are guarded by the Redis deduplication lock in
+    # solstein.worker.idempotency — see STORY-090. Deploy these two stories together.
+    #
+    # worker_prefetch_multiplier=1 is required for acks_late correctness. With
+    # higher prefetch a worker holds multiple unacked tasks in memory; a crash
+    # then requeues all prefetched tasks, increasing duplicate risk. With prefetch=1
+    # only one task is in-flight per worker process at a time.
+    task_acks_late=True,
+    task_reject_on_worker_lost=True,
     worker_prefetch_multiplier=1,
     worker_max_tasks_per_child=100,
+    # STORY-093: Enable task events so Flower (STORY-095) can monitor
+    # real-time task state, success/failure rates, and queue depths.
+    # This adds minimal overhead (~1 Redis message per task state change).
+    worker_send_task_events=True,
+    task_send_sent_event=True,
+    # STORY-111: Route export tasks to dedicated queue with higher time limits.
+    # Default exports: 60 s soft / 90 s hard.
+    # LLM exports override per-task via task_time_limit annotation.
+    task_routes={
+        "solstein.worker_tasks.generate_export": {"queue": "export"},
+    },
 )
+
+# STORY-111: Per-task time limit overrides for LLM exports (120 s)
+celery_app.conf.task_annotations = {
+    "solstein.worker_tasks.generate_export": {
+        "time_limit": 150,
+        "soft_time_limit": 120,
+    },
+}
 
 # Beat schedule for automated data refresh
 # All 12 sources with appropriate frequencies based on data freshness requirements

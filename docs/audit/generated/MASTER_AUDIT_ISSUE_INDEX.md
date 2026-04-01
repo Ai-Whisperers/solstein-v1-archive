@@ -1,6 +1,6 @@
 # Master Audit Issue Index
 
-Generated on `2026-03-30` from `docs/audit/18-03-2026_MASTER_AUDIT.md`.
+Generated on `2026-04-01` from `docs/audit/18-03-2026_MASTER_AUDIT.md`.
 
 This is a generated, deduplicated index of issue identifiers parsed from the master audit.
 It does not modify the source audit. If table metadata repeats across multiple passes, the latest row is kept.
@@ -13,6 +13,20 @@ It does not modify the source audit. If table metadata repeats across multiple p
 - Parsed issue table rows: `1196`
 
 The declared audit tracker total is higher than the distinct issue-id count because the source audit also tracks false positives, corrected entries, and pass-level aggregate accounting.
+
+## Fix-Verification Reconciliation Protocol
+
+Fix-verification audits (ad-hoc docs in `docs/audit/`) must reconcile their scope against this index.
+For each issue a verification audit claims to have fixed:
+
+1. Confirm the `ISSUE-*` identifier exists in the Issue Index table below.
+2. Reference this file by path (`docs/audit/generated/MASTER_AUDIT_ISSUE_INDEX.md`) in the verification doc header.
+3. If the fix changes the issue's `status`, update the source audit (`docs/audit/18-03-2026_MASTER_AUDIT.md`)
+   and re-run `make docs-generate` so this index reflects the new status.
+4. If a verification audit claims issues **not** found in this index, those are either
+   mislabelled (check the source audit) or new issues that need to be added to the source audit first.
+
+Machine consumers may use `docs/audit/generated/MASTER_AUDIT_ISSUE_INDEX.json` for programmatic reconciliation.
 
 ## Issue Index
 

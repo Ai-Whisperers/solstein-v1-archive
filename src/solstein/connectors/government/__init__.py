@@ -13,8 +13,10 @@ __all__ = [
 ]
 
 
-from .dns import DNSConnector
+from .dns import DNSConnector  # noqa: F401
 
-__all__.extend([
-    "DNSConnector",
-])
+__all__.extend(
+    [
+        "DNSConnector",
+    ]
+)

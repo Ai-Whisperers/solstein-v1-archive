@@ -2,8 +2,10 @@
 """Test working LLM providers and show status."""
 
 import sys
+from pathlib import Path as _Path
 
-sys.path.insert(0, "/home/ai-whisperers/solstein/src")
+# Resolve src dynamically: scripts/check_providers.py → project root/src
+sys.path.insert(0, str(_Path(__file__).resolve().parent.parent / "src"))
 
 import asyncio
 

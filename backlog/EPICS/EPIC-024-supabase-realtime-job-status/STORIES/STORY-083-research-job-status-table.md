@@ -7,7 +7,7 @@
 | Severity | HIGH |
 | Epic | [EPIC-024: Supabase Realtime Job Status](../README.md) |
 | Created | 2026-02-28 |
-| Dependencies | [STORY-063](../../EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-063-tenant-model.md) (tenant model), [STORY-087](../../EPIC-018-infrastructure-cicd/STORIES/STORY-087-celery-dlq.md) (Celery DLQ) |
+| Dependencies | [STORY-063](../../EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-063-define-tenant-model.md) (tenant model), [STORY-087](../../EPIC-018-infrastructure-cicd/STORIES/STORY-087-celery-dead-letter-queue.md) (Celery DLQ) |
 
 ---
 

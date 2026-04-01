@@ -212,6 +212,7 @@ class BatchExtractor:
                 if loop and loop.is_running():
                     # Already in async context — run coroutine in a new thread
                     import concurrent.futures
+
                     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
                         result = pool.submit(asyncio.run, self._process_file(file_path)).result()
                 else:

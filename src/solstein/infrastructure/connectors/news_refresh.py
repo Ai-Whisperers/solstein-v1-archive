@@ -5,7 +5,7 @@ Implements incremental refresh with date-based delta detection.
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from loguru import logger
@@ -58,7 +58,7 @@ class NewsRefreshConnector(BaseRefreshConnector):
 
         # Default to last 30 days if no dates specified
         if end_date is None:
-            end_date = datetime.now()
+            end_date = datetime.now(tz=timezone.utc)
         if start_date is None:
             start_date = end_date - timedelta(days=30)
 
@@ -85,7 +85,7 @@ class NewsRefreshConnector(BaseRefreshConnector):
                             "days_back": days_back,
                         },
                         "confidence": confidence,
-                        "extracted_at": datetime.now(),
+                        "extracted_at": datetime.now(tz=timezone.utc),
                         "source": self.source_name,
                         "metadata": {
                             "company_name": company_name,
@@ -105,7 +105,7 @@ class NewsRefreshConnector(BaseRefreshConnector):
                                 "interpretation": self._interpret_sentiment(coverage.sentiment_score),
                             },
                             "confidence": confidence,
-                            "extracted_at": datetime.now(),
+                            "extracted_at": datetime.now(tz=timezone.utc),
                             "source": self.source_name,
                             "metadata": {
                                 "company_name": company_name,
@@ -114,7 +114,7 @@ class NewsRefreshConnector(BaseRefreshConnector):
                         }
                     )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Failed to fetch news for {company_name}: {e}")
                 continue
 

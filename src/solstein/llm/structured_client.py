@@ -33,6 +33,7 @@ from typing import Any, TypeVar
 from loguru import logger
 from pydantic import BaseModel, ValidationError
 
+from solstein.llm.prompts import get_system_prompt
 from solstein.llm.tracing import LLMTracer, TraceRecord
 
 T = TypeVar("T", bound=BaseModel)
@@ -91,10 +92,8 @@ class StructuredLLMClient:
         """
         schema_json = json.dumps(schema.model_json_schema(), indent=2)
         system_prompt = (
-            "You are a structured data extractor.  "
-            "Return ONLY valid JSON that strictly conforms to the provided schema.  "
-            "No markdown, no explanation—just the JSON object.\n\n"
-            f"Schema:\n{schema_json}"
+            get_system_prompt("system_structured_extractor")
+            + f"\n\nSchema:\n{schema_json}"
         )
         if context:
             system_prompt += f"\n\nContext:\n{context}"

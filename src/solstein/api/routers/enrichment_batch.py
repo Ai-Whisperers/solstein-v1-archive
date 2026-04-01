@@ -61,7 +61,7 @@ async def enrich_batch(request_data: BatchEnrichmentRequest, request: Request) -
 
         return BatchEnrichmentResponse(
             status="partial" if failed_count else "success",
-            batch_id=f"batch_{datetime.now().timestamp()}",
+            batch_id=f"batch_{datetime.now(tz=timezone.utc).timestamp()}",
             total_companies=len(request_data.company_ids),
             enriched_count=enriched_count,
             failed_count=failed_count,
@@ -77,6 +77,6 @@ async def enrich_batch(request_data: BatchEnrichmentRequest, request: Request) -
             },
         )
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"Batch enrichment failed: {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e

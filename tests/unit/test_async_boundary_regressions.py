@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from solstein.adapters.enrichment.patents_unified import PatentsUnifiedAdapter
+from solstein.adapters.enrichment._retired.patents_unified import PatentsUnifiedAdapter
 from solstein.data.web_research_pipeline import WebResearcher
 from solstein.infrastructure.connectors.news_signal_refresh import NewsSignalRefreshConnector
 from solstein.infrastructure.connectors.web_search_refresh import WebSearchRefreshConnector
@@ -97,9 +97,7 @@ async def test_news_signal_refresh_awaits_detector_methods(monkeypatch: pytest.M
 @pytest.mark.asyncio
 async def test_web_researcher_search_web_offloads_duckduckgo(monkeypatch: pytest.MonkeyPatch) -> None:
     researcher = WebResearcher()
-    mock_search = MagicMock(
-        return_value=[{"title": "Acme", "href": "https://example.com", "body": "Acme overview"}]
-    )
+    mock_search = MagicMock(return_value=[{"title": "Acme", "href": "https://example.com", "body": "Acme overview"}])
     calls: list[tuple[object, tuple[object, ...], dict[str, object]]] = []
 
     async def fake_to_thread(func, *args, **kwargs):

@@ -24,7 +24,7 @@ from typing import Any
 
 import pytest
 
-from solstein.data.loaders import convert_to_domain_company
+from solstein.data.converters.company import convert_to_domain_company
 
 
 class TestGoldenDatasetFieldPreservation:
@@ -322,7 +322,6 @@ class TestRegressionPrevention:
         company_flat = convert_to_domain_company(flat_data, index=0)
         assert company_flat.revenue == 500.0
         assert company_flat.growth_rate == 10.0
-
 
         # Both flat formats should work
         flat_data_2 = {

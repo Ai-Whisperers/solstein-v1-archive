@@ -19,8 +19,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from solstein.exporters.excel_improved import ImprovedExcelExporter
 
-
-
 ENEVE_CAPABILITIES = {
     "time_series_management": {
         "keywords": ["time series", "smart meter", "meter data", "aggregation", "linked data", "historical data"],
@@ -562,8 +560,8 @@ def main():
     summary = results.get("summary", {})
 
     print(f"📊 Analyzing {len(all_companies)} companies for Eneve relevance...")
-    print(f"   Enhanced with: AI Adoption + Strategic Classification + Capability Overlap")
-    print(f"   Target Market: Netherlands & Europe\n")
+    print("   Enhanced with: AI Adoption + Strategic Classification + Capability Overlap")
+    print("   Target Market: Netherlands & Europe\n")
 
     # Filter for relevant companies with enhanced analysis
     relevant_companies = []
@@ -597,7 +595,7 @@ def main():
     ai_scores = [c.ai_score for c in relevant_companies]
     overlap_scores = [c.capability_overlap_pct for c in relevant_companies]
 
-    print(f"\n📊 Enhanced Intelligence Summary:")
+    print("\n📊 Enhanced Intelligence Summary:")
     print(f"   • Average AI Score: {sum(ai_scores) / len(ai_scores):.1f}/10")
     print(f"   • Average Capability Overlap: {sum(overlap_scores) / len(overlap_scores):.1f}%")
 
@@ -607,12 +605,12 @@ def main():
         cls = c.tier
         class_counts[cls] = class_counts.get(cls, 0) + 1
 
-    print(f"\n🏆 Strategic Classifications:")
+    print("\n🏆 Strategic Classifications:")
     for cls, count in sorted(class_counts.items(), key=lambda x: -x[1]):
         print(f"   • {cls}: {count}")
 
     # Generate Excel dashboard
-    print(f"\n📊 Generating enhanced Excel dashboard...")
+    print("\n📊 Generating enhanced Excel dashboard...")
     exporter = ImprovedExcelExporter()
 
     metadata = {
@@ -672,24 +670,24 @@ def main():
         json.dump(output_data, f, indent=2, default=str)
     print(f"   ✅ JSON saved: {json_path}")
 
-    print(f"\n" + "=" * 70)
-    print(f"🎯 ENHANCED ENEVE COMPETITIVE INTELLIGENCE REPORT COMPLETE")
-    print(f"=" * 70)
-    print(f"\nTarget Company: Eneve (Netherlands)")
-    print(f"Focus: Smart software for the energy value chain")
+    print("\n" + "=" * 70)
+    print("🎯 ENHANCED ENEVE COMPETITIVE INTELLIGENCE REPORT COMPLETE")
+    print("=" * 70)
+    print("\nTarget Company: Eneve (Netherlands)")
+    print("Focus: Smart software for the energy value chain")
     print(f"\nTotal Relevant Competitors: {len(relevant_companies)}")
-    print(f"\nKey Insights:")
+    print("\nKey Insights:")
     print(f"   • Average AI Adoption Score: {sum(ai_scores) / len(ai_scores):.1f}/10")
     print(f"   • Average Capability Overlap: {sum(overlap_scores) / len(overlap_scores):.1f}%")
-    print(f"\nStrategic Breakdown:")
+    print("\nStrategic Breakdown:")
     for cls, count in sorted(class_counts.items(), key=lambda x: -x[1]):
         print(f"   • {cls}: {count}")
-    print(f"\n📁 Output Files:")
+    print("\n📁 Output Files:")
     print(f"   • Enhanced Excel Dashboard: {excel_path}")
     print(f"   • Enhanced JSON Data: {json_path}")
-    print(f"\n✨ Enhanced with AI Adoption Assessment + Strategic Classification")
-    print(f"✨ Capability Overlap Analysis + Evidence-Based Confidence Scoring")
-    print(f"=" * 70)
+    print("\n✨ Enhanced with AI Adoption Assessment + Strategic Classification")
+    print("✨ Capability Overlap Analysis + Evidence-Based Confidence Scoring")
+    print("=" * 70)
 
 
 if __name__ == "__main__":

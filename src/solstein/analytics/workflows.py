@@ -28,12 +28,14 @@ from .activities import calculate_company_score, fetch_market_company_ids
 
 try:
     from temporalio import workflow as _temporal_workflow
+
     _workflow_defn = _temporal_workflow.defn
     _workflow_run = _temporal_workflow.run
 except ImportError:
     # No-op decorators when Temporal is unavailable
     def _workflow_defn(cls):
         return cls
+
     def _workflow_run(fn):
         return fn
 

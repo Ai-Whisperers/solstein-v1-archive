@@ -13,7 +13,6 @@ Usage:
     )
 """
 
-
 from loguru import logger
 
 from solstein.tenant.context import generate_api_key, hash_api_key

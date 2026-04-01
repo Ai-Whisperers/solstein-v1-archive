@@ -19,13 +19,14 @@ import contextlib
 import json
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin
 
 import httpx
 from bs4 import BeautifulSoup
+from duckduckgo_search import DDGS
 from loguru import logger
 
 
@@ -69,7 +70,7 @@ class ResearchResult:
             "revenue": {
                 "timeline": [
                     {
-                        "year": datetime.now().year,
+                        "year": datetime.now(tz=timezone.utc).year,
                         "eur_millions": self.revenue or 0,
                         "confidence": "high" if self.confidence > 0.7 else "medium",
                     }
@@ -118,7 +119,7 @@ class WebResearcher:
             last_updated = datetime.fromisoformat(data.get("last_updated", ""))
 
             # Check if cache is fresh (< 7 days)
-            if datetime.now() - last_updated > timedelta(days=7):
+            if datetime.now(tz=timezone.utc) - last_updated > timedelta(days=7):
                 return None
 
             # Reconstruct ResearchResult
@@ -142,7 +143,7 @@ class WebResearcher:
                 last_updated=last_updated,
                 raw_data=data.get("raw_data", {}),
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to load cache for {company_name}: {e}")
             return None
 
@@ -153,8 +154,6 @@ class WebResearcher:
 
     def _search_web_sync(self, query: str) -> list[dict[str, str]]:
         """Run synchronous DuckDuckGo search off the event loop."""
-        from duckduckgo_search import DDGS
-
         with DDGS() as ddgs:
             results = list(ddgs.text(query, max_results=10))
             return [
@@ -167,7 +166,7 @@ class WebResearcher:
         try:
             # DuckDuckGo search is synchronous; keep it off the event loop.
             return await asyncio.to_thread(self._search_web_sync, query)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Web search failed: {e}")
             return []
 
@@ -208,7 +207,7 @@ class WebResearcher:
                             addr = json_data["address"]
                             if isinstance(addr, dict):
                                 data["headquarters"] = addr.get("addressLocality", addr.get("addressCountry"))
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.debug(f"Failed to parse JSON-LD: {e}")
 
             # Look for About page
@@ -218,7 +217,7 @@ class WebResearcher:
 
             return data
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to scrape {url}: {e}")
             return {}
 
@@ -250,7 +249,7 @@ class WebResearcher:
                             funding_data["valuation"] = amount
                         else:
                             funding_data["funding_raised"] = amount
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         logger.debug(f"Failed to parse funding amount: {e}")
 
         return funding_data
@@ -295,7 +294,15 @@ class WebResearcher:
             if website_data.get("description"):
                 result.description = website_data["description"]
             if website_data.get("employees"):
-                result.employees = website_data["employees"]
+                # STORY-127: Write employee count to canonical source (FinancialMetric)
+                from solstein.domain.models import FinancialMetric
+
+                if result.financials is None:
+                    result.financials = FinancialMetric(
+                        employees=website_data["employees"], allow_empty_primary=True
+                    )
+                else:
+                    result.financials.employees = website_data["employees"]
             if website_data.get("founded"):
                 with contextlib.suppress(BaseException):
                     result.founded_year = int(str(website_data["founded"])[:4])
@@ -436,9 +443,9 @@ class SyntheticDataDetector:
         if last_updated:
             try:
                 updated = datetime.fromisoformat(last_updated.replace("Z", "+00:00"))
-                if datetime.now() - updated > timedelta(days=90):
+                if datetime.now(tz=timezone.utc) - updated > timedelta(days=90):
                     issues.append("Data is >90 days old")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug(f"Failed to parse last_updated date: {e}")
 
         return issues

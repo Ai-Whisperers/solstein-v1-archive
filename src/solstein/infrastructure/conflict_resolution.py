@@ -1,7 +1,19 @@
-"""Conflict resolution engine for handling data source conflicts."""
+"""Conflict resolution engine for handling data source conflicts.
 
-from dataclasses import dataclass
-from datetime import datetime
+Resolves data conflicts using a priority chain:
+1. **Recency** — newer timestamps win when both facts have ``extracted_at``
+2. **Reliability** — higher :class:`SourceAuthority` rank wins on equal timestamps
+3. **Confidence** — higher confidence score wins when authority is equal
+4. **Manual review** — persisted :class:`ManualReviewRecord` for ambiguous cases
+
+See STORY-013 for the decision matrix and rationale.
+"""
+
+from __future__ import annotations
+
+import uuid
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
@@ -22,6 +34,22 @@ class SourceAuthority(Enum):
 
     Higher values indicate more authoritative sources that win
     when facts conflict between sources.
+
+    Reliability rankings (rationale):
+    - **SEC_EDGAR (1.0)**: Official US regulatory filings — legally mandated accuracy
+    - **COMPANIES_HOUSE (0.95)**: Official UK registry — government-verified
+    - **YAHOO_FINANCE (0.88)**: Aggregated market data — high coverage, slight lag
+    - **GLOBAL_MARKET (0.87)**: Market indices — reliable but broad
+    - **GITHUB (0.85)**: Technical signals — first-party but self-reported
+    - **WEBSITE (0.84)**: Corporate websites — first-party, marketing bias
+    - **PATENTS (0.80)**: Patent office data — official but lagging
+    - **LINKEDIN (0.75)**: Professional data — self-reported, often outdated
+    - **FUNDING (0.73)**: Funding databases — relies on voluntary disclosure
+    - **NEWS (0.72)**: News articles — secondary source, variable accuracy
+    - **NEWS_SIGNAL (0.70)**: Sentiment signals — derived, noisy
+    - **WEB_SEARCH (0.68)**: Web search results — unverified, variable quality
+    - **STATIC_CATALOG (0.65)**: Static reference data — may be stale
+    - **COMPETITOR_JSON (0.60)**: Competitor JSON files — manually curated, lowest freshness
     """
 
     # Most authoritative - official government/regulatory sources
@@ -74,18 +102,95 @@ class Resolution:
     resolved_at: datetime
 
 
+@dataclass
+class ManualReviewRecord:
+    """Persisted record for conflicts requiring manual operator review.
+
+    Created when the resolution engine cannot automatically determine
+    a winner. Operators query these records to resolve ambiguous conflicts.
+    """
+
+    review_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    company_id: str = ""
+    fact_type: str = ""
+    existing_fact: dict[str, Any] = field(default_factory=dict)
+    new_fact: dict[str, Any] = field(default_factory=dict)
+    reason: str = ""
+    status: str = "pending"  # pending | resolved | dismissed
+    created_at: datetime = field(default_factory=datetime.now)
+    resolved_at: datetime | None = None
+    resolved_by: str | None = None
+
+
+class ManualReviewQueue:
+    """In-memory queue for conflicts requiring operator review (STORY-013 REQ-3).
+
+    Persists :class:`ManualReviewRecord` instances and provides query/resolve
+    operations so operators can list and act on ambiguous conflicts.
+    """
+
+    def __init__(self) -> None:
+        self._records: list[ManualReviewRecord] = []
+
+    def add(self, record: ManualReviewRecord) -> None:
+        """Append a new review record to the queue."""
+        self._records.append(record)
+
+    def get_pending(self) -> list[ManualReviewRecord]:
+        """Return all records with status ``pending``."""
+        return [r for r in self._records if r.status == "pending"]
+
+    def get_by_id(self, review_id: str) -> ManualReviewRecord | None:
+        """Look up a single record by its ``review_id``."""
+        for record in self._records:
+            if record.review_id == review_id:
+                return record
+        return None
+
+    def resolve(
+        self,
+        review_id: str,
+        resolved_by: str,
+        status: str = "resolved",
+    ) -> ManualReviewRecord | None:
+        """Mark a review record as resolved or dismissed.
+
+        Args:
+            review_id: The UUID of the review record.
+            resolved_by: Identifier of the operator (email, username, etc.).
+            status: New status — ``"resolved"`` or ``"dismissed"``.
+
+        Returns:
+            The updated record, or ``None`` if not found.
+        """
+        record = self.get_by_id(review_id)
+        if record is None:
+            logger.warning(f"Review record not found: {review_id}")
+            return None
+        record.status = status
+        record.resolved_at = datetime.now(tz=timezone.utc)
+        record.resolved_by = resolved_by
+        logger.info(f"Review {review_id} marked as {status} by {resolved_by}")
+        return record
+
+    def __len__(self) -> int:
+        return len(self._records)
+
+    def __getitem__(self, index: int) -> ManualReviewRecord:
+        return self._records[index]
+
+    def __iter__(self):  # noqa: ANN204
+        return iter(self._records)
+
+
 class ConflictResolutionEngine:
     """Engine for detecting and resolving conflicts between data sources.
 
-    Uses multiple strategies:
-    - Higher confidence wins
-    - Authoritative source priority
-    - Newer timestamp wins
-    - Manual review for critical conflicts
+    Uses a priority chain: recency > reliability > confidence > manual review.
     """
 
-    def __init__(self):
-        self.authority_map = {
+    def __init__(self) -> None:
+        self.authority_map: dict[str, SourceAuthority] = {
             "sec_edgar": SourceAuthority.SEC_EDGAR,
             "companies_house": SourceAuthority.COMPANIES_HOUSE,
             "yahoo_finance": SourceAuthority.YAHOO_FINANCE,
@@ -102,6 +207,7 @@ class ConflictResolutionEngine:
             "competitor_json": SourceAuthority.COMPETITOR_JSON,
         }
         self.resolution_log: list[Resolution] = []
+        self.manual_review_queue: ManualReviewQueue = ManualReviewQueue()
 
     def detect_conflicts(
         self,
@@ -135,7 +241,7 @@ class ConflictResolutionEngine:
                     existing_fact=existing_fact,
                     new_fact=new_fact,
                     conflict_type="value_mismatch",
-                    detected_at=datetime.now(),
+                    detected_at=datetime.now(tz=timezone.utc),
                 )
                 conflicts.append(conflict)
                 logger.info(
@@ -176,7 +282,7 @@ class ConflictResolutionEngine:
             winning_fact=winning_fact,
             strategy_used=strategy,
             reason=self._get_resolution_reason(conflict, strategy),
-            resolved_at=datetime.now(),
+            resolved_at=datetime.now(tz=timezone.utc),
         )
 
         self.resolution_log.append(resolution)
@@ -188,34 +294,46 @@ class ConflictResolutionEngine:
         return resolution
 
     def _select_strategy(self, conflict: Conflict) -> ConflictStrategy:
-        """Auto-select best strategy based on conflict characteristics."""
+        """Auto-select best strategy based on conflict characteristics.
+
+        Decision priority chain (STORY-013):
+        1. **Recency** — if both facts have timestamps and they differ,
+           the newer record wins (NEWER_TIMESTAMP).
+        2. **Reliability** — if timestamps are equal or only one exists,
+           use source authority ranking (AUTHORITATIVE_SOURCE).
+        3. **Confidence** — if authority is equal or unknown, pick the
+           fact with higher confidence (HIGHER_CONFIDENCE).
+        4. **Manual review** — when none of the above can discriminate,
+           create a persisted review record (MANUAL_REVIEW).
+        """
+        existing_time = conflict.existing_fact.get("extracted_at")
+        new_time = conflict.new_fact.get("extracted_at")
+
+        # Priority 1: Recency — newer timestamp wins when both are present
+        if existing_time and new_time:
+            et = self._normalise_datetime(existing_time)
+            nt = self._normalise_datetime(new_time)
+            if et != nt:
+                return ConflictStrategy.NEWER_TIMESTAMP
+
+        # Priority 2: Source reliability (tiebreaker when recency is equal)
         existing_source = conflict.existing_fact.get("source", "")
         new_source = conflict.new_fact.get("source", "")
-
-        # Check if one source is more authoritative
         existing_auth = self.authority_map.get(existing_source)
         new_auth = self.authority_map.get(new_source)
 
-        if existing_auth and new_auth:
-            if existing_auth != new_auth:
-                return ConflictStrategy.AUTHORITATIVE_SOURCE
+        if existing_auth and new_auth and existing_auth != new_auth:
+            return ConflictStrategy.AUTHORITATIVE_SOURCE
 
-        # Check confidence difference
+        # Priority 3: Confidence score
         existing_conf = conflict.existing_fact.get("confidence", 0.5)
         new_conf = conflict.new_fact.get("confidence", 0.5)
         conf_diff = abs(existing_conf - new_conf)
 
-        if conf_diff >= 0.1:  # Significant confidence difference
+        if conf_diff >= 0.1:
             return ConflictStrategy.HIGHER_CONFIDENCE
 
-        # Check timestamp difference
-        existing_time = conflict.existing_fact.get("extracted_at")
-        new_time = conflict.new_fact.get("extracted_at")
-
-        if existing_time and new_time:
-            return ConflictStrategy.NEWER_TIMESTAMP
-
-        # Default to manual review for unclear cases
+        # Priority 4: Cannot auto-resolve — require manual review
         return ConflictStrategy.MANUAL_REVIEW
 
     def _apply_strategy(
@@ -261,9 +379,24 @@ class ConflictResolutionEngine:
             return new if new_conf > existing_conf else existing
 
         elif strategy == ConflictStrategy.MANUAL_REVIEW:
-            # For manual review, keep existing as default
-            # In production, this would flag for human review
-            logger.warning(f"Manual review required: {conflict.company_id} {conflict.fact_type}")
+            record = ManualReviewRecord(
+                company_id=conflict.company_id,
+                fact_type=conflict.fact_type,
+                existing_fact=existing,
+                new_fact=new,
+                reason=(
+                    f"Automatic resolution could not determine a winner for "
+                    f"{conflict.company_id} / {conflict.fact_type}. "
+                    f"Both facts have similar confidence and no clear recency or "
+                    f"reliability advantage."
+                ),
+                created_at=conflict.detected_at,
+            )
+            self.manual_review_queue.add(record)
+            logger.warning(
+                f"Manual review record created ({record.review_id}): {conflict.company_id} {conflict.fact_type}"
+            )
+            # Keep existing as the provisional value until an operator resolves
             return existing
 
         # Default to keeping existing
@@ -283,6 +416,13 @@ class ConflictResolutionEngine:
         }
         return reasons.get(strategy, "Unknown resolution strategy")
 
+    @staticmethod
+    def _normalise_datetime(value: str | datetime) -> datetime:
+        """Normalise a timestamp value to a :class:`datetime` instance."""
+        if isinstance(value, str):
+            return datetime.fromisoformat(value)
+        return value
+
     def resolve_all(
         self,
         conflicts: list[Conflict],
@@ -295,12 +435,37 @@ class ConflictResolutionEngine:
             resolutions.append(resolution)
         return resolutions
 
+    # ------------------------------------------------------------------
+    # Manual review queue delegations (STORY-013 REQ-3)
+    # ------------------------------------------------------------------
+
+    def get_pending_reviews(self) -> list[ManualReviewRecord]:
+        """Return all manual review records with status ``pending``."""
+        return self.manual_review_queue.get_pending()
+
+    def get_review_by_id(self, review_id: str) -> ManualReviewRecord | None:
+        """Look up a single review record by its ``review_id``."""
+        return self.manual_review_queue.get_by_id(review_id)
+
+    def resolve_review(
+        self,
+        review_id: str,
+        resolved_by: str,
+        status: str = "resolved",
+    ) -> ManualReviewRecord | None:
+        """Delegate to :meth:`ManualReviewQueue.resolve`."""
+        return self.manual_review_queue.resolve(review_id, resolved_by, status)
+
+    # ------------------------------------------------------------------
+    # Statistics
+    # ------------------------------------------------------------------
+
     def get_resolution_stats(self) -> dict[str, Any]:
         """Get statistics on conflict resolutions."""
         if not self.resolution_log:
             return {"total_resolved": 0}
 
-        strategy_counts = {}
+        strategy_counts: dict[str, int] = {}
         for resolution in self.resolution_log:
             strategy = resolution.strategy_used.value
             strategy_counts[strategy] = strategy_counts.get(strategy, 0) + 1
@@ -309,4 +474,5 @@ class ConflictResolutionEngine:
             "total_resolved": len(self.resolution_log),
             "strategy_breakdown": strategy_counts,
             "sources_involved": list(self.authority_map.keys()),
+            "pending_reviews": len(self.get_pending_reviews()),
         }

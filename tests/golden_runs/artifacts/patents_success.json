@@ -1,0 +1,49 @@
+{
+  "_meta": {
+    "provider": "patents",
+    "scenario": "success",
+    "description": "Contract shape for a successful patent enrichment (any backend)",
+    "story": "STORY-267",
+    "generated": "2026-03-31"
+  },
+  "contract": {
+    "source_type_options": ["USPTO", "GOOGLE_PATENTS", "PATENTS"],
+    "source_name_pattern": "Patent search \\(.+\\)",
+    "confidence": {
+      "uspto_peds": {"min": 0.6, "max": 0.8, "expected": 0.7},
+      "fallback": {"min": 0.3, "max": 0.5, "expected": 0.4}
+    },
+    "relevance_score": {"min": 0.4, "max": 0.8, "expected": 0.6},
+    "extraction_method_pattern": "patent_client_.+",
+    "required_fields": {
+      "raw_content": {
+        "type": "dict",
+        "required_keys": [
+          "total_patents",
+          "recent_patents",
+          "ai_related_patents",
+          "top_categories",
+          "source_backend"
+        ]
+      },
+      "url": {
+        "type": "null",
+        "description": "Patents adapter does not produce a direct URL"
+      },
+      "metadata": {
+        "type": "dict",
+        "required_keys": ["backend", "total_patents", "ai_related_patents"]
+      },
+      "retrieval_timestamp": {
+        "type": "datetime",
+        "nullable": false
+      }
+    },
+    "value_constraints": {
+      "total_patents": {"type": "int", "min": 0},
+      "recent_patents": {"type": "list"},
+      "ai_related_patents": {"type": "int", "min": 0},
+      "top_categories": {"type": "list"}
+    }
+  }
+}

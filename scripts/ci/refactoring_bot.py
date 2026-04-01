@@ -7,7 +7,6 @@ EPIC-019 Story 9: Suggests and applies automated refactoring for common issues.
 from __future__ import annotations
 
 import ast
-import re
 from pathlib import Path
 from typing import Any
 
@@ -139,13 +138,13 @@ class RefactoringBot:
 
             for s in suggestions:
                 report.append(f"**{s['file']}:{s['line']}** (confidence: {s['confidence']})")
-                report.append(f"```python")
-                report.append(f"# Original:
-{s['original']}")
-                report.append(f"")
-                report.append(f"# Suggested:
-{s['suggested']}")
-                report.append(f"```")
+                report.append("```python")
+                report.append("# Original:")
+                report.append(str(s["original"]))
+                report.append("")
+                report.append("# Suggested:")
+                report.append(str(s["suggested"]))
+                report.append("```")
                 report.append()
 
         return "\n".join(report)

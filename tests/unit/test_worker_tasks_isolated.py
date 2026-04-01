@@ -2,16 +2,27 @@
 
 These tests use dependency injection and proper mocking
 without sys.modules manipulation.
+
+STORY-066: All refresh tasks now require tenant_id as first argument.
 """
 
 import contextlib
+import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 celery = pytest.importorskip("celery", reason="celery not installed")
 
+from solstein.worker_tasks import (
+    refresh_companies_house,
+    refresh_news_signals,
+    refresh_sec_edgar,
+)
 from tests.mocks import MaxRetriesExceededError
+
+# Valid tenant_id for tests (STORY-066)
+TEST_TENANT_ID = str(uuid.uuid4())
 
 
 class TestRefreshTasksIsolated:
@@ -53,9 +64,7 @@ class TestRefreshTasksIsolated:
                 patch("solstein.worker.refresh_tasks.get_tracked_company_ids", return_value=mock_tracked_companies),
                 patch("solstein.worker.refresh_tasks.store_facts", mock_store_facts),
             ):
-                from solstein.worker_tasks import refresh_sec_edgar
-
-                result = refresh_sec_edgar.run()
+                result = refresh_sec_edgar.run(TEST_TENANT_ID)
                 assert result is not None
                 assert result["status"] == "completed"
 
@@ -73,9 +82,7 @@ class TestRefreshTasksIsolated:
                 patch("solstein.worker.refresh_tasks.get_tracked_company_ids", return_value=mock_tracked_companies),
                 patch("solstein.worker.refresh_tasks.store_facts", mock_store_facts),
             ):
-                from solstein.worker_tasks import refresh_companies_house
-
-                result = refresh_companies_house.run()
+                result = refresh_companies_house.run(TEST_TENANT_ID)
                 assert result is not None
 
     def test_refresh_news_signals_success(
@@ -95,9 +102,7 @@ class TestRefreshTasksIsolated:
                 patch("solstein.worker.refresh_tasks.get_tracked_company_ids", return_value=mock_tracked_companies),
                 patch("solstein.worker.refresh_tasks.store_facts", mock_store_facts),
             ):
-                from solstein.worker_tasks import refresh_news_signals
-
-                result = refresh_news_signals.run()
+                result = refresh_news_signals.run(TEST_TENANT_ID)
                 assert result is not None
 
 
@@ -119,11 +124,9 @@ class TestRetryLogicIsolated:
             with (
                 patch("solstein.worker.refresh_tasks.get_db_manager"),
                 patch("solstein.worker.refresh_tasks.get_tracked_company_ids", return_value=["comp_001"]),
+                contextlib.suppress(Exception),
             ):
-                from solstein.worker_tasks import refresh_sec_edgar
-
-                with contextlib.suppress(Exception):
-                    refresh_sec_edgar.run()
+                refresh_sec_edgar.run(TEST_TENANT_ID)
 
     def test_max_retries_exceeded_logging(self):
         """Test that MaxRetriesExceededError is logged."""
@@ -140,8 +143,6 @@ class TestRetryLogicIsolated:
             with (
                 patch("solstein.worker.refresh_tasks.get_db_manager"),
                 patch("solstein.worker.refresh_tasks.get_tracked_company_ids", return_value=["comp_001"]),
+                contextlib.suppress(Exception),
             ):
-                from solstein.worker_tasks import refresh_sec_edgar
-
-                with contextlib.suppress(Exception):
-                    refresh_sec_edgar.run()
+                refresh_sec_edgar.run(TEST_TENANT_ID)

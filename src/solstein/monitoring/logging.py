@@ -277,6 +277,7 @@ def configure_logging(
     # Configure formatter
     if json_output:
         formatter = LogFormatter()
+
         def sink(msg):
             return print(formatter.json_format(msg.record), file=sys.stdout)
     else:

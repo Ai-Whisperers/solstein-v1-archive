@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -43,11 +43,11 @@ class CompaniesHouseRefreshConnector(BaseRefreshConnector):
                     fact = self._convert_metrics_to_fact(metrics)
                     facts.append(fact)
 
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning(f"Failed to fetch {company_number}: {e}")
                     continue
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"Failed to process company {company_id}: {e}")
                 continue
 
@@ -78,7 +78,7 @@ class CompaniesHouseRefreshConnector(BaseRefreshConnector):
             "fact_type": "company_profile",
             "value": profile_metrics,
             "confidence": metrics.get("confidence", 0.93),
-            "extracted_at": datetime.now(),
+            "extracted_at": datetime.now(tz=timezone.utc),
             "source": "companies_house",
             "metadata": {
                 "company_number": metrics.get("company_number"),
@@ -114,7 +114,7 @@ class CompaniesHouseRefreshConnector(BaseRefreshConnector):
                         if fact_date > since:
                             filtered_facts.append(fact)
                             break
-                    except Exception:
+                    except Exception:  # noqa: BLE001
                         # If date parsing fails, include the fact
                         filtered_facts.append(fact)
                         break

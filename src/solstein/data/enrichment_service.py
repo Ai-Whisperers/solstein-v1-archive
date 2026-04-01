@@ -262,9 +262,7 @@ class EnrichmentService:
 
         # Execute free source enrichment
         free_executor = FreeEnrichmentExecutor(self, self.orchestrator)
-        enriched, sources_used, errors, fields = free_executor.execute(
-            company, enriched, fields, sources_free
-        )
+        enriched, sources_used, errors, fields = free_executor.execute(company, enriched, fields, sources_free)
 
         # Execute paid escalation if needed
         if fields and self.config.allow_paid_escalation:
@@ -280,7 +278,6 @@ class EnrichmentService:
 
         return enriched, sources_used, errors
 
-
     def analyze_unresolved_gaps(
         self,
         companies: list[EnrichableCompany],
@@ -288,20 +285,10 @@ class EnrichmentService:
     ) -> list[dict[str, object]]:
         return [analyze_company_gaps(company, min_confidence=min_confidence) for company in companies]
 
-    def _enrich_from_sec(self, company: EnrichableCompany) -> EnrichableCompany:
-        """Enrich from SEC EDGAR (placeholder)."""
-        # This would call the actual SEC enrichment method
-        return company
-
-    def _enrich_from_companies_house(self, company: EnrichableCompany) -> EnrichableCompany:
-        """Enrich from Companies House (placeholder)."""
-        # This would call the actual Companies House enrichment method
-        return company
-
-    def _enrich_from_news_signals(self, company: EnrichableCompany) -> EnrichableCompany:
-        """Enrich from News Signals (placeholder)."""
-        # This would call the actual News Signals enrichment method
-        return company
+    # STORY-265: Placeholder methods _enrich_from_sec, _enrich_from_companies_house,
+    # and _enrich_from_news_signals were removed.  They returned the company
+    # unchanged (no-op) and were dead code masquerading as provider integration.
+    # Callers in enrichment_executors.py have been updated accordingly.
 
 
 class CacheService:
