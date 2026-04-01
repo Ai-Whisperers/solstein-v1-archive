@@ -32,6 +32,8 @@ dependencies = [
     "yfinance>=0.2",
     "langgraph>=1.0.10",  # Fixes CVE-2025-64439, CVE-2026-28277 - requires >=1.0.10 for checkpoint 4.x compatibility
     "langgraph-checkpoint>=4.0.1",  # Fixes CVE-2026-28277 - unsafe msgpack deserialization
+    "langchain-core>=0.3.29",  # Fixes path traversal in legacy load()
+    "PyJWT>=2.10.0",  # Fixes unknown crit header acceptance
     "asyncpg>=0.31.0",
     "pytest-asyncio>=1.3.0",
     "redis>=5.0",
@@ -59,7 +61,7 @@ dev = [
     "pytest-asyncio>=0.21",
     "pytest-httpx",
     "factory-boy>=3.3",
-    "black>=23.0",
+    "black>=24.4",
     "ruff>=0.1",
     "mypy>=1.6",
     "pre-commit>=3.5",
