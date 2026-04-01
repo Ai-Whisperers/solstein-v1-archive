@@ -4,6 +4,7 @@ Run ENEVE workflow with 199 companies.
 Converts JSON data to Company models and generates outputs.
 
 EPIC-058: Uses unified convert_to_domain_company() from loaders module.
+STORY-257: Imports canonical converter via solstein.runtime.
 No duplicate custom conversion logic.
 """
 
@@ -20,7 +21,7 @@ sys.path.insert(0, str(_Path(__file__).resolve().parent.parent / "src"))
 
 from solstein.analytics.constants import PHOENIX_SCORE_THRESHOLD, SALT_SCORE_THRESHOLD
 from solstein.analytics.scoring import GrowthScorer
-from solstein.data.loaders import convert_to_domain_company
+from solstein.runtime import convert_raw as convert_to_domain_company
 from solstein.data.report_release_gate import ReportReleaseGate, build_export_metadata
 from solstein.exporters.excel import ExcelExporter
 
