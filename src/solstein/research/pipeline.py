@@ -221,10 +221,10 @@ def run_market_intelligence(
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    from solstein.adapters.registry import build_default_registry
+    from solstein.runtime import get_registry
 
     settings = Settings.load()
-    registry = build_default_registry(settings)
+    registry = get_registry(settings)
     batch_id = uuid.uuid4().hex[:12]
     logger.info(
         "Pipeline run batch_id={}, registry has {} discovery + {} enrichment sources",
