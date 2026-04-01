@@ -15,7 +15,7 @@ Architecture:
     - executor.py:     GraphExecutor with deduplication + error isolation + checkpoint resume
     - checkpointer.py: SqliteSaver / MemorySaver factory functions
     - compile_research_graph(): entry point for graph compilation
-    - run_graph_research(): stable public interface for callers
+    - run_graph_research(): frozen interface (use run_market_intelligence instead)
 """
 
 from .checkpointer import build_checkpointer, build_memory_checkpointer

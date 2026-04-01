@@ -161,6 +161,9 @@ def approve_review_entry(
     logger.info("[ReviewAPI] Approved review %s for run %s", review_id, entry.run_id)
 
     # 2. Resume the LangGraph graph
+    # NOTE (STORY-255): This is the ONLY active graph runtime path in the
+    # codebase — a resume-after-approval trigger, not end-to-end graph
+    # execution. The canonical production runtime is research/pipeline.py.
     try:
         from solstein.research.graph.executor import _get_default_executor
 
