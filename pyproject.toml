@@ -89,7 +89,7 @@ where = [
 
 [tool.ruff]
 line-length = 120
-target-version = "py310"
+target-version = "py312"
 exclude = [
     ".bzr",
     ".direnv",
@@ -172,9 +172,13 @@ ignore = [
     "TRY301",  # STORY-132: raise-within-try — 18 pre-existing, gradual cleanup
     "TRY004",  # STORY-132: type-check-without-type-error — 8 pre-existing, style preference
     "TRY400",  # STORY-132: error-instead-of-exception — 75 pre-existing, gradual cleanup
+    "N818",   # Exception naming with Error suffix — renaming is a breaking change, tracked separately
     "UP017",
     "UP036",
+    "UP041",  # Replace aliased errors with TimeoutError — pre-existing, needs audit
     "UP042",
+    "UP046",  # Generic subclass pattern — pre-existing, needs py312 migration epic
+    "UP047",  # Generic function type params — pre-existing, needs py312 migration epic
     "W291",
     "W293",   # Whitespace in blank lines — auto-fixable but noisy
 ]
@@ -182,6 +186,12 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = [
     "TRY002",  # raise Exception(...) in test stubs/mocks is idiomatic — no need for custom exception classes
+]
+"src/solstein/connectors/**/__init__.py" = [
+    "F401",  # Connector __init__ files are intentional re-export aggregators
+]
+"tests/factories/__init__.py" = [
+    "F401",  # Factory __init__ is a re-export aggregator
 ]
 
 [tool.mypy]

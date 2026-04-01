@@ -3,10 +3,9 @@ name: CI
 on:
   push:
     branches: [develop, main, master]
-    paths: ['src/**', 'tests/**', 'pyproject.toml', 'scripts/ci/**']
+    paths: ['src/**', 'tests/**', 'pyproject.toml', 'scripts/ci/**', 'alembic/**', 'bin/**', '.claude/**']
   pull_request:
     branches: [develop, main, master]
-    paths: ['src/**', 'tests/**', 'pyproject.toml', 'scripts/ci/**']
   workflow_dispatch:
 
 concurrency:
@@ -31,8 +30,8 @@ jobs:
       - uses: ./.github/workflows/composite/setup-python
       - uses: ./.github/workflows/composite/setup-uv
       - run: uv pip install --system ruff
-      - name: Ruff check
-        run: ruff check src/ tests/ scripts/
+      - name: Ruff check (repo-wide)
+        run: ruff check .
       - name: Ruff format check
         run: ruff format --check src/ tests/
 
@@ -40,14 +39,15 @@ jobs:
     name: Type Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    needs: [lint]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/composite/setup-python
       - uses: ./.github/workflows/composite/setup-uv
       - uses: ./.github/workflows/composite/install-deps
       - name: Mypy
-        run: mypy src/solstein --ignore-missing-imports --no-error-summary || true
-        # NOTE: mypy is advisory until type coverage improves
+        run: mypy src/solstein --ignore-missing-imports --no-error-summary
+        # NOTE: --strict deferred until type coverage improves (tracked in EPIC-012)
 
   test:
     name: Test
