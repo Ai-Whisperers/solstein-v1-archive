@@ -18,7 +18,7 @@ import asyncio
 import contextlib
 import traceback
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from celery import shared_task
 from celery.exceptions import MaxRetriesExceededError
@@ -165,7 +165,7 @@ def create_refresh_task(
             with task_tenant_context(validated_tenant):
                 return _run_in_dedicated_loop(_refresh())
 
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error(f"{source_name} refresh failed: {exc}")
             _handle_retry_or_dlq(self, exc, task_name, source_name)
 
@@ -194,7 +194,7 @@ refresh_sec_edgar = create_refresh_task(
     "solstein.worker_tasks.refresh_sec_edgar",
     SECEDGARRefreshConnector,
     "SEC EDGAR",
-    lambda: (datetime.now() - timedelta(days=365), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(days=365), datetime.now(tz=timezone.utc)),
 )
 
 # Companies House: 90 days lookback
@@ -202,7 +202,7 @@ refresh_companies_house = create_refresh_task(
     "solstein.worker_tasks.refresh_companies_house",
     CompaniesHouseRefreshConnector,
     "Companies House",
-    lambda: (datetime.now() - timedelta(days=90), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(days=90), datetime.now(tz=timezone.utc)),
 )
 
 # News Signals: 24 hours lookback
@@ -210,7 +210,7 @@ refresh_news_signals = create_refresh_task(
     "solstein.worker_tasks.refresh_news_signals",
     NewsSignalRefreshConnector,
     "News Signals",
-    lambda: (datetime.now() - timedelta(hours=24), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(hours=24), datetime.now(tz=timezone.utc)),
 )
 
 # GitHub: 7 days lookback
@@ -218,7 +218,7 @@ refresh_github = create_refresh_task(
     "solstein.worker_tasks.refresh_github",
     GitHubRefreshConnector,
     "GitHub",
-    lambda: (datetime.now() - timedelta(days=7), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(days=7), datetime.now(tz=timezone.utc)),
 )
 
 # ============================================================================
@@ -237,7 +237,7 @@ refresh_patents = create_refresh_task(
     "solstein.worker_tasks.refresh_patents",
     PatentsRefreshConnector,
     "Patents",
-    lambda: (datetime.now() - timedelta(days=30), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(days=30), datetime.now(tz=timezone.utc)),
 )
 
 # News: 6 hours lookback
@@ -245,7 +245,7 @@ refresh_news = create_refresh_task(
     "solstein.worker_tasks.refresh_news",
     NewsRefreshConnector,
     "News",
-    lambda: (datetime.now() - timedelta(hours=6), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(hours=6), datetime.now(tz=timezone.utc)),
 )
 
 # Website: no date range needed
@@ -267,7 +267,7 @@ refresh_funding = create_refresh_task(
     "solstein.worker_tasks.refresh_funding",
     FundingRefreshConnector,
     "Funding",
-    lambda: (datetime.now() - timedelta(days=30), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(days=30), datetime.now(tz=timezone.utc)),
 )
 
 # Global Market: no date range needed
@@ -282,5 +282,5 @@ refresh_web_search = create_refresh_task(
     "solstein.worker_tasks.refresh_web_search",
     WebSearchRefreshConnector,
     "Web Search",
-    lambda: (datetime.now() - timedelta(hours=12), datetime.now()),
+    lambda: (datetime.now(tz=timezone.utc) - timedelta(hours=12), datetime.now(tz=timezone.utc)),
 )

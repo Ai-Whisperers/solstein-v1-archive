@@ -8,7 +8,7 @@ Handles loading, saving, and querying research memory state.
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
@@ -109,7 +109,7 @@ class ResearchMemoryStore:
                     data = json.load(f)
                 if isinstance(data, dict):
                     return data
-            except Exception as error:
+            except Exception as error:  # noqa: BLE001
                 logger.warning(f"Failed loading research memory from {self.memory_path}: {error}")
 
         if self.bootstrap_path:
@@ -127,7 +127,7 @@ class ResearchMemoryStore:
         try:
             with open(bootstrap_path) as f:
                 bootstrap = json.load(f)
-        except Exception as error:
+        except Exception as error:  # noqa: BLE001
             logger.warning(f"Failed bootstrapping research memory from {bootstrap_path}: {error}")
             return None
 
@@ -147,7 +147,7 @@ class ResearchMemoryStore:
             memory["companies"][key] = {
                 "latest_report": report,
                 "known_urls": urls,
-                "updated_at": datetime.now().isoformat(),
+                "updated_at": datetime.now(tz=timezone.utc).isoformat(),
             }
         return memory
 
@@ -157,7 +157,7 @@ class ResearchMemoryStore:
             self.memory_path.parent.mkdir(parents=True, exist_ok=True)
             with open(self.memory_path, "w") as f:
                 json.dump(self._data, f, indent=2)
-        except Exception as error:
+        except Exception as error:  # noqa: BLE001
             logger.warning(f"Failed saving research memory to {self.memory_path}: {error}")
 
     def get_company(self, name: str) -> dict[str, Any]:
@@ -188,5 +188,5 @@ class ResearchMemoryStore:
         companies[key] = {
             "latest_report": report,
             "known_urls": sorted(all_urls),
-            "updated_at": datetime.now().isoformat(),
+            "updated_at": datetime.now(tz=timezone.utc).isoformat(),
         }

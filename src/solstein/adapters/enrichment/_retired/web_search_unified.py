@@ -10,7 +10,7 @@ Provides web search capabilities using multiple backends:
 This enables news gathering without requiring NewsAPI keys.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -107,7 +107,7 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
             logger.info(f"Discovered {len(candidates)} companies via web search")
             return candidates
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log_adapter_error(
                 component="WebSearchUnifiedSource",
                 operation="discover",
@@ -155,7 +155,7 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
             raw_data = RawDataSource(
                 source_name=self.source_name,
                 source_type=self.source_type,
-                retrieval_timestamp=datetime.now(),
+                retrieval_timestamp=datetime.now(tz=timezone.utc),
                 raw_content={
                     "news": news,
                     "general_info": info,
@@ -172,7 +172,7 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
 
             return raw_data
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log_adapter_error(
                 component="WebSearchUnifiedSource",
                 operation="enrich",
@@ -184,7 +184,7 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
             return RawDataSource(
                 source_name=self.source_name,
                 source_type=self.source_type,
-                retrieval_timestamp=datetime.now(),
+                retrieval_timestamp=datetime.now(tz=timezone.utc),
                 raw_content={},
                 metadata={"error": str(e)},
             )
@@ -228,7 +228,7 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
                                 "article_count": len(news),
                             },
                             "confidence": self.confidence,
-                            "extracted_at": datetime.now(),
+                            "extracted_at": datetime.now(tz=timezone.utc),
                             "source": self.source_name,
                             "metadata": {
                                 "latest_article_date": news[0].get("date") if news else None,
@@ -249,7 +249,7 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
                                 "result_count": len(info),
                             },
                             "confidence": self.confidence * 0.9,  # Slightly lower for general info
-                            "extracted_at": datetime.now(),
+                            "extracted_at": datetime.now(tz=timezone.utc),
                             "source": self.source_name,
                             "metadata": {
                                 "top_sources": [r.get("url", "") for r in info[:3]],
@@ -257,7 +257,7 @@ class WebSearchUnifiedAdapter(BaseRefreshConnector):
                         }
                     )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 log_adapter_error(
                     component="WebSearchUnifiedSource",
                     operation="fetch_facts",

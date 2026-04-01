@@ -17,7 +17,7 @@ Features:
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import httpx
@@ -88,12 +88,12 @@ class NewsSignalDetector:
 
         # Rate limit tracking
         self._daily_query_count = 0
-        self._last_reset = datetime.now()
+        self._last_reset = datetime.now(tz=timezone.utc)
         self._seen_signals: set[str] = set()
 
     def _reset_daily_counter(self) -> None:
         """Reset daily query counter if day has changed."""
-        now = datetime.now()
+        now = datetime.now(tz=timezone.utc)
         if now.date() != self._last_reset.date():
             self._daily_query_count = 0
             self._last_reset = now

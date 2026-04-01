@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -50,11 +50,11 @@ class NewsSignalRefreshConnector(BaseRefreshConnector):
                         fact = self._convert_signal_to_fact(signal)
                         facts.append(fact)
 
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning(f"Failed to fetch signals for {company_name}: {e}")
                     continue
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"Failed to process company {company_id}: {e}")
                 continue
 
@@ -81,7 +81,7 @@ class NewsSignalRefreshConnector(BaseRefreshConnector):
             "fact_type": "market_signal",
             "value": signal_metrics,
             "confidence": getattr(signal, "confidence", 0.72),
-            "extracted_at": datetime.now(),
+            "extracted_at": datetime.now(tz=timezone.utc),
             "source": "news_signal",
             "metadata": {
                 "signal_type": signal.signal_type,
@@ -108,7 +108,7 @@ class NewsSignalRefreshConnector(BaseRefreshConnector):
                     signal_date = datetime.fromisoformat(signal_date_str)
                     if signal_date > since:
                         filtered_facts.append(fact)
-                except Exception:
+                except Exception:  # noqa: BLE001
                     # If date parsing fails, include the fact
                     filtered_facts.append(fact)
             else:

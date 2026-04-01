@@ -1,5 +1,5 @@
 import asyncio
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query, status
@@ -168,7 +168,7 @@ async def get_statistics(
             "growth_statistics": growth_stats,
             "tier_distribution": tier_counts,
             "growth_classification": class_counts,
-            "calculated_at": datetime.now().isoformat(),
+            "calculated_at": datetime.now(tz=timezone.utc).isoformat(),
         }
     except Exception as e:  # noqa: broad-except
         logger.error(f"Error calculating statistics: {e}")
@@ -245,7 +245,7 @@ def _build_score_response(
             "feature_new_classifier": use_new_classifier,
         },
         "scoring_breakdown": scored_company.scoring_breakdown,
-        "calculated_at": datetime.now().isoformat(),
+        "calculated_at": datetime.now(tz=timezone.utc).isoformat(),
     }
 
 
