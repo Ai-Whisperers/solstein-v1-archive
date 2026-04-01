@@ -8,7 +8,7 @@ private methods on CompetitorDataLoader and MarkdownExtractor.
 import logging
 
 from solstein.analytics.scorers.financial_health import FinancialHealthScorer
-from solstein.cli import main as cli_main
+from solstein.cli_legacy import main as cli_main
 from solstein.data.converters import determine_tier
 from solstein.data.parsers import convert_confidence
 from solstein.domain.models import CompanyTier, ConfidenceLevel, FinancialMetric

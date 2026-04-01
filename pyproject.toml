@@ -70,6 +70,7 @@ dev = [
 
 [project.scripts]
 solstein = "solstein.cli:main"
+solstein-legacy = "solstein.cli_legacy:main"
 
 [build-system]
 requires = [

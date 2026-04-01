@@ -15,7 +15,9 @@ from pathlib import Path
 
 import click
 import pytest
+from click.testing import CliRunner
 
+from solstein.cli_legacy import cli
 from solstein.cli_validators import (
     validate_company_exists,
     validate_input_file,
@@ -224,10 +226,6 @@ def test_validate_output_dir_unwritable_raises(tmp_path: Path) -> None:
 
 def test_cli_score_missing_file_error(tmp_path: Path) -> None:
     """score command with a non-existent file exits non-zero with clear message."""
-    from click.testing import CliRunner
-
-    from solstein.cli import cli
-
     runner = CliRunner()
     missing = tmp_path / "missing.json"
     # click.Path(exists=True) rejects missing files at argument level
@@ -237,10 +235,6 @@ def test_cli_score_missing_file_error(tmp_path: Path) -> None:
 
 def test_cli_compare_bad_json_exits_nonzero(tmp_path: Path) -> None:
     """compare command with malformed JSON exits non-zero."""
-    from click.testing import CliRunner
-
-    from solstein.cli import cli
-
     bad = tmp_path / "bad.json"
     bad.write_text("not json at all")
     runner = CliRunner()
@@ -250,10 +244,6 @@ def test_cli_compare_bad_json_exits_nonzero(tmp_path: Path) -> None:
 
 def test_cli_analyze_market_unknown_structure_exits_nonzero(tmp_path: Path) -> None:
     """analyze-market with unknown JSON structure exits non-zero with clear message."""
-    from click.testing import CliRunner
-
-    from solstein.cli import cli
-
     f = tmp_path / "bad_struct.json"
     f.write_text(json.dumps({"unexpected": []}))
     runner = CliRunner()
