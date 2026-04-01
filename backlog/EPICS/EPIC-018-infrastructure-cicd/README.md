@@ -4,7 +4,7 @@
 |-------|-------|
 | Priority | **P1** |
 | Status | 🔴 Open |
-| Stories | 5 |
+| Stories | 8 |
 | Created | 2026-02-28 |
 | Depends On | [EPIC-002](../EPIC-002-configuration-integrity/README.md) (config must be clean before deployment pipeline) |
 
@@ -25,6 +25,21 @@ This is not a nice-to-have. Without a CI pipeline, every bug fix in this backlog
 | [STORY-061](STORIES/STORY-061-ci-pipeline-quality-gates.md) | Build CI Pipeline with Quality Gates | HIGH |
 | [STORY-062](STORIES/STORY-062-pre-commit-hooks.md) | Implement Pre-commit Hooks and Linting Automation | MEDIUM |
 | [STORY-272](STORIES/STORY-272-restore-ruff-gate-signal-on-develop.md) | Restore Ruff Gate Signal Integrity on Current Develop | HIGH |
+| [STORY-273](STORIES/STORY-273-ruff-slice-scripts-legacy.md) | Ruff Bounded Slice — scripts/ Legacy Helpers (168 errors) | MEDIUM |
+| [STORY-274](STORIES/STORY-274-ruff-slice-alembic-versions.md) | Ruff Bounded Slice — alembic/versions/ Migration Files (21 errors) | MEDIUM |
+| [STORY-275](STORIES/STORY-275-ruff-slice-tooling-and-bin.md) | Ruff Bounded Slice — .claude/, tests/unit/, bin/, src/research/ Final Pass (18 errors) | MEDIUM |
+
+### Ruff Debt Burn-down (as of 2026-04-01)
+
+| Subsystem | Status | Errors |
+|-----------|--------|--------|
+| `src/` (main app) | ✅ Clean | 0 |
+| `tests/` (active) | ✅ Clean | 0 |
+| `scripts/ci/` | ✅ Clean | 0 (done in STORY-272 work branch) |
+| `scripts/` (legacy) | 🔴 Queued STORY-273 | 168 |
+| `alembic/versions/` | 🔴 Queued STORY-274 | 21 |
+| `.claude/`, `tests/unit/` sort, `bin/`, `src/research/` | 🔴 Queued STORY-275 | 18 |
+| **Repo-wide total** | | **207** |
 
 ## Definition of Done
 

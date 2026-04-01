@@ -122,11 +122,15 @@ The same branch then completed a bounded `scripts/ci/` cleanup slice:
 - Repo-wide Ruff count dropped from `260` to `207`.
 - No new global ignores or per-file ignore expansions were added to [pyproject.toml](/home/gestalt/Desktop/solstein/solstein/pyproject.toml).
 
-The next bounded candidate slice is no longer `scripts/ci/`; it is likely one of:
+The next bounded candidate slices have been planned explicitly and queued as follow-up stories:
 
-- Alembic migration files under `alembic/versions/`
-- legacy helper/test scripts under `scripts/`
-- the `.claude/` support package
+| Story | Scope | Errors | Notes |
+|-------|-------|--------|-------|
+| [STORY-273](STORY-273-ruff-slice-scripts-legacy.md) | `scripts/` (non-ci) | 168 | 166 auto-fixable; 1 manual SIM201 |
+| [STORY-274](STORY-274-ruff-slice-alembic-versions.md) | `alembic/versions/` | 21 | All auto-fixable |
+| [STORY-275](STORY-275-ruff-slice-tooling-and-bin.md) | `.claude/`, `tests/unit/`, `bin/`, `src/research/` | 18 | 3 × E722 manual; SIM115 manual |
+
+Completing STORY-273 + STORY-274 + STORY-275 in sequence will bring `ruff check .` to 0 errors on `develop` without any new global ignore expansions.
 
 This story is intentionally the opposite of a compatibility patch. It improves the trustworthiness of the current canonical branch and creates a defensible baseline for future bounded cleanup slices.
 
@@ -138,3 +142,4 @@ This story is intentionally the opposite of a compatibility patch. It improves t
 |------|--------|--------|
 | 2026-04-01 | @codex | Created from develop-side lint gate remediation pass and queue/backlog evidence update |
 | 2026-04-01 | @codex | Added scripts/ci bounded cleanup result: subsystem Ruff-clean, repo-wide Ruff count 260 -> 207 |
+| 2026-04-01 | @gestalt | Added follow-up slice plan (STORY-273/274/275); satisfied AC "follow-up slice plan exists" |
