@@ -1,8 +1,8 @@
-"""STORY-256: Registry always uses the canonical legacy enrichment path.
+"""STORY-256 / STORY-264: Registry uses the canonical legacy enrichment path
+with replaceable provider surfaces removed.
 
-The ``feature_new_unified_loader`` branching has been removed.  These
-tests verify the registry produces the correct adapter set regardless
-of the (now-ignored) flag value.
+STORY-256: ``feature_new_unified_loader`` branching removed.
+STORY-264: Replaceable providers (NewsAPI, Exa) removed from build path.
 """
 
 from solstein.adapters.registry import build_default_registry
@@ -59,3 +59,37 @@ def test_registry_always_registers_base_enrichment() -> None:
 
     assert "YahooFinanceEnrichment" in names
     assert "GlobalMarketEnrichment" in names
+
+
+# -- STORY-264: Replaceable providers removed from canonical build path --
+
+
+def test_registry_excludes_newsapi_enrichment() -> None:
+    """STORY-264: NewsEnrichment (NewsAPI) no longer registered even with key."""
+    names = _enrichment_class_names(Settings(news_api_key="test_key"))
+    assert "NewsEnrichment" not in names
+
+
+def test_registry_excludes_exa_enrichment() -> None:
+    """STORY-264: WebSearchNewsEnrichment (Exa) no longer registered even with key."""
+    names = _enrichment_class_names(Settings(exa_api_key="test_key"))
+    assert "WebSearchNewsEnrichment" not in names
+
+
+def test_registry_excludes_exa_discovery() -> None:
+    """STORY-264: WebSearchDiscoverySource (Exa) no longer registered even with key."""
+    registry = build_default_registry(Settings(exa_api_key="test_key"))
+    discovery_names = {s.__class__.__name__ for s in registry.discovery_sources}
+    assert "WebSearchDiscoverySource" not in discovery_names
+
+
+def test_registry_retains_yahoo_finance_with_justification() -> None:
+    """STORY-264: YahooFinanceEnrichment retained — sole financial data source."""
+    names = _enrichment_class_names(Settings())
+    assert "YahooFinanceEnrichment" in names
+
+
+def test_registry_retains_funding_enrichment() -> None:
+    """STORY-264: FundingEnrichment (Crunchbase) retained — non-negotiable for privates."""
+    names = _enrichment_class_names(Settings(crunchbase_api_key="test_key"))
+    assert "FundingEnrichment" in names

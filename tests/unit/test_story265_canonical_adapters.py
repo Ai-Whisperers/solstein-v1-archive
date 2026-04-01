@@ -21,8 +21,9 @@ class TestCanonicalAdapterContracts:
         adapter = PatentEnrichment()
         assert hasattr(adapter, "enrich")
 
-    def test_news_enrichment_instantiable(self) -> None:
-        from solstein.adapters.enrichment.news import NewsEnrichment
+    def test_news_enrichment_retired(self) -> None:
+        """STORY-264: NewsEnrichment retired (replaceable by GDELT)."""
+        from solstein.adapters.enrichment._retired.news import NewsEnrichment
 
         adapter = NewsEnrichment(news_api_key=None)
         assert hasattr(adapter, "enrich")
@@ -57,8 +58,9 @@ class TestCanonicalAdapterContracts:
         adapter = GlobalMarketEnrichment()
         assert hasattr(adapter, "enrich")
 
-    def test_web_search_news_enrichment_instantiable(self) -> None:
-        from solstein.adapters.enrichment.web_search_news import WebSearchNewsEnrichment
+    def test_web_search_news_enrichment_retired(self) -> None:
+        """STORY-264: WebSearchNewsEnrichment retired (replaceable by SearXNG)."""
+        from solstein.adapters.enrichment._retired.web_search_news import WebSearchNewsEnrichment
 
         adapter = WebSearchNewsEnrichment()
         assert hasattr(adapter, "enrich")
@@ -96,6 +98,36 @@ class TestUnifiedAdaptersRetired:
     )
     def test_unified_adapter_available_from_retired_path(self, module_name: str) -> None:
         """Unified adapters remain importable from _retired for reference tests."""
+        mod = importlib.import_module(module_name)
+        assert mod is not None
+
+
+class TestReplaceableProvidersRetired:
+    """STORY-264: Verify replaceable provider adapters removed from active package."""
+
+    @pytest.mark.parametrize(
+        "module_name",
+        [
+            "solstein.adapters.enrichment.news",
+            "solstein.adapters.enrichment.web_search_news",
+            "solstein.adapters.discovery.web_search",
+        ],
+    )
+    def test_replaceable_adapter_not_importable_from_active_path(self, module_name: str) -> None:
+        """Replaceable provider adapters must not be importable from active package."""
+        with pytest.raises(ModuleNotFoundError):
+            importlib.import_module(module_name)
+
+    @pytest.mark.parametrize(
+        "module_name",
+        [
+            "solstein.adapters.enrichment._retired.news",
+            "solstein.adapters.enrichment._retired.web_search_news",
+            "solstein.adapters.discovery._retired.web_search",
+        ],
+    )
+    def test_replaceable_adapter_available_from_retired_path(self, module_name: str) -> None:
+        """Replaceable adapters remain importable from _retired for reference."""
         mod = importlib.import_module(module_name)
         assert mod is not None
 
