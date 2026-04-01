@@ -1,8 +1,8 @@
 {
-  "generated_on": "2026-03-30",
-  "rules": [
+  "ast_grep_rules": [
     {
       "blocking": true,
+      "gate_type": "ast-grep",
       "language": "Python",
       "message": "Batch enrichment failures must return explicit outcome contracts, not append the original company directly.",
       "rationale_doc": "docs/audit/ISSUE_11_BATCH_ENRICHMENT_OUTCOME_AUDIT_2026-03-26.md",
@@ -18,6 +18,7 @@
     },
     {
       "blocking": true,
+      "gate_type": "ast-grep",
       "language": "Python",
       "message": "Do not mask failed score computation with `or 0.0`; preserve failure state or raise explicitly.",
       "rationale_doc": "docs/audit/SCORING_FAILURE_MODE_AUDIT_2026-03-26.md",
@@ -32,5 +33,96 @@
       ]
     }
   ],
+  "ci_script_gates": [
+    {
+      "blocking": false,
+      "description": "Enforce max 300-line classes; god-classes must be extracted into focused modules.",
+      "gate_id": "class-size-limit",
+      "gate_type": "ci-script",
+      "rationale_doc": ".claude/rules/code-quality.md",
+      "related_issues": [],
+      "script_file": "scripts/ci/check_class_sizes.py",
+      "severity": "warning"
+    },
+    {
+      "blocking": false,
+      "description": "Detect bare-except, broad-exception, and other structural smells via AST scan.",
+      "gate_id": "code-smell-detection",
+      "gate_type": "ci-script",
+      "rationale_doc": ".claude/rules/error-handling.md",
+      "related_issues": [],
+      "script_file": "scripts/ci/code_smell_detector.py",
+      "severity": "warning"
+    },
+    {
+      "blocking": false,
+      "description": "Identify modules and symbols with zero instantiation sites \u2014 candidates for deletion.",
+      "gate_id": "dead-code-detection",
+      "gate_type": "ci-script",
+      "rationale_doc": null,
+      "related_issues": [
+        "EPIC-037"
+      ],
+      "script_file": "scripts/ci/detect_dead_code.py",
+      "severity": "warning"
+    },
+    {
+      "blocking": false,
+      "description": "Enforce max 500-line Python files; files over the limit are flagged as architecture debt.",
+      "gate_id": "file-size-limit",
+      "gate_type": "ci-script",
+      "rationale_doc": ".claude/rules/code-quality.md",
+      "related_issues": [],
+      "script_file": "scripts/ci/check_file_sizes.py",
+      "severity": "warning"
+    },
+    {
+      "blocking": false,
+      "description": "Enforce max 100-line functions; god-functions must be split per project rules.",
+      "gate_id": "function-size-limit",
+      "gate_type": "ci-script",
+      "rationale_doc": ".claude/rules/code-quality.md",
+      "related_issues": [],
+      "script_file": "scripts/ci/check_function_sizes.py",
+      "severity": "warning"
+    },
+    {
+      "blocking": true,
+      "description": "Fail CI when committed generated docs differ from a freshly-regenerated snapshot \u2014 prevents stale catalogs and audit indexes from being merged.",
+      "gate_id": "generated-docs-freshness",
+      "gate_type": "ci-script",
+      "rationale_doc": "docs/governance/docs-topology.md",
+      "related_issues": [
+        "STORY-244"
+      ],
+      "script_file": "scripts/docs/check_generated_docs.py",
+      "severity": "error"
+    },
+    {
+      "blocking": true,
+      "description": "Detect circular import chains between Python modules \u2014 cycles break strict typing and generated docs.",
+      "gate_id": "no-import-cycles",
+      "gate_type": "ci-script",
+      "rationale_doc": null,
+      "related_issues": [
+        "EPIC-066"
+      ],
+      "script_file": "scripts/ci/detect_import_cycles.py",
+      "severity": "error"
+    },
+    {
+      "blocking": true,
+      "description": "Ban `import requests` in adapter and agent modules \u2014 all HTTP must use httpx (async-safe).",
+      "gate_id": "no-requests-in-adapters",
+      "gate_type": "ci-script",
+      "rationale_doc": "docs/developers/async-http-guidelines.md",
+      "related_issues": [
+        "STORY-136"
+      ],
+      "script_file": "scripts/ci/check_banned_imports.py",
+      "severity": "error"
+    }
+  ],
+  "generated_on": "2026-04-01",
   "source_dir": "tooling/ast-grep/rules"
 }
