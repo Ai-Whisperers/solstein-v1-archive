@@ -15,7 +15,7 @@ from . import __version__
 from .analytics.scoring import GrowthScorer
 from .cli_validators import validate_company_exists, validate_input_file, validate_output_dir
 from .config import get_settings
-from .data.converters import convert_to_domain_company
+from .runtime import convert_raw as convert_to_domain_company
 from .data.report_readiness import assert_client_report_ready, assert_report_ready
 from .domain.models import Company, MarketAnalysis
 from .exporters.excel import ExcelExporter
@@ -117,7 +117,7 @@ def _load_companies_for_report(input_path: Path | None = None) -> list[Company]:
         try:
             company = convert_to_domain_company(item, i)
             companies.append(company)
-        except Exception as e:
+        except Exception as e:  # noqa: broad-except — skip malformed entries
             logger.warning(f"[CLI] Skipping company at index {i}: {e}")
 
     return companies
@@ -205,7 +205,7 @@ def export_excel(input_file: Path, output_file: Path, template: Path | None) -> 
         exporter.create_dashboard(domain_companies, output_file)
 
         click.echo(f"✅ Dashboard created: {output_file}")
-    except Exception as e:
+    except Exception as e:  # noqa: broad-except — user-facing CLI error
         click.echo(f"❌ Failed to create dashboard: {e}")
         raise click.Abort() from e
 
@@ -249,7 +249,7 @@ def score(input_file: Path, output: Path | None) -> None:
             output.write_text(json.dumps(output_data, indent=2, default=str))
             click.echo(f"💾 Saved scored profiles to {output}")
 
-    except Exception as e:
+    except Exception as e:  # noqa: broad-except — user-facing CLI error
         click.echo(f"❌ Failed to calculate scores: {e}")
         raise click.Abort() from e
 
