@@ -9,11 +9,12 @@ from loguru import logger
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from solstein.data.eneve_enrichment import EnveEnrichmentService
+
 from solstein.analytics.scorers.competitive_position import CompetitivePositionScorer
 from solstein.analytics.scorers.financial_health import FinancialHealthScorer
 from solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
 from solstein.core.scoring_config import CompetitivePositionConfig, FinancialHealthConfig, GrowthScoringConfig
-from solstein.data.eneve_enrichment import EnveEnrichmentService
 from solstein.data.loaders import CompetitorDataLoader, convert_to_domain_company
 from solstein.domain.models import Company, FinancialMetric
 from solstein.extractors.llm_financial_extractor import LLMFinancialExtractor
@@ -215,7 +216,7 @@ def verify_unified_converter():
     input_path = enriched_path if enriched_path.exists() else Path("data/input/competitor_data_real.json")
 
     if not input_path.exists():
-        logger.warning(f"Real data file not found, skipping converter test")
+        logger.warning("Real data file not found, skipping converter test")
         return
 
     with open(input_path) as f:
@@ -228,8 +229,8 @@ def verify_unified_converter():
     for i, raw in enumerate(companies_raw[:3]):
         try:
             company = convert_to_domain_company(raw, i)
-            assert company.name, f"name is empty"
-            assert company.financials is not None, f"financials is None"
+            assert company.name, "name is empty"
+            assert company.financials is not None, "financials is None"
             if raw.get("growth_rate") is not None:
                 assert company.financials.growth_rate is not None
             logger.info(f"  OK {company.name}")
@@ -238,7 +239,7 @@ def verify_unified_converter():
             logger.error(f"  FAILED: {e}")
 
     if errors:
-        raise AssertionError(f"Converter failed")
+        raise AssertionError("Converter failed")
     logger.info("OK Unified converter verified")
 
 if __name__ == "__main__":

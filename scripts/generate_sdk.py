@@ -14,7 +14,6 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -315,7 +314,7 @@ def main():
     if args.language in ("typescript", "both"):
         generate_typescript_sdk(openapi_spec, args.output / "typescript")
 
-    print(f"\n✅ SDK generation complete!")
+    print("\n✅ SDK generation complete!")
     print(f"   Install Python SDK: pip install {args.output}/python")
     print(f"   Install TypeScript SDK: npm install {args.output}/typescript")
 

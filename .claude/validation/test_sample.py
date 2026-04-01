@@ -59,8 +59,8 @@ def test_no_error_handling():
 
 
 def test_no_cleanup():
-    temp_file = open("temp.txt", "w")
-    temp_file.write("test")
+    with open("temp.txt", "w") as temp_file:
+        temp_file.write("test")
 
 
 # Test with no parameterization

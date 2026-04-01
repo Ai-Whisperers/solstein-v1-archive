@@ -284,7 +284,7 @@ class SecurityAuditor:
         print("SECURITY AUDIT REPORT")
         print("=" * 60)
         print(f"Timestamp: {report.timestamp}")
-        print(f"\nSummary:")
+        print("\nSummary:")
         print(f"  Total: {report.summary.get('total', 0)}")
         print(f"  Critical: {report.summary.get('CRITICAL', 0)} 🔴")
         print(f"  High: {report.summary.get('HIGH', 0)} 🟠")
@@ -292,7 +292,7 @@ class SecurityAuditor:
         print(f"  Low: {report.summary.get('LOW', 0)} 🟢")
 
         if report.vulnerabilities:
-            print(f"\nDetailed Findings:")
+            print("\nDetailed Findings:")
             for v in report.vulnerabilities[:10]:  # Show first 10
                 emoji = {"CRITICAL": "🔴", "HIGH": "🟠", "MEDIUM": "🟡", "LOW": "🟢"}.get(v.severity, "⚪")
                 print(f"\n  {emoji} [{v.severity}] {v.id}")

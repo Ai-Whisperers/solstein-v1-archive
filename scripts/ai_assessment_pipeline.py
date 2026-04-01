@@ -14,10 +14,9 @@ Usage:
 import argparse
 import json
 import logging
+import sys
 from pathlib import Path
 from typing import Any
-
-import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
@@ -31,7 +30,7 @@ logger = logging.getLogger(__name__)
 def load_research_data(filepath: Path) -> list[dict]:
     """Load company data from research results JSON."""
     logger.info(f"Loading research data from {filepath}")
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         data = json.load(f)
     return data.get("companies", [])
 

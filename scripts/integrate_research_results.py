@@ -4,8 +4,8 @@ Integrate batch research results into main research_results.json
 """
 
 import json
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 
 def integrate_research_results(
@@ -84,7 +84,7 @@ def integrate_research_results(
     with open(main_path, "w") as f:
         json.dump(main_data, f, indent=2)
 
-    print(f"\n✅ Integration complete:")
+    print("\n✅ Integration complete:")
     print(f"   • New companies added: {integrated_count}")
     print(f"   • Existing companies updated: {updated_count}")
     print(f"   • Skipped (lower confidence): {skipped_count}")

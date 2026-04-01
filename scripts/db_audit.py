@@ -59,8 +59,9 @@ class DatabaseAuditor:
 
     async def check_existing_indexes(self) -> list[dict]:
         """Check existing indexes on tables."""
-        from solstein.infrastructure.database import get_async_session
         from sqlalchemy import text
+
+        from solstein.infrastructure.database import get_async_session
 
         indexes = []
 
@@ -128,8 +129,9 @@ class DatabaseAuditor:
 
     async def analyze_slow_queries(self) -> list[dict]:
         """Analyze slow queries from pg_stat_statements (if available)."""
-        from solstein.infrastructure.database import get_async_session
         from sqlalchemy import text
+
+        from solstein.infrastructure.database import get_async_session
 
         slow_queries = []
 

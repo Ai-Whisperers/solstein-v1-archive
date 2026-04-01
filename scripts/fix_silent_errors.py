@@ -16,7 +16,6 @@ import argparse
 import re
 from pathlib import Path
 
-
 # Common patterns to fix
 PATTERNS = [
     # Pattern 1: except Exception: pass (with various whitespace)
@@ -53,7 +52,7 @@ CRITICAL_PATHS = [
 
 def should_process_file(filepath: Path) -> bool:
     """Check if file should be processed."""
-    if not filepath.suffix == ".py":
+    if filepath.suffix != ".py":
         return False
 
     for skip in SKIP_FILES:
