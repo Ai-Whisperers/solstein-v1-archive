@@ -4,6 +4,7 @@ STORY-130: Provides a consistent structured logging function for all adapter
 exception handlers, emitting the required fields per exception-handling.md:
 component, operation, error_type, message, entity_id.
 """
+
 from __future__ import annotations
 
 from loguru import logger

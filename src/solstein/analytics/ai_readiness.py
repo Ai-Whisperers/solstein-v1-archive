@@ -54,6 +54,7 @@ class AIReadinessTier(str, Enum):
 # Configuration
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class AIReadinessConfig:
     """Tunable parameters for the AI readiness scorer.
@@ -88,6 +89,7 @@ class AIReadinessConfig:
 # ---------------------------------------------------------------------------
 # Result
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class AIReadinessResult:
@@ -162,9 +164,7 @@ class AIReadinessScorer:
         final = round(min(100.0, max(0.0, weighted)), 2)
 
         tier = self._classify(final)
-        insights = self._build_insights(
-            company, data_infra, tech_debt, ai_literacy, process_auto
-        )
+        insights = self._build_insights(company, data_infra, tech_debt, ai_literacy, process_auto)
 
         logger.debug(
             "AI readiness for %s: %.1f (%s) — data=%.1f tech=%.1f lit=%.1f auto=%.1f",
@@ -246,14 +246,24 @@ class AIReadinessScorer:
         # Modern tech stack signals low debt
         tech_stack: list[str] = getattr(c, "tech_stack", []) or []
         modern_indicators = {
-            "python", "kubernetes", "docker", "react", "typescript",
-            "graphql", "terraform", "aws", "gcp", "azure", "kafka",
-            "spark", "airflow", "dbt", "snowflake", "databricks",
+            "python",
+            "kubernetes",
+            "docker",
+            "react",
+            "typescript",
+            "graphql",
+            "terraform",
+            "aws",
+            "gcp",
+            "azure",
+            "kafka",
+            "spark",
+            "airflow",
+            "dbt",
+            "snowflake",
+            "databricks",
         }
-        modern_count = sum(
-            1 for t in tech_stack
-            if t.lower() in modern_indicators
-        )
+        modern_count = sum(1 for t in tech_stack if t.lower() in modern_indicators)
         if modern_count >= 5:
             score += 25.0
         elif modern_count >= 3:
@@ -263,13 +273,15 @@ class AIReadinessScorer:
 
         # Legacy indicators (negative signals)
         legacy_indicators = {
-            "cobol", "fortran", "delphi", "vb6", "classic asp",
-            "mainframe", "foxpro",
+            "cobol",
+            "fortran",
+            "delphi",
+            "vb6",
+            "classic asp",
+            "mainframe",
+            "foxpro",
         }
-        legacy_count = sum(
-            1 for t in tech_stack
-            if t.lower() in legacy_indicators
-        )
+        legacy_count = sum(1 for t in tech_stack if t.lower() in legacy_indicators)
         score -= legacy_count * 10.0
 
         # SaaS maturity as proxy for cloud-native architecture
@@ -297,11 +309,7 @@ class AIReadinessScorer:
         # Start from ai_maturity enum mapping
         maturity = getattr(c, "ai_maturity", None)
         if maturity is not None:
-            key = (
-                maturity.value.lower()
-                if hasattr(maturity, "value")
-                else str(maturity).lower()
-            )
+            key = maturity.value.lower() if hasattr(maturity, "value") else str(maturity).lower()
             base = _MATURITY_TO_LITERACY.get(key, _MATURITY_TO_LITERACY["unknown"])
         else:
             base = _MATURITY_TO_LITERACY["unknown"]
@@ -352,14 +360,22 @@ class AIReadinessScorer:
         # Tech stack automation indicators
         tech_stack: list[str] = getattr(c, "tech_stack", []) or []
         automation_indicators = {
-            "airflow", "prefect", "dagster", "jenkins", "github actions",
-            "terraform", "ansible", "puppet", "chef", "kubernetes",
-            "argo", "mlflow", "kubeflow", "sagemaker",
+            "airflow",
+            "prefect",
+            "dagster",
+            "jenkins",
+            "github actions",
+            "terraform",
+            "ansible",
+            "puppet",
+            "chef",
+            "kubernetes",
+            "argo",
+            "mlflow",
+            "kubeflow",
+            "sagemaker",
         }
-        auto_count = sum(
-            1 for t in tech_stack
-            if t.lower() in automation_indicators
-        )
+        auto_count = sum(1 for t in tech_stack if t.lower() in automation_indicators)
         score += min(auto_count * 5.0, 15.0)
 
         # Revenue per employee as efficiency/automation proxy
@@ -416,32 +432,19 @@ class AIReadinessScorer:
                 "storage, and modern tooling before attempting AI adoption."
             )
         elif data_infra < 50.0:
-            insights.append(
-                "Data infrastructure needs improvement — consider cloud "
-                "migration and data cataloging."
-            )
+            insights.append("Data infrastructure needs improvement — consider cloud migration and data cataloging.")
         elif data_infra >= 75.0:
-            insights.append(
-                "Strong data infrastructure — well-positioned to support "
-                "AI/ML workloads."
-            )
+            insights.append("Strong data infrastructure — well-positioned to support AI/ML workloads.")
 
         # Technical Debt
         if tech_debt < 30.0:
             insights.append(
-                "High technical debt — legacy systems will impede AI adoption. "
-                "Modernization is a prerequisite."
+                "High technical debt — legacy systems will impede AI adoption. Modernization is a prerequisite."
             )
         elif tech_debt < 50.0:
-            insights.append(
-                "Moderate technical debt — targeted modernization recommended "
-                "before AI transformation."
-            )
+            insights.append("Moderate technical debt — targeted modernization recommended before AI transformation.")
         elif tech_debt >= 75.0:
-            insights.append(
-                "Modern tech stack with low technical debt — minimal barriers "
-                "to AI integration."
-            )
+            insights.append("Modern tech stack with low technical debt — minimal barriers to AI integration.")
 
         # AI Literacy
         if ai_literacy < 30.0:
@@ -450,37 +453,23 @@ class AIReadinessScorer:
                 "Significant upskilling and recruitment required."
             )
         elif ai_literacy < 50.0:
-            insights.append(
-                "Emerging AI awareness — team has basic understanding but "
-                "lacks production AI experience."
-            )
+            insights.append("Emerging AI awareness — team has basic understanding but lacks production AI experience.")
         elif ai_literacy >= 75.0:
-            insights.append(
-                "High AI literacy — team has production AI experience and "
-                "active AI capabilities."
-            )
+            insights.append("High AI literacy — team has production AI experience and active AI capabilities.")
 
         # Process Automation
         if process_auto < 30.0:
             insights.append(
-                "Minimal process automation — manual processes dominate. "
-                "Start with basic automation before AI."
+                "Minimal process automation — manual processes dominate. Start with basic automation before AI."
             )
         elif process_auto < 50.0:
-            insights.append(
-                "Partial automation — some processes automated but significant "
-                "manual work remains."
-            )
+            insights.append("Partial automation — some processes automated but significant manual work remains.")
         elif process_auto >= 75.0:
-            insights.append(
-                "High automation maturity — strong foundation for AI-powered "
-                "process enhancement."
-            )
+            insights.append("High automation maturity — strong foundation for AI-powered process enhancement.")
 
         if not insights:
             insights.append(
-                "Moderate AI readiness across all dimensions — targeted "
-                "investment can unlock transformation potential."
+                "Moderate AI readiness across all dimensions — targeted investment can unlock transformation potential."
             )
 
         return insights

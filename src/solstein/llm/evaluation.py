@@ -152,19 +152,17 @@ def evaluate_research_plan(output: dict[str, Any], expected: dict[str, Any]) -> 
     expected_intents = expected.get("required_intents", [])
     if expected_intents and queries:
         actual_intents = {q.get("intent", "").lower() for q in queries if isinstance(q, dict)}
-        found = sum(
-            1 for intent in expected_intents
-            if any(intent.lower() in ai for ai in actual_intents)
-        )
+        found = sum(1 for intent in expected_intents if any(intent.lower() in ai for ai in actual_intents))
         scores["intent_coverage"] = found / len(expected_intents)
     else:
         scores["intent_coverage"] = 1.0 if queries else 0.0
 
     # Format compliance
-    format_ok = all(
-        isinstance(q, dict) and "query" in q and "priority" in q and "intent" in q
-        for q in queries
-    ) if queries else False
+    format_ok = (
+        all(isinstance(q, dict) and "query" in q and "priority" in q and "intent" in q for q in queries)
+        if queries
+        else False
+    )
     scores["format_compliance"] = 1.0 if format_ok else 0.0
 
     passed = all(v >= 0.6 for v in scores.values())
@@ -181,17 +179,30 @@ def evaluate_company_extraction(output: dict[str, Any], expected: dict[str, Any]
     """
     scores: dict[str, float] = {}
 
-    required_fields = expected.get("required_fields", [
-        "company_name", "industry", "description",
-    ])
+    required_fields = expected.get(
+        "required_fields",
+        [
+            "company_name",
+            "industry",
+            "description",
+        ],
+    )
     scores["field_presence"] = _score_field_presence(output, required_fields)
 
     expected_values = expected.get("expected_values", {})
     scores["value_accuracy"] = _score_value_accuracy(output, expected_values)
 
     all_fields = [
-        "company_name", "website", "description", "industry", "headquarters",
-        "founded_year", "employees", "revenue", "funding_raised", "products",
+        "company_name",
+        "website",
+        "description",
+        "industry",
+        "headquarters",
+        "founded_year",
+        "employees",
+        "revenue",
+        "funding_raised",
+        "products",
     ]
     scores["completeness"] = _score_field_presence(output, all_fields)
 

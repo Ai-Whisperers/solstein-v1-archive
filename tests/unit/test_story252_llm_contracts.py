@@ -132,7 +132,8 @@ class TestExtractionModelDump:
 
     def test_dump_includes_all_fields(self) -> None:
         extraction = CompanyExtractionResponse(
-            company_name="Acme", revenue=42.0,
+            company_name="Acme",
+            revenue=42.0,
         )
         dumped = extraction.model_dump()
         assert "company_name" in dumped
@@ -173,7 +174,8 @@ class TestContentExtractorAgentEmptyPayloadFallback:
 
     @pytest.mark.asyncio()
     async def test_llm_extract_returns_none_on_empty_payload(
-        self, extractor: ContentExtractorAgent,
+        self,
+        extractor: ContentExtractorAgent,
     ) -> None:
         """_llm_extract returns None when LLM yields empty payload."""
         # Make instructor.extract raise ValidationError from empty payload
@@ -185,7 +187,8 @@ class TestContentExtractorAgentEmptyPayloadFallback:
 
     @pytest.mark.asyncio()
     async def test_llm_extract_returns_empty_dict_on_other_validation_error(
-        self, extractor: ContentExtractorAgent,
+        self,
+        extractor: ContentExtractorAgent,
     ) -> None:
         """_llm_extract returns {} on non-empty-payload ValidationError."""
         # A schema error that is NOT about empty payloads (e.g., wrong type)
@@ -197,7 +200,8 @@ class TestContentExtractorAgentEmptyPayloadFallback:
 
     @pytest.mark.asyncio()
     async def test_llm_extract_returns_empty_dict_on_generic_exception(
-        self, extractor: ContentExtractorAgent,
+        self,
+        extractor: ContentExtractorAgent,
     ) -> None:
         """_llm_extract returns {} on unexpected exceptions (e.g., network)."""
         extractor.instructor.extract = AsyncMock(
@@ -208,11 +212,13 @@ class TestContentExtractorAgentEmptyPayloadFallback:
 
     @pytest.mark.asyncio()
     async def test_llm_extract_returns_dict_on_success(
-        self, extractor: ContentExtractorAgent,
+        self,
+        extractor: ContentExtractorAgent,
     ) -> None:
         """_llm_extract returns a dict with data on success."""
         valid_extraction = CompanyExtractionResponse(
-            company_name="Acme Corp", revenue=100.0,
+            company_name="Acme Corp",
+            revenue=100.0,
         )
         extractor.instructor.extract = AsyncMock(return_value=valid_extraction)
         result = await extractor._llm_extract("some text", "Acme Corp", "https://acme.com")
@@ -222,7 +228,8 @@ class TestContentExtractorAgentEmptyPayloadFallback:
 
     @pytest.mark.asyncio()
     async def test_extract_surfaces_schema_failure_on_empty_payload(
-        self, extractor: ContentExtractorAgent,
+        self,
+        extractor: ContentExtractorAgent,
     ) -> None:
         """extract() returns extraction_method='schema_failure:empty_payload'
         when LLM returns an empty payload.
@@ -243,7 +250,8 @@ class TestContentExtractorAgentEmptyPayloadFallback:
 
     @pytest.mark.asyncio()
     async def test_extract_surfaces_llm_parsing_on_success(
-        self, extractor: ContentExtractorAgent,
+        self,
+        extractor: ContentExtractorAgent,
     ) -> None:
         """extract() returns extraction_method='llm_parsing' on valid extraction."""
         mock_fetch_result = MagicMock(spec=FetchResult)
@@ -253,10 +261,12 @@ class TestContentExtractorAgentEmptyPayloadFallback:
         extractor._fetch_page = AsyncMock(return_value=mock_fetch_result)
 
         # Mock _llm_extract to return valid data
-        extractor._llm_extract = AsyncMock(return_value={
-            "company_name": "Acme Corp",
-            "revenue": 100.0,
-        })
+        extractor._llm_extract = AsyncMock(
+            return_value={
+                "company_name": "Acme Corp",
+                "revenue": 100.0,
+            }
+        )
 
         result = await extractor.extract("https://acme.com", "Acme Corp")
         assert result.extraction_method == "llm_parsing"
@@ -266,6 +276,7 @@ class TestContentExtractorAgentEmptyPayloadFallback:
 # ---------------------------------------------------------------------------
 # Helpers for constructing realistic ValidationErrors
 # ---------------------------------------------------------------------------
+
 
 def _make_empty_payload_validation_error() -> ValidationError:
     """Create a ValidationError matching the empty-payload rejection pattern."""

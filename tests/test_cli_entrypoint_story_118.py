@@ -65,31 +65,35 @@ class TestZeroDomainImports:
         cli_app = Path("src/solstein/cli/app.py").read_text()
         tree = ast.parse(cli_app)
         forbidden = {
-            "domain", "analytics", "infrastructure",
-            "exporters", "extractors", "data",
+            "domain",
+            "analytics",
+            "infrastructure",
+            "exporters",
+            "extractors",
+            "data",
         }
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module:
                 if node.module.startswith("solstein."):
                     layer = node.module.split(".")[1]
-                    assert layer not in forbidden, (
-                        f"app.py imports from solstein.{layer} (forbidden)"
-                    )
+                    assert layer not in forbidden, f"app.py imports from solstein.{layer} (forbidden)"
 
     def test_cli_init_no_domain_imports(self) -> None:
         init = Path("src/solstein/cli/__init__.py").read_text()
         tree = ast.parse(init)
         forbidden = {
-            "domain", "analytics", "infrastructure",
-            "exporters", "extractors", "data",
+            "domain",
+            "analytics",
+            "infrastructure",
+            "exporters",
+            "extractors",
+            "data",
         }
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module:
                 if node.module.startswith("solstein."):
                     layer = node.module.split(".")[1]
-                    assert layer not in forbidden, (
-                        f"__init__.py imports from solstein.{layer}"
-                    )
+                    assert layer not in forbidden, f"__init__.py imports from solstein.{layer}"
 
 
 class TestAuthCredentials:

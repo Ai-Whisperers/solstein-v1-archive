@@ -76,10 +76,7 @@ class ResearchJobRepository:
         )
         self.session.add(job)
         await self.session.flush()
-        logger.info(
-            f"[ResearchJob] Created job {job.id} for company {company_id} "
-            f"(tenant={tenant_id[:8]}...)"
-        )
+        logger.info(f"[ResearchJob] Created job {job.id} for company {company_id} (tenant={tenant_id[:8]}...)")
         return job
 
     async def update_status(
@@ -105,9 +102,7 @@ class ResearchJobRepository:
         Raises:
             JobStatusError: If the transition is invalid.
         """
-        result = await self.session.execute(
-            select(ResearchJobRecord).where(ResearchJobRecord.id == job_id)
-        )
+        result = await self.session.execute(select(ResearchJobRecord).where(ResearchJobRecord.id == job_id))
         job = result.scalar_one_or_none()
 
         if job is None:
@@ -145,10 +140,7 @@ class ResearchJobRepository:
         self.session.add(job)
         await self.session.flush()
 
-        logger.info(
-            f"[ResearchJob] Job {job_id} -> {new_status} "
-            f"(progress={job.progress_pct}%, stage={current_stage})"
-        )
+        logger.info(f"[ResearchJob] Job {job_id} -> {new_status} (progress={job.progress_pct}%, stage={current_stage})")
         return job
 
     async def get_job(self, job_id: uuid.UUID) -> ResearchJobRecord | None:
@@ -160,9 +152,7 @@ class ResearchJobRepository:
         Returns:
             ResearchJobRecord or None if not found.
         """
-        result = await self.session.execute(
-            select(ResearchJobRecord).where(ResearchJobRecord.id == job_id)
-        )
+        result = await self.session.execute(select(ResearchJobRecord).where(ResearchJobRecord.id == job_id))
         return result.scalar_one_or_none()
 
     async def get_jobs_for_tenant(

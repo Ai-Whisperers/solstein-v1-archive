@@ -92,9 +92,7 @@ class TestExecFormCMD:
         cmd_lines = [line for line in lines if line.strip().startswith("CMD ")]
         assert cmd_lines, "Dockerfile must have a CMD instruction"
         last_cmd = cmd_lines[-1].strip()
-        assert last_cmd.startswith("CMD ["), (
-            f"CMD must use exec form (JSON array), got: {last_cmd}"
-        )
+        assert last_cmd.startswith("CMD ["), f"CMD must use exec form (JSON array), got: {last_cmd}"
 
 
 class TestRuntimeClean:

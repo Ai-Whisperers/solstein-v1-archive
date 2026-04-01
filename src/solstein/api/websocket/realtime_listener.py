@@ -106,10 +106,7 @@ async def start_realtime_listener() -> None:
         supabase_key = settings.supabase.key
 
         if not supabase_url or not supabase_key:
-            logger.warning(
-                "[RealtimeListener] Supabase not configured, "
-                "realtime listener disabled"
-            )
+            logger.warning("[RealtimeListener] Supabase not configured, realtime listener disabled")
             return
 
         # Build the Realtime WebSocket URL from the Supabase project URL
@@ -143,18 +140,11 @@ async def start_realtime_listener() -> None:
         logger.info("[RealtimeListener] Subscribed to research_jobs changes")
 
     except ImportError:
-        logger.warning(
-            "[RealtimeListener] realtime package not available, "
-            "listener disabled"
-        )
+        logger.warning("[RealtimeListener] realtime package not available, listener disabled")
     except (ConnectionError, OSError, asyncio.TimeoutError) as exc:
-        logger.error(
-            f"[RealtimeListener] Failed to connect to Supabase Realtime: {exc}"
-        )
+        logger.error(f"[RealtimeListener] Failed to connect to Supabase Realtime: {exc}")
     except (ValueError, TypeError, RuntimeError) as exc:
-        logger.error(
-            f"[RealtimeListener] Configuration error: {exc}"
-        )
+        logger.error(f"[RealtimeListener] Configuration error: {exc}")
 
 
 async def stop_realtime_listener() -> None:

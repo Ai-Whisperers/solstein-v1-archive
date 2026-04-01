@@ -159,16 +159,16 @@ def _extract_news_facts(company_id: str, result: Any) -> list[dict[str, Any]]:
             meta = getattr(raw_source, "metadata", {}) or {}
             items = meta.get("items") or []
             for item in items[:10]:  # cap at 10 news items per company
-                facts.append({
-                    "company_id": company_id,
-                    "headline": str(item.get("title", "")),
-                    "url": str(item.get("link", "")),
-                    "published_at": item.get("pagemap", {}).get("metatags", [{}])[0].get(
-                        "article:published_time"
-                    ),
-                    "sentiment": None,
-                    "snippet": str(item.get("snippet", "")),
-                    "source_name": item.get("displayLink"),
-                })
+                facts.append(
+                    {
+                        "company_id": company_id,
+                        "headline": str(item.get("title", "")),
+                        "url": str(item.get("link", "")),
+                        "published_at": item.get("pagemap", {}).get("metatags", [{}])[0].get("article:published_time"),
+                        "sentiment": None,
+                        "snippet": str(item.get("snippet", "")),
+                        "source_name": item.get("displayLink"),
+                    }
+                )
 
     return facts

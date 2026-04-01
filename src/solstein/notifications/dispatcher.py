@@ -73,8 +73,7 @@ class NotificationDispatcher:
 
         if not self._channels:
             logger.warning(
-                "[NotificationDispatcher] No channels registered, "
-                "notification dropped: %s",
+                "[NotificationDispatcher] No channels registered, notification dropped: %s",
                 event.event_type.value,
             )
             return {}

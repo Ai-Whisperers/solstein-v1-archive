@@ -35,9 +35,7 @@ def orchestrator() -> MarketRunOrchestrator:
 @pytest.fixture()
 def market_result(orchestrator: MarketRunOrchestrator) -> MarketRunResult:
     """Run the full-market golden run once and cache the result."""
-    return asyncio.get_event_loop().run_until_complete(
-        orchestrator.run(BENCHMARK_COMPANIES, COMPANY_MOCK_DATA)
-    )
+    return asyncio.get_event_loop().run_until_complete(orchestrator.run(BENCHMARK_COMPANIES, COMPANY_MOCK_DATA))
 
 
 # ---------------------------------------------------------------------------
@@ -56,29 +54,22 @@ class TestFullMarketExecution:
         """Pipeline must produce the expected total fact count."""
         assert market_result.total_facts == 13
 
-    def test_each_company_returns_aggregated_record(
-        self, market_result: MarketRunResult
-    ) -> None:
+    def test_each_company_returns_aggregated_record(self, market_result: MarketRunResult) -> None:
         """Each company result must contain an AggregatedDataRecord."""
         for cr in market_result.company_results:
             assert isinstance(cr.record, AggregatedDataRecord)
             assert cr.record.company_id == cr.company_id
 
-    def test_ticker_companies_have_full_coverage(
-        self, market_result: MarketRunResult
-    ) -> None:
+    def test_ticker_companies_have_full_coverage(self, market_result: MarketRunResult) -> None:
         """Companies with tickers must have 100% data completeness."""
         ticker_companies = ["bench-001", "bench-002", "bench-004", "bench-005"]
         for cr in market_result.company_results:
             if cr.company_id in ticker_companies:
                 assert cr.record.data_completeness_percentage == 100.0, (
-                    f"{cr.company_id} expected 100% completeness, "
-                    f"got {cr.record.data_completeness_percentage}%"
+                    f"{cr.company_id} expected 100% completeness, got {cr.record.data_completeness_percentage}%"
                 )
 
-    def test_private_company_has_partial_coverage(
-        self, market_result: MarketRunResult
-    ) -> None:
+    def test_private_company_has_partial_coverage(self, market_result: MarketRunResult) -> None:
         """Private company (no ticker) must have partial coverage."""
         for cr in market_result.company_results:
             if cr.company_id == "bench-003":
@@ -87,9 +78,7 @@ class TestFullMarketExecution:
                 return
         pytest.fail("bench-003 not found in results")
 
-    def test_average_completeness_above_threshold(
-        self, market_result: MarketRunResult
-    ) -> None:
+    def test_average_completeness_above_threshold(self, market_result: MarketRunResult) -> None:
         """Market-wide average completeness must exceed 80%."""
         assert market_result.average_completeness >= 80.0
 
@@ -112,43 +101,37 @@ class TestArtifactShapes:
         assert "companies" in data
         assert len(data["companies"]) == 5
 
-    def test_company_entries_have_required_fields(
-        self, market_result: MarketRunResult
-    ) -> None:
+    def test_company_entries_have_required_fields(self, market_result: MarketRunResult) -> None:
         """Each company entry must have all required fields."""
         required = [
-            "company_id", "company_name", "adapter_count",
-            "successful_adapters", "failed_adapters", "total_facts",
-            "average_confidence", "data_completeness_percentage", "fact_types",
+            "company_id",
+            "company_name",
+            "adapter_count",
+            "successful_adapters",
+            "failed_adapters",
+            "total_facts",
+            "average_confidence",
+            "data_completeness_percentage",
+            "fact_types",
         ]
         for entry in market_result.to_dict()["companies"]:
             for field in required:
                 assert field in entry, f"Missing field: {field} in {entry['company_id']}"
 
-    def test_fact_types_are_valid_data_source_types(
-        self, market_result: MarketRunResult
-    ) -> None:
+    def test_fact_types_are_valid_data_source_types(self, market_result: MarketRunResult) -> None:
         """All fact_type values must be valid DataSourceType values."""
         from solstein.domain.models import DataSourceType
 
         valid_types = {t.value for t in DataSourceType}
         for cr in market_result.company_results:
             for fact in cr.record.facts:
-                assert fact.fact_type in valid_types, (
-                    f"Invalid fact_type '{fact.fact_type}' "
-                    f"for {cr.company_id}"
-                )
+                assert fact.fact_type in valid_types, f"Invalid fact_type '{fact.fact_type}' for {cr.company_id}"
 
-    def test_confidence_scores_in_range(
-        self, market_result: MarketRunResult
-    ) -> None:
+    def test_confidence_scores_in_range(self, market_result: MarketRunResult) -> None:
         """All confidence scores must be in [0, 1]."""
         for cr in market_result.company_results:
             for fact in cr.record.facts:
-                assert 0.0 <= fact.confidence <= 1.0, (
-                    f"Confidence {fact.confidence} out of range "
-                    f"for {cr.company_id}"
-                )
+                assert 0.0 <= fact.confidence <= 1.0, f"Confidence {fact.confidence} out of range for {cr.company_id}"
 
 
 # ---------------------------------------------------------------------------
@@ -179,10 +162,7 @@ class TestRegressionGates:
         """No company from the baseline should be missing in the run."""
         orchestrator._last_result = market_result
         report = orchestrator.diff_against_baseline(baseline)
-        missing = [
-            v for v in report.violations
-            if v.field_name == "presence" and v.severity == "error"
-        ]
+        missing = [v for v in report.violations if v.field_name == "presence" and v.severity == "error"]
         assert len(missing) == 0, f"Companies missing from run: {missing}"
 
     def test_no_silent_fact_loss(
@@ -191,15 +171,12 @@ class TestRegressionGates:
         baseline: dict[str, Any],
     ) -> None:
         """No company should silently lose facts vs the baseline."""
-        baseline_companies = {
-            c["company_id"]: c for c in baseline["companies"]
-        }
+        baseline_companies = {c["company_id"]: c for c in baseline["companies"]}
         for cr in market_result.company_results:
             expected = baseline_companies.get(cr.company_id, {})
             expected_facts = expected.get("total_facts", 0)
             assert cr.record.total_facts >= expected_facts, (
-                f"{cr.company_id}: expected >= {expected_facts} facts, "
-                f"got {cr.record.total_facts}"
+                f"{cr.company_id}: expected >= {expected_facts} facts, got {cr.record.total_facts}"
             )
 
     def test_no_silent_source_type_loss(
@@ -215,9 +192,7 @@ class TestRegressionGates:
             required = set(required_types.get(cr.company_id, []))
             actual = {f.fact_type for f in cr.record.facts}
             missing = required - actual
-            assert not missing, (
-                f"{cr.company_id}: missing required fact types {sorted(missing)}"
-            )
+            assert not missing, f"{cr.company_id}: missing required fact types {sorted(missing)}"
 
     def test_total_facts_above_minimum(
         self,
@@ -225,12 +200,8 @@ class TestRegressionGates:
         baseline: dict[str, Any],
     ) -> None:
         """Total facts across all companies must meet minimum threshold."""
-        min_facts = baseline.get("regression_thresholds", {}).get(
-            "min_total_facts", 0
-        )
-        assert market_result.total_facts >= min_facts, (
-            f"Total facts {market_result.total_facts} < minimum {min_facts}"
-        )
+        min_facts = baseline.get("regression_thresholds", {}).get("min_total_facts", 0)
+        assert market_result.total_facts >= min_facts, f"Total facts {market_result.total_facts} < minimum {min_facts}"
 
 
 # ---------------------------------------------------------------------------

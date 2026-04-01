@@ -151,22 +151,12 @@ class TestDebtRemovalProgress:
 
     def test_salvage_decision_document_exists(self) -> None:
         """The salvage-vs-rebuild decision document must exist."""
-        doc_path = (
-            Path(__file__).parents[2]
-            / "docs"
-            / "architecture"
-            / "SALVAGE_VS_REBUILD_DECISION.md"
-        )
+        doc_path = Path(__file__).parents[2] / "docs" / "architecture" / "SALVAGE_VS_REBUILD_DECISION.md"
         assert doc_path.exists(), "SALVAGE_VS_REBUILD_DECISION.md not found"
 
     def test_salvage_decision_has_rebuild_triggers(self) -> None:
         """The decision document must define rebuild triggers."""
-        doc_path = (
-            Path(__file__).parents[2]
-            / "docs"
-            / "architecture"
-            / "SALVAGE_VS_REBUILD_DECISION.md"
-        )
+        doc_path = Path(__file__).parents[2] / "docs" / "architecture" / "SALVAGE_VS_REBUILD_DECISION.md"
         content = doc_path.read_text(encoding="utf-8")
         assert "Rebuild Trigger" in content, "Decision document missing rebuild triggers"
         assert "Red Flag" in content, "Decision document missing red flag conditions"
@@ -188,6 +178,4 @@ class TestRouterBypassFixed:
             "config": {"human_review_confidence_threshold": 0.5},
         }
         result = _human_review_router(state)
-        assert result == "human_review_gate", (
-            "Router bypass not fixed — empty scores bypass review"
-        )
+        assert result == "human_review_gate", "Router bypass not fixed — empty scores bypass review"

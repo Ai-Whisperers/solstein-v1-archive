@@ -321,6 +321,7 @@ def _build_retry_configs() -> tuple["RetryConfig", "RetryConfig", "RetryConfig"]
                 github = 30.0
                 companies_house = 30.0
                 web_search_agent = 20.0
+
         _settings = _Defaults()
     github = RetryConfig(
         max_attempts=4,

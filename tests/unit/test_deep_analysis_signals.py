@@ -172,23 +172,17 @@ class TestStrategicAssessment:
         assert "accelerate growth" in report
 
     def test_salt_assessment(self) -> None:
-        report = _strategy()._generate_strategic_assessment(
-            _make_company(classification="Salt", composite_score=5.5)
-        )
+        report = _strategy()._generate_strategic_assessment(_make_company(classification="Salt", composite_score=5.5))
         assert "Salt-class" in report
         assert "transformation" in report
 
     def test_lead_assessment(self) -> None:
-        report = _strategy()._generate_strategic_assessment(
-            _make_company(classification="Lead", composite_score=3.0)
-        )
+        report = _strategy()._generate_strategic_assessment(_make_company(classification="Lead", composite_score=3.0))
         assert "Lead-class" in report
         assert "strategic pivot" in report
 
     def test_unclassified_viable(self) -> None:
-        report = _strategy()._generate_strategic_assessment(
-            _make_company(classification=None, composite_score=5.0)
-        )
+        report = _strategy()._generate_strategic_assessment(_make_company(classification=None, composite_score=5.0))
         assert "competitive pressures" in report
 
 

@@ -8,7 +8,6 @@ Validates that:
 - Validation warnings are stored in scoring_breakdown
 """
 
-
 from solstein.analytics.scoring import GrowthScorer, validate_before_scoring
 from solstein.domain.models import Company, FinancialMetric
 

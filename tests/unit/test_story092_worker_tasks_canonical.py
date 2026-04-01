@@ -26,24 +26,18 @@ class TestWorkerTasksV2Gone:
         """Acceptance criterion 1: worker_tasks_v2.py absent from codebase."""
         src = Path("src/solstein")
         v2_path = src / "worker_tasks_v2.py"
-        assert not v2_path.exists(), (
-            "worker_tasks_v2.py still exists — must be deleted as part of STORY-092"
-        )
+        assert not v2_path.exists(), "worker_tasks_v2.py still exists — must be deleted as part of STORY-092"
 
     def test_no_import_of_worker_tasks_v2_in_production_code(self) -> None:
         """No production source file should have an import statement for worker_tasks_v2."""
         src = Path("src/solstein")
         violations = []
-        import_pattern = re.compile(
-            r"^\s*(import|from)\s+\S*worker_tasks_v2", re.MULTILINE
-        )
+        import_pattern = re.compile(r"^\s*(import|from)\s+\S*worker_tasks_v2", re.MULTILINE)
         for py_file in src.rglob("*.py"):
             content = py_file.read_text(encoding="utf-8")
             if import_pattern.search(content):
                 violations.append(str(py_file))
-        assert not violations, (
-            f"Production files still import worker_tasks_v2: {violations}"
-        )
+        assert not violations, f"Production files still import worker_tasks_v2: {violations}"
 
 
 class TestAllTwelveTasksRegistered:
@@ -67,16 +61,12 @@ class TestAllTwelveTasksRegistered:
     def test_all_twelve_tasks_in_all_list(self) -> None:
         """Acceptance criterion: all 12 task names present in __all__."""
         for task_name in self.EXPECTED_TASKS:
-            assert task_name in worker_tasks_module.__all__, (
-                f"Task '{task_name}' missing from worker_tasks.__all__"
-            )
+            assert task_name in worker_tasks_module.__all__, f"Task '{task_name}' missing from worker_tasks.__all__"
 
     def test_all_twelve_tasks_importable(self) -> None:
         """Each task is accessible as an attribute of worker_tasks."""
         for task_name in self.EXPECTED_TASKS:
-            assert hasattr(worker_tasks_module, task_name), (
-                f"Task '{task_name}' not accessible on worker_tasks module"
-            )
+            assert hasattr(worker_tasks_module, task_name), f"Task '{task_name}' not accessible on worker_tasks module"
 
 
 class TestNoDuplicateTaskDefinitions:
@@ -99,12 +89,8 @@ class TestNoDuplicateTaskDefinitions:
             if name in seen:
                 duplicates.append(name)
             seen.add(name)
-        assert len(names) == 12, (
-            f"Expected 12 create_refresh_task calls, found {len(names)}: {names}"
-        )
-        assert not duplicates, (
-            f"Duplicate task name registrations found: {duplicates}"
-        )
+        assert len(names) == 12, f"Expected 12 create_refresh_task calls, found {len(names)}: {names}"
+        assert not duplicates, f"Duplicate task name registrations found: {duplicates}"
 
 
 class TestModuleDocstring:
@@ -128,16 +114,12 @@ class TestModuleDocstring:
             "refresh_web_search",
         ]
         missing = [s for s in sources if s not in src]
-        assert not missing, (
-            f"worker_tasks.py docstring missing task references: {missing}"
-        )
+        assert not missing, f"worker_tasks.py docstring missing task references: {missing}"
 
     def test_worker_tasks_docstring_mentions_story_092(self) -> None:
         """Docstring acknowledges STORY-092 (capstone marker)."""
         src = Path("src/solstein/worker_tasks.py").read_text(encoding="utf-8")
-        assert "STORY-092" in src, (
-            "worker_tasks.py docstring must mention STORY-092"
-        )
+        assert "STORY-092" in src, "worker_tasks.py docstring must mention STORY-092"
 
 
 class TestIdempotencyWired:
@@ -145,18 +127,14 @@ class TestIdempotencyWired:
 
     def test_deduplicate_imported_in_refresh_tasks(self) -> None:
         """refresh_tasks.py imports the deduplicate function."""
-        src = Path("src/solstein/worker/refresh_tasks.py").read_text(
-            encoding="utf-8"
-        )
+        src = Path("src/solstein/worker/refresh_tasks.py").read_text(encoding="utf-8")
         assert "from .idempotency import deduplicate" in src, (
             "refresh_tasks.py must import deduplicate from idempotency"
         )
 
     def test_deduplicate_called_with_task_name_override(self) -> None:
         """The factory applies deduplicate with task_name_override."""
-        src = Path("src/solstein/worker/refresh_tasks.py").read_text(
-            encoding="utf-8"
-        )
+        src = Path("src/solstein/worker/refresh_tasks.py").read_text(encoding="utf-8")
         assert "task_name_override=task_name" in src, (
             "create_refresh_task must pass task_name_override=task_name to deduplicate"
         )
@@ -174,9 +152,7 @@ class TestEpic025PatternsIncorporated:
 
     def test_story088_dlq_wired_in_refresh_tasks(self) -> None:
         """DLQ (STORY-088) is invoked on MaxRetriesExceededError."""
-        src = Path("src/solstein/worker/refresh_tasks.py").read_text(
-            encoding="utf-8"
-        )
+        src = Path("src/solstein/worker/refresh_tasks.py").read_text(encoding="utf-8")
         assert "dead_letter_queue.record_failure" in src, (
             "refresh_tasks.py must call dead_letter_queue.record_failure on exhausted retries"
         )
@@ -184,9 +160,7 @@ class TestEpic025PatternsIncorporated:
     def test_story089_acks_late_in_celery_config(self) -> None:
         """task_acks_late=True (STORY-089) is configured in celery_config.py."""
         src = Path("src/solstein/celery_config.py").read_text(encoding="utf-8")
-        assert "task_acks_late=True" in src, (
-            "celery_config.py must set task_acks_late=True (STORY-089)"
-        )
+        assert "task_acks_late=True" in src, "celery_config.py must set task_acks_late=True (STORY-089)"
         assert "task_reject_on_worker_lost=True" in src, (
             "celery_config.py must set task_reject_on_worker_lost=True (STORY-089)"
         )

@@ -51,6 +51,7 @@ def _make_patent_result(
 # Patents: Success Contract
 # ---------------------------------------------------------------------------
 
+
 class TestPatentsSuccessContract:
     """Verify Patents adapter output matches golden success contract."""
 
@@ -62,9 +63,7 @@ class TestPatentsSuccessContract:
     def adapter(self) -> PatentEnrichment:
         return PatentEnrichment()
 
-    def test_success_output_shape_uspto(
-        self, adapter: PatentEnrichment, contract: dict[str, Any]
-    ) -> None:
+    def test_success_output_shape_uspto(self, adapter: PatentEnrichment, contract: dict[str, Any]) -> None:
         """USPTO success path matches golden contract shape."""
         mock_result = _make_patent_result(source="uspto_peds")
         with patch(
@@ -81,9 +80,7 @@ class TestPatentsSuccessContract:
         assert report.passed, report.summary()
         assert report.checked_fields >= 8
 
-    def test_success_output_shape_fallback(
-        self, adapter: PatentEnrichment, contract: dict[str, Any]
-    ) -> None:
+    def test_success_output_shape_fallback(self, adapter: PatentEnrichment, contract: dict[str, Any]) -> None:
         """Fallback (Google Patents) success path matches golden contract."""
         mock_result = _make_patent_result(source="google_patents", total=10, ai=1)
         with patch(
@@ -108,8 +105,7 @@ class TestPatentsSuccessContract:
 
         content = result.raw_content
         assert isinstance(content, dict)
-        required = ["total_patents", "recent_patents", "ai_related_patents",
-                     "top_categories", "source_backend"]
+        required = ["total_patents", "recent_patents", "ai_related_patents", "top_categories", "source_backend"]
         for key in required:
             assert key in content, f"Missing required key: {key}"
 
@@ -168,6 +164,7 @@ class TestPatentsSuccessContract:
 # ---------------------------------------------------------------------------
 # Patents: Degraded / Failure Contract
 # ---------------------------------------------------------------------------
+
 
 class TestPatentsDegradedContract:
     """Verify Patents adapter degradation semantics."""

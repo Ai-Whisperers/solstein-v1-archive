@@ -131,14 +131,8 @@ class TestMarkdownTableFormat:
         path = gen.generate_market_overview(companies, tmp_path)
         content = path.read_text()
 
-        double_pipes = [
-            (i + 1, line)
-            for i, line in enumerate(content.split("\n"))
-            if "||" in line
-        ]
-        assert not double_pipes, (
-            f"Found double-pipe '||' on lines: {double_pipes}"
-        )
+        double_pipes = [(i + 1, line) for i, line in enumerate(content.split("\n")) if "||" in line]
+        assert not double_pipes, f"Found double-pipe '||' on lines: {double_pipes}"
 
 
 class TestDeadCodeRemoved:
@@ -155,8 +149,6 @@ class TestDeadCodeRemoved:
         # Look for standalone formatter.avg( calls (result not assigned)
         lines = source.split("\n")
         discarded = [
-            line.strip()
-            for line in lines
-            if "formatter.avg(" in line and "=" not in line.split("formatter.avg(")[0]
+            line.strip() for line in lines if "formatter.avg(" in line and "=" not in line.split("formatter.avg(")[0]
         ]
         assert not discarded, f"Found discarded avg() calls: {discarded}"

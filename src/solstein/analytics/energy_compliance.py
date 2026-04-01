@@ -32,6 +32,7 @@ if TYPE_CHECKING:
 # Data models
 # ---------------------------------------------------------------------------
 
+
 class ComplianceRisk(str, Enum):
     """Overall compliance risk level."""
 
@@ -43,9 +44,9 @@ class ComplianceRisk(str, Enum):
 class ControlSystemTier(str, Enum):
     """Control system sophistication tier."""
 
-    ADVANCED = "advanced"      # Modern SCADA/DMS, full automation, strong cyber
-    STANDARD = "standard"      # Basic SCADA, partial automation
-    LEGACY = "legacy"          # Manual/legacy control systems
+    ADVANCED = "advanced"  # Modern SCADA/DMS, full automation, strong cyber
+    STANDARD = "standard"  # Basic SCADA, partial automation
+    LEGACY = "legacy"  # Manual/legacy control systems
     UNKNOWN = "unknown"
 
 
@@ -85,35 +86,73 @@ class EnergyComplianceResult:
 # Certification and keyword lookups
 # ---------------------------------------------------------------------------
 
-_POSITIVE_CERTS = frozenset({
-    "iso 27001", "iso 9001", "iso 14001", "iso 50001",
-    "soc 2", "soc2", "nerc cip", "iec 62351", "iec 61850",
-    "gdpr compliant", "entso-e certified",
-})
+_POSITIVE_CERTS = frozenset(
+    {
+        "iso 27001",
+        "iso 9001",
+        "iso 14001",
+        "iso 50001",
+        "soc 2",
+        "soc2",
+        "nerc cip",
+        "iec 62351",
+        "iec 61850",
+        "gdpr compliant",
+        "entso-e certified",
+    }
+)
 
-_NEGATIVE_KEYWORDS = frozenset({
-    "violation", "fine", "penalty", "non-compliant",
-    "audit failure", "breach", "incident",
-})
+_NEGATIVE_KEYWORDS = frozenset(
+    {
+        "violation",
+        "fine",
+        "penalty",
+        "non-compliant",
+        "audit failure",
+        "breach",
+        "incident",
+    }
+)
 
-_SCADA_KEYWORDS = frozenset({
-    "scada", "dms", "ems", "adms", "derms", "ot security",
-})
+_SCADA_KEYWORDS = frozenset(
+    {
+        "scada",
+        "dms",
+        "ems",
+        "adms",
+        "derms",
+        "ot security",
+    }
+)
 
-_AUTOMATION_KEYWORDS = frozenset({
-    "automated", "real-time", "self-healing", "auto-restore",
-    "smart grid", "digital twin",
-})
+_AUTOMATION_KEYWORDS = frozenset(
+    {
+        "automated",
+        "real-time",
+        "self-healing",
+        "auto-restore",
+        "smart grid",
+        "digital twin",
+    }
+)
 
-_CYBER_KEYWORDS = frozenset({
-    "iec 62351", "nerc cip", "ot security", "soc 2", "soc2",
-    "penetration testing", "zero trust",
-})
+_CYBER_KEYWORDS = frozenset(
+    {
+        "iec 62351",
+        "nerc cip",
+        "ot security",
+        "soc 2",
+        "soc2",
+        "penetration testing",
+        "zero trust",
+    }
+)
 
 
 # ---------------------------------------------------------------------------
 # Scorer
 # ---------------------------------------------------------------------------
+
 
 class EnergyComplianceScorer:
     """Score energy company compliance posture from available signals."""
@@ -171,10 +210,15 @@ class EnergyComplianceScorer:
         for cert in _POSITIVE_CERTS:
             if cert in text:
                 cert_count += 1
-                signals.append(ComplianceSignal(
-                    "certification", cert.upper(), "active", "positive",
-                    f"Certification '{cert}' detected in company profile",
-                ))
+                signals.append(
+                    ComplianceSignal(
+                        "certification",
+                        cert.upper(),
+                        "active",
+                        "positive",
+                        f"Certification '{cert}' detected in company profile",
+                    )
+                )
         score += min(30.0, cert_count * 10.0)
 
         # Negative: violations
@@ -182,10 +226,15 @@ class EnergyComplianceScorer:
         for kw in _NEGATIVE_KEYWORDS:
             if kw in text:
                 violation_count += 1
-                signals.append(ComplianceSignal(
-                    "violation", kw, "violation", "negative",
-                    f"Negative keyword '{kw}' detected",
-                ))
+                signals.append(
+                    ComplianceSignal(
+                        "violation",
+                        kw,
+                        "violation",
+                        "negative",
+                        f"Negative keyword '{kw}' detected",
+                    )
+                )
         score -= min(40.0, violation_count * 15.0)
 
         return max(0.0, min(100.0, score))
@@ -205,24 +254,39 @@ class EnergyComplianceScorer:
 
         if scada_present:
             score += 20.0
-            signals.append(ComplianceSignal(
-                "control_system", "SCADA/DMS", "active", "positive",
-                "Control system technology detected",
-            ))
+            signals.append(
+                ComplianceSignal(
+                    "control_system",
+                    "SCADA/DMS",
+                    "active",
+                    "positive",
+                    "Control system technology detected",
+                )
+            )
 
         if automation_present:
             score += 20.0
-            signals.append(ComplianceSignal(
-                "control_system", "Automation", "active", "positive",
-                "Automation capabilities detected",
-            ))
+            signals.append(
+                ComplianceSignal(
+                    "control_system",
+                    "Automation",
+                    "active",
+                    "positive",
+                    "Automation capabilities detected",
+                )
+            )
 
         if cyber_present:
             score += 15.0
-            signals.append(ComplianceSignal(
-                "control_system", "OT Security", "active", "positive",
-                "OT/cyber security measures detected",
-            ))
+            signals.append(
+                ComplianceSignal(
+                    "control_system",
+                    "OT Security",
+                    "active",
+                    "positive",
+                    "OT/cyber security measures detected",
+                )
+            )
 
         # Determine tier
         if score >= 70:
@@ -264,11 +328,15 @@ class EnergyComplianceScorer:
         geo = getattr(company, "geographic_presence", [])
         if len(geo) > 3:
             score -= 10.0  # Multi-jurisdiction complexity
-            signals.append(ComplianceSignal(
-                "regulation", "Multi-jurisdiction",
-                "pending", "neutral",
-                f"Operates in {len(geo)} jurisdictions — increased regulatory complexity",
-            ))
+            signals.append(
+                ComplianceSignal(
+                    "regulation",
+                    "Multi-jurisdiction",
+                    "pending",
+                    "neutral",
+                    f"Operates in {len(geo)} jurisdictions — increased regulatory complexity",
+                )
+            )
 
         return max(0.0, min(100.0, score))
 

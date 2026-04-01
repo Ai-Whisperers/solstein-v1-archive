@@ -100,9 +100,7 @@ async def _call_research_plan(
 def _assert_result(result: EvalResult, *, case_name: str) -> None:
     """Assert EvalResult passed; print per-dimension scores on failure."""
     assert result.passed, (
-        f"[{case_name}] live LLM evaluation failed.\n"
-        f"  scores:  {result.scores}\n"
-        f"  details: {result.details}"
+        f"[{case_name}] live LLM evaluation failed.\n  scores:  {result.scores}\n  details: {result.details}"
     )
 
 
@@ -117,7 +115,8 @@ def _assert_result(result: EvalResult, *, case_name: str) -> None:
 async def test_live_research_plan_fintech(anthropic_client: Any, eval_model: str) -> None:
     """Case 1 — Fintech (Stripe): well-known company, high data availability."""
     output = await _call_research_plan(
-        anthropic_client, eval_model,
+        anthropic_client,
+        eval_model,
         company_name="Stripe",
         industry_context="fintech payment processing",
     )
@@ -136,7 +135,8 @@ async def test_live_research_plan_fintech(anthropic_client: Any, eval_model: str
 async def test_live_research_plan_enterprise_saas(anthropic_client: Any, eval_model: str) -> None:
     """Case 2 — Enterprise SaaS (Salesforce): public company, rich public data."""
     output = await _call_research_plan(
-        anthropic_client, eval_model,
+        anthropic_client,
+        eval_model,
         company_name="Salesforce",
         industry_context="enterprise CRM software",
     )
@@ -155,7 +155,8 @@ async def test_live_research_plan_enterprise_saas(anthropic_client: Any, eval_mo
 async def test_live_research_plan_unknown_startup(anthropic_client: Any, eval_model: str) -> None:
     """Case 3 — Unknown startup: sparse public data forces broader search strategy."""
     output = await _call_research_plan(
-        anthropic_client, eval_model,
+        anthropic_client,
+        eval_model,
         company_name="NovaTech AI",
         industry_context="B2B AI automation startup",
     )
@@ -174,7 +175,8 @@ async def test_live_research_plan_unknown_startup(anthropic_client: Any, eval_mo
 async def test_live_research_plan_energy_company(anthropic_client: Any, eval_model: str) -> None:
     """Case 4 — Energy sector (Orsted): domain-specific intent coverage."""
     output = await _call_research_plan(
-        anthropic_client, eval_model,
+        anthropic_client,
+        eval_model,
         company_name="Orsted",
         industry_context="offshore wind energy infrastructure",
     )
@@ -193,7 +195,8 @@ async def test_live_research_plan_energy_company(anthropic_client: Any, eval_mod
 async def test_live_research_plan_biotech(anthropic_client: Any, eval_model: str) -> None:
     """Case 5 — Biotech (Moderna): research-heavy domain, pipeline queries expected."""
     output = await _call_research_plan(
-        anthropic_client, eval_model,
+        anthropic_client,
+        eval_model,
         company_name="Moderna",
         industry_context="mRNA therapeutics and vaccines biotech",
     )
@@ -220,7 +223,7 @@ def test_missing_required_field_fails_evaluation() -> None:
     works correctly before any live API call is made.
     """
     malformed_output: dict[str, Any] = {
-        "queries": [],           # empty — violates min_queries constraint
+        "queries": [],  # empty — violates min_queries constraint
         "estimated_sources": 0,
     }
     expected = {
@@ -229,8 +232,7 @@ def test_missing_required_field_fails_evaluation() -> None:
     }
     result = evaluate_research_plan(malformed_output, expected)
     assert not result.passed, (
-        "Expected evaluation to FAIL for an empty queries list, but it passed.\n"
-        f"  scores: {result.scores}"
+        f"Expected evaluation to FAIL for an empty queries list, but it passed.\n  scores: {result.scores}"
     )
     assert result.scores.get("query_count", 1.0) == 0.0, (
         f"query_count should be 0.0, got {result.scores.get('query_count')}"
@@ -246,12 +248,12 @@ def test_missing_intent_field_causes_format_failure() -> None:
     """
     output_missing_intent: dict[str, Any] = {
         "queries": [
-            {"query": "Acme Corp website", "priority": 1},      # intent absent
-            {"query": "Acme Corp funding", "priority": 1},      # intent absent
-            {"query": "Acme Corp revenue", "priority": 1},      # intent absent
-            {"query": "Acme Corp headcount", "priority": 2},    # intent absent
-            {"query": "Acme Corp news", "priority": 2},         # intent absent
-            {"query": "Acme Corp LinkedIn", "priority": 3},     # intent absent
+            {"query": "Acme Corp website", "priority": 1},  # intent absent
+            {"query": "Acme Corp funding", "priority": 1},  # intent absent
+            {"query": "Acme Corp revenue", "priority": 1},  # intent absent
+            {"query": "Acme Corp headcount", "priority": 2},  # intent absent
+            {"query": "Acme Corp news", "priority": 2},  # intent absent
+            {"query": "Acme Corp LinkedIn", "priority": 3},  # intent absent
         ],
     }
     expected: dict[str, Any] = {
@@ -260,10 +262,8 @@ def test_missing_intent_field_causes_format_failure() -> None:
     }
     result = evaluate_research_plan(output_missing_intent, expected)
     assert not result.passed, (
-        "Expected evaluation to FAIL for queries missing 'intent', but it passed.\n"
-        f"  scores: {result.scores}"
+        f"Expected evaluation to FAIL for queries missing 'intent', but it passed.\n  scores: {result.scores}"
     )
     assert result.scores.get("format_compliance", 1.0) < 1.0, (
-        "format_compliance should be < 1.0 when intent field is absent, "
-        f"got {result.scores.get('format_compliance')}"
+        f"format_compliance should be < 1.0 when intent field is absent, got {result.scores.get('format_compliance')}"
     )

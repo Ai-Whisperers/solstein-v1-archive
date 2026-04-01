@@ -30,8 +30,7 @@ class TestCeleryTimingConfigDefaults:
         """Default result_expires must be 86400s (24h), not the old 3600s."""
         cfg = CeleryTimingConfig()
         assert cfg.result_expires == 86400, (
-            f"Expected 86400 (24h), got {cfg.result_expires}. "
-            "STORY-091 requires the default to be 24 hours."
+            f"Expected 86400 (24h), got {cfg.result_expires}. STORY-091 requires the default to be 24 hours."
         )
 
     def test_result_expires_lower_bound_enforced(self) -> None:

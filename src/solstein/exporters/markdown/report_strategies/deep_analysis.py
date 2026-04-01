@@ -81,7 +81,9 @@ class DeepAnalysisStrategy(ReportStrategy):
         if (company.financial_health_score or 0) >= 7:
             strengths.append(f"- **Robust financial health** — Health score {company.financial_health_score:.2f}/10")
         if (company.competitive_position_score or 0) >= 7:
-            strengths.append(f"- **Strong competitive moat** — Position score {company.competitive_position_score:.2f}/10")
+            strengths.append(
+                f"- **Strong competitive moat** — Position score {company.competitive_position_score:.2f}/10"
+            )
 
         # Revenue growth signal
         cagr = company.revenue_cagr_3yr
@@ -123,7 +125,9 @@ class DeepAnalysisStrategy(ReportStrategy):
 
         # Composite score signals
         if score < 5:
-            weaknesses.append(f"- **Critical position** — Composite {score:.2f}/10 indicates significant competitive pressure")
+            weaknesses.append(
+                f"- **Critical position** — Composite {score:.2f}/10 indicates significant competitive pressure"
+            )
         elif score < 7:
             weaknesses.append(f"- **Below Phoenix threshold** — Composite {score:.2f}/10 (needs >=7.0)")
 
@@ -133,7 +137,9 @@ class DeepAnalysisStrategy(ReportStrategy):
         if (company.financial_health_score or 0) < 4:
             weaknesses.append(f"- **Financial fragility** — Health score {company.financial_health_score or 0:.2f}/10")
         if (company.competitive_position_score or 0) < 4:
-            weaknesses.append(f"- **Weak competitive moat** — Position score {company.competitive_position_score or 0:.2f}/10")
+            weaknesses.append(
+                f"- **Weak competitive moat** — Position score {company.competitive_position_score or 0:.2f}/10"
+            )
 
         # Revenue growth signal
         cagr = company.revenue_cagr_3yr

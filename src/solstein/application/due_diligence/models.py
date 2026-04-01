@@ -15,6 +15,7 @@ from typing import Any
 # Red flags
 # ---------------------------------------------------------------------------
 
+
 class RedFlagSeverity(str, Enum):
     """How urgent a red flag is for the investment committee."""
 
@@ -40,6 +41,7 @@ class RedFlag:
 # Competitive positioning
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class CompetitivePosition:
     """How a target company stacks up against its peer group on AI readiness."""
@@ -57,6 +59,7 @@ class CompetitivePosition:
 # ---------------------------------------------------------------------------
 # DD Checklist
 # ---------------------------------------------------------------------------
+
 
 class ChecklistStatus(str, Enum):
     """Progress state of a checklist item."""
@@ -82,6 +85,7 @@ class ChecklistItem:
 # ---------------------------------------------------------------------------
 # Investment memo
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class InvestmentMemo:
@@ -119,6 +123,7 @@ class InvestmentMemo:
 # ---------------------------------------------------------------------------
 # Full DD report
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class DDReport:

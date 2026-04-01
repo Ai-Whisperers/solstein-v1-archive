@@ -32,11 +32,12 @@ if TYPE_CHECKING:
 # Data models
 # ---------------------------------------------------------------------------
 
+
 class MarketPositioning(str, Enum):
     """Company positioning relative to energy market trends."""
 
-    LEADER = "leader"          # Aligned with high-growth segments
-    ALIGNED = "aligned"        # Good alignment with market trends
+    LEADER = "leader"  # Aligned with high-growth segments
+    ALIGNED = "aligned"  # Good alignment with market trends
     TRANSITIONING = "transitioning"  # Moving toward growth segments
     MISALIGNED = "misaligned"  # Focused on declining segments
     UNKNOWN = "unknown"
@@ -61,8 +62,8 @@ class MarketSignal:
 
     segment: str
     name: str
-    strength: str   # "strong", "moderate", "weak"
-    trend: str      # "growing", "stable", "declining"
+    strength: str  # "strong", "moderate", "weak"
+    trend: str  # "growing", "stable", "declining"
     details: str = ""
 
 
@@ -93,38 +94,88 @@ class EnergyMarketResult:
 # ---------------------------------------------------------------------------
 
 _SEGMENT_KEYWORDS: dict[DemandSegment, frozenset[str]] = {
-    DemandSegment.RENEWABLES_INTEGRATION: frozenset({
-        "solar", "wind", "renewable", "photovoltaic", "geothermal",
-        "renewable integration", "green energy",
-    }),
-    DemandSegment.GRID_MODERNIZATION: frozenset({
-        "smart grid", "grid modernization", "amr", "ami",
-        "grid analytics", "distribution automation", "adms",
-    }),
-    DemandSegment.ENERGY_STORAGE: frozenset({
-        "battery", "energy storage", "ess", "bess", "flow battery",
-        "pumped hydro", "thermal storage",
-    }),
-    DemandSegment.EV_INFRASTRUCTURE: frozenset({
-        "ev charging", "electric vehicle", "evse", "charging station",
-        "v2g", "vehicle-to-grid",
-    }),
-    DemandSegment.DISTRIBUTED_ENERGY: frozenset({
-        "distributed energy", "der", "microgrid", "virtual power plant",
-        "prosumer", "behind-the-meter",
-    }),
-    DemandSegment.CARBON_MANAGEMENT: frozenset({
-        "carbon capture", "carbon trading", "carbon offset", "emissions",
-        "net zero", "decarbonization", "carbon management",
-    }),
-    DemandSegment.DEMAND_RESPONSE: frozenset({
-        "demand response", "load management", "load shifting",
-        "peak shaving", "flexibility market",
-    }),
-    DemandSegment.TRADITIONAL_GENERATION: frozenset({
-        "coal", "natural gas generation", "fossil fuel", "thermal plant",
-        "combined cycle",
-    }),
+    DemandSegment.RENEWABLES_INTEGRATION: frozenset(
+        {
+            "solar",
+            "wind",
+            "renewable",
+            "photovoltaic",
+            "geothermal",
+            "renewable integration",
+            "green energy",
+        }
+    ),
+    DemandSegment.GRID_MODERNIZATION: frozenset(
+        {
+            "smart grid",
+            "grid modernization",
+            "amr",
+            "ami",
+            "grid analytics",
+            "distribution automation",
+            "adms",
+        }
+    ),
+    DemandSegment.ENERGY_STORAGE: frozenset(
+        {
+            "battery",
+            "energy storage",
+            "ess",
+            "bess",
+            "flow battery",
+            "pumped hydro",
+            "thermal storage",
+        }
+    ),
+    DemandSegment.EV_INFRASTRUCTURE: frozenset(
+        {
+            "ev charging",
+            "electric vehicle",
+            "evse",
+            "charging station",
+            "v2g",
+            "vehicle-to-grid",
+        }
+    ),
+    DemandSegment.DISTRIBUTED_ENERGY: frozenset(
+        {
+            "distributed energy",
+            "der",
+            "microgrid",
+            "virtual power plant",
+            "prosumer",
+            "behind-the-meter",
+        }
+    ),
+    DemandSegment.CARBON_MANAGEMENT: frozenset(
+        {
+            "carbon capture",
+            "carbon trading",
+            "carbon offset",
+            "emissions",
+            "net zero",
+            "decarbonization",
+            "carbon management",
+        }
+    ),
+    DemandSegment.DEMAND_RESPONSE: frozenset(
+        {
+            "demand response",
+            "load management",
+            "load shifting",
+            "peak shaving",
+            "flexibility market",
+        }
+    ),
+    DemandSegment.TRADITIONAL_GENERATION: frozenset(
+        {
+            "coal",
+            "natural gas generation",
+            "fossil fuel",
+            "thermal plant",
+            "combined cycle",
+        }
+    ),
 }
 
 # Growth trend weights per segment (higher = faster growing market)
@@ -139,21 +190,37 @@ _SEGMENT_GROWTH: dict[DemandSegment, float] = {
     DemandSegment.TRADITIONAL_GENERATION: 0.6,  # Declining segment
 }
 
-_FORECASTING_KEYWORDS = frozenset({
-    "machine learning", "predictive", "forecasting", "analytics",
-    "data-driven", "ai-powered", "time series", "demand prediction",
-    "load forecasting", "price forecasting",
-})
+_FORECASTING_KEYWORDS = frozenset(
+    {
+        "machine learning",
+        "predictive",
+        "forecasting",
+        "analytics",
+        "data-driven",
+        "ai-powered",
+        "time series",
+        "demand prediction",
+        "load forecasting",
+        "price forecasting",
+    }
+)
 
-_DIVERSIFICATION_KEYWORDS = frozenset({
-    "multi-market", "diversified", "cross-border", "international",
-    "multiple segments", "portfolio",
-})
+_DIVERSIFICATION_KEYWORDS = frozenset(
+    {
+        "multi-market",
+        "diversified",
+        "cross-border",
+        "international",
+        "multiple segments",
+        "portfolio",
+    }
+)
 
 
 # ---------------------------------------------------------------------------
 # Scorer
 # ---------------------------------------------------------------------------
+
 
 class EnergyMarketScorer:
     """Score energy company market positioning and demand alignment."""
@@ -172,10 +239,15 @@ class EnergyMarketScorer:
 
         alignment = self._score_market_alignment(segments, signals)
         resilience = self._score_demand_resilience(
-            segments, text_corpus, company, signals,
+            segments,
+            text_corpus,
+            company,
+            signals,
         )
         forecasting = self._score_forecasting_capability(
-            text_corpus, company, signals,
+            text_corpus,
+            company,
+            signals,
         )
 
         composite = (alignment * 0.40) + (resilience * 0.30) + (forecasting * 0.30)
@@ -183,7 +255,10 @@ class EnergyMarketScorer:
 
         growth_factors = _identify_growth_factors(segments)
         risk_factors = _identify_risk_factors(
-            alignment, resilience, forecasting, segments,
+            alignment,
+            resilience,
+            forecasting,
+            segments,
         )
         recommendations = _build_recommendations(risk_factors, positioning)
 
@@ -203,15 +278,14 @@ class EnergyMarketScorer:
                 "resilience_weight": 0.30,
                 "forecasting_weight": 0.30,
                 "segment_count": len(segments),
-                "growth_segment_count": sum(
-                    1 for s in segments
-                    if _SEGMENT_GROWTH.get(s, 1.0) > 1.0
-                ),
+                "growth_segment_count": sum(1 for s in segments if _SEGMENT_GROWTH.get(s, 1.0) > 1.0),
             },
         )
         logger.info(
             "[MarketForecast] {} scored {:.1f} ({})",
-            company.name, composite, positioning.value,
+            company.name,
+            composite,
+            positioning.value,
         )
         return result
 
@@ -230,13 +304,15 @@ class EnergyMarketScorer:
                 found.append(segment)
                 growth = _SEGMENT_GROWTH.get(segment, 1.0)
                 trend = "growing" if growth > 1.0 else ("declining" if growth < 1.0 else "stable")
-                signals.append(MarketSignal(
-                    segment=segment.value,
-                    name=segment.value.replace("_", " ").title(),
-                    strength="strong" if len(matched) >= 2 else "moderate",
-                    trend=trend,
-                    details=f"Matched keywords: {', '.join(matched[:3])}",
-                ))
+                signals.append(
+                    MarketSignal(
+                        segment=segment.value,
+                        name=segment.value.replace("_", " ").title(),
+                        strength="strong" if len(matched) >= 2 else "moderate",
+                        trend=trend,
+                        details=f"Matched keywords: {', '.join(matched[:3])}",
+                    )
+                )
         return found
 
     @staticmethod
@@ -263,13 +339,15 @@ class EnergyMarketScorer:
         if declining:
             score -= 15.0
             for seg in declining:
-                signals.append(MarketSignal(
-                    segment=seg.value,
-                    name="Declining Segment",
-                    strength="weak",
-                    trend="declining",
-                    details=f"Exposure to declining segment: {seg.value}",
-                ))
+                signals.append(
+                    MarketSignal(
+                        segment=seg.value,
+                        name="Declining Segment",
+                        strength="weak",
+                        trend="declining",
+                        details=f"Exposure to declining segment: {seg.value}",
+                    )
+                )
 
         return max(0.0, min(100.0, score))
 
@@ -286,13 +364,15 @@ class EnergyMarketScorer:
         # Segment diversification
         if len(segments) >= 3:
             score += 20.0
-            signals.append(MarketSignal(
-                segment="diversification",
-                name="Multi-Segment Presence",
-                strength="strong",
-                trend="stable",
-                details=f"Active in {len(segments)} demand segments",
-            ))
+            signals.append(
+                MarketSignal(
+                    segment="diversification",
+                    name="Multi-Segment Presence",
+                    strength="strong",
+                    trend="stable",
+                    details=f"Active in {len(segments)} demand segments",
+                )
+            )
         elif len(segments) >= 2:
             score += 10.0
 
@@ -332,22 +412,26 @@ class EnergyMarketScorer:
         forecast_count = sum(1 for kw in _FORECASTING_KEYWORDS if kw in text)
         if forecast_count >= 3:
             score += 30.0
-            signals.append(MarketSignal(
-                segment="forecasting",
-                name="Advanced Forecasting",
-                strength="strong",
-                trend="growing",
-                details=f"Detected {forecast_count} forecasting capabilities",
-            ))
+            signals.append(
+                MarketSignal(
+                    segment="forecasting",
+                    name="Advanced Forecasting",
+                    strength="strong",
+                    trend="growing",
+                    details=f"Detected {forecast_count} forecasting capabilities",
+                )
+            )
         elif forecast_count >= 1:
             score += 15.0
-            signals.append(MarketSignal(
-                segment="forecasting",
-                name="Basic Forecasting",
-                strength="moderate",
-                trend="stable",
-                details=f"Detected {forecast_count} forecasting capabilities",
-            ))
+            signals.append(
+                MarketSignal(
+                    segment="forecasting",
+                    name="Basic Forecasting",
+                    strength="moderate",
+                    trend="stable",
+                    details=f"Detected {forecast_count} forecasting capabilities",
+                )
+            )
 
         # AI maturity contributes to forecasting capability
         ai_maturity = str(getattr(company, "ai_maturity", "") or "").lower()
@@ -369,6 +453,7 @@ class EnergyMarketScorer:
 # Classification and recommendations (module-level to keep class under 300 lines)
 # ---------------------------------------------------------------------------
 
+
 def _classify_positioning(
     composite: float,
     segments: list[DemandSegment],
@@ -377,12 +462,8 @@ def _classify_positioning(
     if not segments:
         return MarketPositioning.UNKNOWN
 
-    has_declining = any(
-        _SEGMENT_GROWTH.get(s, 1.0) < 1.0 for s in segments
-    )
-    has_growing = any(
-        _SEGMENT_GROWTH.get(s, 1.0) > 1.2 for s in segments
-    )
+    has_declining = any(_SEGMENT_GROWTH.get(s, 1.0) < 1.0 for s in segments)
+    has_growing = any(_SEGMENT_GROWTH.get(s, 1.0) > 1.2 for s in segments)
 
     if composite >= 70:
         return MarketPositioning.LEADER
@@ -401,15 +482,9 @@ def _identify_growth_factors(segments: list[DemandSegment]) -> list[str]:
     for seg in segments:
         growth = _SEGMENT_GROWTH.get(seg, 1.0)
         if growth >= 1.4:
-            factors.append(
-                f"High-growth segment: {seg.value.replace('_', ' ')} "
-                f"(growth multiplier {growth}x)"
-            )
+            factors.append(f"High-growth segment: {seg.value.replace('_', ' ')} (growth multiplier {growth}x)")
         elif growth >= 1.2:
-            factors.append(
-                f"Growing segment: {seg.value.replace('_', ' ')} "
-                f"(growth multiplier {growth}x)"
-            )
+            factors.append(f"Growing segment: {seg.value.replace('_', ' ')} (growth multiplier {growth}x)")
     return factors
 
 
@@ -422,20 +497,12 @@ def _identify_risk_factors(
     """Identify market risk factors."""
     factors: list[str] = []
     if alignment < 40:
-        factors.append(
-            "Poor market alignment — company not positioned in growth segments"
-        )
+        factors.append("Poor market alignment — company not positioned in growth segments")
     if resilience < 40:
-        factors.append(
-            "Low demand resilience — limited diversification or declining revenue"
-        )
+        factors.append("Low demand resilience — limited diversification or declining revenue")
     if forecasting < 40:
-        factors.append(
-            "Weak forecasting capability — limited analytics or AI maturity"
-        )
-    declining = [
-        s for s in segments if _SEGMENT_GROWTH.get(s, 1.0) < 1.0
-    ]
+        factors.append("Weak forecasting capability — limited analytics or AI maturity")
+    declining = [s for s in segments if _SEGMENT_GROWTH.get(s, 1.0) < 1.0]
     if declining:
         names = ", ".join(s.value.replace("_", " ") for s in declining)
         factors.append(f"Exposure to declining segments: {names}")
@@ -452,34 +519,16 @@ def _build_recommendations(
     recs: list[str] = []
     for factor in risk_factors:
         if "alignment" in factor.lower():
-            recs.append(
-                "Pivot product roadmap toward high-growth segments "
-                "(renewables, storage, EV infrastructure)"
-            )
+            recs.append("Pivot product roadmap toward high-growth segments (renewables, storage, EV infrastructure)")
         elif "resilience" in factor.lower():
-            recs.append(
-                "Diversify revenue across multiple demand segments "
-                "to reduce concentration risk"
-            )
+            recs.append("Diversify revenue across multiple demand segments to reduce concentration risk")
         elif "forecasting" in factor.lower():
-            recs.append(
-                "Invest in predictive analytics and AI capabilities "
-                "for demand forecasting"
-            )
+            recs.append("Invest in predictive analytics and AI capabilities for demand forecasting")
         elif "declining" in factor.lower():
-            recs.append(
-                "Develop transition strategy away from declining segments "
-                "toward growth areas"
-            )
+            recs.append("Develop transition strategy away from declining segments toward growth areas")
         elif "no identifiable" in factor.lower():
-            recs.append(
-                "Clarify energy market positioning and identify "
-                "target demand segments"
-            )
+            recs.append("Clarify energy market positioning and identify target demand segments")
 
     if not recs and positioning != MarketPositioning.LEADER:
-        recs.append(
-            "Continue strengthening market position; "
-            "explore adjacent growth segments"
-        )
+        recs.append("Continue strengthening market position; explore adjacent growth segments")
     return recs

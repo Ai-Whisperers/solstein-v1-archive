@@ -40,9 +40,7 @@ class TestAcksLateConfiguration:
     def test_task_acks_late_is_true(self) -> None:
         """celery_config must set task_acks_late = True."""
         conf = cc.celery_app.conf
-        assert conf.task_acks_late is True, (
-            "task_acks_late must be True for at-least-once delivery semantics"
-        )
+        assert conf.task_acks_late is True, "task_acks_late must be True for at-least-once delivery semantics"
 
     def test_task_reject_on_worker_lost_is_true(self) -> None:
         """celery_config must set task_reject_on_worker_lost = True."""

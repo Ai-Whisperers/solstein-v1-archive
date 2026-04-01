@@ -67,9 +67,7 @@ class AnthropicQuerier:
 
         return content
 
-    def _parse_schema_response(
-        self, content: str, schema: type[BaseModel]
-    ) -> BaseModel:
+    def _parse_schema_response(self, content: str, schema: type[BaseModel]) -> BaseModel:
         """Parse and validate JSON response against schema."""
         cleaned = self._clean_json(content)
         return schema.model_validate_json(cleaned)

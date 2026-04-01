@@ -167,9 +167,7 @@ class LLMFilter:
         system_prompt = get_system_prompt("system_company_filter")
 
         user_prompt = (
-            f"Company Profile:\n{company_info}\n\n"
-            f'Filter Criteria: "{criteria}"\n\n'
-            "Does this company match? JSON only."
+            f'Company Profile:\n{company_info}\n\nFilter Criteria: "{criteria}"\n\nDoes this company match? JSON only.'
         )
 
         # Try using the enhanced LLM client

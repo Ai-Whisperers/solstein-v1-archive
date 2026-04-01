@@ -301,9 +301,7 @@ class TestSecFilingsNode:
             "filing_url": "https://www.sec.gov/Archives/example",
         }
 
-        with patch(
-            "solstein.research.graph.nodes.sec_filings_node.SECEdgarConnector"
-        ) as MockConnector:
+        with patch("solstein.research.graph.nodes.sec_filings_node.SECEdgarConnector") as MockConnector:
             instance = MockConnector.return_value
             instance.fetch_filing.return_value = mock_filing
 
@@ -324,9 +322,7 @@ class TestSecFilingsNode:
         """Company IDs that are not US tickers produce a coverage gap."""
         state = _make_state(company_identifiers=["Acme Corporation UK Ltd"])
 
-        with patch(
-            "solstein.research.graph.nodes.sec_filings_node.SECEdgarConnector"
-        ) as MockConnector:
+        with patch("solstein.research.graph.nodes.sec_filings_node.SECEdgarConnector") as MockConnector:
             output = sec_filings_node(state)
             MockConnector.return_value.fetch_filing.assert_not_called()
 
@@ -339,9 +335,7 @@ class TestSecFilingsNode:
         """CompanyNotFoundError from EDGAR produces coverage gap, not crash."""
         state = _make_state(company_identifiers=["FAKE"])
 
-        with patch(
-            "solstein.research.graph.nodes.sec_filings_node.SECEdgarConnector"
-        ) as MockConnector:
+        with patch("solstein.research.graph.nodes.sec_filings_node.SECEdgarConnector") as MockConnector:
             instance = MockConnector.return_value
             instance.fetch_filing.side_effect = CompanyNotFoundError("Not found")
 
@@ -367,9 +361,7 @@ class TestSecFilingsNode:
             "filing_url": None,
         }
 
-        with patch(
-            "solstein.research.graph.nodes.sec_filings_node.SECEdgarConnector"
-        ) as MockConnector:
+        with patch("solstein.research.graph.nodes.sec_filings_node.SECEdgarConnector") as MockConnector:
             instance = MockConnector.return_value
             instance.fetch_filing.return_value = mock_filing
 
@@ -474,6 +466,7 @@ def _run_node_with_mock_facts(
     (facts, errors) without hitting any external APIs.  The node still calls
     asyncio.run(), but against this lightweight coroutine instead.
     """
+
     async def fake_gather(*args: Any, **kwargs: Any) -> tuple[list[dict[str, Any]], list[str]]:
         return facts, errors
 

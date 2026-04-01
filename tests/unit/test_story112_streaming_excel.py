@@ -20,10 +20,7 @@ from openpyxl import load_workbook
 from solstein.infrastructure.models.export import ExportJobRecord
 
 # Load export_tasks module directly to avoid __init__.py chain issues
-_EXPORT_TASKS_PATH = str(
-    Path(__file__).parent.parent.parent
-    / "src" / "solstein" / "worker" / "export_tasks.py"
-)
+_EXPORT_TASKS_PATH = str(Path(__file__).parent.parent.parent / "src" / "solstein" / "worker" / "export_tasks.py")
 _spec = importlib.util.spec_from_file_location(
     "solstein.worker.export_tasks",
     _EXPORT_TASKS_PATH,
@@ -41,21 +38,13 @@ from solstein.exporters.excel_streaming import StreamingExcelExporter
 
 _stream_mod = sys.modules["solstein.exporters.excel_streaming"]
 
-_STREAMING_PATH = str(
-    Path(__file__).parent.parent.parent
-    / "src" / "solstein" / "exporters" / "excel_streaming.py"
-)
+_STREAMING_PATH = str(Path(__file__).parent.parent.parent / "src" / "solstein" / "exporters" / "excel_streaming.py")
 
 # Source text for structural inspection
 _STREAMING_SOURCE = Path(_STREAMING_PATH).read_text()
 _EXPORT_TASKS_SOURCE = Path(_EXPORT_TASKS_PATH).read_text()
 _EXPORT_MODEL_SOURCE = Path(
-    Path(__file__).parent.parent.parent
-    / "src"
-    / "solstein"
-    / "infrastructure"
-    / "models"
-    / "export.py"
+    Path(__file__).parent.parent.parent / "src" / "solstein" / "infrastructure" / "models" / "export.py"
 ).read_text()
 
 
@@ -89,7 +78,8 @@ class TestWriteOnlyMode:
         assert "write_only=True" in _STREAMING_SOURCE
 
     def test_workbook_created_with_write_only(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """Workbook constructor is called with write_only=True."""
         exporter = StreamingExcelExporter()
@@ -262,7 +252,8 @@ class TestProgressCallback:
         assert "filters, _sync_progress" in _EXPORT_TASKS_SOURCE
 
     def test_callback_error_does_not_crash(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """A failing callback must not crash the export."""
         exporter = StreamingExcelExporter()
@@ -273,7 +264,9 @@ class TestProgressCallback:
 
         # Should not raise
         exporter.create_dashboard(
-            [_FakeCompany()], output, bad_callback,
+            [_FakeCompany()],
+            output,
+            bad_callback,
         )
         assert output.exists()
 
@@ -288,10 +281,7 @@ class TestCeleryIntegration:
         """_generate_file must accept progress_callback parameter."""
         assert "progress_callback" in _EXPORT_TASKS_SOURCE
         # Check the function signature
-        assert (
-            "progress_callback: Any | None = None"
-            in _EXPORT_TASKS_SOURCE
-        )
+        assert "progress_callback: Any | None = None" in _EXPORT_TASKS_SOURCE
 
     def test_generate_excel_uses_streaming(self) -> None:
         """_generate_excel must use StreamingExcelExporter."""
@@ -299,29 +289,17 @@ class TestCeleryIntegration:
 
     def test_generate_excel_passes_callback(self) -> None:
         """_generate_excel must pass progress_callback to exporter."""
-        assert (
-            "exporter.create_dashboard"
-            in _EXPORT_TASKS_SOURCE
-        )
+        assert "exporter.create_dashboard" in _EXPORT_TASKS_SOURCE
         assert "progress_callback" in _EXPORT_TASKS_SOURCE
 
     def test_generate_file_passes_callback_to_excel(self) -> None:
         """_generate_file must pass callback to _generate_excel."""
         # The excel branch must pass progress_callback
-        assert (
-            "await _generate_excel(output_path, filters, progress_callback)"
-            in _EXPORT_TASKS_SOURCE
-        )
+        assert "await _generate_excel(output_path, filters, progress_callback)" in _EXPORT_TASKS_SOURCE
 
     def test_streaming_exporter_in_init(self) -> None:
         """StreamingExcelExporter must be exported from __init__.py."""
-        init_path = (
-            Path(__file__).parent.parent.parent
-            / "src"
-            / "solstein"
-            / "exporters"
-            / "__init__.py"
-        )
+        init_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "exporters" / "__init__.py"
         init_source = init_path.read_text()
         assert "StreamingExcelExporter" in init_source
 
@@ -379,7 +357,8 @@ class TestEdgeCases:
         wb.close()
 
     def test_company_with_none_attributes(
-        self, tmp_path: Path,
+        self,
+        tmp_path: Path,
     ) -> None:
         """Company with None attributes must not crash."""
         company = _FakeCompany()

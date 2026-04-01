@@ -23,14 +23,13 @@ OBSERVABILITY_DOCS = PROJECT_ROOT / "docs" / "observability" / "logging.md"
 # REQ-1: Every request gets a unique correlation ID at middleware layer
 # ===========================================================================
 
+
 class TestCorrelationIDAssignment:
     """STORY-049 REQ-1: Correlation ID assigned at middleware layer."""
 
     def test_context_middleware_generates_correlation_id(self):
         text = LOGGING_MIDDLEWARE.read_text()
-        assert "generate_correlation_id" in text, (
-            "ContextMiddleware must call generate_correlation_id()"
-        )
+        assert "generate_correlation_id" in text, "ContextMiddleware must call generate_correlation_id()"
 
     def test_correlation_id_is_uuid(self):
         """Correlation IDs should be full UUIDs."""
@@ -40,9 +39,7 @@ class TestCorrelationIDAssignment:
     def test_accepts_incoming_correlation_id(self):
         """If X-Correlation-ID header is present, use it instead of generating."""
         text = LOGGING_MIDDLEWARE.read_text()
-        assert 'X-Correlation-ID' in text, (
-            "Should accept incoming X-Correlation-ID header"
-        )
+        assert "X-Correlation-ID" in text, "Should accept incoming X-Correlation-ID header"
 
     def test_context_var_exists(self):
         """CORRELATION_ID context var must be defined."""
@@ -54,22 +51,19 @@ class TestCorrelationIDAssignment:
 # REQ-2: Correlation ID propagated through all log calls
 # ===========================================================================
 
+
 class TestCorrelationIDPropagation:
     """STORY-049 REQ-2: Correlation ID in all log entries during request."""
 
     def test_logging_format_includes_context(self):
         """Log formatter must include context (which has correlation_id)."""
         text = LOGGING_UTILS.read_text()
-        assert "get_current_context" in text, (
-            "Log format must call get_current_context() to include correlation_id"
-        )
+        assert "get_current_context" in text, "Log format must call get_current_context() to include correlation_id"
 
     def test_json_format_includes_context(self):
         """JSON log format must include context."""
         text = LOGGING_UTILS.read_text()
-        assert '"context"' in text or "'context'" in text, (
-            "JSON format must include context dict"
-        )
+        assert '"context"' in text or "'context'" in text, "JSON format must include context dict"
 
     def test_context_uses_contextvars(self):
         """Context propagation must use contextvars for async safety."""
@@ -86,25 +80,26 @@ class TestCorrelationIDPropagation:
 # REQ-3: X-Correlation-ID header in HTTP response
 # ===========================================================================
 
+
 class TestCorrelationIDResponseHeader:
     """STORY-049 REQ-3: Correlation ID in response header."""
 
     def test_response_includes_correlation_id_header(self):
         text = LOGGING_MIDDLEWARE.read_text()
-        assert 'X-Correlation-ID' in text
+        assert "X-Correlation-ID" in text
         # Verify it's being set on the response (not just read from request)
-        assert 'response.headers["X-Correlation-ID"]' in text or \
-               "response.headers['X-Correlation-ID']" in text
+        assert 'response.headers["X-Correlation-ID"]' in text or "response.headers['X-Correlation-ID']" in text
 
     def test_response_also_includes_request_id(self):
         """X-Request-ID should also be in response for backward compat."""
         text = LOGGING_MIDDLEWARE.read_text()
-        assert 'X-Request-ID' in text
+        assert "X-Request-ID" in text
 
 
 # ===========================================================================
 # REQ-4: Correlation ID in every loguru log entry
 # ===========================================================================
+
 
 class TestLogEntryFormat:
     """STORY-049 REQ-4: Every log entry includes correlation ID."""
@@ -115,7 +110,7 @@ class TestLogEntryFormat:
         # Verify the format function calls get_current_context
         idx = text.find("def format_record")
         assert idx >= 0, "format_record function must exist"
-        fn_body = text[idx:text.find("\ndef ", idx + 1)]
+        fn_body = text[idx : text.find("\ndef ", idx + 1)]
         assert "get_current_context" in fn_body
 
     def test_json_format_includes_correlation(self):
@@ -123,13 +118,14 @@ class TestLogEntryFormat:
         text = LOGGING_UTILS.read_text()
         idx = text.find("def format_record_json")
         assert idx >= 0, "format_record_json function must exist"
-        fn_body = text[idx:text.find("\ndef ", idx + 1)]
+        fn_body = text[idx : text.find("\ndef ", idx + 1)]
         assert "get_current_context" in fn_body
 
 
 # ===========================================================================
 # REQ-5: Outbound requests include correlation ID
 # ===========================================================================
+
 
 class TestOutboundPropagation:
     """STORY-049 REQ-5: Correlation ID in outbound request headers."""
@@ -147,6 +143,7 @@ class TestOutboundPropagation:
 # ===========================================================================
 # Context reset (no leaks between requests)
 # ===========================================================================
+
 
 class TestContextReset:
     """Verify context is properly reset between requests."""
@@ -169,6 +166,7 @@ class TestContextReset:
 # ===========================================================================
 # Stdlib logging interception
 # ===========================================================================
+
 
 class TestStdlibInterception:
     """STORY-049 dependency: stdlib logging routed to loguru."""
@@ -193,6 +191,7 @@ class TestStdlibInterception:
 # ===========================================================================
 # Documentation
 # ===========================================================================
+
 
 class TestDocumentation:
     """STORY-049: Correlation ID propagation must be documented."""

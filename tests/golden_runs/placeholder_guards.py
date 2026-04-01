@@ -58,22 +58,26 @@ def check_conflict_resolution_output(output: dict[str, Any]) -> PlaceholderRepor
 
     resolved = output.get("resolved_facts")
     if resolved is not None and isinstance(resolved, dict) and len(resolved) == 0:
-        report.violations.append(PlaceholderViolation(
-            location=loc,
-            field_name="resolved_facts",
-            reason="Empty dict — no actual reconciliation performed",
-        ))
+        report.violations.append(
+            PlaceholderViolation(
+                location=loc,
+                field_name="resolved_facts",
+                reason="Empty dict — no actual reconciliation performed",
+            )
+        )
 
     flags = output.get("conflict_flags")
     if flags is not None and isinstance(flags, list) and len(flags) == 0:
         # Empty conflict flags alone is a warning (could be legitimately no conflicts)
         # but combined with empty resolved_facts it's a placeholder
         if resolved is not None and isinstance(resolved, dict) and len(resolved) == 0:
-            report.violations.append(PlaceholderViolation(
-                location=loc,
-                field_name="conflict_flags",
-                reason="Empty list combined with empty resolved_facts — placeholder pattern",
-            ))
+            report.violations.append(
+                PlaceholderViolation(
+                    location=loc,
+                    field_name="conflict_flags",
+                    reason="Empty list combined with empty resolved_facts — placeholder pattern",
+                )
+            )
 
     return report
 
@@ -89,19 +93,23 @@ def check_scoring_output(output: dict[str, Any]) -> PlaceholderReport:
 
     scores = output.get("confidence_scores")
     if scores is not None and isinstance(scores, dict) and len(scores) == 0:
-        report.violations.append(PlaceholderViolation(
-            location=loc,
-            field_name="confidence_scores",
-            reason="Empty dict — no actual scoring performed",
-        ))
+        report.violations.append(
+            PlaceholderViolation(
+                location=loc,
+                field_name="confidence_scores",
+                reason="Empty dict — no actual scoring performed",
+            )
+        )
 
     company_scores = output.get("company_scores")
     if company_scores is not None and isinstance(company_scores, dict) and len(company_scores) == 0:
-        report.violations.append(PlaceholderViolation(
-            location=loc,
-            field_name="company_scores",
-            reason="Empty dict — no company classification performed",
-        ))
+        report.violations.append(
+            PlaceholderViolation(
+                location=loc,
+                field_name="company_scores",
+                reason="Empty dict — no company classification performed",
+            )
+        )
 
     return report
 
@@ -117,28 +125,34 @@ def check_analysis_output(output: dict[str, Any]) -> PlaceholderReport:
 
     analysis = output.get("market_analysis", {})
     if not isinstance(analysis, dict):
-        report.violations.append(PlaceholderViolation(
-            location=loc,
-            field_name="market_analysis",
-            reason=f"Expected dict, got {type(analysis).__name__}",
-        ))
+        report.violations.append(
+            PlaceholderViolation(
+                location=loc,
+                field_name="market_analysis",
+                reason=f"Expected dict, got {type(analysis).__name__}",
+            )
+        )
         return report
 
     if analysis.get("ai_adoption_index", 0.0) == 0.0:
-        report.violations.append(PlaceholderViolation(
-            location=loc,
-            field_name="market_analysis.ai_adoption_index",
-            reason="Zero value — no actual AI adoption analysis performed",
-        ))
+        report.violations.append(
+            PlaceholderViolation(
+                location=loc,
+                field_name="market_analysis.ai_adoption_index",
+                reason="Zero value — no actual AI adoption analysis performed",
+            )
+        )
 
     for list_field in ["top_companies", "market_trends"]:
         val = analysis.get(list_field)
         if isinstance(val, list) and len(val) == 0:
-            report.violations.append(PlaceholderViolation(
-                location=loc,
-                field_name=f"market_analysis.{list_field}",
-                reason="Empty list — no actual analysis data produced",
-            ))
+            report.violations.append(
+                PlaceholderViolation(
+                    location=loc,
+                    field_name=f"market_analysis.{list_field}",
+                    reason="Empty list — no actual analysis data produced",
+                )
+            )
 
     return report
 
@@ -154,19 +168,23 @@ def check_export_output(output: dict[str, Any]) -> PlaceholderReport:
 
     path = output.get("export_path", "")
     if isinstance(path, str) and len(path) == 0:
-        report.violations.append(PlaceholderViolation(
-            location=loc,
-            field_name="export_path",
-            reason="Empty string — no artifact actually written",
-        ))
+        report.violations.append(
+            PlaceholderViolation(
+                location=loc,
+                field_name="export_path",
+                reason="Empty string — no artifact actually written",
+            )
+        )
 
     status = output.get("export_status", "")
     if status == "pending":
-        report.violations.append(PlaceholderViolation(
-            location=loc,
-            field_name="export_status",
-            reason="Still 'pending' — export never completed",
-        ))
+        report.violations.append(
+            PlaceholderViolation(
+                location=loc,
+                field_name="export_status",
+                reason="Still 'pending' — export never completed",
+            )
+        )
 
     return report
 
@@ -193,14 +211,13 @@ def check_router_empty_scores_bypass(
     report = PlaceholderReport()
 
     if not confidence_scores and not human_review_required:
-        report.violations.append(PlaceholderViolation(
-            location="human_review_router",
-            field_name="confidence_scores",
-            reason=(
-                "Empty confidence_scores with human_review_required=False "
-                "silently bypasses human review gate"
-            ),
-        ))
+        report.violations.append(
+            PlaceholderViolation(
+                location="human_review_router",
+                field_name="confidence_scores",
+                reason=("Empty confidence_scores with human_review_required=False silently bypasses human review gate"),
+            )
+        )
 
     return report
 
@@ -221,34 +238,42 @@ def check_raw_data_source_not_placeholder(
     # Check raw_content is not empty
     content = source.raw_content
     if isinstance(content, dict) and len(content) == 0:
-        report.violations.append(PlaceholderViolation(
-            location=loc,
-            field_name="raw_content",
-            reason="Empty dict — adapter returned no actual data",
-        ))
+        report.violations.append(
+            PlaceholderViolation(
+                location=loc,
+                field_name="raw_content",
+                reason="Empty dict — adapter returned no actual data",
+            )
+        )
     elif isinstance(content, str) and len(content.strip()) == 0:
-        report.violations.append(PlaceholderViolation(
-            location=loc,
-            field_name="raw_content",
-            reason="Empty/whitespace string — adapter returned no actual data",
-        ))
+        report.violations.append(
+            PlaceholderViolation(
+                location=loc,
+                field_name="raw_content",
+                reason="Empty/whitespace string — adapter returned no actual data",
+            )
+        )
 
     # Check confidence is not the generic default
     if source.confidence == 0.0:
-        report.violations.append(PlaceholderViolation(
-            location=loc,
-            field_name="confidence",
-            reason="Zero confidence — likely unset placeholder",
-            severity="warning",
-        ))
+        report.violations.append(
+            PlaceholderViolation(
+                location=loc,
+                field_name="confidence",
+                reason="Zero confidence — likely unset placeholder",
+                severity="warning",
+            )
+        )
 
     # Check extraction_method is set
     if not source.extraction_method:
-        report.violations.append(PlaceholderViolation(
-            location=loc,
-            field_name="extraction_method",
-            reason="Missing extraction_method — adapter didn't declare how data was obtained",
-            severity="warning",
-        ))
+        report.violations.append(
+            PlaceholderViolation(
+                location=loc,
+                field_name="extraction_method",
+                reason="Missing extraction_method — adapter didn't declare how data was obtained",
+                severity="warning",
+            )
+        )
 
     return report

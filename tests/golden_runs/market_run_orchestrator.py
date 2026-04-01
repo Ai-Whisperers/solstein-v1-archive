@@ -62,9 +62,7 @@ class MarketRunResult:
     def average_completeness(self) -> float:
         if not self.company_results:
             return 0.0
-        return sum(
-            r.record.data_completeness_percentage for r in self.company_results
-        ) / len(self.company_results)
+        return sum(r.record.data_completeness_percentage for r in self.company_results) / len(self.company_results)
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to a JSON-safe dict for artifact storage."""
@@ -82,9 +80,7 @@ class MarketRunResult:
                     "failed_adapters": r.failed_adapters,
                     "total_facts": r.record.total_facts,
                     "average_confidence": round(r.record.average_confidence, 4),
-                    "data_completeness_percentage": round(
-                        r.record.data_completeness_percentage, 2
-                    ),
+                    "data_completeness_percentage": round(r.record.data_completeness_percentage, 2),
                     "fact_types": [f.fact_type for f in r.record.facts],
                 }
                 for r in self.company_results
@@ -125,8 +121,7 @@ class RegressionReport:
         ]
         for v in self.violations:
             lines.append(
-                f"  [{v.severity.upper()}] {v.company_id}.{v.field_name}: "
-                f"expected {v.expected}, got {v.actual}"
+                f"  [{v.severity.upper()}] {v.company_id}.{v.field_name}: expected {v.expected}, got {v.actual}"
             )
         return "\n".join(lines)
 
@@ -165,9 +160,7 @@ class MarketRunOrchestrator:
         result = MarketRunResult()
 
         for company in companies:
-            company_result = await self._run_single(
-                pipeline, registry, company, mock_data.get(company.company_id, {})
-            )
+            company_result = await self._run_single(pipeline, registry, company, mock_data.get(company.company_id, {}))
             result.company_results.append(company_result)
 
         self._last_result = result
@@ -207,19 +200,15 @@ class MarketRunOrchestrator:
         patches: dict[str, Any] = {}
 
         if "company_research" in mocks:
-            patches["solstein.data.company_research.CompanyResearcher"] = (
-                _make_researcher_mock(mocks["company_research"])
+            patches["solstein.data.company_research.CompanyResearcher"] = _make_researcher_mock(
+                mocks["company_research"]
             )
 
         if "stock_data" in mocks:
-            patches["solstein.data.fetchers.GlobalMarketLoader"] = (
-                _make_loader_mock(mocks["stock_data"])
-            )
+            patches["solstein.data.fetchers.GlobalMarketLoader"] = _make_loader_mock(mocks["stock_data"])
 
         if "patent_result" in mocks:
-            patches["solstein.data.patent_client.search_company_patents"] = (
-                mocks["patent_result"]()
-            )
+            patches["solstein.data.patent_client.search_company_patents"] = mocks["patent_result"]()
 
         return patches
 
@@ -271,9 +260,7 @@ class _ApplyPatches:
         self._patchers: list[Any] = []
         for target, replacement in patches.items():
             if target == "solstein.data.patent_client.search_company_patents":
-                self._patchers.append(
-                    patch(target, return_value=replacement)
-                )
+                self._patchers.append(patch(target, return_value=replacement))
             else:
                 self._patchers.append(patch(target, replacement))
 
@@ -292,22 +279,22 @@ def _diff_market_results(
 ) -> RegressionReport:
     """Compare a MarketRunResult against a baseline artifact."""
     report = RegressionReport()
-    baseline_companies = {
-        c["company_id"]: c for c in baseline.get("companies", [])
-    }
+    baseline_companies = {c["company_id"]: c for c in baseline.get("companies", [])}
 
     for company_result in actual.company_results:
         cid = company_result.company_id
         report.checked_companies += 1
 
         if cid not in baseline_companies:
-            report.violations.append(RegressionViolation(
-                company_id=cid,
-                field_name="presence",
-                expected="present in baseline",
-                actual="missing from baseline",
-                severity="warning",
-            ))
+            report.violations.append(
+                RegressionViolation(
+                    company_id=cid,
+                    field_name="presence",
+                    expected="present in baseline",
+                    actual="missing from baseline",
+                    severity="warning",
+                )
+            )
             continue
 
         expected = baseline_companies[cid]
@@ -317,13 +304,15 @@ def _diff_market_results(
     actual_ids = {r.company_id for r in actual.company_results}
     for cid in baseline_companies:
         if cid not in actual_ids:
-            report.violations.append(RegressionViolation(
-                company_id=cid,
-                field_name="presence",
-                expected="present in run",
-                actual="missing from run",
-                severity="error",
-            ))
+            report.violations.append(
+                RegressionViolation(
+                    company_id=cid,
+                    field_name="presence",
+                    expected="present in run",
+                    actual="missing from run",
+                    severity="error",
+                )
+            )
 
     return report
 
@@ -338,34 +327,40 @@ def _diff_company(
     # Check total_facts (no silent field loss)
     report.checked_fields += 1
     if actual.record.total_facts < expected.get("total_facts", 0):
-        report.violations.append(RegressionViolation(
-            company_id=cid,
-            field_name="total_facts",
-            expected=f">= {expected['total_facts']}",
-            actual=str(actual.record.total_facts),
-        ))
+        report.violations.append(
+            RegressionViolation(
+                company_id=cid,
+                field_name="total_facts",
+                expected=f">= {expected['total_facts']}",
+                actual=str(actual.record.total_facts),
+            )
+        )
 
     # Check data completeness doesn't drop
     report.checked_fields += 1
     expected_completeness = expected.get("data_completeness_percentage", 0)
     if actual.record.data_completeness_percentage < expected_completeness * 0.9:
-        report.violations.append(RegressionViolation(
-            company_id=cid,
-            field_name="data_completeness_percentage",
-            expected=f">= {expected_completeness * 0.9:.1f}%",
-            actual=f"{actual.record.data_completeness_percentage:.1f}%",
-        ))
+        report.violations.append(
+            RegressionViolation(
+                company_id=cid,
+                field_name="data_completeness_percentage",
+                expected=f">= {expected_completeness * 0.9:.1f}%",
+                actual=f"{actual.record.data_completeness_percentage:.1f}%",
+            )
+        )
 
     # Check average confidence doesn't drop significantly
     report.checked_fields += 1
     expected_confidence = expected.get("average_confidence", 0)
     if expected_confidence > 0 and actual.record.average_confidence < expected_confidence * 0.8:
-        report.violations.append(RegressionViolation(
-            company_id=cid,
-            field_name="average_confidence",
-            expected=f">= {expected_confidence * 0.8:.4f}",
-            actual=f"{actual.record.average_confidence:.4f}",
-        ))
+        report.violations.append(
+            RegressionViolation(
+                company_id=cid,
+                field_name="average_confidence",
+                expected=f">= {expected_confidence * 0.8:.4f}",
+                actual=f"{actual.record.average_confidence:.4f}",
+            )
+        )
 
     # Check fact types are preserved (no silent source loss)
     report.checked_fields += 1
@@ -373,9 +368,11 @@ def _diff_company(
     actual_types = {f.fact_type for f in actual.record.facts}
     missing_types = expected_types - actual_types
     if missing_types:
-        report.violations.append(RegressionViolation(
-            company_id=cid,
-            field_name="fact_types",
-            expected=f"includes {sorted(missing_types)}",
-            actual=f"missing {sorted(missing_types)}",
-        ))
+        report.violations.append(
+            RegressionViolation(
+                company_id=cid,
+                field_name="fact_types",
+                expected=f"includes {sorted(missing_types)}",
+                actual=f"missing {sorted(missing_types)}",
+            )
+        )

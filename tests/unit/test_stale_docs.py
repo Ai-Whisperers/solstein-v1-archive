@@ -8,6 +8,7 @@ Covers:
 - CLI exit codes (--fail flag)
 - Policy and allowlist schema validation
 """
+
 from __future__ import annotations
 
 import json
@@ -140,9 +141,7 @@ class TestResolveOwner:
 
 class TestAllowlist:
     def test_exact_file_match(self) -> None:
-        allowlist = [
-            {"owner": "t", "rationale": "r", "expiry": "2099", "file": "docs/foo.md"}
-        ]
+        allowlist = [{"owner": "t", "rationale": "r", "expiry": "2099", "file": "docs/foo.md"}]
         allowed, rationale = _is_allowlisted("docs/foo.md", allowlist)
         assert allowed is True
         assert rationale == "r"
@@ -156,9 +155,7 @@ class TestAllowlist:
         assert reason == "prefix-reason"
 
     def test_no_match(self) -> None:
-        allowlist = [
-            {"owner": "t", "rationale": "r", "expiry": "2099", "file": "docs/other.md"}
-        ]
+        allowlist = [{"owner": "t", "rationale": "r", "expiry": "2099", "file": "docs/other.md"}]
         allowed, _ = _is_allowlisted("docs/foo.md", allowlist)
         assert allowed is False
 

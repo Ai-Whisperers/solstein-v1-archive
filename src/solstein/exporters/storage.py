@@ -114,7 +114,8 @@ class SupabaseStorageBackend(ExportStorageBackend):
             )
         except Exception as exc:
             logger.error(
-                "[ExportStorage] Upload failed: %s", exc,
+                "[ExportStorage] Upload failed: %s",
+                exc,
             )
             raise
 
@@ -228,8 +229,7 @@ def get_storage_backend() -> ExportStorageBackend:
         logger.warning("[ExportStorage] Supabase check failed: %s", exc)
 
     logger.warning(
-        "[ExportStorage] Supabase not configured — using local storage. "
-        "Exports will be lost on container restart.",
+        "[ExportStorage] Supabase not configured — using local storage. Exports will be lost on container restart.",
     )
     return LocalStorageBackend()
 

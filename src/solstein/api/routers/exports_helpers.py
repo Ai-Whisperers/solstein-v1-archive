@@ -57,7 +57,8 @@ def dispatch_export_task(
 
 
 async def get_job_record(
-    job_id: str, tenant_id: str,
+    job_id: str,
+    tenant_id: str,
 ) -> dict[str, Any] | None:
     """Fetch an ExportJobRecord and return as dict with expiry check."""
     from sqlalchemy import select
@@ -116,16 +117,12 @@ async def list_job_records(
                 ExportJobRecord.status == status_filter,
             )
 
-        count_result = await session.execute(
-            select(func.count()).select_from(base_query.subquery())
-        )
+        count_result = await session.execute(select(func.count()).select_from(base_query.subquery()))
         total = count_result.scalar_one()
 
         offset = (page - 1) * page_size
         result = await session.execute(
-            base_query.order_by(ExportJobRecord.created_at.desc())
-            .offset(offset)
-            .limit(page_size)
+            base_query.order_by(ExportJobRecord.created_at.desc()).offset(offset).limit(page_size)
         )
         records = result.scalars().all()
         items = [r.to_dict(check_expiry=True) for r in records]
@@ -134,7 +131,8 @@ async def list_job_records(
 
 
 async def cancel_job(
-    job_id: str, tenant_id: str,
+    job_id: str,
+    tenant_id: str,
 ) -> str | None:
     """Cancel an export job. Returns 'cancelled', 'already_terminal', or None."""
     from sqlalchemy import select
@@ -182,7 +180,8 @@ def _revoke_celery_task(job_id: str) -> None:
 
 
 async def mark_job_error(
-    job_id: str, error_message: str,
+    job_id: str,
+    error_message: str,
 ) -> None:
     """Mark a job as failed (used when Celery dispatch fails)."""
     from sqlalchemy import select

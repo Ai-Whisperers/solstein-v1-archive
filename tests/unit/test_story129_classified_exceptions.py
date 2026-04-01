@@ -7,6 +7,7 @@ Verifies that:
 - Structured logging includes required fields (component, operation, error_type)
 - Successful queries emit success metrics and report_success()
 """
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -127,9 +128,7 @@ class TestQueryProviderClassifiedExceptions:
         result = await client._query_provider("openai", "test prompt", None)
 
         assert result == "test response"
-        mock_client.req_counter.labels.assert_called_with(
-            provider="openai", model="gpt-4o-mini", status="success"
-        )
+        mock_client.req_counter.labels.assert_called_with(provider="openai", model="gpt-4o-mini", status="success")
         mock_client.req_counter.labels.return_value.inc.assert_called_once()
         mock_client.health_checker.report_success.assert_called_once_with("openai")
 
@@ -145,13 +144,9 @@ class TestQueryProviderClassifiedExceptions:
             await client._query_provider("openai", "test prompt", None)
 
         # Request counter with error status
-        mock_client.req_counter.labels.assert_any_call(
-            provider="openai", model="gpt-4o-mini", status="error"
-        )
+        mock_client.req_counter.labels.assert_any_call(provider="openai", model="gpt-4o-mini", status="error")
         # Error counter with classified type
-        mock_client.err_counter.labels.assert_called_with(
-            provider="openai", error_type="rate_limit"
-        )
+        mock_client.err_counter.labels.assert_called_with(provider="openai", error_type="rate_limit")
         mock_client.err_counter.labels.return_value.inc.assert_called_once()
 
     @pytest.mark.asyncio()

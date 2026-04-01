@@ -70,9 +70,7 @@ async def try_provider(
         try:
             result = await query_fn(provider)
             health_checker.report_success(provider)
-            attempts.append(
-                ProviderAttempt(provider, attempt + 1, result=result).to_dict()
-            )
+            attempts.append(ProviderAttempt(provider, attempt + 1, result=result).to_dict())
             return result
 
         except Exception as e:  # noqa: BLE001 — intentional broad catch for provider failover
@@ -86,9 +84,7 @@ async def try_provider(
                 ).to_dict()
             )
 
-            if not await _should_retry(
-                provider, error, attempt, max_retries, health_checker
-            ):
+            if not await _should_retry(provider, error, attempt, max_retries, health_checker):
                 break
 
     return None

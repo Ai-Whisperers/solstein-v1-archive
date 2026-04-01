@@ -173,9 +173,7 @@ def add_advanced_data(ws: Any, styles: ExcelStyles, profiles: list[Company]) -> 
     logger.info(f"Adding advanced data for {len(profiles)} companies")
 
     # Title
-    add_title_banner(
-        ws, styles, "Advanced Data", "Corporate Structure, Provenance & Notes", num_columns=8
-    )
+    add_title_banner(ws, styles, "Advanced Data", "Corporate Structure, Provenance & Notes", num_columns=8)
 
     # STORY-250: Headers derived from single authoritative schema — drift-proof
     headers = get_headers_for_sheet("Advanced Data")
@@ -257,7 +255,9 @@ def add_advanced_data(ws: Any, styles: ExcelStyles, profiles: list[Company]) -> 
         # Merge Conflicts — mapped from enrichment_quality_metrics
         cell = ws.cell(row=row, column=8)
         quality = safe_get(company, "enrichment_quality_metrics", {})
-        conflicts = quality.get("merge_conflicts", quality.get("conflicts", None)) if isinstance(quality, dict) else None
+        conflicts = (
+            quality.get("merge_conflicts", quality.get("conflicts", None)) if isinstance(quality, dict) else None
+        )
         if conflicts:
             cell.value = json.dumps(conflicts, default=str) if isinstance(conflicts, (dict, list)) else str(conflicts)
         else:

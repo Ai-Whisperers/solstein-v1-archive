@@ -39,9 +39,7 @@ def pytest_collection_modifyitems(config, items):  # noqa: ANN001
     """Skip all llm_eval tests when ANTHROPIC_API_KEY is absent."""
     if os.environ.get("ANTHROPIC_API_KEY"):
         return
-    skip_reason = pytest.mark.skip(
-        reason="ANTHROPIC_API_KEY not set — set it to run live LLM evaluation tests"
-    )
+    skip_reason = pytest.mark.skip(reason="ANTHROPIC_API_KEY not set — set it to run live LLM evaluation tests")
     for item in items:
         if item.get_closest_marker("llm_eval"):
             item.add_marker(skip_reason)

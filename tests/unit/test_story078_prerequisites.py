@@ -27,9 +27,7 @@ class TestStubAgentDeletion:
         """additional_agents.py must not exist anywhere in the agents package."""
         agents_dir = Path(__file__).parents[2] / "src" / "solstein" / "agents"
         stub_file = agents_dir / "additional_agents.py"
-        assert not stub_file.exists(), (
-            "additional_agents.py still exists — STORY-078 requires deleting it"
-        )
+        assert not stub_file.exists(), "additional_agents.py still exists — STORY-078 requires deleting it"
 
     def test_additional_agents_not_importable(self) -> None:
         """Importing the stub module must raise ImportError."""
@@ -71,9 +69,7 @@ class TestADRDocumentation:
         content = self.ADR_PATH.read_text()
         excluded_agents = ["LinkedInAgent", "PatentsAgent", "JobsAgent", "TechTrendsAgent"]
         for agent in excluded_agents:
-            assert "Excluded" in content or "EXCLUDED" in content, (
-                f"ADR-014 must explain why {agent} is excluded"
-            )
+            assert "Excluded" in content or "EXCLUDED" in content, f"ADR-014 must explain why {agent} is excluded"
 
     def test_adr_identifies_implemented_nodes(self) -> None:
         """Implemented agents must be listed with their graph node names."""
@@ -95,9 +91,7 @@ class TestCompiledGraphExcludesStubs:
         """The graph must contain exactly the 5 implemented data-collection nodes."""
         expected = {"github_data", "companies_house", "news_search", "sec_filings", "web_profile"}
         actual = set(PARALLEL_COLLECTION_NODES)
-        assert actual == expected, (
-            f"Unexpected parallel nodes: {actual.symmetric_difference(expected)}"
-        )
+        assert actual == expected, f"Unexpected parallel nodes: {actual.symmetric_difference(expected)}"
 
     def test_excluded_agents_not_in_graph_nodes(self) -> None:
         """linkedin_data, patents, jobs_data, tech_trends must not appear as graph nodes."""

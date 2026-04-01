@@ -46,8 +46,7 @@ def _client() -> SolsteinAPIClient:
 
 
 @click.group()
-@click.option("--output", type=click.Choice(["text", "json"]), default="text",
-              help="Output format (text or json)")
+@click.option("--output", type=click.Choice(["text", "json"]), default="text", help="Output format (text or json)")
 @click.version_option(package_name="solstein")
 def cli(output: str) -> None:
     """SolStein -- AI-Powered Competitive Intelligence Platform.
@@ -231,9 +230,9 @@ def research(company_name: str, wait: bool, poll_interval: int) -> None:
 
 @cli.command(name="export")
 @click.argument("company_id")
-@click.option("--format", "fmt", default="excel",
-              type=click.Choice(["excel", "json", "markdown"]),
-              help="Export format")
+@click.option(
+    "--format", "fmt", default="excel", type=click.Choice(["excel", "json", "markdown"]), help="Export format"
+)
 def export_cmd(company_id: str, fmt: str) -> None:
     """Export company data in the specified format."""
     client = _client()

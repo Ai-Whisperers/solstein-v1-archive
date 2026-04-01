@@ -65,8 +65,7 @@ class TestNoBareNow:
 
         assert not violations, (
             f"Found {len(violations)} bare datetime.now() calls "
-            f"(must use tz=timezone.utc):\n"
-            + "\n".join(f"  {v}" for v in violations)
+            f"(must use tz=timezone.utc):\n" + "\n".join(f"  {v}" for v in violations)
         )
 
     def test_no_utcnow(self) -> None:
@@ -86,16 +85,12 @@ class TestNoBareNow:
                 if not isinstance(node, ast.Call):
                     continue
                 func = node.func
-                if (
-                    isinstance(func, ast.Attribute)
-                    and func.attr == "utcnow"
-                ):
+                if isinstance(func, ast.Attribute) and func.attr == "utcnow":
                     violations.append(f"{rel}:{node.lineno}")
 
         assert not violations, (
             f"Found {len(violations)} datetime.utcnow() calls "
-            f"(use datetime.now(tz=timezone.utc) instead):\n"
-            + "\n".join(f"  {v}" for v in violations)
+            f"(use datetime.now(tz=timezone.utc) instead):\n" + "\n".join(f"  {v}" for v in violations)
         )
 
 
@@ -150,8 +145,7 @@ class TestDeferredFiles:
     def test_deferred_count_decreasing(self) -> None:
         """Deferred files should shrink as pre-existing issues are fixed."""
         assert len(_DEFERRED_FILES) <= 8, (
-            f"Deferred file count grew to {len(_DEFERRED_FILES)} — "
-            "only shrink this set, never add to it"
+            f"Deferred file count grew to {len(_DEFERRED_FILES)} — only shrink this set, never add to it"
         )
 
 

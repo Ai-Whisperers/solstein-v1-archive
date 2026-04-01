@@ -28,6 +28,7 @@ from solstein.agents.website_agent import WebsiteAgent
 # 1. No `requests` import
 # ---------------------------------------------------------------------------
 
+
 class TestNoRequestsImport:
     """Ensure no modified file imports the `requests` library."""
 
@@ -46,6 +47,7 @@ class TestNoRequestsImport:
 # ---------------------------------------------------------------------------
 # 2. No asyncio.to_thread in companies_house_agent
 # ---------------------------------------------------------------------------
+
 
 class TestNoToThread:
     """Verify Companies House no longer uses asyncio.to_thread."""
@@ -71,6 +73,7 @@ class TestNoToThread:
 # 3. Async signatures
 # ---------------------------------------------------------------------------
 
+
 class TestAsyncSignatures:
     """Verify key methods are async coroutines."""
 
@@ -95,6 +98,7 @@ class TestAsyncSignatures:
 # ---------------------------------------------------------------------------
 # 4. WebsiteAgent uses httpx.AsyncClient
 # ---------------------------------------------------------------------------
+
 
 class TestWebsiteAgentAsync:
     """Test that WebsiteAgent uses httpx.AsyncClient."""
@@ -131,6 +135,7 @@ class TestWebsiteAgentAsync:
 # 5. CompaniesHouseAgent async API methods
 # ---------------------------------------------------------------------------
 
+
 class TestCompaniesHouseAsync:
     """Test that Companies House _api_* methods use httpx.AsyncClient."""
 
@@ -138,9 +143,7 @@ class TestCompaniesHouseAsync:
     async def test_api_search_company_uses_async_client(self):
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {
-            "items": [{"company_number": "12345678", "title": "TestCorp Ltd"}]
-        }
+        mock_response.json.return_value = {"items": [{"company_number": "12345678", "title": "TestCorp Ltd"}]}
 
         mock_client = AsyncMock()
         mock_client.get.return_value = mock_response
@@ -185,6 +188,7 @@ class TestCompaniesHouseAsync:
 # ---------------------------------------------------------------------------
 # 6. WebsiteUnifiedAdapter concurrency
 # ---------------------------------------------------------------------------
+
 
 class TestWebsiteUnifiedConcurrency:
     """Verify fetch_facts runs fetches concurrently via asyncio.gather."""

@@ -56,13 +56,11 @@ class TestDeprecatedFeatureFlag:
             FeatureFlags.from_settings(settings)
 
         deprecation_msgs = [
-            w for w in caught
-            if issubclass(w.category, DeprecationWarning)
-            and "FEATURE_NEW_UNIFIED_LOADER" in str(w.message)
+            w
+            for w in caught
+            if issubclass(w.category, DeprecationWarning) and "FEATURE_NEW_UNIFIED_LOADER" in str(w.message)
         ]
-        assert len(deprecation_msgs) >= 1, (
-            "Expected DeprecationWarning for feature_new_unified_loader=True"
-        )
+        assert len(deprecation_msgs) >= 1, "Expected DeprecationWarning for feature_new_unified_loader=True"
 
     def test_feature_flag_false_no_warning(self) -> None:
         """Default (False) does not emit a DeprecationWarning."""
@@ -75,10 +73,8 @@ class TestDeprecatedFeatureFlag:
             FeatureFlags.from_settings(settings)
 
         deprecation_msgs = [
-            w for w in caught
-            if issubclass(w.category, DeprecationWarning)
-            and "FEATURE_NEW_UNIFIED_LOADER" in str(w.message)
+            w
+            for w in caught
+            if issubclass(w.category, DeprecationWarning) and "FEATURE_NEW_UNIFIED_LOADER" in str(w.message)
         ]
-        assert len(deprecation_msgs) == 0, (
-            "Default flag value should not emit DeprecationWarning"
-        )
+        assert len(deprecation_msgs) == 0, "Default flag value should not emit DeprecationWarning"

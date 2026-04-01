@@ -33,6 +33,7 @@ from solstein.agents.github_agent import GitHubAgent
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _fake_response(status_code: int = 200, json_data: Any = None) -> httpx.Response:
     """Create a fake httpx.Response."""
     resp = httpx.Response(
@@ -47,13 +48,13 @@ def _fake_response(status_code: int = 200, json_data: Any = None) -> httpx.Respo
 # Test: No requests import in github agent package
 # ---------------------------------------------------------------------------
 
+
 def test_no_requests_import_in_github_package():
     """STORY-133 AC: No import requests remains in any github agent file."""
     for mod in [client_mod, search_mod, analyzers_mod, github_agent_mod]:
         source = inspect.getsource(mod)
         assert "import requests" not in source, (
-            f"Found 'import requests' in {mod.__name__} — "
-            "STORY-133 requires all HTTP calls to use httpx"
+            f"Found 'import requests' in {mod.__name__} — STORY-133 requires all HTTP calls to use httpx"
         )
 
 
@@ -61,12 +62,11 @@ def test_no_requests_import_in_github_package():
 # Test: GitHubClient.get is async
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_github_client_get_is_async():
     """STORY-133 AC: GitHubClient.get uses await with httpx.AsyncClient."""
-    assert inspect.iscoroutinefunction(GitHubClient.get), (
-        "GitHubClient.get must be an async method"
-    )
+    assert inspect.iscoroutinefunction(GitHubClient.get), "GitHubClient.get must be an async method"
 
 
 @pytest.mark.asyncio
@@ -123,6 +123,7 @@ async def test_github_client_get_retries_without_auth_on_401():
 # Test: GitHubOrgSearcher is async
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_org_searcher_search_is_async():
     """GitHubOrgSearcher.search is async."""
@@ -164,6 +165,7 @@ async def test_org_searcher_fetch_repos_returns_list():
 # Test: DependencyAnalyzer is async
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_dependency_analyzer_is_async():
     """DependencyAnalyzer.analyze is async."""
@@ -188,8 +190,28 @@ async def test_dependency_analyzer_fetches_files_concurrently():
     client.fetch_file = _fake_fetch_file  # type: ignore[assignment]
 
     repos = [
-        GitHubRepo(name="repo1", full_name="acme/repo1", html_url="", description="", language="Python", stars=100, forks=10, open_issues=5, updated_at="2026-01-01"),
-        GitHubRepo(name="repo2", full_name="acme/repo2", html_url="", description="", language="JS", stars=50, forks=5, open_issues=2, updated_at="2026-01-01"),
+        GitHubRepo(
+            name="repo1",
+            full_name="acme/repo1",
+            html_url="",
+            description="",
+            language="Python",
+            stars=100,
+            forks=10,
+            open_issues=5,
+            updated_at="2026-01-01",
+        ),
+        GitHubRepo(
+            name="repo2",
+            full_name="acme/repo2",
+            html_url="",
+            description="",
+            language="JS",
+            stars=50,
+            forks=5,
+            open_issues=2,
+            updated_at="2026-01-01",
+        ),
     ]
 
     start = time.monotonic()
@@ -213,13 +235,25 @@ async def test_dependency_analyzer_parses_deps():
         if path == "requirements.txt":
             return "requests==2.31.0\nnumpy>=1.26.0\npandas==2.0.0"
         if path == "package.json":
-            return '{"dependencies": {"react": "18.0.0", "lodash": "4.17.21"}, "devDependencies": {"typescript": "5.3.0"}}'
+            return (
+                '{"dependencies": {"react": "18.0.0", "lodash": "4.17.21"}, "devDependencies": {"typescript": "5.3.0"}}'
+            )
         return None
 
     client.fetch_file = _fake_fetch  # type: ignore[assignment]
 
     repos = [
-        GitHubRepo(name="r1", full_name="o/r1", html_url="", description="", language="Python", stars=10, forks=1, open_issues=0, updated_at="2026-01-01"),
+        GitHubRepo(
+            name="r1",
+            full_name="o/r1",
+            html_url="",
+            description="",
+            language="Python",
+            stars=10,
+            forks=1,
+            open_issues=0,
+            updated_at="2026-01-01",
+        ),
     ]
 
     result = await analyzer.analyze("o", repos)
@@ -232,6 +266,7 @@ async def test_dependency_analyzer_parses_deps():
 # Test: GitHubAgent.gather end-to-end
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_github_agent_gather_end_to_end():
     """GitHubAgent.gather works with fully async pipeline."""
@@ -239,20 +274,22 @@ async def test_github_agent_gather_end_to_end():
 
     # Mock the searcher
     agent.searcher.search = AsyncMock(return_value="acme-corp")
-    agent.searcher.fetch_repos = AsyncMock(return_value=[
-        {
-            "name": "main-repo",
-            "full_name": "acme-corp/main-repo",
-            "html_url": "https://github.com/acme-corp/main-repo",
-            "description": "Main repo",
-            "language": "Python",
-            "stargazers_count": 500,
-            "forks_count": 50,
-            "open_issues_count": 10,
-            "default_branch": "main",
-            "updated_at": "2026-01-01T00:00:00Z",
-        }
-    ])
+    agent.searcher.fetch_repos = AsyncMock(
+        return_value=[
+            {
+                "name": "main-repo",
+                "full_name": "acme-corp/main-repo",
+                "html_url": "https://github.com/acme-corp/main-repo",
+                "description": "Main repo",
+                "language": "Python",
+                "stargazers_count": 500,
+                "forks_count": 50,
+                "open_issues_count": 10,
+                "default_branch": "main",
+                "updated_at": "2026-01-01T00:00:00Z",
+            }
+        ]
+    )
 
     # Mock dependency analyzer (async)
     agent.dep_analyzer.client.fetch_file = AsyncMock(return_value=None)
@@ -282,13 +319,13 @@ async def test_github_agent_gather_no_org_found():
 # Test: httpx.AsyncClient is used as context manager
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_async_client_used_as_context_manager():
     """STORY-133 AC: AsyncClient used as async context manager."""
     source = inspect.getsource(GitHubClient.get)
     assert "async with" in source, (
-        "GitHubClient.get must use 'async with httpx.AsyncClient()' "
-        "for proper connection management"
+        "GitHubClient.get must use 'async with httpx.AsyncClient()' for proper connection management"
     )
     assert "AsyncClient" in source
 
@@ -296,6 +333,7 @@ async def test_async_client_used_as_context_manager():
 # ---------------------------------------------------------------------------
 # Test: Timeout uses httpx-native approach
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_timeout_is_passed_to_httpx():

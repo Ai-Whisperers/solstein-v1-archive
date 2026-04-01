@@ -77,13 +77,15 @@ class TestExtractDocumentedFields:
     def test_extracts_from_temp_file(self, tmp_path: Path) -> None:
         """Custom lineage file can be parsed."""
         lineage = tmp_path / "lineage.md"
-        lineage.write_text(dedent("""\
+        lineage.write_text(
+            dedent("""\
             # Field Lineage
             | Field | Model |
             |-------|-------|
             | `alpha` | Company |
             | `parent.beta` | FinancialMetric |
-        """))
+        """)
+        )
         documented = extract_documented_fields(lineage)
         assert "alpha" in documented
         assert "beta" in documented
@@ -101,7 +103,8 @@ class TestCheckFieldLineage:
         """Strict mode returns exit code 1 when fields are undocumented."""
         # Create a minimal models file with a field not in the lineage doc
         fake_models = tmp_path / "models.py"
-        fake_models.write_text(dedent("""\
+        fake_models.write_text(
+            dedent("""\
             from pydantic import BaseModel
 
             class FinancialMetric(BaseModel):
@@ -110,18 +113,22 @@ class TestCheckFieldLineage:
             class Company(BaseModel):
                 name: str = ""
                 secret_field: str = ""
-        """))
+        """)
+        )
 
         fake_lineage = tmp_path / "lineage.md"
-        fake_lineage.write_text(dedent("""\
+        fake_lineage.write_text(
+            dedent("""\
             # Lineage
             | Field | Model |
             |-------|-------|
             | `name` | Company |
             | `revenue` | FinancialMetric |
-        """))
+        """)
+        )
 
         import scripts.ci.check_field_lineage as module
+
         monkeypatch.setattr(module, "MODELS_FILE", fake_models)
         monkeypatch.setattr(module, "LINEAGE_DOC", fake_lineage)
 
@@ -131,7 +138,8 @@ class TestCheckFieldLineage:
     def test_non_strict_mode_warns_only(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """Non-strict mode returns 0 even with undocumented fields."""
         fake_models = tmp_path / "models.py"
-        fake_models.write_text(dedent("""\
+        fake_models.write_text(
+            dedent("""\
             from pydantic import BaseModel
 
             class FinancialMetric(BaseModel):
@@ -140,18 +148,22 @@ class TestCheckFieldLineage:
             class Company(BaseModel):
                 name: str = ""
                 mystery_field: int = 0
-        """))
+        """)
+        )
 
         fake_lineage = tmp_path / "lineage.md"
-        fake_lineage.write_text(dedent("""\
+        fake_lineage.write_text(
+            dedent("""\
             # Lineage
             | Field | Model |
             |-------|-------|
             | `name` | Company |
             | `revenue` | FinancialMetric |
-        """))
+        """)
+        )
 
         import scripts.ci.check_field_lineage as module
+
         monkeypatch.setattr(module, "MODELS_FILE", fake_models)
         monkeypatch.setattr(module, "LINEAGE_DOC", fake_lineage)
 
@@ -162,10 +174,13 @@ class TestCheckFieldLineage:
 class TestWarningOutput:
     """CI check names specific undocumented fields in output."""
 
-    def test_warning_names_specific_field(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_warning_names_specific_field(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """Warning output includes the specific undocumented field name."""
         fake_models = tmp_path / "models.py"
-        fake_models.write_text(dedent("""\
+        fake_models.write_text(
+            dedent("""\
             from pydantic import BaseModel
 
             class FinancialMetric(BaseModel):
@@ -174,18 +189,22 @@ class TestWarningOutput:
             class Company(BaseModel):
                 name: str = ""
                 undocumented_xyz: str = ""
-        """))
+        """)
+        )
 
         fake_lineage = tmp_path / "lineage.md"
-        fake_lineage.write_text(dedent("""\
+        fake_lineage.write_text(
+            dedent("""\
             # Lineage
             | Field | Model |
             |-------|-------|
             | `name` | Company |
             | `revenue` | FinancialMetric |
-        """))
+        """)
+        )
 
         import scripts.ci.check_field_lineage as module
+
         monkeypatch.setattr(module, "MODELS_FILE", fake_models)
         monkeypatch.setattr(module, "LINEAGE_DOC", fake_lineage)
 

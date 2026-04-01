@@ -19,6 +19,7 @@ from solstein.analytics.energy_compliance import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_company(**overrides):  # type: ignore[no-untyped-def]
     """Create a minimal Company for testing."""
     from solstein.domain.models import Company
@@ -42,6 +43,7 @@ def scorer() -> EnergyComplianceScorer:
 # ---------------------------------------------------------------------------
 # TestResultStructure
 # ---------------------------------------------------------------------------
+
 
 class TestResultStructure:
     """Verify the compliance result has all required fields."""
@@ -78,6 +80,7 @@ class TestResultStructure:
 # TestCertificationScoring
 # ---------------------------------------------------------------------------
 
+
 class TestCertificationScoring:
     """Verify certifications improve regulatory score."""
 
@@ -105,6 +108,7 @@ class TestCertificationScoring:
 # ---------------------------------------------------------------------------
 # TestControlSystemScoring
 # ---------------------------------------------------------------------------
+
 
 class TestControlSystemScoring:
     """Verify control system sophistication scoring."""
@@ -141,6 +145,7 @@ class TestControlSystemScoring:
 # TestChangeExposure
 # ---------------------------------------------------------------------------
 
+
 class TestChangeExposure:
     """Verify regulatory change exposure scoring."""
 
@@ -162,6 +167,7 @@ class TestChangeExposure:
 # ---------------------------------------------------------------------------
 # TestRiskClassification
 # ---------------------------------------------------------------------------
+
 
 class TestRiskClassification:
     """Verify risk classification logic."""
@@ -188,6 +194,7 @@ class TestRiskClassification:
 # ---------------------------------------------------------------------------
 # TestRecommendations
 # ---------------------------------------------------------------------------
+
 
 class TestRecommendations:
     """Verify recommendations are generated for risk factors."""
@@ -216,6 +223,7 @@ class TestRecommendations:
 # ---------------------------------------------------------------------------
 # TestCompanyModelIntegration
 # ---------------------------------------------------------------------------
+
 
 class TestCompanyModelIntegration:
     """Verify Company model has compliance fields."""

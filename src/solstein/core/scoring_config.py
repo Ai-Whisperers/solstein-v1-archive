@@ -171,9 +171,7 @@ class AIReadinessScoringConfig(BaseModel):
     technical_debt_weight: float = Field(
         default_factory=lambda: float(os.getenv("SCORING_AI_TECH_DEBT_WEIGHT", "0.25"))
     )
-    ai_literacy_weight: float = Field(
-        default_factory=lambda: float(os.getenv("SCORING_AI_LITERACY_WEIGHT", "0.30"))
-    )
+    ai_literacy_weight: float = Field(default_factory=lambda: float(os.getenv("SCORING_AI_LITERACY_WEIGHT", "0.30")))
     process_automation_weight: float = Field(
         default_factory=lambda: float(os.getenv("SCORING_AI_AUTOMATION_WEIGHT", "0.20"))
     )

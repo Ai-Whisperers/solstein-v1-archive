@@ -38,7 +38,9 @@ def _make_company(**kwargs: Any) -> Company:
         "enrichment_sources": ["SEC EDGAR"],
         "signal_confidences": {"growth": 0.85},
         "financials": FinancialMetric(
-            revenue=50_000_000, employees=200, profit_margin=0.15,
+            revenue=50_000_000,
+            employees=200,
+            profit_margin=0.15,
             allow_empty_primary=True,
         ),
     }
@@ -116,7 +118,10 @@ class TestCompanyProfile:
         pdf.add_page()
         footnotes: list[tuple[int, str]] = []
         render_company_profile(
-            pdf, _make_company(source_links=[], enrichment_sources=[]), 1, footnotes,
+            pdf,
+            _make_company(source_links=[], enrichment_sources=[]),
+            1,
+            footnotes,
         )
         pdf.output(str(tmp_path / "profile_nosrc.pdf"))
         assert len(footnotes) == 0

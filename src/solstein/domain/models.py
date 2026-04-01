@@ -839,9 +839,7 @@ class ScoringExplanation(BaseModel):
         for comp in self.components:
             weight_pct = int(comp.confidence_weight * 100)
             sign = "+" if comp.value >= 0 else ""
-            lines.append(
-                f"  {comp.name}: {sign}{comp.value:.2f} ({weight_pct}% confident)"
-            )
+            lines.append(f"  {comp.name}: {sign}{comp.value:.2f} ({weight_pct}% confident)")
         if self.data_warnings:
             lines.append("  Warnings:")
             for warning in self.data_warnings:
