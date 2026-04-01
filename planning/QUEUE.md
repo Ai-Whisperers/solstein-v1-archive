@@ -486,7 +486,8 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 ### EPIC-031: Shared Library and Architecture (P2)
 
-> Deps: EPIC-007 (DDD — satisfied), EPIC-027/STORY-100 (bypass scripts deleted — DONE). All stories READY. Can run in parallel with STORY-245. Required before EPIC-066 can start.
+> **STATUS: COMPLETE** (all 5 stories DONE — PRs #225-#229). 8 files deferred from STORY-120 UTC fix due to pre-existing hook blockers.
+> Deps: EPIC-007 (DDD — satisfied), EPIC-027/STORY-100 (bypass scripts deleted — DONE). Required before EPIC-066 can start.
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
@@ -494,7 +495,7 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 | 137 | STORY-117 | Fix Circular Import Risk — Introduce shared/ Package | DONE | PR #226 |
 | 138 | STORY-118 | Formalize CLI as Proper Package Entrypoint | DONE | PR #227 |
 | 139 | STORY-119 | Split unified_loader.py into Separate Modules | DONE | PR #228 — already split in EPIC-021, added verification tests |
-| 140 | STORY-120 | Enforce UTC Timezone Policy Across All Modules | IN_PROGRESS | |
+| 140 | STORY-120 | Enforce UTC Timezone Policy Across All Modules | DONE | PR #229 — 8 files deferred due to pre-existing hook blockers |
 
 ### EPIC-066: Architectural Boundaries and Cycle Elimination (P1)
 
