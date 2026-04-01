@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
-import solstein.adapters.enrichment.website_unified as website_adapter_mod
+import solstein.adapters.enrichment._retired.website_unified as website_adapter_mod
 import solstein.agents.companies_house_agent as ch_mod
 import solstein.agents.website_agent as web_mod
 from solstein.adapters.enrichment._retired.website_unified import WebsiteUnifiedAdapter

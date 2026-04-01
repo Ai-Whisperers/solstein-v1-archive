@@ -15,6 +15,8 @@ from .rate_limit import (
 )
 from .security import (
     SupabaseJWTMiddleware as AuthenticationMiddleware,
+)
+from .security import (
     setup_security_middleware,
 )
 from .tracing import (

@@ -55,7 +55,7 @@ class SemanticSearchRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
     @model_validator(mode="after")
-    def validate_exactly_one_query_source(self) -> "SemanticSearchRequest":
+    def validate_exactly_one_query_source(self) -> SemanticSearchRequest:
         has_query = bool(self.query)
         has_company_id = bool(self.company_id)
         if has_query == has_company_id:

@@ -18,8 +18,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
-import solstein.adapters.enrichment.funding_unified as funding_mod
-import solstein.adapters.enrichment.news_unified as news_mod
+import solstein.adapters.enrichment._retired.funding_unified as funding_mod
+import solstein.adapters.enrichment._retired.news_unified as news_mod
 from solstein.adapters.enrichment._retired.funding_unified import FundingUnifiedAdapter
 from solstein.adapters.enrichment._retired.news_unified import NewsUnifiedAdapter
 
@@ -225,8 +225,8 @@ class TestNewsFetchFactsConcurrency:
 class TestFundingSyncHttpx:
     """Test that sync path uses httpx.get."""
 
-    @patch("solstein.adapters.enrichment.funding_unified.get_settings")
-    @patch("solstein.adapters.enrichment.funding_unified.httpx.get")
+    @patch("solstein.adapters.enrichment._retired.funding_unified.get_settings")
+    @patch("solstein.adapters.enrichment._retired.funding_unified.httpx.get")
     def test_get_crunchbase_data_uses_httpx(self, mock_get: MagicMock, mock_settings: MagicMock):
         mock_settings.return_value.http_timeouts.funding = 10.0
         mock_response = MagicMock()
@@ -274,7 +274,7 @@ class TestFundingAsyncHttpx:
         assert result is None
 
     @pytest.mark.asyncio
-    @patch("solstein.adapters.enrichment.funding_unified.get_settings")
+    @patch("solstein.adapters.enrichment._retired.funding_unified.get_settings")
     async def test_get_crunchbase_data_async_returns_data(self, mock_settings: MagicMock):
         mock_settings.return_value.http_timeouts.funding = 10.0
 
@@ -296,7 +296,7 @@ class TestFundingAsyncHttpx:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
-        with patch("solstein.adapters.enrichment.funding_unified.httpx.AsyncClient", return_value=mock_client):
+        with patch("solstein.adapters.enrichment._retired.funding_unified.httpx.AsyncClient", return_value=mock_client):
             adapter = FundingUnifiedAdapter.__new__(FundingUnifiedAdapter)
             adapter.crunchbase_api_key = "test-key"
             adapter.source_name = "funding_unified"
@@ -314,7 +314,7 @@ class TestFundingFetchFactsConcurrency:
     """Verify fetch_facts runs fetches concurrently via asyncio.gather."""
 
     @pytest.mark.asyncio
-    @patch("solstein.adapters.enrichment.funding_unified.get_settings")
+    @patch("solstein.adapters.enrichment._retired.funding_unified.get_settings")
     async def test_fetch_facts_concurrent(self, mock_settings: MagicMock):
         mock_settings.return_value.http_timeouts.funding = 10.0
         delay_seconds = 0.05
@@ -340,7 +340,7 @@ class TestFundingFetchFactsConcurrency:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
-        with patch("solstein.adapters.enrichment.funding_unified.httpx.AsyncClient", return_value=mock_client):
+        with patch("solstein.adapters.enrichment._retired.funding_unified.httpx.AsyncClient", return_value=mock_client):
             adapter = FundingUnifiedAdapter.__new__(FundingUnifiedAdapter)
             adapter.crunchbase_api_key = "test-key"
             adapter.source_name = "funding_unified"
