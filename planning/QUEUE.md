@@ -93,6 +93,40 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 ---
 
+## Consolidation And Depth Documentation (2026-03-31)
+
+These stories convert the dual-runtime diagnosis into explicit execution work. Do not start new compatibility patches, graph expansion, or new provider surfaces before the inventory and canonical-runtime work below is underway.
+
+### EPIC-067: Legacy Runtime Canonicalization (Consolidation)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 0f | STORY-271 | Publish Runtime Depth, Wiring, and Duplication Ledger | READY | Added 2026-03-31: document wired vs unwired surfaces, orphan objects, and dual-system LOC/file bloat before more migration work |
+| 0g | STORY-255 | Freeze Graph Runtime and Declare Legacy Pipeline Canonical | READY | Added 2026-03-31: commit history shows graph intent, runtime reality still favors legacy path |
+| 0h | STORY-256 | Delete Runtime Aliases and Feature-Flag Branching Around Orchestration | BLOCKED | Depends on STORY-271 and STORY-255 so deletion is evidence-driven rather than ad-hoc |
+| 0i | STORY-257 | Repair Legacy Entrypoints to Share One Registry and One Converter | BLOCKED | Depends on STORY-271 and STORY-256 |
+| 0j | STORY-258 | Define Salvage-vs-Rebuild Trigger for the Legacy Runtime | BLOCKED | Depends on STORY-271 and EPIC-070 evidence work |
+
+### EPIC-069: Provider Surface Rationalization (Consolidation)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 0k | STORY-263 | Build Provider Scorecard and Enforcement Matrix | READY | Added 2026-03-31: one provider ownership matrix before more adapter churn |
+| 0l | STORY-265 | Collapse Duplicate Adapter Pairs and Placeholder Services | BLOCKED | Depends on STORY-263 so collapse decisions cite one scorecard and include orphan/LOC reduction accounting |
+| 0m | STORY-264 | Remove Replaceable Providers from the Canonical Runtime | BLOCKED | Depends on STORY-263 and EPIC-067 canonical-runtime decision |
+| 0n | STORY-266 | Ban New Compatibility Patches at Provider Boundaries | READY | Added 2026-03-31: stop net-new wrapper growth during consolidation |
+
+### EPIC-070: Empirical Golden Runs and Rebuild Gate (Consolidation)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 0o | STORY-267 | Add Provider-Level Golden Contract Runs | BLOCKED | Depends on canonical provider/runtime decisions from EPIC-067 and EPIC-069 |
+| 0p | STORY-268 | Add Full-Market Golden Run with Artifact Diffing | BLOCKED | Depends on STORY-267 and canonical runtime path |
+| 0q | STORY-269 | Block Empty, Placeholder, and Mock Success Paths | BLOCKED | Depends on STORY-271 inventory and golden-run failure criteria |
+| 0r | STORY-270 | Make Save-vs-Rebuild Decision from Golden-Run Evidence | BLOCKED | Final consolidation gate after EPIC-067 through EPIC-070 evidence is collected |
+
+---
+
 ## M1: Safe Foundation
 
 ### EPIC-002: Configuration Integrity (P0) — Claimed Complete, VERIFY
