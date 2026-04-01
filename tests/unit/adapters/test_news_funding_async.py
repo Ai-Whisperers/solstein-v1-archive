@@ -82,8 +82,8 @@ class TestAsyncSignatures:
 class TestNewsSyncHttpx:
     """Test that sync path uses httpx.get."""
 
-    @patch("solstein.adapters.enrichment.news_unified.get_settings")
-    @patch("solstein.adapters.enrichment.news_unified.httpx.get")
+    @patch("solstein.adapters.enrichment._retired.news_unified.get_settings")
+    @patch("solstein.adapters.enrichment._retired.news_unified.httpx.get")
     def test_get_news_from_api_uses_httpx(self, mock_get: MagicMock, mock_settings: MagicMock):
         mock_settings.return_value.http_timeouts.news_api = 10.0
         mock_response = MagicMock()
@@ -119,7 +119,7 @@ class TestNewsAsyncHttpx:
         assert result == []
 
     @pytest.mark.asyncio
-    @patch("solstein.adapters.enrichment.news_unified.get_settings")
+    @patch("solstein.adapters.enrichment._retired.news_unified.get_settings")
     async def test_get_news_from_api_async_uses_async_client(self, mock_settings: MagicMock):
         mock_settings.return_value.http_timeouts.news_api = 10.0
 
@@ -141,7 +141,7 @@ class TestNewsAsyncHttpx:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
-        with patch("solstein.adapters.enrichment.news_unified.httpx.AsyncClient", return_value=mock_client):
+        with patch("solstein.adapters.enrichment._retired.news_unified.httpx.AsyncClient", return_value=mock_client):
             adapter = NewsUnifiedAdapter.__new__(NewsUnifiedAdapter)
             adapter.news_api_key = "test-key"
             adapter.source_name = "news_unified"
@@ -160,7 +160,7 @@ class TestNewsFetchFactsConcurrency:
     """Verify fetch_facts runs fetches concurrently via asyncio.gather."""
 
     @pytest.mark.asyncio
-    @patch("solstein.adapters.enrichment.news_unified.get_settings")
+    @patch("solstein.adapters.enrichment._retired.news_unified.get_settings")
     async def test_fetch_facts_concurrent(self, mock_settings: MagicMock):
         mock_settings.return_value.http_timeouts.news_api = 10.0
         delay_seconds = 0.05
@@ -186,7 +186,7 @@ class TestNewsFetchFactsConcurrency:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
-        with patch("solstein.adapters.enrichment.news_unified.httpx.AsyncClient", return_value=mock_client):
+        with patch("solstein.adapters.enrichment._retired.news_unified.httpx.AsyncClient", return_value=mock_client):
             adapter = NewsUnifiedAdapter.__new__(NewsUnifiedAdapter)
             adapter.news_api_key = "test-key"
             adapter.source_name = "news_unified"
