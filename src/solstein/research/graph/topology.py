@@ -163,14 +163,17 @@ def _web_profile_node(state: ResearchState) -> dict[str, Any]:
 def _conflict_resolution_node(state: ResearchState) -> dict[str, Any]:
     """Conflict resolution node — fan-in sync point.
 
+    .. warning:: STUB — returns empty containers. No reconciliation logic
+       is executed. The graph runtime is frozen (STORY-255); this node will
+       not be implemented until the graph is unfrozen.
+
     Reads: raw_github_facts, raw_companies_house_facts, raw_news_facts,
            raw_sec_facts, raw_web_facts, data_collection_errors
     Writes: conflict_flags, resolved_facts, completed_nodes
 
-    Receives all raw facts from the five parallel collection nodes and
-    resolves contradictions using the reconciliation logic from
-    src/solstein/research/reconcile.py. Each field gets a winner with
-    source attribution and confidence score.
+    Intended behavior (not implemented): receive all raw facts from the five
+    parallel collection nodes and resolve contradictions using the
+    reconciliation logic from src/solstein/research/reconcile.py.
     """
     logger.info(
         "[conflict_resolution] Merging facts from %d github, %d companies_house, "
@@ -191,17 +194,19 @@ def _conflict_resolution_node(state: ResearchState) -> dict[str, Any]:
 def _scoring_node(state: ResearchState) -> dict[str, Any]:
     """Scoring and classification node.
 
+    .. warning:: STUB — returns empty containers. No scoring logic is
+       executed. The graph runtime is frozen (STORY-255); this node will
+       not be implemented until the graph is unfrozen.
+
     Reads: resolved_facts, conflict_flags
     Writes: confidence_scores, company_scores, human_review_required,
             completed_nodes
 
-    Computes composite scores using src/solstein/analytics/scoring.py
-    and classifies each company into tier, threat level, and AI maturity.
-    Sets human_review_required=True when aggregate confidence < 0.5 or
-    when conflict_flags contain unresolved contradictions.
+    Intended behavior (not implemented): compute composite scores using
+    src/solstein/analytics/scoring.py and classify each company into
+    tier, threat level, and AI maturity.
 
-    Preserves human_review_required=True if already set by caller —
-    real implementation (STORY-078) will derive this from resolved_facts.
+    Preserves human_review_required=True if already set by caller.
     """
     logger.info("[scoring] Computing scores for %d companies", len(state.get("company_identifiers") or []))
     prior_review_required = state.get("human_review_required", False)

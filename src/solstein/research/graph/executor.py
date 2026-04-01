@@ -15,9 +15,9 @@ Key responsibilities:
     2. Node error isolation — a failure in one data-collection node is logged
        and recorded in the state, but does not crash the graph. Independent
        nodes continue executing.
-    3. Stable interface — run_graph_research() has the same signature shape as
-       run_market_intelligence() so callers can switch execution paths without
-       code changes beyond the import.
+    3. Frozen interface — run_graph_research() has the same signature shape as
+       run_market_intelligence() to preserve future migration optionality, but
+       the canonical production path is run_market_intelligence() (STORY-255).
 """
 
 from __future__ import annotations
@@ -315,9 +315,21 @@ def run_graph_research(
 ) -> dict[str, Any]:
     """Execute the LangGraph research pipeline.
 
-    This is the stable public interface for graph-based research.
-    Callers switch from run_market_intelligence() to this function by
-    changing the import — the signature is intentionally compatible.
+    .. warning:: FROZEN — STORY-255 (2026-03-31)
+
+       This function is part of the frozen graph runtime. It is **not** the
+       canonical production path — use ``run_market_intelligence()`` from
+       ``research/pipeline.py`` instead. The graph runtime receives only
+       bug fixes and security patches. See ADR-027 in
+       ``docs/architecture/decisions.md`` and the runtime ledger at
+       ``docs/architecture/runtime-depth-ledger.md`` for rationale.
+
+    .. note:: The ``_conflict_resolution_node`` and ``_scoring_node`` in
+       ``topology.py`` are still stubs that return empty containers. End-to-end
+       graph execution will not produce scores or resolve conflicts.
+
+    The signature is intentionally compatible with ``run_market_intelligence()``
+    to preserve future migration optionality.
 
     Args:
         company_identifiers: List of company IDs / names to research.
