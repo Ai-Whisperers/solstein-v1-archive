@@ -87,8 +87,8 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 0o | STORY-267 | Add Provider-Level Golden Contract Runs | DONE | PR #231 — 30 golden contract tests, ArtifactDiffer engine |
-| 0p | STORY-268 | Add Full-Market Golden Run with Artifact Diffing | READY | STORY-267 DONE, canonical runtime available |
-| 0q | STORY-269 | Block Empty, Placeholder, and Mock Success Paths | BLOCKED | Depends on STORY-271 inventory and golden-run failure criteria |
+| 0p | STORY-268 | Add Full-Market Golden Run with Artifact Diffing | DONE | PR #232 — 17 tests, MarketRunOrchestrator + regression gates |
+| 0q | STORY-269 | Block Empty, Placeholder, and Mock Success Paths | READY | STORY-271 DONE + golden-run framework from STORY-267/268 available |
 | 0r | STORY-270 | Make Save-vs-Rebuild Decision from Golden-Run Evidence | BLOCKED | Final consolidation gate after EPIC-067 through EPIC-070 evidence is collected |
 
 ---
