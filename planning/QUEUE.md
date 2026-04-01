@@ -71,7 +71,7 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 | 0g | STORY-255 | Freeze Graph Runtime and Declare Legacy Pipeline Canonical | DONE | PR #211 merged (PR #223 is duplicate — close) |
 | 0h | STORY-256 | Delete Runtime Aliases and Feature-Flag Branching Around Orchestration | DONE | PR #214 merged |
 | 0i | STORY-257 | Repair Legacy Entrypoints to Share One Registry and One Converter | DONE | PR #230 — canonical runtime facade, 12 tests |
-| 0j | STORY-258 | Define Salvage-vs-Rebuild Trigger for the Legacy Runtime | READY | STORY-271 DONE + EPIC-070 evidence (STORY-267/268/269 DONE) |
+| 0j | STORY-258 | Define Salvage-vs-Rebuild Trigger for the Legacy Runtime | DONE | PR #234 — decision doc + 13 executable salvage criteria tests |
 
 ### EPIC-069: Provider Surface Rationalization (Consolidation)
 
@@ -89,7 +89,7 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 | 0o | STORY-267 | Add Provider-Level Golden Contract Runs | DONE | PR #231 — 30 golden contract tests, ArtifactDiffer engine |
 | 0p | STORY-268 | Add Full-Market Golden Run with Artifact Diffing | DONE | PR #232 — 17 tests, MarketRunOrchestrator + regression gates |
 | 0q | STORY-269 | Block Empty, Placeholder, and Mock Success Paths | DONE | PR #233 — 28 tests, placeholder guards + router bypass fix |
-| 0r | STORY-270 | Make Save-vs-Rebuild Decision from Golden-Run Evidence | BLOCKED | Depends on STORY-258 (last EPIC-067 story) + all EPIC-070 evidence |
+| 0r | STORY-270 | Make Save-vs-Rebuild Decision from Golden-Run Evidence | READY | STORY-258 DONE (PR #234) + all EPIC-070 evidence available |
 
 ---
 
