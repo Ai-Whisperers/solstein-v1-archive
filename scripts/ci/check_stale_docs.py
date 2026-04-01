@@ -4,7 +4,7 @@
 import argparse
 import json
 import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 STALE_DAYS = 90
@@ -46,8 +46,6 @@ def check_stale(path: str, fail_on_stale: bool = False, json_output: bool = Fals
 
     stale_files = []
     now = datetime.now()
-    cutoff = now - timedelta(days=STALE_DAYS)
-
     for md_file in docs_path.rglob("*.md"):
         if "generated" in md_file.parts or "__pycache__" in str(md_file):
             continue

@@ -1,8 +1,8 @@
 """Check file sizes in Python codebase."""
 
+import argparse
 import sys
 from pathlib import Path
-import argparse
 
 
 def check_file_sizes(max_lines: int = 500, warn_lines: int = 400) -> tuple[list[Path], list[Path]]:

@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-03-31 | Updated By | Codex consolidation backlog update |
+| Last Updated | 2026-04-01 | Updated By | Codex develop lint gate signal update |
 
 ## Status Key
 
@@ -90,6 +90,18 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 | 0p | STORY-268 | Add Full-Market Golden Run with Artifact Diffing | DONE | PR #232 — 17 tests, MarketRunOrchestrator + regression gates |
 | 0q | STORY-269 | Block Empty, Placeholder, and Mock Success Paths | DONE | PR #233 — 28 tests, placeholder guards + router bypass fix |
 | 0r | STORY-270 | Make Save-vs-Rebuild Decision from Golden-Run Evidence | DONE | PR #235 — ADR-010 + 30 decision completeness tests |
+
+---
+
+## Develop Lint Gate Signal Restoration (2026-04-01)
+
+The canonical `develop` branch still has substantial real Ruff debt. Do not treat older queue notes that say "ruff clean" as repository-wide truth unless they explicitly scoped the claim to touched files. The 2026-04-01 pass removed invalid suppression noise from active files first; repo-wide `ruff check .` still reports `260` errors and must be handled as bounded follow-up work on `develop`, not via `master` lint-commit replay.
+
+### EPIC-018: Infrastructure-as-Code & CI/CD (Current Develop Quality Signal)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 0s | STORY-272 | Restore Ruff Gate Signal Integrity on Current Develop | IN_PROGRESS | Branch `work/develop-lint-gate-signal-2026-04-01`; initial commit `abd3761a` fixed invalid suppressions in `tests/conftest.py`, `tests/unit/test_behavioral_contracts.py`, `src/solstein/api/routers/scoring.py`, and `scripts/ci/agent_precommit_hook.py`; follow-up bounded pass made `scripts/ci/` Ruff-clean; repo-wide Ruff reduced `260 -> 207` without new ignore expansion |
 
 ---
 

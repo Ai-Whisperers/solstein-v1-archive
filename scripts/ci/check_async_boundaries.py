@@ -17,7 +17,6 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-
 DEFAULT_PATHS = [Path("src/solstein")]
 
 FORBIDDEN_SYNC_CALLS: dict[str, str] = {

@@ -64,3 +64,12 @@ Manual quality checks that require developer discipline are less reliable than a
 
 ## Notes
 This story has no dependencies and can be started immediately — it is one of the earliest-deliverable improvements in the backlog. Pre-commit hooks complement CI (STORY-061) but do not replace it: hooks run on changed files for speed, CI runs on the full codebase for thoroughness. The secrets detection hook is particularly important given the hardcoded credentials found in STORY-007 — preventing future credential commits is as important as removing existing ones.
+
+## 2026-04-01 Empirical Update
+
+The current local guardrails are themselves carrying invalid lint suppressions, so "hook exists" is not the same as "hook signal is trustworthy":
+
+- [scripts/ci/agent_precommit_hook.py](/home/gestalt/Desktop/solstein/solstein/scripts/ci/agent_precommit_hook.py) contained multiple `# noqa: broad-except` directives, which Ruff does not recognize as valid rule suppressions.
+- That means the local quality gate can appear cleaner than it is while still accumulating rule-noise and inconsistent enforcement semantics.
+
+This story should now be read together with STORY-272. Before expanding hook coverage, the repository needs valid, machine-recognized suppressions and a bounded plan to reduce current `develop` lint debt without broad ignore-file expansion.
