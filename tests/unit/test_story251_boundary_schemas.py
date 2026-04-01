@@ -17,7 +17,6 @@ from solstein.infrastructure.fact_payloads import (
     validate_connector_fact_payloads,
 )
 
-
 # ===========================================================================
 # ConnectorFactPayload: strict ingress with legacy alias support
 # ===========================================================================
@@ -219,3 +218,194 @@ class TestAPIRequestModelConfigInSource:
         # enrichment.py request models
         text = (schemas_dir / "enrichment.py").read_text()
         assert 'extra="forbid"' in text, "EnrichmentRequest lost extra=forbid"
+
+
+# ===========================================================================
+# Domain ingress models: extra="forbid" enforcement
+# ===========================================================================
+
+# Load evidence/models.py directly to avoid evidence/__init__ import chain
+# (which pulls in crawl4ai, neo4j, and other heavy deps)
+import importlib.util as _ilu
+import types as _types
+
+from solstein.domain.models import Company, FinancialMetric
+from solstein.tenant.models import (
+    Tenant,
+    TenantConfig,
+    TenantFeatures,
+    TenantLimits,
+    TenantUsage,
+    TenantUser,
+)
+
+_EVIDENCE_MODELS_PATH = (
+    Path(__file__).resolve().parents[2] / "src" / "solstein" / "evidence" / "models.py"
+)
+_ev_spec = _ilu.spec_from_file_location(
+    "solstein_evidence_models_isolated",
+    _EVIDENCE_MODELS_PATH,
+    submodule_search_locations=[],
+)
+assert _ev_spec is not None and _ev_spec.loader is not None
+_ev_mod: _types.ModuleType = _ilu.module_from_spec(_ev_spec)
+_ev_spec.loader.exec_module(_ev_mod)
+
+# Rebuild models to resolve forward references from __future__ annotations
+from datetime import datetime
+from typing import Any
+from uuid import UUID
+
+_ns = {
+    "UUID": UUID,
+    "datetime": datetime,
+    "Any": Any,
+    "ConfidenceComponent": _ev_mod.ConfidenceComponent,
+    "ClaimStatus": _ev_mod.ClaimStatus,
+    "SourceType": _ev_mod.SourceType,
+}
+for _cls_name in ("ConfidenceComponent", "Claim", "SourceDocument", "Contradiction", "EvidenceReadiness"):
+    _cls = getattr(_ev_mod, _cls_name)
+    _cls.model_rebuild(_types_namespace=_ns)
+
+Claim = _ev_mod.Claim
+ConfidenceComponent = _ev_mod.ConfidenceComponent
+Contradiction = _ev_mod.Contradiction
+EvidenceReadiness = _ev_mod.EvidenceReadiness
+SourceDocument = _ev_mod.SourceDocument
+SourceType = _ev_mod.SourceType
+
+
+class TestDomainModelStrictIngress:
+    """Domain models reject undeclared fields at ingress."""
+
+    def test_financial_metric_rejects_extra_field(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            FinancialMetric(revenue=1000, employees=10, bogus_field="oops")
+
+    def test_financial_metric_valid_creation(self) -> None:
+        fm = FinancialMetric(revenue=1000, employees=10)
+        assert fm.revenue == 1000
+
+    def test_financial_metric_extra_absent_from_dump(self) -> None:
+        fm = FinancialMetric(revenue=500, employees=5)
+        dumped = fm.model_dump()
+        assert "bogus_field" not in dumped
+
+    def test_company_rejects_extra_field(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            Company(id="COMP-001", name="Test", unknown_attr="nope")
+
+    def test_company_valid_creation(self) -> None:
+        c = Company(id="COMP-001", name="TestCo")
+        assert c.name == "TestCo"
+
+    def test_company_extra_absent_from_dump(self) -> None:
+        c = Company(id="COMP-001", name="TestCo")
+        dumped = c.model_dump()
+        assert "unknown_attr" not in dumped
+
+
+class TestTenantModelStrictIngress:
+    """Tenant models reject undeclared fields at ingress."""
+
+    def test_tenant_rejects_extra_field(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            Tenant(name="Acme", hacker_field="injected")
+
+    def test_tenant_valid_creation(self) -> None:
+        t = Tenant(name="Acme")
+        assert t.name == "Acme"
+
+    def test_tenant_limits_rejects_extra_field(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            TenantLimits(max_companies=100, sneaky="data")
+
+    def test_tenant_features_rejects_extra_field(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            TenantFeatures(ai_enrichment=True, hidden_flag=True)
+
+    def test_tenant_config_rejects_extra_field(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            TenantConfig(tenant_id="T1", rogue_setting="bad")
+
+    def test_tenant_user_rejects_extra_field(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            TenantUser(tenant_id="T1", email="a@b.com", admin_override=True)
+
+    def test_tenant_usage_rejects_extra_field(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            TenantUsage(tenant_id="T1", date="2026-01-01", phantom_metric=99)
+
+
+class TestEvidenceModelStrictIngress:
+    """Evidence models reject undeclared fields at ingress."""
+
+    def test_confidence_component_rejects_extra_field(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            ConfidenceComponent(name="src", score=0.8, explanation="ok", bonus=1.0)
+
+    def test_claim_rejects_extra_field(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            Claim(
+                entity_id="E1",
+                field="revenue",
+                value=1000,
+                source_url="https://example.com",
+                source_type=SourceType.WEBSITE,
+                snippet="Revenue was $1000",
+                extraction_method="regex",
+                ghost_field="haunted",
+            )
+
+    def test_claim_valid_creation(self) -> None:
+        claim = Claim(
+            entity_id="E1",
+            field="revenue",
+            value=1000,
+            source_url="https://example.com",
+            source_type=SourceType.WEBSITE,
+            snippet="Revenue was $1000",
+            extraction_method="regex",
+        )
+        assert claim.entity_id == "E1"
+
+    def test_claim_extra_absent_from_dump(self) -> None:
+        claim = Claim(
+            entity_id="E1",
+            field="revenue",
+            value=1000,
+            source_url="https://example.com",
+            source_type=SourceType.WEBSITE,
+            snippet="Revenue was $1000",
+            extraction_method="regex",
+        )
+        dumped = claim.model_dump()
+        assert "ghost_field" not in dumped
+
+    def test_source_document_rejects_extra_field(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            SourceDocument(
+                url="https://example.com",
+                source_type=SourceType.NEWS,
+                domain="example.com",
+                extra_meta="leaked",
+            )
+
+    def test_contradiction_rejects_extra_field(self) -> None:
+        from uuid import uuid4
+
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            Contradiction(
+                claim_ids=[uuid4(), uuid4()],
+                field="revenue",
+                values=[100, 200],
+                debug_info="should not exist",
+            )
+
+    def test_evidence_readiness_rejects_extra_field(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            EvidenceReadiness(
+                entity_id="E1",
+                internal_score=99.9,
+            )

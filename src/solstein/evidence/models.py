@@ -17,7 +17,7 @@ from enum import Enum
 from typing import Any
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ClaimStatus(str, Enum):
@@ -53,6 +53,8 @@ class SourceType(str, Enum):
 class ConfidenceComponent(BaseModel):
     """Component of confidence score with explanation."""
 
+    model_config = ConfigDict(extra="forbid")
+
     name: str
     score: float = Field(ge=0.0, le=1.0)
     explanation: str
@@ -66,6 +68,8 @@ class Claim(BaseModel):
     This is the core unit of evidence in the system. Every metric,
     signal, and score should ultimately trace back to one or more claims.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     # Identity
     id: UUID = Field(default_factory=uuid4)
@@ -112,12 +116,6 @@ class Claim(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat(),
-            UUID: lambda v: str(v),
-        }
-
     def calculate_overall_confidence(self) -> float:
         """Calculate weighted overall confidence from components."""
         if not self.confidence_components:
@@ -136,6 +134,8 @@ class SourceDocument(BaseModel):
     """
     A source document from which claims are extracted.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     id: UUID = Field(default_factory=uuid4)
     url: str
@@ -162,17 +162,13 @@ class SourceDocument(BaseModel):
     referrer_url: str | None = None
     user_agent: str = "SolsteinBot/1.0"
 
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat(),
-            UUID: lambda v: str(v),
-        }
-
 
 class Contradiction(BaseModel):
     """
     A contradiction between two or more claims.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     id: UUID = Field(default_factory=uuid4)
     claim_ids: list[UUID]
@@ -191,17 +187,13 @@ class Contradiction(BaseModel):
     detected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     resolved_at: datetime | None = None
 
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat(),
-            UUID: lambda v: str(v),
-        }
-
 
 class EvidenceReadiness(BaseModel):
     """
     Evidence readiness score for an entity.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     entity_id: str
     entity_type: str = "company"
@@ -225,11 +217,6 @@ class EvidenceReadiness(BaseModel):
     recommended_sources: list[str] = Field(default_factory=list)
 
     calculated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat(),
-        }
 
 
 # Field definitions for common company metrics

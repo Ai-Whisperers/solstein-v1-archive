@@ -89,7 +89,7 @@ DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000000"
 class FinancialMetric(BaseModel):
     """Financial metrics domain entity."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
     allow_empty_primary: bool = Field(default=False, exclude=True)
     revenue: float | None = None
@@ -151,7 +151,7 @@ class FinancialMetric(BaseModel):
 class Company(BaseModel):
     """Company domain entity."""
 
-    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
+    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True, extra="forbid")
 
     id: str = Field(..., description="Unique company identifier")
     tenant_id: str = Field(

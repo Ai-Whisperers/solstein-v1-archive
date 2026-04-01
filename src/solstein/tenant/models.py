@@ -13,7 +13,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TenantPlan(str, Enum):
@@ -47,6 +47,8 @@ class Tenant(BaseModel):
         stripe_customer_id: Stripe customer ID for billing
     """
 
+    model_config = ConfigDict(extra="forbid", use_enum_values=True)
+
     id: str = Field(default_factory=lambda: str(__import__("uuid").uuid4()))
     name: str
     plan: TenantPlan = TenantPlan.STARTER
@@ -55,9 +57,6 @@ class Tenant(BaseModel):
     settings: dict[str, Any] = Field(default_factory=dict)
     api_key_hash: str | None = None
     stripe_customer_id: str | None = None
-
-    class Config:
-        use_enum_values = True
 
 
 class TenantLimits(BaseModel):
@@ -70,6 +69,8 @@ class TenantLimits(BaseModel):
         max_users: Maximum team members
         max_storage_gb: Storage limit in GB
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     max_companies: int = 1000
     max_api_calls_per_day: int = 10000
@@ -90,6 +91,8 @@ class TenantFeatures(BaseModel):
         sso: Enable SSO authentication
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     ai_enrichment: bool = True
     advanced_scoring: bool = False
     api_access: bool = True
@@ -103,6 +106,8 @@ class TenantConfig(BaseModel):
 
     Combines limits, features, and custom settings.
     """
+
+    model_config = ConfigDict(extra="forbid", use_enum_values=True)
 
     tenant_id: str
     limits: TenantLimits = Field(default_factory=TenantLimits)
@@ -123,9 +128,6 @@ class TenantConfig(BaseModel):
     # Default settings
     default_market: str = "global"
     allowed_export_formats: list[str] = Field(default_factory=lambda: ["pdf", "excel", "csv"])
-
-    class Config:
-        use_enum_values = True
 
 
 # Default configurations per plan
@@ -208,6 +210,8 @@ class TenantUser(BaseModel):
         last_login: Last login timestamp
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     id: str = Field(default_factory=lambda: str(__import__("uuid").uuid4()))
     tenant_id: str
     email: str
@@ -228,6 +232,8 @@ class TenantUsage(BaseModel):
         storage_gb: Storage used in GB
         companies_tracked: Number of companies
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     tenant_id: str
     date: str  # YYYY-MM-DD
