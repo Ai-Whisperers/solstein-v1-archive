@@ -70,7 +70,7 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 | 0f | STORY-271 | Publish Runtime Depth, Wiring, and Duplication Ledger | DONE | PR #210 merged |
 | 0g | STORY-255 | Freeze Graph Runtime and Declare Legacy Pipeline Canonical | DONE | PR #211 merged (PR #223 is duplicate — close) |
 | 0h | STORY-256 | Delete Runtime Aliases and Feature-Flag Branching Around Orchestration | DONE | PR #214 merged |
-| 0i | STORY-257 | Repair Legacy Entrypoints to Share One Registry and One Converter | IN_PROGRESS | Unblocked: STORY-271 (PR #210) + STORY-256 (PR #214) both merged |
+| 0i | STORY-257 | Repair Legacy Entrypoints to Share One Registry and One Converter | DONE | PR #230 — canonical runtime facade, 12 tests |
 | 0j | STORY-258 | Define Salvage-vs-Rebuild Trigger for the Legacy Runtime | BLOCKED | Depends on STORY-271 and EPIC-070 evidence work |
 
 ### EPIC-069: Provider Surface Rationalization (Consolidation)
