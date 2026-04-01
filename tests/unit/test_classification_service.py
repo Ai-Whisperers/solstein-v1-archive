@@ -1,4 +1,3 @@
-
 from solstein.analytics.classification_service import (
     ClassificationResult,
     ClassificationService,

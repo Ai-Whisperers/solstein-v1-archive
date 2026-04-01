@@ -3,7 +3,6 @@
 F3: Tests for standardized error envelope.
 """
 
-
 from solstein.core.error_envelope import (
     ErrorCategory,
     ErrorContext,

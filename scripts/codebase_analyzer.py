@@ -5,14 +5,13 @@ Runs hourly to identify anti-patterns, gaps, and improvement opportunities
 """
 
 import ast
-import os
-import re
 import json
+import re
 import subprocess
-from pathlib import Path
-from dataclasses import dataclass, asdict
-from typing import List, Dict, Optional, Tuple
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
+
 
 @dataclass
 class AntiPattern:
@@ -34,8 +33,8 @@ class Metric:
 class CodebaseAnalyzer:
     def __init__(self, src_dir: str = "src/solstein"):
         self.src_dir = Path(src_dir)
-        self.anti_patterns: List[AntiPattern] = []
-        self.metrics: List[Metric] = []
+        self.anti_patterns: list[AntiPattern] = []
+        self.metrics: list[Metric] = []
         self.files_analyzed = 0
         self.total_lines = 0
         

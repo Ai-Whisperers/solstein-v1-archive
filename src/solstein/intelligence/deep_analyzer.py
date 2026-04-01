@@ -627,7 +627,13 @@ Provide 2-3 specific reasons with explanations."""
         # Assess AI capabilities (inline simple version)
         combined_text = " ".join(source_texts).lower()
         ai_signals = {
-            "very_strong": ["ai-native", "machine learning", "deep learning", "neural network", "artificial intelligence"],
+            "very_strong": [
+                "ai-native",
+                "machine learning",
+                "deep learning",
+                "neural network",
+                "artificial intelligence",
+            ],
             "strong": ["ai", "ml", "predictive", "automation", "algorithm"],
             "moderate": ["analytics", "data-driven", "optimization"],
         }
@@ -643,7 +649,13 @@ Provide 2-3 specific reasons with explanations."""
         ai_score = min(10, signal_strength * 1.5)
         ai_assessment = {
             "score": round(ai_score, 1),
-            "signal_level": "Very Strong" if ai_score >= 8 else "Strong" if ai_score >= 5 else "Moderate" if ai_score >= 2 else "Minimal",
+            "signal_level": "Very Strong"
+            if ai_score >= 8
+            else "Strong"
+            if ai_score >= 5
+            else "Moderate"
+            if ai_score >= 2
+            else "Minimal",
             "evidence": detected_signals[:5],
             "evidence_count": len(detected_signals),
         }
@@ -755,7 +767,9 @@ Provide 2-3 specific reasons with explanations."""
         blindspot_analysis += "This competitor may be hard to discover through traditional research because:\n\n"
         blindspot_analysis += "1. **Search term variations:** May use non-standard terminology for energy software\n"
         blindspot_analysis += "2. **Geographic factors:** Different regional positioning or market focus\n"
-        blindspot_analysis += "3. **Category positioning:** Markets itself outside traditional ETRM/energy software categories\n"
+        blindspot_analysis += (
+            "3. **Category positioning:** Markets itself outside traditional ETRM/energy software categories\n"
+        )
 
         # Key insights
         key_insights = [
@@ -765,7 +779,9 @@ Provide 2-3 specific reasons with explanations."""
             + (
                 "Yes"
                 if capability_matrix.high_overlap_capabilities >= 5
-                else "Partial" if capability_matrix.high_overlap_capabilities >= 3 else "Limited"
+                else "Partial"
+                if capability_matrix.high_overlap_capabilities >= 3
+                else "Limited"
             ),
         ]
 

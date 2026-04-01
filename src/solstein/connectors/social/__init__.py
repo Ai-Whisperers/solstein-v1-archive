@@ -15,14 +15,18 @@ __all__ = [
 ]
 
 
-from .podcastindex import PodcastIndexConnector
+from .podcastindex import PodcastIndexConnector  # noqa: F401
 
-__all__.extend([
-    "PodcastIndexConnector",
-])
+__all__.extend(
+    [
+        "PodcastIndexConnector",
+    ]
+)
 
-from .twitter import TwitterConnector
+from .twitter import TwitterConnector  # noqa: F401
 
-__all__.extend([
-    "TwitterConnector",
-])
+__all__.extend(
+    [
+        "TwitterConnector",
+    ]
+)

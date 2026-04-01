@@ -112,10 +112,7 @@ class FinancialSignalExtractor(SignalExtractor):
                     signal_confidence=0.85,
                     source_facts=["Crunchbase"],
                     calculation_method="extraction",
-                    reasoning=(
-                        f"${latest_round.get('size', 0):,} at "
-                        f"${latest_round.get('valuation', 0):,} valuation"
-                    ),
+                    reasoning=(f"${latest_round.get('size', 0):,} at ${latest_round.get('valuation', 0):,} valuation"),
                 )
             )
 

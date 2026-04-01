@@ -4,15 +4,17 @@ from typing import Any
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+from supabase_auth.errors import AuthApiError
 
 from ..api.services.drill_down_service import DrillDownService
+from ..core.supabase_client import get_supabase
 from ..infrastructure.company_repository import CompanyRepository
 from ..infrastructure.database import db_manager
 from ..infrastructure.database_service import DatabaseService
 from ..infrastructure.enrichment_repositories import EnrichmentAuditRepository, EnrichmentCacheRepository
 from ..infrastructure.repositories import FactRepository
-from ..security.jwt_handler import UserPayload, jwt_handler
 
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
@@ -67,10 +69,25 @@ async def get_enrichment_cache_repository(
 security = HTTPBearer()
 
 
+class UserPayload(BaseModel):
+    """User payload extracted from Supabase JWT token.
+
+    STORY-067: Replaces the old jwt_handler.UserPayload. Fields are now
+    sourced from Supabase Auth's user object rather than a custom JWT.
+    """
+
+    user_id: str
+    email: str
+    role: str = "user"
+
+
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
 ) -> UserPayload:
-    """Get current user from JWT token.
+    """Get current user by verifying token with Supabase Auth.
+
+    STORY-067: Delegates token verification entirely to Supabase Auth SDK.
+    No custom JWT decoding or signing logic exists in this codebase.
 
     Args:
         credentials: HTTP Authorization credentials with Bearer token
@@ -89,14 +106,35 @@ async def get_current_user(
         )
 
     try:
-        return jwt_handler.verify_token(credentials.credentials)
-    except Exception as e:
-        logger.warning(f"Token verification failed: {e}")
+        client = get_supabase()
+        user_response = client.auth.get_user(credentials.credentials)
+    except AuthApiError as e:
+        logger.warning(f"Token verification failed: {e.message}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
-        ) from None
+        ) from e
+    except (ValueError, ImportError) as e:
+        logger.error(f"Supabase configuration error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Authentication service unavailable",
+        ) from e
+
+    if not user_response or not user_response.user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = user_response.user
+    return UserPayload(
+        user_id=user.id,
+        email=user.email or "",
+        role=user.role or "user",
+    )
 
 
 async def get_current_tenant(request: Request) -> dict[str, Any]:
@@ -114,7 +152,6 @@ async def get_current_tenant(request: Request) -> dict[str, Any]:
         )
 
     return tenant
-
 
 
 async def require_admin(user: UserPayload = Depends(get_current_user)) -> UserPayload:

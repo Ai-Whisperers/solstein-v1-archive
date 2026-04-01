@@ -245,10 +245,10 @@ ROCKET_THRESHOLD = 7.0
 class CompanyScorer:
     def __init__(self):
         self._cache: dict[str, float] = {}
-    
+
     def calculate_score(self, company: Company) -> float:
         return self._calculate_from_metrics(company.financials)
-    
+
     def _calculate_from_metrics(self, metrics: FinancialMetric) -> float:
         ...
 
@@ -260,7 +260,7 @@ Company_Scorer = None                      # Misleading name
 class companyScorer:                       # Should be PascalCase
     def __init__(self):
         self.cache = {}                    # Should be private (_cache)
-    
+
     def CalculateScore(self, company):    # Should be snake_case
         ...
 ```
@@ -320,20 +320,20 @@ ruff check --select I src/ --fix
 # ✅ GOOD — Google-style docstring
 def calculate_scores(self, company: Company) -> Company:
     """Calculate all scores for a company profile.
-    
+
     Computes growth, financial health, and competitive position
     scores, then applies classification logic.
-    
+
     Args:
         company: Company profile to score.
-    
+
     Returns:
         The same company with scores and classification populated.
         Note: This method mutates the input (see ADR-008).
-    
+
     Raises:
         ValueError: If company has no financial data.
-    
+
     Examples:
         >>> scorer = GrowthScorer()
         >>> company = Company(id="test", name="Test Corp")
@@ -409,18 +409,18 @@ If a function exceeds these, break it into smaller functions:
 def process_market(market: str):
     # 1. Load data
     companies = load_companies(market)
-    
+
     # 2. Score them
     for company in companies:
         calculate_scores(company)
-    
+
     # 3. Filter
     phoenixes = [c for c in companies if c.classification == "Phoenix"]
-    
+
     # 4. Export
     exporter = ExcelExporter()
     exporter.export(rockets)
-    
+
     # 5. Notify
     send_email(f"Processed {len(companies)} companies")
     # ... 40 more lines
@@ -586,7 +586,7 @@ SOLSTEIN_SCORING__GROWTH__ROCKET_THRESHOLD=7.0
 class Settings(BaseSettings):
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     scoring: ScoringSettings = Field(default_factory=ScoringSettings)
-    
+
     class Config:
         env_file = ".env"
         env_nested_delimiter = "__"  # Supports nested config
@@ -703,10 +703,10 @@ def test_calculate_score():
     # Arrange — Set up test data
     company = make_company(growth_rate=50.0)
     scorer = GrowthScorer()
-    
+
     # Act — Perform action
     result = scorer.calculate_scores(company)
-    
+
     # Assert — Verify results
     assert result.growth_score > 7.0
     assert result.classification == "Phoenix"
@@ -806,7 +806,7 @@ def search_companies(query: str) -> list[Company]:
     # Validate query
     if not query or len(query) < 2:
         raise ValueError("Query must be at least 2 characters")
-    
+
     # Escape for SQL (if using raw SQL, which you shouldn't)
     # Or use parameterized queries
     return repo.search(query)
@@ -876,11 +876,10 @@ Use `# noqa` (flake8) and `# type: ignore` (mypy) sparingly, with explanations.
 ## References
 
 - [pyproject.toml](../../pyproject.toml) — Tool configurations
-- [CONTRIBUTING.md](../../CONTRIBUTING.md) — Contributing guidelines
+- [CONTRIBUTING.md](../reference/CONTRIBUTING.md) — Contributing guidelines
 - [Module Architecture](../architecture/modules.md) — How modules are organized
 
 ---
 
 *Last Updated: February 20, 2026*
 *Maintained by: Dev Standards Committee*
-

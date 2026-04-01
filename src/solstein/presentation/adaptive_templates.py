@@ -177,9 +177,7 @@ class AdaptiveTemplates:
                         f"{rev_per_emp:.0f}K per employee shows operational efficiency"
                     )
                 else:
-                    strengths.append(
-                        f"- **Revenue Scale**: €{company.financials.revenue:.1f}M revenue"
-                    )
+                    strengths.append(f"- **Revenue Scale**: €{company.financials.revenue:.1f}M revenue")
 
             if company.ebitda_margin:
                 if company.ebitda_margin > 30:

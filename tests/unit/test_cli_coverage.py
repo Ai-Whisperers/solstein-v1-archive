@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from solstein.cli import cli
+from solstein.cli_legacy import cli
 from solstein.domain.models import Company, FinancialMetric
 
 
@@ -56,7 +56,7 @@ def test_verbose_logger(runner: CliRunner) -> None:
     assert result.exit_code == 0
 
 
-@patch("solstein.cli.BatchExtractor")
+@patch("solstein.cli_legacy.BatchExtractor")
 def test_extract_command(mock_batch_cls: MagicMock, runner: CliRunner, tmp_path: Path) -> None:
     mock_batch = MagicMock()
     mock_batch_cls.return_value = mock_batch
@@ -85,7 +85,7 @@ def test_extract_command(mock_batch_cls: MagicMock, runner: CliRunner, tmp_path:
     mock_batch.save_to_json.assert_called_once()
 
 
-@patch("solstein.cli.ExcelExporter")
+@patch("solstein.cli_legacy.ExcelExporter")
 def test_export_excel_command(
     mock_exporter_cls: MagicMock, runner: CliRunner, mock_profiles: Path, tmp_path: Path
 ) -> None:
@@ -104,7 +104,7 @@ def test_export_excel_command(
     assert "Failed to create dashboard" in res.output
 
 
-@patch("solstein.cli.GrowthScorer")
+@patch("solstein.cli_legacy.GrowthScorer")
 def test_score_command(mock_scorer_cls: MagicMock, runner: CliRunner, mock_profiles: Path, tmp_path: Path) -> None:
     mock_scorer = MagicMock()
     mock_scorer_cls.return_value = mock_scorer

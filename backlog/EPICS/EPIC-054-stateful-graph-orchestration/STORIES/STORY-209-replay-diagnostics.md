@@ -5,7 +5,7 @@
 | **Status** | 🔴 Not Started |
 | **Priority** | P2 |
 | **Size** | M (1-2 days) |
-| **Epic** | [EPIC-054](README.md) |
+| **Epic** | [EPIC-054](../README.md) |
 | **Created** | 2026-03-10 |
 | **Risk** | Medium |
 

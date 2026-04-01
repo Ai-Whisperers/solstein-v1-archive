@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from ...config import get_settings
 from ...llm.enhanced_client import EnhancedLLMClient, get_enhanced_llm_client
+from ...llm.prompts import get_system_prompt
 
 
 class FilterResponse(BaseModel):
@@ -163,14 +164,13 @@ class LLMFilter:
         """
         company_info = self._format_company_info(company)
 
-        system_prompt = """You are a company analysis assistant. Given a company profile and a filter criteria, determine if the company matches. Respond ONLY with JSON: {"matches": true/false, "reasoning": "..."}"""
+        system_prompt = get_system_prompt("system_company_filter")
 
-        user_prompt = f"""Company Profile:
-{company_info}
-
-Filter Criteria: "{criteria}"
-
-Does this company match? JSON only."""
+        user_prompt = (
+            f"Company Profile:\n{company_info}\n\n"
+            f'Filter Criteria: "{criteria}"\n\n'
+            "Does this company match? JSON only."
+        )
 
         # Try using the enhanced LLM client
         try:
@@ -184,7 +184,7 @@ Does this company match? JSON only."""
             if result:
                 return result.matches, f"[LLM] {result.reasoning}"
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - broad catch intentional for LLM failover
             logger.warning(f"LLM filter failed: {e}, falling back to keyword")
 
         # Fallback to keyword filter

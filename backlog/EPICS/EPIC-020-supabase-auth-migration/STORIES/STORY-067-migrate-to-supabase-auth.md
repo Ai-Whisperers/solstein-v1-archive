@@ -6,7 +6,7 @@
 | Priority | P1 |
 | Severity | CRITICAL |
 | Epic | [EPIC-020: Supabase Auth Migration](../README.md) |
-| Supersedes | [STORY-001](../../EPIC-001-security-restoration/STORIES/STORY-001-real-password-hashing.md), [STORY-003](../../EPIC-001-security-restoration/STORIES/STORY-003-jwt-secret-rotation.md) |
+| Supersedes | [STORY-001](../../../archive/superseded/STORY-001-real-password-hashing.md), [STORY-003](../../../archive/superseded/STORY-003-jwt-secret-rotation.md) |
 | Created | 2026-02-28 |
 | Dependencies | [EPIC-002](../../EPIC-002-configuration-integrity/README.md) (config must be clean) |
 

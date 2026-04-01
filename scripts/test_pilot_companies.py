@@ -15,8 +15,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from solstein.evidence import (
     EvidenceService,
     get_evidence_service,
-    create_claim,
-    SourceType,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -75,7 +73,7 @@ async def test_company(service: EvidenceService, company: dict) -> dict:
             max_pages=3,  # Limit to 3 pages per company for testing
         )
 
-        print(f"✅ Success!")
+        print("✅ Success!")
         print(f"   Pages crawled: {result['pages_crawled']}")
         print(f"   Claims extracted: {result['claims_extracted']}")
         print(f"   Claims stored: {result['claims_stored']}")

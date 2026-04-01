@@ -40,7 +40,7 @@ def test_confidence_system():
             # Check signal_confidences is populated
             if not company.signal_confidences:
                 errors.append(f"{company.name}: signal_confidences is empty")
-                print(f"    ✗ signal_confidences is EMPTY")
+                print("    ✗ signal_confidences is EMPTY")
             else:
                 print(f"    ✓ signal_confidences: {company.signal_confidences}")
 
@@ -63,7 +63,7 @@ def test_confidence_system():
             # Check confidence_scores is synced from signal_confidences
             if not company.confidence_scores:
                 errors.append(f"{company.name}: confidence_scores is empty (should be synced from signal_confidences)")
-                print(f"    ✗ confidence_scores is EMPTY")
+                print("    ✗ confidence_scores is EMPTY")
             else:
                 print(f"    ✓ confidence_scores: {company.confidence_scores}")
 

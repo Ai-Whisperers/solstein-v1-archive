@@ -166,7 +166,6 @@ class IdentifierLookupService:
             request=request,
             operation=_operation,
             retryable_exceptions=(RuntimeError, TimeoutError),
-            empty_is_degraded=True,
             empty_error="No identifiers resolved",
             extra_metadata={"strategy_count": len(self._strategies)},
         )

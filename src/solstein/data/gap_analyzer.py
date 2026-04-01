@@ -22,7 +22,7 @@ REQUIRED_FINANCIAL_FIELDS = (
 ZERO_ALLOWED_FIELDS = {
     "growth_rate",
     "profit_margin",
-    "revenue",   # pre-revenue companies legitimately have revenue=0.0
+    "revenue",  # pre-revenue companies legitimately have revenue=0.0
     "employees",  # 0 employees is technically valid (solo founder, etc.)
 }
 

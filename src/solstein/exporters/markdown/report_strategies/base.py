@@ -54,6 +54,9 @@ class ReportStrategy(ABC):
     def get_output_path(self, company: Company, output_dir: Path) -> Path:
         """Get the output file path for this report.
 
+        STORY-181: Use clean filenames (e.g., 'deep-analysis.md') since files
+        are already placed in a company-named directory. No company name prefix.
+
         Args:
             company: Company being reported on
             output_dir: Output directory
@@ -61,5 +64,5 @@ class ReportStrategy(ABC):
         Returns:
             Path object for output file
         """
-        filename = f"{self.formatter.sanitize_filename(company.name)}_{self.filename_suffix}.md"
+        filename = f"{self.filename_suffix.replace('_', '-')}.md"
         return output_dir / filename

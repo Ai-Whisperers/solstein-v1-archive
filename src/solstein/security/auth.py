@@ -143,7 +143,7 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
-        ) from None
+        ) from e
 
 
 async def get_current_active_user(

@@ -2,8 +2,10 @@
 """Final provider status report."""
 
 import sys
+from pathlib import Path as _Path
 
-sys.path.insert(0, "/home/ai-whisperers/solstein/src")
+# Resolve src dynamically: scripts/provider_status_final.py → project root/src
+sys.path.insert(0, str(_Path(__file__).resolve().parent.parent / "src"))
 
 print("=" * 70)
 print("🔐 Ivan's API Keystore - FINAL STATUS REPORT")

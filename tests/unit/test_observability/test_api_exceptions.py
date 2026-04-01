@@ -13,27 +13,34 @@ from solstein.exceptions import NotFoundError
 app = FastAPI()
 setup_exception_handlers(app)
 
+
 class DummyPayload(BaseModel):
     email: str
     age: int
+
 
 @app.get("/api-error")
 def trigger_api_error():
     raise APIError(code="TEST_ERROR", message="Test API error", status_code=400)
 
+
 @app.get("/domain-error")
 def trigger_domain_error():
     raise NotFoundError("Company", "COMP-123")
+
 
 @app.post("/validation-error")
 def trigger_validation_error(payload: DummyPayload):
     return {"status": "ok"}
 
+
 @app.get("/generic-error")
 def trigger_generic_error():
     raise ValueError("Secret error details")
 
+
 client = TestClient(app, raise_server_exceptions=False)
+
 
 class TestAPIError:
     """Test APIError custom exception."""
@@ -53,6 +60,7 @@ class TestAPIError:
         assert "error" in data
         assert data["error"]["code"] == "TEST_ERROR"
         assert data["error"]["message"] == "Test API error"
+
 
 class TestSolsteinErrorHandler:
     """Test SolsteinError exception handler."""
@@ -74,6 +82,7 @@ class TestSolsteinErrorHandler:
             assert "traceback" not in data.lower()
             assert "stack_trace" not in data.lower()
 
+
 class TestValidationExceptionHandler:
     """Test Pydantic validation error handler."""
 
@@ -86,6 +95,7 @@ class TestValidationExceptionHandler:
         assert "error" in data
         assert data["error"]["code"] == "VALIDATION_ERROR"
         assert "details" in data["error"]
+
 
 class TestGlobalExceptionHandler:
     """Test global exception handler."""

@@ -1,0 +1,34 @@
+[Unit]
+Description=Solstein Autonomous Agent Cycles (24/7 Improvement Loop)
+After=network-online.target
+Wants=network-online.target
+Documentation=file://${PROJECT_ROOT}/docs/agent-cycles/
+
+[Service]
+Type=simple
+WorkingDirectory=${PROJECT_ROOT}
+
+# Environment setup
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONPATH=${PROJECT_ROOT}/src"
+
+# Run orchestrator — ${PYTHON_EXECUTABLE} and ${PROJECT_ROOT} are substituted at install time
+# by scripts/install-service.sh
+ExecStart=${PYTHON_EXECUTABLE} ${PROJECT_ROOT}/bin/orchestrate_agents.py --continuous
+
+# Auto-restart on failure
+Restart=on-failure
+RestartSec=30
+
+# Log output
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=solstein-agents
+
+# Resource limits
+CPUQuota=50%
+TasksMax=100
+
+[Install]
+WantedBy=default.target

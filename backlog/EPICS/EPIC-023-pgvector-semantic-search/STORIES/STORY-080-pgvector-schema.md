@@ -7,7 +7,7 @@
 | Severity | HIGH |
 | Epic | [EPIC-023: pgvector Semantic Search](../README.md) |
 | Created | 2026-02-28 |
-| Dependencies | [STORY-063](../../EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-063-tenant-model.md) (tenant model), [EPIC-019](../../EPIC-019-multi-tenancy-data-isolation/README.md) (RLS must apply to vector search) |
+| Dependencies | [STORY-063](../../EPIC-019-multi-tenancy-data-isolation/STORIES/STORY-063-define-tenant-model.md) (tenant model), [EPIC-019](../../EPIC-019-multi-tenancy-data-isolation/README.md) (RLS must apply to vector search) |
 
 ---
 

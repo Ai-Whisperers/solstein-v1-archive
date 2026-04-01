@@ -192,17 +192,17 @@ class ModuleBoundaryEnforcer:
         print("=" * 80)
 
         print("\n📊 Architectural Layers:")
-        for name, level in sorted(self.LAYERS.items(), key=lambda x: x[1], reverse=True):
+        for name, level in sorted(self.LAYERS.items(), key=lambda item: item[1], reverse=True):
             indent = "  " * (4 - level)
             print(f"{indent}Layer {level}: {name}")
 
         print("\n📋 Allowed Dependencies:")
         for layer, allowed in sorted(self.ALLOWED_DEPS.items(), reverse=True):
             layer_name = self._get_layer_name(layer)
-            allowed_names = [self._get_layer_name(l) for l in allowed]
+            allowed_names = [self._get_layer_name(level) for level in allowed]
             print(f"  {layer_name}: can import from {', '.join(allowed_names)}")
 
-        has_violations = self.enforce()
+        self.enforce()
 
         if self.violations:
             print(f"\n❌ BOUNDARY VIOLATIONS ({len(self.violations)} found):")
@@ -260,7 +260,7 @@ def main():
             "violation_count": len(enforcer.violations),
             "violations": enforcer.violations,
             "layers": enforcer.LAYERS,
-            "allowed_deps": {k: v for k, v in enforcer.ALLOWED_DEPS.items()},
+            "allowed_deps": dict(enforcer.ALLOWED_DEPS),
         }
         print(json.dumps(output, indent=2))
         sys.exit(0 if len(enforcer.violations) == 0 else 1)

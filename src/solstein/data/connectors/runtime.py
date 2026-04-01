@@ -4,6 +4,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from typing import Any, TypeVar
 
+from solstein.config import get_settings
 from solstein.infrastructure.retry_policy import (
     CircuitBreaker,
     FailureClassification,
@@ -24,7 +25,14 @@ class ConnectorRuntime:
         sleep_func: Callable[[float], Awaitable[None]] | None = None,
     ) -> None:
         self.retry_policy = retry_policy or RetryPolicy(max_attempts=3)
-        self.circuit_breaker = circuit_breaker or CircuitBreaker(failure_threshold=5, cooldown_seconds=30.0)
+        if circuit_breaker is not None:
+            self.circuit_breaker = circuit_breaker
+        else:
+            _cb = get_settings().circuit_breaker
+            self.circuit_breaker = CircuitBreaker(
+                failure_threshold=_cb.failure_threshold,
+                cooldown_seconds=_cb.cooldown_seconds,
+            )
         self.sleep_func = sleep_func or asyncio.sleep
 
     async def run(
@@ -33,10 +41,19 @@ class ConnectorRuntime:
         request: ConnectorRequest,
         operation: Callable[[], Awaitable[PayloadT]],
         retryable_exceptions: tuple[type[Exception], ...] = (Exception,),
-        empty_is_degraded: bool = False,
-        empty_error: str = "No payload returned",
+        empty_error: str | None = None,
         extra_metadata: dict[str, Any] | None = None,
     ) -> ConnectorResponse[PayloadT]:
+        """Run an operation with retry and circuit-breaker protection.
+
+        Args:
+            request: Connector request metadata.
+            operation: Zero-argument async callable to execute.
+            retryable_exceptions: Exception types that trigger a retry.
+            empty_error: If not ``None``, treat an empty/falsy payload as a
+                degraded response with this error message.
+            extra_metadata: Additional metadata to include in the response.
+        """
         metadata = dict(extra_metadata or {})
         if not self.circuit_breaker.allow_request():
             return ConnectorResponse(
@@ -54,7 +71,7 @@ class ConnectorRuntime:
                 payload = await operation()
                 self.circuit_breaker.record_success()
 
-                if empty_is_degraded and not payload:
+                if empty_error is not None and not payload:
                     return ConnectorResponse(
                         status="degraded",
                         connector=request.connector,

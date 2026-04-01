@@ -1,4 +1,7 @@
-"""GitHub organization search."""
+"""GitHub organization search.
+
+STORY-133: Migrated to async — all methods now use await for HTTP calls.
+"""
 
 from __future__ import annotations
 
@@ -15,7 +18,7 @@ class GitHubOrgSearcher:
     def __init__(self, client: GitHubClient):
         self.client = client
 
-    def search(self, company_name: str) -> str | None:
+    async def search(self, company_name: str) -> str | None:
         """Search for company's GitHub organization."""
         search_queries = [
             company_name,
@@ -24,19 +27,19 @@ class GitHubOrgSearcher:
         ]
 
         for query in [q for q in search_queries if q]:
-            result = self._search_org(query)
+            result = await self._search_org(query)
             if result:
                 return result
 
         return None
 
-    def _search_org(self, query: str) -> str | None:
+    async def _search_org(self, query: str) -> str | None:
         """API call to search for GitHub org."""
         url = f"{self.client.api_base}/search/users"
         params = {"q": f"{query} type:org", "per_page": 5}
 
         try:
-            resp = self.client.get(url, params=params, timeout=10)
+            resp = await self.client.get(url, params=params)
             if resp.status_code == 200:
                 data = resp.json()
                 items = data.get("items", [])
@@ -49,7 +52,7 @@ class GitHubOrgSearcher:
 
         return None
 
-    def fetch_repos(self, org_name: str, max_repos: int = 100) -> list[dict]:
+    async def fetch_repos(self, org_name: str, max_repos: int = 100) -> list[dict]:
         """Fetch repos from GitHub org, paginating until max_repos is reached."""
         url = f"{self.client.api_base}/orgs/{org_name}/repos"
         all_repos: list[dict] = []
@@ -65,7 +68,7 @@ class GitHubOrgSearcher:
             }
 
             try:
-                resp = self.client.get(url, params=params, timeout=15)
+                resp = await self.client.get(url, params=params)
                 if resp.status_code != 200:
                     logger.warning(f"GitHub repo fetch failed for org '{org_name}' (status={resp.status_code})")
                     break

@@ -44,6 +44,7 @@ sys.modules["_models_module"] = _models_module
 _spec.loader.exec_module(_models_module)
 
 # Re-export all models from the original location for backward compatibility
+DEFAULT_TENANT_ID = _models_module.DEFAULT_TENANT_ID  # EPIC-019
 ConfidenceLevel = _models_module.ConfidenceLevel
 AIMaturity = _models_module.AIMaturity
 ThreatLevel = _models_module.ThreatLevel
@@ -65,8 +66,12 @@ SignalExtraction = _models_module.SignalExtraction
 SignalExtractionRecord = _models_module.SignalExtractionRecord
 GatheringBatch = _models_module.GatheringBatch
 CompanyAnalysisAuditTrail = _models_module.CompanyAnalysisAuditTrail
+ApiKeyScope = _models_module.ApiKeyScope  # EPIC-019 STORY-065
+ApiKey = _models_module.ApiKey  # EPIC-019 STORY-065
 
 __all__ = [
+    # EPIC-019 Tenant
+    "DEFAULT_TENANT_ID",
     # Enums
     "ConfidenceLevel",
     "AIMaturity",
@@ -96,4 +101,7 @@ __all__ = [
     "SignalExtractionRecord",
     "GatheringBatch",
     "CompanyAnalysisAuditTrail",
+    # API Key Management (EPIC-019)
+    "ApiKeyScope",
+    "ApiKey",
 ]

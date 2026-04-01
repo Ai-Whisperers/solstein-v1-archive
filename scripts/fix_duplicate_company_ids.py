@@ -17,7 +17,7 @@ from collections import defaultdict
 
 sys.path.insert(0, "src")
 
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from solstein.infrastructure.database import get_async_engine

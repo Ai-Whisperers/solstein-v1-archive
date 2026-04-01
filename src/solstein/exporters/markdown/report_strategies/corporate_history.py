@@ -3,7 +3,7 @@
 EPIC-022: Extracted from CompanyReportGenerator for modularity.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from solstein.domain.models import Company
 
@@ -34,7 +34,7 @@ class CorporateHistoryStrategy(ReportStrategy):
 
         return f"""# Corporate History - {company.name}
 
-**Report Date**: {datetime.now().strftime("%B %Y")}
+**Report Date**: {datetime.now(tz=timezone.utc).strftime("%B %Y")}
 **Data Source**: SolStein Competitive Intelligence Platform
 **Classification**: {company.classification or "N/A"}
 

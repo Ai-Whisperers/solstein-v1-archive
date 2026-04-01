@@ -85,7 +85,7 @@ class CoverageTracker:
         """
         try:
             # Run pytest with coverage
-            result = subprocess.run(
+            subprocess.run(
                 [
                     "pytest",
                     "--cov=src/solstein",
@@ -188,13 +188,13 @@ def print_report(report: CoverageReport):
     print("TEST COVERAGE REPORT")
     print("=" * 60)
     print(f"Timestamp: {report.timestamp}")
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  Total Coverage: {report.total_coverage:.1f}%")
     print(f"  Statements: {report.total_statements}")
     print(f"  Missing: {report.total_missing}")
 
     if report.modules:
-        print(f"\nModules (sorted by coverage):")
+        print("\nModules (sorted by coverage):")
         print("-" * 60)
         print(f"{'Module':<40} {'Coverage':>10} {'Missing':>8}")
         print("-" * 60)

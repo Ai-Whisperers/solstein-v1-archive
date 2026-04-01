@@ -214,24 +214,23 @@ class KimiProviderStrategy(ProviderClientStrategy):
 
 
 class AnthropicProviderStrategy(ProviderClientStrategy):
-    """Anthropic provider client strategy."""
+    """Anthropic provider client strategy using native Anthropic SDK.
+
+    STORY-071: Replaced OpenAI-compatible wrapper with AsyncAnthropic.
+    """
 
     @property
     def provider_name(self) -> str:
         return "anthropic"
 
     def create_client(self, settings: Settings) -> Any | None:
-        from openai import AsyncOpenAI
+        from anthropic import AsyncAnthropic
 
         api_key = self._check_api_key(settings, "anthropic_api_key")
         if not api_key:
             return None
 
-        return AsyncOpenAI(
-            api_key=api_key,
-            base_url="https://api.anthropic.com/v1",
-            default_headers={"anthropic-version": "2023-06-01"},
-        )
+        return AsyncAnthropic(api_key=api_key)
 
 
 class SiliconFlowProviderStrategy(ProviderClientStrategy):
@@ -294,7 +293,7 @@ class ProviderClientFactory:
 
         try:
             return strategy.create_client(settings)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — intentional broad catch for client init
             logger.warning(f"Failed to initialize {provider} client: {e}")
             return None
 

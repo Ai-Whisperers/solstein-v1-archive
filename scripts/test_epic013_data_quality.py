@@ -6,8 +6,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from solstein.validation.company_validator import CompanyValidator, ValidationSeverity
 from solstein.analytics.data_quality import DataQualityCalculator
+from solstein.validation.company_validator import CompanyValidator
 
 
 def test_data_validation():
@@ -99,7 +99,7 @@ def test_data_quality():
         print(f"\n  Company: {report.company_name}")
         print(f"  Overall Score: {report.overall_score:.0%}")
         print(f"  Fields Present: {report.fields_present}/{report.fields_total}")
-        print(f"\n  Category Scores:")
+        print("\n  Category Scores:")
         for category, score in report.category_scores.items():
             print(f"    - {category}: {score:.0%}")
 
@@ -132,7 +132,7 @@ def test_market_report():
 
         print(f"\n  Companies Analyzed: {report['companies_analyzed']}")
         print(f"  Market Average Score: {report['market_average_score']}")
-        print(f"\n  Quality Distribution:")
+        print("\n  Quality Distribution:")
         for quality, count in report['quality_distribution'].items():
             print(f"    - {quality.capitalize()}: {count}")
 

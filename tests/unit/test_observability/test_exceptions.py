@@ -6,7 +6,6 @@ This module tests the new exception hierarchy that provides:
 - Backwards compatibility
 """
 
-
 from solstein.exceptions import (
     AuthenticationError,
     ConfigurationError,

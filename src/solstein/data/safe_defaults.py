@@ -187,8 +187,12 @@ class SafeDefault:
 # Convenience instances for common use cases
 def SafeList():
     return SafeDefault(list)
+
+
 def SafeDict():
     return SafeDefault(dict)
+
+
 def SafeSet():
     return SafeDefault(set)
 

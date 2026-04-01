@@ -127,7 +127,6 @@ async def initialize_default_connectors() -> ConnectorRegistry:
     except Exception as e:
         logger.warning(f"Failed to initialize Reddit: {e}")
 
-
     # Additional product connectors
     try:
         stackoverflow = StackOverflowConnector()
@@ -213,7 +212,6 @@ async def initialize_default_connectors() -> ConnectorRegistry:
         registry.register("g2", g2)
     except Exception as e:
         logger.warning(f"Failed to initialize G2: {e}")
-
 
     # Additional news connectors
     try:

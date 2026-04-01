@@ -58,9 +58,7 @@ def test_record_outbox_failure_marks_failed_for_terminal_errors() -> None:
         record_outbox_failure(
             session=session,
             event=OutboxEvent(
-                event_key="run-1:research_run_persist",
-                event_type="research_run_persist",
-                payload={"run_id": "run-1"}
+                event_key="run-1:research_run_persist", event_type="research_run_persist", payload={"run_id": "run-1"}
             ),
             exc=ValueError("terminal"),
             max_attempts=3,

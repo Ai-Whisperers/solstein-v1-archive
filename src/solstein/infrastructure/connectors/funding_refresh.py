@@ -4,7 +4,7 @@ Uses Crunchbase API or news-based detection to fetch funding data.
 Implements incremental refresh with funding round detection.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
@@ -78,7 +78,7 @@ class FundingRefreshConnector(BaseRefreshConnector):
                             "average_round_size": (total_raised / funding.num_rounds if funding.num_rounds > 0 else 0),
                         },
                         "confidence": confidence,
-                        "extracted_at": datetime.now(),
+                        "extracted_at": datetime.now(tz=timezone.utc),
                         "source": self.source_name,
                         "metadata": {
                             "company_name": company_name,
@@ -92,7 +92,7 @@ class FundingRefreshConnector(BaseRefreshConnector):
                 if hasattr(funding, "latest_round") and funding.latest_round:
                     lr = funding.latest_round
                     # Handle both dict and dataclass/object
-                    lr_get = lr.get if isinstance(lr, dict) else lambda k, d=None, _lr=lr: getattr(_lr, k, d)
+                    lr_get = lr.get if isinstance(lr, dict) else lambda k, d=None, _lr=lr: getattr(_lr, k, d)  # noqa: B023
                     facts.append(
                         {
                             "company_id": company_name,
@@ -103,7 +103,7 @@ class FundingRefreshConnector(BaseRefreshConnector):
                                 "date": lr_get("date"),
                             },
                             "confidence": confidence,
-                            "extracted_at": datetime.now(),
+                            "extracted_at": datetime.now(tz=timezone.utc),
                             "source": self.source_name,
                             "metadata": {
                                 "company_name": company_name,
@@ -112,7 +112,7 @@ class FundingRefreshConnector(BaseRefreshConnector):
                         }
                     )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Failed to fetch funding data for {company_name}: {e}")
                 continue
 

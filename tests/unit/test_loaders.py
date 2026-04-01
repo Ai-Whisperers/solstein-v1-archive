@@ -1,92 +1,133 @@
+"""Tests for CompetitorDataLoader — exercises real code paths.
+
+STORY-044: Rewritten to test real loader behavior instead of relying on
+autouse fixture that silently patched load_companies().
+"""
+
 import json
-from pathlib import Path
-from unittest.mock import mock_open, patch
+
+import pytest
 
 from solstein.data.loaders import CompetitorDataLoader
-from solstein.domain.models import AIMaturity
+from solstein.domain.models import AIMaturity, CompanyTier
 
 
-def test_loader_missing_file():
-    """Test that loader returns mocked test data (fixture patches load_companies).
+@pytest.fixture
+def temp_data_dir(tmp_path):
+    """Create temporary data directory with proper structure."""
+    data_dir = tmp_path / "data" / "input"
+    data_dir.mkdir(parents=True)
+    return data_dir
 
-    Note: The autouse fixture in conftest.py patches CompetitorDataLoader.load_companies
-    to return test data, so this test verifies the mocked behavior works.
-    """
-    loader = CompetitorDataLoader(data_dir=Path("/non/existent/path"))
+
+def test_loader_missing_file(temp_data_dir):
+    """Test that a missing competitor_data.json raises FileNotFoundError."""
+    loader = CompetitorDataLoader(data_dir=temp_data_dir)
+    with pytest.raises(FileNotFoundError, match="Competitor data not found"):
+        loader.load_companies()
+
+
+def test_loader_invalid_json(temp_data_dir):
+    """Test that invalid JSON gracefully returns empty list."""
+    json_path = temp_data_dir / "competitor_data.json"
+    json_path.write_text("NOT VALID JSON {{{")
+
+    loader = CompetitorDataLoader(data_dir=temp_data_dir)
     companies = loader.load_companies()
-    # Should return mocked test data (3 companies from fixture)
-    assert len(companies) == 3
-    assert companies[0].name == "Eneve"
+    assert len(companies) == 0
 
 
-@patch("pathlib.Path.exists")
-@patch(
-    "builtins.open",
-    new_callable=mock_open,
-    read_data=json.dumps(
-        {
-            "competitors": [
-                {
-                    "company_name": "Tech Corp",
-                    "folder": "tech-corp-uk",
-                    "description": "A UK startup",
-                    "revenue": {
-                        "timeline": [
-                            {
-                                "eur_millions": 50.5,
-                                "yoy_growth_pct": 12.0,
-                                "confidence": "Confirm",
-                            }
-                        ]
-                    },
-                    "scorecard": {
-                        "composite_score": 7,
-                        "dimensions": {"SaaS Maturity": {"score": 6}},
-                    },
+def test_loader_success(temp_data_dir):
+    """Test that valid competitor JSON produces Company objects."""
+    json_path = temp_data_dir / "competitor_data.json"
+    comp_data = {
+        "competitors": [
+            {
+                "company_name": "Tech Corp",
+                "folder": "tech-corp",
+                "description": "A tech startup",
+                "revenue": {
+                    "timeline": [
+                        {
+                            "eur_millions": 50.5,
+                            "yoy_growth_pct": 12.0,
+                            "confidence": "Confirmed",
+                        }
+                    ]
                 },
-                {
-                    # Edge case: No revenue data, completely empty
+                "scorecard": {
+                    "composite_score": 7,
+                    "dimensions": {"SaaS Maturity": {"score": 6}},
                 },
-            ]
-        }
-    ),
-)
-def test_loader_success(mock_file, mock_exists):
-    mock_exists.return_value = True
+            },
+            {
+                "company_name": "Energy Co",
+                "folder": "energy-co",
+                "revenue": {
+                    "timeline": [
+                        {
+                            "eur_millions": 1500,
+                            "yoy_growth_pct": 20,
+                            "confidence": "Confirmed",
+                        }
+                    ]
+                },
+                "scorecard": {
+                    "composite_score": 9,
+                    "dimensions": {"SaaS Maturity": {"score": 9}},
+                },
+            },
+        ]
+    }
+    json_path.write_text(json.dumps(comp_data))
 
-    loader = CompetitorDataLoader(data_dir=Path("/mocked/path"))
+    loader = CompetitorDataLoader(data_dir=temp_data_dir)
     companies = loader.load_companies()
 
-    assert len(companies) == 3  # Fixture mocks load_companies to return 3 test companies
-
-    # Check first company from fixture (Eneve)
-    c1 = companies[0]
-    assert c1.name == "Eneve"
-    assert c1.id == "eneve_001"
-    assert c1.classification == "Phoenix"
-    assert c1.ai_maturity == AIMaturity.STRONG  # Fixed: fixture sets Strong
-
-    # Check second company from fixture (Test Company 2)
-    c2 = companies[1]
-    assert c2.name == "Test Company 2"
-    assert c2.id == "test_002"
-    assert c2.classification == "Salt"
-
-    # Check third company from fixture (Test Company 3)
-    c3 = companies[2]
-    assert c3.name == "Test Company 3"
-    assert c3.id == "test_003"
-    assert c3.classification == "Lead"
+    assert len(companies) == 2
+    assert companies[0].name == "Tech Corp"
+    assert companies[0].ai_maturity == AIMaturity.MODERATE
+    assert companies[0].tier == CompanyTier.TIER_3
+    assert companies[1].name == "Energy Co"
+    assert companies[1].ai_maturity == AIMaturity.STRONG
+    assert companies[1].tier == CompanyTier.TIER_1
 
 
-@patch("pathlib.Path.exists")
-@patch("builtins.open", new_callable=mock_open, read_data="INVALID JSON DATA")
-def test_loader_invalid_json(mock_file, mock_exists):
-    mock_exists.return_value = True
+def test_loader_caching(temp_data_dir):
+    """Test that repeated calls use cache."""
+    json_path = temp_data_dir / "competitor_data.json"
+    json_path.write_text(json.dumps({
+        "competitors": [
+            {
+                "company_name": "Cached Co",
+                "folder": "cached",
+                "scorecard": {"composite_score": 5, "dimensions": {"SaaS Maturity": {"score": 5}}},
+            }
+        ]
+    }))
 
-    loader = CompetitorDataLoader(data_dir=Path("/mocked/path"))
-    companies = loader.load_companies()
+    loader = CompetitorDataLoader(data_dir=temp_data_dir)
+    first_call = loader.load_companies()
+    assert len(first_call) == 1
 
-    # Fixture mocks load_companies to return test data, even with invalid JSON
-    assert len(companies) == 3
-    assert companies[0].name == "Eneve"
+    # Delete the file — cached result should still work
+    json_path.unlink()
+    second_call = loader.load_companies()
+    assert len(second_call) == 1
+    assert second_call[0].name == "Cached Co"
+
+
+def test_loader_limit(temp_data_dir):
+    """Test that limit parameter restricts results."""
+    json_path = temp_data_dir / "competitor_data.json"
+    json_path.write_text(json.dumps({
+        "competitors": [
+            {"company_name": f"Co {i}", "folder": f"co-{i}",
+             "scorecard": {"composite_score": 5, "dimensions": {"SaaS Maturity": {"score": 5}}}}
+            for i in range(5)
+        ]
+    }))
+
+    loader = CompetitorDataLoader(data_dir=temp_data_dir)
+    limited = loader.load_companies(limit=2)
+    assert len(limited) == 2

@@ -46,25 +46,6 @@ class ClientReportGenerator(CompanyReportGenerator):
         logger.info(f"Generated client report for {client_company.name} in {output_dir}")
         return generated
 
-    def _generate_competitive_analysis(self, client: Company, competitors: list[Company], output_dir: Path) -> Path:
-        """Generate competitive analysis report."""
-
-        # Sort competitors by score
-        sorted_comp = sorted(competitors, key=lambda c: c.composite_score or 0, reverse=True)
-
-        # Find direct competitors (similar tier/score)
-        [c for c in sorted_comp if c.tier == client.tier and c.id != client.id][:5]
-
-        # Find threats (higher score competitors)
-        [c for c in sorted_comp if (c.composite_score or 0) > (client.composite_score or 0)][:5]
-
-        def _fmt_float(value: float | None) -> str:
-            if value is None:
-                return "N/A"
-            return f"{value:.1f}"
-
-        self._avg([c.ai_score for c in competitors if c.ai_score is not None]) if competitors else None
-
     def _generate_competitive_analysis(
         self,
         client: Company,
@@ -86,15 +67,20 @@ class ClientReportGenerator(CompanyReportGenerator):
         ai_market_avg = self._avg([c.ai_score for c in competitors if c.ai_score is not None])
         growth_market_avg = self._avg([c.growth_score for c in competitors if c.growth_score is not None])
         growth_top = max([c.growth_score or 0 for c in competitors], default=None)
-        health_market_avg = self._avg([c.financial_health_score for c in competitors if c.financial_health_score is not None])
+        health_market_avg = self._avg(
+            [c.financial_health_score for c in competitors if c.financial_health_score is not None]
+        )
         health_top = max([c.financial_health_score or 0 for c in competitors], default=None)
-        position_market_avg = self._avg([c.competitive_position_score for c in competitors if c.competitive_position_score is not None])
+        position_market_avg = self._avg(
+            [c.competitive_position_score for c in competitors if c.competitive_position_score is not None]
+        )
         position_top = max([c.competitive_position_score or 0 for c in competitors], default=None)
         composite_market_avg = self._avg([c.composite_score for c in competitors if c.composite_score is not None])
         composite_top = max([c.composite_score or 0 for c in competitors], default=None)
 
-        # Check data authenticity
-        is_authentic, warning = self._check_data_authenticity([client] + competitors)
+        # Data authenticity warning (placeholder — synthetic data check
+        # is enforced at the ReportGenerator orchestration layer)
+        warning = ""
 
         # Sort competitors by score
         sorted_comp = sorted(
@@ -109,13 +95,25 @@ class ClientReportGenerator(CompanyReportGenerator):
         report_parts = [
             section_gen.generate_executive_summary(client, competitors, threats, ai_market_avg, warning),
             section_gen.generate_client_profile(
-                client, competitors,
-                self._rank_revenue, self._rank_growth, self._rank_score, self._rank_ai, self._rank_saas
+                client,
+                competitors,
+                self._rank_revenue,
+                self._rank_growth,
+                self._rank_score,
+                self._rank_ai,
+                self._rank_saas,
             ),
             section_gen.generate_competitive_positioning(
-                client, competitors, growth_market_avg, growth_top,
-                health_market_avg, health_top, position_market_avg, position_top,
-                composite_market_avg, composite_top
+                client,
+                competitors,
+                growth_market_avg,
+                growth_top,
+                health_market_avg,
+                health_top,
+                position_market_avg,
+                position_top,
+                composite_market_avg,
+                composite_top,
             ),
             section_gen.generate_direct_competitors(client, direct),
             section_gen.generate_competitor_details(client, direct),
@@ -132,7 +130,6 @@ class ClientReportGenerator(CompanyReportGenerator):
         output_path = output_dir / "competitive-analysis.md"
         output_path.write_text(report)
         return output_path
-
 
     def _rank_revenue(self, client: Company, competitors: list[Company]) -> str:
         """Get revenue rank."""

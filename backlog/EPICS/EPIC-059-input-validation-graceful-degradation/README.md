@@ -1,7 +1,7 @@
 # EPIC-059: Input Validation & Graceful Degradation
 
 > **Priority**: P1 – High (prevents silent data corruption)  
-> **Stories**: 5 (STORY-206 through STORY-210)  
+> **Stories**: 6 (STORY-206 through STORY-210, STORY-251)  
 > **Effort**: M (3–4 days total)  
 > **Dependencies**: EPIC-047 (Data Loading Fidelity), EPIC-046 (Scoring Engine Correctness)  
 > **Status**: 🔴 Not Started
@@ -48,6 +48,7 @@ The data pipeline silently accepts incomplete or invalid data, passes it through
 | STORY-208 | Extract and apply metric_lineage confidence to signal_confidences | P1 | M | Confidence 0.72→weight 0.72 applied to score component |
 | STORY-209 | Add conversion output validation before Company construction | P1 | S | Fail fast if conversion loses too many fields |
 | STORY-210 | Implement graceful degradation mode for incomplete data | P2 | M | Score with warnings instead of blocking export |
+| STORY-251 | Enforce strict boundary schemas for connector, API, and domain ingress | P1 | M | Reject undeclared fields at high-risk boundaries while preserving explicit legacy aliases |
 
 ---
 
@@ -60,6 +61,7 @@ The data pipeline silently accepts incomplete or invalid data, passes it through
 - [ ] Converter validates output and fails fast if critical fields lost
 - [ ] Scoring produces consistent thresholds even with partial data
 - [ ] All conversion and scoring tests pass with real data
+- [ ] Critical ingress boundaries define and test explicit extra-field policy instead of silently allowing or ignoring unknown keys
 
 ---
 
@@ -134,3 +136,33 @@ Add test fixtures for:
 - Company with only employees
 - Company with both None (should fail validation)
 - Company with partial growth_rate (should score with reduced confidence)
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This epic currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently schedule this epic, treat it as triage-required backlog inventory instead of self-startable work.
+
+### Develop-Relevant Evidence
+
+- `tests/unit/test_story209_validation_before_scoring.py` already exists and should be treated as a real boundary-validation anchor rather than a future placeholder.
+- `STORY-206` through `STORY-210` already encode Pydantic `ValidationError` expectations and conversion/scoring validation behavior in a machine-checkable way.
+- The 2026-03-31 audit found connector and API ingress paths still accepting or silently discarding undeclared keys; `STORY-251` is the follow-up hardening item for those boundaries.
+- Future work should extend these validation-before-scoring contracts, not create a second detached validation pass.
+
+### Next Agent Action
+
+- Reconcile this epic against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before selecting a story.
+- Do not start implementation from this README alone unless the queue or a fresh planning decision activates the epic.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Prefer narrow, machine-checkable progress over broad narrative backlog churn.
+
+### Minimum Verification For Future Agents
+
+- If this epic is reactivated, update the queue or controlling planning artifact first.
+- Then execute one story at a time with the relevant tests, gates, and generated references for the touched surface.

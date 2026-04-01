@@ -3,7 +3,6 @@
 F1: Tests for global exception taxonomy.
 """
 
-
 from solstein.core.error_taxonomy import (
     ERROR_CLASSIFICATION,
     ErrorCategory,

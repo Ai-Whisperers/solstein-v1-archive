@@ -9,6 +9,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from loguru import logger
+
+from ...core.math_utils import safe_div
 from ...core.scoring_config import ScoringSettings
 from ...domain.models import (
     FinancialMetric,
@@ -19,7 +22,7 @@ from ...domain.models import (
 if TYPE_CHECKING:
     from ...infrastructure.repositories import FactRepository
 
-from ._shared import merge_facts_into_financials
+from ._shared import calculate_data_confidence, merge_facts_into_financials
 
 
 class FinancialHealthScorer:
@@ -30,6 +33,7 @@ class FinancialHealthScorer:
 
     # Missing data penalty
     _UNKNOWN_DATA_PENALTY: float = -2.0  # Penalty when financial data is unknown
+
     def score(
         self,
         financials: FinancialMetric,
@@ -53,6 +57,15 @@ class FinancialHealthScorer:
         # Merge facts from repository if available
         if fact_repo and company_id:
             financials = merge_facts_into_financials(financials, fact_repo, company_id)
+
+        # STORY-207: Calculate data confidence before scoring
+        data_confidence, data_warnings = calculate_data_confidence(financials)
+        explanation.data_confidence = data_confidence
+        explanation.data_warnings = data_warnings
+
+        if data_warnings:
+            for warning in data_warnings:
+                logger.warning(f"[EPIC-059] Financial health scorer: {warning}")
 
         # Apply all scoring components
         score = self._score_revenue_scale(financials, score, explanation, cfg)
@@ -142,6 +155,19 @@ class FinancialHealthScorer:
                 )
             )
 
+        # STORY-179: Recurring revenue bonus — strong SaaS stability signal
+        if financials.recurring_revenue_pct is not None and financials.recurring_revenue_pct > 80:
+            _RECURRING_REVENUE_BONUS = 0.25
+            score += _RECURRING_REVENUE_BONUS
+            explanation.components.append(
+                ScoreComponent(
+                    name="High Recurring Revenue",
+                    value=_RECURRING_REVENUE_BONUS,
+                    formula=f"recurring_revenue_pct({financials.recurring_revenue_pct}%) > 80% → +0.25",
+                    reasoning="Recurring revenue above 80% signals strong SaaS-like predictability and financial stability.",
+                )
+            )
+
         return score
 
     def _score_operating_efficiency(
@@ -157,7 +183,12 @@ class FinancialHealthScorer:
 
         # Convert revenue from millions to actual EUR for calculation
         revenue_eur = financials.revenue * 1_000_000
-        rev_per_emp = revenue_eur / financials.employees
+        rev_per_emp = safe_div(
+            revenue_eur, financials.employees,
+            default=None, label="revenue_per_employee_financial",
+        )
+        if rev_per_emp is None:
+            return score
 
         adj = 0.0
         if rev_per_emp > cfg.efficiency_exceptional_threshold:
@@ -192,7 +223,12 @@ class FinancialHealthScorer:
             return score
 
         # Both in millions, so ratio is unitless
-        ratio = financials.funding_raised / financials.revenue
+        ratio = safe_div(
+            financials.funding_raised, financials.revenue,
+            default=None, label="funding_to_revenue_ratio",
+        )
+        if ratio is None:
+            return score
         adj = 0.0
 
         if ratio > cfg.cushion_high_ratio:
@@ -214,4 +250,3 @@ class FinancialHealthScorer:
             )
 
         return score
-

@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from solstein.connectors import initialize_default_connectors, get_registry
+from solstein.connectors import get_registry, initialize_default_connectors
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -34,15 +34,15 @@ async def test_connector(name: str, query: str):
         # Test connection
         connected = await connector.connect()
         if not connected:
-            print(f"  ❌ Connection failed")
+            print("  ❌ Connection failed")
             return False
-        print(f"  ✅ Connected")
+        print("  ✅ Connected")
 
         # Test search
         result = await connector.search(query, limit=3)
 
         if result.success:
-            print(f"  ✅ Search successful")
+            print("  ✅ Search successful")
             print(f"     Results: {len(result.data)}")
             print(f"     Total found: {result.total_found}")
 

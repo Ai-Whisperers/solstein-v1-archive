@@ -77,7 +77,11 @@ class QuotaManager:
         new_count = await self.cache.incr(key, count)
 
         # Set expiry to end of day
-        ttl = int((datetime.now(timezone.utc).replace(hour=23, minute=59, second=59) - datetime.now(timezone.utc)).total_seconds())
+        ttl = int(
+            (
+                datetime.now(timezone.utc).replace(hour=23, minute=59, second=59) - datetime.now(timezone.utc)
+            ).total_seconds()
+        )
         await self.cache.expire(key, ttl)
 
         return new_count
@@ -163,7 +167,7 @@ class QuotaManager:
             True if quota available.
 
         Raises:
-            QuotaExceeded: If quota exceeded.
+            QuotaExceededError: If quota exceeded.
         """
         limits = config.get("limits", {})
 
@@ -176,12 +180,12 @@ class QuotaManager:
 
         if quota.exceeded:
             logger.warning(f"Quota exceeded for tenant {tenant_id[:8]}...: {resource}")
-            raise QuotaExceeded(f"{resource} quota exceeded. Resets at {quota.reset_at}")
+            raise QuotaExceededError(f"{resource} quota exceeded. Resets at {quota.reset_at}")
 
         return True
 
 
-class QuotaExceeded(Exception):
+class QuotaExceededError(Exception):
     """Raised when tenant quota is exceeded."""
 
     pass

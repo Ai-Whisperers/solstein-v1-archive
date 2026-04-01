@@ -28,6 +28,19 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
+try:
+    from solstein.config import get_settings as _get_settings_impl
+except ImportError:  # pragma: no cover
+    _get_settings_impl = None  # type: ignore[assignment,misc]
+
+
+def _get_settings_safe():  # noqa: ANN202
+    """Return application settings or raise ImportError."""
+    if _get_settings_impl is None:
+        raise ImportError("solstein.config not available")
+    return _get_settings_impl()
+
+
 # Endpoints that do not require a tenant API key
 _PUBLIC_PATHS: frozenset[str] = frozenset(
     {
@@ -37,6 +50,7 @@ _PUBLIC_PATHS: frozenset[str] = frozenset(
         "/healthz",
         "/health",
         "/metrics",
+        "/metrics/prometheus",
         "/favicon.ico",
     }
 )
@@ -62,9 +76,7 @@ class TenantMiddleware(BaseHTTPMiddleware):
 
         # Allow disabling enforcement in dev via settings
         try:
-            from solstein.config import get_settings
-
-            settings = get_settings()
+            settings = _get_settings_safe()
             require_api_key = getattr(
                 settings.api,
                 "require_api_key",
@@ -104,8 +116,8 @@ class TenantMiddleware(BaseHTTPMiddleware):
                     "detail": "Failed to validate API key. Please try again.",
                 },
             )
-        except Exception as e:
-            # Unexpected errors - log and return 500
+        except (RuntimeError, ValueError, TypeError, KeyError, AttributeError) as e:
+            # Unexpected non-DB errors - log and return 500
             logger.exception(
                 "Unexpected error looking up tenant",
                 api_key_prefix=api_key[:8],

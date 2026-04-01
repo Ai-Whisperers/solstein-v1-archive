@@ -4,12 +4,13 @@ from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 
+from ...core.math_utils import safe_div
 from ...core.scoring_config import ScoringSettings
 from ...domain.models import FinancialMetric, ScoreComponent, ScoringExplanation
 
 if TYPE_CHECKING:
     from ...infrastructure.repositories import FactRepository
-from ._shared import merge_facts_into_financials
+from ._shared import calculate_data_confidence, merge_facts_into_financials
 
 _STAGNANT_GROWTH_UPPER: float = 5.0
 _BELOW_AVERAGE_GROWTH_UPPER: float = 10.0
@@ -52,6 +53,15 @@ class GrowthMomentumScorer:
         if fact_repo and company_id:
             financials = merge_facts_into_financials(financials, fact_repo, company_id)
 
+        # STORY-207: Calculate data confidence before scoring
+        data_confidence, data_warnings = calculate_data_confidence(financials)
+        explanation.data_confidence = data_confidence
+        explanation.data_warnings = data_warnings
+
+        if data_warnings:
+            for warning in data_warnings:
+                logger.warning(f"[EPIC-059] Growth scorer: {warning}")
+
         # Apply all scoring components
         score = self._score_growth_rate(financials, score, explanation, cfg)
         score = self._score_employee_efficiency(financials, score, explanation, cfg)
@@ -84,10 +94,11 @@ class GrowthMomentumScorer:
             return score
 
         growth_rate = financials.growth_rate
-        growth_factor = min(
-            growth_rate / cfg.revenue_growth_divisor,
-            cfg.revenue_growth_cap,
+        growth_quotient = safe_div(
+            growth_rate, cfg.revenue_growth_divisor,
+            default=0.0, label="growth_factor",
         )
+        growth_factor = min(growth_quotient or 0.0, cfg.revenue_growth_cap)
         score += growth_factor
 
         # Apply growth penalties
@@ -159,7 +170,12 @@ class GrowthMomentumScorer:
             return score
 
         revenue_eur = financials.revenue * 1_000_000
-        rev_per_emp = revenue_eur / financials.employees
+        rev_per_emp = safe_div(
+            revenue_eur, financials.employees,
+            default=None, label="revenue_per_employee_growth",
+        )
+        if rev_per_emp is None:
+            return score
         bonus = 0.0
 
         if rev_per_emp > cfg.efficiency_high_threshold:
@@ -251,6 +267,19 @@ class GrowthMomentumScorer:
                     reasoning="Healthy margins contribute to growth score."
                     if adj > 0
                     else "Negative margins penalize growth score.",
+                )
+            )
+
+        # STORY-179: EBITDA margin bonus — strong operational efficiency signal
+        if financials.ebitda_margin is not None and financials.ebitda_margin > 25:
+            _EBITDA_MARGIN_BONUS = 0.25
+            score += _EBITDA_MARGIN_BONUS
+            explanation.components.append(
+                ScoreComponent(
+                    name="Strong EBITDA Margin",
+                    value=_EBITDA_MARGIN_BONUS,
+                    formula=f"ebitda_margin({financials.ebitda_margin}%) > 25% → +0.25",
+                    reasoning="EBITDA margin above 25% indicates strong operational efficiency and sustainable growth potential.",
                 )
             )
 

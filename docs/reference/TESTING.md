@@ -760,7 +760,7 @@ company_id = "test-company-001"
 async def test_create_fact_with_invalid_confidence_raises_error(self, db_session):
     """
     Test that creating a fact with confidence > 1.0 raises IntegrityError.
-    
+
     The facts table has a CHECK constraint: confidence BETWEEN 0 AND 1.
     """
 ```
@@ -801,11 +801,11 @@ pytest tests/ --cov=src/solstein --cov-fail-under=75
 
 - [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) — Complete schema reference
 - [DATABASE.md](DATABASE.md) — Connection configuration and query patterns
-- [PROFESSIONALIZATION.md](PROFESSIONALIZATION.md) — How the test suite was built
+- [PROFESSIONALIZATION.md](../archive/analysis/PROFESSIONALIZATION.md) — How the test suite was built
 - [SETUP.md](SETUP.md) — Project setup guide
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — Common issues and solutions
 
 ---
 
-*Testing guide updated: February 2026*  
+*Testing guide updated: February 2026*
 *Built by AI Whisperers — finding the diamonds nobody knew were there.*

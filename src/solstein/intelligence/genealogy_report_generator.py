@@ -186,8 +186,6 @@ class BatchGenealogyReportGenerator:
 
         return paths
 
-
-
     async def generate_narratives(
         self,
         genealogy: CorporateGenealogy,
@@ -195,6 +193,7 @@ class BatchGenealogyReportGenerator:
         region: str = "Europe",
     ) -> dict[str, str]:
         from .narrative_synthesis import NarrativeContext, NarrativeSynthesisEngine
+
         context = NarrativeContext(
             company_name=genealogy.company_name,
             industry=industry,
@@ -204,9 +203,7 @@ class BatchGenealogyReportGenerator:
         engine = NarrativeSynthesisEngine()
         return await engine.generate_genealogy_narrative(genealogy, context)
 
-    def generate_with_narratives(
-        self, genealogy: CorporateGenealogy, narratives: dict[str, str]
-    ) -> str:
+    def generate_with_narratives(self, genealogy: CorporateGenealogy, narratives: dict[str, str]) -> str:
         lines = [
             f"# Corporate Genealogy Analysis - {genealogy.company_name}",
             "",

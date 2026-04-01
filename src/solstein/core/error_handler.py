@@ -257,7 +257,7 @@ def get_error_handler() -> ErrorHandler:
 T = TypeVar("T")
 
 
-def with_error_handling[T](
+def with_error_handling(
     component: str,
     operation: str,
     severity: ErrorSeverity = ErrorSeverity.ERROR,

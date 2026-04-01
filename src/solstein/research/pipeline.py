@@ -1,7 +1,20 @@
 """Research pipeline for market intelligence.
 
+.. note:: CANONICAL RUNTIME — STORY-255 (2026-03-31)
+
+   This sequential pipeline is the **canonical production runtime**.
+   All new feature work, bug fixes, and optimizations target this path.
+   The LangGraph graph runtime (``research/graph/``) is frozen and
+   receives only security patches. See ``docs/architecture/decisions.md``.
+
 EPIC-020: Refactored from 505-line monolithic function to Pipeline Stage pattern.
 Uses composition of stage classes for better testability and maintainability.
+
+CANONICAL RUNTIME (STORY-256 / EPIC-067)
+-----------------------------------------
+This module is the **sole canonical production runtime**.  All CLI and API
+research entry-points must resolve to ``run_market_intelligence`` defined here.
+The graph runtime (``research/graph/``) is frozen for new features.
 """
 
 from __future__ import annotations
@@ -208,10 +221,10 @@ def run_market_intelligence(
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    from solstein.adapters.registry import build_default_registry
+    from solstein.runtime import get_registry
 
     settings = Settings.load()
-    registry = build_default_registry(settings)
+    registry = get_registry(settings)
     batch_id = uuid.uuid4().hex[:12]
     logger.info(
         "Pipeline run batch_id={}, registry has {} discovery + {} enrichment sources",

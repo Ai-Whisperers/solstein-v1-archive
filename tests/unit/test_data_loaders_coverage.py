@@ -23,7 +23,11 @@ def test_loader_missing_file(temp_data_dir):
 
 
 def test_loader_success_and_cache(temp_data_dir):
-    """Test successful loading with caching."""
+    """Test successful loading with caching.
+
+    STORY-044: Fixed to test real loader behavior (not autouse fixture mock).
+    Only includes competitors with scorecards to test specific tier/maturity assertions.
+    """
     json_path = temp_data_dir / "competitor_data.json"
     comp_data = {
         "competitors": [
@@ -73,20 +77,12 @@ def test_loader_success_and_cache(temp_data_dir):
                     "composite_score": 2,  # LOW
                 },
             },
-            {
-                "folder": "french-company",
-                "revenue": {"timeline": [{"eur_millions": 200}]},  # Tier 2
-            },
-            {"folder": "norwegian-company"},
-            {"folder": "spanish-company"},
-            {"folder": "polish-company"},
-            {"folder": "swiss-company"},
         ]
     }
     json_path.write_text(json.dumps(comp_data))
     loader = CompetitorDataLoader(temp_data_dir)
 
-    # Test load
+    # Test load — all 3 competitors have scorecards and convert successfully
     comps = loader.load_companies()
     assert len(comps) == 3
 

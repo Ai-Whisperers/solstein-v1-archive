@@ -4,7 +4,6 @@ Field-level and pipeline-level data quality validation.
 Part of EPIC-017 Wave 2 Testing Hardening.
 """
 
-
 from solstein.analytics.completeness import DataQualityTier
 from solstein.domain.models import Company, FinancialMetric
 from solstein.presentation.data_quality_indicators import DataQualityIndicators
@@ -30,6 +29,7 @@ class TestFieldLevelDataQuality:
     def test_founded_year_range(self) -> None:
         """Founded year should be reasonable."""
         from datetime import datetime
+
         current_year = datetime.now().year
 
         company = Company(id="test", name="Test", industry="saas", founded_year=2020)
@@ -80,7 +80,12 @@ class TestDataQualityIndicatorsExtended:
         )
 
         tier = DataQualityIndicators.get_data_quality_tier(high_quality)
-        assert tier in [DataQualityTier.COMPLETE, DataQualityTier.PARTIAL, DataQualityTier.MINIMAL, DataQualityTier.INSUFFICIENT]
+        assert tier in [
+            DataQualityTier.COMPLETE,
+            DataQualityTier.PARTIAL,
+            DataQualityTier.MINIMAL,
+            DataQualityTier.INSUFFICIENT,
+        ]
 
 
 class TestFinancialMetricQuality:

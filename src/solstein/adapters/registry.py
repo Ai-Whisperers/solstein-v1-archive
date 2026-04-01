@@ -4,6 +4,11 @@ The registry collects DiscoverySource, EnrichmentSource, and
 UnifiedDataSource adapters and provides them to the pipeline stages.
 ``build_default_registry`` constructs a registry with all available
 sources based on the current Settings (API keys present → adapter registered).
+
+STORY-256: Feature-flag branching collapsed; legacy path is canonical.
+STORY-264: Replaceable provider surfaces (NewsAPI, Exa) removed from
+           canonical build path.  See inline comments for retained
+           exceptions and their justification.
 """
 
 from __future__ import annotations
@@ -91,55 +96,37 @@ def build_default_registry(settings: Settings) -> SourceRegistry:
     registry.register_enrichment(YahooFinanceEnrichment())
     registry.register_enrichment(GlobalMarketEnrichment())
 
-    use_unified_enrichment = settings.feature_new_unified_loader
+    # -- Discovery: Exa Search REMOVED (STORY-264) --
+    # WebSearchDiscoverySource (Exa) is replaceable by self-hosted SearXNG.
+    # Adapter moved to adapters/discovery/_retired/web_search.py.
+    # Re-enable when SearXNG discovery adapter is implemented.
 
-    if settings.exa_api_key:
-        from solstein.adapters.discovery.web_search import WebSearchDiscoverySource
+    # -- Enrichment: canonical legacy path (STORY-256 / STORY-264) --
+    # The feature_new_unified_loader branching has been collapsed (STORY-256).
+    # Replaceable provider surfaces have been removed (STORY-264):
+    #   - NewsEnrichment (NewsAPI) → replaced by GDELT; moved to _retired/
+    #   - WebSearchNewsEnrichment (Exa) → replaced by SearXNG; moved to _retired/
+    # Retained with justification:
+    #   - YahooFinanceEnrichment: sole financial data source; no replacement wired yet
+    #   - FundingEnrichment: Crunchbase is non-negotiable for private company coverage
+    #   - LinkedInEnrichment: news_api_key is an internal fallback, not a primary surface
+    from solstein.adapters.enrichment.linkedin import LinkedInEnrichment
+    from solstein.adapters.enrichment.patents import PatentEnrichment
+    from solstein.adapters.enrichment.website import WebsiteEnrichment
 
-        registry.register_discovery(WebSearchDiscoverySource(exa_api_key=settings.exa_api_key))
+    registry.register_enrichment(PatentEnrichment())
 
-    if use_unified_enrichment:
-        from solstein.adapters.enrichment.funding_unified import FundingUnifiedAdapter
-        from solstein.adapters.enrichment.linkedin_unified import LinkedInUnifiedAdapter
-        from solstein.adapters.enrichment.news_unified import NewsUnifiedAdapter
-        from solstein.adapters.enrichment.patents_unified import PatentsUnifiedAdapter
-        from solstein.adapters.enrichment.web_search_unified import WebSearchUnifiedAdapter
-        from solstein.adapters.enrichment.website_unified import WebsiteUnifiedAdapter
+    if settings.crunchbase_api_key:
+        from solstein.adapters.enrichment.funding import FundingEnrichment
 
-        registry.register_enrichment(PatentsUnifiedAdapter())
-        registry.register_enrichment(NewsUnifiedAdapter(news_api_key=settings.news_api_key))
-        registry.register_enrichment(FundingUnifiedAdapter(crunchbase_api_key=settings.crunchbase_api_key))
-        registry.register_enrichment(LinkedInUnifiedAdapter(news_api_key=settings.news_api_key))
-        registry.register_enrichment(WebsiteUnifiedAdapter())
-        registry.register_enrichment(WebSearchUnifiedAdapter())
-    else:
-        from solstein.adapters.enrichment.linkedin import LinkedInEnrichment
-        from solstein.adapters.enrichment.patents import PatentEnrichment
-        from solstein.adapters.enrichment.website import WebsiteEnrichment
-
-        registry.register_enrichment(PatentEnrichment())
-
-        if settings.news_api_key:
-            from solstein.adapters.enrichment.news import NewsEnrichment
-
-            registry.register_enrichment(NewsEnrichment(news_api_key=settings.news_api_key))
-
-        if settings.crunchbase_api_key:
-            from solstein.adapters.enrichment.funding import FundingEnrichment
-
-            registry.register_enrichment(
-                FundingEnrichment(
-                    crunchbase_api_key=settings.crunchbase_api_key,
-                    news_api_key=settings.news_api_key,
-                )
+        registry.register_enrichment(
+            FundingEnrichment(
+                crunchbase_api_key=settings.crunchbase_api_key,
+                news_api_key=settings.news_api_key,
             )
+        )
 
-        if settings.exa_api_key:
-            from solstein.adapters.enrichment.web_search_news import WebSearchNewsEnrichment
-
-            registry.register_enrichment(WebSearchNewsEnrichment())
-
-        registry.register_enrichment(LinkedInEnrichment(news_api_key=settings.news_api_key))
-        registry.register_enrichment(WebsiteEnrichment())
+    registry.register_enrichment(LinkedInEnrichment(news_api_key=settings.news_api_key))
+    registry.register_enrichment(WebsiteEnrichment())
 
     return registry

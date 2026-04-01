@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
+import aiohttp
 from loguru import logger
 from pydantic import BaseModel
 
 from solstein.config import Settings
+from solstein.llm.prompts import get_system_prompt
 
 
 class OllamaQuerier:
@@ -23,12 +25,7 @@ class OllamaQuerier:
         schema: type[BaseModel] | None = None,
     ) -> Any | None:
         """Query Ollama (local) instance."""
-        import aiohttp
-
-        system = (
-            system_prompt
-            or "You are an expert business analyst specializing in technology companies and private equity. Provide concise, data-driven insights."
-        )
+        system = system_prompt or get_system_prompt("system_business_analyst")
 
         payload = {
             "model": self.settings.ollama_model,
@@ -61,11 +58,21 @@ class OllamaQuerier:
 
                     return content
                 else:
-                    raise Exception(f"Ollama returned {response.status}")
+                    raise RuntimeError(f"Ollama returned {response.status}")
         except TimeoutError as e:
             logger.error(f"Ollama request timed out for model {self.settings.ollama_model}")
-            raise Exception("Ollama request timeout") from e
-        except Exception as e:
+            raise TimeoutError("Ollama request timeout") from e
+        except aiohttp.ClientError as e:
+            logger.error(
+                f"[OllamaQuerier] HTTP client error: {e}",
+                extra={
+                    "model": self.settings.ollama_model,
+                    "url": f"{self.settings.ollama_url}/api/chat",
+                    "error_type": type(e).__name__,
+                },
+            )
+            raise
+        except (RuntimeError, ValueError, KeyError) as e:
             logger.error(
                 f"[OllamaQuerier] query failed: {e}",
                 extra={
@@ -82,6 +89,6 @@ class OllamaQuerier:
             if "```json" in content:
                 content = content.split("```json")[-1].split("```")[0].strip()
             return schema.model_validate_json(content)
-        except Exception as e:
+        except (ValueError, KeyError) as e:
             logger.warning(f"Ollama schema validation failed: {e}")
             return None

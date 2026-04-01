@@ -42,14 +42,14 @@ Long-running epics (EPIC-007, EPIC-021) can be demoralizing. Quick wins provide:
 |-------|-------|--------|-------|
 | [STORY-169](STORIES/STORY-169-api-response-times.md) | Add API Response Time Headers | Users see performance | Backend |
 | [STORY-170](STORIES/STORY-170-health-check-real.md) | Replace Fake Health Check with Real DB Probe | Ops can trust health | Backend |
-| [STORY-171](STORIES/STORY-171-error-message-clarity.md) | Improve Error Message Clarity | Users understand failures | Backend |
-| [STORY-172](STORIES/STORY-172-log-request-ids.md) | Add Request IDs to All Logs | Debugging is easier | Backend |
-| [STORY-173](STORIES/STORY-173-seed-data-script.md) | Create Seed Data Script for Local Dev | New devs productive in 30 min | Backend |
-| [STORY-174](STORIES/STORY-174-api-docs-examples.md) | Add Request/Response Examples to API Docs | API easier to use | Backend |
-| [STORY-175](STORIES/STORY-175-test-speed-optimization.md) | Speed Up Slowest Test by 50% | Faster feedback | Backend |
-| [STORY-176](STORIES/STORY-176-env-validation.md) | Add Startup Validation for Critical Env Vars | Fail fast on misconfig | Backend |
-| [STORY-177](STORIES/STORY-177-logging-consistency.md) | Standardize Log Format Across All Modules | Logs are parseable | Backend |
-| [STORY-178](STORIES/STORY-178-makefile-improvements.md) | Add Common Commands to Makefile | Fewer commands to remember | DevEx |
+| STORY-171 | Improve Error Message Clarity | Users understand failures | Backend |
+| STORY-172 | Add Request IDs to All Logs | Debugging is easier | Backend |
+| STORY-173 | Create Seed Data Script for Local Dev | New devs productive in 30 min | Backend |
+| STORY-174 | Add Request/Response Examples to API Docs | API easier to use | Backend |
+| STORY-175 | Speed Up Slowest Test by 50% | Faster feedback | Backend |
+| STORY-176 | Add Startup Validation for Critical Env Vars | Fail fast on misconfig | Backend |
+| STORY-177 | Standardize Log Format Across All Modules | Logs are parseable | Backend |
+| STORY-178 | Add Common Commands to Makefile | Fewer commands to remember | DevEx |
 
 ---
 

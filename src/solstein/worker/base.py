@@ -6,7 +6,6 @@ Provides database helpers and dead letter queue for failed jobs.
 
 from __future__ import annotations
 
-import json
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,6 +21,7 @@ from solstein.infrastructure.database import DatabaseManager
 from solstein.infrastructure.database_models import CompanyRecord
 from solstein.infrastructure.fact_payloads import ConnectorFactPayload
 from solstein.monitoring.errors import global_error_tracker
+from solstein.worker.dlq import persist_failed_task
 
 
 class FactIngestionPayload(ConnectorFactPayload):
@@ -36,14 +36,34 @@ def get_db_manager():
     return db_manager
 
 
-async def get_tracked_company_ids(db_manager) -> list[str]:
-    """Get list of tracked company IDs from database."""
+async def get_tracked_company_ids(db_manager, *, tenant_id: str | None = None) -> list[str]:
+    """Get list of tracked company IDs from database.
+
+    STORY-066: When tenant_id is provided, only returns companies
+    belonging to that tenant.
+
+    Args:
+        db_manager: Database manager instance.
+        tenant_id: Optional tenant ID to scope the query.
+
+    Returns:
+        List of company IDs.
+    """
     async with db_manager.get_session() as session:
-        result = await session.execute(select(CompanyRecord.company_id))
+        query = select(CompanyRecord.company_id)
+        if tenant_id:
+            query = query.where(CompanyRecord.tenant_id == tenant_id)
+        result = await session.execute(query)
         return [row[0] for row in result.fetchall()]
 
 
-async def store_facts(db_manager: DatabaseManager, facts: list[dict[str, Any]], source: str) -> int:
+async def store_facts(
+    db_manager: DatabaseManager,
+    facts: list[dict[str, Any]],
+    source: str,
+    *,
+    tenant_id: str | None = None,
+) -> int:
     """Store fetched facts in database using the Fact repository pattern.
 
     Creates a GatheringBatch, then persists each fact as a proper Fact ORM
@@ -51,12 +71,17 @@ async def store_facts(db_manager: DatabaseManager, facts: list[dict[str, Any]], 
     ``CompanyRecord.raw_data`` blob so downstream code that reads from it
     continues to work.
 
+    STORY-066: When tenant_id is provided, validates that each fact's
+    company belongs to the specified tenant before writing.
+
     Args:
         db_manager: Initialised DatabaseManager.
         facts: List of fact dicts.  Each dict must contain at least
             ``company_id``; ``fact_type``/``type`` and ``value`` are used
             when present.
         source: Name of the data source (e.g. ``"sec_edgar"``).
+        tenant_id: Optional tenant ID. When set, only writes to companies
+            belonging to this tenant.
 
     Returns:
         Number of facts successfully stored.
@@ -99,13 +124,20 @@ async def store_facts(db_manager: DatabaseManager, facts: list[dict[str, Any]], 
                 fact_value = payload.value
 
                 # Verify the company exists before writing
-                result = await session.execute(
-                    select(CompanyRecord).where(CompanyRecord.company_id == company_id)
-                )
+                result = await session.execute(select(CompanyRecord).where(CompanyRecord.company_id == company_id))
                 record = result.scalar_one_or_none()
 
                 if record is None:
                     logger.debug(f"[store_facts] No company record found for {company_id}, skipping fact from {source}")
+                    continue
+
+                # STORY-066: Enforce tenant isolation on writes
+                if tenant_id and hasattr(record, "tenant_id") and record.tenant_id != tenant_id:
+                    logger.warning(
+                        f"[store_facts] Tenant mismatch: task tenant={tenant_id[:8]}... "
+                        f"but company {company_id} belongs to tenant={record.tenant_id[:8] if record.tenant_id else 'None'}. "
+                        f"Skipping write from {source}."
+                    )
                     continue
 
                 # --- Persist as a proper Fact record ---
@@ -139,8 +171,10 @@ async def store_facts(db_manager: DatabaseManager, facts: list[dict[str, Any]], 
                 legacy_record.last_updated = datetime.now(timezone.utc)
                 stored_count += 1
 
-            except Exception as e:
-                logger.warning(f"[store_facts] Failed to store fact from {source} for company {fact_dict.get('company_id', '?')}: {e}")
+            except Exception as e:  # noqa: BLE001 — per-fact isolation; log and continue
+                logger.warning(
+                    f"[store_facts] Failed to store fact from {source} for company {fact_dict.get('company_id', '?')}: {e}"
+                )
                 continue
 
         # Mark batch as completed (or failed if nothing stored)
@@ -157,15 +191,22 @@ async def store_facts(db_manager: DatabaseManager, facts: list[dict[str, Any]], 
 
 
 class DeadLetterQueue:
-    """Track permanently failed jobs after max retries exceeded.
+    """Persistent Dead Letter Queue for permanently failed tasks.
 
-    Persists structured failure records to an append-only JSONL audit
-    trail while preserving the in-memory list for backward compatibility.
+    STORY-088: This class previously stored failures in a Python list that
+    evaporated on every worker restart. It now delegates all persistence to
+    PostgreSQL via solstein.worker.dlq.persist_failed_task.
+
+    The class interface is preserved for backward compatibility with callers in
+    refresh_tasks.py and enrichment_tasks.py. The in-memory `failed_jobs` list
+    is kept as a session-level cache only — do not rely on it for durability.
     """
 
     def __init__(self, audit_path: Path | None = None):
-        self.failed_jobs: list[dict[str, Any]] = []
+        # audit_path kept for backward compat — no longer used for primary persistence
         self.audit_path = audit_path or Path("data/output/dead_letter_queue.jsonl")
+        # Session-level cache (not durable — use the DB for real queries)
+        self.failed_jobs: list[dict[str, Any]] = []
 
     def record_failure(
         self,
@@ -173,44 +214,70 @@ class DeadLetterQueue:
         task_id: str,
         error: Exception | str,
         attempt: int,
-        *,
-        traceback_text: str | None = None,
-        context: dict[str, Any] | None = None,
+        **metadata: Any,
     ) -> dict[str, Any]:
-        """Record a permanently failed job with durable structured metadata."""
-        timestamp = datetime.now(timezone.utc)
+        """Record a permanently failed job in PostgreSQL (durable) and session cache.
+
+        Args:
+            task_name: Name of the failed task.
+            task_id: Celery task ID.
+            error: The exception or error message.
+            attempt: Final attempt number before giving up.
+            **metadata: Optional keys: ``traceback_text``, ``context``, ``queue_name``,
+                ``args``, ``kwargs``, ``tenant_id``.
+        """
         error_message = str(error)
         error_type = type(error).__name__ if isinstance(error, Exception) else "TaskFailure"
-        record = {
+        timestamp = datetime.now(timezone.utc)
+        record: dict[str, Any] = {
             "task_name": task_name,
             "task_id": task_id,
             "error": error_message,
             "error_type": error_type,
-            "traceback": traceback_text,
+            "traceback": metadata.get("traceback_text"),
             "final_attempt": attempt,
             "timestamp": timestamp,
-            "context": context or {},
+            "context": metadata.get("context") or {},
         }
 
         logger.error(
-            f"[RETRY-FAILED] {task_name} (task_id={task_id}) permanently failed after {attempt} attempts: {error_type}: {error_message}"
+            "[RETRY-FAILED] %s (task_id=%s) permanently failed after %d attempts: %s: %s",
+            task_name,
+            task_id,
+            attempt,
+            error_type,
+            error_message[:500],
         )
+
+        # Persist to PostgreSQL — failure here must NOT change the task outcome.
+        # persist_failed_task is already fail-open internally, but if it raises
+        # unexpectedly (e.g. bug in the DLQ code itself), we catch here too.
+        try:
+            persist_failed_task(
+                task_name=task_name,
+                task_id=task_id,
+                error=error,
+                retry_count=attempt,
+                extra={
+                    "queue_name": str(metadata.get("queue_name", "default")),
+                    "args": metadata.get("args") or [],
+                    "kwargs": metadata.get("kwargs") or {},
+                    "tenant_id": metadata.get("tenant_id"),
+                },
+            )
+        except Exception as dlq_exc:  # noqa: BLE001
+            logger.error(
+                "[DLQ] persist_failed_task raised unexpectedly — DLQ write dropped. "
+                "task_name=%s task_id=%s dlq_error=%s",
+                task_name,
+                task_id,
+                str(dlq_exc)[:200],
+            )
+
+        # Update session-level cache and error tracker
         self.failed_jobs.append(record)
-        self._persist_record(record)
         self._track_record(error, record)
         return record
-
-    def _persist_record(self, record: dict[str, Any]) -> None:
-        self.audit_path.parent.mkdir(parents=True, exist_ok=True)
-        serializable = dict(record)
-        timestamp = serializable.get("timestamp")
-        if isinstance(timestamp, datetime):
-            serializable["timestamp"] = timestamp.isoformat()
-        try:
-            with self.audit_path.open("a", encoding="utf-8") as handle:
-                _ = handle.write(json.dumps(serializable, default=str) + "\n")
-        except Exception as exc:
-            logger.error(f"[RETRY-FAILED] Failed to persist DLQ record to {self.audit_path}: {exc}")
 
     def _track_record(self, error: Exception | str, record: dict[str, Any]) -> None:
         context = {

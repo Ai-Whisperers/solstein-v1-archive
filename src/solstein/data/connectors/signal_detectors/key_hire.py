@@ -3,7 +3,7 @@
 EPIC-022: Extracted from NewsSignalDetector for modularity.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from .base import Signal, SignalDetector
@@ -63,7 +63,7 @@ class KeyHireSignalDetector(SignalDetector):
                 description=f"Key hire signal detected: {context[:100]}...",
                 confidence=self.confidence,
                 source=article.get("source", {}).get("name", "NewsAPI"),
-                detected_at=datetime.now(),
+                detected_at=datetime.now(tz=timezone.utc),
                 raw_data={
                     "article_title": article.get("title"),
                     "article_url": article.get("url"),

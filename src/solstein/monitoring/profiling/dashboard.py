@@ -192,9 +192,9 @@ async def get_dashboard() -> str:
 @router.post("/export")
 async def export_results() -> dict[str, str]:
     """Export profiling results to JSON file."""
-    from datetime import datetime
+    from datetime import datetime, timezone
 
-    output_path = Path(f"profiling_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    output_path = Path(f"profiling_results_{datetime.now(tz=timezone.utc).strftime('%Y%m%d_%H%M%S')}.json")
     profiler.export_json(output_path)
 
     return {"message": f"Results exported to {output_path}", "path": str(output_path)}

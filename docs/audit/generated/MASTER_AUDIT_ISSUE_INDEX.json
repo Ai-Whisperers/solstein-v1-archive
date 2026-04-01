@@ -1,5 +1,5 @@
 {
-  "generated_on": "2026-03-30",
+  "generated_on": "2026-04-01",
   "issues": [
     {
       "heading_line": 114,
@@ -2989,6 +2989,7 @@
   ],
   "parsed_issue_count": 271,
   "parsed_table_row_count": 1196,
+  "reconciliation_protocol": "Fix-verification audits must confirm every claimed ISSUE-* fix exists in this index, reference this file in their header, and update the source audit + regenerate when status changes.",
   "source_file": "docs/audit/18-03-2026_MASTER_AUDIT.md",
   "source_line_count": 7589,
   "source_metrics": {

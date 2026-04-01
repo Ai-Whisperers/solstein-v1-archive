@@ -23,8 +23,10 @@ mkdir -p data/output/logs
 mkdir -p data/output/exports
 mkdir -p data/output/debug
 
-# Set environment
-export PYTHONPATH=/home/ai-whisperers/solstein/src:$PYTHONPATH
+# Set environment — derive PROJECT_ROOT from this script's location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+export PYTHONPATH="$PROJECT_ROOT/src:$PYTHONPATH"
 export ENVIRONMENT=development
 export DEBUG=true
 export LOG_LEVEL=DEBUG

@@ -8,10 +8,10 @@ FREE sources:
 - OpenAlex (free API)
 """
 
-import asyncio
+import asyncio  # noqa: F401
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any, Optional  # noqa: F401
 
 import aiohttp
 
@@ -38,23 +38,25 @@ class SemanticScholarConnector(BaseConnector):
         """Test connection to Semantic Scholar."""
         try:
             # Semantic Scholar doesn't require auth, just test with a simple query
-            async with aiohttp.ClientSession() as session, session.get(
-                f"{self.config.base_url}/graph/v1/paper/search",
-                params={"query": "test", "limit": 1, "fields": "paperId"},
-                timeout=aiohttp.ClientTimeout(total=10)
-            ) as response:
-                # SS returns 200 even for empty results
-                return response.status in [200, 404]
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    f"{self.config.base_url}/graph/v1/paper/search",
+                    params={"query": "test", "limit": 1, "fields": "paperId"},
+                    timeout=aiohttp.ClientTimeout(total=10),
+                ) as response:
+                    # SS returns 200 even for empty results
+                    return response.status in [200, 404]
         except Exception as e:
             logger.warning(f"Semantic Scholar connection test: {e}")
             # Don't fail - SS might be temporarily unavailable
             return True  # Assume working, will fail on actual search if broken
         """Test connection to Semantic Scholar."""
         try:
-            async with aiohttp.ClientSession() as session, session.get(
-                f"{self.config.base_url}/paper/search", params={"query": "test", "limit": 1}
-            ) as response:
-                return response.status == 200
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    f"{self.config.base_url}/paper/search", params={"query": "test", "limit": 1}
+                ) as response:
+                    return response.status == 200
         except Exception as e:
             logger.error(f"Failed to connect to Semantic Scholar: {e}")
             return False
@@ -112,35 +114,36 @@ class SemanticScholarConnector(BaseConnector):
         logger.info(f"Getting Semantic Scholar paper: {entity_id}")
 
         try:
-            async with aiohttp.ClientSession() as session, session.get(
-                f"{self.config.base_url}/paper/{entity_id}",
-                params={"fields": "title,authors,year,abstract,citationCount,references,citations"},
-            ) as response:
-                paper = await response.json()
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    f"{self.config.base_url}/paper/{entity_id}",
+                    params={"fields": "title,authors,year,abstract,citationCount,references,citations"},
+                ) as response:
+                    paper = await response.json()
 
-                if not paper or "paperId" not in paper:
-                    return ConnectorResult(
-                        success=True,
-                        data=[],
-                        total_found=0,
+                    if not paper or "paperId" not in paper:
+                        return ConnectorResult(
+                            success=True,
+                            data=[],
+                            total_found=0,
+                        )
+
+                    raw_data = RawData(
+                        source_name=self.config.name,
+                        source_url=f"https://www.semanticscholar.org/paper/{entity_id}",
+                        raw_content=paper,
+                        extracted_at=datetime.now(timezone.utc),
+                        metadata={
+                            "paper_id": entity_id,
+                            "source_type": "academic_paper",
+                        },
                     )
 
-                raw_data = RawData(
-                    source_name=self.config.name,
-                    source_url=f"https://www.semanticscholar.org/paper/{entity_id}",
-                    raw_content=paper,
-                    extracted_at=datetime.now(timezone.utc),
-                    metadata={
-                        "paper_id": entity_id,
-                        "source_type": "academic_paper",
-                    },
-                )
-
-                return ConnectorResult(
-                    success=True,
-                    data=[raw_data],
-                    total_found=1,
-                )
+                    return ConnectorResult(
+                        success=True,
+                        data=[raw_data],
+                        total_found=1,
+                    )
 
         except Exception as e:
             logger.error(f"Semantic Scholar get_by_id failed: {e}")
@@ -188,10 +191,11 @@ class ArXivConnector(BaseConnector):
     async def connect(self) -> bool:
         """Test connection to arXiv."""
         try:
-            async with aiohttp.ClientSession() as session, session.get(
-                self.config.base_url, params={"search_query": "all:test", "max_results": 1}
-            ) as response:
-                return response.status == 200
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    self.config.base_url, params={"search_query": "all:test", "max_results": 1}
+                ) as response:
+                    return response.status == 200
         except Exception as e:
             logger.error(f"Failed to connect to arXiv: {e}")
             return False
@@ -306,7 +310,6 @@ async def create_academic_connector(source_type: str, **kwargs) -> BaseConnector
 
     connector = connector_class(**kwargs)
     return connector
-
 
 
 __all__ = [

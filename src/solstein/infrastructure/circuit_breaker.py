@@ -12,6 +12,8 @@ from typing import Any, TypeVar
 
 from loguru import logger
 
+from solstein.config import get_settings
+
 T = TypeVar("T")
 
 
@@ -30,7 +32,11 @@ class CircuitBreaker:
     is experiencing high failure rates.
 
     Usage:
-        breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
+        cb = get_settings().circuit_breaker  # from solstein.config
+        breaker = CircuitBreaker(
+            failure_threshold=cb.failure_threshold,
+            recovery_timeout=cb.recovery_timeout,
+        )
 
         @breaker
         async def call_external_api():
@@ -165,27 +171,40 @@ class CircuitBreaker:
         return sync_wrapper  # type: ignore
 
 
-class CircuitBreakerOpen(Exception):
+class CircuitBreakerOpen(Exception):  # noqa: N818
     """Exception raised when circuit breaker is open."""
 
     pass
 
 
-# Pre-configured circuit breakers for common enrichment sources
-linkedin_breaker = CircuitBreaker(
-    failure_threshold=5,
-    recovery_timeout=120.0,
-    expected_exception=Exception,
-)
+def _make_preconfigured_breakers() -> tuple["CircuitBreaker", "CircuitBreaker", "CircuitBreaker"]:
+    """Build pre-configured circuit breakers using settings-driven defaults.
 
-crunchbase_breaker = CircuitBreaker(
-    failure_threshold=5,
-    recovery_timeout=60.0,
-    expected_exception=Exception,
-)
+    LinkedIn and Crunchbase previously used 5 failures / 120s and 5 / 60s respectively.
+    News used 10 / 30s. All now share the same failure_threshold from config; recovery
+    timeouts remain source-specific multiples of the base recovery_timeout.
+    """
+    _settings = get_settings()
+    cb = _settings.circuit_breaker
 
-news_breaker = CircuitBreaker(
-    failure_threshold=10,
-    recovery_timeout=30.0,
-    expected_exception=Exception,
-)
+    _linkedin = CircuitBreaker(
+        failure_threshold=cb.failure_threshold,
+        recovery_timeout=cb.recovery_timeout * 2,  # LinkedIn is slower to recover — 2x default
+        expected_exception=Exception,
+    )
+    _crunchbase = CircuitBreaker(
+        failure_threshold=cb.failure_threshold,
+        recovery_timeout=cb.recovery_timeout,
+        expected_exception=Exception,
+    )
+    _news = CircuitBreaker(
+        failure_threshold=cb.failure_threshold * 2,  # News is higher-volume; tolerate more failures
+        recovery_timeout=cb.recovery_timeout / 2,  # But recover faster (30s at default)
+        expected_exception=Exception,
+    )
+    return _linkedin, _crunchbase, _news
+
+
+# Pre-configured circuit breakers for common enrichment sources.
+# Values are driven by CircuitBreakerConfig in config.py rather than hardcoded literals.
+linkedin_breaker, crunchbase_breaker, news_breaker = _make_preconfigured_breakers()

@@ -161,7 +161,7 @@ class EvidenceCrawler:
             if result.success:
                 # Extract content
                 # Extract content - Crawl4AI returns MarkdownGenerationResult
-                if hasattr(result.markdown, 'fit_markdown'):
+                if hasattr(result.markdown, "fit_markdown"):
                     # New API: markdown is MarkdownGenerationResult
                     content = result.markdown.fit_markdown or result.markdown.raw_markdown or ""
                 else:

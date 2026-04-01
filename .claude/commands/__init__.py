@@ -7,14 +7,9 @@ It maps command names to their corresponding implementations and handles
 command execution, argument parsing, and error handling.
 """
 
-import importlib
-import inspect
-import os
 import sys
-from argparse import ArgumentParser, Namespace
 from collections.abc import Callable
-from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class CommandSystem:

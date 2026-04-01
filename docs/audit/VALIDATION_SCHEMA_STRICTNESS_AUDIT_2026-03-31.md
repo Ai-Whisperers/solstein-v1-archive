@@ -1,110 +1,107 @@
 # Validation Schema Strictness Audit - 2026-03-31
 
-## Scope and Goal
+## Goal
 
-Audit current validation schema structure and runtime enforcement strictness across:
+Review validation schema structure and strict enforcement at runtime, fix safe issues immediately, and document unresolved items that need broader follow-up.
 
-- Python API boundary schemas (`src/solstein/api/schemas/*.py` and request models in routers)
-- TypeScript contract schemas (`tooling/contracts-ts/src/**/*.ts`)
+## Scope Reviewed
 
-Goal: identify strictness gaps, fix what is safe now, and document unresolved items requiring deeper follow-up.
+- `src/solstein/api/schemas/validation.py`
+- `src/solstein/api/schemas/enrichment.py`
+- `src/solstein/api/schemas/semantic_search.py`
+- `src/solstein/api/routers/auth.py`
+- `src/solstein/api/routers/exports.py`
+- `tooling/contracts-ts/src/external/facts.ts`
 
-## Audit Method
+## Context Gathering Notes
 
-- Direct codebase inspection with grep/read/LSP tooling.
-- Parallel exploration agents were launched but failed due external access restrictions in this environment.
-- External reference sweep (librarian) completed and confirmed Zod strictness best practices (strict object handling, safe parsing at boundaries, coercion caveats).
+- Two explore background tasks failed due external access restrictions in this environment.
+- One librarian background task succeeded and confirmed strict Zod best practices:
+  - prefer strict object mode at boundaries
+  - avoid permissive unknown-key passthrough by default
+  - use safe parse patterns for external input flows
 
-## Current State Before Fixes
+## Issues Found
 
-### 1) Python request schemas accepted unknown fields in multiple boundary models
-
-By default, Pydantic models without `extra="forbid"` can silently accept/drop unexpected keys, which weakens API contract enforcement.
-
-### 2) SearchRequest validation order bug risk
-
-`SearchRequest` validated `field` against `model_type` inside a field validator, which can execute before `model_type` is finalized. This can lead to allowlist checks being applied against the wrong model type.
-
-### 3) TS connector fact contracts were permissive on unknown keys
-
-`tooling/contracts-ts/src/external/facts.ts` used `.passthrough()` for both input and canonical schemas, allowing contract drift to pass through boundary validation.
-
-### 4) Legacy validation schema module exists but is not wired into active API handlers
-
-`src/solstein/api/schemas/validation.py` contains strict domain request models, but current routing paths mostly use other schemas or inline models.
+1. Python request models accepted unknown keys in multiple boundary schemas (`extra` policy not strict).
+2. `SearchRequest` used cross-field logic in a field validator, risking model-type/field allowlist validation order issues.
+3. Semantic search request documented exactly-one-of (`query` vs `company_id`) but did not enforce it.
+4. TypeScript connector fact contracts were permissive (`.passthrough()`), enabling boundary drift.
+5. Several active request boundaries still rely on broad/non-hardened models (see unresolved section).
 
 ## Fixes Applied
 
-### A) Hardened Python API request schema strictness
+### Python API schemas
 
 - `src/solstein/api/schemas/validation.py`
   - Added `StrictRequestModel` with `ConfigDict(extra="forbid", str_strip_whitespace=True)`.
-  - Applied to `SearchRequest`, `PaginationParams`, `CompanyFilterRequest`, `MarketAnalysisRequest`, `ScoreUpdateRequest`, and `CompanyCreateRequest`.
-  - Moved model-type field allowlist enforcement in `SearchRequest` to a model-level validator so cross-field validation runs on a fully parsed model.
+  - Applied strict base to:
+    - `SearchRequest`
+    - `PaginationParams`
+    - `CompanyFilterRequest`
+    - `MarketAnalysisRequest`
+    - `ScoreUpdateRequest`
+    - `CompanyCreateRequest`
+  - Moved field/model-type allowlist check to a model validator to avoid field-order coupling.
 
 - `src/solstein/api/schemas/enrichment.py`
-  - `EnrichmentRequest` and `BatchEnrichmentRequest` now enforce:
-    - `extra="forbid"`
-    - `str_strip_whitespace=True`
-  - Replaced mutable list default for `sources` with `default_factory`.
+  - `EnrichmentRequest` and `BatchEnrichmentRequest` now use strict extras policy (`extra="forbid"`).
+  - Added `str_strip_whitespace=True` for request normalization.
+  - Replaced mutable list default in `EnrichmentRequest.sources` with `default_factory`.
+
+- `src/solstein/api/schemas/semantic_search.py`
+  - Added strict config (`extra="forbid"`, `str_strip_whitespace=True`).
+  - Added exactly-one-of invariant for `query` and `company_id`.
+
+### Router request models
 
 - `src/solstein/api/routers/auth.py`
-  - Hardened boundary request models:
-    - `LoginRequest` and `RefreshRequest` now forbid extra fields.
-    - Added explicit password length bounds for login.
-    - Added refresh token length bounds.
+  - Hardened `LoginRequest`, `SignupRequest`, `RefreshRequest` with `extra="forbid"`.
+  - Added explicit bounds on password and refresh token lengths.
+  - Kept credential/token payloads untrimmed (no whitespace mutation for secrets).
 
-### B) Hardened TypeScript connector fact contracts
-
-- `tooling/contracts-ts/src/external/facts.ts`
-  - Changed base input envelope from `.passthrough()` to `.strict()`.
-  - Changed canonical `ConnectorFactSchema` from `.passthrough()` to `.strict()`.
-  - Updated transform output to explicit canonical fields only (prevents leaking permissive input fields into canonical output).
-
-## Verification Results
+- `src/solstein/api/routers/exports.py`
+  - Hardened `ExportRequest` with `extra="forbid"` and input string normalization.
 
 ### TypeScript contracts
 
-- `npm --prefix tooling/contracts-ts ci` -> passed
-- `npm --prefix tooling/contracts-ts run check` -> passed
-- `npm --prefix tooling/contracts-ts run build` -> passed
+- `tooling/contracts-ts/src/external/facts.ts`
+  - Changed base and canonical schemas from `.passthrough()` to `.strict()`.
+  - Updated transform to emit explicit canonical fields only.
 
-### Python runtime checks
+## Verification
 
-- `python3 -m compileall` on modified Python modules -> passed (syntax-level validation).
+- TypeScript
+  - `npm --prefix tooling/contracts-ts ci` -> passed
+  - `npm --prefix tooling/contracts-ts run check` -> passed
+  - `npm --prefix tooling/contracts-ts run build` -> passed
 
-### Python test execution
+- Python
+  - `python3 -m compileall src/solstein/api/schemas/validation.py src/solstein/api/schemas/enrichment.py src/solstein/api/schemas/semantic_search.py src/solstein/api/routers/auth.py src/solstein/api/routers/exports.py` -> passed
+  - `pytest` is not available in this runtime image, so behavioral test execution could not be completed here.
 
-- `pytest` and `python3 -m pytest` unavailable initially (`pytest` not installed in this runtime image).
-- Full Python behavioral test pass could not be executed in this environment and must be run in the project test environment/CI.
+- LSP
+  - TS diagnostics for modified contract file are clean.
+  - Python LSP reports unresolved imports (`pydantic`, `fastapi`, etc.) in this environment due missing language-server dependency resolution.
 
-### LSP diagnostics
+## Unresolved / Needs Deeper Analysis
 
-- LSP reports unresolved imports (`pydantic`, `fastapi`, `loguru`, etc.) due this runtime's language server environment not being configured with project dependencies.
-- TS modified file diagnostics (`facts.ts`) returned clean.
-
-## Remaining Issues Requiring Further Analysis
-
-1. Request models still defined inline in several active routers without shared strict base policy:
-   - `src/solstein/api/routers/companies.py`
+1. Active request boundaries still needing strictness review and likely hardening:
+   - `src/solstein/api/routers/companies.py` (create path currently takes broad domain `Company` model)
    - `src/solstein/api/routers/simulation.py`
    - `src/solstein/api/routers/async_jobs.py`
    - `src/solstein/api/routers/review.py`
    - `src/solstein/api/routers/scoring.py`
 
-2. `src/solstein/api/schemas/validation.py` appears underused by active API routes.
-   - This should be either (a) wired into handlers, or (b) retired/migrated to avoid split-brain validation policy.
+2. `src/solstein/api/schemas/validation.py` remains underused by active endpoints and should be either:
+   - wired to the actual route boundaries, or
+   - deprecated in favor of a single boundary schema strategy.
 
-3. Python connector boundary in `src/solstein/infrastructure/fact_payloads.py` intentionally uses `extra="allow"`.
-   - This may be required for connector-specific metadata, but it is not strict and should be evaluated with connector owners before tightening.
+3. Python connector boundary (`src/solstein/infrastructure/fact_payloads.py`) currently uses permissive extra handling by design (`extra="allow"`), which may be intentional for connector-specific metadata and needs connector-owner review before tightening.
 
-4. FastAPI/Pydantic strictness policy is currently fragmented across modules.
-   - Recommend introducing a shared boundary base model (single source of strict config) and applying it incrementally to all request schemas.
+## Recommended Next Steps
 
-## Recommended Next Steps (Priority Order)
-
-1. Apply strict request model policy to remaining inline router request models.
-2. Add/extend contract tests that explicitly assert unknown field rejection at API boundaries.
-3. Decide lifecycle for `api/schemas/validation.py` (wire or deprecate).
-4. Perform connector-by-connector compatibility review before changing Python fact payload `extra="allow"`.
-5. Run full Python test suite in CI/test container with dependencies installed to validate behavioral compatibility.
+1. Introduce a shared strict request-model base for all API request bodies.
+2. Migrate broad request bodies (`Company`, raw dict-list payloads) to dedicated boundary schemas.
+3. Add explicit tests asserting rejection of unknown fields and invalid cross-field combinations.
+4. Re-run full Python test suite in CI/test container with project deps installed.

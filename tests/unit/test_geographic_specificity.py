@@ -5,6 +5,8 @@ Ensures that geographic data is preserved at country-level granularity
 and not reduced to continent-level or generic regions.
 """
 
+from unittest.mock import patch
+
 import pytest
 
 from solstein.data.unified_loader import UnifiedCompanyLoader
@@ -14,10 +16,11 @@ class TestGeographicSpecificity:
     """Validate geographic data preservation across data sources."""
 
     @pytest.fixture
-    def companies(self):
+    def companies(self, mock_competitor_data):
         """Load all companies with unified data."""
         loader = UnifiedCompanyLoader()
-        return loader.load_unified_companies()
+        with patch.object(loader, "_load_markdown_companies", return_value=[]):
+            return loader.load_unified_companies()
 
     def test_eneve_has_seven_countries(self, companies):
         """Eneve should have 7 specific countries, not 'Europe'."""
@@ -76,13 +79,14 @@ class TestGeographicSpecificity:
         assert geo_source is not None, "geographic_presence data source should be tracked"
         assert geo_source in ["JSON", "Markdown"], f"Data source should be JSON or Markdown, got {geo_source}"
 
-    def test_geographic_specificity_deterministic(self):
+    def test_geographic_specificity_deterministic(self, mock_competitor_data):
         """Geographic data should be deterministic across multiple loads."""
         results = []
 
         for _ in range(3):
             loader = UnifiedCompanyLoader()
-            companies = loader.load_unified_companies()
+            with patch.object(loader, "_load_markdown_companies", return_value=[]):
+                companies = loader.load_unified_companies()
             eneve = next((c for c in companies if "Eneve" in c.name), None)
             if eneve:
                 results.append(tuple(sorted(eneve.geographic_presence)))

@@ -189,6 +189,19 @@ LLM_REQUEST_DURATION = Histogram(
     buckets=[0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0],
 )
 
+# STORY-129: Request and error counters with classification labels
+LLM_REQUESTS_TOTAL = Counter(
+    "llm_requests_total",
+    "Total LLM requests by provider, model, and outcome",
+    ["provider", "model", "status"],  # status: success/error
+)
+
+LLM_ERRORS_TOTAL = Counter(
+    "llm_errors_total",
+    "Total LLM errors by provider and classified error type",
+    ["provider", "error_type"],  # error_type: from ProviderErrorType enum
+)
+
 # Provider availability gauge
 LLM_PROVIDER_AVAILABLE = Gauge(
     "llm_provider_available",

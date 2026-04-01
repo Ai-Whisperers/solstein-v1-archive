@@ -18,6 +18,10 @@ from solstein.domain.models import Company
 logger = logging.getLogger(__name__)
 
 
+# TODO: STORY-171 — remove in next cleanup sprint
+# The CLI no longer imports CompetitorDataLoader (replaced by _load_companies_for_report).
+# This class is still used internally by UnifiedCompanyLoader as a JSON bootstrap step.
+# Safe to remove once UnifiedCompanyLoader is refactored to read JSON directly.
 class CompetitorDataLoader:
     """Load competitor data from JSON files and convert to domain entities.
 
@@ -79,14 +83,14 @@ class CompetitorDataLoader:
                 try:
                     company = convert_to_domain_company(comp, i)
                     companies.append(company)
-                except Exception as e:
+                except (KeyError, ValueError, TypeError) as e:
                     logger.warning(f"Error converting competitor {i}: {e}")
                     continue
 
             logger.info(f"Loaded {len(companies)} companies from {json_path}")
             return companies
 
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.error(f"Error loading JSON from {json_path}: {e}")
             return []
 
@@ -96,5 +100,28 @@ class CompetitorDataLoader:
         logger.debug("Cleared data cache")
 
 
-# Global instance for easy import
-loader = CompetitorDataLoader()
+# STORY-254: Lazy singleton to avoid import-time config access.
+# Previous module-level instantiation triggered get_settings() during
+# collection, which requires DATABASE__URL even for tests that never
+# touch the loader.
+_loader_instance: CompetitorDataLoader | None = None
+
+
+def get_loader() -> CompetitorDataLoader:
+    """Return the global CompetitorDataLoader (created on first call)."""
+    global _loader_instance  # noqa: PLW0603
+    if _loader_instance is None:
+        _loader_instance = CompetitorDataLoader()
+    return _loader_instance
+
+
+# Backward-compatible alias — code that still imports ``loader`` at
+# module level will get a proxy that defers construction.
+class _LazyLoader:
+    """Transparent proxy that delays CompetitorDataLoader construction."""
+
+    def __getattr__(self, name: str) -> object:
+        return getattr(get_loader(), name)
+
+
+loader = _LazyLoader()

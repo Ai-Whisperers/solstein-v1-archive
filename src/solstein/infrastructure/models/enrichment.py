@@ -26,6 +26,7 @@ class EnrichmentAuditRecord(Base):
     __tablename__ = "enrichment_audit_trail"
 
     id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(String(255), index=True, nullable=True)  # EPIC-019
     company_id = Column(String(255), index=True, nullable=False)
     company_name = Column(String(500), nullable=True)
 
@@ -82,6 +83,7 @@ class EnrichmentCacheRecord(Base):
     __tablename__ = "enrichment_cache"
 
     id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(String(255), index=True, nullable=True)  # EPIC-019
     company_id = Column(String(255), unique=True, index=True, nullable=False)
 
     # Cached enrichment data
@@ -133,6 +135,7 @@ class EnrichmentJobRecord(Base):
     __tablename__ = "enrichment_jobs"
 
     id = Column(String(255), primary_key=True, index=True)  # Celery task_id
+    tenant_id = Column(String(255), index=True, nullable=True)  # EPIC-019
 
     # Job details
     company_id = Column(String(255), index=True, nullable=False)

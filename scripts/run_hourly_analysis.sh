@@ -2,7 +2,8 @@
 # Solstein Hourly Codebase Analysis Runner
 # This script runs the comprehensive codebase analysis every hour
 
-REPO_DIR="/home/ai-whisperers/Documents/Work/solstein"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="${PROJECT_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 OUTPUT_DIR="$REPO_DIR/.analysis-output"
 TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
 

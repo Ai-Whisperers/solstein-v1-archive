@@ -11,6 +11,7 @@ from typing import Any
 from loguru import logger
 
 _TIER_PROXIMITY_NORMALIZER: float = 3.0
+from ..core.math_utils import safe_avg, safe_div, safe_pct
 from ..core.scoring_config import ScoringSettings
 from ..domain.models import (
     Company,
@@ -20,6 +21,7 @@ from ..domain.models import (
     ThreatLevel,
 )
 from ..exceptions import ScoringError
+from .ai_readiness import AIReadinessScorer
 from .constants import (
     LEAD_SCORE_THRESHOLD,
     MAX_SCORE,
@@ -59,22 +61,30 @@ class CompositeScoreResult:
     breakdown: dict[str, float | str]
 
 
+# STORY-208: Default confidence for signals without metadata.
+# When signal_confidences IS populated but a specific signal is missing,
+# use this neutral default instead of 1.0 (which would assume full confidence).
+_DEFAULT_SIGNAL_CONFIDENCE: float = 0.50
+
+
 def _confidence_weight(
     component_name: str,
     signal_confidences: dict[str, float],
 ) -> float:
     """Look up the average signal confidence for a scoring component.
 
-    Returns 1.0 when the component has no mapped signals or none of the
-    mapped signals have confidence data (preserves original score).
+    Returns 1.0 when the component has no mapped signals (unmapped components
+    keep their original score).  For mapped signals missing from the dict,
+    uses _DEFAULT_SIGNAL_CONFIDENCE (0.50) as a neutral prior per STORY-208.
     """
     signal_names = _COMPONENT_SIGNAL_MAP.get(component_name, [])
     if not signal_names:
         return 1.0
-    confidences = [signal_confidences[s] for s in signal_names if s in signal_confidences]
-    if not confidences:
-        return 1.0
-    return sum(confidences) / len(confidences)
+    confidences = [
+        signal_confidences.get(s, _DEFAULT_SIGNAL_CONFIDENCE)
+        for s in signal_names
+    ]
+    return safe_avg(confidences, default=_DEFAULT_SIGNAL_CONFIDENCE, label="signal_confidence_avg") or _DEFAULT_SIGNAL_CONFIDENCE
 
 
 def _apply_confidence_weights(
@@ -95,6 +105,40 @@ def _apply_confidence_weights(
     final = max(MIN_SCORE, min(score, MAX_SCORE))
     explanation.final_score = final
     return final, explanation
+
+
+# ---------------------------------------------------------------------------
+# STORY-209: Pre-scoring validation gate
+# ---------------------------------------------------------------------------
+
+
+def validate_before_scoring(company: Company) -> list[str]:
+    """Validate company data before scoring.
+
+    Runs Company.validate_scoring_readiness() and logs each warning.
+    Returns the list of validation warnings (empty = fully valid).
+
+    This function never raises — it logs and returns warnings so the
+    caller can decide whether to proceed with scoring.
+    """
+    warnings: list[str] = []
+
+    try:
+        warnings = company.validate_scoring_readiness()
+    except Exception as exc:
+        # Validation itself should never crash scoring
+        logger.error(
+            f"[EPIC-059] Validation failed for {company.name}: {exc}"
+        )
+        warnings = [f"Validation error: {exc}"]
+
+    if warnings:
+        for warning in warnings:
+            logger.warning(
+                f"[EPIC-059] Pre-scoring validation for '{company.name}': {warning}"
+            )
+
+    return warnings
 
 
 def classify_company(score: float | None) -> CompanyClassification:
@@ -150,8 +194,15 @@ class GrowthScorer:
         self.competitive_position_scorer = CompetitivePositionScorer(self.config)
 
     def calculate_scores(self, profile: Company) -> Company:
-        """Calculate all scores for a company profile."""
+        """Calculate all scores for a company profile.
+
+        STORY-209: Validates company before scoring. Validation warnings are
+        logged and stored in scoring_breakdown but do not block scoring.
+        """
         logger.debug(f"Calculating scores for {profile.name}")
+
+        # STORY-209: Validation gate — run before scoring
+        validation_warnings = validate_before_scoring(profile)
 
         profile.growth_score = None
         profile.financial_health_score = None
@@ -237,11 +288,33 @@ class GrowthScorer:
         # Derive threat level from classification and score
         profile.threat_level = ThreatLevel(derive_threat_level(profile.classification, profile.composite_score))
 
+        # STORY-145: AI Readiness Assessment (EPIC-038)
+        try:
+            ai_scorer = AIReadinessScorer()
+            ai_result = ai_scorer.score(profile)
+            profile.ai_readiness_score = ai_result.score
+            profile.ai_readiness_tier = ai_result.tier.value
+            profile.ai_readiness_breakdown = ai_result.breakdown
+        except Exception as exc:
+            logger.error(
+                "[EPIC-038] AI readiness scoring failed for %s: %s",
+                profile.name,
+                exc,
+            )
+            # Graceful degradation: scoring continues without AI readiness
+            profile.ai_readiness_score = None
+            profile.ai_readiness_tier = None
+            profile.ai_readiness_breakdown = {}
+
         profile.scoring_breakdown = {
             "growth": growth_expl,
             "financial": fin_expl,
             "competitive": comp_expl,
         }
+
+        # STORY-209: Persist validation warnings in breakdown
+        if validation_warnings:
+            profile.scoring_breakdown["validation_warnings"] = validation_warnings
 
         return profile
 
@@ -268,16 +341,17 @@ class MarketAnalyzer:
         revenues = [p.financials.revenue for p in profiles if p.financials and p.financials.revenue]
         market_size = sum(revenues) if revenues else 0.0
 
-        growth_rates = [p.financials.growth_rate for p in profiles if p.financials and p.financials.growth_rate is not None]
-        avg_growth = sum(growth_rates) / len(growth_rates) if growth_rates else 0.0
+        growth_rates = [
+            p.financials.growth_rate for p in profiles if p.financials and p.financials.growth_rate is not None
+        ]
+        avg_growth = safe_avg(growth_rates, default=0.0, label="market_avg_growth") or 0.0
 
         # Calculate CR4
         cr4 = 0.0
         if revenues:
             sorted_revenues = sorted(revenues, reverse=True)
             top_4 = sorted_revenues[:4]
-            if sum(revenues) > 0:
-                cr4 = sum(top_4) / sum(revenues) * 100
+            cr4 = safe_pct(sum(top_4), sum(revenues), default=0.0, label="cr4") or 0.0
 
         # Return Domain Entity
         return MarketAnalysis(
@@ -335,7 +409,9 @@ class MarketAnalyzer:
 
     def _calculate_growth_metrics(self, profiles: list[Company]) -> dict[str, float]:
         """Calculate market growth metrics."""
-        growth_rates = [p.financials.growth_rate for p in profiles if p.financials and p.financials.growth_rate is not None]
+        growth_rates = [
+            p.financials.growth_rate for p in profiles if p.financials and p.financials.growth_rate is not None
+        ]
 
         if not growth_rates:
             return {"average": 0.0, "median": 0.0, "high_growth_count": 0}
@@ -353,7 +429,9 @@ class MarketAnalyzer:
     def _calculate_financial_metrics(self, profiles: list[Company]) -> dict[str, Any]:
         """Calculate market financial metrics."""
         revenues = [p.financials.revenue for p in profiles if p.financials and p.financials.revenue]
-        profits = [p.financials.profit_margin for p in profiles if p.financials and p.financials.profit_margin is not None]
+        profits = [
+            p.financials.profit_margin for p in profiles if p.financials and p.financials.profit_margin is not None
+        ]
 
         metrics = {
             "total_revenue": sum(revenues) if revenues else 0,
@@ -412,7 +490,10 @@ class MarketAnalyzer:
         revenues = [p.financials.revenue for p in profiles if p.financials.revenue]
         if revenues:
             total_revenue = sum(revenues)
-            market_shares = [r / total_revenue * 100 for r in revenues]
+            market_shares = [
+                safe_pct(r, total_revenue, default=0.0, label="market_share") or 0.0
+                for r in revenues
+            ]
             hhi = sum(share**2 for share in market_shares)
         else:
             hhi = 0.0
@@ -478,7 +559,7 @@ class CompetitiveOverlapCalculator:
         scores.append(tier_proximity)
 
         # Average the scores
-        return sum(scores) / len(scores) if scores else 0.0
+        return safe_avg(scores, default=0.0, label="similarity_score") or 0.0
 
     def _calculate_geographic_overlap(self, p1: Company, p2: Company) -> float:
         """Calculate geographic overlap (0-1)."""
@@ -491,7 +572,7 @@ class CompetitiveOverlapCalculator:
         intersection = len(set1.intersection(set2))
         union = len(set1.union(set2))
 
-        return intersection / union if union > 0 else 0.0
+        return safe_div(intersection, union, default=0.0, label="geographic_overlap") or 0.0
 
     def _calculate_technology_overlap(self, p1: Company, p2: Company) -> float:
         """Calculate technology stack overlap (0-1)."""
@@ -504,7 +585,7 @@ class CompetitiveOverlapCalculator:
         intersection = len(set1.intersection(set2))
         union = len(set1.union(set2))
 
-        return intersection / union if union > 0 else 0.0
+        return safe_div(intersection, union, default=0.0, label="technology_overlap") or 0.0
 
     def _calculate_customer_overlap(self, p1: Company, p2: Company) -> float:
         """Calculate customer overlap (0-1)."""
@@ -523,7 +604,7 @@ class CompetitiveOverlapCalculator:
                     common_terms += 1
 
         max_customers = max(len(p1.key_customers), len(p2.key_customers))
-        return common_terms / max_customers if max_customers > 0 else 0.0
+        return safe_div(common_terms, max_customers, default=0.0, label="customer_overlap") or 0.0
 
     def _calculate_tier_proximity(self, p1: Company, p2: Company) -> float:
         """Calculate tier proximity score (0-1)."""
@@ -533,4 +614,4 @@ class CompetitiveOverlapCalculator:
         tier2 = tier_order.get(p2.tier, 2)
 
         distance = abs(tier1 - tier2)
-        return 1.0 - (distance / _TIER_PROXIMITY_NORMALIZER)
+        return 1.0 - (safe_div(distance, _TIER_PROXIMITY_NORMALIZER, default=0.0) or 0.0)

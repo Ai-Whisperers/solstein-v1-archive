@@ -3,6 +3,25 @@
 from ...core.scoring_config import ScoringSettings
 from ...domain.models import Company, ScoreComponent, ScoringExplanation
 
+# Neutral midpoint for saas_maturity (1-10 scale) — used when field is absent.
+# At the midpoint, saas_adj = (5-1)/9 * 2.0 = 0.889 which rounds to near-zero
+# relative effect; effectively contributes neither bonus nor penalty.
+_SAAS_MATURITY_DEFAULT: float = 5.0
+
+
+def _safe_float(value: object, default: float = 0.0) -> float:
+    """Return value coerced to float, or default if None or non-numeric.
+
+    Used throughout this scorer to guard against None optional fields without
+    hard-crashing or silently producing wrong scores.
+    """
+    if value is None:
+        return default
+    try:
+        return float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return default
+
 
 class CompetitivePositionScorer:
     """Score company competitive position (0-10)."""
@@ -38,7 +57,9 @@ class CompetitivePositionScorer:
             )
         )
 
-        saas_maturity = profile.saas_maturity
+        # Guard: saas_maturity is optional; treat None as the neutral midpoint (5).
+        # At 5 the adjustment is (5-1)/9*2.0 ≈ 0.889 — close to zero relative effect.
+        saas_maturity = _safe_float(profile.saas_maturity, default=_SAAS_MATURITY_DEFAULT)
         saas_adj = (saas_maturity - 1) / 9 * 2.0
         score += saas_adj
         explanation.components.append(
@@ -46,7 +67,9 @@ class CompetitivePositionScorer:
                 name="SaaS Maturity",
                 value=saas_adj,
                 formula=f"({saas_maturity}-1)/9 * 2.0",
-                reasoning=f"SaaS transformation index: {saas_maturity}/10.",
+                reasoning=f"SaaS transformation index: {saas_maturity}/10."
+                if profile.saas_maturity is not None
+                else f"SaaS maturity absent — using neutral default ({_SAAS_MATURITY_DEFAULT}/10).",
             )
         )
 

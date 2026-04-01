@@ -82,28 +82,26 @@ class UnifiedCompanyLoader:
             logger.warning(f"Identifier lookup service initialization failed: {e}")
             self.lookup_service = None
 
-        # EPIC-FIX-003: Configurable markdown directory (was hardcoded to 2026-02-23/dutch_market)
-        # Use config if available, otherwise use environment variable, then fallback to default
-        if hasattr(self.config, "markdown_dir") and self.config.markdown_dir:
+        # STORY-014: Market data directory is now fully configurable.
+        # Priority: config.data.market_data_dir > MARKET_DATA_DIR env var > error.
+        # No hardcoded date or market name fallback — callers must configure explicitly.
+        from solstein.config import get_settings
+
+        settings = get_settings()
+        if settings.data.market_data_dir is not None:
+            self.markdown_dir = settings.data.market_data_dir
+        elif hasattr(self.config, "markdown_dir") and self.config.markdown_dir:
             self.markdown_dir = Path(self.config.markdown_dir)
         else:
-            # Check for environment variable override
-            env_market_dir = os.getenv("DUTCH_MARKET_DIR")
+            env_market_dir = os.getenv("MARKET_DATA_DIR")
             if env_market_dir:
                 self.markdown_dir = Path(env_market_dir)
             else:
-                # Fallback: use 'latest' instead of hardcoded date
-                self.markdown_dir = (
-                    Path(__file__).parent.parent.parent.parent
-                    / "data"
-                    / "input"
-                    / "custom_market_runs"
-                    / "latest"
-                    / "dutch_market"
-                )
+                # No configuration provided — set to None and raise at load time
+                self.markdown_dir = None  # type: ignore[assignment]
 
-        # Log the configured path for debugging
-        logger.info(f"📁 Dutch market directory configured: {self.markdown_dir}")
+        if self.markdown_dir is not None:
+            logger.info(f"Market data directory configured: {self.markdown_dir}")
 
         # Initialize caching and metrics for Phase B (Performance)
         self.cache = CacheService(ttl_hours=24)  # 24-hour TTL for enrichment results
@@ -177,15 +175,34 @@ class UnifiedCompanyLoader:
         return enriched_companies
 
     def _load_markdown_companies(self):
-        """Load companies from Markdown files in dutch_market directory."""
+        """Load companies from Markdown files in the configured market data directory.
+
+        Raises:
+            FileNotFoundError: If the market data directory is not configured or does not exist.
+        """
+        if self.markdown_dir is None:
+            raise FileNotFoundError(
+                "Market data directory is not configured. "
+                "Set DATA__MARKET_DATA_DIR in your environment, "
+                "or MARKET_DATA_DIR env var, "
+                "or config.data.market_data_dir in settings."
+            )
+
         companies = []
 
         if not self.markdown_dir.exists():
-            logger.warning(f"Markdown directory not found: {self.markdown_dir}")
-            return companies
+            raise FileNotFoundError(
+                f"Market data directory does not exist: {self.markdown_dir}. "
+                f"Ensure the directory exists and contains company .md files."
+            )
 
         # Find all .md files
-        for md_file in self.markdown_dir.glob("*.md"):
+        md_files = list(self.markdown_dir.glob("*.md"))
+        if not md_files:
+            logger.warning(f"Market data directory is empty (no .md files): {self.markdown_dir}")
+            return companies
+
+        for md_file in md_files:
             try:
                 extracted_data = self.markdown_extractor.extract_from_file(md_file)
                 if extracted_data:

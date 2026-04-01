@@ -1,8 +1,4 @@
-"""
-Configuration management for SolStein.
-
-Handles environment variables, configuration files, and settings.
-"""
+"""Configuration management for SolStein."""
 
 from functools import lru_cache
 from pathlib import Path
@@ -11,6 +7,9 @@ from typing import Any
 from loguru import logger
 from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from solstein._config_timeouts import CeleryTimingConfig, CircuitBreakerConfig, HttpTimeoutsConfig
+from solstein.utils.logging import setup_logging as _setup_logging
 
 
 class ConfigurationError(Exception):
@@ -100,25 +99,21 @@ class APIConfig(BaseModel):
 
 
 class SecurityConfig(BaseModel):
-    """Security configuration."""
+    """Security configuration.
+
+    STORY-067: JWT signing and user management are now delegated to Supabase Auth.
+    The secret_key is retained for backward compatibility with middleware that
+    may still reference it, but Supabase manages JWT secrets externally.
+    admin_email and admin_password_hash have been removed -- Supabase Auth
+    manages user credentials.
+    """
 
     secret_key: str = Field(
-        ..., description="JWT signing secret. Set SECURITY__SECRET_KEY env var to a strong value (required)."
+        default="supabase-managed",
+        description="Legacy JWT secret. Supabase Auth manages JWT signing externally.",
     )
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30, ge=1)
-    admin_email: str | None = Field(default=None, description="Admin login email (set ADMIN_EMAIL env var)")
-    admin_password_hash: str | None = Field(
-        default=None, description="SHA-256 hex hash of admin password (set ADMIN_PASSWORD_HASH env var)"
-    )
-
-    @field_validator("secret_key")
-    @classmethod
-    def validate_secret_key(cls, v: str) -> str:
-        """Validate secret key - must be provided."""
-        if not v:
-            raise ValueError("SECURITY__SECRET_KEY is required - set it to a strong secret before starting.")
-        return v
 
 
 class LoggingConfig(BaseModel):
@@ -146,11 +141,19 @@ class DataConfig(BaseModel):
     data_dir: Path = Field(default=Path("data/input"))
     cache_dir: Path = Field(default=Path("data/cache"))
     export_dir: Path = Field(default=Path("data/output/exports"))
+    market_data_dir: Path | None = Field(
+        default=None,
+        description="Directory containing market data files (e.g. company markdown profiles). "
+        "When set, the unified loader reads from this directory instead of requiring "
+        "MARKET_DATA_DIR env var. No hardcoded market or date defaults are used.",
+    )
 
-    @field_validator("data_dir", "cache_dir", "export_dir", mode="before")
+    @field_validator("data_dir", "cache_dir", "export_dir", "market_data_dir", mode="before")
     @classmethod
-    def resolve_paths(cls, v: Any) -> Path:
+    def resolve_paths(cls, v: Any) -> Path | None:
         """Resolve paths to absolute."""
+        if v is None:
+            return None
         v_path = Path(v) if isinstance(v, str) else v
 
         if v_path and not v_path.is_absolute():
@@ -175,6 +178,10 @@ class Settings(BaseSettings):
     debug_errors: bool = Field(
         default=False, description="Include debug info (tracebacks) in error responses. NEVER enable in production."
     )
+    # Timeout and resilience configuration
+    http_timeouts: HttpTimeoutsConfig = Field(default_factory=HttpTimeoutsConfig)
+    circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
+    celery_timing: CeleryTimingConfig = Field(default_factory=CeleryTimingConfig)
     # Components
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     api: APIConfig = Field(default_factory=APIConfig)
@@ -191,13 +198,37 @@ class Settings(BaseSettings):
     github_token: str | None = Field(default=None)
     companies_house_api_key: str | None = Field(default=None)
     google_api_key: str | None = Field(default=None)
+    google_search_engine_id: str | None = Field(default=None)
     sec_user_agent: str | None = Field(default=None)
+
+    # STORY-101: SearXNG self-hosted meta-search engine (primary web search backend)
+    searxng_url: str = Field(
+        default="http://searxng:8080",
+        description="SearXNG instance URL. docker-compose provides this as a service.",
+    )
+    searxng_engines: str | None = Field(
+        default=None,
+        description="Comma-separated SearXNG engine list (e.g. 'google,bing,duckduckgo,brave').",
+    )
+    search_cache_ttl: int = Field(
+        default=3600,
+        ge=60,
+        description="Search result cache TTL in seconds (default: 1 hour).",
+    )
 
     # Data source APIs
     exa_api_key: str | None = Field(default=None)
     crunchbase_api_key: str | None = Field(default=None)
     news_api_key: str | None = Field(default=None)
     patentsview_api_key: str | None = Field(default=None)
+
+    # STORY-091: Top-level alias so CELERY_RESULT_EXPIRES_SECONDS env var works alongside
+    # the nested CELERY_TIMING__RESULT_EXPIRES.
+    celery_result_expires_seconds: int | None = Field(
+        default=None,
+        ge=60,
+        description="Override for Celery result TTL (seconds).",
+    )
 
     connector_max_attempts: int = Field(default=3, ge=1, le=10)
     connector_retry_base_delay: float = Field(default=0.25, ge=0.0, le=30.0)
@@ -207,6 +238,10 @@ class Settings(BaseSettings):
 
     feature_new_classifier: bool = Field(default=False)
     feature_new_readiness_gate: bool = Field(default=False)
+    # DEPRECATED (STORY-256): feature_new_unified_loader is no longer read by
+    # build_default_registry.  The legacy enrichment path is canonical.
+    # Kept for config-file backward compatibility; will be removed in a
+    # future cleanup pass.  Deletion trigger: EPIC-067 complete.
     feature_new_unified_loader: bool = Field(default=False)
 
     # LLM APIs
@@ -223,10 +258,9 @@ class Settings(BaseSettings):
     celery_result_backend: str | None = Field(default=None)
     refresh_schedule: dict[str, Any] | None = Field(default=None)
 
-    llm_provider: str = Field(
-        default="auto",
-        description="LLM provider selection: auto|ollama|openai|groq|fireworks|mistral|deepinfra|gemini|nvidia|cerebras|kimi|anthropic|siliconflow|alibaba|none",
-    )
+    llm_provider: str = Field(default="auto")
+    llm_provider_order: list[str] = Field(default=["deepinfra", "mistral", "nvidia"])
+    llm_circuit_breaker_enabled: bool = Field(default=True)
     ollama_url: str = Field(default="http://localhost:11434")
     ollama_model: str = Field(default="llama3.2:latest")
     openai_model: str = Field(default="gpt-4o-mini")
@@ -245,6 +279,24 @@ class Settings(BaseSettings):
     alibaba_api_key: str | None = Field(default=None)
     alibaba_model: str = Field(default="qwen-plus")
 
+    # OpenTelemetry (STORY-050)
+    otlp_endpoint: str | None = Field(default=None)
+
+    # Langfuse observability (STORY-073)
+    langfuse_public_key: str | None = Field(default=None)
+    langfuse_secret_key: str | None = Field(default=None)
+    langfuse_host: str = Field(default="https://cloud.langfuse.com")
+
+    # Embedding (EPIC-023)
+    embedding_model: str = Field(default="text-embedding-3-small")
+    embedding_dimensions: int = Field(default=1536)
+    embedding_batch_size: int = Field(default=50, ge=1, le=500)
+
+    # STORY-079: LangGraph checkpointing and human-in-the-loop
+    graph_checkpoint_db_path: Path = Field(default=Path("data/checkpoints/research_graph.db"))
+    human_review_confidence_threshold: float = Field(default=0.5, ge=0.0, le=1.0)
+    review_queue_db_path: Path = Field(default=Path("data/checkpoints/review_queue.db"))
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -256,7 +308,6 @@ class Settings(BaseSettings):
     @classmethod
     def load(cls) -> "Settings":
         """Load settings with environment variable overrides."""
-        # Try to load from .env file
         env_file = Path(".env")
         if env_file.exists():
             logger.info(f"Loading configuration from {env_file}")
@@ -264,14 +315,12 @@ class Settings(BaseSettings):
             logger.warning("No .env file found, using defaults")
 
         settings = cls()
-        settings._validate_runtime_safety()
+        _validate_runtime_safety(settings)
         settings.data.ensure_dirs()
 
-        # Log configuration summary
         logger.info(f"Environment: {settings.environment}")
         logger.info(f"Debug mode: {settings.debug}")
         logger.info(f"Data directory: {settings.data.data_dir}")
-
         return settings
 
     def get_database_url(self, test: bool = False) -> str:
@@ -283,84 +332,8 @@ class Settings(BaseSettings):
         return url
 
     def check_configuration(self) -> None:
-        """Check required configuration at startup.
-
-        Raises ConfigurationError if critical keys are missing.
-        Warns for optional keys. Logs a full startup summary.
-        """
-        self._validate_runtime_safety()
-
-        # Required: Database URL
-        if not self.database.url:
-            raise ConfigurationError(
-                "DATABASE__URL environment variable is required. "
-                "Set DATABASE__URL before starting the application."
-            )
-
-        # Required: Security/JWT secret (checked via Pydantic validation, but double-check here)
-        if not self.security.secret_key:
-            raise ConfigurationError(
-                "SECURITY__SECRET_KEY environment variable is required. "
-                "Set a strong secret (32+ characters) before starting."
-            )
-
-        # Required: GitHub token
-        if not (self.github_token or "").strip():
-            raise ConfigurationError(
-                "GITHUB_TOKEN environment variable is required. "
-                "Get a token from: https://github.com/settings/tokens and set it before starting."
-            )
-
-        # Optional data source keys
-        optional_data: dict[str, str | None] = {
-            "COMPANIES_HOUSE_API_KEY": self.companies_house_api_key,
-            "GOOGLE_API_KEY": self.google_api_key,
-            "EXA_API_KEY": self.exa_api_key,
-            "CRUNCHBASE_API_KEY": self.crunchbase_api_key,
-            "NEWS_API_KEY": self.news_api_key,
-            "SEC_USER_AGENT": self.sec_user_agent,
-        }
-        for name, value in optional_data.items():
-            if not value:
-                logger.warning(f"{name} not configured — related data gathering will be disabled.")
-
-        # LLM provider summary
-        llm_providers: dict[str, str | None] = {
-            "OPENAI_API_KEY": self.openai_api_key,
-            "ANTHROPIC_API_KEY": self.anthropic_api_key,
-            "GROQ_API_KEY": self.groq_api_key,
-            "GEMINI_API_KEY": self.gemini_api_key,
-            "FIREWORKS_API_KEY": self.fireworks_api_key,
-            "MISTRAL_API_KEY": self.mistral_api_key,
-            "DEEPINFRA_API_KEY": self.deepinfra_api_key,
-            "CEREBRAS_API_KEY": self.cerebras_api_key,
-            "KIMI_API_KEY": self.kimi_api_key,
-            "SILICONFLOW_API_KEY": self.siliconflow_api_key,
-            "ALIBABA_API_KEY": self.alibaba_api_key,
-            "NVIDIA_NIM_API_KEY": self.nvidia_nim_api_key,
-            "PERPLEXITY_API_KEY": self.perplexity_api_key,
-            "OLLAMA_URL": self.ollama_url if self.llm_provider == "ollama" else None,
-        }
-        configured = [name for name, val in llm_providers.items() if val]
-        missing = [name for name, val in llm_providers.items() if not val]
-
-        if not configured:
-            logger.warning(
-                "No LLM provider API keys configured. "
-                "AI features (report generation, analysis) will be unavailable. "
-                f"Set any of: {', '.join(llm_providers.keys())}"
-            )
-
-        configured_lines = [f"  ✓ {n}" for n in sorted(configured)]
-        missing_lines = [f"  - {n} (optional)" for n in sorted(missing)]
-
-        logger.info(
-            "Configuration validation passed.\n"
-            "───────────────────────────────────────────────\n"
-            "Startup Summary\n"
-            "───────────────────────────────────────────────\n"
-            + "\n".join(configured_lines + missing_lines)
-        )
+        """Check required configuration at startup."""
+        _check_settings_configuration(self)
 
     @field_validator("environment", mode="before")
     @classmethod
@@ -370,28 +343,109 @@ class Settings(BaseSettings):
             return value or "development"
         return "development"
 
-    def _validate_runtime_safety(self) -> None:
-        if self.environment != "production":
-            return
 
-        if not self.security.secret_key.strip():
-            raise ConfigurationError("SECURITY__SECRET_KEY must be set to a strong non-default value in production.")
+# ---------------------------------------------------------------------------
+# Extracted validation helpers (keep Settings class under 300 lines)
+# ---------------------------------------------------------------------------
 
-        if len(self.security.secret_key) < 32:
-            raise ConfigurationError("SECURITY__SECRET_KEY must be at least 32 characters in production.")
 
-        if self.debug:
-            raise ConfigurationError("DEBUG must be false in production.")
+def _validate_runtime_safety(settings: Settings) -> None:
+    """Validate production safety constraints."""
+    if settings.environment != "production":
+        return
 
-        if self.debug_errors:
-            raise ConfigurationError("DEBUG_ERRORS must be false in production.")
+    if not settings.supabase.url or not settings.supabase.key:
+        raise ConfigurationError(
+            "SUPABASE__URL and SUPABASE__KEY must be configured in production. "
+            "Supabase Auth manages authentication and JWT signing."
+        )
 
-        if not self.api.require_api_key:
-            raise ConfigurationError("API__REQUIRE_API_KEY must be true in production.")
+    if settings.debug:
+        raise ConfigurationError("DEBUG must be false in production.")
 
-        lowered_db_url = self.database.url.lower()
-        if "postgres:postgres@" in self.database.url or "password" in lowered_db_url:
-            raise ConfigurationError("DATABASE__URL appears to use insecure default credentials in production.")
+    if settings.debug_errors:
+        raise ConfigurationError("DEBUG_ERRORS must be false in production.")
+
+    if not settings.api.require_api_key:
+        raise ConfigurationError("API__REQUIRE_API_KEY must be true in production.")
+
+    lowered_db_url = settings.database.url.lower()
+    if "postgres:postgres@" in settings.database.url or "password" in lowered_db_url:
+        raise ConfigurationError("DATABASE__URL appears to use insecure default credentials in production.")
+
+
+def _check_settings_configuration(settings: Settings) -> None:
+    """Check required configuration at startup.
+
+    Raises ConfigurationError if critical keys are missing.
+    Warns for optional keys. Logs a full startup summary.
+    """
+    _validate_runtime_safety(settings)
+
+    if not settings.database.url:
+        raise ConfigurationError(
+            "DATABASE__URL environment variable is required. Set DATABASE__URL before starting the application."
+        )
+
+    if settings.supabase.url and not settings.supabase.key:
+        logger.warning(
+            "SUPABASE__URL is set but SUPABASE__KEY is missing. "
+            "Supabase Auth will not function without a valid key."
+        )
+
+    if not (settings.github_token or "").strip():
+        raise ConfigurationError(
+            "GITHUB_TOKEN environment variable is required. "
+            "Get a token from: https://github.com/settings/tokens and set it before starting."
+        )
+
+    optional_data: dict[str, str | None] = {
+        "COMPANIES_HOUSE_API_KEY": settings.companies_house_api_key,
+        "GOOGLE_API_KEY": settings.google_api_key,
+        "EXA_API_KEY": settings.exa_api_key,
+        "CRUNCHBASE_API_KEY": settings.crunchbase_api_key,
+        "NEWS_API_KEY": settings.news_api_key,
+        "SEC_USER_AGENT": settings.sec_user_agent,
+    }
+    for name, value in optional_data.items():
+        if not value:
+            logger.warning(f"{name} not configured — related data gathering will be disabled.")
+
+    llm_providers: dict[str, str | None] = {
+        "OPENAI_API_KEY": settings.openai_api_key,
+        "ANTHROPIC_API_KEY": settings.anthropic_api_key,
+        "GROQ_API_KEY": settings.groq_api_key,
+        "GEMINI_API_KEY": settings.gemini_api_key,
+        "FIREWORKS_API_KEY": settings.fireworks_api_key,
+        "MISTRAL_API_KEY": settings.mistral_api_key,
+        "DEEPINFRA_API_KEY": settings.deepinfra_api_key,
+        "CEREBRAS_API_KEY": settings.cerebras_api_key,
+        "KIMI_API_KEY": settings.kimi_api_key,
+        "SILICONFLOW_API_KEY": settings.siliconflow_api_key,
+        "ALIBABA_API_KEY": settings.alibaba_api_key,
+        "NVIDIA_NIM_API_KEY": settings.nvidia_nim_api_key,
+        "PERPLEXITY_API_KEY": settings.perplexity_api_key,
+        "OLLAMA_URL": settings.ollama_url if settings.llm_provider == "ollama" else None,
+    }
+    configured = [name for name, val in llm_providers.items() if val]
+    missing = [name for name, val in llm_providers.items() if not val]
+
+    if not configured:
+        logger.warning(
+            "No LLM provider API keys configured. "
+            "AI features (report generation, analysis) will be unavailable. "
+            f"Set any of: {', '.join(llm_providers.keys())}"
+        )
+
+    configured_lines = [f"  ✓ {n}" for n in sorted(configured)]
+    missing_lines = [f"  - {n} (optional)" for n in sorted(missing)]
+
+    logger.info(
+        "Configuration validation passed.\n"
+        "───────────────────────────────────────────────\n"
+        "Startup Summary\n"
+        "───────────────────────────────────────────────\n" + "\n".join(configured_lines + missing_lines)
+    )
 
 
 @lru_cache
@@ -402,9 +456,7 @@ def get_settings() -> "Settings":
 
 def configure_logging(settings: Settings) -> None:
     """Configure logging based on settings."""
-    from .utils.logging import setup_logging
-
-    setup_logging(
+    _setup_logging(
         level=settings.logging.level,
         json_format=settings.logging.format.lower() == "json",
         log_file=settings.logging.file_path,
@@ -413,76 +465,5 @@ def configure_logging(settings: Settings) -> None:
     )
 
 
-# Template for .env file
-ENV_TEMPLATE = """# SolStein Configuration
-# Copy this file to .env and update values
-
-# Environment
-ENVIRONMENT=development
-DEBUG=true
-
-# Database (legacy, kept for SQLAlchemy compatibility)
-DATABASE__URL=postgresql://<user>:<password>@localhost:5432/solstein
-DATABASE__POOL_SIZE=20
-DATABASE__ECHO=false
-
-# Supabase
-SUPABASE__URL=https://your-project.supabase.co
-SUPABASE__KEY=sb_secret_your_key
-SUPABASE__ANON_KEY=sb_publishable_your_key
-SUPABASE__DB_URL=postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres
-
-# Temporal
-TEMPORAL__HOST_URL=localhost:7233
-TEMPORAL__NAMESPACE=default
-TEMPORAL__API_KEY=
-
-# API
-API__HOST=0.0.0.0
-API__PORT=8000
-API__DEBUG=true
-API__CORS_ORIGINS=["http://localhost:3000"]
-API__API_PREFIX=/api/v1
-
-# Security
-SECURITY__SECRET_KEY=replace-with-a-strong-32-char-min-secret
-SECURITY__ALGORITHM=HS256
-SECURITY__ACCESS_TOKEN_EXPIRE_MINUTES=30
-
-# Logging
-LOGGING__LEVEL=INFO
-LOGGING__FORMAT=json
-LOGGING__FILE_PATH=data/output/logs/solstein.log
-LOGGING__ROTATION="500 MB"
-LOGGING__RETENTION="30 days"
-
-# Data
-DATA__DATA_DIR=data
-DATA__CACHE_DIR=.cache
-DATA__EXPORT_DIR=exports
-
-# External APIs (optional)
-# OPENAI_API_KEY=sk-...
-# GROQ_API_KEY=gsk_...
-# FIREWORKS_API_KEY=fw_...
-# PERPLEXITY_API_KEY=pplx-...  # (currently unused)
-
-# Feature flags (safe cutover controls)
-# FEATURE_NEW_CLASSIFIER=false
-# FEATURE_NEW_READINESS_GATE=false
-# FEATURE_NEW_UNIFIED_LOADER=false
-
-# LLM Runtime (optional)
-# LLM_PROVIDER=auto  # auto|ollama|fireworks|openai|groq|none
-# OLLAMA_URL=http://localhost:11434
-# OLLAMA_MODEL=llama3.2:latest
-# OPENAI_MODEL=gpt-4o-mini
-# GROQ_MODEL=llama-3.3-70b-versatile
-# FIREWORKS_MODEL=qwen2-72b-instruct
-"""
-
-
-def create_env_template(output_path: Path = Path(".env.example")) -> None:
-    """Create .env template file."""
-    output_path.write_text(ENV_TEMPLATE)
-    logger.info(f"Created environment template at {output_path}")
+# Re-exported from config_template for backward compatibility
+from solstein.config_template import ENV_TEMPLATE, create_env_template  # noqa: F401

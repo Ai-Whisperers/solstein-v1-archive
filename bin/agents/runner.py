@@ -10,15 +10,23 @@ Agent 1 of 5: Code Execution + Baseline Metrics
 """
 
 import json
+import shutil
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
+
+# Resolve project root dynamically from this file's location: bin/agents/runner.py → project root
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
+# Discover Python interpreter: prefer the current interpreter, fall back to shutil.which
+_PYTHON = sys.executable or shutil.which("python3") or "python3"
 
 
 class RunnerAgent:
     def __init__(self, cycle_num):
         self.cycle_num = cycle_num
-        self.project_root = Path("/home/ai-whisperers/solstein")
+        self.project_root = _PROJECT_ROOT
         self.logs_dir = self.project_root / "logs"
         self.logs_dir.mkdir(exist_ok=True)
 
@@ -26,7 +34,7 @@ class RunnerAgent:
         """Execute full test suite"""
         print(f"[RUNNER] Cycle #{self.cycle_num}: Running test suite...")
         result = subprocess.run(
-            ["/home/ai-whisperers/.linuxbrew/bin/python3", "-m", "pytest", "tests/", "-v", "--tb=short"],
+            [_PYTHON, "-m", "pytest", "tests/", "-v", "--tb=short"],
             cwd=self.project_root,
             capture_output=True,
             text=True,
@@ -50,7 +58,7 @@ class RunnerAgent:
 
     def _run_mypy(self):
         result = subprocess.run(
-            ["/home/ai-whisperers/.linuxbrew/bin/python3", "-m", "mypy", "src/", "--ignore-missing-imports"],
+            [_PYTHON, "-m", "mypy", "src/", "--ignore-missing-imports"],
         )
         return {"exit_code": result.returncode, "output": result.stdout}
 
@@ -60,7 +68,7 @@ class RunnerAgent:
         )
         try:
             return json.loads(result.stdout)
-        except:
+        except (json.JSONDecodeError, ValueError):
             return {"error": result.stderr}
 
     def _run_radon(self):

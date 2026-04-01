@@ -19,9 +19,7 @@ def test_composite_score_uses_configured_weights() -> None:
     assert scored.composite_score is not None
 
     expected = round(
-        (scored.growth_score * 0.2)
-        + (scored.financial_health_score * 0.5)
-        + (scored.competitive_position_score * 0.3),
+        (scored.growth_score * 0.2) + (scored.financial_health_score * 0.5) + (scored.competitive_position_score * 0.3),
         2,
     )
     assert scored.composite_score == expected

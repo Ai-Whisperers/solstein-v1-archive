@@ -47,7 +47,9 @@ class GitHubConnector:
         if self.github_token:
             self.headers["Authorization"] = f"token {self.github_token}"
 
-    async def get_user_repositories(self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE) -> list[dict[str, Any]]:
+    async def get_user_repositories(
+        self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE
+    ) -> list[dict[str, Any]]:
         """Fetch repositories for a GitHub user or organization.
 
         Args:
@@ -132,7 +134,9 @@ class GitHubConnector:
             logger.error(f"Unexpected error fetching commits for {username}: {e}")
             return []
 
-    async def get_repository_activity(self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE) -> list[dict[str, Any]]:
+    async def get_repository_activity(
+        self, username: str, per_page: int = GITHUB_DEFAULT_PER_PAGE
+    ) -> list[dict[str, Any]]:
         """Fetch recent activity for a GitHub user.
 
         Returns the user's public events (activity stream).

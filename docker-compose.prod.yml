@@ -1,0 +1,42 @@
+# Solstein Production Overrides
+#
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# This file documents production-specific overrides:
+#   - Worker horizontal scaling (replicas: 2+)
+#   - Beat singleton enforcement
+#   - Tighter resource limits
+#   - No port exposure for internal services
+
+services:
+  # Scale workers horizontally for throughput
+  worker:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2.0"
+        reservations:
+          memory: 512M
+
+  # CRITICAL: Beat MUST remain a singleton. deploy.replicas: 1 is the
+  # enforcement mechanism. If you change this to 2, you WILL get duplicate
+  # task dispatches and duplicate data writes. There is no distributed
+  # lock in the file-based PersistentScheduler — the only protection is
+  # running exactly one instance.
+  beat:
+    deploy:
+      replicas: 1
+
+  # Do not expose database port in production
+  db:
+    ports: []
+
+  # Do not expose Redis port in production
+  redis:
+    ports: []
+
+  # Flower: VPN/internal only. Remove port mapping if behind reverse proxy.
+  flower:
+    ports: []

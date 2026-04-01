@@ -129,6 +129,7 @@ class TestValidationGate:
         assert company.name == "Incomplete Corp"
         assert company.financials.revenue == 100.0
         # Test validates that no exception was raised during conversion
+
     def test_converter_handles_none_fields_gracefully(self):
         """AC-4: No exceptions raised, financial metric returned with available data."""
         raw_data = {

@@ -1,9 +1,9 @@
 """Check class sizes in Python files."""
 
+import argparse
 import ast
 import sys
 from pathlib import Path
-import argparse
 
 
 def check_class_sizes(filepath: Path, max_lines: int = 300) -> list[dict]:

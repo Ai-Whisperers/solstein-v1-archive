@@ -1,11 +1,14 @@
 """GitHub data gathering agent.
 
 EPIC-022: Refactored from 756-line god class to use analyzers package.
+STORY-133: All HTTP calls now async — search, fetch_repos, fetch_file use await.
 """
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
+
+from solstein.config import get_settings
 
 from ..domain.models import DataSourceType
 from .base_agent import AgentTaskResult, BaseDataGatheringAgent
@@ -26,8 +29,6 @@ class GitHubAgent(BaseDataGatheringAgent):
     def __init__(self, github_token: str | None = None):
         """Initialize GitHub agent."""
         super().__init__("GitHubAgent", DataSourceType.GITHUB)
-
-        from solstein.config import get_settings
 
         settings = get_settings()
         token = github_token or settings.github_token
@@ -57,7 +58,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             github_org = known_org if isinstance(known_org, str) and known_org else None
 
             if github_org is None:
-                github_org = self.searcher.search(company_name)
+                github_org = await self.searcher.search(company_name)
                 if github_org is None:
                     self.log_warning(f"No GitHub org found for {company_name}")
                     result.coverage_gaps.append("GitHub organization not found")
@@ -66,7 +67,7 @@ class GitHubAgent(BaseDataGatheringAgent):
                     return result
 
             # Fetch repos
-            repos_data = self.searcher.fetch_repos(github_org)
+            repos_data = await self.searcher.fetch_repos(github_org)
             if not repos_data:
                 self.log_warning(f"No repos found in {github_org}")
                 result.coverage_gaps.append("No public repositories available")
@@ -120,7 +121,7 @@ class GitHubAgent(BaseDataGatheringAgent):
                 )
 
             # Analyze dependency health
-            dep_health = self.dep_analyzer.analyze(github_org, primary_repos)
+            dep_health = await self.dep_analyzer.analyze(github_org, primary_repos)
             if dep_health:
                 result.extracted_facts.append(
                     self._create_fact(
@@ -146,7 +147,7 @@ class GitHubAgent(BaseDataGatheringAgent):
             result.success = True
             self.log_info(f"Successfully gathered GitHub data for {company_name}")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — top-level agent catch-all, logged with context
             self.log_error(f"Error gathering GitHub data: {e}")
             result.error_message = str(e)
 

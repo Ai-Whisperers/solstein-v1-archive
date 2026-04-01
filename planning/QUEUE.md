@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-03-31 | Updated By | Codex consolidation backlog update |
+| Last Updated | 2026-04-01 | Updated By | gestalt — ruff gate DONE (0 errors), STORY-276 queued for develop→master merge |
 
 ## Status Key
 
@@ -36,26 +36,26 @@ These stories were added after a live audit found schema-enforcement gaps, a fai
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0a | STORY-254 | Remove Test Collection Side Effects and Env-Coupled Imports | READY | Added 2026-03-31: isolated pytest currently needs manual `DATABASE__URL` injection |
-| 0b | STORY-253 | Replace Structural Source-Inspection Tests with Behavioral Contract Tests | READY | Added 2026-03-31: runtime regressions escaped source-text tests |
+| 0a | STORY-254 | Remove Test Collection Side Effects and Env-Coupled Imports | DONE | PR #217 | Added 2026-03-31: isolated pytest currently needs manual `DATABASE__URL` injection |
+| 0b | STORY-253 | Replace Structural Source-Inspection Tests with Behavioral Contract Tests | DONE | PR #218 — 29 behavioral contract tests |
 
 ### EPIC-033: Data Completeness & Export Integrity (Audit Hotfix)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0c | STORY-250 | Reconcile Export Schema Contract with Workbook Output | READY | Added 2026-03-31: exporter currently fails its own schema gate |
+| 0c | STORY-250 | Reconcile Export Schema Contract with Workbook Output | DONE | PR #219 |
 
 ### EPIC-059: Input Validation & Graceful Degradation (Audit Hotfix)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0d | STORY-251 | Enforce Strict Boundary Schemas for Connector, API, and Domain Ingress | READY | Added 2026-03-31: extra fields still survive or disappear silently at ingress |
+| 0d | STORY-251 | Enforce Strict Boundary Schemas for Connector, API, and Domain Ingress | DONE | PR #220 |
 
 ### EPIC-021: Modern LLM Stack Migration (Audit Hotfix)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0e | STORY-252 | Tighten Structured LLM Contracts and Reject Empty Extraction Successes | READY | Added 2026-03-31: empty structured payloads still validate as success |
+| 0e | STORY-252 | Tighten Structured LLM Contracts and Reject Empty Extraction Successes | DONE | PR #222 |
 
 ---
 
@@ -67,29 +67,47 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0f | STORY-271 | Publish Runtime Depth, Wiring, and Duplication Ledger | IN_PROGRESS | Ledger artifact created in `docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md`; continue caller inventory, deletion budget, and parity-gap follow-through |
-| 0g | STORY-255 | Freeze Graph Runtime and Declare Legacy Pipeline Canonical | READY | Added 2026-03-31: commit history shows graph intent, runtime reality still favors legacy path, and current evidence shows graph resume wiring without a confirmed normal production caller |
-| 0h | STORY-256 | Delete Runtime Aliases and Feature-Flag Branching Around Orchestration | BLOCKED | Depends on STORY-271 and STORY-255 so deletion is evidence-driven rather than ad-hoc |
-| 0i | STORY-257 | Repair Legacy Entrypoints to Share One Registry and One Converter | BLOCKED | Depends on STORY-271 and STORY-256 |
-| 0j | STORY-258 | Define Salvage-vs-Rebuild Trigger for the Legacy Runtime | BLOCKED | Depends on STORY-271 and EPIC-070 evidence work |
+| 0f | STORY-271 | Publish Runtime Depth, Wiring, and Duplication Ledger | DONE | PR #210 merged |
+| 0g | STORY-255 | Freeze Graph Runtime and Declare Legacy Pipeline Canonical | DONE | PR #211 merged (PR #223 is duplicate — close) |
+| 0h | STORY-256 | Delete Runtime Aliases and Feature-Flag Branching Around Orchestration | DONE | PR #214 merged |
+| 0i | STORY-257 | Repair Legacy Entrypoints to Share One Registry and One Converter | DONE | PR #230 — canonical runtime facade, 12 tests |
+| 0j | STORY-258 | Define Salvage-vs-Rebuild Trigger for the Legacy Runtime | DONE | PR #234 — decision doc + 13 executable salvage criteria tests |
 
 ### EPIC-069: Provider Surface Rationalization (Consolidation)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0k | STORY-263 | Build Provider Scorecard and Enforcement Matrix | READY | Added 2026-03-31: one provider ownership matrix before more adapter churn |
-| 0l | STORY-265 | Collapse Duplicate Adapter Pairs and Placeholder Services | BLOCKED | Depends on STORY-263 so collapse decisions cite one scorecard, name feature-flag branching in `adapters/registry.py`, and include orphan/LOC reduction accounting |
-| 0m | STORY-264 | Remove Replaceable Providers from the Canonical Runtime | BLOCKED | Depends on STORY-263 and EPIC-067 canonical-runtime decision |
-| 0n | STORY-266 | Ban New Compatibility Patches at Provider Boundaries | READY | Added 2026-03-31: stop net-new wrapper growth during consolidation |
+| 0k | STORY-263 | Build Provider Scorecard and Enforcement Matrix | DONE | PR #212; scorecard at `docs/architecture/provider-scorecard.md` |
+| 0l | STORY-265 | Collapse Duplicate Adapter Pairs and Placeholder Services | DONE | PR #215 | Unblocked: STORY-263 (DONE); cite scorecard section 4 |
+| 0m | STORY-264 | Remove Replaceable Providers from the Canonical Runtime | DONE | PR #216; NewsAPI/Exa removed, YahooFinance/Crunchbase retained with justification |
+| 0n | STORY-266 | Ban New Compatibility Patches at Provider Boundaries | DONE | PR #213; adapter freeze check in `scripts/ci/adapter_freeze_check.py` |
 
 ### EPIC-070: Empirical Golden Runs and Rebuild Gate (Consolidation)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0o | STORY-267 | Add Provider-Level Golden Contract Runs | BLOCKED | Depends on canonical provider/runtime decisions from EPIC-067 and EPIC-069 |
-| 0p | STORY-268 | Add Full-Market Golden Run with Artifact Diffing | BLOCKED | Depends on STORY-267 and canonical runtime path |
-| 0q | STORY-269 | Block Empty, Placeholder, and Mock Success Paths | BLOCKED | Depends on STORY-271 inventory and golden-run failure criteria |
-| 0r | STORY-270 | Make Save-vs-Rebuild Decision from Golden-Run Evidence | BLOCKED | Final consolidation gate after EPIC-067 through EPIC-070 evidence is collected |
+| 0o | STORY-267 | Add Provider-Level Golden Contract Runs | DONE | PR #231 — 30 golden contract tests, ArtifactDiffer engine |
+| 0p | STORY-268 | Add Full-Market Golden Run with Artifact Diffing | DONE | PR #232 — 17 tests, MarketRunOrchestrator + regression gates |
+| 0q | STORY-269 | Block Empty, Placeholder, and Mock Success Paths | DONE | PR #233 — 28 tests, placeholder guards + router bypass fix |
+| 0r | STORY-270 | Make Save-vs-Rebuild Decision from Golden-Run Evidence | DONE | PR #235 — ADR-010 + 30 decision completeness tests |
+
+---
+
+## Develop Lint Gate Signal Restoration (2026-04-01)
+
+**STATUS: COMPLETE (2026-04-01).** `ruff check . --output-format concise` → 0 errors on `develop`. Commit `b007cdde` on `work/develop-lint-gate-signal-2026-04-01`. No new pyproject.toml ignore entries. The develop→master merge (STORY-276) is now unblocked.
+
+**Branch/master sync assessment (2026-04-01):** `develop` is 611 commits ahead of `master`. `master` has 7 commits not on `develop`. A full cherry-pick review confirmed none of those 7 commits require porting: the M0 functional fix (`01f94def`) is already materially present on `develop`; the ruff compliance commit (`755eab6c`) added broad ignores that are not appropriate for `develop`'s current clean state. `develop` is and remains the canonical branch. No cherry-picks needed. See `docs/audit/MASTER_ONLY_CHERRY_PICK_EXECUTION_2026-04-01.md` for evidence.
+
+### EPIC-018: Infrastructure-as-Code & CI/CD (Ruff Burn-down)
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 0s | STORY-272 | Restore Ruff Gate Signal Integrity on Current Develop | DONE | `ruff check .` → 0 errors. Commit `b007cdde` on `work/develop-lint-gate-signal-2026-04-01` |
+| 0t | STORY-273 | Ruff Bounded Slice — scripts/ Legacy Helpers | DONE | Merged into STORY-272 completion pass |
+| 0u | STORY-274 | Ruff Bounded Slice — alembic/versions/ | DONE | Merged into STORY-272 completion pass |
+| 0v | STORY-275 | Ruff Bounded Slice — .claude/, tests/unit/, bin/, src/research/ | DONE | Merged into STORY-272 completion pass. STORY-061 now unblocked |
+| 0w | STORY-276 | Merge develop into master — Production Sync | READY | Ruff gate clean; pyproject.toml conflict resolution documented in STORY-276; run on release branch |
 
 ---
 
@@ -190,7 +208,10 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 26 | — | See EPIC-052 README for stories | BLOCKED | No story files in STORIES/ dir — cannot implement without acceptance criteria |
+| 26a | STORY-198 | Enforce provenance completeness at write boundary | READY | Story files created 2026-04-01, P0 ship blocker |
+| 26b | STORY-199 | Confidence calibration per source tier | READY | Story files created 2026-04-01 |
+| 26c | STORY-200 | Quality gate before scoring and export | READY | Story files created 2026-04-01, P0 ship blocker |
+| 26d | STORY-201 | Provenance dashboard and audit trail | READY | Story files created 2026-04-01 |
 
 ### EPIC-058: Data Conversion Pipeline Consolidation (P0)
 
@@ -462,8 +483,8 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 |---|-------|-------|--------|-------|
 | 120 | STORY-055 | Centralize LLM Prompt Templates into Managed Registry | DONE | PR #190 |
 | 121 | STORY-056 | Build LLM Output Evaluation Harness | DONE | PR #191 |
-| 122 | STORY-057 | Automate Local Development Setup | BLOCKED | Dep: STORY-059 (Dockerfile exists via EPIC-026, verify fully satisfies) |
-| 123 | STORY-058 | Write Developer Onboarding Documentation | BLOCKED | Dep: STORY-039 (not done) |
+| 122 | STORY-057 | Automate Local Development Setup | READY | UNBLOCKED: Dockerfile, Dockerfile.dev, docker-compose.yml all exist (EPIC-026 DONE) |
+| 123 | STORY-058 | Write Developer Onboarding Documentation | READY | UNBLOCKED: scoring rationale documented in docs/architecture/scoring-rationale.md (satisfies STORY-039) |
 
 ---
 
@@ -482,28 +503,29 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 | 128 | STORY-239 | Add Stale-Doc Detection and Ownership Alerts | DONE | PR #194 |
 | 129 | STORY-240 | Introduce Docs Review Checklist and Change-Control Workflow | DONE | PR #195 |
 | 130 | STORY-241 | Publish Docs Health Dashboard and Weekly Audit Automation | DONE | PR #196 |
-| 131 | STORY-245 | Expand Generated API Docs and Schema Registries | READY | |
+| 131 | STORY-245 | Expand Generated API Docs and Schema Registries | DONE | PR #224 | |
 
 ### EPIC-031: Shared Library and Architecture (P2)
 
-> Deps: EPIC-007 (DDD — satisfied), EPIC-027/STORY-100 (bypass scripts deleted — DONE). All stories READY. Can run in parallel with STORY-245. Required before EPIC-066 can start.
+> **STATUS: COMPLETE** (all 5 stories DONE — PRs #225-#229). 8 files deferred from STORY-120 UTC fix due to pre-existing hook blockers.
+> Deps: EPIC-007 (DDD — satisfied), EPIC-027/STORY-100 (bypass scripts deleted — DONE). Required before EPIC-066 can start.
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 136 | STORY-116 | Centralize All Retry/Backoff in core/retry_policy.py | READY | |
-| 137 | STORY-117 | Fix Circular Import Risk — Introduce shared/ Package | READY | |
-| 138 | STORY-118 | Formalize CLI as Proper Package Entrypoint | READY | |
-| 139 | STORY-119 | Split unified_loader.py into Separate Modules | READY | |
-| 140 | STORY-120 | Enforce UTC Timezone Policy Across All Modules | READY | |
+| 136 | STORY-116 | Centralize All Retry/Backoff in core/retry_policy.py | DONE | PR #225 | |
+| 137 | STORY-117 | Fix Circular Import Risk — Introduce shared/ Package | DONE | PR #226 |
+| 138 | STORY-118 | Formalize CLI as Proper Package Entrypoint | DONE | PR #227 |
+| 139 | STORY-119 | Split unified_loader.py into Separate Modules | DONE | PR #228 — already split in EPIC-021, added verification tests |
+| 140 | STORY-120 | Enforce UTC Timezone Policy Across All Modules | DONE | PR #229 — 8 files deferred due to pre-existing hook blockers |
 
 ### EPIC-066: Architectural Boundaries and Cycle Elimination (P1)
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 141 | STORY-246 | Break patents_unified / discovery / registry cycle | BLOCKED | Dep: EPIC-065 (STORY-245 pending), EPIC-031 (not started) |
-| 142 | STORY-247 | Move canonicalization and hashing helpers to lower shared boundary | BLOCKED | Dep: EPIC-065 (STORY-245 pending), EPIC-031 (not started) |
-| 143 | STORY-248 | Decouple domain value objects from analytics constants | BLOCKED | Dep: EPIC-065 (STORY-245 pending), EPIC-031 (not started) |
-| 144 | STORY-249 | Enforce import-cycle and module-boundary checks in maintained gates | BLOCKED | Dep: EPIC-065 (STORY-245 pending), EPIC-031 (not started) |
+|| 141 | STORY-246 | Break patents_unified / discovery / registry cycle | DONE | PR branch pushed — 4 import cycles → 0. DiscoveryCandidate moved to domain.discovery |
+|| 142 | STORY-247 | Move canonicalization and hashing helpers to lower shared boundary | DONE | PR branch pushed — shared/canonicalize.py created, infra no longer imports from research |
+|| 143 | STORY-248 | Decouple domain value objects from analytics constants | READY | Dep: EPIC-065 DONE, EPIC-031 DONE |
+|| 144 | STORY-249 | Enforce import-cycle and module-boundary checks in maintained gates | READY | Dep: STORY-246 DONE, EPIC-065 DONE, EPIC-031 DONE |
 
 ---
 
@@ -512,6 +534,15 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-04-01 02:20 BRT] Worker Morning Shift
+- **Stories completed**: STORY-246 (Break patents_unified/discovery/registry import cycle)
+- **Branch**: `feature/STORY-246-break-discovery-import-cycle` pushed
+- **Metrics**: 4304 tests collected (unchanged), 0 lint errors (was 1), LOC delta +20, import cycles 4→0, files 636→637
+- **Queue**: EPIC-066: STORY-246 DONE, STORY-247/248/249 unblocked → READY
+- **Dependencies unblocked**: STORY-247, STORY-248, STORY-249 (EPIC-065 + EPIC-031 both DONE)
+- **Pre-existing failures**: 313 failed + 149 errors in full suite (baseline, not caused by this change)
+- **STORY-247**: Also completed — canonicalize_url + canonical_json_dumps moved to shared/canonicalize.py. Branch `feature/STORY-247-move-canonicalization-helpers` pushed.
 
 ### [2026-03-30 08:35 AEST] Work Checker Run
 - **PRs merged**: 0 — no open PRs
@@ -1577,3 +1608,19 @@ Status: All 4 PRs open against develop, all checks pass.
 - **Dependencies unblocked**: None — EPIC-066 still requires STORY-245 + all EPIC-031 stories complete before unblocking.
 - **Branch hygiene**: Clean — only develop + master remote branches (origin/HEAD, origin/develop, origin/master). No local feature branches. fetch --prune confirmed no stale refs.
 - **Actions taken**: Lock check (no lock), PR health (0 open), queue validation (consistent with prior runs — 7/8 EPIC-065 DONE, STORY-245 READY), branch hygiene (clean). No changes needed.
+
+### [2026-04-01 08:30 AEST] Autonomous Worker Run
+- **Stories completed**: 3 — STORY-256 (PR #214), STORY-265 (PR #215), STORY-264 (PR #216)
+- **Epics progressed**: EPIC-067 (Legacy Runtime Canonicalization): STORY-256 DONE. EPIC-069 (Provider Surface Rationalization): STORY-265 + STORY-264 DONE — all 4 stories now DONE.
+- **PRs created**: 3 (all against develop)
+  - PR #214: STORY-256 — Delete runtime aliases and feature-flag branching
+  - PR #215: STORY-265 — Collapse duplicate adapter pairs and placeholder services
+  - PR #216: STORY-264 — Remove replaceable providers from canonical runtime
+- **Key changes**:
+  - Registry `build_default_registry` simplified: unified loader branching collapsed, NewsAPI/Exa removed, 6 unified adapters + 3 replaceable adapters moved to `_retired/`
+  - Feature flag `new_unified_loader` deprecated with `DeprecationWarning`
+  - Enrichment executors cleaned: placeholder dispatch replaced with logger.debug skips
+  - 83 new tests across 3 story-specific test files + existing test updates
+- **Retained with justification**: YahooFinanceEnrichment (sole financial source), FundingEnrichment (Crunchbase non-negotiable), LinkedInEnrichment (internal fallback)
+- **Queue**: EPIC-069 all 4 stories DONE. EPIC-067: 3/5 DONE (STORY-257 BLOCKED on STORY-256 merge, STORY-258 BLOCKED on EPIC-070). No more unblocked consolidation stories.
+- **Next READY stories**: STORY-245 (EPIC-065), STORY-116–120 (EPIC-031) in M1-M12. Consolidation EPIC-070 stories blocked on EPIC-067/069 completion.

@@ -7,9 +7,10 @@ Handles enrichment from SEC EDGAR, Companies House, and News Signals.
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
 import time
 from collections.abc import Mapping
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Protocol
 
 from loguru import logger
@@ -133,14 +134,15 @@ def fill_identifiers_from_lookup(loader, company: UnifiedCompany) -> UnifiedComp
             loop = None
 
         if loop and loop.is_running():
-            import concurrent.futures
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 response = pool.submit(
                     asyncio.run,
                     service.resolve_identifiers_enveloped(company.name, headquarters=company.headquarters),
                 ).result()
         else:
-            response = asyncio.run(service.resolve_identifiers_enveloped(company.name, headquarters=company.headquarters))
+            response = asyncio.run(
+                service.resolve_identifiers_enveloped(company.name, headquarters=company.headquarters)
+            )
         company.metric_justifications["identifier_lookup_status"] = str(response.status)
         company.metric_justifications["identifier_lookup_attempts"] = str(response.metadata.get("attempts"))
 
@@ -229,9 +231,7 @@ def enrich_batch(
                 if cached_result:
                     cached_company = UnifiedCompany.model_validate(cached_result)
                     logger.debug(f"Cache hit for {company.name}")
-                    enriched_companies.append(
-                        _build_batch_outcome(cached_company, status="success", from_cache=True)
-                    )
+                    enriched_companies.append(_build_batch_outcome(cached_company, status="success", from_cache=True))
                     loader.metrics.record_enrichment(0, True)  # 0ms for cache
                     continue
 
@@ -314,7 +314,7 @@ def fill_nulls_from_sec_edgar(loader, company: UnifiedCompany) -> UnifiedCompany
 
     try:
         # Try to fetch 10-K for current year first, then previous years
-        current_year = datetime.now().year
+        current_year = datetime.now(tz=timezone.utc).year
         filing_data = None
 
         for year_offset in range(0, 3):  # Try current year and 2 previous years
@@ -445,7 +445,6 @@ def attach_news_signals(loader, company: UnifiedCompany) -> UnifiedCompany:
             loop = None
 
         if loop and loop.is_running():
-            import concurrent.futures
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 response = pool.submit(
                     asyncio.run,

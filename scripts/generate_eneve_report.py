@@ -15,7 +15,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
-
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from solstein.exporters.excel_improved import ImprovedExcelExporter
@@ -276,8 +275,8 @@ def main():
     summary = results.get("summary", {})
 
     print(f"📊 Analyzing {len(all_companies)} companies for Eneve relevance...")
-    print(f"   Eneve Focus: Energy software & value chain management")
-    print(f"   Target Market: Netherlands & Europe\n")
+    print("   Eneve Focus: Energy software & value chain management")
+    print("   Target Market: Netherlands & Europe\n")
 
     # Filter for relevant companies
     relevant_companies = []
@@ -304,7 +303,7 @@ def main():
         print(f"   • {category}: {count} companies")
 
     # Generate Excel dashboard
-    print(f"\n📊 Generating Excel dashboard...")
+    print("\n📊 Generating Excel dashboard...")
     exporter = ImprovedExcelExporter()
 
     metadata = {
@@ -348,20 +347,20 @@ def main():
         json.dump(output_data, f, indent=2, default=str)
     print(f"   ✅ JSON saved: {json_path}")
 
-    print(f"\n" + "=" * 60)
-    print(f"🎯 ENEVE COMPETITIVE INTELLIGENCE REPORT COMPLETE")
-    print(f"=" * 60)
-    print(f"\nTarget Company: Eneve (Netherlands)")
-    print(f"Focus: Smart software for the energy value chain")
+    print("\n" + "=" * 60)
+    print("🎯 ENEVE COMPETITIVE INTELLIGENCE REPORT COMPLETE")
+    print("=" * 60)
+    print("\nTarget Company: Eneve (Netherlands)")
+    print("Focus: Smart software for the energy value chain")
     print(f"\nTotal Relevant Competitors: {len(relevant_companies)}")
-    print(f"\nBreakdown by Category:")
+    print("\nBreakdown by Category:")
     for category, count in sorted(relevance_breakdown.items(), key=lambda x: -x[1]):
         print(f"   • {category}: {count}")
-    print(f"\n📁 Output Files:")
+    print("\n📁 Output Files:")
     print(f"   • Excel Dashboard: {excel_path}")
     print(f"   • JSON Data: {json_path}")
-    print(f"\n✨ All data is 100% real - no synthetic entries")
-    print(f"=" * 60)
+    print("\n✨ All data is 100% real - no synthetic entries")
+    print("=" * 60)
 
 
 if __name__ == "__main__":

@@ -67,6 +67,7 @@ This epic addresses the full scope of the data completeness failure: restoring d
 | [STORY-126](STORIES/STORY-126-export-schema-validation.md) | Add Export Schema Validation | P1 | 🔴 Not Started |
 | [STORY-127](STORIES/STORY-127-deduplicate-fields.md) | Deduplicate profit_margin and employee Fields | P1 | 🔴 Not Started |
 | [STORY-128](STORIES/STORY-128-document-field-lineage.md) | Document Field Lineage from Ingestion to Export | P2 | 🔴 Not Started |
+| [STORY-250](STORIES/STORY-250-reconcile-export-schema-with-workbook-output.md) | Reconcile Export Schema Contract with Workbook Output | P1 | 🔴 Not Started |
 
 ---
 
@@ -98,6 +99,7 @@ STORY-128 (Field Lineage Docs)
 | Export schema validation coverage | 0% | 100% |
 | Field lineage documentation coverage | 0% | 100% |
 | CI detection of field drops | None | Automated |
+| Exporter passes its own schema gate | No | Yes |
 
 ---
 
@@ -123,3 +125,33 @@ STORY-128 (Field Lineage Docs)
 The root cause of this failure is architectural: the export layer was built without a contract. There is no schema, no validation, no test that asserts "these fields must be present." The export tests validate what the export currently produces, not what it should produce. This is a common failure mode — tests that describe behavior rather than specify it — and it means the test suite actively conceals the problem.
 
 The fix is not just adding 20 fields. The fix is establishing the contract that prevents the next 20 fields from being silently dropped.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This epic currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently schedule this epic, treat it as triage-required backlog inventory instead of self-startable work.
+
+### Develop-Relevant Evidence
+
+- `planning/QUEUE.md` already records merged work for `STORY-125`, `STORY-126`, and `STORY-127`, plus field-lineage and strict-mode CI deliverables.
+- `STORY-126` and `STORY-128` are already the canonical contract references for export schema validation and lineage closure; do not re-specify them with weaker mock validation language.
+- The 2026-03-31 audit found the current exporter failing its own schema gate; `STORY-250` is the remediation follow-up and should be treated as contract repair, not optional enhancement.
+- Future agents should treat this epic as the existing schema-contract backbone for export surfaces, not as an untouched greenfield backlog item.
+
+### Next Agent Action
+
+- Reconcile this epic against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before selecting a story.
+- Do not start implementation from this README alone unless the queue or a fresh planning decision activates the epic.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Prefer narrow, machine-checkable progress over broad narrative backlog churn.
+
+### Minimum Verification For Future Agents
+
+- If this epic is reactivated, update the queue or controlling planning artifact first.
+- Then execute one story at a time with the relevant tests, gates, and generated references for the touched surface.

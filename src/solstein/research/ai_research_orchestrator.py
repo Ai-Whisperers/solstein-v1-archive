@@ -6,674 +6,222 @@ stage with web search and deterministic validation.
 """
 
 import asyncio
-import importlib
-import importlib.util
-import json
-from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
-import httpx
-from bs4 import BeautifulSoup
 from loguru import logger
 
-# Optional: DuckDuckGo search backend (loaded lazily)
-_ddgs_class: Any | None = None
-_duckduckgo_available = False
-
-try:
-    if importlib.util.find_spec("duckduckgo_search") is not None:
-        module = importlib.import_module("duckduckgo_search")
-        _ddgs_class = getattr(module, "DDGS", None)
-        _duckduckgo_available = _ddgs_class is not None
-    else:
-        logger.warning("duckduckgo_search not installed. Web search will be disabled.")
-except Exception as error:
-    logger.warning(f"duckduckgo_search failed to initialize: {error}")
-
-from ..llm.enhanced_client import EnhancedLLMClient
-
-
-@dataclass
-class ResearchPlan:
-    """Research strategy for a company."""
-
-    company_name: str
-    queries: list[dict[str, Any]]
-    estimated_sources: int
-    created_at: datetime = field(default_factory=datetime.now)
-
-
-@dataclass
-class SearchResult:
-    """Web search result."""
-
-    title: str
-    url: str
-    snippet: str
-    source: str
-    relevance_score: float = 0.0
-    intent_match: str = ""
-
-
-@dataclass
-class ExtractedData:
-    """Structured data extracted from a source."""
-
-    source_url: str
-    source_type: str
-    data: dict[str, Any]
-    confidence: float
-    extraction_method: str
-    extracted_at: datetime = field(default_factory=datetime.now)
-    raw_content: str = ""
-
-
-@dataclass
-class ValidationResult:
-    """Data validation outcome."""
-
-    is_valid: bool
-    issues: list[str]
-    confidence_adjustment: float
-    recommendations: list[str]
-
-
-@dataclass
-class ResearchReport:
-    """Final research report for a company."""
-
-    company_name: str
-    is_synthetic: bool = False
-    confidence_score: float = 0.0
-    basic_info: dict[str, Any] = field(default_factory=dict)
-    financials: dict[str, Any] = field(default_factory=dict)
-    funding: dict[str, Any] = field(default_factory=dict)
-    data_sources: list[dict[str, Any]] = field(default_factory=list)
-    metadata: dict[str, Any] = field(default_factory=dict)
-    errors: list[str] = field(default_factory=list)
-
-
-class ResearchPlannerAgent:
-    """Creates research strategies using the configured LLM provider."""
-
-    def __init__(self, llm_client: EnhancedLLMClient | None = None) -> None:
-        self.llm = llm_client or EnhancedLLMClient()
-
-    async def create_plan(self, company_name: str, industry: str | None = None) -> ResearchPlan:
-        """Generate a research plan with prioritized search queries."""
-        industry_context = f"in the {industry} industry" if industry else ""
-        prompt = f"""Create a detailed web research plan for: {company_name} {industry_context}
-
-Your goal is to find factual information about this company from web sources.
-Generate 6-8 specific search queries for website, funding, financials,
-headcount, news, social presence, and industry positioning.
-
-Return ONLY valid JSON in this format:
-{{
-  "queries": [
-    {{"query": "...", "priority": 1, "intent": "website"}},
-    {{"query": "...", "priority": 1, "intent": "funding"}}
-  ],
-  "estimated_sources": 5
-}}
-"""
-
-        try:
-            response = await self.llm.generate(prompt)
-            if response is None or response == "":
-                raise ValueError("Planner returned empty response")
-            response_text = str(response)
-            plan_data = json.loads(self._extract_json(response_text))
-            queries = sorted(plan_data.get("queries", []), key=lambda item: item.get("priority", 3))
-            return ResearchPlan(
-                company_name=company_name,
-                queries=queries,
-                estimated_sources=plan_data.get("estimated_sources", 5),
-            )
-        except Exception as error:
-            logger.error(f"Failed to create plan for {company_name}: {error}")
-            return ResearchPlan(
-                company_name=company_name,
-                queries=[
-                    {"query": f"{company_name} official website", "priority": 1, "intent": "website"},
-                    {"query": f"{company_name} funding valuation", "priority": 1, "intent": "funding"},
-                    {"query": f"{company_name} revenue 2024", "priority": 2, "intent": "financials"},
-                    {"query": f"{company_name} employees headcount", "priority": 2, "intent": "employees"},
-                ],
-                estimated_sources=4,
-            )
-
-    def _extract_json(self, text: str) -> str:
-        """Extract JSON payload from an LLM response."""
-        if "```json" in text:
-            start = text.find("```json") + 7
-            end = text.find("```", start)
-            return text[start:end].strip()
-
-        if "```" in text:
-            start = text.find("```") + 3
-            end = text.find("```", start)
-            return text[start:end].strip()
-
-        start = text.find("{")
-        end = text.rfind("}")
-        if start >= 0 and end > start:
-            return text[start : end + 1]
-
-        return text
-
-
-class WebSearchAgent:
-    """Performs web searches and relevance ranking.
-
-    Primary backend: SearXNG (local instance, aggregates Brave+DDG+Google).
-    Fallback: direct DuckDuckGo library.
-    """
-
-    SEARXNG_URL = "http://localhost:8889/search"
-
-    def __init__(self) -> None:
-        self.ddgs = _ddgs_class() if _duckduckgo_available and _ddgs_class is not None else None
-        self.cache: dict[str, list[SearchResult]] = {}
-        self._cache_max_size: int = 256  # prevent unbounded memory growth
-
-    async def search(self, query: str, intent: str, max_results: int = 10) -> list[SearchResult]:
-        """Execute search and return ranked results."""
-        cache_key = f"{query}_{intent}"
-        if cache_key in self.cache:
-            return self.cache[cache_key]
-
-        results: list[SearchResult] = []
-
-        # Primary: SearXNG (aggregates Brave, DDG, Google, Wikipedia)
-        try:
-            searxng_results = await self._search_searxng(query, max_results)
-            results.extend(searxng_results)
-            if searxng_results:
-                logger.info(f"SearXNG returned {len(searxng_results)} results for '{query}'")
-        except Exception as error:
-            logger.warning(f"SearXNG search failed for '{query}': {error}")
-
-        # Fallback: direct DuckDuckGo library
-        if not results and self.ddgs is not None:
-            try:
-                ddg_results = await asyncio.to_thread(self._search_duckduckgo, query, max_results)
-                results.extend(ddg_results)
-                if ddg_results:
-                    logger.info(f"DDG fallback returned {len(ddg_results)} results for '{query}'")
-            except Exception as error:
-                logger.warning(f"DuckDuckGo fallback failed for '{query}': {error}")
-
-        if not results:
-            logger.warning(f"All search backends returned 0 results for '{query}'")
-
-        ranked = self._rank_by_relevance(results, intent)
-        if len(self.cache) >= self._cache_max_size:
-            # Evict oldest entry (first key inserted) to keep memory bounded
-            oldest_key = next(iter(self.cache))
-            del self.cache[oldest_key]
-        self.cache[cache_key] = ranked
-        return ranked
-
-    async def _search_searxng(self, query: str, max_results: int) -> list[SearchResult]:
-        """Search using local SearXNG instance (aggregates multiple engines)."""
-        results: list[SearchResult] = []
-        async with httpx.AsyncClient(timeout=20.0) as client:
-            try:
-                # Try JSON format first
-                response = await client.get(
-                    self.SEARXNG_URL,
-                    params={"q": query, "format": "json", "language": "en"},
-                )
-
-                # If JSON is forbidden (403), fall back to HTML parsing
-                if response.status_code == 403:
-                    logger.debug(f"SearXNG JSON returned 403, falling back to HTML for: {query}")
-                    return await self._search_searxng_html(client, query, max_results)
-
-                response.raise_for_status()
-                data = response.json()
-
-                for item in data.get("results", [])[:max_results]:
-                    url = item.get("url", "")
-                    if not url:
-                        continue
-                    results.append(
-                        SearchResult(
-                            title=item.get("title", ""),
-                            url=url,
-                            snippet=item.get("content", ""),
-                            source=urlparse(url).netloc,
-                        )
-                    )
-
-                # Also pull infobox data as a bonus result if available
-                for infobox in data.get("infoboxes", []):
-                    ib_url = infobox.get("id", "")
-                    if ib_url and ib_url.startswith("http"):
-                        results.append(
-                            SearchResult(
-                                title=infobox.get("infobox", ""),
-                                url=ib_url,
-                                snippet=infobox.get("content", ""),
-                                source=urlparse(ib_url).netloc,
-                            )
-                        )
-            except Exception as e:
-                logger.warning(f"SearXNG search failed: {e}")
-
-        return results
-
-    async def _search_searxng_html(
-        self, client: httpx.AsyncClient, query: str, max_results: int
-) -> list[SearchResult]:
-        """Fallback: Parse SearXNG HTML results when JSON is unavailable."""
-        results: list[SearchResult] = []
-        try:
-            response = await client.get(
-                self.SEARXNG_URL,
-                params={"q": query, "language": "en"},
-                headers={"Accept": "text/html"},
-            )
-            response.raise_for_status()
-
-            soup = BeautifulSoup(response.text, "html.parser")
-
-            # Find all result articles
-            for article in soup.find_all("article", class_="result")[:max_results]:
-                link_elem = article.find("a", href=True)
-                if not link_elem:
-                    continue
-
-                url = link_elem.get("href", "")
-                title_elem = article.find("h3")
-                title = title_elem.get_text(strip=True) if title_elem else ""
-                content_elem = article.find("p", class_="content")
-                if not content_elem:
-                    content_elem = article.find("p")
-                snippet = content_elem.get_text(strip=True) if content_elem else ""
-
-                if url:
-                    results.append(
-                        SearchResult(
-                            title=title,
-                            url=url,
-                            snippet=snippet,
-                            source=urlparse(url).netloc,
-                        )
-                    )
-        except Exception as e:
-            logger.warning(f"SearXNG HTML parsing failed: {e}")
-
-        return results
-
-
-    def _search_duckduckgo(self, query: str, max_results: int) -> list[SearchResult]:
-        """Fallback: search using DuckDuckGo library."""
-        if self.ddgs is None:
-            return []
-
-        results: list[SearchResult] = []
-        for result in self.ddgs.text(query, max_results=max_results):
-            href = result.get("href", "")
-            results.append(
-                SearchResult(
-                    title=result.get("title", ""),
-                    url=href,
-                    snippet=result.get("body", ""),
-                    source=urlparse(href).netloc,
-                )
-            )
-        return results
-
-    def _rank_by_relevance(self, results: list[SearchResult], intent: str) -> list[SearchResult]:
-        """Rank search results by intent relevance and source quality."""
-        intent_keywords: dict[str, list[str]] = {
-            "website": ["official", "about", "company", "home"],
-            "funding": ["funding", "investment", "raised", "series", "valuation"],
-            "financials": ["revenue", "financial", "sales", "growth", "profit"],
-            "employees": ["employees", "headcount", "team", "hiring", "jobs"],
-            "news": ["news", "press", "announces", "launches"],
-            "social": ["linkedin", "twitter", "social", "media"],
-        }
-        keywords = intent_keywords.get(intent, [])
-
-        for result in results:
-            text = f"{result.title} {result.snippet}".lower()
-            score = 0.0
-
-            for keyword in keywords:
-                if keyword in text:
-                    score += 0.2
-
-            if any(domain in result.source for domain in ["crunchbase.com", "linkedin.com", "bloomberg.com"]):
-                score += 0.3
-            elif any(domain in result.source for domain in ["techcrunch.com", "forbes.com", "reuters.com"]):
-                score += 0.25
-            elif ".gov" in result.source:
-                score += 0.2
-
-            if any(year in text for year in ["2024", "2025", "2026"]):
-                score += 0.1
-
-            result.relevance_score = min(score, 1.0)
-            result.intent_match = intent
-
-        return sorted(results, key=lambda item: item.relevance_score, reverse=True)
-
-
-class ContentExtractorAgent:
-    """Extracts structured data from web pages using an LLM."""
-
-    def __init__(self, llm_client: EnhancedLLMClient | None = None) -> None:
-        self.llm = llm_client or EnhancedLLMClient()
-        self.http = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
-
-    async def aclose(self) -> None:
-        """Close the underlying HTTP client and release connection pool."""
-        await self.http.aclose()
-
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, *args):
-        await self.aclose()
-
-    async def extract(self, url: str, company_name: str) -> ExtractedData:
-        """Extract structured data from a single URL."""
-        try:
-            html = await self._fetch_page(url)
-            text = self._clean_html(html)
-            if len(text) < 100:
-                return ExtractedData(url, "error", {}, 0.0, "fetch_too_short", raw_content="")
-
-            data = await self._llm_extract(text[:8000], company_name, url)
-            source_type = self._classify_source(url)
-            confidence = self._calculate_confidence(data)
-
-            return ExtractedData(
-                source_url=url,
-                source_type=source_type,
-                data=data,
-                confidence=confidence,
-                extraction_method="llm_parsing",
-                raw_content=text[:2000],
-            )
-        except Exception as error:
-            logger.error(f"Extraction failed for {url}: {error}")
-            return ExtractedData(url, "error", {}, 0.0, f"error: {error}", raw_content="")
-
-    async def _fetch_page(self, url: str) -> str:
-        headers = {"User-Agent": "Mozilla/5.0 (compatible; SolsteinResearchBot/1.0)"}
-        primary_error: Exception | None = None
-
-        try:
-            response = await self.http.get(url, headers=headers)
-            response.raise_for_status()
-            text = response.text
-            content_type = (response.headers.get("content-type") or "").lower()
-            if self._is_usable_content(text, content_type):
-                return text
-        except Exception as error:
-            primary_error = error
-
-        reader_url = self._reader_url(url)
-        try:
-            response = await self.http.get(reader_url, headers=headers)
-            response.raise_for_status()
-            text = response.text
-            if text:
-                return text
-        except Exception as fallback_error:
-            if primary_error is not None:
-                raise primary_error from fallback_error
-            raise
-
-        if primary_error is not None:
-            raise primary_error
-        raise ValueError(f"Unable to fetch usable content from {url}")
-
-    @staticmethod
-    def _reader_url(url: str) -> str:
-        return f"https://r.jina.ai/{url.strip()}"
-
-    @staticmethod
-    def _looks_blocked_page(text: str) -> bool:
-        lower = text.lower()
-        blocked_markers = [
-            "enable javascript",
-            "access denied",
-            "are you a human",
-            "captcha",
-            "bot detection",
-            "cloudflare",
-            "forbidden",
-            "please sign in",
-            "login required",
-        ]
-        return any(marker in lower for marker in blocked_markers)
-
-    @staticmethod
-    def _visible_text_length(text: str) -> int:
-        try:
-            soup = BeautifulSoup(text, "html.parser")
-            visible = soup.get_text(" ", strip=True)
-            if visible:
-                return len(visible)
-        except Exception as error:
-            logger.debug(f"Visible-text parse failed, using fallback length: {error}")
-        return len(" ".join(text.split()))
-
-    def _is_usable_content(self, text: str, content_type: str) -> bool:
-        if not text:
-            return False
-        if "application/pdf" in content_type:
-            return False
-        if self._looks_blocked_page(text):
-            return False
-        return len(text) >= 300 and self._visible_text_length(text) >= 120
-
-    def _clean_html(self, html: str) -> str:
-        soup = BeautifulSoup(html, "html.parser")
-        for node in soup(["script", "style", "nav", "footer"]):
-            node.decompose()
-        text = soup.get_text(separator="\n")
-        lines = (line.strip() for line in text.splitlines())
-        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-        return "\n".join(chunk for chunk in chunks if chunk)
-
-    async def _llm_extract(self, text: str, company_name: str, url: str) -> dict[str, Any]:
-        prompt = f"""Extract structured company information from this content.
-Company: {company_name}
-Source: {url}
-
-Return ONLY valid JSON (no markdown, no explanation) with these keys:
-company_name, website, description, industry, headquarters, founded_year,
-employees, revenue, revenue_currency, funding_raised, valuation,
-funding_rounds, key_executives, products, is_public.
-Use null for unknown values.
-
-Content:
-{text[:6000]}
-"""
-        try:
-            response = await self.llm.generate(prompt)
-            if response is None or response == "":
-                raise ValueError("Extractor returned empty response")
-            response_text = str(response)
-            # Strip markdown code fences and extract JSON object
-            json_str = self._extract_json_from_response(response_text)
-            return json.loads(json_str)
-        except Exception as error:
-            logger.error(f"LLM extraction failed for {url}: {error}")
-            return {}
-
-    @staticmethod
-    def _extract_json_from_response(text: str) -> str:
-        """Extract JSON payload from an LLM response that may contain markdown fences."""
-        # Strip markdown code fences
-        if "```json" in text:
-            start = text.find("```json") + 7
-            end = text.find("```", start)
-            if end > start:
-                return text[start:end].strip()
-
-        if "```" in text:
-            start = text.find("```") + 3
-            end = text.find("```", start)
-            if end > start:
-                return text[start:end].strip()
-
-        # Find raw JSON object
-        start = text.find("{")
-        end = text.rfind("}")
-        if start >= 0 and end > start:
-            return text[start : end + 1]
-
-        return text
-
-    def _classify_source(self, url: str) -> str:
-        domain = urlparse(url).netloc.lower()
-        if "crunchbase.com" in domain:
-            return "crunchbase"
-        if "linkedin.com" in domain:
-            return "linkedin"
-        if any(name in domain for name in ["bloomberg.com", "reuters.com", "forbes.com", "techcrunch.com"]):
-            return "news"
-        if "wikipedia.org" in domain:
-            return "wikipedia"
-        return "company_website"
-
-    def _calculate_confidence(self, data: dict[str, Any]) -> float:
-        critical_fields = ["company_name", "website", "description"]
-        important_fields = ["industry", "headquarters", "founded_year", "employees"]
-        financial_fields = ["revenue", "funding_raised"]
-
-        score = 0.0
-        score += sum(0.2 for key in critical_fields if data.get(key))
-        score += sum(0.075 for key in important_fields if data.get(key))
-        score += sum(0.05 for key in financial_fields if data.get(key))
-        return min(score, 1.0)
-
-
-class DataValidatorAgent:
-    """Validates extracted data for sanity and consistency."""
-
-    VALIDATION_RULES = {
-        "revenue": {"min": 0, "max": 1_000_000},
-        "employees": {"min": 1, "max": 1_000_000},
-        "founded_year": {"min": 1800, "max": 2026},
-        "funding_raised": {"min": 0, "max": 100_000},
-        "valuation": {"min": 0, "max": 1_000_000},
+from .research_agents import (
+    ContentExtractorAgent,
+    DataValidatorAgent,
+    ResearchPlannerAgent,
+    WebSearchAgent,
+)
+from .research_memory import (
+    ResearchMemoryStore as _ResearchMemoryStore,
+)
+from .research_memory import (
+    is_report_stale as _is_report_stale,
+)
+from .research_memory import (
+    normalize_url as _normalize_url,
+)
+from .research_memory import (
+    score_completeness as _score_completeness,
+)
+from .research_types import (
+    ExtractedData,
+    ResearchPlan,
+    ResearchReport,
+    SearchResult,
+    ValidationResult,
+)
+
+# Orchestrator constants (module-level to reduce class body size)
+_TARGET_FIELDS = [
+    "website",
+    "description",
+    "industry",
+    "headquarters",
+    "founded_year",
+    "employees",
+    "revenue",
+    "revenue_currency",
+    "valuation",
+    "funding_raised",
+    "funding_rounds",
+]
+
+_ADAPTIVE_QUERY_BY_FIELD: dict[str, list[str]] = {
+    "website": ["{company} official website", "{company} contact us"],
+    "description": ["{company} company overview", "{company} about us"],
+    "industry": ["{company} business model", "{company} services"],
+    "headquarters": ["{company} headquarters location", "{company} address"],
+    "founded_year": ["{company} founded year", "{company} company history"],
+    "employees": ["{company} employee count", "{company} headcount"],
+    "revenue": ["{company} annual report pdf", "{company} revenue 2025"],
+    "revenue_currency": ["{company} revenue currency", "{company} annual report"],
+    "valuation": ["{company} valuation", "{company} market cap"],
+    "funding_raised": ["{company} funding rounds", "{company} raised capital"],
+    "funding_rounds": ["{company} series funding", "{company} investors"],
+}
+
+_VOLATILE_FIELDS = frozenset(
+    {"employees", "revenue", "revenue_currency", "valuation", "funding_raised", "funding_rounds"}
+)
+
+
+def _flatten_report_to_fields(report_dict: dict[str, Any]) -> dict[str, Any]:
+    """Flatten a report's nested sections into target field values."""
+    basic = report_dict.get("basic_info", {}) if isinstance(report_dict.get("basic_info"), dict) else {}
+    financials = report_dict.get("financials", {}) if isinstance(report_dict.get("financials"), dict) else {}
+    funding = report_dict.get("funding", {}) if isinstance(report_dict.get("funding"), dict) else {}
+    return {
+        "website": basic.get("website"),
+        "description": basic.get("description"),
+        "industry": basic.get("industry"),
+        "headquarters": basic.get("headquarters"),
+        "founded_year": basic.get("founded_year"),
+        "employees": basic.get("employees"),
+        "revenue": financials.get("revenue"),
+        "revenue_currency": financials.get("revenue_currency"),
+        "valuation": financials.get("valuation"),
+        "funding_raised": funding.get("total_raised"),
+        "funding_rounds": funding.get("rounds"),
     }
 
-    @staticmethod
-    def _to_number(value: Any) -> float | int | None:
-        """Coerce a value to a number, returning None if impossible."""
-        if value is None:
-            return None
-        if isinstance(value, (int, float)):
-            return value
-        if isinstance(value, str):
-            # Strip currency symbols, commas, whitespace
-            cleaned = value.replace(",", "").replace("$", "").replace("€", "").replace("£", "").strip()
-            if not cleaned:
-                return None
-            try:
-                return float(cleaned) if "." in cleaned else int(cleaned)
-            except ValueError:
-                return None
-        return None
 
-    async def validate(self, data: ExtractedData) -> ValidationResult:
-        issues: list[str] = []
-        recommendations: list[str] = []
-        confidence_adjustment = 0.0
-        payload = data.data
+def _synthesize_validated_data(validated_data: list[dict[str, Any]]) -> dict[str, Any]:
+    """Merge data from multiple sources, preferring higher-confidence values."""
+    field_values: dict[str, list[dict[str, Any]]] = {}
 
-        for field_name, rule in self.VALIDATION_RULES.items():
-            raw_value = payload.get(field_name)
-            if raw_value is None:
-                continue
-            value = self._to_number(raw_value)
+    for item in validated_data:
+        extraction = item["extraction"]
+        confidence = item["confidence"]
+        for f_name, value in extraction.data.items():
             if value is None:
-                issues.append(f"{field_name} is not numeric: {raw_value}")
-                confidence_adjustment -= 0.1
                 continue
-            # Write back the coerced numeric value for downstream use
-            payload[field_name] = value
-            if value < rule["min"] or value > rule["max"]:
-                issues.append(f"{field_name}={value} outside [{rule['min']}, {rule['max']}]")
-                confidence_adjustment -= 0.15
+            field_values.setdefault(f_name, []).append(
+                {"value": value, "confidence": confidence, "source": extraction.source_url}
+            )
 
-        funding = self._to_number(payload.get("funding_raised")) or 0
-        valuation = self._to_number(payload.get("valuation")) or 0
-        if funding > 0 and valuation > 0 and funding > valuation * 0.9:
-            issues.append(f"Funding ({funding}M) unusually high vs valuation ({valuation}M)")
-            recommendations.append("Verify funding and valuation values")
-            confidence_adjustment -= 0.1
+    final_data: dict[str, Any] = {"_confidence": 0.0}
+    total_confidence = 0.0
+    field_count = 0
 
-        employees = self._to_number(payload.get("employees"))
-        revenue = self._to_number(payload.get("revenue"))
-        if employees and revenue and employees > 0:
-            revenue_per_employee = revenue / employees
-            if revenue_per_employee > 10:
-                issues.append(f"Revenue per employee unusually high: {revenue_per_employee:.2f}M")
-                confidence_adjustment -= 0.1
-            elif revenue_per_employee < 0.01:
-                issues.append(f"Revenue per employee unusually low: {revenue_per_employee:.3f}M")
-                confidence_adjustment -= 0.1
+    for f_name, values in field_values.items():
+        values.sort(key=lambda item: item["confidence"], reverse=True)
+        best = values[0]
+        final_data[f_name] = best["value"]
+        total_confidence += best["confidence"]
+        field_count += 1
 
-        return ValidationResult(
-            is_valid=len(issues) == 0,
-            issues=issues,
-            confidence_adjustment=confidence_adjustment,
-            recommendations=recommendations,
-        )
+    if field_count > 0:
+        final_data["_confidence"] = total_confidence / field_count
+
+    return final_data
+
+
+def _missing_fields(final_data: dict[str, Any]) -> list[str]:
+    """Return TARGET_FIELDS that are empty or missing in the data."""
+    return [f for f in _TARGET_FIELDS if final_data.get(f) in (None, "", [], {})]
+
+
+def _build_adaptive_queries(
+    company_name: str,
+    missing_fields: list[str],
+    max_queries: int = 6,
+) -> list[dict[str, str]]:
+    """Build targeted search queries for missing fields."""
+    seen: set[str] = set()
+    queries: list[dict[str, str]] = []
+    for field_name in missing_fields:
+        templates = _ADAPTIVE_QUERY_BY_FIELD.get(field_name, [])
+        for template in templates:
+            query = template.format(company=company_name)
+            if query in seen:
+                continue
+            seen.add(query)
+            intent = "financials" if field_name in {"revenue", "revenue_currency", "valuation"} else "funding"
+            if field_name in {"website", "description", "industry", "headquarters", "founded_year", "employees"}:
+                intent = "website"
+            queries.append({"query": query, "intent": intent})
+            if len(queries) >= max_queries:
+                return queries
+    return queries
+
+
+def _merge_report_with_previous(
+    current: ResearchReport,
+    previous: dict[str, Any],
+) -> tuple[ResearchReport, int]:
+    """Merge current report with previous data, carrying forward missing fields."""
+    previous_fields = _flatten_report_to_fields(previous)
+    previous_is_stale = _is_report_stale(previous, max_age_hours=24 * 30)
+    merged_fields = _flatten_report_to_fields(
+        {
+            "basic_info": current.basic_info,
+            "financials": current.financials,
+            "funding": current.funding,
+        }
+    )
+
+    carry_forward_count = 0
+    for field_name in _TARGET_FIELDS:
+        if merged_fields.get(field_name) in (None, "", [], {}):
+            if previous_is_stale and field_name in _VOLATILE_FIELDS:
+                continue
+            previous_value = previous_fields.get(field_name)
+            if previous_value not in (None, "", [], {}):
+                merged_fields[field_name] = previous_value
+                carry_forward_count += 1
+
+    current.basic_info = {
+        "website": merged_fields.get("website"),
+        "description": merged_fields.get("description"),
+        "industry": merged_fields.get("industry"),
+        "headquarters": merged_fields.get("headquarters"),
+        "founded_year": merged_fields.get("founded_year"),
+        "employees": merged_fields.get("employees"),
+    }
+    current.financials = {
+        "revenue": merged_fields.get("revenue"),
+        "revenue_currency": merged_fields.get("revenue_currency") or "EUR",
+        "valuation": merged_fields.get("valuation"),
+    }
+    current.funding = {
+        "total_raised": merged_fields.get("funding_raised"),
+        "rounds": merged_fields.get("funding_rounds") if merged_fields.get("funding_rounds") is not None else [],
+    }
+
+    previous_sources = previous.get("data_sources", []) if isinstance(previous.get("data_sources"), list) else []
+    seen_urls: set[str] = set()
+    merged_sources: list[dict[str, Any]] = []
+    for source in current.data_sources + previous_sources:
+        if not isinstance(source, dict):
+            continue
+        raw_url = source.get("url")
+        if not isinstance(raw_url, str) or not raw_url:
+            continue
+        url = _normalize_url(raw_url)
+        if not url or url in seen_urls:
+            continue
+        seen_urls.add(url)
+        merged_source = dict(source)
+        merged_source["url"] = url
+        merged_sources.append(merged_source)
+    current.data_sources = merged_sources
+
+    return current, carry_forward_count
 
 
 class AIResearchOrchestrator:
     """Orchestrates the multi-agent research workflow."""
 
-    TARGET_FIELDS = [
-        "website",
-        "description",
-        "industry",
-        "headquarters",
-        "founded_year",
-        "employees",
-        "revenue",
-        "revenue_currency",
-        "valuation",
-        "funding_raised",
-        "funding_rounds",
-    ]
-
-    ADAPTIVE_QUERY_BY_FIELD = {
-        "website": ["{company} official website", "{company} contact us"],
-        "description": ["{company} company overview", "{company} about us"],
-        "industry": ["{company} business model", "{company} services"],
-        "headquarters": ["{company} headquarters location", "{company} address"],
-        "founded_year": ["{company} founded year", "{company} company history"],
-        "employees": ["{company} employee count", "{company} headcount"],
-        "revenue": ["{company} annual report pdf", "{company} revenue 2025"],
-        "revenue_currency": ["{company} revenue currency", "{company} annual report"],
-        "valuation": ["{company} valuation", "{company} market cap"],
-        "funding_raised": ["{company} funding rounds", "{company} raised capital"],
-        "funding_rounds": ["{company} series funding", "{company} investors"],
-    }
-
-    VOLATILE_FIELDS = {
-        "employees",
-        "revenue",
-        "revenue_currency",
-        "valuation",
-        "funding_raised",
-        "funding_rounds",
-    }
+    TARGET_FIELDS = _TARGET_FIELDS  # backward compat
+    ADAPTIVE_QUERY_BY_FIELD = _ADAPTIVE_QUERY_BY_FIELD  # backward compat
+    VOLATILE_FIELDS = _VOLATILE_FIELDS  # backward compat
 
     def __init__(self) -> None:
         self.planner = ResearchPlannerAgent()
@@ -681,205 +229,18 @@ class AIResearchOrchestrator:
         self.extractor = ContentExtractorAgent()
         self.validator = DataValidatorAgent()
         self.repo_root = Path(__file__).resolve().parents[3]
-        self.memory_path = self.repo_root / "data/research_results/research_memory.json"
-        self._memory = self._load_memory()
-
-    @staticmethod
-    def _normalize_url(url: str) -> str:
-        try:
-            parsed = urlparse(url.strip())
-            if not parsed.scheme or not parsed.netloc:
-                return url.strip()
-            scheme = parsed.scheme.lower()
-            netloc = parsed.netloc.lower()
-            if netloc.startswith("www."):
-                netloc = netloc[4:]
-            path = parsed.path.rstrip("/") or "/"
-            query_params = [(k, v) for k, v in parse_qsl(parsed.query, keep_blank_values=True) if not k.startswith("utm_")]
-            query = urlencode(query_params)
-            return urlunparse((scheme, netloc, path, "", query, ""))
-        except Exception:
-            return url.strip()
-
-    def _load_memory(self) -> dict[str, Any]:
-        if self.memory_path.exists():
-            try:
-                with open(self.memory_path) as f:
-                    data = json.load(f)
-                if isinstance(data, dict):
-                    return data
-            except Exception as error:
-                logger.warning(f"Failed loading research memory from {self.memory_path}: {error}")
-
+        memory_path = self.repo_root / "data/research_results/research_memory.json"
         bootstrap_path = self.repo_root / "data/research_results/research_results.json"
-        if bootstrap_path.exists():
-            try:
-                with open(bootstrap_path) as f:
-                    bootstrap = json.load(f)
-                companies = bootstrap.get("companies", []) if isinstance(bootstrap, dict) else []
-                if isinstance(companies, list):
-                    memory: dict[str, Any] = {"companies": {}}
-                    for report in companies:
-                        if not isinstance(report, dict):
-                            continue
-                        company_name = report.get("company_name")
-                        if not isinstance(company_name, str) or not company_name.strip():
-                            continue
-                        key = self._company_key(company_name)
-                        urls: set[str] = set()
-                        for source in report.get("data_sources", []):
-                            if isinstance(source, dict):
-                                url = source.get("url")
-                                if isinstance(url, str) and url:
-                                    urls.add(self._normalize_url(url))
-                        memory["companies"][key] = {
-                            "latest_report": report,
-                            "known_urls": sorted(urls),
-                            "updated_at": datetime.now().isoformat(),
-                        }
-                    return memory
-            except Exception as error:
-                logger.warning(f"Failed bootstrapping research memory from {bootstrap_path}: {error}")
-
-        return {"companies": {}}
-
-    def _save_memory(self) -> None:
-        try:
-            self.memory_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.memory_path, "w") as f:
-                json.dump(self._memory, f, indent=2)
-        except Exception as error:
-            logger.warning(f"Failed saving research memory to {self.memory_path}: {error}")
-
-    @staticmethod
-    def _company_key(company_name: str) -> str:
-        return " ".join(company_name.lower().split())
-
-    @staticmethod
-    def _score_completeness(payload: dict[str, Any], fields: list[str]) -> float:
-        if not fields:
-            return 0.0
-        filled = 0
-        for field_name in fields:
-            value = payload.get(field_name)
-            if value in (None, "", [], {}):
-                continue
-            filled += 1
-        return filled / len(fields)
-
-    @staticmethod
-    def _is_report_stale(report_dict: dict[str, Any], max_age_hours: int = 24 * 7) -> bool:
-        metadata = report_dict.get("metadata", {}) if isinstance(report_dict.get("metadata"), dict) else {}
-        research_date = metadata.get("research_date")
-        if not isinstance(research_date, str) or not research_date:
-            return True
-        try:
-            ts = datetime.fromisoformat(research_date.replace("Z", "+00:00"))
-        except Exception:
-            return True
-        age_seconds = (datetime.now(ts.tzinfo) - ts).total_seconds()
-        return age_seconds > (max_age_hours * 3600)
-
-    def _previous_report(self, company_name: str) -> dict[str, Any] | None:
-        company_key = self._company_key(company_name)
-        company_entry = self._memory.get("companies", {}).get(company_key, {})
-        report = company_entry.get("latest_report")
-        return report if isinstance(report, dict) else None
-
-    def _previous_urls(self, company_name: str) -> set[str]:
-        company_key = self._company_key(company_name)
-        company_entry = self._memory.get("companies", {}).get(company_key, {})
-        urls = company_entry.get("known_urls", [])
-        if isinstance(urls, list):
-            return {self._normalize_url(url) for url in urls if isinstance(url, str) and url}
-        return set()
-
-    @staticmethod
-    def _flatten_report_fields(report_dict: dict[str, Any]) -> dict[str, Any]:
-        basic = report_dict.get("basic_info", {}) if isinstance(report_dict.get("basic_info"), dict) else {}
-        financials = report_dict.get("financials", {}) if isinstance(report_dict.get("financials"), dict) else {}
-        funding = report_dict.get("funding", {}) if isinstance(report_dict.get("funding"), dict) else {}
-        return {
-            "website": basic.get("website"),
-            "description": basic.get("description"),
-            "industry": basic.get("industry"),
-            "headquarters": basic.get("headquarters"),
-            "founded_year": basic.get("founded_year"),
-            "employees": basic.get("employees"),
-            "revenue": financials.get("revenue"),
-            "revenue_currency": financials.get("revenue_currency"),
-            "valuation": financials.get("valuation"),
-            "funding_raised": funding.get("total_raised"),
-            "funding_rounds": funding.get("rounds"),
-        }
+        self._memory_store = _ResearchMemoryStore(memory_path, bootstrap_path)
+        self._memory = self._memory_store.data
 
     def _merge_with_previous(self, company_name: str, current: ResearchReport) -> tuple[ResearchReport, int]:
-        previous = self._previous_report(company_name)
+        previous = self._memory_store.get_previous_report(company_name)
         if not previous:
             return current, 0
-
-        previous_fields = self._flatten_report_fields(previous)
-        previous_is_stale = self._is_report_stale(previous, max_age_hours=24 * 30)
-        merged_fields = self._flatten_report_fields(
-            {
-                "basic_info": current.basic_info,
-                "financials": current.financials,
-                "funding": current.funding,
-            }
-        )
-
-        carry_forward_count = 0
-        for field_name in self.TARGET_FIELDS:
-            if merged_fields.get(field_name) in (None, "", [], {}):
-                if previous_is_stale and field_name in self.VOLATILE_FIELDS:
-                    continue
-                previous_value = previous_fields.get(field_name)
-                if previous_value not in (None, "", [], {}):
-                    merged_fields[field_name] = previous_value
-                    carry_forward_count += 1
-
-        current.basic_info = {
-            "website": merged_fields.get("website"),
-            "description": merged_fields.get("description"),
-            "industry": merged_fields.get("industry"),
-            "headquarters": merged_fields.get("headquarters"),
-            "founded_year": merged_fields.get("founded_year"),
-            "employees": merged_fields.get("employees"),
-        }
-        current.financials = {
-            "revenue": merged_fields.get("revenue"),
-            "revenue_currency": merged_fields.get("revenue_currency") or "EUR",
-            "valuation": merged_fields.get("valuation"),
-        }
-        current.funding = {
-            "total_raised": merged_fields.get("funding_raised"),
-            "rounds": merged_fields.get("funding_rounds") if merged_fields.get("funding_rounds") is not None else [],
-        }
-
-        previous_sources = previous.get("data_sources", []) if isinstance(previous.get("data_sources"), list) else []
-        seen_urls: set[str] = set()
-        merged_sources: list[dict[str, Any]] = []
-        for source in current.data_sources + previous_sources:
-            if not isinstance(source, dict):
-                continue
-            raw_url = source.get("url")
-            if not isinstance(raw_url, str) or not raw_url:
-                continue
-            url = self._normalize_url(raw_url)
-            if not url or url in seen_urls:
-                continue
-            seen_urls.add(url)
-            merged_source = dict(source)
-            merged_source["url"] = url
-            merged_sources.append(merged_source)
-        current.data_sources = merged_sources
-
-        return current, carry_forward_count
+        return _merge_report_with_previous(current, previous)
 
     def _persist_report(self, report: ResearchReport) -> None:
-        company_key = self._company_key(report.company_name)
-        companies = self._memory.setdefault("companies", {})
-        entry = companies.setdefault(company_key, {})
         report_dict = {
             "company_name": report.company_name,
             "is_synthetic": report.is_synthetic,
@@ -891,44 +252,19 @@ class AIResearchOrchestrator:
             "metadata": report.metadata,
             "errors": report.errors,
         }
-        known_urls = set(self._previous_urls(report.company_name))
+        source_urls: set[str] = set()
         for source in report.data_sources:
             url = source.get("url") if isinstance(source, dict) else None
             if isinstance(url, str) and url:
-                known_urls.add(self._normalize_url(url))
+                source_urls.add(url)
+        self._memory_store.update_company(report.company_name, report_dict, source_urls)
+        self._memory_store.save()
 
-        entry["latest_report"] = report_dict
-        entry["known_urls"] = sorted(known_urls)
-        entry["updated_at"] = datetime.now().isoformat()
-        self._save_memory()
-
-    def _missing_fields(self, final_data: dict[str, Any]) -> list[str]:
-        missing: list[str] = []
-        for field_name in self.TARGET_FIELDS:
-            value = final_data.get(field_name)
-            if value in (None, "", [], {}):
-                missing.append(field_name)
-        return missing
-
-    def _build_adaptive_queries(self, company_name: str, missing_fields: list[str], max_queries: int = 6) -> list[dict[str, str]]:
-        seen: set[str] = set()
-        queries: list[dict[str, str]] = []
-        for field_name in missing_fields:
-            templates = self.ADAPTIVE_QUERY_BY_FIELD.get(field_name, [])
-            for template in templates:
-                query = template.format(company=company_name)
-                if query in seen:
-                    continue
-                seen.add(query)
-                intent = "financials" if field_name in {"revenue", "revenue_currency", "valuation"} else "funding"
-                if field_name in {"website", "description", "industry", "headquarters", "founded_year", "employees"}:
-                    intent = "website"
-                queries.append({"query": query, "intent": intent})
-                if len(queries) >= max_queries:
-                    return queries
-        return queries
-
-    async def _extract_and_validate(self, company_name: str, results: list[SearchResult]) -> list[dict[str, Any]]:
+    async def _extract_and_validate(
+        self,
+        company_name: str,
+        results: list[SearchResult],
+    ) -> list[dict[str, Any]]:
         validated_data: list[dict[str, Any]] = []
         for result in results:
             extracted = await self.extractor.extract(result.url, company_name)
@@ -954,13 +290,13 @@ class AIResearchOrchestrator:
         """Perform full autonomous research on a company."""
         start_time = datetime.now()
         report = ResearchReport(company_name=company_name)
-        previous_report = self._previous_report(company_name)
-        previous_urls = self._previous_urls(company_name)
+        previous_report = self._memory_store.get_previous_report(company_name)
+        previous_urls = self._memory_store.get_known_urls(company_name)
 
         if previous_report:
-            previous_flat = self._flatten_report_fields(previous_report)
-            completeness = self._score_completeness(previous_flat, self.TARGET_FIELDS)
-            report_is_stale = self._is_report_stale(previous_report, max_age_hours=24 * 7)
+            previous_flat = _flatten_report_to_fields(previous_report)
+            completeness = _score_completeness(previous_flat, self.TARGET_FIELDS)
+            report_is_stale = _is_report_stale(previous_report, max_age_hours=24 * 7)
             if completeness >= 0.65 and not report_is_stale:
                 report = ResearchReport(
                     company_name=company_name,
@@ -971,7 +307,11 @@ class AIResearchOrchestrator:
                     funding=previous_report.get("funding", {}),
                     data_sources=previous_report.get("data_sources", []),
                     metadata={
-                        **(previous_report.get("metadata", {}) if isinstance(previous_report.get("metadata"), dict) else {}),
+                        **(
+                            previous_report.get("metadata", {})
+                            if isinstance(previous_report.get("metadata"), dict)
+                            else {}
+                        ),
                         "research_date": datetime.now().isoformat(),
                         "cache_reuse": True,
                         "previous_completeness": round(completeness, 3),
@@ -979,7 +319,9 @@ class AIResearchOrchestrator:
                         "sources_reused": len(previous_urls),
                         "research_time_seconds": (datetime.now() - start_time).total_seconds(),
                     },
-                    errors=list(previous_report.get("errors", [])) if isinstance(previous_report.get("errors"), list) else [],
+                    errors=list(previous_report.get("errors", []))
+                    if isinstance(previous_report.get("errors"), list)
+                    else [],
                 )
                 self._persist_report(report)
                 return report
@@ -1001,7 +343,7 @@ class AIResearchOrchestrator:
             known_urls = set(previous_urls)
             deferred_known: list[SearchResult] = []
             for result in all_search_results:
-                normalized_url = self._normalize_url(result.url) if result.url else ""
+                normalized_url = _normalize_url(result.url) if result.url else ""
                 if normalized_url and normalized_url not in seen_urls:
                     seen_urls.add(normalized_url)
                     normalized_result = SearchResult(
@@ -1049,12 +391,12 @@ class AIResearchOrchestrator:
             additional_queries_executed = 0
             additional_sources_used = 0
 
-            initial_synthesized = self._synthesize_data(validated_data)
-            missing_before = self._missing_fields(initial_synthesized)
-            initial_completeness = self._score_completeness(initial_synthesized, self.TARGET_FIELDS)
+            initial_synthesized = _synthesize_validated_data(validated_data)
+            missing_before = _missing_fields(initial_synthesized)
+            initial_completeness = _score_completeness(initial_synthesized, self.TARGET_FIELDS)
 
             if missing_before and initial_completeness < 0.8:
-                adaptive_queries = self._build_adaptive_queries(company_name, missing_before)
+                adaptive_queries = _build_adaptive_queries(company_name, missing_before)
                 adaptive_results: list[SearchResult] = []
                 adaptive_seen = {r.url for r in unique_results}
                 adaptive_known: list[SearchResult] = []
@@ -1065,7 +407,7 @@ class AIResearchOrchestrator:
                     additional_queries_executed += 1
                     results = await self.searcher.search(query, intent, max_results=5)
                     for result in results:
-                        normalized_url = self._normalize_url(result.url) if result.url else ""
+                        normalized_url = _normalize_url(result.url) if result.url else ""
                         if not normalized_url or normalized_url in adaptive_seen:
                             continue
                         adaptive_seen.add(normalized_url)
@@ -1101,9 +443,9 @@ class AIResearchOrchestrator:
                         additional_sources_used = len(additional_validated)
                         additional_pass_used = True
 
-            final_data = self._synthesize_data(validated_data)
+            final_data = _synthesize_validated_data(validated_data)
             revisited_count = len([r for r in unique_results if r.url in previous_urls])
-            missing_after = self._missing_fields(final_data)
+            missing_after = _missing_fields(final_data)
             report = ResearchReport(
                 company_name=company_name,
                 is_synthetic=False,
@@ -1163,47 +505,23 @@ class AIResearchOrchestrator:
                     funding=previous_report.get("funding", {}),
                     data_sources=previous_report.get("data_sources", []),
                     metadata={
-                        **(previous_report.get("metadata", {}) if isinstance(previous_report.get("metadata"), dict) else {}),
+                        **(
+                            previous_report.get("metadata", {})
+                            if isinstance(previous_report.get("metadata"), dict)
+                            else {}
+                        ),
                         "research_date": datetime.now().isoformat(),
                         "fallback_to_previous_on_error": True,
                         "error": str(error),
                     },
-                    errors=list(previous_report.get("errors", [])) if isinstance(previous_report.get("errors"), list) else [],
+                    errors=list(previous_report.get("errors", []))
+                    if isinstance(previous_report.get("errors"), list)
+                    else [],
                 )
             report.errors.append(str(error))
 
         self._persist_report(report)
         return report
-
-    def _synthesize_data(self, validated_data: list[dict[str, Any]]) -> dict[str, Any]:
-        """Merge data from multiple sources, preferring higher-confidence values."""
-        field_values: dict[str, list[dict[str, Any]]] = {}
-
-        for item in validated_data:
-            extraction = item["extraction"]
-            confidence = item["confidence"]
-            for f_name, value in extraction.data.items():
-                if value is None:
-                    continue
-                field_values.setdefault(f_name, []).append(
-                    {"value": value, "confidence": confidence, "source": extraction.source_url}
-                )
-
-        final_data: dict[str, Any] = {"_confidence": 0.0}
-        total_confidence = 0.0
-        field_count = 0
-
-        for f_name, values in field_values.items():
-            values.sort(key=lambda item: item["confidence"], reverse=True)
-            best = values[0]
-            final_data[f_name] = best["value"]
-            total_confidence += best["confidence"]
-            field_count += 1
-
-        if field_count > 0:
-            final_data["_confidence"] = total_confidence / field_count
-
-        return final_data
 
 
 __all__ = [

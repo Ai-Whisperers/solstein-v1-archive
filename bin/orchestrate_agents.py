@@ -12,19 +12,27 @@ Runs the 5-agent autonomous system in sequence:
 Cycle runs every 30 minutes (48 cycles per day)
 """
 
+import os
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime
 from pathlib import Path
 
+# Resolve project root dynamically: bin/orchestrate_agents.py → project root
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# State directory: configurable via STATE_DIR env var, falls back to platform temp dir
+_STATE_DIR = Path(os.environ.get("STATE_DIR", tempfile.gettempdir()))
+
 
 class AgentOrchestrator:
     def __init__(self):
-        self.project_root = Path("/home/ai-whisperers/solstein")
+        self.project_root = _PROJECT_ROOT
         self.agents_dir = self.project_root / "bin" / "agents"
         self.logs_dir = self.project_root / "logs"
-        self.counter_file = Path("/tmp/solstein-cycle-counter")
+        self.counter_file = _STATE_DIR / "solstein-cycle-counter"
         self.logs_dir.mkdir(exist_ok=True)
 
         # Get and increment cycle number
@@ -38,7 +46,7 @@ class AgentOrchestrator:
                     cycle_num = int(f.read().strip())
             else:
                 cycle_num = 1
-        except:
+        except (OSError, ValueError):
             cycle_num = 1
 
         # Write incremented number for next cycle
@@ -84,7 +92,7 @@ class AgentOrchestrator:
         except subprocess.TimeoutExpired:
             self.log(f"❌ {agent_name.upper()} timed out after 5 minutes")
             return False
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError, FileNotFoundError) as e:
             self.log(f"❌ {agent_name.upper()} failed: {e}")
             return False
 

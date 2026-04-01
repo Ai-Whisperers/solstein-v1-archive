@@ -26,16 +26,10 @@ def evaluate_rollout(metrics: RolloutMetrics, thresholds: RolloutThresholds | No
     reasons: list[str] = []
 
     if metrics.gate_fail_ratio > active.max_gate_fail_ratio:
-        reasons.append(
-            f"gate_fail_ratio {metrics.gate_fail_ratio:.3f} > {active.max_gate_fail_ratio:.3f}"
-        )
+        reasons.append(f"gate_fail_ratio {metrics.gate_fail_ratio:.3f} > {active.max_gate_fail_ratio:.3f}")
     if metrics.confidence_drift > active.max_confidence_drift:
-        reasons.append(
-            f"confidence_drift {metrics.confidence_drift:.3f} > {active.max_confidence_drift:.3f}"
-        )
+        reasons.append(f"confidence_drift {metrics.confidence_drift:.3f} > {active.max_confidence_drift:.3f}")
     if metrics.export_error_ratio > active.max_export_error_ratio:
-        reasons.append(
-            f"export_error_ratio {metrics.export_error_ratio:.3f} > {active.max_export_error_ratio:.3f}"
-        )
+        reasons.append(f"export_error_ratio {metrics.export_error_ratio:.3f} > {active.max_export_error_ratio:.3f}")
 
     return RolloutDecision(should_rollback=bool(reasons), reasons=reasons)

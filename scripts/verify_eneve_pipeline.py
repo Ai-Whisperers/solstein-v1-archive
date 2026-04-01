@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Verification script for eneve competitive intelligence pipeline."""
 
+import json
 import sys
+import traceback
 from pathlib import Path
 
 from loguru import logger
@@ -12,12 +14,14 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from solstein.analytics.scorers.competitive_position import CompetitivePositionScorer
 from solstein.analytics.scorers.financial_health import FinancialHealthScorer
 from solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
+from solstein.cli import cli as solstein_cli
 from solstein.core.scoring_config import CompetitivePositionConfig, FinancialHealthConfig, GrowthScoringConfig
 from solstein.data.eneve_enrichment import EnveEnrichmentService
-from solstein.data.loaders import CompetitorDataLoader, convert_to_domain_company
+from solstein.data.loaders import CompetitorDataLoader
 from solstein.domain.models import Company, FinancialMetric
 from solstein.extractors.llm_financial_extractor import LLMFinancialExtractor
 from solstein.extractors.markdown_extractor import BatchExtractor, MarkdownExtractor
+from solstein.runtime import convert_raw as convert_to_domain_company
 
 
 def verify_scoring_config():
@@ -155,10 +159,8 @@ def verify_cli_integration():
     """Verify CLI has --input option."""
     logger.info("Verifying CLI integration...")
 
-    from solstein.cli import cli
-
     # Check that generate_report command exists
-    assert "generate-report" in [cmd.name for cmd in cli.commands.values()], "generate-report command missing"
+    assert "generate-report" in [cmd.name for cmd in solstein_cli.commands.values()], "generate-report command missing"
 
     logger.info("✅ CLI integration verified")
 
@@ -199,23 +201,20 @@ def main():
     except AssertionError as e:
         logger.error(f"❌ VERIFICATION FAILED: {e}")
         return 1
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"❌ UNEXPECTED ERROR: {e}")
-        import traceback
-
         traceback.print_exc()
         return 1
 
 def verify_unified_converter():
     """Verify unified converter works with real data (EPIC-058)."""
     logger.info("Verifying unified converter with real data...")
-    import json
 
     enriched_path = Path("data/input/competitor_data_real_enriched.json")
     input_path = enriched_path if enriched_path.exists() else Path("data/input/competitor_data_real.json")
 
     if not input_path.exists():
-        logger.warning(f"Real data file not found, skipping converter test")
+        logger.warning("Real data file not found, skipping converter test")
         return
 
     with open(input_path) as f:
@@ -228,17 +227,17 @@ def verify_unified_converter():
     for i, raw in enumerate(companies_raw[:3]):
         try:
             company = convert_to_domain_company(raw, i)
-            assert company.name, f"name is empty"
-            assert company.financials is not None, f"financials is None"
+            assert company.name, "name is empty"
+            assert company.financials is not None, "financials is None"
             if raw.get("growth_rate") is not None:
                 assert company.financials.growth_rate is not None
             logger.info(f"  OK {company.name}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             errors.append(str(e))
             logger.error(f"  FAILED: {e}")
 
     if errors:
-        raise AssertionError(f"Converter failed")
+        raise AssertionError("Converter failed")
     logger.info("OK Unified converter verified")
 
 if __name__ == "__main__":

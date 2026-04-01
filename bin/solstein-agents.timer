@@ -1,7 +1,7 @@
 [Unit]
 Description=Solstein Agent Cycle Timer (Every 30 Minutes - Rate Limited)
 Requires=solstein-agents.service
-Documentation=file:///home/ai-whisperers/solstein/docs/agent-cycles/
+Documentation=https://github.com/Ai-Whisperers/solstein/tree/develop/docs
 
 [Timer]
 # Run every 30 minutes (48 cycles/day instead of 96)

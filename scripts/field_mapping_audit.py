@@ -189,10 +189,17 @@ Usage:
         print("All fields mapped correctly!")
 """
 
+import json
+import sys
 from dataclasses import dataclass
+from pathlib import Path as _Path
 from typing import Any
 
+# Setup PYTHONPATH so solstein package is importable when run directly
+sys.path.insert(0, str(_Path(__file__).resolve().parent.parent / "src"))
+
 from solstein.domain.models import Company
+from solstein.runtime import convert_raw as convert_to_domain_company
 
 
 @dataclass
@@ -205,6 +212,63 @@ class FieldMappingIssue:
     message: str
 
 
+def _check_basic_fields(json_data: dict[str, Any], company: Company) -> list[FieldMappingIssue]:
+    """Check that basic identity/profile fields match between JSON and Company model."""
+    issues: list[FieldMappingIssue] = []
+    checks = [
+        ("company_name", json_data.get("company_name"), company.name, "Company name mismatch"),
+        ("description", json_data.get("description"), company.description, "Description mismatch"),
+        ("website", json_data.get("website"), company.website, "Website mismatch"),
+        ("country", json_data.get("country"), company.headquarters, "Country/headquarters mismatch"),
+        ("founded_year", json_data.get("founded_year"), company.founded_year, "Founded year mismatch"),
+    ]
+    for field, expected, actual, message in checks:
+        if expected != actual:
+            issues.append(FieldMappingIssue(field=field, expected=expected, actual=actual, message=message))
+
+    industry = json_data.get("industry")
+    if industry != company.industry and company.industry != "Energy Software":
+        issues.append(
+            FieldMappingIssue(
+                field="industry",
+                expected=industry,
+                actual=company.industry,
+                message="Industry mismatch or unexpected default",
+            )
+        )
+    return issues
+
+
+def _check_financial_fields(json_data: dict[str, Any], company: Company) -> list[FieldMappingIssue]:
+    """Check that financial/revenue fields are preserved correctly."""
+    issues: list[FieldMappingIssue] = []
+    revenue_data = json_data.get("revenue", {})
+    timeline = revenue_data.get("timeline", [])
+    latest = timeline[0] if timeline else {}
+
+    fin_checks = [
+        ("revenue.timeline[0].eur_millions", latest.get("eur_millions"), company.financials.revenue, "Revenue mismatch"),
+        ("revenue.timeline[0].yoy_growth_pct", latest.get("yoy_growth_pct"), company.financials.growth_rate, "Growth rate mismatch"),
+        ("revenue.cagr_3yr_pct", revenue_data.get("cagr_3yr_pct"), company.revenue_cagr_3yr, "CAGR 3-year not preserved"),
+        ("revenue.cagr_5yr_pct", revenue_data.get("cagr_5yr_pct"), company.revenue_cagr_5yr, "CAGR 5-year not preserved"),
+        ("enrichment_source_count", json_data.get("enrichment_source_count"), company.enrichment_source_count, "Enrichment source count not preserved"),
+    ]
+    for field, expected, actual, message in fin_checks:
+        if expected != actual:
+            issues.append(FieldMappingIssue(field=field, expected=expected, actual=actual, message=message))
+
+    if not company.signal_confidences:
+        issues.append(
+            FieldMappingIssue(
+                field="signal_confidences",
+                expected="dict with confidence weights",
+                actual=company.signal_confidences,
+                message="Signal confidences not populated",
+            )
+        )
+    return issues
+
+
 def validate_field_mapping(json_data: dict[str, Any], company: Company) -> list[FieldMappingIssue]:
     """Validate that all fields from JSON are correctly mapped to Company model.
 
@@ -215,135 +279,7 @@ def validate_field_mapping(json_data: dict[str, Any], company: Company) -> list[
     Returns:
         List of field mapping issues (empty if all valid)
     """
-    issues = []
-
-    # Check basic fields
-    if json_data.get("company_name") != company.name:
-        issues.append(
-            FieldMappingIssue(
-                field="company_name",
-                expected=json_data.get("company_name"),
-                actual=company.name,
-                message="Company name mismatch",
-            )
-        )
-
-    if json_data.get("industry") != company.industry and company.industry != "Energy Software":
-        issues.append(
-            FieldMappingIssue(
-                field="industry",
-                expected=json_data.get("industry"),
-                actual=company.industry,
-                message="Industry mismatch or unexpected default",
-            )
-        )
-
-    if json_data.get("description") != company.description:
-        issues.append(
-            FieldMappingIssue(
-                field="description",
-                expected=json_data.get("description"),
-                actual=company.description,
-                message="Description mismatch",
-            )
-        )
-
-    if json_data.get("website") != company.website:
-        issues.append(
-            FieldMappingIssue(
-                field="website", expected=json_data.get("website"), actual=company.website, message="Website mismatch"
-            )
-        )
-
-    if json_data.get("country") != company.headquarters:
-        issues.append(
-            FieldMappingIssue(
-                field="country",
-                expected=json_data.get("country"),
-                actual=company.headquarters,
-                message="Country/headquarters mismatch",
-            )
-        )
-
-    if json_data.get("founded_year") != company.founded_year:
-        issues.append(
-            FieldMappingIssue(
-                field="founded_year",
-                expected=json_data.get("founded_year"),
-                actual=company.founded_year,
-                message="Founded year mismatch",
-            )
-        )
-
-    # Check financial fields
-    revenue_data = json_data.get("revenue", {})
-    timeline = revenue_data.get("timeline", [])
-    latest_revenue = timeline[0] if timeline else {}
-
-    if latest_revenue.get("eur_millions") != company.financials.revenue:
-        issues.append(
-            FieldMappingIssue(
-                field="revenue.timeline[0].eur_millions",
-                expected=latest_revenue.get("eur_millions"),
-                actual=company.financials.revenue,
-                message="Revenue mismatch",
-            )
-        )
-
-    if latest_revenue.get("yoy_growth_pct") != company.financials.growth_rate:
-        issues.append(
-            FieldMappingIssue(
-                field="revenue.timeline[0].yoy_growth_pct",
-                expected=latest_revenue.get("yoy_growth_pct"),
-                actual=company.financials.growth_rate,
-                message="Growth rate mismatch",
-            )
-        )
-
-    # Check CAGR preservation
-    if revenue_data.get("cagr_3yr_pct") != company.revenue_cagr_3yr:
-        issues.append(
-            FieldMappingIssue(
-                field="revenue.cagr_3yr_pct",
-                expected=revenue_data.get("cagr_3yr_pct"),
-                actual=company.revenue_cagr_3yr,
-                message="CAGR 3-year not preserved",
-            )
-        )
-
-    if revenue_data.get("cagr_5yr_pct") != company.revenue_cagr_5yr:
-        issues.append(
-            FieldMappingIssue(
-                field="revenue.cagr_5yr_pct",
-                expected=revenue_data.get("cagr_5yr_pct"),
-                actual=company.revenue_cagr_5yr,
-                message="CAGR 5-year not preserved",
-            )
-        )
-
-    # Check enrichment count preservation
-    if json_data.get("enrichment_source_count") != company.enrichment_source_count:
-        issues.append(
-            FieldMappingIssue(
-                field="enrichment_source_count",
-                expected=json_data.get("enrichment_source_count"),
-                actual=company.enrichment_source_count,
-                message="Enrichment source count not preserved",
-            )
-        )
-
-    # Check signal confidences populated
-    if not company.signal_confidences:
-        issues.append(
-            FieldMappingIssue(
-                field="signal_confidences",
-                expected="dict with confidence weights",
-                actual=company.signal_confidences,
-                message="Signal confidences not populated",
-            )
-        )
-
-    return issues
+    return _check_basic_fields(json_data, company) + _check_financial_fields(json_data, company)
 
 
 def generate_field_mapping_report(json_data: dict[str, Any], company: Company) -> str:
@@ -404,14 +340,6 @@ def audit_all_companies(json_path: str) -> dict[str, Any]:
     Returns:
         Dictionary with audit results
     """
-    import json
-
-    # Import here to avoid circular import
-    import sys
-
-    sys.path.insert(0, "/home/ai-whisperers/solstein/src")
-    from scripts.run_eneve_199 import convert_json_to_company
-
     with open(json_path) as f:
         data = json.load(f)
 
@@ -421,9 +349,9 @@ def audit_all_companies(json_path: str) -> dict[str, Any]:
     successful = 0
     failed = 0
 
-    for company_data in companies:
+    for idx, company_data in enumerate(companies):
         try:
-            company = convert_json_to_company(company_data)
+            company = convert_to_domain_company(company_data, idx)
             issues = validate_field_mapping(company_data, company)
 
             if issues:
@@ -432,7 +360,7 @@ def audit_all_companies(json_path: str) -> dict[str, Any]:
             else:
                 successful += 1
 
-        except Exception as e:
+        except (ValueError, TypeError, AttributeError, KeyError) as e:
             all_issues.append(
                 FieldMappingIssue(
                     field="conversion",
@@ -454,11 +382,8 @@ def audit_all_companies(json_path: str) -> dict[str, Any]:
 
 if __name__ == "__main__":
     # Run audit on the 199 companies file
-    import sys
-
-    sys.path.insert(0, "/home/ai-whisperers/solstein/src")
-
-    json_path = "/home/ai-whisperers/solstein/tests/fixtures/synthetic/competitor_data_199.json"
+    _project_root = _Path(__file__).resolve().parent.parent
+    json_path = str(_project_root / "tests/fixtures/synthetic/competitor_data_199.json")
 
     print("Running field mapping audit...")
     print()

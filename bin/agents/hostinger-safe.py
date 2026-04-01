@@ -28,7 +28,7 @@ class HostingerSafeRunner:
                 timeout=1
             )
             return result.returncode != 0
-        except:
+        except Exception:
             return True  # Assume Hostinger if systemctl fails
 
     def wait_for_telegram_rate_limit(self) -> None:
@@ -46,7 +46,7 @@ class HostingerSafeRunner:
             try:
                 retry_after = int(error.split("retry after ")[-1].split(")")[0])
                 self.telegram_retry_after = retry_after
-            except:
+            except Exception:
                 self.telegram_retry_after = 30
         elif "409:" in error:
             # Conflict - another bot instance running
@@ -73,7 +73,7 @@ class HostingerSafeRunner:
                 timeout=2
             )
             return result.returncode == 0
-        except:
+        except Exception:
             return False
 
 if __name__ == "__main__":
