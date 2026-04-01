@@ -7,12 +7,13 @@ Confidence: 0.60
 Authority: LINKEDIN
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from loguru import logger
 
 from solstein.adapters.logging import log_adapter_error
+from solstein.data.additional_sources import AdditionalDataSources
 from solstein.domain.models import RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 from solstein.infrastructure.refresh import BaseRefreshConnector
@@ -41,8 +42,6 @@ class LinkedInUnifiedAdapter(BaseRefreshConnector):
     def _get_hiring_signals(self, company_name: str) -> dict[str, Any]:
         """Get hiring signals from news."""
         try:
-            from solstein.data.additional_sources import AdditionalDataSources
-
             additional = AdditionalDataSources(news_api_key=self.news_api_key)
             news = additional.get_news(company_name, days_back=90)
 
@@ -70,7 +69,7 @@ class LinkedInUnifiedAdapter(BaseRefreshConnector):
                 "recent_hires": recent_hires[:10],
                 "sentiment": news.sentiment_score,
             }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log_adapter_error(
                 component="LinkedInUnifiedSource",
                 operation="_get_hiring_signals",
@@ -113,7 +112,7 @@ class LinkedInUnifiedAdapter(BaseRefreshConnector):
         return RawDataSource(
             source_name=self.source_name,
             source_type=self.source_type,
-            retrieval_timestamp=datetime.now(),
+            retrieval_timestamp=datetime.now(tz=timezone.utc),
             raw_content=signals,
             metadata={
                 "data_source": "news_proxy",
@@ -140,7 +139,7 @@ class LinkedInUnifiedAdapter(BaseRefreshConnector):
                         "fact_type": "hiring_signals",
                         "value": signals,
                         "confidence": self.confidence,
-                        "extracted_at": datetime.now(),
+                        "extracted_at": datetime.now(tz=timezone.utc),
                         "source": self.source_name,
                     }
                 )
