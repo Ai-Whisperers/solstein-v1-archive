@@ -67,10 +67,10 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 0f | STORY-271 | Publish Runtime Depth, Wiring, and Duplication Ledger | IN_PROGRESS | Ledger artifact created in `docs/audit/RUNTIME_DEPTH_AND_DUPLICATION_LEDGER_2026-03-31.md`; continue caller inventory, deletion budget, and parity-gap follow-through |
-| 0g | STORY-255 | Freeze Graph Runtime and Declare Legacy Pipeline Canonical | DONE | PR #223 |
-| 0h | STORY-256 | Delete Runtime Aliases and Feature-Flag Branching Around Orchestration | BLOCKED | Depends on STORY-271 and STORY-255 so deletion is evidence-driven rather than ad-hoc |
-| 0i | STORY-257 | Repair Legacy Entrypoints to Share One Registry and One Converter | BLOCKED | Depends on STORY-271 and STORY-256 |
+| 0f | STORY-271 | Publish Runtime Depth, Wiring, and Duplication Ledger | DONE | PR #210 merged |
+| 0g | STORY-255 | Freeze Graph Runtime and Declare Legacy Pipeline Canonical | DONE | PR #211 merged (PR #223 is duplicate — close) |
+| 0h | STORY-256 | Delete Runtime Aliases and Feature-Flag Branching Around Orchestration | DONE | PR #214 merged |
+| 0i | STORY-257 | Repair Legacy Entrypoints to Share One Registry and One Converter | IN_PROGRESS | Unblocked: STORY-271 (PR #210) + STORY-256 (PR #214) both merged |
 | 0j | STORY-258 | Define Salvage-vs-Rebuild Trigger for the Legacy Runtime | BLOCKED | Depends on STORY-271 and EPIC-070 evidence work |
 
 ### EPIC-069: Provider Surface Rationalization (Consolidation)
