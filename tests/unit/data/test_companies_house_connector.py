@@ -1,5 +1,6 @@
 import pytest
 
+from solstein.config import get_settings
 from solstein.data.connectors.companies_house_connector import (
     CompaniesHouseCompanyNotFoundError,
     CompaniesHouseConnector,
@@ -9,14 +10,22 @@ from solstein.data.connectors.companies_house_connector import (
 
 def test_companies_house_connector_reads_api_key_from_env(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("COMPANIES_HOUSE_API_KEY", "env-key")
-    connector = CompaniesHouseConnector(api_key=None)
-    assert connector.api_key == "env-key"
+    get_settings.cache_clear()  # get_settings() is @lru_cache; must clear so the new env var is read
+    try:
+        connector = CompaniesHouseConnector(api_key=None)
+        assert connector.api_key == "env-key"
+    finally:
+        get_settings.cache_clear()  # restore so subsequent tests get a fresh read
 
 
 def test_companies_house_connector_param_overrides_env(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("COMPANIES_HOUSE_API_KEY", "env-key")
-    connector = CompaniesHouseConnector(api_key="param-key")
-    assert connector.api_key == "param-key"
+    get_settings.cache_clear()
+    try:
+        connector = CompaniesHouseConnector(api_key="param-key")
+        assert connector.api_key == "param-key"
+    finally:
+        get_settings.cache_clear()
 
 
 def test_companies_house_connector_defaults_api_base():
