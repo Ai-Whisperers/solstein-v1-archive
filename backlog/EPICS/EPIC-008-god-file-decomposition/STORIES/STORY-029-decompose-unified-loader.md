@@ -87,3 +87,26 @@ No single engineer can hold all six of these concerns in mind simultaneously. A 
 This story MUST NOT start until STORY-020 (loader consolidation) is complete. The sequence is: choose the canonical loader, then decompose it. Attempting to decompose while two other loaders still exist will result in confusion about which loader is being decomposed and whether the other loaders need matching decomposition.
 
 The suggested module names follow the pipeline stages identified in the audit. Adjust them based on the actual code structure — the names should describe what each module does, not what the audit suggested.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

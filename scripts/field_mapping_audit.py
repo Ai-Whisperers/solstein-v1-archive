@@ -247,11 +247,36 @@ def _check_financial_fields(json_data: dict[str, Any], company: Company) -> list
     latest = timeline[0] if timeline else {}
 
     fin_checks = [
-        ("revenue.timeline[0].eur_millions", latest.get("eur_millions"), company.financials.revenue, "Revenue mismatch"),
-        ("revenue.timeline[0].yoy_growth_pct", latest.get("yoy_growth_pct"), company.financials.growth_rate, "Growth rate mismatch"),
-        ("revenue.cagr_3yr_pct", revenue_data.get("cagr_3yr_pct"), company.revenue_cagr_3yr, "CAGR 3-year not preserved"),
-        ("revenue.cagr_5yr_pct", revenue_data.get("cagr_5yr_pct"), company.revenue_cagr_5yr, "CAGR 5-year not preserved"),
-        ("enrichment_source_count", json_data.get("enrichment_source_count"), company.enrichment_source_count, "Enrichment source count not preserved"),
+        (
+            "revenue.timeline[0].eur_millions",
+            latest.get("eur_millions"),
+            company.financials.revenue,
+            "Revenue mismatch",
+        ),
+        (
+            "revenue.timeline[0].yoy_growth_pct",
+            latest.get("yoy_growth_pct"),
+            company.financials.growth_rate,
+            "Growth rate mismatch",
+        ),
+        (
+            "revenue.cagr_3yr_pct",
+            revenue_data.get("cagr_3yr_pct"),
+            company.revenue_cagr_3yr,
+            "CAGR 3-year not preserved",
+        ),
+        (
+            "revenue.cagr_5yr_pct",
+            revenue_data.get("cagr_5yr_pct"),
+            company.revenue_cagr_5yr,
+            "CAGR 5-year not preserved",
+        ),
+        (
+            "enrichment_source_count",
+            json_data.get("enrichment_source_count"),
+            company.enrichment_source_count,
+            "Enrichment source count not preserved",
+        ),
     ]
     for field, expected, actual, message in fin_checks:
         if expected != actual:

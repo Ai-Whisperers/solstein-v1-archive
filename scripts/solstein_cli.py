@@ -15,9 +15,7 @@ from pathlib import Path
 import click
 
 # Configure logging (Vete pattern)
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Add src to path
@@ -45,9 +43,7 @@ def cli():
 
 
 @cli.command()
-@click.option(
-    "--env", default="development", help="Environment (development/production)"
-)
+@click.option("--env", default="development", help="Environment (development/production)")
 def config(env: str):
     """Show current configuration"""
     try:
@@ -62,9 +58,7 @@ def config(env: str):
         )
         click.echo(f"  Log Level: {settings.logging.level}")
         # This is a bit hacky but we need to check if keys are set
-        api_keys_status = "Configured" if (
-            settings.openai_api_key or settings.perplexity_api_key
-        ) else "Not configured"
+        api_keys_status = "Configured" if (settings.openai_api_key or settings.perplexity_api_key) else "Not configured"
 
         click.echo(f"  API Keys: {api_keys_status}")
     except Exception as e:
@@ -115,9 +109,7 @@ def analyze(input: str | None, output: str | None, limit: int):
         if output:
             output_dir = Path(output)
         else:
-            output_dir = Path("data/output/analysis") / datetime.now().strftime(
-                "%Y%m%d_%H%M%S"
-            )
+            output_dir = Path("data/output/analysis") / datetime.now().strftime("%Y%m%d_%H%M%S")
 
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -142,13 +134,9 @@ def analyze(input: str | None, output: str | None, limit: int):
 
             financial = FinancialMetric(
                 revenue=revenue,
-                revenue_confidence=ConfidenceLevel.CONFIRMED
-                if revenue
-                else ConfidenceLevel.UNKNOWN,
+                revenue_confidence=ConfidenceLevel.CONFIRMED if revenue else ConfidenceLevel.UNKNOWN,
                 growth_rate=growth,
-                growth_confidence=ConfidenceLevel.ESTIMATED
-                if growth
-                else ConfidenceLevel.UNKNOWN,
+                growth_confidence=ConfidenceLevel.ESTIMATED if growth else ConfidenceLevel.UNKNOWN,
                 employees=100,  # Default
             )
 
@@ -274,25 +262,17 @@ def compare(company: list[str], input: str | None):
 
             click.echo(f"\n🏢 {comp.get('company_name')}")
             click.echo(f"   📁 Folder: {comp.get('folder', 'N/A')}")
-            click.echo(
-                f"   📊 Data Availability: {comp.get('data_availability', 'N/A')}"
-            )
+            click.echo(f"   📊 Data Availability: {comp.get('data_availability', 'N/A')}")
 
             if timeline:
                 latest = timeline[0]
                 click.echo(
-                    f"   💰 Revenue: €{latest.get('eur_millions', 'N/A')}M "
-                    f"({latest.get('yoy_growth_pct', 'N/A')}% YoY)"
+                    f"   💰 Revenue: €{latest.get('eur_millions', 'N/A')}M ({latest.get('yoy_growth_pct', 'N/A')}% YoY)"
                 )
 
             if scorecard:
-                click.echo(
-                    f"   🎯 Composite Score: "
-                    f"{scorecard.get('composite_score', 'N/A')}/10"
-                )
-                click.echo(
-                    f"   🏷️  Classification: {scorecard.get('classification', 'N/A')}"
-                )
+                click.echo(f"   🎯 Composite Score: {scorecard.get('composite_score', 'N/A')}/10")
+                click.echo(f"   🏷️  Classification: {scorecard.get('classification', 'N/A')}")
 
         click.echo("\n" + "=" * 60)
 
@@ -361,9 +341,7 @@ def report(output: str | None):
             "total_companies": len(competitors),
             "market_overview": {
                 "total_revenue_eur_m": total_revenue,
-                "average_growth_pct": total_growth / growth_count
-                if growth_count > 0
-                else 0,
+                "average_growth_pct": total_growth / growth_count if growth_count > 0 else 0,
             },
             "companies": [],
         }
@@ -385,10 +363,7 @@ def report(output: str | None):
             report_data["companies"].append(company_info)
 
         # Save report
-        report_path = (
-            output_dir
-            / f"solstein_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        )
+        report_path = output_dir / f"solstein_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_path, "w") as f:
             json.dump(report_data, f, indent=2, default=str)
 
@@ -398,29 +373,15 @@ def report(output: str | None):
             f.write("# SolStein Competitive Intelligence Report\n\n")
             f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
             f.write("## Market Overview\n\n")
-            f.write(
-                f"- **Total Companies Analyzed**: {report_data['total_companies']}\n"
-            )
-            f.write(
-                f"- **Total Revenue**: "
-                f"€{report_data['market_overview']['total_revenue_eur_m']:,.0f}M\n"
-            )
-            f.write(
-                f"- **Average Growth Rate**: "
-                f"{report_data['market_overview']['average_growth_pct']:.1f}%\n\n"
-            )
+            f.write(f"- **Total Companies Analyzed**: {report_data['total_companies']}\n")
+            f.write(f"- **Total Revenue**: €{report_data['market_overview']['total_revenue_eur_m']:,.0f}M\n")
+            f.write(f"- **Average Growth Rate**: {report_data['market_overview']['average_growth_pct']:.1f}%\n\n")
 
             f.write("## Top Companies\n\n")
-            f.write(
-                "| Company | Revenue (€M) | Growth (%) | Score | Classification |\n"
-            )
-            f.write(
-                "|---------|--------------|------------|-------|----------------|\n"
-            )
+            f.write("| Company | Revenue (€M) | Growth (%) | Score | Classification |\n")
+            f.write("|---------|--------------|------------|-------|----------------|\n")
 
-            for comp in sorted(
-                report_data["companies"], key=lambda x: x["revenue"] or 0, reverse=True
-            )[:10]:
+            for comp in sorted(report_data["companies"], key=lambda x: x["revenue"] or 0, reverse=True)[:10]:
                 f.write(
                     f"| {comp['name']} | "
                     f"{comp['revenue'] or 'N/A'} | "
@@ -448,9 +409,7 @@ def demo():
     if demo_path.exists():
         import subprocess
 
-        result = subprocess.run(
-            [sys.executable, str(demo_path)], capture_output=True, text=True
-        )
+        result = subprocess.run([sys.executable, str(demo_path)], capture_output=True, text=True)
         click.echo(result.stdout)
         if result.stderr:
             click.echo(result.stderr, err=True)

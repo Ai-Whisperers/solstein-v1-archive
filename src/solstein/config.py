@@ -385,8 +385,7 @@ def _check_settings_configuration(settings: Settings) -> None:
 
     if settings.supabase.url and not settings.supabase.key:
         logger.warning(
-            "SUPABASE__URL is set but SUPABASE__KEY is missing. "
-            "Supabase Auth will not function without a valid key."
+            "SUPABASE__URL is set but SUPABASE__KEY is missing. Supabase Auth will not function without a valid key."
         )
 
     if not (settings.github_token or "").strip():

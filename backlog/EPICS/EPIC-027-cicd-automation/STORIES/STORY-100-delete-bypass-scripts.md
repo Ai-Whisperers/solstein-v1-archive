@@ -85,3 +85,26 @@ If any operation lacks an API endpoint, that endpoint must be created BEFORE the
 **On the CLI restructuring:** The CLI should use a configured `API_BASE_URL` and `API_TOKEN` (from environment or config file). It should format API responses for terminal display (tables, colors, progress bars for long-running jobs). It should NOT be a thin `curl` wrapper — it should be a proper CLI experience that happens to use the API as its backend. Think `gh` (GitHub CLI), not `curl | jq`.
 
 **Expect resistance.** These scripts are convenient. They're fast. They skip auth. That's the point — they skip things that exist for good reasons. The migration path must be equally convenient, or the scripts will reappear under a different name within a sprint.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

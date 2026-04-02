@@ -29,3 +29,28 @@ This is not just inconvenience. Poor developer experience increases the cost of 
 - [ ] LLM evaluation harness exists with at least 5 test cases
 - [ ] `make setup` brings up a working local environment from scratch
 - [ ] Onboarding documentation gets a new engineer to first API response in under 30 minutes
+
+## Autonomous Continuation Notes
+
+### Queue Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` before starting any story here.
+- `planning/QUEUE.md` currently marks only `STORY-057` and `STORY-058` unfinished here.
+- `STORY-057` is `BLOCKED` on `STORY-059`.
+- `STORY-058` is `BLOCKED` on `STORY-039`.
+
+### Next Agent Action
+
+- Do not start implementation work in this epic until the blockers are actually resolved in `develop` and the queue is updated.
+- Once unblocked, prefer `STORY-057` before `STORY-058` so onboarding docs describe the real setup path instead of a guessed one.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md` for machine-checkable work.
+- Avoid prose-only “helpful” setup content. Setup and onboarding docs must be derived from commands that actually run in this repo.
+- Any developer-experience fix should add at least one durable guardrail: regression test, generated reference update, schema/type gate, or AST/check script.
+
+### Minimum Verification For Future Agents
+
+- If `STORY-057` is worked: prove the setup path with real commands and actual output.
+- If `STORY-058` is worked: verify the documented onboarding path matches the current `Makefile`, `.venv`, and active dev commands instead of historical docs.

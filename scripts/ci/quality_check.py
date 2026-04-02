@@ -12,8 +12,6 @@ Usage:
 import argparse
 import subprocess
 import sys
-from pathlib import Path
-from typing import List, Tuple
 
 # Check configurations
 # required=True means CI will fail if this check fails
@@ -109,7 +107,7 @@ CHECKS = [
 ]
 
 
-def run_check(check: dict) -> Tuple[bool, str]:
+def run_check(check: dict) -> tuple[bool, str]:
     """Run a single check and return (success, output)."""
     name = check["name"]
     cmd = check["cmd"]
@@ -164,7 +162,7 @@ def main():
     print(f"Checks to run: {len(CHECKS)}")
     print()
 
-    results: List[Tuple[str, bool, bool]] = []  # (name, success, required)
+    results: list[tuple[str, bool, bool]] = []  # (name, success, required)
     failed_required = []
 
     for check in CHECKS:
@@ -177,7 +175,7 @@ def main():
         if not success and check["required"]:
             failed_required.append(check["name"])
             if args.fail_fast:
-                print(f"\n🛑 Fail-fast enabled, stopping after first required failure")
+                print("\n🛑 Fail-fast enabled, stopping after first required failure")
                 break
 
     # Print summary

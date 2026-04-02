@@ -111,18 +111,18 @@ class StreamingExcelExporter:
             )
         except (OSError, ValueError, TypeError) as exc:
             logger.error(
-                "[StreamingExcel] Export failed: %s", exc,
+                "[StreamingExcel] Export failed: %s",
+                exc,
             )
             raise
 
     def _report_progress(
-        self, callback: Any | None,
+        self,
+        callback: Any | None,
     ) -> None:
         """Report progress after sheet completion."""
         self._sheets_completed += 1
-        pct = int(
-            (self._sheets_completed / self._total_sheets) * 100
-        )
+        pct = int((self._sheets_completed / self._total_sheets) * 100)
         if callback is not None:
             try:
                 callback(pct)
@@ -141,41 +141,51 @@ class StreamingExcelExporter:
         ws = wb.create_sheet("Summary")
 
         # Header row
-        ws.append([
-            "Export Summary",
-            None,
-            None,
-            None,
-        ])
-        ws.append([
-            "Generated",
-            datetime.now(timezone.utc).isoformat(),
-        ])
-        ws.append([
-            "Total Companies",
-            len(profiles),
-        ])
+        ws.append(
+            [
+                "Export Summary",
+                None,
+                None,
+                None,
+            ]
+        )
+        ws.append(
+            [
+                "Generated",
+                datetime.now(timezone.utc).isoformat(),
+            ]
+        )
+        ws.append(
+            [
+                "Total Companies",
+                len(profiles),
+            ]
+        )
         ws.append([])  # blank row
 
         # Company summary table
-        ws.append([
-            "Company",
-            "Industry",
-            "Classification",
-            "Overall Score",
-            "Growth Score",
-            "AI Maturity",
-        ])
+        ws.append(
+            [
+                "Company",
+                "Industry",
+                "Classification",
+                "Overall Score",
+                "Growth Score",
+                "AI Maturity",
+            ]
+        )
 
         for company in profiles:
-            ws.append([
-                _safe_str(company.name),
-                _safe_str(company.industry),
-                _safe_str(company.classification),
-                _safe_num(getattr(company, "overall_score", None)),
-                _safe_num(getattr(company, "growth_score", None)),
-                _safe_str(getattr(company, "ai_maturity", None)),
-            ])
+            ws.append(
+                [
+                    _safe_str(company.name),
+                    _safe_str(company.industry),
+                    _safe_str(company.classification),
+                    _safe_num(getattr(company, "overall_score", None)),
+                    _safe_num(getattr(company, "growth_score", None)),
+                    _safe_str(getattr(company, "ai_maturity", None)),
+                ]
+            )
 
     def _write_companies_sheet(
         self,
@@ -186,48 +196,40 @@ class StreamingExcelExporter:
         ws = wb.create_sheet("Companies")
 
         # Header
-        ws.append([
-            "Name",
-            "Industry",
-            "Classification",
-            "Description",
-            "Website",
-            "Country",
-            "Employee Count",
-            "Founded Year",
-            "Revenue",
-            "Revenue Growth",
-            "Total Funding",
-            "Last Funding Round",
-        ])
+        ws.append(
+            [
+                "Name",
+                "Industry",
+                "Classification",
+                "Description",
+                "Website",
+                "Country",
+                "Employee Count",
+                "Founded Year",
+                "Revenue",
+                "Revenue Growth",
+                "Total Funding",
+                "Last Funding Round",
+            ]
+        )
 
         for company in profiles:
-            ws.append([
-                _safe_str(company.name),
-                _safe_str(company.industry),
-                _safe_str(company.classification),
-                _safe_str(
-                    getattr(company, "description", None)
-                ),
-                _safe_str(getattr(company, "website", None)),
-                _safe_str(getattr(company, "country", None)),
-                _safe_num(
-                    getattr(company, "employee_count", None)
-                ),
-                _safe_num(
-                    getattr(company, "founded_year", None)
-                ),
-                _safe_num(getattr(company, "revenue", None)),
-                _safe_num(
-                    getattr(company, "revenue_growth", None)
-                ),
-                _safe_num(
-                    getattr(company, "total_funding", None)
-                ),
-                _safe_str(
-                    getattr(company, "last_funding_round", None)
-                ),
-            ])
+            ws.append(
+                [
+                    _safe_str(company.name),
+                    _safe_str(company.industry),
+                    _safe_str(company.classification),
+                    _safe_str(getattr(company, "description", None)),
+                    _safe_str(getattr(company, "website", None)),
+                    _safe_str(getattr(company, "country", None)),
+                    _safe_num(getattr(company, "employee_count", None)),
+                    _safe_num(getattr(company, "founded_year", None)),
+                    _safe_num(getattr(company, "revenue", None)),
+                    _safe_num(getattr(company, "revenue_growth", None)),
+                    _safe_num(getattr(company, "total_funding", None)),
+                    _safe_str(getattr(company, "last_funding_round", None)),
+                ]
+            )
 
     def _write_signals_sheet(
         self,
@@ -237,52 +239,52 @@ class StreamingExcelExporter:
         """Write the Signals sheet with signal data."""
         ws = wb.create_sheet("Signals")
 
-        ws.append([
-            "Company",
-            "Signal Type",
-            "Signal Value",
-            "Confidence",
-            "Source",
-        ])
+        ws.append(
+            [
+                "Company",
+                "Signal Type",
+                "Signal Value",
+                "Confidence",
+                "Source",
+            ]
+        )
 
         for company in profiles:
             signals = getattr(company, "signals", None) or []
             if not signals:
                 # Write a placeholder row for companies with no signals
-                ws.append([
-                    _safe_str(company.name),
-                    "N/A",
-                    None,
-                    None,
-                    None,
-                ])
+                ws.append(
+                    [
+                        _safe_str(company.name),
+                        "N/A",
+                        None,
+                        None,
+                        None,
+                    ]
+                )
                 continue
 
             for signal in signals:
                 if isinstance(signal, dict):
-                    ws.append([
-                        _safe_str(company.name),
-                        _safe_str(signal.get("type")),
-                        _safe_str(signal.get("value")),
-                        _safe_num(signal.get("confidence")),
-                        _safe_str(signal.get("source")),
-                    ])
+                    ws.append(
+                        [
+                            _safe_str(company.name),
+                            _safe_str(signal.get("type")),
+                            _safe_str(signal.get("value")),
+                            _safe_num(signal.get("confidence")),
+                            _safe_str(signal.get("source")),
+                        ]
+                    )
                 else:
-                    ws.append([
-                        _safe_str(company.name),
-                        _safe_str(
-                            getattr(signal, "type", None)
-                        ),
-                        _safe_str(
-                            getattr(signal, "value", None)
-                        ),
-                        _safe_num(
-                            getattr(signal, "confidence", None)
-                        ),
-                        _safe_str(
-                            getattr(signal, "source", None)
-                        ),
-                    ])
+                    ws.append(
+                        [
+                            _safe_str(company.name),
+                            _safe_str(getattr(signal, "type", None)),
+                            _safe_str(getattr(signal, "value", None)),
+                            _safe_num(getattr(signal, "confidence", None)),
+                            _safe_str(getattr(signal, "source", None)),
+                        ]
+                    )
 
     def _write_financials_sheet(
         self,
@@ -292,39 +294,31 @@ class StreamingExcelExporter:
         """Write the Financials sheet with financial metrics."""
         ws = wb.create_sheet("Financials")
 
-        ws.append([
-            "Company",
-            "Revenue",
-            "Revenue Growth (%)",
-            "Gross Margin (%)",
-            "EBITDA",
-            "Net Income",
-            "Total Funding",
-            "Burn Rate",
-            "Runway (months)",
-        ])
+        ws.append(
+            [
+                "Company",
+                "Revenue",
+                "Revenue Growth (%)",
+                "Gross Margin (%)",
+                "EBITDA",
+                "Net Income",
+                "Total Funding",
+                "Burn Rate",
+                "Runway (months)",
+            ]
+        )
 
         for company in profiles:
-            ws.append([
-                _safe_str(company.name),
-                _safe_num(getattr(company, "revenue", None)),
-                _safe_num(
-                    getattr(company, "revenue_growth", None)
-                ),
-                _safe_num(
-                    getattr(company, "gross_margin", None)
-                ),
-                _safe_num(getattr(company, "ebitda", None)),
-                _safe_num(
-                    getattr(company, "net_income", None)
-                ),
-                _safe_num(
-                    getattr(company, "total_funding", None)
-                ),
-                _safe_num(
-                    getattr(company, "burn_rate", None)
-                ),
-                _safe_num(
-                    getattr(company, "runway_months", None)
-                ),
-            ])
+            ws.append(
+                [
+                    _safe_str(company.name),
+                    _safe_num(getattr(company, "revenue", None)),
+                    _safe_num(getattr(company, "revenue_growth", None)),
+                    _safe_num(getattr(company, "gross_margin", None)),
+                    _safe_num(getattr(company, "ebitda", None)),
+                    _safe_num(getattr(company, "net_income", None)),
+                    _safe_num(getattr(company, "total_funding", None)),
+                    _safe_num(getattr(company, "burn_rate", None)),
+                    _safe_num(getattr(company, "runway_months", None)),
+                ]
+            )

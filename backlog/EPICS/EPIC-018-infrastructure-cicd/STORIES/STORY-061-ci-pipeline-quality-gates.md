@@ -67,3 +67,26 @@ Without CI, the quality guarantees documented in this backlog (test coverage, ty
 
 ## Notes
 This is the enforcement mechanism for every other quality improvement in this backlog. Without CI, test coverage improvements (EPIC-013), type safety improvements (EPIC-012), and linting standards are all voluntary. This story should be prioritised highly — not because it delivers user-facing value directly, but because it protects every other improvement from regression. The pipeline should use the Docker image from STORY-059 to ensure CI runs in the same environment as production, eliminating "works in CI but not in production" failures.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

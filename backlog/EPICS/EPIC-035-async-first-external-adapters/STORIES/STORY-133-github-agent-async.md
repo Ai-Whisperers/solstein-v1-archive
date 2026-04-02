@@ -91,3 +91,26 @@ The `requests` library is not inherently bad. It is excellent for synchronous co
 The migration path is well-documented and the API surface is nearly identical. The primary gotchas are: (1) exception types differ between `requests` and `httpx` — any `except requests.exceptions.X` blocks must be updated; (2) `httpx.AsyncClient` should be reused across requests rather than instantiated per-call; (3) response methods like `.json()` are synchronous in `httpx` (unlike some async HTTP libraries), so no `await` is needed there.
 
 This story is the highest-priority item in EPIC-035 because `github_agent.py` is explicitly called out in the audit with line numbers, and the GitHub agent is a core component of the research pipeline.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

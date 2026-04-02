@@ -118,3 +118,9 @@ The backlog documentation claims all EPICs are "Open" or "In Progress", but code
 1. Complete EPIC-002 scoring (verify with real data)
 2. Complete EPIC-003 data lineage (wire data_source_type fully)
 3. Define Done criteria so future work can be tracked
+
+## 2026-03-30 Usage Note
+
+- This reconciliation is a historical snapshot and must not be treated as the current execution source for `develop`.
+- Future coworker agents should consult `planning/QUEUE.md` first and `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` second.
+- If this file conflicts with the queue, the queue wins.

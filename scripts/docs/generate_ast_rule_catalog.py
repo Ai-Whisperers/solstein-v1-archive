@@ -148,15 +148,8 @@ def _parse_rule_file(path: Path) -> RuleRecord:
             fields[field_match.group(1)] = field_match.group(2).strip().strip('"')
 
     rule_id = fields["id"]
-    test_files = sorted(
-        str(test_path.relative_to(ROOT))
-        for test_path in TESTS_DIR.glob(f"*{rule_id}*.yml")
-    )
-    related_issues = [
-        issue.strip()
-        for issue in metadata.get("related-issues", "").split(",")
-        if issue.strip()
-    ]
+    test_files = sorted(str(test_path.relative_to(ROOT)) for test_path in TESTS_DIR.glob(f"*{rule_id}*.yml"))
+    related_issues = [issue.strip() for issue in metadata.get("related-issues", "").split(",") if issue.strip()]
     blocking_value = metadata.get("blocking", "").lower()
 
     return RuleRecord(

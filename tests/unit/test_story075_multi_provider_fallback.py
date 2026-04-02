@@ -332,12 +332,14 @@ class TestEnhancedClientWithFallback:
         mock_health.report_success = MagicMock()
 
         mock_fallback = MagicMock()
-        mock_fallback.execute = AsyncMock(return_value=FallbackResult(
-            result="test result",
-            provider_used="deepinfra",
-            is_template_fallback=False,
-            decisions=[],
-        ))
+        mock_fallback.execute = AsyncMock(
+            return_value=FallbackResult(
+                result="test result",
+                provider_used="deepinfra",
+                is_template_fallback=False,
+                decisions=[],
+            )
+        )
 
         client = EnhancedLLMClient(
             health_checker=mock_health,
@@ -355,13 +357,15 @@ class TestEnhancedClientWithFallback:
         mock_health.check_all_providers = AsyncMock(return_value={})
 
         mock_fallback = MagicMock()
-        mock_fallback.execute = AsyncMock(return_value=FallbackResult(
-            result=None,
-            provider_used=None,
-            is_template_fallback=True,
-            decisions=[],
-            template_response=TEMPLATE_FALLBACK_RESPONSE.copy(),
-        ))
+        mock_fallback.execute = AsyncMock(
+            return_value=FallbackResult(
+                result=None,
+                provider_used=None,
+                is_template_fallback=True,
+                decisions=[],
+                template_response=TEMPLATE_FALLBACK_RESPONSE.copy(),
+            )
+        )
 
         client = EnhancedLLMClient(
             health_checker=mock_health,
@@ -379,12 +383,14 @@ class TestEnhancedClientWithFallback:
         mock_health.check_all_providers = AsyncMock(return_value={})
 
         mock_fallback = MagicMock()
-        mock_fallback.execute = AsyncMock(return_value=FallbackResult(
-            result=None,
-            provider_used=None,
-            is_template_fallback=True,
-            decisions=[FallbackDecision(provider="x", action="failed", reason="down")],
-        ))
+        mock_fallback.execute = AsyncMock(
+            return_value=FallbackResult(
+                result=None,
+                provider_used=None,
+                is_template_fallback=True,
+                decisions=[FallbackDecision(provider="x", action="failed", reason="down")],
+            )
+        )
 
         client = EnhancedLLMClient(
             health_checker=mock_health,

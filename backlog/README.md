@@ -143,6 +143,15 @@ EPIC-002: Configuration Integrity
 
 ---
 
+## Develop Branch Autonomous Continuation
+
+- For live unfinished work on `develop`, consult `planning/QUEUE.md` first.
+- Then consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md`.
+- Treat the epic registry and story index below as historical planning surfaces that may lag merged work in `develop`.
+- Do not start implementation from a red `Open` badge here unless the queue or the develop autonomy audit confirms it is still unfinished and in scope.
+
+---
+
 ## Story Index
 
 <details>

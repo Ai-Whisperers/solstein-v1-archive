@@ -171,9 +171,8 @@ class TestFieldMappingParity:
             if value is None:
                 missing_attrs.append((json_path, company_path))
 
-        assert not missing_attrs, (
-            "The following JSON fields are mapped but Company attribute is None:\n"
-            + "\n".join(f"  {jp!r} -> {cp!r}" for jp, cp in missing_attrs)
+        assert not missing_attrs, "The following JSON fields are mapped but Company attribute is None:\n" + "\n".join(
+            f"  {jp!r} -> {cp!r}" for jp, cp in missing_attrs
         )
 
     def test_ai_score_is_float_not_truncated(self, raw_companies, companies):
@@ -197,8 +196,7 @@ class TestFieldMappingParity:
                 assert company.total_funding_raised_eur is None
             else:
                 assert company.total_funding_raised_eur == float(raw_funding), (
-                    f"{company.name}: total_funding_raised_eur "
-                    f"{company.total_funding_raised_eur} != raw {raw_funding}"
+                    f"{company.name}: total_funding_raised_eur {company.total_funding_raised_eur} != raw {raw_funding}"
                 )
 
     def test_valuation_maps_to_latest_valuation_eur(self, raw_companies, companies):
@@ -209,8 +207,7 @@ class TestFieldMappingParity:
                 assert company.latest_valuation_eur is None
             else:
                 assert company.latest_valuation_eur == float(raw_val), (
-                    f"{company.name}: latest_valuation_eur "
-                    f"{company.latest_valuation_eur} != raw {raw_val}"
+                    f"{company.name}: latest_valuation_eur {company.latest_valuation_eur} != raw {raw_val}"
                 )
 
     def test_funding_normalized_to_millions_in_financials(self, raw_companies, companies):
@@ -258,8 +255,7 @@ class TestFieldMappingParity:
                 assert company.revenue_per_employee_eur_k is None
             else:
                 assert company.revenue_per_employee_eur_k == float(raw_rpe), (
-                    f"{company.name}: revenue_per_employee_eur_k "
-                    f"{company.revenue_per_employee_eur_k} != raw {raw_rpe}"
+                    f"{company.name}: revenue_per_employee_eur_k {company.revenue_per_employee_eur_k} != raw {raw_rpe}"
                 )
 
     def test_profitability_fields_sync_with_financials(self, companies):
@@ -279,13 +275,9 @@ class TestFieldMappingParity:
             raw_3yr = revenue.get("cagr_3yr_pct")
             raw_5yr = revenue.get("cagr_5yr_pct")
             if raw_3yr is not None:
-                assert company.revenue_cagr_3yr == float(raw_3yr), (
-                    f"{company.name}: revenue_cagr_3yr mismatch"
-                )
+                assert company.revenue_cagr_3yr == float(raw_3yr), f"{company.name}: revenue_cagr_3yr mismatch"
             if raw_5yr is not None:
-                assert company.revenue_cagr_5yr == float(raw_5yr), (
-                    f"{company.name}: revenue_cagr_5yr mismatch"
-                )
+                assert company.revenue_cagr_5yr == float(raw_5yr), f"{company.name}: revenue_cagr_5yr mismatch"
 
     def test_field_type_compatibility(self, raw_companies, companies):
         """Each mapped field must match the expected Python type on the Company."""
@@ -320,8 +312,7 @@ class TestFieldMappingParity:
                 company_val = getattr(company, company_attr, None)
                 if company_val is None:
                     violations.append(
-                        f"{company.name}: JSON[{json_key!r}]={raw_val} "
-                        f"but company.{company_attr} is None"
+                        f"{company.name}: JSON[{json_key!r}]={raw_val} but company.{company_attr} is None"
                     )
         assert not violations, "Silent None mappings detected:\n" + "\n".join(violations)
 

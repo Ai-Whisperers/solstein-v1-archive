@@ -9,11 +9,11 @@ import sys
 
 sys.path.insert(0, "src")
 
-from solstein.analytics.scoring import classify_company
 from solstein.analytics.constants import (
-    PHOENIX_SCORE_THRESHOLD,
     LEAD_SCORE_THRESHOLD,
+    PHOENIX_SCORE_THRESHOLD,
 )
+from solstein.analytics.scoring import classify_company
 
 
 def test_classification_thresholds():
@@ -21,7 +21,7 @@ def test_classification_thresholds():
     print("Testing Classification Thresholds...")
     print("=" * 60)
 
-    print(f"\nThresholds:")
+    print("\nThresholds:")
     print(f"  Phoenix: >= {PHOENIX_SCORE_THRESHOLD}")
     print(f"  Salt: {LEAD_SCORE_THRESHOLD + 0.01} - {PHOENIX_SCORE_THRESHOLD - 0.01}")
     print(f"  Lead: <= {LEAD_SCORE_THRESHOLD}")
@@ -30,19 +30,19 @@ def test_classification_thresholds():
         (2.0, "Lead"),
         (4.0, "Lead"),
         (4.49, "Lead"),  # Exactly at Lead threshold (<= 4.49)
-        (4.5, "Salt"),   # Just above Lead threshold
+        (4.5, "Salt"),  # Just above Lead threshold
         (5.0, "Salt"),
         (6.5, "Salt"),
         (6.99, "Salt"),  # Just below Phoenix threshold
-        (7.0, "Phoenix"), # Exactly at Phoenix threshold (>= 7.0)
+        (7.0, "Phoenix"),  # Exactly at Phoenix threshold (>= 7.0)
         (8.5, "Phoenix"),
         (9.5, "Phoenix"),
     ]
-    print(f"\nThresholds:")
+    print("\nThresholds:")
     print(f"  Phoenix: >= {PHOENIX_SCORE_THRESHOLD}")
     print(f"  Salt: {LEAD_SCORE_THRESHOLD + 0.01} - {PHOENIX_SCORE_THRESHOLD - 0.01}")
     print(f"  Lead: <= {LEAD_SCORE_THRESHOLD}")
-    print(f"\nTest Cases:")
+    print("\nTest Cases:")
     all_passed = True
     for score, expected in test_cases:
         result = classify_company(score)
@@ -80,7 +80,7 @@ def test_classification_distribution():
     salt = sum(1 for c in classifications if c == "Salt")
     lead = sum(1 for c in classifications if c == "Lead")
 
-    print(f"\nDistribution (199 companies):")
+    print("\nDistribution (199 companies):")
     print(f"  Phoenix: {phoenix} ({phoenix / 199 * 100:.1f}%)")
     print(f"  Salt:    {salt} ({salt / 199 * 100:.1f}%)")
     print(f"  Lead:    {lead} ({lead / 199 * 100:.1f}%)")
@@ -153,7 +153,7 @@ if __name__ == "__main__":
 
     if all_passed:
         print("\n🎉 Classification system is working correctly!")
-        print(f"\nThresholds:")
+        print("\nThresholds:")
         print(f"  Phoenix: >= {PHOENIX_SCORE_THRESHOLD}")
         print(f"  Salt:    {LEAD_SCORE_THRESHOLD + 0.01} - {PHOENIX_SCORE_THRESHOLD - 0.01}")
         print(f"  Lead:    <= {LEAD_SCORE_THRESHOLD}")

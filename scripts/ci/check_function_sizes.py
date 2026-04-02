@@ -1,9 +1,9 @@
 """Check function sizes in Python files."""
 
+import argparse
 import ast
 import sys
 from pathlib import Path
-import argparse
 
 
 def check_function_sizes(filepath: Path, max_lines: int = 100) -> list[dict]:

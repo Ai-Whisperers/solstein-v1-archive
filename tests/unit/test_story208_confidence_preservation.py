@@ -150,11 +150,16 @@ class TestConfidenceDifferentiatesScores:
             industry="Software",
             financials=financials,
             signal_confidences={
-                "revenue_level": 1.0, "revenue": 1.0,
-                "growth_rate": 1.0, "profitability": 1.0,
-                "profit_margin": 1.0, "company_size": 1.0,
-                "employees": 1.0, "funding": 1.0,
-                "funding_raised": 1.0, "valuation": 1.0,
+                "revenue_level": 1.0,
+                "revenue": 1.0,
+                "growth_rate": 1.0,
+                "profitability": 1.0,
+                "profit_margin": 1.0,
+                "company_size": 1.0,
+                "employees": 1.0,
+                "funding": 1.0,
+                "funding_raised": 1.0,
+                "valuation": 1.0,
             },
         )
 
@@ -164,11 +169,16 @@ class TestConfidenceDifferentiatesScores:
             industry="Software",
             financials=financials,
             signal_confidences={
-                "revenue_level": 1.0, "revenue": 1.0,
-                "growth_rate": 0.3, "profitability": 0.3,
-                "profit_margin": 0.3, "company_size": 1.0,
-                "employees": 1.0, "funding": 0.3,
-                "funding_raised": 0.3, "valuation": 0.3,
+                "revenue_level": 1.0,
+                "revenue": 1.0,
+                "growth_rate": 0.3,
+                "profitability": 0.3,
+                "profit_margin": 0.3,
+                "company_size": 1.0,
+                "employees": 1.0,
+                "funding": 0.3,
+                "funding_raised": 0.3,
+                "valuation": 0.3,
             },
         )
 

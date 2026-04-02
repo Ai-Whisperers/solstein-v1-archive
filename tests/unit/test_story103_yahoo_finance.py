@@ -170,9 +170,7 @@ class TestFinancialBackendDispatcher:
         av_data = [self._make_raw_data("AAPL", "alpha_vantage")]
 
         with patch.object(dispatcher, "_search_yahoo", new_callable=AsyncMock, return_value=None):
-            with patch.object(
-                dispatcher, "_search_alpha_vantage", new_callable=AsyncMock, return_value=av_data
-            ):
+            with patch.object(dispatcher, "_search_alpha_vantage", new_callable=AsyncMock, return_value=av_data):
                 results = await dispatcher.search("AAPL")
                 assert len(results) == 1
                 assert results[0].source_name == "alpha_vantage"

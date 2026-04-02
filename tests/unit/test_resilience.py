@@ -391,12 +391,12 @@ class TestIntegrationScenarios:
         async def failing_service():
             nonlocal call_count
             call_count += 1
-            raise Exception("service down")
+            raise RuntimeError("service down")
 
         cb = CircuitBreaker(failure_threshold=2, recovery_timeout=10.0)
 
         # Exhaust retries and trigger circuit breaker open
-        with pytest.raises(Exception, match="service down"):
+        with pytest.raises(RuntimeError, match="service down"):
             await call_with_retry(
                 failing_service,
                 retry_config=RetryConfig(max_attempts=2, base_delay=0.001, jitter=False),
@@ -424,7 +424,7 @@ class TestIntegrationScenarios:
         async def track_time():
             attempt_times.append(time.time())
             if len(attempt_times) < 3:
-                raise Exception("retry")
+                raise RuntimeError("retry")
             return "success"
 
         result = await call_with_retry(

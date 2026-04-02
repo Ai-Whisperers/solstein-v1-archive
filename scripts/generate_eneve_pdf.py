@@ -22,18 +22,18 @@ def clean_text(text, max_length=200):
         return ""
     text = str(text)
     replacements = {
-        '\u2022': '-',
-        '\u2019': "'",
-        '\u2018': "'",
-        '\u201c': '"',
-        '\u201d': '"',
-        '\u2013': '-',
-        '\u2014': '-',
-        '\u2026': '...',
+        "\u2022": "-",
+        "\u2019": "'",
+        "\u2018": "'",
+        "\u201c": '"',
+        "\u201d": '"',
+        "\u2013": "-",
+        "\u2014": "-",
+        "\u2026": "...",
     }
     for uni, asc in replacements.items():
         text = text.replace(uni, asc)
-    text = text.encode('latin-1', 'ignore').decode('latin-1')
+    text = text.encode("latin-1", "ignore").decode("latin-1")
     return text[:max_length]
 
 
@@ -136,10 +136,10 @@ def main():
     print("\n" + "=" * 60)
     print("📊 REPORT SUMMARY")
     print("=" * 60)
-    print(f"Target Company: Eneve (Netherlands)")
-    print(f"Focus: Smart software for the energy value chain")
+    print("Target Company: Eneve (Netherlands)")
+    print("Focus: Smart software for the energy value chain")
     print(f"Total Competitors Analyzed: {len(companies_data)}")
-    print(f"\nTop 5 by Confidence Score:")
+    print("\nTop 5 by Confidence Score:")
     sorted_companies = sorted(companies_data, key=lambda x: x.get("confidence_score", 0) or 0, reverse=True)
     for i, c in enumerate(sorted_companies[:5], 1):
         print(f"  {i}. {c.get('name', 'Unknown')} (Score: {c.get('confidence_score', 0):.2f})")

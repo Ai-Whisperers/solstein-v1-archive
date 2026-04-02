@@ -1,7 +1,5 @@
-import sys
-
 # Read the file
-with open("src/solstein/connectors/registry.py", "r") as f:
+with open("src/solstein/connectors/registry.py") as f:
     content = f.read()
 
 # Remove the last two lines (logger.info and return)

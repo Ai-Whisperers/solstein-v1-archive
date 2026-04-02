@@ -89,3 +89,26 @@ This is the smallest of the three functional regressions in this epic, but it is
 The severity on this story is High rather than Critical because the failure mode is a connection error rather than a silent data corruption or security issue. The pipeline fails loudly rather than silently. That said, "fails loudly with a misleading error" is not a satisfactory outcome for a production system.
 
 The temptation will be to add a single `if not url: return None` and call it done. This is insufficient. `None` is not a structured result. The caller cannot distinguish "no website available" from "fetch failed" if both return `None`. The return value must carry enough information for the pipeline to log the data gap correctly and continue without treating it as an infrastructure failure.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

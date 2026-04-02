@@ -30,11 +30,11 @@ def configure_logging():
     logger.add(
         sys.stderr,
         format=(
-        "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-        "<level>{level: <8}</level> | "
-        "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
-        "<level>{message}</level>"
-    ),
+            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+            "<level>{message}</level>"
+        ),
         level="INFO",
     )
 
@@ -45,10 +45,7 @@ def configure_logging():
         log_dir / "solstein_api_{time:YYYY-MM-DD}.log",
         rotation="1 day",
         retention="30 days",
-        format=(
-            "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | "
-            "{name}:{function}:{line} - {message}"
-        ),
+        format=("{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}"),
         level="DEBUG",
     )
 

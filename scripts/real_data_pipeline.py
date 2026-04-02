@@ -252,16 +252,16 @@ class DataValidator:
         data = company.merged_data
 
         # Check required fields
-        for field in self.required_fields:
-            if field not in data or not data[field]:
-                errors.append(f"Missing required field: {field}")
+        for required_field in self.required_fields:
+            if required_field not in data or not data[required_field]:
+                errors.append(f"Missing required field: {required_field}")
 
         # Check numeric ranges
-        for field, (min_val, max_val) in self.numeric_ranges.items():
-            if field in data:
-                value = data[field]
+        for numeric_field, (min_val, max_val) in self.numeric_ranges.items():
+            if numeric_field in data:
+                value = data[numeric_field]
                 if value is not None and (value < min_val or value > max_val):
-                    errors.append(f"{field} out of range: {value}")
+                    errors.append(f"{numeric_field} out of range: {value}")
 
         # Check data freshness
         if datetime.now() - company.last_updated > timedelta(days=30):

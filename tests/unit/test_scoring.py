@@ -128,7 +128,11 @@ def test_calculate_scores_raises_on_subscorer_exception(monkeypatch, scorer):
         (20.0, -0.01, 0.01),  # base(0) + 1.0 + missing_margin(-1.0) = 0.0 → clamped 0.0
         (45.0, 1.2, 1.3),  # base(0) + 2.25 + missing_margin(-1.0) = 1.25
         (400.0, 5.4, 5.6),  # base(0) + cap(4.0) + hyper(+2.5) + missing_margin(-1.0) = 5.5
-        (-10.0, -0.01, 0.01),  # base(0) + (-0.5) + declining(-1.5) + compound(-1.0) + missing_margin(-1.0) → clamped 0.0
+        (
+            -10.0,
+            -0.01,
+            0.01,
+        ),  # base(0) + (-0.5) + declining(-1.5) + compound(-1.0) + missing_margin(-1.0) → clamped 0.0
         (
             -40.0,
             -0.01,

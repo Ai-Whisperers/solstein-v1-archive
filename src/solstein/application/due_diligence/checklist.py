@@ -27,6 +27,7 @@ def build_checklist(company: Company) -> list[ChecklistItem]:
 # Standard DD items
 # ---------------------------------------------------------------------------
 
+
 def _standard_items() -> list[ChecklistItem]:
     """Standard PE due diligence checklist items."""
     return [

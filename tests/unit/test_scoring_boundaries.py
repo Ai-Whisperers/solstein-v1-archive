@@ -120,31 +120,23 @@ class TestScoreRangeBounds:
     def test_minimum_score_is_lead(self):
         """Minimum possible score (0.0) should classify as Lead."""
         result = classify_company(MIN_SCORE)
-        assert result == CompanyClassification.LEAD, (
-            f"MIN_SCORE ({MIN_SCORE}) should be Lead, got {result}"
-        )
+        assert result == CompanyClassification.LEAD, f"MIN_SCORE ({MIN_SCORE}) should be Lead, got {result}"
 
     def test_maximum_score_is_phoenix(self):
         """Maximum possible score (10.0) should classify as Phoenix."""
         result = classify_company(MAX_SCORE)
-        assert result == CompanyClassification.PHOENIX, (
-            f"MAX_SCORE ({MAX_SCORE}) should be Phoenix, got {result}"
-        )
+        assert result == CompanyClassification.PHOENIX, f"MAX_SCORE ({MAX_SCORE}) should be Phoenix, got {result}"
 
     def test_none_score_defaults_to_salt(self):
         """None score should default to Salt classification."""
         result = classify_company(None)
-        assert result == CompanyClassification.SALT, (
-            f"None score should be Salt, got {result}"
-        )
+        assert result == CompanyClassification.SALT, f"None score should be Salt, got {result}"
 
     def test_midpoint_of_salt_range_is_salt(self):
         """Score in the middle of the Salt range should be Salt."""
         midpoint = (SALT_SCORE_THRESHOLD + PHOENIX_SCORE_THRESHOLD) / 2
         result = classify_company(midpoint)
-        assert result == CompanyClassification.SALT, (
-            f"Salt midpoint ({midpoint}) should be Salt, got {result}"
-        )
+        assert result == CompanyClassification.SALT, f"Salt midpoint ({midpoint}) should be Salt, got {result}"
 
 
 # ---------------------------------------------------------------------------
@@ -168,9 +160,7 @@ class TestParametrizedClassification:
     def test_lead_range(self, score):
         """Scores in the Lead range should classify as Lead."""
         result = classify_company(score)
-        assert result == CompanyClassification.LEAD, (
-            f"Score {score} should be Lead, got {result}"
-        )
+        assert result == CompanyClassification.LEAD, f"Score {score} should be Lead, got {result}"
 
     @pytest.mark.parametrize(
         "score",
@@ -185,9 +175,7 @@ class TestParametrizedClassification:
     def test_salt_range(self, score):
         """Scores in the Salt range should classify as Salt."""
         result = classify_company(score)
-        assert result == CompanyClassification.SALT, (
-            f"Score {score} should be Salt, got {result}"
-        )
+        assert result == CompanyClassification.SALT, f"Score {score} should be Salt, got {result}"
 
     @pytest.mark.parametrize(
         "score",
@@ -202,9 +190,7 @@ class TestParametrizedClassification:
     def test_phoenix_range(self, score):
         """Scores in the Phoenix range should classify as Phoenix."""
         result = classify_company(score)
-        assert result == CompanyClassification.PHOENIX, (
-            f"Score {score} should be Phoenix, got {result}"
-        )
+        assert result == CompanyClassification.PHOENIX, f"Score {score} should be Phoenix, got {result}"
 
 
 # ---------------------------------------------------------------------------
@@ -239,8 +225,7 @@ class TestThresholdConstantIntegrity:
         """Gap between Lead and Salt thresholds should be <= 0.1."""
         gap = SALT_SCORE_THRESHOLD - LEAD_SCORE_THRESHOLD
         assert gap <= 0.1, (
-            f"Gap between Salt ({SALT_SCORE_THRESHOLD}) and Lead "
-            f"({LEAD_SCORE_THRESHOLD}) is {gap}, expected <= 0.1"
+            f"Gap between Salt ({SALT_SCORE_THRESHOLD}) and Lead ({LEAD_SCORE_THRESHOLD}) is {gap}, expected <= 0.1"
         )
 
 

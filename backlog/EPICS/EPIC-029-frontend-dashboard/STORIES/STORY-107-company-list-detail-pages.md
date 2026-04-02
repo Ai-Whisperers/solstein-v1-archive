@@ -84,3 +84,26 @@ Without these pages, Solstein is a data warehouse with an API door and no window
 - Score breakdown by dimension depends on the scoring algorithm exposing per-dimension scores via the API. If the API only returns an aggregate score, the detail page should show only the aggregate with a note that dimensional breakdown is forthcoming.
 - Consider URL-based filter state (`?classification=Lead&minScore=60`) so that filtered views are shareable and bookmarkable. This is a product differentiator for analysts who share links with colleagues.
 - The financials section will be sparse for many companies early on. Design for graceful degradation — "Data not yet available" is better than an empty section with column headers and no rows.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

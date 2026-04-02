@@ -61,3 +61,25 @@ The retry policy module exists. Nobody uses it. Instead, individual adapters imp
 ## Notes
 
 This consolidates 15+ implementations into one canonical module.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- `planning/QUEUE.md` marks this story `READY`.
+
+### Next Agent Action
+
+- Use this as the preferred EPIC-031 entry story.
+- Centralize one retry ownership model without bundling unrelated shared-package or CLI work.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md` and `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`.
+- Remove duplicate retry logic only where the canonical policy can replace it with verifiable parity.
+
+### Minimum Verification For Future Agents
+
+- Prove the maintained retry policy is used at the touched call sites.
+- Run targeted regression tests plus relevant strict checks after the refactor.

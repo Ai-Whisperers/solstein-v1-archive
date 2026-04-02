@@ -26,3 +26,24 @@
 - [ ] Decide whether thresholds belong in `domain`, a shared constants module, or injected configuration.
 - [ ] Refactor `Score` helpers to use the new ownership model.
 - [ ] Add focused regression coverage for `Score.valid_range()`, `is_phoenix()`, and `is_lead()`.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- `planning/QUEUE.md` marks this story `BLOCKED` on `STORY-245` and EPIC-031 progress.
+
+### Next Agent Action
+
+- Wait for blockers to move, then re-home threshold ownership without weakening domain invariants.
+
+### Required Working Style
+
+- Keep the domain layer lower than analytics.
+- Avoid solving this by duplicating constants in multiple layers.
+
+### Minimum Verification For Future Agents
+
+- Prove the domain layer no longer imports analytics-owned constants.
+- Run focused score/value-object regressions after the refactor.

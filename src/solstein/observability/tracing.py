@@ -130,6 +130,7 @@ def create_span(
     # Include correlation_id from contextvars
     try:
         from ..utils.context import CORRELATION_ID
+
         cid = CORRELATION_ID.get()
         if cid:
             all_attrs["correlation_id"] = cid

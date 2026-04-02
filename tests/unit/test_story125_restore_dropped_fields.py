@@ -196,8 +196,14 @@ class TestAdvancedDataSheet:
         ws = exported_workbook["Advanced Data"]
         headers = [ws.cell(row=4, column=c).value for c in range(1, 9)]
         expected = [
-            "Company", "Parent Company", "Subsidiaries", "Acquisitions",
-            "Notes", "Source Links", "Data Sources Per Field", "Merge Conflicts",
+            "Company",
+            "Parent Company",
+            "Subsidiaries",
+            "Acquisitions",
+            "Notes",
+            "Source Links",
+            "Data Sources Per Field",
+            "Merge Conflicts",
         ]
         assert headers == expected
 
@@ -278,8 +284,13 @@ class TestBackwardCompatibility:
     def test_financial_original_columns_preserved(self, exported_workbook: Any) -> None:
         ws = exported_workbook["Financial Intelligence"]
         original_headers = [
-            "Company", "Revenue (€M)", "Growth Rate", "Profit Margin",
-            "Total Funding", "Latest Valuation", "Investors",
+            "Company",
+            "Revenue (€M)",
+            "Growth Rate",
+            "Profit Margin",
+            "Total Funding",
+            "Latest Valuation",
+            "Investors",
         ]
         actual = [ws.cell(row=4, column=c).value for c in range(1, 8)]
         assert actual == original_headers

@@ -26,3 +26,25 @@ The recursive structural sweep found a module cycle involving `solstein.adapters
 - [ ] Rework `research.discovery` type ownership so it does not depend on `adapters.registry`.
 - [ ] Keep the registry build path lazy and acyclic.
 - [ ] Add regression coverage for the chosen import shape if needed.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- `planning/QUEUE.md` marks this story `BLOCKED` on `STORY-245` and EPIC-031 progress.
+
+### Next Agent Action
+
+- Do not start until the blockers move.
+- Once unblocked, remove the measured cycle without broad registry/discovery redesign.
+
+### Required Working Style
+
+- Fix the real cycle, not adjacent style issues.
+- Preserve discovery behavior while making the dependency graph acyclic.
+
+### Minimum Verification For Future Agents
+
+- Run the import-cycle detection tooling and show this cycle is gone.
+- Add regression coverage if the import shape changed materially.

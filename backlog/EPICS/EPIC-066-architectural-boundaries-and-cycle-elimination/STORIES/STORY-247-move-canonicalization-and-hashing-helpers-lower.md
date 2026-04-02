@@ -27,3 +27,24 @@ Infrastructure persistence and reconciliation currently import `canonicalize_url
 - [ ] Introduce a lower shared utility module for canonicalization/hashing.
 - [ ] Update `research_dual_write.py`, `research_persistence.py`, and `reconcile_runs.py`.
 - [ ] Add regression coverage around canonicalization/hashing behavior before moving the helpers.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- `planning/QUEUE.md` marks this story `BLOCKED` on `STORY-245` and EPIC-031 progress.
+
+### Next Agent Action
+
+- Wait for blockers to move, then relocate only the truly shared helpers.
+
+### Required Working Style
+
+- Keep behavior identical while lowering ownership.
+- Do not move unrelated research or persistence logic with the helpers.
+
+### Minimum Verification For Future Agents
+
+- Prove the new lower-layer helper is used by both sides.
+- Run focused regression tests around canonicalization and hashing behavior.

@@ -60,3 +60,24 @@ Naive datetimes — those without timezone information — are a reliability haz
 ## Notes
 
 UTC everywhere. No exceptions.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- `planning/QUEUE.md` marks this story `READY`.
+
+### Next Agent Action
+
+- Enforce UTC at the real boundaries first instead of sweeping naive datetime edits across the repo blindly.
+
+### Required Working Style
+
+- Follow the stricter gate model already established in `develop`.
+- Use shared utilities and explicit rule enforcement rather than ad-hoc timestamp cleanup.
+
+### Minimum Verification For Future Agents
+
+- Run the datetime-related lint/gate checks and show the boundary conversions with real code paths.
+- Prove affected timestamp comparisons still behave correctly after normalization.

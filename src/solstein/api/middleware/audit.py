@@ -44,9 +44,7 @@ _EXCLUDED_PREFIXES: tuple[str, ...] = (
 
 # Pattern to extract resource IDs from common URL shapes
 # e.g. /api/v1/companies/abc-123 -> abc-123
-_RESOURCE_ID_PATTERN = re.compile(
-    r"/(?:companies|research|jobs|enrichment|scoring)/([a-zA-Z0-9_-]+)(?:/|$)"
-)
+_RESOURCE_ID_PATTERN = re.compile(r"/(?:companies|research|jobs|enrichment|scoring)/([a-zA-Z0-9_-]+)(?:/|$)")
 
 
 def _extract_resource_id(path: str) -> str | None:

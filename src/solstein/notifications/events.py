@@ -69,10 +69,7 @@ def research_completed_event(
     return NotificationEvent(
         event_type=EventType.RESEARCH_COMPLETED,
         title=f"Research completed: {company_name}",
-        message=(
-            f"Research pipeline for {company_name} completed in "
-            f"{duration_min:.1f} minutes{score_str}."
-        ),
+        message=(f"Research pipeline for {company_name} completed in {duration_min:.1f} minutes{score_str}."),
         metadata={
             "company_name": company_name,
             "duration_seconds": duration_seconds,

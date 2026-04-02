@@ -5,9 +5,9 @@ Pydantic models for request/response validation.
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 # ============================================================================
 # REQUEST SCHEMAS (Input Validation)
@@ -32,7 +32,7 @@ class EnrichmentRequest(BaseModel):
         if v:
             valid_sources = {"SEC_EDGAR", "COMPANIES_HOUSE", "NEWS_SIGNALS", "GITHUB", "CRUNCHBASE"}
             for source in v:
-                if not isinstance(source, str) or not source.strip():
+                if not source.strip():
                     raise ValueError("Each source must be a non-empty string")
                 if source not in valid_sources:
                     raise ValueError(f"Invalid source '{source}'. Valid: {sorted(valid_sources)}")
@@ -59,8 +59,6 @@ class BatchEnrichmentRequest(BaseModel):
         if not v:
             raise ValueError("company_ids must not be empty")
         for cid in v:
-            if not isinstance(cid, str):
-                raise ValueError(f"Each company ID must be a string, got {type(cid).__name__}")
             if not cid.strip():
                 raise ValueError("Company IDs cannot be empty or whitespace")
             if len(cid) > 100:
@@ -260,10 +258,13 @@ class BatchEnrichmentResult(BaseModel):
     """Result for single company in batch enrichment."""
 
     company_id: str = Field(..., min_length=1, max_length=100, description="Company ID")
-    status: str = Field(..., min_length=1, max_length=50, description="Enrichment status")
+    company_name: str | None = Field(None, min_length=1, max_length=255, description="Company name")
+    status: Literal["success", "failure", "partial", "pending", "skipped"] = Field(..., description="Enrichment status")
     duration_ms: float = Field(..., ge=0, le=3600000, description="Processing duration in milliseconds")
     source: str | None = Field(None, min_length=1, max_length=100, description="Data source (cache/SEC_EDGAR/etc)")
     error: str | None = Field(None, max_length=1000, description="Error message if failed")
+    errors: list[str] = Field(default_factory=list, description="Explicit enrichment errors for this company")
+    from_cache: bool = Field(default=False, description="Whether this result was served from cache")
 
     @field_validator("company_id")
     @classmethod
@@ -273,15 +274,6 @@ class BatchEnrichmentResult(BaseModel):
             raise ValueError("company_id cannot be empty or whitespace")
         return v.strip()
 
-    @field_validator("status")
-    @classmethod
-    def validate_status(cls, v: str) -> str:
-        """Validate status is a known value."""
-        valid_statuses = {"success", "failure", "partial", "pending", "skipped"}
-        if v not in valid_statuses:
-            raise ValueError(f"Invalid status '{v}'. Must be one of: {sorted(valid_statuses)}")
-        return v
-
     @field_validator("duration_ms")
     @classmethod
     def validate_duration(cls, v: float) -> float:
@@ -290,26 +282,29 @@ class BatchEnrichmentResult(BaseModel):
             raise ValueError("duration_ms must be non-negative")
         return v
 
+    model_config = ConfigDict(extra="forbid")
+
+
+class BatchEnrichmentMetrics(BaseModel):
+    total_duration_ms: int = Field(..., ge=0, description="Total batch duration in milliseconds")
+    avg_duration_ms: int = Field(..., ge=0, description="Average per-company duration in milliseconds")
+    cache_hits: int = Field(..., ge=0, description="Number of cached outcomes returned")
+    cache_misses: int = Field(..., ge=0, description="Number of non-cached outcomes returned")
+    success_rate: float = Field(..., ge=0.0, le=100.0, description="Percent of non-failed outcomes")
+
+    model_config = ConfigDict(extra="forbid")
+
 
 class BatchEnrichmentResponse(BaseModel):
     """Response from POST /companies/enrich/batch endpoint."""
 
-    status: str = Field(..., min_length=1, max_length=50, description="Overall batch status")
+    status: Literal["success", "failure", "partial", "pending"] = Field(..., description="Overall batch status")
     batch_id: str = Field(..., min_length=1, max_length=100, description="Unique batch ID")
     total_companies: int = Field(..., ge=0, le=1000000, description="Total companies requested")
     enriched_count: int = Field(..., ge=0, le=1000000, description="Successfully enriched count")
     failed_count: int = Field(..., ge=0, le=1000000, description="Failed count")
     results: list[BatchEnrichmentResult] = Field(..., description="Per-company results")
-    metrics: dict[str, Any] = Field(..., description="Batch metrics")
-
-    @field_validator("status")
-    @classmethod
-    def validate_status(cls, v: str) -> str:
-        """Validate status is a known value."""
-        valid_statuses = {"success", "failure", "partial", "pending"}
-        if v not in valid_statuses:
-            raise ValueError(f"Invalid status '{v}'. Must be one of: {sorted(valid_statuses)}")
-        return v
+    metrics: BatchEnrichmentMetrics = Field(..., description="Batch metrics")
 
     @field_validator("batch_id")
     @classmethod
@@ -327,7 +322,18 @@ class BatchEnrichmentResponse(BaseModel):
             raise ValueError("Counts must be non-negative")
         return v
 
+    @model_validator(mode="after")
+    def validate_batch_consistency(self) -> "BatchEnrichmentResponse":
+        if len(self.results) != self.total_companies:
+            raise ValueError("results length must equal total_companies")
+        if self.enriched_count + self.failed_count != self.total_companies:
+            raise ValueError("enriched_count + failed_count must equal total_companies")
+        if self.metrics.cache_hits + self.metrics.cache_misses != self.total_companies:
+            raise ValueError("cache_hits + cache_misses must equal total_companies")
+        return self
+
     model_config = ConfigDict(
+        extra="forbid",
         json_schema_extra={
             "example": {
                 "status": "success",
@@ -336,8 +342,24 @@ class BatchEnrichmentResponse(BaseModel):
                 "enriched_count": 3,
                 "failed_count": 0,
                 "results": [
-                    {"company_id": "001", "status": "success", "duration_ms": 245, "source": "cache"},
-                    {"company_id": "002", "status": "success", "duration_ms": 1234, "source": "SEC_EDGAR"},
+                    {
+                        "company_id": "001",
+                        "company_name": "Acme Corp",
+                        "status": "success",
+                        "duration_ms": 245,
+                        "source": "cache",
+                        "errors": [],
+                        "from_cache": True,
+                    },
+                    {
+                        "company_id": "002",
+                        "company_name": "Beta Corp",
+                        "status": "partial",
+                        "duration_ms": 1234,
+                        "source": "SEC_EDGAR",
+                        "errors": ["[SEC_EDGAR] degraded response"],
+                        "from_cache": False,
+                    },
                 ],
                 "metrics": {
                     "total_duration_ms": 1479,
@@ -347,7 +369,7 @@ class BatchEnrichmentResponse(BaseModel):
                     "success_rate": 100.0,
                 },
             }
-        }
+        },
     )
 
 
@@ -532,7 +554,7 @@ class ServiceUnavailableErrorResponse(BaseModel):
         if not v:
             raise ValueError("affected_sources must not be empty")
         for source in v:
-            if not isinstance(source, str) or not source.strip():
+            if not source.strip():
                 raise ValueError("Each source must be a non-empty string")
         return [s.strip() for s in v]
 

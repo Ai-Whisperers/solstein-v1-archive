@@ -21,7 +21,6 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
-from pathlib import Path
 
 
 def run(cmd: list[str], description: str, timeout: int = 120) -> tuple[bool, str]:
@@ -87,26 +86,32 @@ def main() -> int:
 
     if not args.quick:
         # Gate 3: Import cycles
-        gates.append((
-            "Import cycles",
-            ["python3", "scripts/ci/detect_import_cycles.py", "src/solstein"],
-            True,
-        ))
+        gates.append(
+            (
+                "Import cycles",
+                ["python3", "scripts/ci/detect_import_cycles.py", "src/solstein"],
+                True,
+            )
+        )
 
         # Gate 4: Quality checks (required subset only)
-        gates.append((
-            "Quality checks",
-            ["python3", "scripts/ci/quality_check.py", "--only-required"],
-            True,
-        ))
+        gates.append(
+            (
+                "Quality checks",
+                ["python3", "scripts/ci/quality_check.py", "--only-required"],
+                True,
+            )
+        )
 
         if not args.skip_tests:
             # Gate 5: Unit tests (fast subset)
-            gates.append((
-                "Unit tests",
-                ["python3", "-m", "pytest", "tests/unit/", "-x", "--timeout=60", "-q"],
-                True,
-            ))
+            gates.append(
+                (
+                    "Unit tests",
+                    ["python3", "-m", "pytest", "tests/unit/", "-x", "--timeout=60", "-q"],
+                    True,
+                )
+            )
 
     print(f"\nRunning {len(gates)} gate(s)...\n")
 

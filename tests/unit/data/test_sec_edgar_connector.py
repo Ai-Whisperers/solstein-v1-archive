@@ -282,7 +282,7 @@ def test_fetch_filing_raises_without_retry_on_non_retryable_error(monkeypatch: p
             self.ticker = ticker
 
         def get_filings(self, *, form: str):
-            raise Exception("boom")
+            raise RuntimeError("boom")
 
     monkeypatch.setattr(edgar, "set_identity", lambda _identity: None)
     monkeypatch.setattr(edgar, "Company", FakeCompany)

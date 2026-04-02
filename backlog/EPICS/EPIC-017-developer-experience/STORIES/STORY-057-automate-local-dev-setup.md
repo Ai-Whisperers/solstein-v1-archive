@@ -63,3 +63,25 @@ An undocumented, multi-step setup process means every new engineer rediscovers t
 
 ## Notes
 This story depends on STORY-059 (Dockerfile) for the Docker-based local services and STORY-008 (startup validation) for the self-verification step. The `make setup` target should be the single documented entry point — if a developer reads nothing else, they should be able to run `make setup` and get a working environment. The `.env.local` template should contain sensible defaults that work with the docker-compose.dev.yml services (e.g., `DATABASE_URL=postgresql://solstein:solstein@localhost:5432/solstein_dev`).
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- `planning/QUEUE.md` marks this story `BLOCKED` pending `STORY-059` verification in `develop`.
+
+### Next Agent Action
+
+- Do not implement until the Docker/local-stack dependency is verified as a real working foundation in `develop`.
+- When unblocked, keep this story scoped to one real entrypoint for local setup instead of broad infrastructure cleanup.
+
+### Required Working Style
+
+- Avoid aspirational setup prose.
+- Any setup path documented here must be proven by commands that actually run in this repo.
+
+### Minimum Verification For Future Agents
+
+- Run the chosen setup entrypoint twice and show it is idempotent.
+- Show database, Redis, and API startup checks with actual output.

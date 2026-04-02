@@ -57,3 +57,28 @@ These issues do not always fail at runtime immediately, but they make strict typ
 - Shared canonicalization and hashing helpers live in a lower, reusable module.
 - `domain/value_objects.py` no longer depends on analytics-owned scoring constants.
 - Maintained engineering gates can run cycle and boundary checks without permanent red noise.
+
+## Autonomous Continuation Notes
+
+### Queue Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` before working any story here.
+- `planning/QUEUE.md` marks this epic `BLOCKED`.
+- Current blockers are `EPIC-065/STORY-245` and the not-yet-started `EPIC-031` stories.
+
+### Next Agent Action
+
+- Do not begin implementation until the blockers are resolved in the queue.
+- Once unblocked, execute in dependency order: `STORY-246` -> `STORY-247` -> `STORY-248` -> `STORY-249`.
+- Treat `STORY-249` as the capstone gate-promotion story after the underlying cycle and boundary defects are actually removed.
+
+### Required Working Style
+
+- Use the architectural findings from the recursive structural sweep and keep fixes narrowly tied to real cycle/boundary defects.
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md` and `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`.
+- Avoid “cleanup” edits that only move code around without eliminating a measured cycle, boundary violation, or guardrail gap.
+
+### Minimum Verification For Future Agents
+
+- Run the maintained structural gates and supporting checks after each story, not just at epic end.
+- Validate that cycle/boundary tooling becomes less noisy because the architecture improved, not because the checks were weakened.

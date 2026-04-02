@@ -13,9 +13,7 @@ from .styles import ExcelStyles, LayoutConstants
 from .utils import auto_adjust_columns, format_number, format_percentage, safe_get, safe_get_financial
 
 
-def add_title_banner(
-    ws: Any, styles: ExcelStyles, title: str, subtitle: str = "", num_columns: int = 10
-) -> None:
+def add_title_banner(ws: Any, styles: ExcelStyles, title: str, subtitle: str = "", num_columns: int = 10) -> None:
     """Add a title banner to the worksheet.
 
     Args:
@@ -97,8 +95,17 @@ def add_executive_summary(ws: Any, styles: ExcelStyles, profiles: list[Company])
 
     # Headers — STORY-125: added tech_stack, key_customers, open_positions, data_availability
     headers = [
-        "Company", "Industry", "Revenue (€M)", "Growth", "AI Score", "Tier", "Threat Level",
-        "Tech Stack", "Key Customers", "Open Positions", "Data Availability",
+        "Company",
+        "Industry",
+        "Revenue (€M)",
+        "Growth",
+        "AI Score",
+        "Tier",
+        "Threat Level",
+        "Tech Stack",
+        "Key Customers",
+        "Open Positions",
+        "Data Availability",
     ]
     write_headers(ws, styles, headers)
 

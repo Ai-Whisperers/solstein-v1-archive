@@ -87,9 +87,7 @@ async def semantic_search(
         return response
 
     except SemanticSearchError as e:
-        logger.warning(
-            f"[SemanticSearch] Search failed: code={e.code} message={e.message}"
-        )
+        logger.warning(f"[SemanticSearch] Search failed: code={e.code} message={e.message}")
         status_map = {
             "INVALID_REQUEST": status.HTTP_400_BAD_REQUEST,
             "EMBEDDING_NOT_FOUND": status.HTTP_404_NOT_FOUND,

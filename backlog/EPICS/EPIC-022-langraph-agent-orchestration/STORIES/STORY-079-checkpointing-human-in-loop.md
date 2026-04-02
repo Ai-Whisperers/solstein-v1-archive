@@ -90,3 +90,26 @@ This story is deliberately the last in EPIC-022 because it requires the graph (S
 The human-in-the-loop capability has strategic value beyond quality control. PE/VC clients may request it as a feature — the ability to inject human analyst review into AI-generated research reports. This positions Solstein as "AI-assisted" rather than "AI-autonomous," which may be the commercially correct positioning for this market.
 
 The initial confidence threshold should be calibrated empirically. A threshold that is too low (rarely triggers review) provides no quality gate. A threshold that is too high (triggers review for most results) creates an operational bottleneck. Start with a threshold that captures approximately 10–15% of results for review and adjust based on analyst feedback.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

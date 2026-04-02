@@ -82,9 +82,7 @@ class TestNoRawFloats:
         for report_type, path in reports.items():
             content = path.read_text()
             matches = RAW_FLOAT_PATTERN.findall(content)
-            assert not matches, (
-                f"Raw floats in {report_type}: {matches}"
-            )
+            assert not matches, f"Raw floats in {report_type}: {matches}"
 
     def test_market_overview_no_raw_floats(self, tmp_path: Path) -> None:
         gen = MarketReportGenerator(tmp_path)
@@ -114,25 +112,15 @@ class TestNoMarkdownBugs:
         reports = gen.generate_company_reports(company, tmp_path)
         for report_type, path in reports.items():
             content = path.read_text()
-            double_pipes = [
-                (i + 1, line)
-                for i, line in enumerate(content.split("\n"))
-                if "||" in line
-            ]
-            assert not double_pipes, (
-                f"Double pipes in {report_type}: {double_pipes}"
-            )
+            double_pipes = [(i + 1, line) for i, line in enumerate(content.split("\n")) if "||" in line]
+            assert not double_pipes, f"Double pipes in {report_type}: {double_pipes}"
 
     def test_market_overview_no_double_pipes(self, tmp_path: Path) -> None:
         gen = MarketReportGenerator(tmp_path)
         companies = [_make_company()] + _make_competitors()
         path = gen.generate_market_overview(companies, tmp_path)
         content = path.read_text()
-        double_pipes = [
-            (i + 1, line)
-            for i, line in enumerate(content.split("\n"))
-            if "||" in line
-        ]
+        double_pipes = [(i + 1, line) for i, line in enumerate(content.split("\n")) if "||" in line]
         assert not double_pipes, f"Double pipes in market overview: {double_pipes}"
 
     def test_tables_have_separator_rows(self, tmp_path: Path) -> None:
@@ -213,9 +201,7 @@ class TestCleanFilePaths:
             parts = path.parts
             # Count how many times the company name appears in the path
             name_count = sum(1 for p in parts if sanitized in p.lower())
-            assert name_count <= 1, (
-                f"Double nesting detected: {path}"
-            )
+            assert name_count <= 1, f"Double nesting detected: {path}"
 
 
 class TestReportCompleteness:
@@ -226,18 +212,14 @@ class TestReportCompleteness:
         reports = gen.generate_company_reports(_make_company(), tmp_path)
         for rtype, path in reports.items():
             content = path.read_text()
-            assert content.startswith("# "), (
-                f"{rtype} missing H1 title"
-            )
+            assert content.startswith("# "), f"{rtype} missing H1 title"
 
     def test_all_reports_have_platform_footer(self, tmp_path: Path) -> None:
         gen = CompanyReportGenerator(tmp_path)
         reports = gen.generate_company_reports(_make_company(), tmp_path)
         for rtype, path in reports.items():
             content = path.read_text()
-            assert "SolStein" in content, (
-                f"{rtype} missing platform attribution"
-            )
+            assert "SolStein" in content, f"{rtype} missing platform attribution"
 
     def test_market_overview_has_required_sections(self, tmp_path: Path) -> None:
         gen = MarketReportGenerator(tmp_path)

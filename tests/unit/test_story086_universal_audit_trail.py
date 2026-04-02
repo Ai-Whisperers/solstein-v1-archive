@@ -20,12 +20,10 @@ from unittest.mock import MagicMock
 # Model imports work fine — they don't trigger the broken middleware __init__
 from solstein.infrastructure.models.audit import DataAccessAuditRecord
 
-_AUDIT_MW_PATH = str(
-    Path(__file__).parent.parent.parent
-    / "src" / "solstein" / "api" / "middleware" / "audit.py"
-)
+_AUDIT_MW_PATH = str(Path(__file__).parent.parent.parent / "src" / "solstein" / "api" / "middleware" / "audit.py")
 _spec = importlib.util.spec_from_file_location(
-    "solstein.api.middleware.audit", _AUDIT_MW_PATH,
+    "solstein.api.middleware.audit",
+    _AUDIT_MW_PATH,
     submodule_search_locations=[],
 )
 _audit_mod = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]
@@ -117,8 +115,7 @@ class TestMiddlewareBased:
         tenant_pos = source.index("add_middleware(TenantMiddleware)")
         # AuditMiddleware registration must appear before TenantMiddleware
         assert audit_pos < tenant_pos, (
-            "AuditMiddleware must be registered before TenantMiddleware "
-            "so it executes after tenant_id is set"
+            "AuditMiddleware must be registered before TenantMiddleware so it executes after tenant_id is set"
         )
 
 
@@ -135,7 +132,9 @@ class TestDedicatedTable:
 
     def test_model_exported_from_package(self):
         """DataAccessAuditRecord must be exported from models package."""
-        models_init = Path(__file__).parent.parent.parent / "src" / "solstein" / "infrastructure" / "models" / "__init__.py"
+        models_init = (
+            Path(__file__).parent.parent.parent / "src" / "solstein" / "infrastructure" / "models" / "__init__.py"
+        )
         source = models_init.read_text()
         assert "DataAccessAuditRecord" in source
 

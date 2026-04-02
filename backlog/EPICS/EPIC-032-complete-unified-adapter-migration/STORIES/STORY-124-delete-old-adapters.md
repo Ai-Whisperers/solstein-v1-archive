@@ -98,3 +98,26 @@ This story has a hard dependency on STORY-121, STORY-122, and STORY-123. Do not 
 The parity audit for `linkedin.py`, `patents.py`, and `web_search_news.py` is the highest-risk part of this story. These adapters were not covered by the initial audit that produced STORY-121, 122, and 123. They may have their own functional regressions. If the audit finds gaps, new stories must be created and completed before deletion. The temptation to delete and "fix it later" must be resisted. "Fix it later" is how this epic came to exist.
 
 The migration guide is not optional documentation. It is the artifact that prevents this situation from recurring. The next developer who joins the team and sees `BaseRefreshConnector` in the codebase needs to understand why it exists, what it replaced, and how to use it correctly. Without the guide, the institutional knowledge lives only in git history and the memories of whoever was present for the migration. That is not sufficient.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

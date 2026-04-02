@@ -60,3 +60,25 @@
 ## Notes
 
 This is god file decomposition for the data layer.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- `planning/QUEUE.md` marks this story `READY`.
+
+### Next Agent Action
+
+- Split the loader incrementally while preserving its external surface for callers.
+- Treat interface preservation as part of the story, not optional cleanup.
+
+### Required Working Style
+
+- Keep decomposition evidence-driven.
+- Do not mix unrelated market/config fixes unless they are required to remove a documented hardcoded value.
+
+### Minimum Verification For Future Agents
+
+- Prove callers still work through the orchestration layer.
+- Run targeted tests around the split modules and touched call paths.

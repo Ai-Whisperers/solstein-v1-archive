@@ -22,7 +22,6 @@ from solstein.connectors.news.gdelt import (
     deduplicate_by_url,
 )
 
-
 # -----------------------------------------------------------------------
 # GDELTArticle schema tests
 # -----------------------------------------------------------------------

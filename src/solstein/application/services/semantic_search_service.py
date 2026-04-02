@@ -84,9 +84,7 @@ async def execute_semantic_search(
 
     if request.company_id:
         query_type = "company_id"
-        query_vector, exclude_company_id = await _resolve_company_vector(
-            request.company_id, embedding_repo
-        )
+        query_vector, exclude_company_id = await _resolve_company_vector(request.company_id, embedding_repo)
     else:
         query_type = "text"
         query_vector = await _resolve_text_vector(request.query, settings)
@@ -103,10 +101,7 @@ async def execute_semantic_search(
         search_params=search_params,
     )
 
-    items = [
-        _record_to_result_item(record, similarity)
-        for record, similarity in results
-    ]
+    items = [_record_to_result_item(record, similarity) for record, similarity in results]
 
     return SemanticSearchResponse(
         items=items,
@@ -136,9 +131,7 @@ async def _resolve_company_vector(
     """
     embedding = await embedding_repo.get_embedding_by_company_id(company_id)
     if embedding is None:
-        logger.warning(
-            f"[SemanticSearch] Company {company_id} not found or has no embedding"
-        )
+        logger.warning(f"[SemanticSearch] Company {company_id} not found or has no embedding")
         raise SemanticSearchError(
             code="EMBEDDING_NOT_FOUND",
             message=(
@@ -179,8 +172,7 @@ async def _resolve_text_vector(
         raise SemanticSearchError(
             code="EMBEDDING_GENERATION_FAILED",
             message=(
-                "Failed to generate embedding for the query. "
-                "Check that the OpenAI API key is configured and valid."
+                "Failed to generate embedding for the query. Check that the OpenAI API key is configured and valid."
             ),
         )
     return embedding

@@ -2,6 +2,13 @@
 
 > Clear states, clear transitions, clear ownership.
 
+## Develop Autonomy Guard
+
+- For active `develop` work, consult `planning/QUEUE.md` first.
+- Then consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md`.
+- A story or epic file showing `Open` or `Not Started` is not by itself authorization to begin work.
+- If the queue does not currently schedule the item, treat it as triage-required backlog inventory until a planning pass reactivates it.
+
 ---
 
 ## Status Definitions

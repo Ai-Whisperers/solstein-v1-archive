@@ -151,7 +151,7 @@ def test_batch_extractor_errors(tmp_path):
 
         def to_company_profile(self, extracted_data):
             # Generating profile fails (which is caught in extract_directory try block)
-            raise Exception("Fail")
+            raise RuntimeError("Fail")
 
     batch = BatchExtractor(extractor=BadExtractor())
     md_file.write_text("dummy")

@@ -27,11 +27,11 @@ class TestCircuitBreakerResilience:
         async def failing_function():
             nonlocal call_count
             call_count += 1
-            raise Exception("Service unavailable")
+            raise RuntimeError("Service unavailable")
 
         # First 3 calls should raise the original exception
         for _ in range(3):
-            with pytest.raises(Exception, match="Service unavailable"):
+            with pytest.raises(RuntimeError, match="Service unavailable"):
                 await failing_function()
 
         # 4th call should raise CircuitBreakerOpen
@@ -47,11 +47,11 @@ class TestCircuitBreakerResilience:
 
         @breaker
         async def flaky_function():
-            raise Exception("Fail")
+            raise RuntimeError("Fail")
 
         # Trigger circuit open
         for _ in range(2):
-            with pytest.raises(Exception):
+            with pytest.raises(RuntimeError):
                 await flaky_function()
 
         # Circuit should be open
@@ -62,7 +62,7 @@ class TestCircuitBreakerResilience:
         await asyncio.sleep(0.15)
 
         # Now it should try again (half-open)
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             await flaky_function()
 
     @pytest.mark.asyncio
@@ -78,16 +78,16 @@ class TestCircuitBreakerResilience:
             call_count += 1
             if call_count % 2 == 0:
                 return "success"
-            raise Exception("Fail")
+            raise RuntimeError("Fail")
 
         # Alternate failures and successes
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             await sometimes_fails()  # Fail 1
 
         result = await sometimes_fails()  # Success 1
         assert result == "success"
 
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             await sometimes_fails()  # Fail 2
 
         result = await sometimes_fails()  # Success 2

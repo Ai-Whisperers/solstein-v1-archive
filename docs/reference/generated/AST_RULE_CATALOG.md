@@ -1,6 +1,6 @@
 # AST Rule Catalog and Structural Guardrail Registry
 
-Generated on `2026-03-31` from `tooling/ast-grep/rules`.
+Generated on `2026-04-02` from `tooling/ast-grep/rules`.
 
 This catalog covers all structural guardrails enforced in this repository — both `ast-grep` YAML rules and non-ast-grep CI script gates.
 

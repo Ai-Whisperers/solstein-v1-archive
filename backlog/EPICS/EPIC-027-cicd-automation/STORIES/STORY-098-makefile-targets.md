@@ -69,3 +69,26 @@ The Makefile currently says: "You can test, lint, and format." It does not say: 
 There's a philosophical question about `make deploy`: should it actually deploy, or should it just verify deploy-readiness and delegate to CI? The answer depends on the team's workflow. If developers deploy from their laptops, `make deploy` should deploy. If deploys only happen through CI, `make deploy` should run the same checks CI runs (lint, test, check-migrations) and print "Ready to deploy — push to staging branch." The target should exist either way; the implementation depends on the team's deployment model.
 
 `make migrate-down` deserves special attention. Downgrading is destructive. The confirmation prompt should include the migration name being reverted and a warning about potential data loss. In CI (non-interactive), the target should require an explicit `CONFIRM=yes` environment variable to proceed. The default behavior for `make migrate-down` without confirmation should be to print what would happen and exit without doing it.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

@@ -19,6 +19,7 @@ from solstein.analytics.energy_grid_infrastructure import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_company(**overrides):  # type: ignore[no-untyped-def]
     """Create a minimal Company for testing."""
     from solstein.domain.models import Company
@@ -42,6 +43,7 @@ def scorer() -> GridInfrastructureScorer:
 # ---------------------------------------------------------------------------
 # TestResultStructure
 # ---------------------------------------------------------------------------
+
 
 class TestResultStructure:
     """Verify the grid result has all required fields."""
@@ -79,32 +81,27 @@ class TestResultStructure:
 # TestGridConnectivity
 # ---------------------------------------------------------------------------
 
+
 class TestGridConnectivity:
     """Verify grid connectivity scoring."""
 
     def test_grid_keywords_boost(self, scorer: GridInfrastructureScorer) -> None:
         basic = _make_company(description="Basic energy company")
-        grid = _make_company(
-            description="DER management with grid integration and frequency regulation"
-        )
+        grid = _make_company(description="DER management with grid integration and frequency regulation")
         r_basic = scorer.score(basic)
         r_grid = scorer.score(grid)
         assert r_grid.grid_connectivity_score > r_basic.grid_connectivity_score
 
     def test_der_boosts_score(self, scorer: GridInfrastructureScorer) -> None:
         basic = _make_company(description="Basic energy")
-        der = _make_company(
-            description="Solar inverter battery inverter with net metering and curtailment"
-        )
+        der = _make_company(description="Solar inverter battery inverter with net metering and curtailment")
         r_basic = scorer.score(basic)
         r_der = scorer.score(der)
         assert r_der.grid_connectivity_score > r_basic.grid_connectivity_score
 
     def test_vpp_boosts_score(self, scorer: GridInfrastructureScorer) -> None:
         basic = _make_company(description="Basic energy")
-        vpp = _make_company(
-            description="Virtual power plant with demand response and flexibility"
-        )
+        vpp = _make_company(description="Virtual power plant with demand response and flexibility")
         r_basic = scorer.score(basic)
         r_vpp = scorer.score(vpp)
         assert r_vpp.grid_connectivity_score > r_basic.grid_connectivity_score
@@ -114,32 +111,27 @@ class TestGridConnectivity:
 # TestSmartInfrastructure
 # ---------------------------------------------------------------------------
 
+
 class TestSmartInfrastructure:
     """Verify smart infrastructure scoring."""
 
     def test_iot_boosts_score(self, scorer: GridInfrastructureScorer) -> None:
         basic = _make_company(description="Basic energy")
-        iot = _make_company(
-            description="IoT sensor network with smart meter and edge computing telemetry"
-        )
+        iot = _make_company(description="IoT sensor network with smart meter and edge computing telemetry")
         r_basic = scorer.score(basic)
         r_iot = scorer.score(iot)
         assert r_iot.smart_infrastructure_score > r_basic.smart_infrastructure_score
 
     def test_digital_twin_boosts_score(self, scorer: GridInfrastructureScorer) -> None:
         basic = _make_company(description="Basic energy")
-        twin = _make_company(
-            description="Digital twin with predictive maintenance"
-        )
+        twin = _make_company(description="Digital twin with predictive maintenance")
         r_basic = scorer.score(basic)
         r_twin = scorer.score(twin)
         assert r_twin.smart_infrastructure_score > r_basic.smart_infrastructure_score
 
     def test_ai_grid_boosts_score(self, scorer: GridInfrastructureScorer) -> None:
         basic = _make_company(description="Basic energy")
-        ai = _make_company(
-            description="Machine learning for load forecasting and anomaly detection"
-        )
+        ai = _make_company(description="Machine learning for load forecasting and anomaly detection")
         r_basic = scorer.score(basic)
         r_ai = scorer.score(ai)
         assert r_ai.smart_infrastructure_score > r_basic.smart_infrastructure_score
@@ -168,23 +160,20 @@ class TestSmartInfrastructure:
 # TestDecentralization
 # ---------------------------------------------------------------------------
 
+
 class TestDecentralization:
     """Verify decentralization scoring."""
 
     def test_microgrid_boosts_score(self, scorer: GridInfrastructureScorer) -> None:
         basic = _make_company(description="Basic energy")
-        micro = _make_company(
-            description="Microgrid with island mode and community energy"
-        )
+        micro = _make_company(description="Microgrid with island mode and community energy")
         r_basic = scorer.score(basic)
         r_micro = scorer.score(micro)
         assert r_micro.decentralization_score > r_basic.decentralization_score
 
     def test_p2p_boosts_score(self, scorer: GridInfrastructureScorer) -> None:
         basic = _make_company(description="Basic energy")
-        p2p = _make_company(
-            description="Peer-to-peer prosumer energy marketplace"
-        )
+        p2p = _make_company(description="Peer-to-peer prosumer energy marketplace")
         r_basic = scorer.score(basic)
         r_p2p = scorer.score(p2p)
         assert r_p2p.decentralization_score > r_basic.decentralization_score
@@ -205,6 +194,7 @@ class TestDecentralization:
 # ---------------------------------------------------------------------------
 # TestRecommendations
 # ---------------------------------------------------------------------------
+
 
 class TestRecommendations:
     """Verify recommendations generation."""
@@ -234,6 +224,7 @@ class TestRecommendations:
 # TestCompanyModelIntegration
 # ---------------------------------------------------------------------------
 
+
 class TestCompanyModelIntegration:
     """Verify Company model has grid infrastructure fields."""
 
@@ -245,9 +236,7 @@ class TestCompanyModelIntegration:
         assert hasattr(company, "energy_grid_breakdown")
 
     def test_store_grid_results(self, scorer: GridInfrastructureScorer) -> None:
-        company = _make_company(
-            description="DER management with microgrid"
-        )
+        company = _make_company(description="DER management with microgrid")
         result = scorer.score(company)
         company.energy_grid_score = result.composite_score
         company.energy_grid_readiness = result.grid_readiness.value

@@ -122,3 +122,26 @@ The schema validation layer is the mechanism that converts the test suite from d
 **On the "tests describe behavior" problem:** The existing export tests are not wrong — they are just testing the wrong contract. They should be updated to assert against the `ExportSchema` rather than against hardcoded expected values. This is a test philosophy change, not just a test addition. The code review gate should verify that at least the critical export tests have been updated to use schema-based assertions.
 
 **On schema versioning philosophy:** The version bump requirement is a forcing function for deliberate change management. It is not bureaucracy — it is the mechanism that ensures no structural change to the export happens accidentally. The version bump must be a human decision, not an automated one.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

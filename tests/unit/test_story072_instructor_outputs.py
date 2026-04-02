@@ -104,9 +104,7 @@ class TestMalformedResponseRaisesAtCallSite:
 
     def test_wrong_type_raises_validation_error(self):
         with pytest.raises(ValidationError):
-            SearchQueryItem.model_validate(
-                {"query": "test", "priority": "not_an_int", "intent": "website"}
-            )
+            SearchQueryItem.model_validate({"query": "test", "priority": "not_an_int", "intent": "website"})
 
 
 # ---------------------------------------------------------------------------
@@ -134,9 +132,7 @@ class TestInstructorClient:
 
         # Mock the patched client
         mock_patched = MagicMock()
-        mock_response = CompanyExtractionResponse(
-            company_name="Acme", industry="Tech"
-        )
+        mock_response = CompanyExtractionResponse(company_name="Acme", industry="Tech")
         mock_patched.chat.completions.create = AsyncMock(return_value=mock_response)
         client._patched_clients["deepinfra"] = mock_patched
 
@@ -252,10 +248,12 @@ class TestContentExtractorWithInstructor:
         from solstein.research.research_agents import ContentExtractorAgent
 
         mock_instructor = MagicMock()
-        mock_instructor.extract = AsyncMock(side_effect=ValidationError.from_exception_data(
-            title="CompanyExtractionResponse",
-            line_errors=[],
-        ))
+        mock_instructor.extract = AsyncMock(
+            side_effect=ValidationError.from_exception_data(
+                title="CompanyExtractionResponse",
+                line_errors=[],
+            )
+        )
 
         agent = ContentExtractorAgent(instructor_client=mock_instructor)
         data = await agent._llm_extract("Bad content", "Unknown", "https://bad.com")

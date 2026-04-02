@@ -69,8 +69,7 @@ class SourceHealthStatus:
         if self.consecutive_failures >= DEGRADED_THRESHOLD and not self.is_degraded:
             self.is_degraded = True
             logger.warning(
-                "[FinancialHealth] Source %s marked DEGRADED after %d "
-                "consecutive failures. Last reason: %s",
+                "[FinancialHealth] Source %s marked DEGRADED after %d consecutive failures. Last reason: %s",
                 self.name,
                 self.consecutive_failures,
                 reason,
@@ -150,8 +149,7 @@ class FinancialBackendDispatcher:
         # 2. Alpha Vantage fallback (only if key configured)
         if self.alpha_vantage_key:
             logger.warning(
-                "[FinancialDispatcher] Yahoo Finance unavailable for %s, "
-                "falling back to Alpha Vantage",
+                "[FinancialDispatcher] Yahoo Finance unavailable for %s, falling back to Alpha Vantage",
                 ticker,
             )
             av_results = await self._search_alpha_vantage(ticker, **kwargs)
@@ -185,8 +183,7 @@ class FinancialBackendDispatcher:
                     content = item.raw_content
                     if content.get("marketCap") is None:
                         logger.warning(
-                            "[YahooFinance] marketCap is None for %s — "
-                            "yfinance scraping may be broken",
+                            "[YahooFinance] marketCap is None for %s — yfinance scraping may be broken",
                             ticker,
                         )
                 return result.data
@@ -222,11 +219,7 @@ class FinancialBackendDispatcher:
             "yahoo_finance": {
                 "consecutive_failures": self.yf_health.consecutive_failures,
                 "is_degraded": self.yf_health.is_degraded,
-                "last_success": (
-                    self.yf_health.last_success.isoformat()
-                    if self.yf_health.last_success
-                    else None
-                ),
+                "last_success": (self.yf_health.last_success.isoformat() if self.yf_health.last_success else None),
                 "circuit_breaker_state": self.circuit_breaker_yf.get_state(),
             },
             "alpha_vantage": {

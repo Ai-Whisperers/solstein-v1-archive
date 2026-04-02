@@ -65,3 +65,26 @@ The platform needs at-most-once-per-logical-period semantics on top of at-least-
 - The fail-open decision is deliberate: a brief Redis outage should not halt all data collection. Duplicate execution during Redis downtime is preferable to zero execution. The DLQ (STORY-088) provides the safety net for any resulting data issues.
 - Consider using `redis-py`'s `Lock` class with `blocking=False` rather than a hand-rolled SETNX implementation. The built-in Lock handles edge cases (owner verification, atomic release) that manual implementations typically miss.
 - Idempotency key granularity matters. Too coarse (just `task_name`) and tasks block across unrelated companies. Too fine (include `request_id`) and the lock never deduplicates anything. The sweet spot is `task_name + primary_entity_id + schedule_period`.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

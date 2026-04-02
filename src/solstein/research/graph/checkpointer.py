@@ -32,6 +32,7 @@ from langgraph.checkpoint.memory import MemorySaver
 
 try:
     from langgraph.checkpoint.sqlite import SqliteSaver as _SqliteSaver
+
     _SQLITE_AVAILABLE = True
 except ImportError:  # pragma: no cover
     _SqliteSaver = None  # type: ignore[assignment,misc]

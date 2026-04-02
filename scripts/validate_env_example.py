@@ -13,6 +13,7 @@ Usage:
     python scripts/validate_env_example.py
     python scripts/validate_env_example.py --config src/solstein/config.py --env .env.example
 """
+
 from __future__ import annotations
 
 import argparse
@@ -73,10 +74,7 @@ def extract_settings_fields(config_path: Path) -> list[str]:
 
     # Filter out methods (def blocks), class-level dunder attrs, and exclusions
     method_names: set[str] = set(re.findall(r"def\s+([a-z_][a-z0-9_]*)\s*\(", body))
-    return [
-        f for f in fields
-        if f not in method_names and f not in EXCLUSION_LIST
-    ]
+    return [f for f in fields if f not in method_names and f not in EXCLUSION_LIST]
 
 
 def extract_env_example_vars(env_path: Path) -> set[str]:

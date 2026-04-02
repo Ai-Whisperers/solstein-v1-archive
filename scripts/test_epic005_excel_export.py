@@ -6,8 +6,8 @@ Verifies that profit_margin and ebitda_margin are correctly exported to Excel.
 """
 
 import sys
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
@@ -62,7 +62,7 @@ def test_excel_export():
 
                 if "Financial Intelligence" in wb.sheetnames:
                     ws = wb["Financial Intelligence"]
-                    print(f"✓ Financial Intelligence sheet found")
+                    print("✓ Financial Intelligence sheet found")
                     print(f"  Rows: {ws.max_row}, Columns: {ws.max_column}")
 
                     # Check headers to find profit_margin and ebitda_margin columns
@@ -89,7 +89,7 @@ def test_excel_export():
                         profit_val = ws.cell(row=5, column=profit_col).value
                         print(f"  First row profit_margin value: {profit_val}")
                         if profit_val and profit_val != "N/A":
-                            print(f"  ✓ profit_margin is not N/A!")
+                            print("  ✓ profit_margin is not N/A!")
                         else:
                             print(f"  ✗ profit_margin is {profit_val}")
 
@@ -97,11 +97,11 @@ def test_excel_export():
                         ebitda_val = ws.cell(row=5, column=ebitda_col).value
                         print(f"  First row ebitda_margin value: {ebitda_val}")
                         if ebitda_val and ebitda_val != "N/A":
-                            print(f"  ✓ ebitda_margin is not N/A!")
+                            print("  ✓ ebitda_margin is not N/A!")
                         else:
                             print(f"  ✗ ebitda_margin is {ebitda_val}")
                 else:
-                    print(f"✗ Financial Intelligence sheet not found!")
+                    print("✗ Financial Intelligence sheet not found!")
                     print(f"  Available sheets: {wb.sheetnames}")
 
                 wb.close()

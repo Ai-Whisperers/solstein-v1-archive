@@ -341,9 +341,7 @@ class TestAdminDLQRouter:
         mod = _load_admin_dlq()
         router = mod.router
 
-        assert router.prefix == "/api/v1/admin/dlq", (
-            f"Expected prefix /api/v1/admin/dlq, got {router.prefix}"
-        )
+        assert router.prefix == "/api/v1/admin/dlq", f"Expected prefix /api/v1/admin/dlq, got {router.prefix}"
 
     def test_admin_dlq_router_has_required_endpoints(self) -> None:
         """Router must expose GET list, GET single, POST resolve, POST requeue."""

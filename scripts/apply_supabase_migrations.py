@@ -9,8 +9,7 @@ def _require_env(name: str) -> str:
     value = os.getenv(name, "").strip()
     if not value:
         raise SystemExit(
-            f"Missing required environment variable: {name}. "
-            "Set it to your Supabase Postgres connection URL."
+            f"Missing required environment variable: {name}. Set it to your Supabase Postgres connection URL."
         )
     return value
 

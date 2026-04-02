@@ -34,21 +34,22 @@ if TYPE_CHECKING:
 # Data models
 # ---------------------------------------------------------------------------
 
+
 class PlatformMaturity(str, Enum):
     """Trading platform maturity level."""
 
-    ADVANCED = "advanced"        # Algorithmic, multi-market, real-time
+    ADVANCED = "advanced"  # Algorithmic, multi-market, real-time
     INTERMEDIATE = "intermediate"  # Electronic trading, single market
-    BASIC = "basic"              # Manual/bilateral trading
+    BASIC = "basic"  # Manual/bilateral trading
     UNKNOWN = "unknown"
 
 
 class InfrastructureTier(str, Enum):
     """Digital infrastructure tier."""
 
-    CLOUD_NATIVE = "cloud_native"    # Full cloud, microservices, CI/CD
-    HYBRID = "hybrid"                # Mix of cloud and on-premise
-    LEGACY = "legacy"                # On-premise, monolithic
+    CLOUD_NATIVE = "cloud_native"  # Full cloud, microservices, CI/CD
+    HYBRID = "hybrid"  # Mix of cloud and on-premise
+    LEGACY = "legacy"  # On-premise, monolithic
     UNKNOWN = "unknown"
 
 
@@ -88,56 +89,128 @@ class TradingInfrastructureResult:
 # Keyword lookups
 # ---------------------------------------------------------------------------
 
-_TRADING_KEYWORDS = frozenset({
-    "algorithmic trading", "algo trading", "automated trading",
-    "energy trading", "power trading", "commodity trading",
-    "market making", "hedging", "derivatives",
-    "etrm", "ctrm",  # Energy/Commodity Trading Risk Management
-})
+_TRADING_KEYWORDS = frozenset(
+    {
+        "algorithmic trading",
+        "algo trading",
+        "automated trading",
+        "energy trading",
+        "power trading",
+        "commodity trading",
+        "market making",
+        "hedging",
+        "derivatives",
+        "etrm",
+        "ctrm",  # Energy/Commodity Trading Risk Management
+    }
+)
 
-_MARKET_ACCESS_KEYWORDS = frozenset({
-    "epex", "nord pool", "entsoe", "wholesale market",
-    "balancing market", "intraday", "day-ahead", "futures",
-    "otc", "bilateral", "exchange",
-})
+_MARKET_ACCESS_KEYWORDS = frozenset(
+    {
+        "epex",
+        "nord pool",
+        "entsoe",
+        "wholesale market",
+        "balancing market",
+        "intraday",
+        "day-ahead",
+        "futures",
+        "otc",
+        "bilateral",
+        "exchange",
+    }
+)
 
-_RISK_MGMT_KEYWORDS = frozenset({
-    "var", "value at risk", "risk management", "position management",
-    "credit risk", "market risk", "counterparty",
-    "collateral", "margin",
-})
+_RISK_MGMT_KEYWORDS = frozenset(
+    {
+        "var",
+        "value at risk",
+        "risk management",
+        "position management",
+        "credit risk",
+        "market risk",
+        "counterparty",
+        "collateral",
+        "margin",
+    }
+)
 
-_CLOUD_KEYWORDS = frozenset({
-    "aws", "azure", "gcp", "cloud", "kubernetes", "docker",
-    "serverless", "lambda", "cloud-native",
-})
+_CLOUD_KEYWORDS = frozenset(
+    {
+        "aws",
+        "azure",
+        "gcp",
+        "cloud",
+        "kubernetes",
+        "docker",
+        "serverless",
+        "lambda",
+        "cloud-native",
+    }
+)
 
-_API_KEYWORDS = frozenset({
-    "api", "rest", "graphql", "grpc", "webhook",
-    "api gateway", "microservices", "event-driven",
-})
+_API_KEYWORDS = frozenset(
+    {
+        "api",
+        "rest",
+        "graphql",
+        "grpc",
+        "webhook",
+        "api gateway",
+        "microservices",
+        "event-driven",
+    }
+)
 
-_DATA_ARCH_KEYWORDS = frozenset({
-    "data lake", "data warehouse", "data mesh", "data pipeline",
-    "streaming", "kafka", "real-time data", "time series",
-    "snowflake", "databricks", "spark",
-})
+_DATA_ARCH_KEYWORDS = frozenset(
+    {
+        "data lake",
+        "data warehouse",
+        "data mesh",
+        "data pipeline",
+        "streaming",
+        "kafka",
+        "real-time data",
+        "time series",
+        "snowflake",
+        "databricks",
+        "spark",
+    }
+)
 
-_INTEGRATION_KEYWORDS = frozenset({
-    "iec 61968", "cim", "iec 62325", "entsoe",
-    "openapi", "interoperability", "standard protocol",
-    "edi", "xml", "json api",
-})
+_INTEGRATION_KEYWORDS = frozenset(
+    {
+        "iec 61968",
+        "cim",
+        "iec 62325",
+        "entsoe",
+        "openapi",
+        "interoperability",
+        "standard protocol",
+        "edi",
+        "xml",
+        "json api",
+    }
+)
 
-_SECURITY_INFRA_KEYWORDS = frozenset({
-    "zero trust", "sso", "oauth", "mfa",
-    "encryption", "waf", "siem", "soc",
-})
+_SECURITY_INFRA_KEYWORDS = frozenset(
+    {
+        "zero trust",
+        "sso",
+        "oauth",
+        "mfa",
+        "encryption",
+        "waf",
+        "siem",
+        "soc",
+    }
+)
 
 
 # ---------------------------------------------------------------------------
 # Scorer
 # ---------------------------------------------------------------------------
+
 
 class TradingInfrastructureScorer:
     """Score energy company trading platform and digital infrastructure."""
@@ -154,7 +227,10 @@ class TradingInfrastructureScorer:
         signals: list[InfrastructureSignal] = []
         trading = self._score_trading_platform(text_corpus, signals)
         infra = self._score_digital_infrastructure(
-            text_corpus, tech_stack, company, signals,
+            text_corpus,
+            tech_stack,
+            company,
+            signals,
         )
         integration = self._score_integration_readiness(text_corpus, signals)
 
@@ -181,18 +257,16 @@ class TradingInfrastructureScorer:
                 "trading_weight": 0.35,
                 "infrastructure_weight": 0.40,
                 "integration_weight": 0.25,
-                "trading_keywords_found": sum(
-                    1 for s in signals if s.category == "trading"
-                ),
-                "cloud_keywords_found": sum(
-                    1 for s in signals if s.category == "cloud"
-                ),
+                "trading_keywords_found": sum(1 for s in signals if s.category == "trading"),
+                "cloud_keywords_found": sum(1 for s in signals if s.category == "cloud"),
             },
         )
         logger.info(
             "[TradingInfra] {} scored {:.1f} ({}, {})",
-            company.name, composite,
-            platform_mat.value, infra_tier.value,
+            company.name,
+            composite,
+            platform_mat.value,
+            infra_tier.value,
         )
         return result
 
@@ -210,25 +284,37 @@ class TradingInfrastructureScorer:
         trading_count = sum(1 for kw in _TRADING_KEYWORDS if kw in text)
         if trading_count >= 2:
             score += 25.0
-            signals.append(InfrastructureSignal(
-                "trading", "Algorithmic Trading", "advanced",
-                f"Detected {trading_count} trading platform indicators",
-            ))
+            signals.append(
+                InfrastructureSignal(
+                    "trading",
+                    "Algorithmic Trading",
+                    "advanced",
+                    f"Detected {trading_count} trading platform indicators",
+                )
+            )
         elif trading_count >= 1:
             score += 12.0
-            signals.append(InfrastructureSignal(
-                "trading", "Electronic Trading", "intermediate",
-                "Trading platform capability detected",
-            ))
+            signals.append(
+                InfrastructureSignal(
+                    "trading",
+                    "Electronic Trading",
+                    "intermediate",
+                    "Trading platform capability detected",
+                )
+            )
 
         # Market access breadth
         market_count = sum(1 for kw in _MARKET_ACCESS_KEYWORDS if kw in text)
         if market_count >= 3:
             score += 20.0
-            signals.append(InfrastructureSignal(
-                "trading", "Multi-Market Access", "advanced",
-                f"Access to {market_count} market types detected",
-            ))
+            signals.append(
+                InfrastructureSignal(
+                    "trading",
+                    "Multi-Market Access",
+                    "advanced",
+                    f"Access to {market_count} market types detected",
+                )
+            )
         elif market_count >= 1:
             score += 10.0
 
@@ -236,10 +322,14 @@ class TradingInfrastructureScorer:
         risk_count = sum(1 for kw in _RISK_MGMT_KEYWORDS if kw in text)
         if risk_count >= 2:
             score += 15.0
-            signals.append(InfrastructureSignal(
-                "trading", "Risk Management", "advanced",
-                "Comprehensive risk management detected",
-            ))
+            signals.append(
+                InfrastructureSignal(
+                    "trading",
+                    "Risk Management",
+                    "advanced",
+                    "Comprehensive risk management detected",
+                )
+            )
         elif risk_count >= 1:
             score += 8.0
 
@@ -257,48 +347,58 @@ class TradingInfrastructureScorer:
 
         # Cloud adoption
         cloud_count = sum(1 for kw in _CLOUD_KEYWORDS if kw in text)
-        cloud_in_stack = sum(
-            1 for t in tech_stack
-            if t in {"aws", "azure", "gcp", "kubernetes", "docker"}
-        )
+        cloud_in_stack = sum(1 for t in tech_stack if t in {"aws", "azure", "gcp", "kubernetes", "docker"})
         total_cloud = cloud_count + cloud_in_stack
         if total_cloud >= 3:
             score += 25.0
-            signals.append(InfrastructureSignal(
-                "cloud", "Cloud-Native", "advanced",
-                f"Strong cloud adoption ({total_cloud} indicators)",
-            ))
+            signals.append(
+                InfrastructureSignal(
+                    "cloud",
+                    "Cloud-Native",
+                    "advanced",
+                    f"Strong cloud adoption ({total_cloud} indicators)",
+                )
+            )
         elif total_cloud >= 1:
             score += 12.0
-            signals.append(InfrastructureSignal(
-                "cloud", "Cloud Adoption", "intermediate",
-                "Cloud infrastructure detected",
-            ))
+            signals.append(
+                InfrastructureSignal(
+                    "cloud",
+                    "Cloud Adoption",
+                    "intermediate",
+                    "Cloud infrastructure detected",
+                )
+            )
 
         # API maturity
         api_count = sum(1 for kw in _API_KEYWORDS if kw in text)
         if api_count >= 3:
             score += 20.0
-            signals.append(InfrastructureSignal(
-                "api", "API-First Architecture", "advanced",
-                f"Strong API maturity ({api_count} indicators)",
-            ))
+            signals.append(
+                InfrastructureSignal(
+                    "api",
+                    "API-First Architecture",
+                    "advanced",
+                    f"Strong API maturity ({api_count} indicators)",
+                )
+            )
         elif api_count >= 1:
             score += 10.0
 
         # Data architecture
         data_count = sum(1 for kw in _DATA_ARCH_KEYWORDS if kw in text)
-        data_in_stack = sum(
-            1 for t in tech_stack
-            if t in {"kafka", "spark", "snowflake", "databricks"}
-        )
+        data_in_stack = sum(1 for t in tech_stack if t in {"kafka", "spark", "snowflake", "databricks"})
         total_data = data_count + data_in_stack
         if total_data >= 3:
             score += 20.0
-            signals.append(InfrastructureSignal(
-                "data", "Modern Data Architecture", "advanced",
-                f"Advanced data infrastructure ({total_data} indicators)",
-            ))
+            signals.append(
+                InfrastructureSignal(
+                    "data",
+                    "Modern Data Architecture",
+                    "advanced",
+                    f"Advanced data infrastructure ({total_data} indicators)",
+                )
+            )
         elif total_data >= 1:
             score += 10.0
 
@@ -323,25 +423,37 @@ class TradingInfrastructureScorer:
         std_count = sum(1 for kw in _INTEGRATION_KEYWORDS if kw in text)
         if std_count >= 3:
             score += 30.0
-            signals.append(InfrastructureSignal(
-                "integration", "Standards Compliance", "advanced",
-                f"Strong standards adherence ({std_count} standards detected)",
-            ))
+            signals.append(
+                InfrastructureSignal(
+                    "integration",
+                    "Standards Compliance",
+                    "advanced",
+                    f"Strong standards adherence ({std_count} standards detected)",
+                )
+            )
         elif std_count >= 1:
             score += 15.0
-            signals.append(InfrastructureSignal(
-                "integration", "Partial Standards", "intermediate",
-                "Some integration standards detected",
-            ))
+            signals.append(
+                InfrastructureSignal(
+                    "integration",
+                    "Partial Standards",
+                    "intermediate",
+                    "Some integration standards detected",
+                )
+            )
 
         # Security infrastructure
         sec_count = sum(1 for kw in _SECURITY_INFRA_KEYWORDS if kw in text)
         if sec_count >= 3:
             score += 25.0
-            signals.append(InfrastructureSignal(
-                "integration", "Security Infrastructure", "advanced",
-                f"Robust security posture ({sec_count} security measures)",
-            ))
+            signals.append(
+                InfrastructureSignal(
+                    "integration",
+                    "Security Infrastructure",
+                    "advanced",
+                    f"Robust security posture ({sec_count} security measures)",
+                )
+            )
         elif sec_count >= 1:
             score += 12.0
 
@@ -351,6 +463,7 @@ class TradingInfrastructureScorer:
 # ---------------------------------------------------------------------------
 # Classification and recommendations (module-level)
 # ---------------------------------------------------------------------------
+
 
 def _classify_platform_maturity(trading_score: float) -> PlatformMaturity:
     """Map trading score to platform maturity level."""
@@ -381,7 +494,9 @@ def _classify_infrastructure_tier(
 
 
 def _identify_strengths(
-    trading: float, infra: float, integration: float,
+    trading: float,
+    infra: float,
+    integration: float,
 ) -> list[str]:
     """Identify infrastructure strengths."""
     strengths: list[str] = []
@@ -422,33 +537,16 @@ def _build_recommendations(
     recs: list[str] = []
     for gap in gaps:
         if "trading platform" in gap.lower() and "limited" in gap.lower():
-            recs.append(
-                "Implement electronic trading capabilities; "
-                "evaluate ETRM solutions"
-            )
+            recs.append("Implement electronic trading capabilities; evaluate ETRM solutions")
         elif "legacy digital" in gap.lower():
-            recs.append(
-                "Develop cloud migration roadmap; "
-                "prioritize API-first architecture"
-            )
+            recs.append("Develop cloud migration roadmap; prioritize API-first architecture")
         elif "integration readiness" in gap.lower():
-            recs.append(
-                "Adopt energy industry standards (IEC 61968/CIM); "
-                "implement standard APIs"
-            )
+            recs.append("Adopt energy industry standards (IEC 61968/CIM); implement standard APIs")
         elif "maturity insufficient" in gap.lower():
-            recs.append(
-                "Invest in trading technology modernization programme"
-            )
+            recs.append("Invest in trading technology modernization programme")
 
     if not recs and platform != PlatformMaturity.ADVANCED:
-        recs.append(
-            "Continue platform evolution; "
-            "explore algorithmic trading capabilities"
-        )
+        recs.append("Continue platform evolution; explore algorithmic trading capabilities")
     if not recs and tier != InfrastructureTier.CLOUD_NATIVE:
-        recs.append(
-            "Evaluate cloud-native architecture migration "
-            "for improved scalability"
-        )
+        recs.append("Evaluate cloud-native architecture migration for improved scalability")
     return recs

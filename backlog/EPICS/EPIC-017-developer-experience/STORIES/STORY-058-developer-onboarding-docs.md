@@ -63,3 +63,25 @@ Absent onboarding documentation forces knowledge transfer via synchronous conver
 
 ## Notes
 This story depends on STORY-057 (automated setup) because the onboarding docs must reference `make setup` as the starting point. It also depends on STORY-039 (scoring business rationale) because the architecture doc should reference the scoring methodology document rather than re-explaining it. Documentation should be written by someone who understands the system and reviewed by someone who does not — the reviewer's confusion is the most valuable feedback. Resist the temptation to write aspirational documentation about how the system should work — document how it actually works today.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- `planning/QUEUE.md` marks this story `BLOCKED` on `STORY-057` and `STORY-039`.
+
+### Next Agent Action
+
+- Do not write onboarding docs until the setup path and scoring-rationale dependency are both real and current.
+- Once unblocked, document the verified develop-branch path only.
+
+### Required Working Style
+
+- Keep onboarding source-derived from the current `Makefile`, `.venv`, active docs, and real commands.
+- Do not duplicate business rationale that should live in `STORY-039` outputs.
+
+### Minimum Verification For Future Agents
+
+- Have someone unfamiliar with the repo follow the docs to first API response.
+- Verify every linked command or file path against the current tree.

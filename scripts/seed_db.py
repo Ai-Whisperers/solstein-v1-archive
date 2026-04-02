@@ -8,8 +8,8 @@ Usage:
 
 from __future__ import annotations
 
-import asyncio
 import argparse
+import asyncio
 import random
 import sys
 from datetime import datetime, timedelta
@@ -19,8 +19,8 @@ sys.path.insert(0, "src")
 
 from faker import Faker
 
-from solstein.domain.models import Company, FinancialMetrics
-from solstein.infrastructure.database import init_db, get_async_session
+from solstein.domain.models import Company
+from solstein.infrastructure.database import get_async_session, init_db
 from solstein.infrastructure.repositories import CompanyRepository
 
 fake = Faker()

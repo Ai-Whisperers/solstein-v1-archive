@@ -6,9 +6,9 @@ Run this after batch research completes.
 
 import json
 import sys
-from pathlib import Path
-from datetime import datetime
 from collections import Counter
+from datetime import datetime
+from pathlib import Path
 
 
 def validate_research_results(results_path: str) -> dict:
@@ -19,7 +19,6 @@ def validate_research_results(results_path: str) -> dict:
 
     companies = data.get("companies", [])
     errors = data.get("errors", [])
-    summary = data.get("summary", {})
 
     # Categorize companies
     real_companies = []
@@ -90,7 +89,7 @@ def print_validation_report(report: dict):
     print("=" * 70)
 
     summary = report["summary"]
-    print(f"\n📊 OVERVIEW")
+    print("\n📊 OVERVIEW")
     print(f"   Total Companies: {summary['total_companies']}")
     print(f"   ✅ Real Data: {summary['real_data_count']} ({summary['real_data_percentage']}%)")
     print(f"   ⚠️  Synthetic Data: {summary['synthetic_data_count']}")
@@ -98,28 +97,28 @@ def print_validation_report(report: dict):
     print(f"   ❌ Errors: {summary['errors_count']}")
     print(f"   📈 Average Confidence: {summary['average_confidence']}")
 
-    print(f"\n📊 CONFIDENCE DISTRIBUTION")
+    print("\n📊 CONFIDENCE DISTRIBUTION")
     for category, count in report["confidence_distribution"].items():
         print(f"   {category}: {count}")
 
     if report["real_companies"]:
-        print(f"\n✅ TOP REAL DATA COMPANIES (by confidence)")
+        print("\n✅ TOP REAL DATA COMPANIES (by confidence)")
         sorted_real = sorted(report["real_companies"], key=lambda x: x["confidence"], reverse=True)
         for company in sorted_real[:10]:
             print(f"   • {company['name']}: {company['confidence']:.2f} ({company['sources']} sources)")
 
     if report["synthetic_companies"]:
-        print(f"\n⚠️  SYNTHETIC DATA COMPANIES")
+        print("\n⚠️  SYNTHETIC DATA COMPANIES")
         for company in report["synthetic_companies"][:10]:
             print(f"   • {company['name']}: {company['confidence']:.2f}")
 
     if report["low_confidence_companies"]:
-        print(f"\n⚠️  LOW CONFIDENCE COMPANIES")
+        print("\n⚠️  LOW CONFIDENCE COMPANIES")
         for company in report["low_confidence_companies"][:10]:
             print(f"   • {company['name']}: {company['confidence']:.2f}")
 
     if report["errors"]:
-        print(f"\n❌ SAMPLE ERRORS")
+        print("\n❌ SAMPLE ERRORS")
         for error in report["errors"][:5]:
             print(f"   • {error.get('company', 'Unknown')}: {error.get('error', 'Unknown error')[:80]}")
 

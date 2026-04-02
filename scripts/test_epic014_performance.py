@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from solstein.data.loaders import CompetitorDataLoader
 from solstein.analytics.scoring import classify_company
+from solstein.data.loaders import CompetitorDataLoader
 
 
 def test_data_loading_performance():
@@ -33,7 +33,7 @@ def test_data_loading_performance():
         print(f"  Time per company: {load_time / company_count * 1000:.1f}ms")
 
         if load_time / company_count < 0.1:
-            print(f"  ✓ PASS: Load time under 100ms per company")
+            print("  ✓ PASS: Load time under 100ms per company")
         else:
             print(f"  ℹ INFO: Load time is {load_time / company_count * 1000:.1f}ms per company")
 
@@ -54,17 +54,17 @@ def test_classification_performance():
         start_time = time.time()
 
         for _ in range(10000):
-            result = classify_company(8.5)
+            classify_company(8.5)
 
         end_time = time.time()
         total_time = end_time - start_time
 
-        print(f"\n  Classification calls: 10000")
+        print("\n  Classification calls: 10000")
         print(f"  Total time: {total_time:.3f}s")
         print(f"  Time per call: {total_time / 10000 * 1000:.3f}ms")
 
         if total_time / 10000 < 0.001:
-            print(f"  ✓ PASS: Classification under 1ms per call")
+            print("  ✓ PASS: Classification under 1ms per call")
         else:
             print(f"  ℹ INFO: Classification time is {total_time / 10000 * 1000:.3f}ms per call")
 

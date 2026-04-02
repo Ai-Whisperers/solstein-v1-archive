@@ -227,7 +227,7 @@ def check_parameter_counts(files: list[Path], max_params: int = 5) -> bool:
                         param_count += 1
 
                     # Subtract 1 for self/cls in methods
-                    if args.args and args.args[0].arg in ('self', 'cls'):
+                    if args.args and args.args[0].arg in ("self", "cls"):
                         param_count -= 1
 
                     if param_count > max_params:
@@ -267,26 +267,21 @@ def check_class_sizes(files: list[Path], max_lines: int = 300, max_methods: int 
                 if isinstance(node, ast.ClassDef):
                     # Count lines
                     start_line = node.lineno
-                    end_line = getattr(node, 'end_lineno', start_line)
+                    end_line = getattr(node, "end_lineno", start_line)
                     class_lines = end_line - start_line + 1
 
                     # Count methods
-                    methods = [
-                        n for n in node.body
-                        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-                    ]
+                    methods = [n for n in node.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
                     method_count = len(methods)
 
                     if class_lines > max_lines:
                         violations.append(
-                            f"{file}:{node.lineno}: Class '{node.name}' has {class_lines} lines "
-                            f"(max: {max_lines})"
+                            f"{file}:{node.lineno}: Class '{node.name}' has {class_lines} lines (max: {max_lines})"
                         )
 
                     if method_count > max_methods:
                         violations.append(
-                            f"{file}:{node.lineno}: Class '{node.name}' has {method_count} methods "
-                            f"(max: {max_methods})"
+                            f"{file}:{node.lineno}: Class '{node.name}' has {method_count} methods (max: {max_methods})"
                         )
 
         except SyntaxError as e:
@@ -300,6 +295,7 @@ def check_class_sizes(files: list[Path], max_lines: int = 300, max_methods: int 
             print(f"  - {v}")
         return False
     return True
+
 
 def get_staged_python_files() -> list[Path]:
     """Get list of staged Python files."""
@@ -406,6 +402,7 @@ def main():
         print()
         print("📚 See: docs/developers/code-quality.md for full guidelines")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

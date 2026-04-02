@@ -180,10 +180,7 @@ def _check_metadata(
     except UnicodeDecodeError:
         return violations
 
-    found_keys = set(
-        m.group(1)
-        for m in BLOCKQUOTE_METADATA_RE.finditer(content)
-    )
+    found_keys = set(m.group(1) for m in BLOCKQUOTE_METADATA_RE.finditer(content))
 
     for key in REQUIRED_METADATA_KEYS:
         if key not in found_keys:
@@ -234,14 +231,10 @@ def run_checks(search_root: Path) -> CheckResult:
         if "generated" in file_rel:
             continue
 
-        result.violations.extend(
-            _check_placeholder_tokens(path, file_rel, allowlist)
-        )
+        result.violations.extend(_check_placeholder_tokens(path, file_rel, allowlist))
 
         if _is_governance_doc(file_rel):
-            result.violations.extend(
-                _check_metadata(path, file_rel, allowlist)
-            )
+            result.violations.extend(_check_metadata(path, file_rel, allowlist))
 
     return result
 

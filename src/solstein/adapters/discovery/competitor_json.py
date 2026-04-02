@@ -12,10 +12,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from loguru import logger
-
 from solstein.adapters.logging import log_adapter_error
-
 from solstein.domain.models import DataSourceType, RawDataSource
 from solstein.infrastructure.conflict_resolution import SourceAuthority
 

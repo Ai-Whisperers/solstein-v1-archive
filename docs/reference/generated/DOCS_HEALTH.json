@@ -4,12 +4,12 @@
     "available": true,
     "blocking_gates": 5,
     "ci_script_gate_count": 8,
-    "generated_on": "2026-03-31"
+    "generated_on": "2026-04-02"
   },
   "audit_index": {
     "available": true,
     "closed_issues": 0,
-    "generated_on": "2026-03-31",
+    "generated_on": "2026-04-02",
     "open_issues": 270,
     "total_issues": 271
   },
@@ -17,7 +17,7 @@
     "available": false,
     "error": "Command '['/d1/AI WHISPERERS/AGENTIC/solstein/.venv/bin/python3', '/d1/AI WHISPERERS/AGENTIC/solstein/scripts/docs/check_generated_docs.py']' timed out after 60 seconds"
   },
-  "generated_on": "2026-03-31",
+  "generated_on": "2026-04-02",
   "quality_gate": {
     "available": true,
     "paths": {

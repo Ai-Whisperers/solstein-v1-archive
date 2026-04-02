@@ -20,6 +20,7 @@ from solstein.data.unified_loader import UnifiedCompanyLoader
 @dataclass
 class ClassificationStats:
     """Statistics for classification distribution."""
+
     total_companies: int
     phoenix_count: int
     salt_count: int
@@ -84,20 +85,24 @@ def validate_classification_distribution() -> ClassificationStats:
     for company in scored_companies:
         # Phoenix boundary: 7.0
         if 6.8 <= company.composite_score <= 7.2:
-            boundary_cases.append({
-                "name": company.name,
-                "score": company.composite_score,
-                "classification": company.classification,
-                "reason": "Near Phoenix/Salt boundary (7.0)"
-            })
+            boundary_cases.append(
+                {
+                    "name": company.name,
+                    "score": company.composite_score,
+                    "classification": company.classification,
+                    "reason": "Near Phoenix/Salt boundary (7.0)",
+                }
+            )
         # Salt/Lead boundary: 4.0
         elif 3.8 <= company.composite_score <= 4.2:
-            boundary_cases.append({
-                "name": company.name,
-                "score": company.composite_score,
-                "classification": company.classification,
-                "reason": "Near Salt/Lead boundary (4.0)"
-            })
+            boundary_cases.append(
+                {
+                    "name": company.name,
+                    "score": company.composite_score,
+                    "classification": company.classification,
+                    "reason": "Near Salt/Lead boundary (4.0)",
+                }
+            )
 
     stats = ClassificationStats(
         total_companies=total,
@@ -111,7 +116,7 @@ def validate_classification_distribution() -> ClassificationStats:
         salt_in_range=salt_in_range,
         lead_in_range=lead_in_range,
         all_in_range=all_in_range,
-        boundary_cases=boundary_cases
+        boundary_cases=boundary_cases,
     )
 
     return stats
@@ -119,15 +124,21 @@ def validate_classification_distribution() -> ClassificationStats:
 
 def print_report(stats: ClassificationStats) -> None:
     """Print human-readable report."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("CLASSIFICATION DISTRIBUTION VALIDATION REPORT")
-    print("="*70)
+    print("=" * 70)
 
     print(f"\nTotal Companies Scored: {stats.total_companies}")
     print("\nDistribution:")
-    print(f"  Phoenix: {stats.phoenix_count:3d} ({stats.phoenix_pct:5.1f}%) - Target: 15-25% {'✓' if stats.phoenix_in_range else '✗'}")
-    print(f"  Salt:    {stats.salt_count:3d} ({stats.salt_pct:5.1f}%) - Target: 60-70% {'✓' if stats.salt_in_range else '✗'}")
-    print(f"  Lead:    {stats.lead_count:3d} ({stats.lead_pct:5.1f}%) - Target: 10-20% {'✓' if stats.lead_in_range else '✗'}")
+    print(
+        f"  Phoenix: {stats.phoenix_count:3d} ({stats.phoenix_pct:5.1f}%) - Target: 15-25% {'✓' if stats.phoenix_in_range else '✗'}"
+    )
+    print(
+        f"  Salt:    {stats.salt_count:3d} ({stats.salt_pct:5.1f}%) - Target: 60-70% {'✓' if stats.salt_in_range else '✗'}"
+    )
+    print(
+        f"  Lead:    {stats.lead_count:3d} ({stats.lead_pct:5.1f}%) - Target: 10-20% {'✓' if stats.lead_in_range else '✗'}"
+    )
 
     print(f"\nOverall Status: {'✓ PASS' if stats.all_in_range else '✗ FAIL'}")
 
@@ -138,7 +149,7 @@ def print_report(stats: ClassificationStats) -> None:
         if len(stats.boundary_cases) > 10:
             print(f"  ... and {len(stats.boundary_cases) - 10} more")
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
 
 
 def save_evidence(stats: ClassificationStats, output_path: Path = None) -> Path:

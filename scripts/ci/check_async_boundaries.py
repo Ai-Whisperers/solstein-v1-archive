@@ -17,7 +17,6 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-
 DEFAULT_PATHS = [Path("src/solstein")]
 
 FORBIDDEN_SYNC_CALLS: dict[str, str] = {
@@ -167,10 +166,7 @@ def main(argv: list[str]) -> int:
 
     print("async-boundary violations found:")
     for finding in findings:
-        print(
-            f"{finding.path}:{finding.line} [{finding.function}] {finding.rule}: "
-            f"{finding.detail} :: {finding.code}"
-        )
+        print(f"{finding.path}:{finding.line} [{finding.function}] {finding.rule}: {finding.detail} :: {finding.code}")
     return 1
 
 

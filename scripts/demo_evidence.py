@@ -26,11 +26,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from solstein.evidence import (
-    EvidenceService,
-    get_evidence_service,
-    ClaimStatus,
-    create_claim,
     SourceType,
+    create_claim,
+    get_evidence_service,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")

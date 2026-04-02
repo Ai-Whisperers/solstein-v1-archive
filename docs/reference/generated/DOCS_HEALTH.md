@@ -1,6 +1,6 @@
 # Docs Health Dashboard
 
-Generated on `2026-03-31`. Updated automatically on every push to `develop` and weekly on Mondays.
+Generated on `2026-04-02`. Updated automatically on every push to `develop` and weekly on Mondays.
 
 This dashboard aggregates metrics from the repository's documentation CI gates.
 See [docs/guides/docs-change-control.md](../../../guides/docs-change-control.md) for the
@@ -28,8 +28,8 @@ remediation workflow.
 
 ## Data Sources
 
-- AST catalog: [AST_RULE_CATALOG.json](AST_RULE_CATALOG.json) (generated 2026-03-31)
-- Audit index: [MASTER_AUDIT_ISSUE_INDEX.json](MASTER_AUDIT_ISSUE_INDEX.json) (generated 2026-03-31)
+- AST catalog: [AST_RULE_CATALOG.json](AST_RULE_CATALOG.json) (generated 2026-04-02)
+- Audit index: [MASTER_AUDIT_ISSUE_INDEX.json](MASTER_AUDIT_ISSUE_INDEX.json) (generated 2026-04-02)
 - Quality gate: `scripts/ci/check_docs_quality.py`
 - Stale docs: `scripts/ci/check_stale_docs.py`
 - Freshness: `scripts/docs/check_generated_docs.py`

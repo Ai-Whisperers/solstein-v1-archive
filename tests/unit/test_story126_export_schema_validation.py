@@ -9,13 +9,12 @@ Validates that:
 """
 
 from pathlib import Path
-from typing import Any
-from unittest.mock import patch
 
 import pytest
 from openpyxl import load_workbook
 
 from solstein.domain.models import Company, FinancialMetric
+from solstein.exporters.excel_improved import ImprovedExcelExporter
 from solstein.exporters.export_schema import (
     EXPORT_SCHEMA,
     EXPORT_SCHEMA_VERSION,
@@ -25,7 +24,6 @@ from solstein.exporters.export_schema import (
     get_schema_by_sheet,
     validate_export,
 )
-from solstein.exporters.excel_improved import ImprovedExcelExporter
 
 
 def _make_full_company() -> Company:
@@ -96,13 +94,29 @@ class TestExportSchemaDefinition:
     def test_schema_covers_story125_fields(self) -> None:
         """All 20 STORY-125 restored fields are represented in the schema."""
         story125_headers = {
-            "Tech Stack", "Key Customers", "Open Positions", "Data Availability",
-            "Funding Rounds", "Funding War Chest", "Investors",
-            "Revenue CAGR 5yr", "Revenue/Employee (€K)", "Employee CAGR 3yr",
-            "Company", "Year", "Revenue (EUR M)", "Source",
-            "Parent Company", "Subsidiaries", "Acquisitions", "Notes",
-            "Source Links", "Data Sources Per Field", "Merge Conflicts",
-            "Profit Margin", "Employees",
+            "Tech Stack",
+            "Key Customers",
+            "Open Positions",
+            "Data Availability",
+            "Funding Rounds",
+            "Funding War Chest",
+            "Investors",
+            "Revenue CAGR 5yr",
+            "Revenue/Employee (€K)",
+            "Employee CAGR 3yr",
+            "Company",
+            "Year",
+            "Revenue (EUR M)",
+            "Source",
+            "Parent Company",
+            "Subsidiaries",
+            "Acquisitions",
+            "Notes",
+            "Source Links",
+            "Data Sources Per Field",
+            "Merge Conflicts",
+            "Profit Margin",
+            "Employees",
         }
         schema_headers = {spec.header for spec in EXPORT_SCHEMA}
         missing = story125_headers - schema_headers
@@ -110,12 +124,12 @@ class TestExportSchemaDefinition:
 
     def test_all_fields_have_required_attributes(self) -> None:
         for spec in EXPORT_SCHEMA:
-            assert spec.name, f"Field spec missing name"
+            assert spec.name, "Field spec missing name"
             assert spec.header, f"Field {spec.name} missing header"
             assert spec.sheet, f"Field {spec.name} missing sheet"
-            assert spec.data_type in {
-                "string", "number", "percentage", "integer", "list", "structured"
-            }, f"Field {spec.name} has invalid data_type: {spec.data_type}"
+            assert spec.data_type in {"string", "number", "percentage", "integer", "list", "structured"}, (
+                f"Field {spec.name} has invalid data_type: {spec.data_type}"
+            )
 
 
 class TestValidationPasses:
@@ -143,12 +157,6 @@ class TestValidationFails:
         exporter = ImprovedExcelExporter()
 
         # Patch add_executive_summary to skip tech_stack column
-        original_headers = [
-            "Company", "Industry", "Revenue (€M)", "Growth", "AI Score", "Tier", "Threat Level",
-            "Tech Stack", "Key Customers", "Open Positions", "Data Availability",
-        ]
-        broken_headers = [h for h in original_headers if h != "Tech Stack"]
-
         # Create the export normally first, then tamper with the file
         exporter.create_dashboard([company], export_path)
 

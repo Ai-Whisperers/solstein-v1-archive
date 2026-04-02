@@ -25,7 +25,7 @@ from pathlib import Path
 
 # File extensions / names that are expected to contain /home/ placeholders
 ALLOWED_PATTERNS: list[str] = [
-    "*.template",            # systemd service/timer templates
+    "*.template",  # systemd service/timer templates
     "check_hardcoded_paths.py",  # this script itself
 ]
 
@@ -110,7 +110,7 @@ def main() -> int:
     print()
     print("Fix: replace hardcoded paths with dynamic resolution:")
     print("  Python:  Path(__file__).resolve().parent.parent")
-    print("  Shell:   $(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)")
+    print('  Shell:   $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)')
     print("  Systemd: generate from *.service.template via scripts/install-service.sh")
     return 1
 

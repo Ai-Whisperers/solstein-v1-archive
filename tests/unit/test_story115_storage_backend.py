@@ -21,6 +21,7 @@ import pytest
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _run(coro: Any) -> Any:
     """Run a coroutine synchronously for test purposes."""
     return asyncio.get_event_loop().run_until_complete(coro)
@@ -30,6 +31,7 @@ def _run(coro: Any) -> Any:
 # LocalStorageBackend tests
 # ---------------------------------------------------------------------------
 
+
 class TestLocalStorageBackend:
     """Tests for the local filesystem storage backend."""
 
@@ -38,12 +40,14 @@ class TestLocalStorageBackend:
 
         backend = LocalStorageBackend(base_dir=tmp_path)
         data = b"hello world"
-        url = _run(backend.upload(
-            data=data,
-            tenant_id="tenant-abc",
-            job_id="job-123",
-            filename="report.pdf",
-        ))
+        url = _run(
+            backend.upload(
+                data=data,
+                tenant_id="tenant-abc",
+                job_id="job-123",
+                filename="report.pdf",
+            )
+        )
 
         result_path = Path(url)
         assert result_path.exists()
@@ -53,12 +57,14 @@ class TestLocalStorageBackend:
         from solstein.exporters.storage import LocalStorageBackend
 
         backend = LocalStorageBackend(base_dir=tmp_path)
-        url = _run(backend.upload(
-            data=b"data",
-            tenant_id="tenant-xyz",
-            job_id="job-456",
-            filename="export.xlsx",
-        ))
+        url = _run(
+            backend.upload(
+                data=b"data",
+                tenant_id="tenant-xyz",
+                job_id="job-456",
+                filename="export.xlsx",
+            )
+        )
 
         assert "tenant-xyz" in url
         assert url.endswith(".xlsx")
@@ -68,24 +74,28 @@ class TestLocalStorageBackend:
 
         backend = LocalStorageBackend(base_dir=tmp_path)
         for ext in [".pdf", ".xlsx", ".csv", ".json", ".md"]:
-            url = _run(backend.upload(
-                data=b"x",
-                tenant_id="t",
-                job_id=f"j{ext}",
-                filename=f"file{ext}",
-            ))
+            url = _run(
+                backend.upload(
+                    data=b"x",
+                    tenant_id="t",
+                    job_id=f"j{ext}",
+                    filename=f"file{ext}",
+                )
+            )
             assert url.endswith(ext)
 
     def test_delete_existing_file(self, tmp_path: Path) -> None:
         from solstein.exporters.storage import LocalStorageBackend
 
         backend = LocalStorageBackend(base_dir=tmp_path)
-        url = _run(backend.upload(
-            data=b"deleteme",
-            tenant_id="t",
-            job_id="j",
-            filename="f.pdf",
-        ))
+        url = _run(
+            backend.upload(
+                data=b"deleteme",
+                tenant_id="t",
+                job_id="j",
+                filename="f.pdf",
+            )
+        )
 
         assert Path(url).exists()
         result = _run(backend.delete(url))
@@ -103,6 +113,7 @@ class TestLocalStorageBackend:
 # ---------------------------------------------------------------------------
 # SupabaseStorageBackend tests (mocked)
 # ---------------------------------------------------------------------------
+
 
 class TestSupabaseStorageBackend:
     """Tests for the Supabase storage backend with mocked client."""
@@ -127,24 +138,28 @@ class TestSupabaseStorageBackend:
 
     def test_upload_returns_signed_url(self) -> None:
         backend, _ = self._make_backend()
-        url = _run(backend.upload(
-            data=b"pdf-bytes",
-            tenant_id="tenant-1",
-            job_id="job-1",
-            filename="report.pdf",
-        ))
+        url = _run(
+            backend.upload(
+                data=b"pdf-bytes",
+                tenant_id="tenant-1",
+                job_id="job-1",
+                filename="report.pdf",
+            )
+        )
 
         assert url.startswith("https://")
         assert "sign" in url
 
     def test_upload_calls_storage_api(self) -> None:
         backend, mock_bucket = self._make_backend()
-        _run(backend.upload(
-            data=b"data",
-            tenant_id="t",
-            job_id="j",
-            filename="f.xlsx",
-        ))
+        _run(
+            backend.upload(
+                data=b"data",
+                tenant_id="t",
+                job_id="j",
+                filename="f.xlsx",
+            )
+        )
 
         mock_bucket.upload.assert_called_once()
         call_kwargs = mock_bucket.upload.call_args
@@ -152,12 +167,14 @@ class TestSupabaseStorageBackend:
 
     def test_upload_uses_correct_content_type(self) -> None:
         backend, mock_bucket = self._make_backend()
-        _run(backend.upload(
-            data=b"data",
-            tenant_id="t",
-            job_id="j",
-            filename="report.pdf",
-        ))
+        _run(
+            backend.upload(
+                data=b"data",
+                tenant_id="t",
+                job_id="j",
+                filename="report.pdf",
+            )
+        )
 
         call_kwargs = mock_bucket.upload.call_args
         file_options = call_kwargs.kwargs.get(
@@ -171,24 +188,28 @@ class TestSupabaseStorageBackend:
         mock_bucket.upload.side_effect = RuntimeError("Storage down")
 
         with pytest.raises(RuntimeError, match="Storage down"):
-            _run(backend.upload(
-                data=b"data",
-                tenant_id="t",
-                job_id="j",
-                filename="f.pdf",
-            ))
+            _run(
+                backend.upload(
+                    data=b"data",
+                    tenant_id="t",
+                    job_id="j",
+                    filename="f.pdf",
+                )
+            )
 
     def test_upload_raises_on_missing_signed_url(self) -> None:
         backend, mock_bucket = self._make_backend()
         mock_bucket.create_signed_url.return_value = {}
 
         with pytest.raises(RuntimeError, match="Failed to create signed URL"):
-            _run(backend.upload(
-                data=b"data",
-                tenant_id="t",
-                job_id="j",
-                filename="f.pdf",
-            ))
+            _run(
+                backend.upload(
+                    data=b"data",
+                    tenant_id="t",
+                    job_id="j",
+                    filename="f.pdf",
+                )
+            )
 
     def test_delete_parses_url(self) -> None:
         backend, mock_bucket = self._make_backend()
@@ -207,6 +228,7 @@ class TestSupabaseStorageBackend:
 # ---------------------------------------------------------------------------
 # Factory function tests
 # ---------------------------------------------------------------------------
+
 
 class TestGetStorageBackend:
     """Tests for the get_storage_backend() factory."""
@@ -272,6 +294,7 @@ class TestGetStorageBackend:
 # Content type guessing
 # ---------------------------------------------------------------------------
 
+
 class TestGuessContentType:
     """Tests for _guess_content_type helper."""
 
@@ -279,10 +302,7 @@ class TestGuessContentType:
         from solstein.exporters.storage import _guess_content_type
 
         assert _guess_content_type(".pdf") == "application/pdf"
-        assert _guess_content_type(".xlsx") == (
-            "application/vnd.openxmlformats-officedocument"
-            ".spreadsheetml.sheet"
-        )
+        assert _guess_content_type(".xlsx") == ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         assert _guess_content_type(".csv") == "text/csv"
         assert _guess_content_type(".json") == "application/json"
         assert _guess_content_type(".md") == "text/markdown"
@@ -297,7 +317,4 @@ class TestGuessContentType:
         from solstein.exporters.storage import _guess_content_type
 
         assert _guess_content_type(".PDF") == "application/pdf"
-        assert _guess_content_type(".Xlsx") == (
-            "application/vnd.openxmlformats-officedocument"
-            ".spreadsheetml.sheet"
-        )
+        assert _guess_content_type(".Xlsx") == ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

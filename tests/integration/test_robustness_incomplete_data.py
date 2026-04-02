@@ -19,6 +19,7 @@ from solstein.domain.models import Company, FinancialMetric
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_complete_company(id_suffix: str = "1") -> Company:
     """Create a fully populated company for comparison."""
     return Company(

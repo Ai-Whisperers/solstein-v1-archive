@@ -250,7 +250,6 @@ class Company(CompanyMixin, CompanyPropertyMixin, CompanySyncMixin, BaseModel):
     energy_smart_infra_level: str | None = None
     energy_grid_breakdown: dict[str, Any] = Field(default_factory=dict)
 
-
     # Validators
     @field_validator("id")
     @classmethod

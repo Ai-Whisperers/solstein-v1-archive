@@ -18,12 +18,10 @@ from pathlib import Path
 from solstein.infrastructure.models.export import ExportJobRecord
 
 # Load the export task module directly to avoid __init__.py chain issues
-_EXPORT_TASKS_PATH = str(
-    Path(__file__).parent.parent.parent
-    / "src" / "solstein" / "worker" / "export_tasks.py"
-)
+_EXPORT_TASKS_PATH = str(Path(__file__).parent.parent.parent / "src" / "solstein" / "worker" / "export_tasks.py")
 _spec = importlib.util.spec_from_file_location(
-    "solstein.worker.export_tasks", _EXPORT_TASKS_PATH,
+    "solstein.worker.export_tasks",
+    _EXPORT_TASKS_PATH,
     submodule_search_locations=[],
 )
 _export_mod = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]
@@ -34,10 +32,7 @@ generate_export = _export_mod.generate_export
 _LLM_FORMATS = _export_mod._LLM_FORMATS
 
 # Load the API router module directly
-_EXPORTS_ROUTER_PATH = str(
-    Path(__file__).parent.parent.parent
-    / "src" / "solstein" / "api" / "routers" / "exports.py"
-)
+_EXPORTS_ROUTER_PATH = str(Path(__file__).parent.parent.parent / "src" / "solstein" / "api" / "routers" / "exports.py")
 
 
 # ---------------------------------------------------------------------------
@@ -142,19 +137,13 @@ class TestCeleryTaskStructure:
 
     def test_task_registered_in_worker_tasks(self):
         """generate_export must be re-exported from worker_tasks.py."""
-        worker_tasks_path = (
-            Path(__file__).parent.parent.parent
-            / "src" / "solstein" / "worker_tasks.py"
-        )
+        worker_tasks_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "worker_tasks.py"
         source = worker_tasks_path.read_text()
         assert "generate_export" in source
 
     def test_task_included_in_celery_config(self):
         """export_tasks module must be in celery_config includes."""
-        config_path = (
-            Path(__file__).parent.parent.parent
-            / "src" / "solstein" / "celery_config.py"
-        )
+        config_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "celery_config.py"
         source = config_path.read_text()
         assert "solstein.worker.export_tasks" in source
 
@@ -213,8 +202,7 @@ class TestExportJobModel:
     def test_model_exported_from_package(self):
         """ExportJobRecord must be exported from models package."""
         models_init = (
-            Path(__file__).parent.parent.parent
-            / "src" / "solstein" / "infrastructure" / "models" / "__init__.py"
+            Path(__file__).parent.parent.parent / "src" / "solstein" / "infrastructure" / "models" / "__init__.py"
         )
         source = models_init.read_text()
         assert "ExportJobRecord" in source
@@ -333,20 +321,14 @@ class TestCeleryConfiguration:
 
     def test_export_queue_routing(self):
         """Export task must be routed to export queue in config."""
-        config_path = (
-            Path(__file__).parent.parent.parent
-            / "src" / "solstein" / "celery_config.py"
-        )
+        config_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "celery_config.py"
         source = config_path.read_text()
         assert "export" in source
         assert "task_routes" in source
 
     def test_time_limit_annotation(self):
         """Export task must have time limit annotations."""
-        config_path = (
-            Path(__file__).parent.parent.parent
-            / "src" / "solstein" / "celery_config.py"
-        )
+        config_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "celery_config.py"
         source = config_path.read_text()
         assert "task_annotations" in source
         assert "150" in source  # hard limit
@@ -354,10 +336,7 @@ class TestCeleryConfiguration:
 
     def test_story_111_comment(self):
         """Celery config must reference STORY-111."""
-        config_path = (
-            Path(__file__).parent.parent.parent
-            / "src" / "solstein" / "celery_config.py"
-        )
+        config_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "celery_config.py"
         source = config_path.read_text()
         assert "STORY-111" in source
 
@@ -370,19 +349,13 @@ class TestAPIWiring:
 
     def test_exports_router_in_main(self):
         """main.py must include the exports router."""
-        main_path = (
-            Path(__file__).parent.parent.parent
-            / "src" / "solstein" / "api" / "main.py"
-        )
+        main_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "api" / "main.py"
         source = main_path.read_text()
         assert "exports_router" in source or "exports" in source
 
     def test_story_111_documented_in_main(self):
         """main.py must reference STORY-111."""
-        main_path = (
-            Path(__file__).parent.parent.parent
-            / "src" / "solstein" / "api" / "main.py"
-        )
+        main_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "api" / "main.py"
         source = main_path.read_text()
         assert "STORY-111" in source
 
@@ -395,18 +368,12 @@ class TestDocumentation:
 
     def test_api_documentation_exists(self):
         """Export API documentation must exist."""
-        doc_path = (
-            Path(__file__).parent.parent.parent
-            / "docs" / "exports" / "async-export-api.md"
-        )
+        doc_path = Path(__file__).parent.parent.parent / "docs" / "exports" / "async-export-api.md"
         assert doc_path.exists()
 
     def test_documentation_covers_endpoints(self):
         """Documentation must cover both POST and GET endpoints."""
-        doc_path = (
-            Path(__file__).parent.parent.parent
-            / "docs" / "exports" / "async-export-api.md"
-        )
+        doc_path = Path(__file__).parent.parent.parent / "docs" / "exports" / "async-export-api.md"
         source = doc_path.read_text()
         assert "POST" in source
         assert "GET" in source
@@ -415,10 +382,7 @@ class TestDocumentation:
 
     def test_documentation_covers_schema(self):
         """Documentation must describe the export_jobs table."""
-        doc_path = (
-            Path(__file__).parent.parent.parent
-            / "docs" / "exports" / "async-export-api.md"
-        )
+        doc_path = Path(__file__).parent.parent.parent / "docs" / "exports" / "async-export-api.md"
         source = doc_path.read_text()
         assert "export_jobs" in source
         assert "tenant_id" in source
@@ -433,8 +397,7 @@ class TestDocumentation:
     def test_model_module_has_docstring(self):
         """export.py model must have a module docstring."""
         model_path = (
-            Path(__file__).parent.parent.parent
-            / "src" / "solstein" / "infrastructure" / "models" / "export.py"
+            Path(__file__).parent.parent.parent / "src" / "solstein" / "infrastructure" / "models" / "export.py"
         )
         source = model_path.read_text()
         assert "STORY-111" in source

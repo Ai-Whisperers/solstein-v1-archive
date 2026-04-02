@@ -91,10 +91,7 @@ class StructuredLLMClient:
             StructuredOutputError: If all retries fail.
         """
         schema_json = json.dumps(schema.model_json_schema(), indent=2)
-        system_prompt = (
-            get_system_prompt("system_structured_extractor")
-            + f"\n\nSchema:\n{schema_json}"
-        )
+        system_prompt = get_system_prompt("system_structured_extractor") + f"\n\nSchema:\n{schema_json}"
         if context:
             system_prompt += f"\n\nContext:\n{context}"
 

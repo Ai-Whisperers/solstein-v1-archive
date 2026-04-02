@@ -67,9 +67,7 @@ def test_ast_rule_catalog_guardrails_doc_reference() -> None:
     catalog_path = ROOT / "docs" / "reference" / "generated" / "AST_RULE_CATALOG.md"
     assert catalog_path.exists(), "Catalog MD not found — run make docs-generate"
     content = catalog_path.read_text(encoding="utf-8")
-    assert "guardrails.md" in content, (
-        "Markdown catalog must reference the engineering guardrails guide"
-    )
+    assert "guardrails.md" in content, "Markdown catalog must reference the engineering guardrails guide"
 
 
 def test_guardrails_doc_exists() -> None:
@@ -88,9 +86,7 @@ def test_catalog_generator_runs_without_error() -> None:
         text=True,
         cwd=ROOT,
     )
-    assert result.returncode == 0, (
-        f"generate_ast_rule_catalog.py failed:\n{result.stdout}\n{result.stderr}"
-    )
+    assert result.returncode == 0, f"generate_ast_rule_catalog.py failed:\n{result.stdout}\n{result.stderr}"
 
 
 # ---------------------------------------------------------------------------
@@ -147,9 +143,7 @@ def test_master_audit_generator_runs_without_error() -> None:
         text=True,
         cwd=ROOT,
     )
-    assert result.returncode == 0, (
-        f"generate_master_audit_issue_index.py failed:\n{result.stdout}\n{result.stderr}"
-    )
+    assert result.returncode == 0, f"generate_master_audit_issue_index.py failed:\n{result.stdout}\n{result.stderr}"
 
 
 # ---------------------------------------------------------------------------

@@ -61,3 +61,24 @@ The CLI is a script that lives in `scripts/`, isn't installed, isn't tested, and
 ## Notes
 
 The CLI becomes a first-class API client, not a domain bypass tool.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- `planning/QUEUE.md` marks this story `READY`.
+
+### Next Agent Action
+
+- Keep this story focused on turning the CLI into a supported package entrypoint without reworking unrelated API behavior.
+
+### Required Working Style
+
+- Remove bypass patterns and preserve user-facing command behavior where justified.
+- Verify the CLI against real entrypoint behavior instead of code inspection alone.
+
+### Minimum Verification For Future Agents
+
+- Run the installed CLI entrypoint and show actual output.
+- Prove the CLI no longer imports the domain layer directly.

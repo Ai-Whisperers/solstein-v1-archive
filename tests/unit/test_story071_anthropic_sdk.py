@@ -27,6 +27,7 @@ ENHANCED_CLIENT_PATH = SRC_DIR / "llm" / "enhanced_client.py"
 # Acceptance Criterion: enhanced_client.py is under 100 lines
 # ===================================================================
 
+
 class TestEnhancedClientSize:
     def test_enhanced_client_under_150_lines(self):
         """AC: enhanced_client.py stays compact.
@@ -36,14 +37,13 @@ class TestEnhancedClientSize:
         Limit raised to 150 to accommodate tracing while still enforcing compactness.
         """
         lines = ENHANCED_CLIENT_PATH.read_text().splitlines()
-        assert len(lines) <= 150, (
-            f"enhanced_client.py has {len(lines)} lines (max 150)"
-        )
+        assert len(lines) <= 150, f"enhanced_client.py has {len(lines)} lines (max 150)"
 
 
 # ===================================================================
 # Acceptance Criterion: No direct HTTP calls to api.anthropic.com
 # ===================================================================
+
 
 class TestNoDirectHTTPCalls:
     def test_no_raw_http_calls_to_anthropic(self):
@@ -58,9 +58,7 @@ class TestNoDirectHTTPCalls:
                 # provider_strategies.py should NOT have the old pattern
                 if "AnthropicProviderStrategy" in content:
                     violations.append(str(py_file))
-        assert not violations, (
-            f"Files still contain raw api.anthropic.com URLs: {violations}"
-        )
+        assert not violations, f"Files still contain raw api.anthropic.com URLs: {violations}"
 
     def test_anthropic_strategy_uses_native_sdk(self):
         """AnthropicProviderStrategy imports AsyncAnthropic, not AsyncOpenAI."""
@@ -75,10 +73,12 @@ class TestNoDirectHTTPCalls:
 # AnthropicQuerier tests
 # ===================================================================
 
+
 class TestAnthropicQuerier:
     @pytest.fixture
     def querier(self):
         from solstein.llm.query.anthropic_querier import AnthropicQuerier
+
         return AnthropicQuerier()
 
     @pytest.mark.asyncio
@@ -173,6 +173,7 @@ class TestAnthropicQuerier:
 # EnhancedLLMClient routing tests
 # ===================================================================
 
+
 class TestClientRouting:
     @pytest.mark.asyncio
     async def test_anthropic_routes_to_anthropic_querier(self):
@@ -223,6 +224,7 @@ class TestClientRouting:
 # Public interface backward compatibility
 # ===================================================================
 
+
 class TestBackwardCompatibility:
     def test_public_exports_available(self):
         """All public symbols are still importable from enhanced_client."""
@@ -231,6 +233,7 @@ class TestBackwardCompatibility:
             LLMGenerationError,
             get_enhanced_llm_client,
         )
+
         assert EnhancedLLMClient is not None
         assert LLMGenerationError is not None
         assert get_enhanced_llm_client is not None
@@ -239,14 +242,14 @@ class TestBackwardCompatibility:
         """llm/__init__.py still exports all expected symbols."""
         from solstein.llm import (
             EnhancedLLMClient,
-            LLMGenerationError,
-            get_enhanced_llm_client,
         )
+
         assert EnhancedLLMClient is not None
 
     def test_generate_method_signature(self):
         """generate() accepts the same parameters as before."""
         from solstein.llm.enhanced_client import EnhancedLLMClient
+
         sig = inspect.signature(EnhancedLLMClient.generate)
         params = list(sig.parameters.keys())
         assert "prompt" in params
@@ -257,6 +260,7 @@ class TestBackwardCompatibility:
     def test_generate_structured_method_signature(self):
         """generate_structured() accepts the same parameters as before."""
         from solstein.llm.enhanced_client import EnhancedLLMClient
+
         sig = inspect.signature(EnhancedLLMClient.generate_structured)
         params = list(sig.parameters.keys())
         assert "prompt" in params
@@ -267,6 +271,7 @@ class TestBackwardCompatibility:
 # ===================================================================
 # Failover module tests
 # ===================================================================
+
 
 class TestFailoverModule:
     @pytest.mark.asyncio
@@ -306,9 +311,11 @@ class TestFailoverModule:
 # JSON parsing module tests
 # ===================================================================
 
+
 class TestJsonParsing:
     def test_parse_json_string(self):
         from pydantic import BaseModel
+
         from solstein.llm.json_parsing import parse_json_string
 
         class Simple(BaseModel):
@@ -319,6 +326,7 @@ class TestJsonParsing:
 
     def test_parse_json_with_markdown_fences(self):
         from pydantic import BaseModel
+
         from solstein.llm.json_parsing import parse_json_string
 
         class Simple(BaseModel):
@@ -329,6 +337,7 @@ class TestJsonParsing:
 
     def test_parse_structured_result_string(self):
         from pydantic import BaseModel
+
         from solstein.llm.json_parsing import parse_structured_result
 
         class Simple(BaseModel):
@@ -340,6 +349,7 @@ class TestJsonParsing:
 
     def test_parse_structured_result_invalid_returns_none(self):
         from pydantic import BaseModel
+
         from solstein.llm.json_parsing import parse_structured_result
 
         class Simple(BaseModel):
@@ -353,6 +363,7 @@ class TestJsonParsing:
 # AST scan: no raw HTTP to api.anthropic.com in LLM module
 # ===================================================================
 
+
 class TestNoRawHTTPAST:
     def test_no_anthropic_base_url_in_provider_strategies(self):
         """provider_strategies.py AnthropicProviderStrategy doesn't use base_url."""
@@ -362,7 +373,7 @@ class TestNoRawHTTPAST:
             if isinstance(node, ast.Constant) and isinstance(node.value, str):
                 if "api.anthropic.com" in node.value:
                     # Find which class this belongs to
-                    assert False, (
+                    raise AssertionError(
                         f"Found 'api.anthropic.com' string literal at line {node.lineno} "
                         "in provider_strategies.py — should use native Anthropic SDK"
                     )

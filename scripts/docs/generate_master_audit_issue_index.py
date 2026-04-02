@@ -16,9 +16,7 @@ OUTPUT_MD = OUTPUT_DIR / "MASTER_AUDIT_ISSUE_INDEX.md"
 
 
 HEADING_RE = re.compile(r"^###\s+(ISSUE-\d+)(?:\s+—\s+(.+?))?\s*$")
-ROW_RE = re.compile(
-    r"^\|\s*(ISSUE-\d+)\s*\|\s*(.*?)\s*\|\s*`?(.*?)`?\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|$"
-)
+ROW_RE = re.compile(r"^\|\s*(ISSUE-\d+)\s*\|\s*(.*?)\s*\|\s*`?(.*?)`?\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|$")
 METRIC_RE = re.compile(r"^\|\s*\*\*(.+?)\*\*\s*\|\s*(.+?)\s*\|$")
 FILE_RE = re.compile(r"^\*\*File:\*\*\s*`(.+?)`\s*$")
 SEVERITY_RE = re.compile(r"^\*\*Severity:\*\*\s*(.+?)\s*$")
@@ -99,9 +97,7 @@ def _parse() -> tuple[dict[str, str], list[dict[str, object]], int, int]:
     return metrics, issue_list, len(source_lines), row_count
 
 
-def _write_json(
-    metrics: dict[str, str], issue_list: list[dict[str, object]], line_count: int, row_count: int
-) -> None:
+def _write_json(metrics: dict[str, str], issue_list: list[dict[str, object]], line_count: int, row_count: int) -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     payload = {
         "generated_on": date.today().isoformat(),

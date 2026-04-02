@@ -40,6 +40,7 @@ except ImportError:
 @dataclass
 class BenchmarkResult:
     """Result of a single benchmark."""
+
     name: str
     category: str
     duration_ms: float
@@ -61,8 +62,7 @@ class PerformanceBenchmark:
 
     def __init__(self, database_url: str | None = None):
         self.database_url = database_url or os.getenv(
-            "DATABASE_URL",
-            "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
+            "DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
         )
         self.results: list[BenchmarkResult] = []
         self.engine = None
@@ -71,17 +71,8 @@ class PerformanceBenchmark:
     async def initialize(self):
         """Initialize database connection."""
         try:
-            self.engine = create_async_engine(
-                self.database_url,
-                echo=False,
-                pool_size=5,
-                max_overflow=10
-            )
-            self.session_factory = sessionmaker(
-                self.engine,
-                class_=AsyncSession,
-                expire_on_commit=False
-            )
+            self.engine = create_async_engine(self.database_url, echo=False, pool_size=5, max_overflow=10)
+            self.session_factory = sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
             # Test connection
             async with self.engine.connect() as conn:
                 await conn.execute(text("SELECT 1"))
@@ -103,11 +94,7 @@ class PerformanceBenchmark:
             yield session
 
     async def benchmark_query(
-        self,
-        name: str,
-        query: str,
-        category: str = "database",
-        iterations: int = 100
+        self, name: str, query: str, category: str = "database", iterations: int = 100
     ) -> BenchmarkResult:
         """Benchmark a single query."""
         durations = []
@@ -140,7 +127,7 @@ class PerformanceBenchmark:
                 min_ms=min(durations),
                 max_ms=max(durations),
                 success=error is None,
-                error=error
+                error=error,
             )
         else:
             result = BenchmarkResult(
@@ -152,7 +139,7 @@ class PerformanceBenchmark:
                 min_ms=0,
                 max_ms=0,
                 success=False,
-                error=error or "No iterations completed"
+                error=error or "No iterations completed",
             )
 
         self.results.append(result)
@@ -170,51 +157,77 @@ class PerformanceBenchmark:
             ("companies_by_ticker", "SELECT * FROM companies WHERE ticker = 'AAPL'", "companies"),
             ("companies_by_status", "SELECT * FROM companies WHERE status = 'active' LIMIT 100", "companies"),
             ("companies_count", "SELECT COUNT(*) FROM companies", "companies"),
-
             # Research runs queries
             ("research_runs_select_all", "SELECT * FROM research_runs LIMIT 100", "research_runs"),
-            ("research_runs_by_company", "SELECT * FROM research_runs WHERE company_id IS NOT NULL LIMIT 100", "research_runs"),
-            ("research_runs_by_status", "SELECT * FROM research_runs WHERE status = 'completed' LIMIT 100", "research_runs"),
-            ("research_runs_active", "SELECT * FROM research_runs WHERE status IN ('pending', 'running')", "research_runs"),
-
+            (
+                "research_runs_by_company",
+                "SELECT * FROM research_runs WHERE company_id IS NOT NULL LIMIT 100",
+                "research_runs",
+            ),
+            (
+                "research_runs_by_status",
+                "SELECT * FROM research_runs WHERE status = 'completed' LIMIT 100",
+                "research_runs",
+            ),
+            (
+                "research_runs_active",
+                "SELECT * FROM research_runs WHERE status IN ('pending', 'running')",
+                "research_runs",
+            ),
             # Facts queries
             ("facts_select_all", "SELECT * FROM facts LIMIT 100", "facts"),
             ("facts_by_company", "SELECT * FROM facts WHERE company_id IS NOT NULL LIMIT 100", "facts"),
             ("facts_active", "SELECT * FROM facts WHERE status = 'active' LIMIT 100", "facts"),
             ("facts_high_confidence", "SELECT * FROM facts WHERE confidence >= 0.8 LIMIT 100", "facts"),
-
             # Signals queries
             ("signals_select_all", "SELECT * FROM signals LIMIT 100", "signals"),
             ("signals_by_company", "SELECT * FROM signals WHERE company_id IS NOT NULL LIMIT 100", "signals"),
             ("signals_active", "SELECT * FROM signals WHERE status = 'active' LIMIT 100", "signals"),
             ("signals_by_type", "SELECT * FROM signals WHERE signal_type = 'price_movement' LIMIT 100", "signals"),
-
             # Scoring queries
             ("scoring_records_select_all", "SELECT * FROM scoring_records LIMIT 100", "scoring"),
-            ("scoring_by_company", "SELECT * FROM scoring_records WHERE company_id IS NOT NULL ORDER BY scored_at DESC LIMIT 100", "scoring"),
-            ("scoring_top_scores", "SELECT * FROM scoring_records WHERE total_score >= 70 ORDER BY total_score DESC LIMIT 100", "scoring"),
-
+            (
+                "scoring_by_company",
+                "SELECT * FROM scoring_records WHERE company_id IS NOT NULL ORDER BY scored_at DESC LIMIT 100",
+                "scoring",
+            ),
+            (
+                "scoring_top_scores",
+                "SELECT * FROM scoring_records WHERE total_score >= 70 ORDER BY total_score DESC LIMIT 100",
+                "scoring",
+            ),
             # Enrichment queries
             ("enrichment_jobs_select_all", "SELECT * FROM enrichment_jobs LIMIT 100", "enrichment"),
-            ("enrichment_pending", "SELECT * FROM enrichment_jobs WHERE status = 'pending' ORDER BY priority DESC", "enrichment"),
-
+            (
+                "enrichment_pending",
+                "SELECT * FROM enrichment_jobs WHERE status = 'pending' ORDER BY priority DESC",
+                "enrichment",
+            ),
             # Join queries
-            ("companies_with_runs", """
+            (
+                "companies_with_runs",
+                """
                 SELECT c.*, COUNT(r.id) as run_count 
                 FROM companies c 
                 LEFT JOIN research_runs r ON c.id = r.company_id 
                 GROUP BY c.id LIMIT 100
-            """, "joins"),
-
-            ("companies_with_facts", """
+            """,
+                "joins",
+            ),
+            (
+                "companies_with_facts",
+                """
                 SELECT c.id, c.ticker, COUNT(f.id) as fact_count 
                 FROM companies c 
                 LEFT JOIN facts f ON c.id = f.company_id AND f.status = 'active'
                 GROUP BY c.id LIMIT 100
-            """, "joins"),
-
+            """,
+                "joins",
+            ),
             # Aggregation queries
-            ("facts_stats", """
+            (
+                "facts_stats",
+                """
                 SELECT 
                     company_id,
                     COUNT(*) as total_facts,
@@ -223,9 +236,12 @@ class PerformanceBenchmark:
                 WHERE status = 'active'
                 GROUP BY company_id 
                 LIMIT 100
-            """, "aggregation"),
-
-            ("signals_daily_count", """
+            """,
+                "aggregation",
+            ),
+            (
+                "signals_daily_count",
+                """
                 SELECT 
                     DATE(detected_at) as date,
                     COUNT(*) as signal_count
@@ -233,14 +249,18 @@ class PerformanceBenchmark:
                 WHERE detected_at > NOW() - INTERVAL '30 days'
                 GROUP BY DATE(detected_at)
                 ORDER BY date DESC
-            """, "aggregation"),
+            """,
+                "aggregation",
+            ),
         ]
 
         for name, query, category in benchmarks:
             result = await self.benchmark_query(name, query, category)
             status = "✓" if result.success else "✗"
             if result.success:
-                print(f"{status} {name:40s} {result.avg_ms:8.2f}ms (min: {result.min_ms:6.2f}ms, max: {result.max_ms:6.2f}ms)")
+                print(
+                    f"{status} {name:40s} {result.avg_ms:8.2f}ms (min: {result.min_ms:6.2f}ms, max: {result.max_ms:6.2f}ms)"
+                )
             else:
                 print(f"{status} {name:40s} FAILED: {result.error}")
 
@@ -257,19 +277,19 @@ class PerformanceBenchmark:
         """Save benchmark results to file."""
         data = {
             "timestamp": datetime.utcnow().isoformat(),
-            "database_url": self.database_url.replace(
-                "://", "://***@").replace("//postgres:", "//***:"),
+            "database_url": self.database_url.replace("://", "://***@").replace("//postgres:", "//***:"),
             "results": [asdict(r) for r in self.results],
             "summary": {
                 "total_benchmarks": len(self.results),
                 "successful": sum(1 for r in self.results if r.success),
                 "failed": sum(1 for r in self.results if not r.success),
-                "avg_duration_ms": sum(r.avg_ms for r in self.results if r.success) / max(1, sum(1 for r in self.results if r.success))
-            }
+                "avg_duration_ms": sum(r.avg_ms for r in self.results if r.success)
+                / max(1, sum(1 for r in self.results if r.success)),
+            },
         }
 
         filepath = os.path.join(os.path.dirname(__file__), filename)
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2)
 
         print(f"\n✓ Results saved to {filepath}")
@@ -329,7 +349,7 @@ class PerformanceBenchmark:
         print(f"Previous: {baseline.get('timestamp', 'unknown')}")
         print(f"Current:  {datetime.utcnow().isoformat()}")
 
-        baseline_results = {r['name']: r for r in baseline.get('results', [])}
+        baseline_results = {r["name"]: r for r in baseline.get("results", [])}
 
         print("\n{'Name':<40s} {'Previous':>10s} {'Current':>10s} {'Change':>10s}")
         print("-" * 80)
@@ -337,8 +357,8 @@ class PerformanceBenchmark:
         for result in self.results:
             if result.name in baseline_results and result.success:
                 prev = baseline_results[result.name]
-                if prev.get('success'):
-                    change = ((result.avg_ms - prev['avg_ms']) / prev['avg_ms']) * 100
+                if prev.get("success"):
+                    change = ((result.avg_ms - prev["avg_ms"]) / prev["avg_ms"]) * 100
                     change_str = f"{change:+.1f}%"
                     print(f"{result.name:<40s} {prev['avg_ms']:>10.2f} {result.avg_ms:>10.2f} {change_str:>10s}")
 

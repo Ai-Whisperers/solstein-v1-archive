@@ -247,13 +247,13 @@ class TestRateLimitHandling:
             nonlocal call_count
             call_count += 1
             if call_count < 2:
-                raise Exception("429 Too Many Requests")
+                raise ConnectionError("429 Too Many Requests")
             return "success"
 
         result = await call_with_retry(
             rate_limited_func,
             retry_config=RetryConfig(max_attempts=3),
-            retryable_exceptions=(Exception,),
+            retryable_exceptions=(ConnectionError,),
         )
 
         assert result == "success"
@@ -312,7 +312,7 @@ class TestGracefulDegradation:
 
         async def primary_agent():
             if not agent_success:
-                raise Exception("Primary agent failed")
+                raise RuntimeError("Primary agent failed")
             return {"data": "primary"}
 
         async def fallback_agent():
@@ -374,7 +374,7 @@ class TestScenarios:
         breaker = CircuitBreaker(failure_threshold=2, recovery_timeout=10.0)
 
         async def failing_service():
-            raise Exception("Service error")
+            raise RuntimeError("Service error")
 
         attempts = 0
         for _ in range(5):

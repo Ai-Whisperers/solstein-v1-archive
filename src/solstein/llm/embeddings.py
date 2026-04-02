@@ -195,8 +195,7 @@ async def batch_generate_embeddings(
         for company, result in zip(batch, batch_results):
             if isinstance(result, Exception):
                 logger.error(
-                    f"[Embedding] Batch embedding failed for {company.name}: "
-                    f"{type(result).__name__}: {result}"
+                    f"[Embedding] Batch embedding failed for {company.name}: {type(result).__name__}: {result}"
                 )
                 results.append((company.name, None))
             else:
@@ -208,9 +207,7 @@ async def batch_generate_embeddings(
             await asyncio.sleep(0.5)
 
     succeeded = sum(1 for _, emb in results if emb is not None)
-    logger.info(
-        f"[Embedding] Batch complete: {succeeded}/{len(results)} embeddings generated"
-    )
+    logger.info(f"[Embedding] Batch complete: {succeeded}/{len(results)} embeddings generated")
     return results
 
 

@@ -282,14 +282,16 @@ async def test_batch_enrichment_partial_status_uses_schema_valid_partial(monkeyp
         SimpleNamespace(
             enrich_batch=lambda companies, batch_size: [
                 SimpleNamespace(
-                    company=SimpleNamespace(id="acme"),
+                    company=SimpleNamespace(id="acme", name="Acme Corp"),
                     status="success",
-                    from_cache=False,
+                    from_cache=True,
+                    errors=[],
                 ),
                 SimpleNamespace(
-                    company=SimpleNamespace(id="beta"),
-                    status="failure",
+                    company=SimpleNamespace(id="beta", name="Beta Corp"),
+                    status="partial",
                     from_cache=False,
+                    errors=["[SEC_EDGAR] degraded response"],
                 ),
             ]
         ),
@@ -299,6 +301,13 @@ async def test_batch_enrichment_partial_status_uses_schema_valid_partial(monkeyp
 
     assert response.status == "partial"
     assert response.failed_count == 1
+    assert response.results[0].company_name == "Acme Corp"
+    assert response.results[0].from_cache is True
+    assert response.results[0].errors == []
+    assert response.results[1].status == "partial"
+    assert response.results[1].errors == ["[SEC_EDGAR] degraded response"]
+    assert response.metrics.cache_hits == 1
+    assert response.metrics.cache_misses == 1
 
 
 @pytest.mark.asyncio

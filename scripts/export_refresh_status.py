@@ -6,10 +6,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from loguru import logger
-
-from solstein.infrastructure.database import db_manager
 from sqlalchemy.exc import OperationalError
 
+from solstein.infrastructure.database import db_manager
 from solstein.infrastructure.refresh import build_refresh_snapshot, get_refresh_statuses
 
 

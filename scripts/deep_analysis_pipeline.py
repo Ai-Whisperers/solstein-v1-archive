@@ -15,19 +15,20 @@ Usage:
 import argparse
 import json
 import logging
-from pathlib import Path
-from typing import Any
 
 # Add src to path for imports
 import sys
+from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from solstein.intelligence.capability_overlap import OverlapAnalyzer
 from solstein.intelligence.deep_analyzer import DeepAnalysisGenerator
-from solstein.intelligence.report_generator import CitedReportGenerator, DeepAnalysisExporter
+from solstein.intelligence.report_generator import CitedReportGenerator
+
 try:
-    from solstein.evidence.models import Claim, SourceType, ConfidenceComponent, create_claim
+    from solstein.evidence.models import Claim, ConfidenceComponent, SourceType, create_claim
 except ImportError:
     # Evidence system requires Neo4j which may not be available
     Claim = None
@@ -42,7 +43,7 @@ logger = logging.getLogger(__name__)
 def load_research_data(filepath: Path) -> list[dict]:
     """Load company data from research results JSON."""
     logger.info(f"Loading research data from {filepath}")
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         data = json.load(f)
     return data.get("companies", [])
 
@@ -103,35 +104,35 @@ def analyze_company(
 | Attribute | Value |
 |-----------|-------|
 | **Company** | {company_name} |
-| **Headquarters** | {basic.get('headquarters', 'Unknown')} |
-| **Employees** | {basic.get('employees', 'Unknown')} |
-| **Founded** | {basic.get('founded_year', 'Unknown')} |
+| **Headquarters** | {basic.get("headquarters", "Unknown")} |
+| **Employees** | {basic.get("employees", "Unknown")} |
+| **Founded** | {basic.get("founded_year", "Unknown")} |
 
 ## Executive Assessment
 
-{deep_analysis['executive_assessment']}
+{deep_analysis["executive_assessment"]}
 
 ## Product Offering
 
-{deep_analysis['product_offering']}
+{deep_analysis["product_offering"]}
 
 ## AI Assessment
 
-- **AI Score:** {deep_analysis['ai_assessment']['score']}/10
-- **Signal Level:** {deep_analysis['ai_assessment']['signal_level']}
-- **Evidence:** {', '.join(deep_analysis['ai_assessment']['evidence'][:5])}
+- **AI Score:** {deep_analysis["ai_assessment"]["score"]}/10
+- **Signal Level:** {deep_analysis["ai_assessment"]["signal_level"]}
+- **Evidence:** {", ".join(deep_analysis["ai_assessment"]["evidence"][:5])}
 
 ## Strategic Implications
 
-{deep_analysis['strategic_implications']}
+{deep_analysis["strategic_implications"]}
 
 ## Blindspot Analysis
 
-{deep_analysis['blindspot_analysis']}
+{deep_analysis["blindspot_analysis"]}
 
 ## Key Insights
 
-{deep_analysis['key_insights']}
+{deep_analysis["key_insights"]}
 
 ## Capability Overlap with Eneve
 
@@ -141,7 +142,7 @@ def analyze_company(
 | **Matching Capabilities** | {overlap_result.matching_capabilities}/8 |
 | **High Overlap** | {overlap_result.high_overlap_capabilities}/8 |
 
-**Strongest Matches:** {', '.join(overlap_result.strongest_matches[:5])}
+**Strongest Matches:** {", ".join(overlap_result.strongest_matches[:5])}
 
 ---
 
@@ -181,7 +182,6 @@ def main():
     overlap_analyzer = OverlapAnalyzer()
     deep_analyzer = DeepAnalysisGenerator()
     report_gen = CitedReportGenerator()
-    exporter = DeepAnalysisExporter()
 
     # Load data
     companies = load_research_data(args.data_file)

@@ -61,3 +61,26 @@ Getting this wrong doesn't produce errors. It produces duplicate task dispatches
 - The singleton constraint is the most important requirement. Everything else is standard compose configuration. If this constraint is violated, the platform silently produces duplicate data — a failure mode that is much harder to detect and fix than a crash.
 - If the codebase uses file-based Beat scheduler, the schedule file (`celerybeat-schedule`) must be volume-mounted. If it uses the database scheduler, the corresponding tables must exist (covered by Alembic migrations).
 - Consider adding a startup probe that verifies Beat successfully loaded all 12 schedule entries before reporting healthy.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

@@ -15,11 +15,10 @@ If no files provided, analyzes all changed files in git.
 """
 
 import ast
-import sys
-from pathlib import Path
-from dataclasses import dataclass
-from typing import Optional
 import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass
@@ -212,7 +211,7 @@ def get_changed_files() -> list[Path]:
         result = subprocess.run(["git", "diff", "--name-only", "HEAD~1", "HEAD"], capture_output=True, text=True)
         files = []
         for line in result.stdout.strip().split("\n"):
-            if line.endswith(".py") and not "__pycache__" in line:
+            if line.endswith(".py") and "__pycache__" not in line:
                 path = Path(line)
                 if path.exists():
                     files.append(path)

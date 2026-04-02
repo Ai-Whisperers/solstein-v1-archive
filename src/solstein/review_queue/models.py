@@ -57,8 +57,7 @@ class ReviewQueueEntry(BaseModel):
     # Research result metadata for the analyst
     confidence_scores: dict[str, float] = Field(
         default_factory=dict,
-        description="Per-company confidence scores that triggered review. "
-                    "Structure: {company_id: score_in_0_to_1}.",
+        description="Per-company confidence scores that triggered review. Structure: {company_id: score_in_0_to_1}.",
     )
     company_scores: dict[str, Any] = Field(
         default_factory=dict,

@@ -65,3 +65,26 @@ The single-stage image also runs as root by default, which means a container esc
 - The `python:3.11-slim` base is ~120MB. The virtualenv with all dependencies will be the bulk of the remaining size. If the image exceeds 500MB, investigate whether any large dependencies (e.g., `torch`, `tensorflow`) are being installed unnecessarily.
 - Signal handling matters: if the entrypoint uses shell form (`CMD celery worker ...`), SIGTERM is sent to the shell, not to Celery. This means graceful shutdown doesn't work. Use exec form (`CMD ["celery", "-A", "solstein.celery_app", "worker"]`) or `exec` in a shell entrypoint script.
 - The non-root user must own the application directory and any directories the application writes to (logs, temp files). Map these out before setting `USER`.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

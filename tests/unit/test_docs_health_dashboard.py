@@ -6,6 +6,7 @@ Covers:
 - JSON and Markdown outputs are generated and parseable
 - CI workflow and Makefile target existence
 """
+
 from __future__ import annotations
 
 import json

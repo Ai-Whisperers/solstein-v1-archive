@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import Protocol
 
 import pytest
+from pydantic import ValidationError
 
+from solstein.api.schemas.enrichment import BatchEnrichmentMetrics, BatchEnrichmentResponse, BatchEnrichmentResult
 from solstein.data.unified import enrichment as enrichment_module
 from solstein.data.unified.batch_outcomes import BatchEnrichmentOutcome
 from solstein.data.unified.company import UnifiedCompany
@@ -96,3 +98,31 @@ def test_enrich_batch_marks_enrichment_errors_as_partial(monkeypatch: pytest.Mon
     assert outcomes[0].status == "partial"
     assert outcomes[0].errors == ["[SEC_EDGAR] degraded response"]
     assert outcomes[0].company.id == "partial"
+
+
+def test_batch_enrichment_response_rejects_inconsistent_counts() -> None:
+    with pytest.raises(ValidationError):
+        BatchEnrichmentResponse(
+            status="success",
+            batch_id="batch-1",
+            total_companies=2,
+            enriched_count=2,
+            failed_count=0,
+            results=[
+                BatchEnrichmentResult(
+                    company_id="acme",
+                    company_name=None,
+                    status="success",
+                    duration_ms=1,
+                    source=None,
+                    error=None,
+                ),
+            ],
+            metrics=BatchEnrichmentMetrics(
+                total_duration_ms=1,
+                avg_duration_ms=1,
+                cache_hits=1,
+                cache_misses=0,
+                success_rate=100.0,
+            ),
+        )

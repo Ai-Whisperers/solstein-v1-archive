@@ -116,10 +116,6 @@ class DeadCodeDetector:
 
             # Check if referenced
             if name not in self.references:
-                # Additional check: might be referenced with module prefix
-                module = definition["module"]
-                full_ref = f"{module}.{name}"
-
                 # Skip if it's in __all__
                 if self._is_in_all(definition["file"], name):
                     continue
@@ -142,9 +138,12 @@ class DeadCodeDetector:
                         if isinstance(target, ast.Name) and target.id == "__all__":
                             if isinstance(node.value, (ast.List, ast.Tuple)):
                                 for elt in node.value.elts:
-                                    if isinstance(elt, ast.Constant) and elt.value == name:
-                                        return True
-                                    elif isinstance(elt, ast.Str) and elt.s == name:
+                                    if (
+                                        isinstance(elt, ast.Constant)
+                                        and elt.value == name
+                                        or isinstance(elt, ast.Str)
+                                        and elt.s == name
+                                    ):
                                         return True
             return False
         except Exception:
@@ -307,7 +306,7 @@ def main():
     has_dead_code = detector.print_report()
 
     if has_dead_code:
-        print(f"\n⚠️  Dead code detected!")
+        print("\n⚠️  Dead code detected!")
         print("   Please review and remove or document unused code.")
         # Don't fail CI, just warn
         sys.exit(0)

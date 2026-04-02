@@ -33,6 +33,7 @@ Exit codes
     0 — No stale docs (or --fail not set)
     1 — Stale docs found AND --fail flag is set
 """
+
 from __future__ import annotations
 
 import argparse
@@ -244,9 +245,7 @@ def _print_report(report: StalenessReport, verbose: bool = False) -> None:
     exempt = report.allowlisted
 
     if not actionable and not exempt:
-        print(
-            f"[stale-docs] OK — {report.total_scanned} docs scanned, none stale."
-        )
+        print(f"[stale-docs] OK — {report.total_scanned} docs scanned, none stale.")
         return
 
     if exempt:
@@ -260,10 +259,7 @@ def _print_report(report: StalenessReport, verbose: bool = False) -> None:
         for doc in actionable:
             by_owner.setdefault(doc.owner_team, []).append(doc)
 
-        print(
-            f"\n[stale-docs] {len(actionable)} actionable stale doc(s) "
-            f"(grouped by owner):\n"
-        )
+        print(f"\n[stale-docs] {len(actionable)} actionable stale doc(s) (grouped by owner):\n")
         for owner in sorted(by_owner):
             docs = sorted(by_owner[owner], key=lambda d: -d.age_days)
             print(f"  {owner}:")

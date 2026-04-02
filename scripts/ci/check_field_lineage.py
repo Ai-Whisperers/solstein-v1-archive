@@ -22,10 +22,12 @@ MODELS_FILE = PROJECT_ROOT / "src" / "solstein" / "domain" / "models.py"
 
 # Fields that are intentionally excluded from lineage documentation.
 # These are internal Pydantic/infrastructure fields, not domain data.
-EXCLUDED_FIELDS = frozenset({
-    "allow_empty_primary",  # FinancialMetric internal flag
-    "model_config",         # Pydantic config (not a data field)
-})
+EXCLUDED_FIELDS = frozenset(
+    {
+        "allow_empty_primary",  # FinancialMetric internal flag
+        "model_config",  # Pydantic config (not a data field)
+    }
+)
 
 
 def extract_model_fields(models_path: Path) -> dict[str, set[str]]:
@@ -152,9 +154,7 @@ def check_field_lineage(strict: bool = False) -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Check that all domain model fields are documented in field lineage."
-    )
+    parser = argparse.ArgumentParser(description="Check that all domain model fields are documented in field lineage.")
     parser.add_argument(
         "--strict",
         action="store_true",

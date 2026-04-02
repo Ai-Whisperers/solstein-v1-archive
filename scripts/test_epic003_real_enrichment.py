@@ -6,8 +6,8 @@ Verifies that the enrichment pipeline is working with real API calls
 and proper fallback mechanisms.
 """
 
-import sys
 import asyncio
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -42,7 +42,7 @@ async def test_real_enrichment():
         # Create enricher
         print("\nInitializing EneveEnricher...")
         enricher = EneveEnricher(enable_cache=True)
-        print(f"✓ Enricher created")
+        print("✓ Enricher created")
         print(f"  - Cache enabled: {enricher.enable_cache}")
         print(f"  - Registry sources: {len(enricher.registry.all_enrichment_sources)}")
 
@@ -75,7 +75,7 @@ async def test_real_enrichment():
             # Check quality metrics
             quality_metrics = company.get("enrichment_quality_metrics", {})
             if quality_metrics:
-                print(f"    quality_metrics:")
+                print("    quality_metrics:")
                 print(f"      - source_diversity: {quality_metrics.get('source_diversity', 0)}")
                 print(f"      - data_completeness: {quality_metrics.get('data_completeness', 0):.0%}")
 
@@ -90,7 +90,7 @@ async def test_real_enrichment():
         # Check cache stats
         if enricher.cache:
             cache_stats = enricher.cache.get_stats()
-            print(f"\n  Cache stats:")
+            print("\n  Cache stats:")
             print(f"    - Total entries: {cache_stats['total_entries']}")
             print(f"    - Cache size: {cache_stats['total_size_bytes'] / 1024:.1f} KB")
 

@@ -18,7 +18,6 @@ from solstein.analytics.scorers.growth_momentum import GrowthMomentumScorer
 from solstein.data.converters.company import convert_to_domain_company
 from solstein.domain.models import FinancialMetric
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

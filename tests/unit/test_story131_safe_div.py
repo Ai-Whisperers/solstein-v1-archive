@@ -8,8 +8,6 @@ Verifies that:
 - safe_avg handles None values and empty lists
 """
 
-import math
-
 import pytest
 
 from solstein.core.math_utils import safe_avg, safe_div, safe_pct

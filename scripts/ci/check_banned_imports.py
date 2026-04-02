@@ -58,14 +58,12 @@ def check_file(filepath: Path, root: Path) -> list[str]:
             for alias in node.names:
                 if alias.name in BANNED_MODULES:
                     violations.append(
-                        f"  {filepath}:{node.lineno}: `import {alias.name}` is banned "
-                        f"(use httpx instead)"
+                        f"  {filepath}:{node.lineno}: `import {alias.name}` is banned (use httpx instead)"
                     )
         elif isinstance(node, ast.ImportFrom):
             if node.module and node.module.split(".")[0] in BANNED_MODULES:
                 violations.append(
-                    f"  {filepath}:{node.lineno}: `from {node.module} import ...` is banned "
-                    f"(use httpx instead)"
+                    f"  {filepath}:{node.lineno}: `from {node.module} import ...` is banned (use httpx instead)"
                 )
 
     return violations

@@ -96,15 +96,19 @@ def test_loader_success(temp_data_dir):
 def test_loader_caching(temp_data_dir):
     """Test that repeated calls use cache."""
     json_path = temp_data_dir / "competitor_data.json"
-    json_path.write_text(json.dumps({
-        "competitors": [
+    json_path.write_text(
+        json.dumps(
             {
-                "company_name": "Cached Co",
-                "folder": "cached",
-                "scorecard": {"composite_score": 5, "dimensions": {"SaaS Maturity": {"score": 5}}},
+                "competitors": [
+                    {
+                        "company_name": "Cached Co",
+                        "folder": "cached",
+                        "scorecard": {"composite_score": 5, "dimensions": {"SaaS Maturity": {"score": 5}}},
+                    }
+                ]
             }
-        ]
-    }))
+        )
+    )
 
     loader = CompetitorDataLoader(data_dir=temp_data_dir)
     first_call = loader.load_companies()
@@ -120,13 +124,20 @@ def test_loader_caching(temp_data_dir):
 def test_loader_limit(temp_data_dir):
     """Test that limit parameter restricts results."""
     json_path = temp_data_dir / "competitor_data.json"
-    json_path.write_text(json.dumps({
-        "competitors": [
-            {"company_name": f"Co {i}", "folder": f"co-{i}",
-             "scorecard": {"composite_score": 5, "dimensions": {"SaaS Maturity": {"score": 5}}}}
-            for i in range(5)
-        ]
-    }))
+    json_path.write_text(
+        json.dumps(
+            {
+                "competitors": [
+                    {
+                        "company_name": f"Co {i}",
+                        "folder": f"co-{i}",
+                        "scorecard": {"composite_score": 5, "dimensions": {"SaaS Maturity": {"score": 5}}},
+                    }
+                    for i in range(5)
+                ]
+            }
+        )
+    )
 
     loader = CompetitorDataLoader(data_dir=temp_data_dir)
     limited = loader.load_companies(limit=2)

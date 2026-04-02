@@ -91,8 +91,7 @@ class ReviewQueueEntryResponse(BaseModel):
     response_model=list[ReviewQueueEntryResponse],
     summary="List review queue entries",
     description=(
-        "Returns all review queue entries. Pass ``status=pending`` to see only "
-        "items awaiting analyst action."
+        "Returns all review queue entries. Pass ``status=pending`` to see only items awaiting analyst action."
     ),
 )
 def list_review_entries(

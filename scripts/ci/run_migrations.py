@@ -150,19 +150,13 @@ def run_migration(timeout_seconds: int = 300, dry_run: bool = False) -> int:
         return 0
 
     except MigrationTimeoutError:
-        logger.error(
-            "Migration TIMED OUT after %ds — killed", timeout_seconds
-        )
+        logger.error("Migration TIMED OUT after %ds — killed", timeout_seconds)
         return 1
     except subprocess.TimeoutExpired:
-        logger.error(
-            "Migration TIMED OUT after %ds — process killed", timeout_seconds
-        )
+        logger.error("Migration TIMED OUT after %ds — process killed", timeout_seconds)
         return 1
     except FileNotFoundError:
-        logger.error(
-            "alembic command not found — ensure alembic is installed"
-        )
+        logger.error("alembic command not found — ensure alembic is installed")
         return 1
     except Exception as exc:
         logger.error("Migration failed with unexpected error: %s", exc)

@@ -4,12 +4,12 @@ import re
 from pathlib import Path
 from typing import Any
 
+from solstein.data.company_research import CompanyResearcher
 from solstein.data.connectors.lookup_service import IdentifierLookupService
 from solstein.data.enrichment_config import ConnectorConfig, UnifiedCompanyLoaderConfig
 from solstein.data.enrichment_service import EnrichmentService
 from solstein.data.metric_contract import normalize_percent, normalize_revenue_to_millions
 from solstein.data.web_search_client import search_company_info
-from solstein.data.company_research import CompanyResearcher
 from solstein.domain.models import AIMaturity, Company, FinancialMetric
 
 
@@ -269,7 +269,6 @@ def _build_company(
     ticker = raw.get("ticker") or resolved.get("ticker")
     company_number = raw.get("company_number") or resolved.get("company_number")
     isin = raw.get("isin") or resolved.get("isin")
-    geography = raw.get("geography") or resolved.get("geography")
 
     financials = FinancialMetric(
         revenue=raw.get("revenue"),
@@ -376,7 +375,7 @@ def _build_research_queue(companies: list[dict[str, Any]]) -> dict[str, Any]:
         "ai_maturity_score",
     ]
     queue = []
-    missing_counts: dict[str, int] = {k: 0 for k in required_fields}
+    missing_counts: dict[str, int] = dict.fromkeys(required_fields, 0)
 
     recommendations = {
         "company_number": "Use Companies House/OpenCorporates lookup",

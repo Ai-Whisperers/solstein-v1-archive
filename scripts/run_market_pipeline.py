@@ -35,9 +35,7 @@ def main() -> None:
             encoding="utf-8",
         )
         if violations:
-            raise RuntimeError(
-                f"Provenance validation failed for {len(violations)} profiles"
-            )
+            raise RuntimeError(f"Provenance validation failed for {len(violations)} profiles")
 
     extracted_path = output_dir / "extracted.json"
     batch.save_to_json(profiles, extracted_path)

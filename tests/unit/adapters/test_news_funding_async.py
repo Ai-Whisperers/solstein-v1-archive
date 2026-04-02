@@ -27,6 +27,7 @@ from solstein.adapters.enrichment.news_unified import NewsUnifiedAdapter
 # 1. No `requests` import
 # ---------------------------------------------------------------------------
 
+
 class TestNoRequestsImport:
     """Ensure neither adapter imports the `requests` library."""
 
@@ -55,6 +56,7 @@ class TestNoRequestsImport:
 # 2. Async method signatures
 # ---------------------------------------------------------------------------
 
+
 class TestAsyncSignatures:
     """Verify async methods exist and are coroutines."""
 
@@ -78,6 +80,7 @@ class TestAsyncSignatures:
 # ---------------------------------------------------------------------------
 # 3. NewsUnifiedAdapter - sync httpx usage
 # ---------------------------------------------------------------------------
+
 
 class TestNewsSyncHttpx:
     """Test that sync path uses httpx.get."""
@@ -107,6 +110,7 @@ class TestNewsSyncHttpx:
 # ---------------------------------------------------------------------------
 # 4. NewsUnifiedAdapter - async httpx usage
 # ---------------------------------------------------------------------------
+
 
 class TestNewsAsyncHttpx:
     """Test that async path uses httpx.AsyncClient."""
@@ -155,6 +159,7 @@ class TestNewsAsyncHttpx:
 # ---------------------------------------------------------------------------
 # 5. News fetch_facts uses asyncio.gather (concurrency check)
 # ---------------------------------------------------------------------------
+
 
 class TestNewsFetchFactsConcurrency:
     """Verify fetch_facts runs fetches concurrently via asyncio.gather."""
@@ -222,6 +227,7 @@ class TestNewsFetchFactsConcurrency:
 # 6. FundingUnifiedAdapter - sync httpx usage
 # ---------------------------------------------------------------------------
 
+
 class TestFundingSyncHttpx:
     """Test that sync path uses httpx.get."""
 
@@ -262,6 +268,7 @@ class TestFundingSyncHttpx:
 # ---------------------------------------------------------------------------
 # 7. FundingUnifiedAdapter - async httpx usage
 # ---------------------------------------------------------------------------
+
 
 class TestFundingAsyncHttpx:
     """Test that async path uses httpx.AsyncClient."""
@@ -309,6 +316,7 @@ class TestFundingAsyncHttpx:
 # ---------------------------------------------------------------------------
 # 8. Funding fetch_facts concurrency
 # ---------------------------------------------------------------------------
+
 
 class TestFundingFetchFactsConcurrency:
     """Verify fetch_facts runs fetches concurrently via asyncio.gather."""
@@ -374,6 +382,7 @@ class TestFundingFetchFactsConcurrency:
 # ---------------------------------------------------------------------------
 # 9. Sentiment analysis (news adapter utility)
 # ---------------------------------------------------------------------------
+
 
 class TestSentimentAnalysis:
     """Verify simple sentiment analysis still works after migration."""

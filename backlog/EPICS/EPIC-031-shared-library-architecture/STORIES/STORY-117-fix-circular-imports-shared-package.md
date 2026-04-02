@@ -58,3 +58,25 @@ The current layer hierarchy is undefined in practice. `core/` is supposed to be 
 ## Notes
 
 This establishes clean architecture boundaries.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- `planning/QUEUE.md` marks this story `READY`.
+
+### Next Agent Action
+
+- Remove measured boundary risk with the smallest viable shared-layer introduction.
+- Do not combine this with unrelated retry, CLI, or timezone work.
+
+### Required Working Style
+
+- Prefer explicit import-boundary cleanup and machine-checkable enforcement over large package moves.
+- Keep the resulting import graph auditable.
+
+### Minimum Verification For Future Agents
+
+- Prove the cycle/boundary problem is reduced by code shape, not by weakening checks.
+- Run the maintained structural gates after the change.

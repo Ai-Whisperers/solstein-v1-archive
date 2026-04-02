@@ -27,7 +27,6 @@ except ModuleNotFoundError as exc:
 from solstein.config import get_settings
 from solstein.data.loaders import CompetitorDataLoader
 from solstein.database_config import convert_to_async_url, get_test_database_url
-from solstein.domain.models import AIMaturity
 from tests.test_data import make_test_companies
 
 # API imports are optional — the import chain may fail if AuthenticationMiddleware

@@ -172,7 +172,9 @@ def main():
         try:
             company = research_to_company(cd)
             companies.append(company)
-            print(f"   ✅ {company.name} (tier={company.tier}, revenue={company.revenue}, employees={company.employees})")
+            print(
+                f"   ✅ {company.name} (tier={company.tier}, revenue={company.revenue}, employees={company.employees})"
+            )
         except Exception as e:
             print(f"   ❌ Failed to convert {cd.get('company_name', 'Unknown')}: {e}")
 
@@ -194,7 +196,7 @@ def main():
 
     exporter.create_dashboard(companies, output_path, metadata=metadata)
     print(f"\n✅ Dashboard saved to: {output_path}")
-    print(f"   Sheets: Executive Summary, Market Rankings, Financial Intelligence, Export Metadata")
+    print("   Sheets: Executive Summary, Market Rankings, Financial Intelligence, Export Metadata")
 
 
 if __name__ == "__main__":

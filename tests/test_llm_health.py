@@ -321,7 +321,7 @@ class TestEnhancedLLMClient:
             nonlocal call_count
             call_count += 1
             if provider == "openai":
-                raise Exception("Rate limit")
+                raise RuntimeError("Rate limit")
             return "Generated from groq"
 
         with patch.object(client, "_query_cloud_provider", side_effect=mock_query):

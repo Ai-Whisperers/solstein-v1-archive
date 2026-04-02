@@ -11,8 +11,6 @@ Validates:
 
 from __future__ import annotations
 
-import pytest
-
 from solstein.analytics.ai_readiness import (
     AIReadinessConfig,
     AIReadinessResult,
@@ -20,7 +18,6 @@ from solstein.analytics.ai_readiness import (
     AIReadinessTier,
 )
 from solstein.domain.models import AIMaturity, Company, FinancialMetric
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -48,8 +45,18 @@ def _make_ai_leader() -> Company:
         ai_key_capabilities="Advanced ML pipelines, NLP, computer vision deployed in production",
         ai_signal_level="Very High",
         saas_maturity=9,
-        tech_stack=["python", "kubernetes", "docker", "react", "typescript",
-                    "terraform", "aws", "kafka", "spark", "airflow"],
+        tech_stack=[
+            "python",
+            "kubernetes",
+            "docker",
+            "react",
+            "typescript",
+            "terraform",
+            "aws",
+            "kafka",
+            "spark",
+            "airflow",
+        ],
         total_funding_raised_eur=200_000_000.0,
         data_availability="High",
         financials=FinancialMetric(
@@ -179,12 +186,8 @@ class TestDataInfrastructureDimension:
     def test_large_company_bonus(self):
         """Large employee count boosts data infrastructure score."""
         scorer = AIReadinessScorer()
-        small = scorer.score(_make_company(
-            financials=FinancialMetric(employees=10)
-        ))
-        large = scorer.score(_make_company(
-            financials=FinancialMetric(employees=600)
-        ))
+        small = scorer.score(_make_company(financials=FinancialMetric(employees=10)))
+        large = scorer.score(_make_company(financials=FinancialMetric(employees=600)))
         assert large.breakdown["data_infrastructure"] > small.breakdown["data_infrastructure"]
 
 
@@ -194,12 +197,8 @@ class TestTechnicalDebtDimension:
     def test_modern_stack_scores_higher(self):
         """Modern tech stack reduces technical debt score (= higher readiness)."""
         scorer = AIReadinessScorer()
-        modern = scorer.score(_make_company(
-            tech_stack=["python", "kubernetes", "docker", "react", "typescript"]
-        ))
-        legacy = scorer.score(_make_company(
-            tech_stack=["cobol", "mainframe"]
-        ))
+        modern = scorer.score(_make_company(tech_stack=["python", "kubernetes", "docker", "react", "typescript"]))
+        legacy = scorer.score(_make_company(tech_stack=["cobol", "mainframe"]))
         assert modern.breakdown["technical_debt"] > legacy.breakdown["technical_debt"]
 
 
@@ -209,14 +208,18 @@ class TestAILiteracyDimension:
     def test_high_ai_maturity_scores_high(self):
         """High AI maturity enum boosts literacy score."""
         scorer = AIReadinessScorer()
-        high = scorer.score(_make_company(
-            ai_maturity=AIMaturity.VERY_STRONG,
-            ai_score=9.0,
-        ))
-        low = scorer.score(_make_company(
-            ai_maturity=AIMaturity.NONE,
-            ai_score=0.0,
-        ))
+        high = scorer.score(
+            _make_company(
+                ai_maturity=AIMaturity.VERY_STRONG,
+                ai_score=9.0,
+            )
+        )
+        low = scorer.score(
+            _make_company(
+                ai_maturity=AIMaturity.NONE,
+                ai_score=0.0,
+            )
+        )
         assert high.breakdown["ai_literacy"] > low.breakdown["ai_literacy"]
 
     def test_production_ai_bonus(self):
@@ -261,12 +264,14 @@ class TestAIReadinessConfig:
             process_automation_weight=0.10,
         )
         scorer = AIReadinessScorer(config=config)
-        result = scorer.score(_make_company(
-            ai_maturity=AIMaturity.VERY_STRONG,
-            ai_score=9.0,
-            ai_in_production=True,
-            ai_signal_level="Very High",
-        ))
+        result = scorer.score(
+            _make_company(
+                ai_maturity=AIMaturity.VERY_STRONG,
+                ai_score=9.0,
+                ai_in_production=True,
+                ai_signal_level="Very High",
+            )
+        )
         # With heavy literacy weight, high AI maturity should push score up
         assert result.score > 50.0
 
@@ -295,9 +300,7 @@ class TestCompanyModelIntegration:
         c.ai_readiness_tier = result.tier.value
         c.ai_readiness_breakdown = result.breakdown
         assert c.ai_readiness_score == result.score
-        assert c.ai_readiness_tier in (
-            "AI-Ready", "AI-Capable", "AI-Challenged", "AI-Resistant"
-        )
+        assert c.ai_readiness_tier in ("AI-Ready", "AI-Capable", "AI-Challenged", "AI-Resistant")
         assert len(c.ai_readiness_breakdown) == 4
 
 

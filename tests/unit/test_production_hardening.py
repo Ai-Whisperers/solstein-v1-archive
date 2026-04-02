@@ -129,7 +129,7 @@ class TestGracefulDegradation:
         """Verify that failed calls use fallback."""
 
         async def failing_agent():
-            raise Exception("Agent failed")
+            raise RuntimeError("Agent failed")
 
         async def fallback_agent():
             return {"status": "fallback"}
@@ -147,7 +147,7 @@ class TestGracefulDegradation:
         """Verify that agents degrade after threshold."""
 
         async def failing_agent():
-            raise Exception("Always fails")
+            raise RuntimeError("Always fails")
 
         for _ in range(5):
             await degradation.wrap_agent_call("degraded_agent", failing_agent)

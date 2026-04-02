@@ -7,6 +7,7 @@ Covers:
 - CLI exit codes and --strict flag
 - Allowlist file schema validation
 """
+
 from __future__ import annotations
 
 import json
@@ -77,9 +78,7 @@ class TestBlockingTokens:
         assert todo_v.line == 3
 
     def test_multiple_tokens_on_same_line_all_reported(self, tmp_path: Path) -> None:
-        doc = _write(
-            tmp_path, "doc.md", "# T\n\nPLACEHOLDER and TODO: both here.\n"
-        )
+        doc = _write(tmp_path, "doc.md", "# T\n\nPLACEHOLDER and TODO: both here.\n")
         violations = _check_placeholder_tokens(doc, "doc.md", [])
         checks = {v.check for v in violations}
         assert "PLACEHOLDER_MARKER" in checks
@@ -132,9 +131,7 @@ class TestAllowlist:
 
     def test_allowlist_without_file_field_applies_globally(self, tmp_path: Path) -> None:
         doc = _write(tmp_path, "other.md", "PLACEHOLDER here.\n")
-        allowlist = [
-            {"owner": "t", "rationale": "r", "expiry": "2099-01-01", "pattern": "PLACEHOLDER"}
-        ]
+        allowlist = [{"owner": "t", "rationale": "r", "expiry": "2099-01-01", "pattern": "PLACEHOLDER"}]
         violations = _check_placeholder_tokens(doc, "other.md", allowlist)
         v = next(v for v in violations if v.check == "PLACEHOLDER_MARKER")
         assert v.allowlisted is True
@@ -155,9 +152,7 @@ class TestAllowlist:
         assert v.allowlisted is False
 
     def test_is_allowlisted_helper(self) -> None:
-        allowlist = [
-            {"owner": "o", "rationale": "r", "expiry": "2099", "pattern": "FOO", "file": "x.md"}
-        ]
+        allowlist = [{"owner": "o", "rationale": "r", "expiry": "2099", "pattern": "FOO", "file": "x.md"}]
         assert _is_allowlisted("x.md", "FOO", allowlist) is True
         assert _is_allowlisted("y.md", "FOO", allowlist) is False
         assert _is_allowlisted("x.md", "BAR", allowlist) is False
@@ -194,24 +189,14 @@ class TestMetadataValidation:
         assert violations == []
 
     def test_missing_status_is_blocking(self, tmp_path: Path) -> None:
-        content = (
-            "# Policy\n\n"
-            "> **Owner**: platform-team\n"
-            "> **Last Reviewed**: 2026-01-01\n"
-            "> **Superseded By**: N/A\n"
-        )
+        content = "# Policy\n\n> **Owner**: platform-team\n> **Last Reviewed**: 2026-01-01\n> **Superseded By**: N/A\n"
         doc = self._governance_doc(tmp_path, content)
         violations = _check_metadata(doc, "docs/governance/policy.md", [])
         blocking = [v for v in violations if v.severity == "blocking"]
         assert any("Status" in v.message for v in blocking)
 
     def test_missing_owner_is_blocking(self, tmp_path: Path) -> None:
-        content = (
-            "# Policy\n\n"
-            "> **Status**: Active\n"
-            "> **Last Reviewed**: 2026-01-01\n"
-            "> **Superseded By**: N/A\n"
-        )
+        content = "# Policy\n\n> **Status**: Active\n> **Last Reviewed**: 2026-01-01\n> **Superseded By**: N/A\n"
         doc = self._governance_doc(tmp_path, content)
         violations = _check_metadata(doc, "docs/governance/policy.md", [])
         assert any("Owner" in v.message for v in violations if v.severity == "blocking")
@@ -316,9 +301,7 @@ class TestCLI:
 
 class TestAllowlistSchema:
     def test_shipped_allowlist_has_required_fields(self) -> None:
-        allowlist_path = (
-            Path(__file__).resolve().parents[2] / "scripts" / "ci" / "docs-quality-allowlist.json"
-        )
+        allowlist_path = Path(__file__).resolve().parents[2] / "scripts" / "ci" / "docs-quality-allowlist.json"
         assert allowlist_path.exists(), "docs-quality-allowlist.json must exist"
         entries = json.loads(allowlist_path.read_text(encoding="utf-8"))
         for entry in entries:
@@ -328,21 +311,11 @@ class TestAllowlistSchema:
             assert "pattern" in entry, f"Entry missing 'pattern': {entry}"
 
     def test_ci_workflow_exists(self) -> None:
-        workflow = (
-            Path(__file__).resolve().parents[2]
-            / ".github"
-            / "workflows"
-            / "docs-quality-gates.yml"
-        )
+        workflow = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "docs-quality-gates.yml"
         assert workflow.exists(), "docs-quality-gates.yml CI workflow must exist"
 
     def test_ci_workflow_targets_develop(self) -> None:
-        workflow = (
-            Path(__file__).resolve().parents[2]
-            / ".github"
-            / "workflows"
-            / "docs-quality-gates.yml"
-        )
+        workflow = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "docs-quality-gates.yml"
         content = workflow.read_text(encoding="utf-8")
         assert "develop" in content, "CI workflow must target the develop branch"
 

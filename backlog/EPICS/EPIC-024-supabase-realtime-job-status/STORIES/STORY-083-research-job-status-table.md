@@ -78,3 +78,26 @@ Long-running research jobs with no client-visible status feedback create a poor 
 - The `progress_pct` field is an approximation. Research pipelines have a variable number of stages depending on company data availability. A percentage that jumps from 20% to 80% is acceptable — a percentage that never updates is not.
 - Consider adding a `metadata` JSONB column for extensibility — pipeline stage names, agent outputs, intermediate results. This avoids schema changes as the pipeline evolves.
 - The retention period should default to 30 days. Completed and failed job records are valuable for debugging and analytics. Deleting them immediately is a false economy.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

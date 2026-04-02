@@ -161,11 +161,7 @@ def validate_export(file_path: str | Any, schema: list[FieldSpec] | None = None)
         target_headers = sheet_headers.get(spec.sheet, set())
         if spec.header not in target_headers:
             # Check if it's on a different sheet (wrong placement)
-            found_elsewhere = any(
-                spec.header in hdrs
-                for name, hdrs in sheet_headers.items()
-                if name != spec.sheet
-            )
+            found_elsewhere = any(spec.header in hdrs for name, hdrs in sheet_headers.items() if name != spec.sheet)
             if found_elsewhere:
                 wrong_sheet.append(f"{spec.name} (expected on '{spec.sheet}', found elsewhere)")
             else:

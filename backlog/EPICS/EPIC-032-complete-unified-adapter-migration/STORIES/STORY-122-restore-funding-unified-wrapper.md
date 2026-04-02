@@ -92,3 +92,26 @@ The `AdditionalDataSources` wrapper in `funding.py` handled Crunchbase's error b
 The news cross-reference feature is not a nice-to-have. For PE analysis, the combination of funding event timing and contemporaneous news coverage is a primary signal for assessing market momentum. Dropping it silently in a "refactor" is the kind of decision that gets noticed six months later when an analyst asks why the funding signals look thin.
 
 The distinction between Crunchbase 401 and 403 matters operationally. A 401 means the API key is expired and needs rotation. A 403 on a specific endpoint means the subscription tier doesn't cover that data. These require different responses from the operations team. Collapsing them into a generic "auth error" loses information that is genuinely useful.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

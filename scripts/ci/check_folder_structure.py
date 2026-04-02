@@ -4,10 +4,10 @@
 Part of CI/CD code quality guardrails to ensure proper code organization.
 """
 
-import sys
-from pathlib import Path
 import argparse
+import sys
 from dataclasses import dataclass
+from pathlib import Path
 
 # Configuration
 DEFAULT_FILE_THRESHOLD = 15

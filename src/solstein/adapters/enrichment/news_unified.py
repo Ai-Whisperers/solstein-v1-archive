@@ -26,15 +26,40 @@ from solstein.infrastructure.refresh import BaseRefreshConnector
 from solstein.research.discovery import DiscoveryCandidate
 
 _POSITIVE_WORDS = [
-    "growth", "profit", "revenue", "success", "win", "launch",
-    "expand", "innovation", "leader", "partnership", "award",
-    "acquisition", "positive", "strong", "beat", "bullish",
+    "growth",
+    "profit",
+    "revenue",
+    "success",
+    "win",
+    "launch",
+    "expand",
+    "innovation",
+    "leader",
+    "partnership",
+    "award",
+    "acquisition",
+    "positive",
+    "strong",
+    "beat",
+    "bullish",
 ]
 
 _NEGATIVE_WORDS = [
-    "loss", "lawsuit", "investigation", "scandal", "fire", "layoff",
-    "bankruptcy", "decline", "weak", "miss", "warning", "fraud",
-    "investor", "concern", "risk",
+    "loss",
+    "lawsuit",
+    "investigation",
+    "scandal",
+    "fire",
+    "layoff",
+    "bankruptcy",
+    "decline",
+    "weak",
+    "miss",
+    "warning",
+    "fraud",
+    "investor",
+    "concern",
+    "risk",
 ]
 
 
@@ -263,6 +288,7 @@ class NewsUnifiedAdapter(BaseRefreshConnector):
         STORY-134: Uses asyncio.gather for concurrent per-company fetches
         instead of sequential asyncio.to_thread calls.
         """
+
         async def _fetch_one(company_name: str) -> dict[str, Any] | None:
             articles = await self._get_news_from_api_async(company_name, 7)
             if articles:

@@ -168,9 +168,7 @@ class TestGenerateEmbedding:
 
         with patch("solstein.llm.embeddings.httpx.AsyncClient") as mock_client_cls:
             mock_client = AsyncMock()
-            mock_client.post = AsyncMock(
-                side_effect=httpx.ConnectError("API unavailable")
-            )
+            mock_client.post = AsyncMock(side_effect=httpx.ConnectError("API unavailable"))
             mock_client.__aenter__ = AsyncMock(return_value=mock_client)
             mock_client.__aexit__ = AsyncMock(return_value=None)
             mock_client_cls.return_value = mock_client

@@ -23,6 +23,7 @@ Usage
     python scripts/docs/generate_docs_health.py
     python scripts/docs/generate_docs_health.py --help
 """
+
 from __future__ import annotations
 
 import argparse

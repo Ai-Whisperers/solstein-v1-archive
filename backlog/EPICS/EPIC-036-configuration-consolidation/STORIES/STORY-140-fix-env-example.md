@@ -99,3 +99,26 @@ This story has a hard dependency on STORY-137. The `.env.example` cannot be comp
 The validation script should be simple and robust. It does not need to understand Pydantic internals — it can parse the `config.py` file as text, extract field names from the Settings class, and compare them against the variable names in `.env.example`. A false positive (flagging a field that doesn't need to be in `.env.example`) is acceptable and can be handled with an explicit exclusion list. A false negative (missing a required variable) is not acceptable.
 
 The `.env.example` file should never contain real secrets, even for development. Example values should be clearly fake: `your-github-token-here`, `sk-groq-your-key-here`, `postgresql://user:password@localhost:5432/solstein`. Real secrets committed to the repository are a security incident, not a convenience.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

@@ -19,6 +19,7 @@ from solstein.analytics.ai_transformation_calculator import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 def _make_company(**overrides):  # type: ignore[no-untyped-def]
     """Create a minimal Company for testing."""
     from solstein.domain.models import Company
@@ -42,6 +43,7 @@ def calculator() -> TransformationCalculator:
 # ---------------------------------------------------------------------------
 # TestTransformationEstimateStructure
 # ---------------------------------------------------------------------------
+
 
 class TestTransformationEstimateStructure:
     """Verify the estimate returns all required fields."""
@@ -80,6 +82,7 @@ class TestTransformationEstimateStructure:
 # ---------------------------------------------------------------------------
 # TestConfidenceIntervals
 # ---------------------------------------------------------------------------
+
 
 class TestConfidenceIntervals:
     """Verify confidence intervals are properly bounded."""
@@ -122,6 +125,7 @@ class TestConfidenceIntervals:
 # TestSizeClassScaling
 # ---------------------------------------------------------------------------
 
+
 class TestSizeClassScaling:
     """Larger companies should cost more and take longer."""
 
@@ -143,6 +147,7 @@ class TestSizeClassScaling:
 # ---------------------------------------------------------------------------
 # TestMaturityDiscount
 # ---------------------------------------------------------------------------
+
 
 class TestMaturityDiscount:
     """More mature companies should need less time and investment."""
@@ -166,6 +171,7 @@ class TestMaturityDiscount:
 # TestTechStackImpact
 # ---------------------------------------------------------------------------
 
+
 class TestTechStackImpact:
     """Modern tech stack should reduce cost; legacy should increase it."""
 
@@ -187,6 +193,7 @@ class TestTechStackImpact:
 # ---------------------------------------------------------------------------
 # TestRiskAssessment
 # ---------------------------------------------------------------------------
+
 
 class TestRiskAssessment:
     """Verify risk factors are identified correctly."""
@@ -236,6 +243,7 @@ class TestRiskAssessment:
 # TestScenarioPlanning
 # ---------------------------------------------------------------------------
 
+
 class TestScenarioPlanning:
     """Verify simulate() applies overrides correctly."""
 
@@ -266,15 +274,18 @@ class TestScenarioPlanning:
 # TestEstimateFromParams
 # ---------------------------------------------------------------------------
 
+
 class TestEstimateFromParams:
     """Verify direct parameter-based estimation works."""
 
     def test_estimate_from_params_basic(self, calculator: TransformationCalculator) -> None:
-        result = calculator.estimate_from_params({
-            "employees": 200,
-            "ai_maturity": "emerging",
-            "saas_maturity": 5,
-        })
+        result = calculator.estimate_from_params(
+            {
+                "employees": 200,
+                "ai_maturity": "emerging",
+                "saas_maturity": 5,
+            }
+        )
         assert isinstance(result, TransformationEstimate)
         assert result.time_to_ai_ready_months.point > 0
         assert result.scenario_label == "manual"
@@ -283,6 +294,7 @@ class TestEstimateFromParams:
 # ---------------------------------------------------------------------------
 # TestCompanyModelIntegration
 # ---------------------------------------------------------------------------
+
 
 class TestCompanyModelIntegration:
     """Verify Company model has transformation fields."""
@@ -311,6 +323,7 @@ class TestCompanyModelIntegration:
 # ---------------------------------------------------------------------------
 # TestEdgeCases
 # ---------------------------------------------------------------------------
+
 
 class TestEdgeCases:
     """Handle sparse / minimal data gracefully."""

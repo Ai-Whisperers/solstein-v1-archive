@@ -81,3 +81,26 @@ The staging environment doesn't need to be a full replica of production. It need
 The smoke test suite should be minimal and fast. The goal is not to re-run the full test suite against staging — that's what CI already did. The goal is to verify that the deployed artifact actually starts, connects to its dependencies, and serves traffic. Five HTTP requests that return 200 in under 10 seconds. If the smoke tests take more than 30 seconds, they're too comprehensive for this purpose.
 
 The rollback mechanism needs careful design. Options: revert the image tag to the previous value (simple, works for container deployments), or keep the old version running alongside the new one and switch traffic (blue-green, more complex but safer). Start with the simple approach; graduate to blue-green when the deployment volume justifies it.
+
+## Autonomous Continuation Notes
+
+### Current Develop Status
+
+- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
+- This story currently carries a historical open or in-progress backlog badge.
+- If `planning/QUEUE.md` does not currently list this story as active work, treat it as triage-required rather than immediately actionable.
+
+### Next Agent Action
+
+- Reconcile this story against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before starting.
+- Do not begin implementation from this file alone unless the queue or a fresh planning decision reactivates it.
+
+### Required Working Style
+
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
+- Preserve machine-checkable enforcement and avoid prose-only or speculative "AI slop" updates.
+
+### Minimum Verification For Future Agents
+
+- If this story is reactivated, update the queue or controlling planning artifact first.
+- Then prove the work with the smallest relevant regression tests, gates, or generated artifacts for the touched boundary.

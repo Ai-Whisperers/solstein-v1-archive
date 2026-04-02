@@ -15,7 +15,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
-
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from solstein.exporters.excel_improved import ImprovedExcelExporter
@@ -37,7 +36,6 @@ def is_relevant_to_eneve(company_data: dict) -> tuple[bool, str]:
     industry = (basic.get("industry") or "").lower()
     description = (basic.get("description") or "").lower()
     hq = (basic.get("headquarters") or "").lower()
-
 
     software_keywords = [
         "software",
@@ -72,13 +70,10 @@ def is_relevant_to_eneve(company_data: dict) -> tuple[bool, str]:
         "trading",
     ]
 
-
     has_software = any(kw in description or kw in industry for kw in software_keywords)
     has_energy = any(kw in description or kw in industry for kw in energy_keywords)
 
-
     is_netherlands = "netherlands" in hq or "amsterdam" in hq or "rotterdam" in hq or "arnhem" in hq or "zwolle" in hq
-
 
     is_european_energy = any(
         x in hq
@@ -102,7 +97,6 @@ def is_relevant_to_eneve(company_data: dict) -> tuple[bool, str]:
         ]
     )
 
-
     direct_competitors = [
         "autogrid",
         "gridbeyond",
@@ -121,7 +115,6 @@ def is_relevant_to_eneve(company_data: dict) -> tuple[bool, str]:
     ]
 
     is_direct = any(comp in name.lower() for comp in direct_competitors)
-
 
     if is_direct:
         return True, "Direct Competitor"
@@ -276,8 +269,8 @@ def main():
     summary = results.get("summary", {})
 
     print(f"📊 Analyzing {len(all_companies)} companies for Eneve relevance...")
-    print(f"   Eneve Focus: Energy software & value chain management")
-    print(f"   Target Market: Netherlands & Europe\n")
+    print("   Eneve Focus: Energy software & value chain management")
+    print("   Target Market: Netherlands & Europe\n")
 
     # Filter for relevant companies
     relevant_companies = []
@@ -304,7 +297,7 @@ def main():
         print(f"   • {category}: {count} companies")
 
     # Generate Excel dashboard
-    print(f"\n📊 Generating Excel dashboard...")
+    print("\n📊 Generating Excel dashboard...")
     exporter = ImprovedExcelExporter()
 
     metadata = {
@@ -348,20 +341,20 @@ def main():
         json.dump(output_data, f, indent=2, default=str)
     print(f"   ✅ JSON saved: {json_path}")
 
-    print(f"\n" + "=" * 60)
-    print(f"🎯 ENEVE COMPETITIVE INTELLIGENCE REPORT COMPLETE")
-    print(f"=" * 60)
-    print(f"\nTarget Company: Eneve (Netherlands)")
-    print(f"Focus: Smart software for the energy value chain")
+    print("\n" + "=" * 60)
+    print("🎯 ENEVE COMPETITIVE INTELLIGENCE REPORT COMPLETE")
+    print("=" * 60)
+    print("\nTarget Company: Eneve (Netherlands)")
+    print("Focus: Smart software for the energy value chain")
     print(f"\nTotal Relevant Competitors: {len(relevant_companies)}")
-    print(f"\nBreakdown by Category:")
+    print("\nBreakdown by Category:")
     for category, count in sorted(relevance_breakdown.items(), key=lambda x: -x[1]):
         print(f"   • {category}: {count}")
-    print(f"\n📁 Output Files:")
+    print("\n📁 Output Files:")
     print(f"   • Excel Dashboard: {excel_path}")
     print(f"   • JSON Data: {json_path}")
-    print(f"\n✨ All data is 100% real - no synthetic entries")
-    print(f"=" * 60)
+    print("\n✨ All data is 100% real - no synthetic entries")
+    print("=" * 60)
 
 
 if __name__ == "__main__":
