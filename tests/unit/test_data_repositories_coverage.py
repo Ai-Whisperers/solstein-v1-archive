@@ -137,7 +137,7 @@ def test_supabase_repo_methods(mock_get_sb):
 
     # get_by_id
     mock_query = mock_client.table().select().eq()
-    mock_query.execute.return_value.data = [{"id": "cmp1", "name": "Test"}]
+    mock_query.execute.return_value.data = [{"id": "cmp1", "name": "Test", "revenue": 100.0}]
     assert repo.get_by_id("cmp1").name == "Test"
 
     mock_query.execute.return_value.data = []
@@ -154,7 +154,7 @@ def test_supabase_repo_methods(mock_get_sb):
     assert repo.delete("cmp1") is True
 
     # search
-    mock_client.table().select().ilike().execute.return_value.data = [{"id": "cmp1", "name": "Test"}]
+    mock_client.table().select().ilike().execute.return_value.data = [{"id": "cmp1", "name": "Test", "revenue": 100.0}]
     assert len(repo.search("Test")) == 1
 
 
