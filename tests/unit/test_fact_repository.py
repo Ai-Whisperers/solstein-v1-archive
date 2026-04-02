@@ -14,6 +14,7 @@ from solstein.infrastructure.test_cleanup import cleanup_test_database
 from tests.factories import create_test_batch, create_test_fact, create_test_fact_source
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 class TestFactRepository:
     """Test suite for FactRepository with real Supabase backend."""
