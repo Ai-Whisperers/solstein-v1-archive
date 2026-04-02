@@ -83,7 +83,7 @@ class CompetitorDataLoader:
                 try:
                     company = convert_to_domain_company(comp, i)
                     companies.append(company)
-                except (KeyError, ValueError, TypeError) as e:
+                except (KeyError, ValueError, TypeError, AttributeError) as e:
                     logger.warning(f"Error converting competitor {i}: {e}")
                     continue
 
