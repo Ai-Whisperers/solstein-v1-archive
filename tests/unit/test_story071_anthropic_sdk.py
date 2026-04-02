@@ -34,10 +34,12 @@ class TestEnhancedClientSize:
 
         Originally 96 lines after STORY-071 refactor.
         STORY-073 added Langfuse tracing (~20 lines) bringing it to ~120.
-        Limit raised to 150 to accommodate tracing while still enforcing compactness.
+        STORY-075 added FallbackChain integration, raising it to ~150.
+        STORY-129 added classified exception handling and Prometheus metrics (~40 lines).
+        Limit raised to 200 to accommodate STORY-129 while still enforcing compactness.
         """
         lines = ENHANCED_CLIENT_PATH.read_text().splitlines()
-        assert len(lines) <= 150, f"enhanced_client.py has {len(lines)} lines (max 150)"
+        assert len(lines) <= 200, f"enhanced_client.py has {len(lines)} lines (max 200)"
 
 
 # ===================================================================
