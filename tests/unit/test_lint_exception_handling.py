@@ -237,6 +237,9 @@ class TestMain:
         assert result == 1
 
     def test_critical_only_mode(self, tmp_path: Path) -> None:
+        # Non-critical file: bare except is WARNING severity.
+        # With --fail-on-warning (strict mode) that should still exit 1.
+        # Contrast: --critical-only (test_critical_only_mode_non_critical_file) exits 0.
         test_file = tmp_path / "dirty.py"
         test_file.write_text("try:\n    pass\nexcept:\n    pass")
 
@@ -244,7 +247,7 @@ class TestMain:
 
         old_argv = sys.argv
         try:
-            sys.argv = ["lint_exception_handling.py", str(test_file)]
+            sys.argv = ["lint_exception_handling.py", "--fail-on-warning", str(test_file)]
             result = main()
         finally:
             sys.argv = old_argv
