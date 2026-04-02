@@ -180,9 +180,7 @@ class TestResearchJobRepository:
         repo = ResearchJobRepository(mock_session)
 
         # Act
-        result = await repo.update_status(
-            job_id=uuid.uuid4(), new_status="running"
-        )
+        result = await repo.update_status(job_id=uuid.uuid4(), new_status="running")
 
         # Assert
         assert result is None

@@ -71,12 +71,19 @@ class TestSearchResult:
     def test_schema_parity_between_backends(self):
         """Both backends produce results with identical dict keys."""
         searxng_result = SearchResult(
-            title="A", url="https://a.com", snippet="a",
-            source_engine="bing", relevance_score=0.5,
+            title="A",
+            url="https://a.com",
+            snippet="a",
+            source_engine="bing",
+            relevance_score=0.5,
         )
-        gcs_result = normalize_gcs_to_search_result({
-            "title": "B", "link": "https://b.com", "snippet": "b",
-        })
+        gcs_result = normalize_gcs_to_search_result(
+            {
+                "title": "B",
+                "link": "https://b.com",
+                "snippet": "b",
+            }
+        )
         assert set(searxng_result.to_dict().keys()) == set(gcs_result.to_dict().keys())
 
 
@@ -117,12 +124,19 @@ class TestCaching:
         """Serialize -> deserialize produces identical SearchResult list."""
         original = [
             SearchResult(
-                title="Title 1", url="https://a.com", snippet="Snippet 1",
-                source_engine="google", relevance_score=0.9, published_date="2026-01-01",
+                title="Title 1",
+                url="https://a.com",
+                snippet="Snippet 1",
+                source_engine="google",
+                relevance_score=0.9,
+                published_date="2026-01-01",
             ),
             SearchResult(
-                title="Title 2", url="https://b.com", snippet="Snippet 2",
-                source_engine="bing,duckduckgo", relevance_score=0.7,
+                title="Title 2",
+                url="https://b.com",
+                snippet="Snippet 2",
+                source_engine="bing,duckduckgo",
+                relevance_score=0.7,
             ),
         ]
         serialized = serialize_results(original)
@@ -237,8 +251,11 @@ class TestSearchBackendDispatcher:
         with patch("solstein.agents.search_backends.call_with_retry") as mock_retry:
             mock_retry.return_value = [
                 SearchResult(
-                    title="Result 1", url="https://a.com", snippet="Snippet",
-                    source_engine="google", relevance_score=0.8,
+                    title="Result 1",
+                    url="https://a.com",
+                    snippet="Snippet",
+                    source_engine="google",
+                    relevance_score=0.8,
                 ),
             ]
             dispatcher = self._make_dispatcher()

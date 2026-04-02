@@ -128,7 +128,11 @@ def test_calculate_scores_raises_on_subscorer_exception(monkeypatch, scorer):
         (20.0, -0.01, 0.01),  # base(0) + 1.0 + missing_margin(-1.0) = 0.0 → clamped 0.0
         (45.0, 1.2, 1.3),  # base(0) + 2.25 + missing_margin(-1.0) = 1.25
         (400.0, 5.4, 5.6),  # base(0) + cap(4.0) + hyper(+2.5) + missing_margin(-1.0) = 5.5
-        (-10.0, -0.01, 0.01),  # base(0) + (-0.5) + declining(-1.5) + compound(-1.0) + missing_margin(-1.0) → clamped 0.0
+        (
+            -10.0,
+            -0.01,
+            0.01,
+        ),  # base(0) + (-0.5) + declining(-1.5) + compound(-1.0) + missing_margin(-1.0) → clamped 0.0
         (
             -40.0,
             -0.01,
@@ -147,15 +151,15 @@ def test_growth_score_ranges(scorer, growth_rate, expected_min, expected_max):
 
 
 def test_growth_score_always_clamped_to_10(scorer):
-    """Extreme growth_rate must never produce a score > 10.0."""
-    company = make_company(financials=FinancialMetric(growth_rate=10_000.0, employees=1))
+    """Max growth_rate must never produce a score > 10.0."""
+    company = make_company(financials=FinancialMetric(growth_rate=1000.0, employees=1))
     scored = scorer.calculate_scores(company)
     assert scored.growth_score <= 10.0
 
 
 def test_growth_score_never_below_zero(scorer):
-    """Extreme negative growth_rate must never produce a score < 0.0."""
-    company = make_company(financials=FinancialMetric(growth_rate=-10_000.0, employees=1))
+    """Min growth_rate must never produce a score < 0.0."""
+    company = make_company(financials=FinancialMetric(growth_rate=-100.0, employees=1))
     scored = scorer.calculate_scores(company)
     assert scored.growth_score >= 0.0
 

@@ -70,7 +70,11 @@ class TestWorkerServiceExists:
         worker = compose_config["services"]["worker"]
         healthcheck = worker.get("healthcheck", {})
         assert healthcheck, "Worker must have a healthcheck"
-        test_cmd = healthcheck.get("test", [""])[1] if isinstance(healthcheck.get("test"), list) else healthcheck.get("test", "")
+        test_cmd = (
+            healthcheck.get("test", [""])[1]
+            if isinstance(healthcheck.get("test"), list)
+            else healthcheck.get("test", "")
+        )
         assert "inspect ping" in str(test_cmd) or "celery" in str(test_cmd)
 
     def test_worker_restart_policy(self, compose_config):

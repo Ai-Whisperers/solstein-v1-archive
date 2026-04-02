@@ -3,6 +3,7 @@
 Verifies that log_adapter_error emits structured fields required by
 exception-handling.md: component, operation, error_type, message, entity_id.
 """
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch

@@ -219,24 +219,17 @@ class TestNoInlinePrompts:
     def test_research_agents_imports_get_system_prompt(self):
         source = inspect.getsource(_research_agents_mod)
         assert "get_system_prompt" in source, (
-            "research_agents.py must import and use get_system_prompt() "
-            "from solstein.llm.prompts"
+            "research_agents.py must import and use get_system_prompt() from solstein.llm.prompts"
         )
 
     def test_instructor_client_imports_get_system_prompt(self):
         source = inspect.getsource(_instructor_client_mod)
-        assert "get_system_prompt" in source, (
-            "instructor_client.py must import and use get_system_prompt()"
-        )
+        assert "get_system_prompt" in source, "instructor_client.py must import and use get_system_prompt()"
 
     def test_structured_client_imports_get_system_prompt(self):
         source = inspect.getsource(_structured_client_mod)
-        assert "get_system_prompt" in source, (
-            "structured_client.py must import and use get_system_prompt()"
-        )
+        assert "get_system_prompt" in source, "structured_client.py must import and use get_system_prompt()"
 
     def test_llm_filter_imports_get_system_prompt(self):
         source = inspect.getsource(_filters_llm_mod)
-        assert "get_system_prompt" in source, (
-            "analytics/filters/llm.py must import and use get_system_prompt()"
-        )
+        assert "get_system_prompt" in source, "analytics/filters/llm.py must import and use get_system_prompt()"

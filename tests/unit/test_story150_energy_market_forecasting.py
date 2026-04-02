@@ -19,6 +19,7 @@ from solstein.analytics.energy_market_forecasting import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_company(**overrides):  # type: ignore[no-untyped-def]
     """Create a minimal Company for testing."""
     from solstein.domain.models import Company
@@ -42,6 +43,7 @@ def scorer() -> EnergyMarketScorer:
 # ---------------------------------------------------------------------------
 # TestResultStructure
 # ---------------------------------------------------------------------------
+
 
 class TestResultStructure:
     """Verify the market result has all required fields."""
@@ -81,6 +83,7 @@ class TestResultStructure:
 # TestSegmentDetection
 # ---------------------------------------------------------------------------
 
+
 class TestSegmentDetection:
     """Verify demand segment detection from company data."""
 
@@ -105,9 +108,7 @@ class TestSegmentDetection:
         assert DemandSegment.ENERGY_STORAGE in result.primary_segments
 
     def test_multiple_segments_detected(self, scorer: EnergyMarketScorer) -> None:
-        company = _make_company(
-            description="Solar renewable integration with battery storage and EV charging"
-        )
+        company = _make_company(description="Solar renewable integration with battery storage and EV charging")
         result = scorer.score(company)
         assert len(result.primary_segments) >= 3
 
@@ -121,6 +122,7 @@ class TestSegmentDetection:
 # TestMarketAlignment
 # ---------------------------------------------------------------------------
 
+
 class TestMarketAlignment:
     """Verify market alignment scoring."""
 
@@ -133,18 +135,14 @@ class TestMarketAlignment:
 
     def test_multiple_growth_segments_boost(self, scorer: EnergyMarketScorer) -> None:
         single = _make_company(description="Solar renewable energy")
-        multi = _make_company(
-            description="Solar renewable energy with battery storage and smart grid"
-        )
+        multi = _make_company(description="Solar renewable energy with battery storage and smart grid")
         r_single = scorer.score(single)
         r_multi = scorer.score(multi)
         assert r_multi.market_alignment_score >= r_single.market_alignment_score
 
     def test_declining_segment_penalty(self, scorer: EnergyMarketScorer) -> None:
         clean = _make_company(description="Solar renewable energy platform")
-        mixed = _make_company(
-            description="Solar renewable and coal fossil fuel generation"
-        )
+        mixed = _make_company(description="Solar renewable and coal fossil fuel generation")
         r_clean = scorer.score(clean)
         r_mixed = scorer.score(mixed)
         assert r_clean.market_alignment_score > r_mixed.market_alignment_score
@@ -154,14 +152,13 @@ class TestMarketAlignment:
 # TestDemandResilience
 # ---------------------------------------------------------------------------
 
+
 class TestDemandResilience:
     """Verify demand resilience scoring."""
 
     def test_diversified_scores_higher(self, scorer: EnergyMarketScorer) -> None:
         narrow = _make_company(description="Solar energy only")
-        broad = _make_company(
-            description="Solar renewable with battery storage and demand response"
-        )
+        broad = _make_company(description="Solar renewable with battery storage and demand response")
         r_narrow = scorer.score(narrow)
         r_broad = scorer.score(broad)
         assert r_broad.demand_resilience_score > r_narrow.demand_resilience_score
@@ -185,14 +182,13 @@ class TestDemandResilience:
 # TestForecastingCapability
 # ---------------------------------------------------------------------------
 
+
 class TestForecastingCapability:
     """Verify forecasting capability scoring."""
 
     def test_analytics_keywords_boost(self, scorer: EnergyMarketScorer) -> None:
         basic = _make_company(description="Energy company")
-        advanced = _make_company(
-            description="Machine learning predictive analytics with demand forecasting"
-        )
+        advanced = _make_company(description="Machine learning predictive analytics with demand forecasting")
         r_basic = scorer.score(basic)
         r_advanced = scorer.score(advanced)
         assert r_advanced.forecasting_capability_score > r_basic.forecasting_capability_score
@@ -215,6 +211,7 @@ class TestForecastingCapability:
 # ---------------------------------------------------------------------------
 # TestMarketPositioning
 # ---------------------------------------------------------------------------
+
 
 class TestMarketPositioning:
     """Verify market positioning classification."""
@@ -247,6 +244,7 @@ class TestMarketPositioning:
 # ---------------------------------------------------------------------------
 # TestRecommendations
 # ---------------------------------------------------------------------------
+
 
 class TestRecommendations:
     """Verify recommendations generation."""
@@ -287,6 +285,7 @@ class TestRecommendations:
 # TestCompanyModelIntegration
 # ---------------------------------------------------------------------------
 
+
 class TestCompanyModelIntegration:
     """Verify Company model has market forecasting fields."""
 
@@ -304,5 +303,9 @@ class TestCompanyModelIntegration:
         company.energy_market_positioning = result.market_positioning.value
         assert company.energy_market_score is not None
         assert company.energy_market_positioning in (
-            "leader", "aligned", "transitioning", "misaligned", "unknown",
+            "leader",
+            "aligned",
+            "transitioning",
+            "misaligned",
+            "unknown",
         )

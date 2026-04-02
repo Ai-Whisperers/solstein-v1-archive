@@ -151,8 +151,7 @@ def deduplicate(
                 acquired = lock.acquire(blocking=False)
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "[Idempotency] Lock acquire error for %s — executing without lock "
-                    "(fail-open): %s",
+                    "[Idempotency] Lock acquire error for %s — executing without lock (fail-open): %s",
                     task_name,
                     exc,
                 )

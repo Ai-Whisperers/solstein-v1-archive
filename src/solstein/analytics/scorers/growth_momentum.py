@@ -95,8 +95,10 @@ class GrowthMomentumScorer:
 
         growth_rate = financials.growth_rate
         growth_quotient = safe_div(
-            growth_rate, cfg.revenue_growth_divisor,
-            default=0.0, label="growth_factor",
+            growth_rate,
+            cfg.revenue_growth_divisor,
+            default=0.0,
+            label="growth_factor",
         )
         growth_factor = min(growth_quotient or 0.0, cfg.revenue_growth_cap)
         score += growth_factor
@@ -171,8 +173,10 @@ class GrowthMomentumScorer:
 
         revenue_eur = financials.revenue * 1_000_000
         rev_per_emp = safe_div(
-            revenue_eur, financials.employees,
-            default=None, label="revenue_per_employee_growth",
+            revenue_eur,
+            financials.employees,
+            default=None,
+            label="revenue_per_employee_growth",
         )
         if rev_per_emp is None:
             return score

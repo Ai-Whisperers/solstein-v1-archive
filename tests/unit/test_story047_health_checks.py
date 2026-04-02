@@ -38,6 +38,7 @@ DOCS_HEALTH = PROJECT_ROOT / "docs" / "runbooks" / "health-endpoints.md"
 # REQ-6: No asyncio.sleep in health check logic
 # ===========================================================================
 
+
 class TestNoAsyncioSleep:
     """STORY-047 REQ-6: asyncio.sleep must not appear in health check logic."""
 
@@ -74,6 +75,7 @@ class TestNoAsyncioSleep:
 # REQ-1: Database probe does SELECT 1
 # ===========================================================================
 
+
 class TestDatabaseProbe:
     """STORY-047 REQ-1: Health endpoint must attempt real database connection."""
 
@@ -93,6 +95,7 @@ class TestDatabaseProbe:
 # ===========================================================================
 # REQ-2: Redis probe does real ping
 # ===========================================================================
+
 
 class TestRedisProbe:
     """STORY-047 REQ-2: Health endpoint must attempt real Redis ping."""
@@ -116,6 +119,7 @@ class TestRedisProbe:
 # REQ-3: LLM provider reachability
 # ===========================================================================
 
+
 class TestLLMProbe:
     """STORY-047 REQ-3: Health endpoint must check LLM provider reachability."""
 
@@ -132,15 +136,14 @@ class TestLLMProbe:
 # REQ-4: Per-component status in /health response
 # ===========================================================================
 
+
 class TestPerComponentStatus:
     """STORY-047 REQ-4: Response must include per-component status."""
 
     def test_health_endpoint_returns_components(self):
         """The /health endpoint must include a 'components' dict."""
         text = HEALTH_ROUTER.read_text()
-        assert '"components"' in text or "'components'" in text, (
-            "Health endpoint must return components dict"
-        )
+        assert '"components"' in text or "'components'" in text, "Health endpoint must return components dict"
 
     def test_health_endpoint_maps_component_status(self):
         """Components dict should map name -> status string."""
@@ -159,6 +162,7 @@ class TestPerComponentStatus:
 # ===========================================================================
 # REQ-5: Probe failures don't crash the endpoint
 # ===========================================================================
+
 
 class TestProbeFailureResilience:
     """STORY-047 REQ-5: Probe failures must not crash the health endpoint."""
@@ -188,6 +192,7 @@ class TestProbeFailureResilience:
 # Critical component logic
 # ===========================================================================
 
+
 class TestCriticalComponentLogic:
     """STORY-047: Overall status depends on component criticality."""
 
@@ -207,7 +212,7 @@ class TestCriticalComponentLogic:
         """Redis failure should result in degraded, not unhealthy overall."""
         text = CORE_MONITORING.read_text()
         # Verify redis is NOT in CRITICAL_COMPONENTS
-        match = re.search(r'CRITICAL_COMPONENTS\s*=\s*\{([^}]+)\}', text)
+        match = re.search(r"CRITICAL_COMPONENTS\s*=\s*\{([^}]+)\}", text)
         assert match, "Could not find CRITICAL_COMPONENTS definition"
         critical = match.group(1)
         assert "redis" not in critical, "Redis should not be a critical component"
@@ -222,6 +227,7 @@ class TestCriticalComponentLogic:
 # ===========================================================================
 # Documentation
 # ===========================================================================
+
 
 class TestDocumentation:
     """STORY-047: Health endpoint schema must be documented."""
@@ -257,6 +263,7 @@ class TestDocumentation:
 # ===========================================================================
 # Monitoring health module (src/solstein/monitoring/health.py)
 # ===========================================================================
+
 
 class TestMonitoringHealthModule:
     """Verify monitoring/health.py also uses real probes."""

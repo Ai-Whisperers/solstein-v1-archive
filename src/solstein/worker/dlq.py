@@ -115,8 +115,7 @@ def persist_failed_task(
         db_url = _get_db_url()
         if not db_url:
             logger.warning(
-                "[DLQ] No database URL configured — cannot persist failed task. "
-                "task_name=%s task_id=%s error=%s",
+                "[DLQ] No database URL configured — cannot persist failed task. task_name=%s task_id=%s error=%s",
                 task_name,
                 task_id,
                 str(error)[:200],
@@ -131,8 +130,7 @@ def persist_failed_task(
         engine.dispose()
 
         logger.error(
-            "[DLQ] Persisted failed task to PostgreSQL. "
-            "entry_id=%s task_name=%s task_id=%s retry_count=%d error=%s",
+            "[DLQ] Persisted failed task to PostgreSQL. entry_id=%s task_name=%s task_id=%s retry_count=%d error=%s",
             entry_id,
             task_name,
             task_id,
@@ -144,8 +142,7 @@ def persist_failed_task(
     except Exception as dlq_exc:
         # DLQ write failure must NEVER cascade into the original error path.
         logger.error(
-            "[DLQ] Failed to persist failed task record. "
-            "task_name=%s task_id=%s dlq_error=%s",
+            "[DLQ] Failed to persist failed task record. task_name=%s task_id=%s dlq_error=%s",
             task_name,
             task_id,
             str(dlq_exc)[:500],

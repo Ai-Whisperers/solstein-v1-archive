@@ -65,7 +65,9 @@ class RetryConfig:
     backoff_max: float = 30.0
     jitter: bool = True
     retryable_exceptions: tuple[type[Exception], ...] = (
-        OSError, TimeoutError, ConnectionError,
+        OSError,
+        TimeoutError,
+        ConnectionError,
     )
     non_retryable_exceptions: tuple[type[Exception], ...] = ()
     timeout_per_attempt: float = 30.0
@@ -110,10 +112,7 @@ def get_config(
     base = PROFILES[profile]
     if not overrides:
         return base
-    fields = {
-        f.name: getattr(base, f.name)
-        for f in base.__dataclass_fields__.values()
-    }
+    fields = {f.name: getattr(base, f.name) for f in base.__dataclass_fields__.values()}
     fields.update(overrides)
     return RetryConfig(**fields)
 
@@ -127,7 +126,7 @@ def _calculate_delay(attempt: int, config: RetryConfig) -> float:
     """Calculate backoff delay for a given attempt (0-indexed)."""
     if config.backoff_base <= 0:
         return 0.0
-    delay = config.backoff_base * (2.0 ** attempt)
+    delay = config.backoff_base * (2.0**attempt)
     delay = min(delay, config.backoff_max)
     if config.jitter:
         jitter_amount = delay * 0.2
@@ -207,7 +206,8 @@ async def call_with_retry(
         metrics.attempts = attempt + 1
         try:
             result = await asyncio.wait_for(
-                func(), timeout=cfg.timeout_per_attempt,
+                func(),
+                timeout=cfg.timeout_per_attempt,
             )
             metrics.final_outcome = "success"
             metrics.total_duration_s = time.monotonic() - start
@@ -280,7 +280,9 @@ def call_with_retry_sync(
 
 
 def _record_non_retryable(
-    metrics: RetryMetrics, exc: Exception, start: float,
+    metrics: RetryMetrics,
+    exc: Exception,
+    start: float,
 ) -> None:
     metrics.final_outcome = "non_retryable_error"
     metrics.errors.append(f"{type(exc).__name__}: {exc}")
@@ -289,12 +291,18 @@ def _record_non_retryable(
 
 
 def _log_attempt_failure(
-    name: str, attempt: int, max_retries: int, exc: Exception,
+    name: str,
+    attempt: int,
+    max_retries: int,
+    exc: Exception,
 ) -> None:
     logger.warning(
         "[%s] Attempt %d/%d failed: %s: %s",
-        name, attempt + 1, max_retries + 1,
-        type(exc).__name__, exc,
+        name,
+        attempt + 1,
+        max_retries + 1,
+        type(exc).__name__,
+        exc,
     )
 
 

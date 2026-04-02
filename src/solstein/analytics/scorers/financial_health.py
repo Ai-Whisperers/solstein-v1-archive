@@ -184,8 +184,10 @@ class FinancialHealthScorer:
         # Convert revenue from millions to actual EUR for calculation
         revenue_eur = financials.revenue * 1_000_000
         rev_per_emp = safe_div(
-            revenue_eur, financials.employees,
-            default=None, label="revenue_per_employee_financial",
+            revenue_eur,
+            financials.employees,
+            default=None,
+            label="revenue_per_employee_financial",
         )
         if rev_per_emp is None:
             return score
@@ -224,8 +226,10 @@ class FinancialHealthScorer:
 
         # Both in millions, so ratio is unitless
         ratio = safe_div(
-            financials.funding_raised, financials.revenue,
-            default=None, label="funding_to_revenue_ratio",
+            financials.funding_raised,
+            financials.revenue,
+            default=None,
+            label="funding_to_revenue_ratio",
         )
         if ratio is None:
             return score

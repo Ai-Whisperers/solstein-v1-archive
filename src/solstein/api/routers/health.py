@@ -33,10 +33,7 @@ async def health_check() -> dict:
     overall_status = health_monitor.get_overall_status()
 
     # Build per-component status map
-    components = {
-        name: check.status
-        for name, check in health_monitor.checks.items()
-    }
+    components = {name: check.status for name, check in health_monitor.checks.items()}
 
     response = {
         "status": overall_status,
@@ -73,10 +70,7 @@ async def readiness_check() -> dict:
     await health_monitor.run_all_checks()
     is_ready = health_monitor.is_ready()
 
-    components = {
-        name: check.status
-        for name, check in health_monitor.checks.items()
-    }
+    components = {name: check.status for name, check in health_monitor.checks.items()}
 
     response = {
         "ready": is_ready,

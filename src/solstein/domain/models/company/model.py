@@ -152,7 +152,6 @@ class Company(CompanyUtilityMixin, CompanyPropertyMixin, CompanySyncMixin):
     energy_smart_infra_level: str | None = None
     energy_grid_breakdown: dict[str, Any] = Field(default_factory=dict)
 
-
     # Aliases for backward compatibility
     @property
     def funding(self) -> float | None:

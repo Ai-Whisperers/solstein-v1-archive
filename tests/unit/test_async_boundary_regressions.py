@@ -31,8 +31,8 @@ async def test_patents_unified_fetch_facts_offloads_sync_patent_lookup(monkeypat
         calls.append((func, args, kwargs))
         return func(*args, **kwargs)
 
-    monkeypatch.setattr("solstein.adapters.enrichment.patents_unified.search_company_patents", mock_search)
-    monkeypatch.setattr("solstein.adapters.enrichment.patents_unified.asyncio.to_thread", fake_to_thread)
+    monkeypatch.setattr("solstein.adapters.enrichment._retired.patents_unified.search_company_patents", mock_search)
+    monkeypatch.setattr("solstein.adapters.enrichment._retired.patents_unified.asyncio.to_thread", fake_to_thread)
 
     facts = await adapter.fetch_facts(["acme"])
 

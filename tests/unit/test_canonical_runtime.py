@@ -26,6 +26,7 @@ from solstein.runtime import convert_raw, get_registry
 # Fixture: minimal Settings with no API keys
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def minimal_settings() -> Settings:
     """Build a Settings object with no optional API keys."""
@@ -43,6 +44,7 @@ def minimal_settings() -> Settings:
 # ---------------------------------------------------------------------------
 # 1. get_registry returns the same type as build_default_registry
 # ---------------------------------------------------------------------------
+
 
 class TestCanonicalRegistry:
     """The canonical ``get_registry`` must produce a SourceRegistry."""
@@ -77,6 +79,7 @@ class TestCanonicalRegistry:
 # 2. convert_raw delegates to the canonical converter
 # ---------------------------------------------------------------------------
 
+
 class TestCanonicalConverter:
     """The canonical ``convert_raw`` must produce a Company domain object."""
 
@@ -110,27 +113,23 @@ class TestCanonicalConverter:
 # 3. Pipeline wires canonical registry (import check)
 # ---------------------------------------------------------------------------
 
+
 class TestPipelineUsesCanonicalRegistry:
     """The research pipeline must import get_registry from solstein.runtime."""
 
     def test_pipeline_imports_canonical_registry(self) -> None:
         """Verify pipeline.py imports get_registry from solstein.runtime."""
-        pipeline_path = (
-            Path(inspect.getfile(importlib.import_module("solstein.research.pipeline")))
-        )
+        pipeline_path = Path(inspect.getfile(importlib.import_module("solstein.research.pipeline")))
         source = pipeline_path.read_text(encoding="utf-8")
 
         # Must NOT import build_default_registry directly
         assert "from solstein.adapters.registry import build_default_registry" not in source, (
-            "pipeline.py must use solstein.runtime.get_registry, not "
-            "solstein.adapters.registry.build_default_registry"
+            "pipeline.py must use solstein.runtime.get_registry, not solstein.adapters.registry.build_default_registry"
         )
 
     def test_pipeline_async_imports_canonical_registry(self) -> None:
         """Verify pipeline_async.py imports get_registry from solstein.runtime."""
-        pipeline_path = (
-            Path(inspect.getfile(importlib.import_module("solstein.research.pipeline_async")))
-        )
+        pipeline_path = Path(inspect.getfile(importlib.import_module("solstein.research.pipeline_async")))
         source = pipeline_path.read_text(encoding="utf-8")
 
         assert "from solstein.adapters.registry import build_default_registry" not in source, (
@@ -141,6 +140,7 @@ class TestPipelineUsesCanonicalRegistry:
 # ---------------------------------------------------------------------------
 # 4. CLI uses canonical converter (import check)
 # ---------------------------------------------------------------------------
+
 
 class TestCLIUsesCanonicalConverter:
     """The CLI must import convert_raw from solstein.runtime."""
@@ -158,6 +158,7 @@ class TestCLIUsesCanonicalConverter:
 # ---------------------------------------------------------------------------
 # 5. Smoke test: one company through shared path
 # ---------------------------------------------------------------------------
+
 
 class TestSharedPathSmokeTest:
     """Prove that a single company can flow through the canonical
@@ -188,6 +189,7 @@ class TestSharedPathSmokeTest:
 # ---------------------------------------------------------------------------
 # 6. No direct build_default_registry usage in canonical entrypoints
 # ---------------------------------------------------------------------------
+
 
 class TestNoDirectRegistryImports:
     """Canonical entrypoints must NOT import build_default_registry directly."""

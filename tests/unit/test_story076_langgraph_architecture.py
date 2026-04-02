@@ -167,8 +167,13 @@ class TestGraphTopology:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.integration
 class TestParallelModel:
-    """Verify parallel nodes are correctly modeled (REQ-3)."""
+    """Verify parallel nodes are correctly modeled (REQ-3).
+
+    Marked integration: these tests invoke the full graph with live HTTP calls.
+    Run with: pytest -m integration
+    """
 
     def test_all_parallel_nodes_in_graph(self) -> None:
         """All 5 collection nodes must appear in the compiled graph."""
@@ -206,8 +211,15 @@ class TestParallelModel:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.integration
 class TestGraphExecution:
-    """Verify the graph executes end-to-end and produces expected output."""
+    """Verify the graph executes end-to-end and produces expected output.
+
+    Marked integration: these tests invoke the full graph with live HTTP calls
+    (GitHub API, SearXNG, Companies House). They require network access and
+    configured credentials to pass reliably.
+    Run with: pytest -m integration
+    """
 
     def test_graph_runs_to_completion(self) -> None:
         """Graph must execute to END without raising an exception."""

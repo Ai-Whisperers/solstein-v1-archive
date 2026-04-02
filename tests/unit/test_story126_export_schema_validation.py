@@ -94,13 +94,29 @@ class TestExportSchemaDefinition:
     def test_schema_covers_story125_fields(self) -> None:
         """All 20 STORY-125 restored fields are represented in the schema."""
         story125_headers = {
-            "Tech Stack", "Key Customers", "Open Positions", "Data Availability",
-            "Funding Rounds", "Funding War Chest", "Investors",
-            "Revenue CAGR 5yr", "Revenue/Employee (€K)", "Employee CAGR 3yr",
-            "Company", "Year", "Revenue (EUR M)", "Source",
-            "Parent Company", "Subsidiaries", "Acquisitions", "Notes",
-            "Source Links", "Data Sources Per Field", "Merge Conflicts",
-            "Profit Margin", "Employees",
+            "Tech Stack",
+            "Key Customers",
+            "Open Positions",
+            "Data Availability",
+            "Funding Rounds",
+            "Funding War Chest",
+            "Investors",
+            "Revenue CAGR 5yr",
+            "Revenue/Employee (€K)",
+            "Employee CAGR 3yr",
+            "Company",
+            "Year",
+            "Revenue (EUR M)",
+            "Source",
+            "Parent Company",
+            "Subsidiaries",
+            "Acquisitions",
+            "Notes",
+            "Source Links",
+            "Data Sources Per Field",
+            "Merge Conflicts",
+            "Profit Margin",
+            "Employees",
         }
         schema_headers = {spec.header for spec in EXPORT_SCHEMA}
         missing = story125_headers - schema_headers
@@ -111,9 +127,9 @@ class TestExportSchemaDefinition:
             assert spec.name, "Field spec missing name"
             assert spec.header, f"Field {spec.name} missing header"
             assert spec.sheet, f"Field {spec.name} missing sheet"
-            assert spec.data_type in {
-                "string", "number", "percentage", "integer", "list", "structured"
-            }, f"Field {spec.name} has invalid data_type: {spec.data_type}"
+            assert spec.data_type in {"string", "number", "percentage", "integer", "list", "structured"}, (
+                f"Field {spec.name} has invalid data_type: {spec.data_type}"
+            )
 
 
 class TestValidationPasses:

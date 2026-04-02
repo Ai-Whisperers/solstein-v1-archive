@@ -32,6 +32,7 @@ if TYPE_CHECKING:
 # Data models
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class Initiative:
     """A single initiative within a roadmap phase."""
@@ -81,14 +82,18 @@ _ENERGY_QUICK_WINS = [
     Initiative(
         "Predictive maintenance alerting",
         "Deploy ML models on equipment sensor data to predict failures",
-        "4-6", "medium", "high",
+        "4-6",
+        "medium",
+        "high",
         "1 ML engineer, 1 domain expert",
         "30% reduction in unplanned downtime",
     ),
     Initiative(
         "Automated regulatory compliance checking",
         "NLP-based scanning of regulatory updates against company policies",
-        "4-6", "medium", "high",
+        "4-6",
+        "medium",
+        "high",
         "1 NLP engineer, 1 compliance analyst",
         "80% of regulatory changes auto-flagged",
     ),
@@ -98,14 +103,18 @@ _ENERGY_TRANSFORMATION = [
     Initiative(
         "Grid optimisation AI",
         "Real-time demand/supply balancing using reinforcement learning",
-        "7-12", "high", "high",
+        "7-12",
+        "high",
+        "high",
         "2 ML engineers, 1 grid specialist",
         "15% improvement in grid efficiency",
     ),
     Initiative(
         "Energy trading signal generation",
         "ML-powered price prediction for energy trading",
-        "7-12", "high", "high",
+        "7-12",
+        "high",
+        "high",
         "2 quant engineers, 1 trader",
         "Measurable alpha in trading decisions",
     ),
@@ -115,14 +124,18 @@ _FINTECH_QUICK_WINS = [
     Initiative(
         "Fraud detection enhancement",
         "Add ML layer to existing rule-based fraud detection",
-        "4-6", "medium", "high",
+        "4-6",
+        "medium",
+        "high",
         "1 ML engineer, 1 fraud analyst",
         "40% more fraud detected, 20% fewer false positives",
     ),
     Initiative(
         "Customer churn prediction",
         "Predict at-risk customers using transaction patterns",
-        "4-6", "medium", "medium",
+        "4-6",
+        "medium",
+        "medium",
         "1 data scientist, 1 product manager",
         "25% improvement in retention intervention success",
     ),
@@ -132,7 +145,9 @@ _FINTECH_TRANSFORMATION = [
     Initiative(
         "AI-powered credit scoring",
         "Replace legacy credit models with ML-based scoring",
-        "7-12", "high", "high",
+        "7-12",
+        "high",
+        "high",
         "2 ML engineers, 1 risk manager",
         "15% improvement in default prediction accuracy",
     ),
@@ -142,14 +157,18 @@ _GENERIC_QUICK_WINS = [
     Initiative(
         "Document processing automation",
         "OCR + NLP pipeline for invoice/contract processing",
-        "4-6", "medium", "high",
+        "4-6",
+        "medium",
+        "high",
         "1 ML engineer, 1 ops lead",
         "60% reduction in manual document handling",
     ),
     Initiative(
         "Customer support AI assistant",
         "Deploy LLM-powered support chatbot for tier-1 queries",
-        "4-6", "low", "medium",
+        "4-6",
+        "low",
+        "medium",
         "1 engineer, 1 support lead",
         "40% of tier-1 queries resolved without human",
     ),
@@ -159,7 +178,9 @@ _GENERIC_TRANSFORMATION = [
     Initiative(
         "Core process AI integration",
         "Embed ML into primary business workflow",
-        "7-12", "high", "high",
+        "7-12",
+        "high",
+        "high",
         "2 ML engineers, 1 process owner",
         "20% efficiency improvement in core process",
     ),
@@ -169,6 +190,7 @@ _GENERIC_TRANSFORMATION = [
 # ---------------------------------------------------------------------------
 # Generator
 # ---------------------------------------------------------------------------
+
 
 class RoadmapGenerator:
     """Generate phased AI transformation roadmaps from company signals."""
@@ -258,21 +280,27 @@ class RoadmapGenerator:
             Initiative(
                 "Data platform assessment and setup",
                 "Audit existing data infrastructure, implement data lake/warehouse",
-                "1-3", "high" if saas <= 3 else "medium", "high",
+                "1-3",
+                "high" if saas <= 3 else "medium",
+                "high",
                 "1 data architect, 1 DevOps engineer",
                 "Unified data platform operational",
             ),
             Initiative(
                 "AI/ML team formation",
                 "Hire or train core AI team, establish ML engineering practices",
-                "1-3", "high" if ai_mat in ("none", "low") else "medium", "high",
+                "1-3",
+                "high" if ai_mat in ("none", "low") else "medium",
+                "high",
                 "HR + 1 AI lead hire",
                 "Core AI team of 2-3 engineers operational",
             ),
             Initiative(
                 "Data governance framework",
                 "Establish data quality standards, access controls, lineage tracking",
-                "2-4", "medium", "medium",
+                "2-4",
+                "medium",
+                "medium",
                 "1 data steward, 1 compliance lead",
                 "Data governance policy documented and enforced",
             ),
@@ -346,14 +374,18 @@ class RoadmapGenerator:
             Initiative(
                 "Advanced analytics platform",
                 "Deploy real-time analytics with ML-powered anomaly detection",
-                "14-18", "high", "high",
+                "14-18",
+                "high",
+                "high",
                 "2 ML engineers, 1 analytics lead",
                 "Real-time dashboards with predictive insights operational",
             ),
             Initiative(
                 "AI strategy review and scale-up",
                 "Review transformation outcomes, plan next-generation AI initiatives",
-                "18-24", "medium", "medium",
+                "18-24",
+                "medium",
+                "medium",
                 "CTO + AI lead",
                 "AI roadmap v2 published with measurable ROI from v1",
             ),

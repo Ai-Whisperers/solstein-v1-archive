@@ -157,13 +157,10 @@ class DueDiligenceEngine:
         score_text = f"{ai_score}/10" if ai_score is not None else "N/A"
 
         exec_summary = (
-            f"{target.name} is an energy software company "
-            f"with AI maturity '{ai_maturity}' (score: {score_text}). "
+            f"{target.name} is an energy software company with AI maturity '{ai_maturity}' (score: {score_text}). "
         )
         if critical:
-            exec_summary += (
-                f"CRITICAL: {len(critical)} critical red flag(s) require immediate attention. "
-            )
+            exec_summary += f"CRITICAL: {len(critical)} critical red flag(s) require immediate attention. "
         if high:
             exec_summary += f"{len(high)} high-severity risk(s) identified. "
 
@@ -171,26 +168,18 @@ class DueDiligenceEngine:
         ai_summary = f"AI maturity: {ai_maturity}. AI score: {score_text}. "
         if competitive:
             ai_summary += (
-                f"Ranked #{competitive.target_rank} of {competitive.peer_count + 1} "
-                f"peers ({competitive.positioning}). "
+                f"Ranked #{competitive.target_rank} of {competitive.peer_count + 1} peers ({competitive.positioning}). "
             )
 
         # Recommendation
         if critical:
-            recommendation = (
-                "PROCEED WITH CAUTION: Critical red flags must be resolved "
-                "before investment commitment."
-            )
+            recommendation = "PROCEED WITH CAUTION: Critical red flags must be resolved before investment commitment."
         elif len(high) >= 2:
             recommendation = (
-                "CONDITIONAL PROCEED: Multiple high-severity risks require "
-                "mitigation plan as condition of investment."
+                "CONDITIONAL PROCEED: Multiple high-severity risks require mitigation plan as condition of investment."
             )
         elif high:
-            recommendation = (
-                "PROCEED: One high-severity risk identified — include in "
-                "100-day plan."
-            )
+            recommendation = "PROCEED: One high-severity risk identified — include in 100-day plan."
         else:
             recommendation = "PROCEED: No critical risks identified."
 
@@ -204,7 +193,8 @@ class DueDiligenceEngine:
             critical_flags=[f.title for f in critical],
             competitive_summary=(
                 f"Positioned as '{competitive.positioning}' among peers"
-                if competitive else "No peer comparison available"
+                if competitive
+                else "No peer comparison available"
             ),
             recommendation=recommendation,
         )

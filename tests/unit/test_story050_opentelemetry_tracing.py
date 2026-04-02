@@ -91,26 +91,21 @@ class TestOTLPEndpointConfig:
 
     def test_init_with_explicit_endpoint(self):
         mod = _reload_tracing()
-        with patch(
-            "opentelemetry.exporter.otlp.proto.http.trace_exporter.OTLPSpanExporter"
-        ) as mock_exporter, patch(
-            "opentelemetry.sdk.trace.export.BatchSpanProcessor"
+        with (
+            patch("opentelemetry.exporter.otlp.proto.http.trace_exporter.OTLPSpanExporter") as mock_exporter,
+            patch("opentelemetry.sdk.trace.export.BatchSpanProcessor"),
         ):
             mock_exporter.return_value = MagicMock()
             result = mod.init_tracing(otlp_endpoint="http://localhost:4318/v1/traces")
             assert result is True
-            mock_exporter.assert_called_once_with(
-                endpoint="http://localhost:4318/v1/traces"
-            )
+            mock_exporter.assert_called_once_with(endpoint="http://localhost:4318/v1/traces")
 
     def test_init_with_env_var_endpoint(self):
         mod = _reload_tracing()
-        with patch.dict(
-            os.environ, {"OTLP_ENDPOINT": "http://tempo:4318"}
-        ), patch(
-            "opentelemetry.exporter.otlp.proto.http.trace_exporter.OTLPSpanExporter"
-        ) as mock_exporter, patch(
-            "opentelemetry.sdk.trace.export.BatchSpanProcessor"
+        with (
+            patch.dict(os.environ, {"OTLP_ENDPOINT": "http://tempo:4318"}),
+            patch("opentelemetry.exporter.otlp.proto.http.trace_exporter.OTLPSpanExporter") as mock_exporter,
+            patch("opentelemetry.sdk.trace.export.BatchSpanProcessor"),
         ):
             mock_exporter.return_value = MagicMock()
             result = mod.init_tracing()
@@ -119,12 +114,10 @@ class TestOTLPEndpointConfig:
 
     def test_explicit_endpoint_overrides_env(self):
         mod = _reload_tracing()
-        with patch.dict(
-            os.environ, {"OTLP_ENDPOINT": "http://env-endpoint"}
-        ), patch(
-            "opentelemetry.exporter.otlp.proto.http.trace_exporter.OTLPSpanExporter"
-        ) as mock_exporter, patch(
-            "opentelemetry.sdk.trace.export.BatchSpanProcessor"
+        with (
+            patch.dict(os.environ, {"OTLP_ENDPOINT": "http://env-endpoint"}),
+            patch("opentelemetry.exporter.otlp.proto.http.trace_exporter.OTLPSpanExporter") as mock_exporter,
+            patch("opentelemetry.sdk.trace.export.BatchSpanProcessor"),
         ):
             mock_exporter.return_value = MagicMock()
             mod.init_tracing(otlp_endpoint="http://explicit-endpoint")
@@ -132,9 +125,10 @@ class TestOTLPEndpointConfig:
 
     def test_tracing_enabled_after_successful_init(self):
         mod = _reload_tracing()
-        with patch(
-            "opentelemetry.exporter.otlp.proto.http.trace_exporter.OTLPSpanExporter"
-        ), patch("opentelemetry.sdk.trace.export.BatchSpanProcessor"):
+        with (
+            patch("opentelemetry.exporter.otlp.proto.http.trace_exporter.OTLPSpanExporter"),
+            patch("opentelemetry.sdk.trace.export.BatchSpanProcessor"),
+        ):
             mod.init_tracing(otlp_endpoint="http://localhost:4318")
             assert mod.is_tracing_enabled() is True
 
@@ -298,9 +292,10 @@ class TestFastAPIInstrumentation:
     def test_instrument_when_enabled(self):
         """instrument_fastapi calls FastAPIInstrumentor when enabled."""
         mod = _reload_tracing()
-        with patch(
-            "opentelemetry.exporter.otlp.proto.http.trace_exporter.OTLPSpanExporter"
-        ), patch("opentelemetry.sdk.trace.export.BatchSpanProcessor"):
+        with (
+            patch("opentelemetry.exporter.otlp.proto.http.trace_exporter.OTLPSpanExporter"),
+            patch("opentelemetry.sdk.trace.export.BatchSpanProcessor"),
+        ):
             mod.init_tracing(otlp_endpoint="http://localhost:4318")
 
         mock_instrumentor = MagicMock()
@@ -335,9 +330,7 @@ class TestSettingsIntegration:
         assert s.otlp_endpoint is None
 
     def test_settings_otlp_endpoint_from_env(self):
-        with patch.dict(
-            os.environ, {"OTLP_ENDPOINT": "http://jaeger:4318/v1/traces"}
-        ):
+        with patch.dict(os.environ, {"OTLP_ENDPOINT": "http://jaeger:4318/v1/traces"}):
             s = Settings()
             assert s.otlp_endpoint == "http://jaeger:4318/v1/traces"
 

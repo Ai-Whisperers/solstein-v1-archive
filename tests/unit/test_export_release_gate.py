@@ -20,7 +20,7 @@ class _DummyRepo:
         _ = (industry, skip, limit)
         return self.companies
 
-    def get_all(self, filters: object | None = None) -> list[Company]:
+    async def get_all(self, filters: object | None = None) -> list[Company]:
         _ = filters
         return self.companies
 
@@ -116,7 +116,7 @@ def test_excel_export_runs_when_gate_blocks(monkeypatch: MonkeyPatch) -> None:
 
     monkeypatch.setattr(export_router.excel_exporter, "create_dashboard", _fake_create_dashboard)
 
-    export_router._run_excel_export(repo, filters={}, filename="test.xlsx")
+    _run(export_router._run_excel_export(repo, filters={}, filename="test.xlsx"))
 
     assert created_paths == [str(export_router.settings.data.export_dir / "test.xlsx")]
     assert scoring_calls["count"] == 1

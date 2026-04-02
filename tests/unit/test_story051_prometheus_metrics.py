@@ -56,9 +56,7 @@ class TestPrometheusFormat:
         """The /metrics/prometheus route must be registered."""
         prom_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "api" / "routers" / "prometheus.py"
         source = prom_path.read_text()
-        assert "/metrics/prometheus" in source, (
-            "Expected /metrics/prometheus route in prometheus.py"
-        )
+        assert "/metrics/prometheus" in source, "Expected /metrics/prometheus route in prometheus.py"
 
 
 # ---------------------------------------------------------------------------
@@ -70,10 +68,7 @@ class TestRequiredMetrics:
     def _get_metric_names(self) -> set[str]:
         """Get all metric names from Prometheus output."""
         data = generate_latest().decode("utf-8")
-        return {
-            family.name
-            for family in text_string_to_metric_families(data)
-        }
+        return {family.name for family in text_string_to_metric_families(data)}
 
     def test_http_request_rate_metric(self):
         """HTTP request rate counter must exist."""
@@ -152,7 +147,9 @@ class TestUnauthenticatedAccess:
 
     def test_rate_limit_excluded(self):
         """The endpoint must be excluded from rate limiting."""
-        rate_limit_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "api" / "middleware" / "rate_limit.py"
+        rate_limit_path = (
+            Path(__file__).parent.parent.parent / "src" / "solstein" / "api" / "middleware" / "rate_limit.py"
+        )
         source = rate_limit_path.read_text()
         assert '"/metrics/prometheus"' in source
 
@@ -177,19 +174,14 @@ class TestNamingConventions:
 
     def _get_metric_names(self) -> set[str]:
         data = generate_latest().decode("utf-8")
-        return {
-            family.name
-            for family in text_string_to_metric_families(data)
-        }
+        return {family.name for family in text_string_to_metric_families(data)}
 
     def test_names_are_snake_case(self):
         """All metric names must be snake_case."""
         names = self._get_metric_names()
         snake_case_pattern = re.compile(r"^[a-z][a-z0-9_]*$")
         for name in names:
-            assert snake_case_pattern.match(name), (
-                f"Metric name '{name}' is not snake_case"
-            )
+            assert snake_case_pattern.match(name), f"Metric name '{name}' is not snake_case"
 
     def test_duration_metrics_have_seconds_suffix(self):
         """Duration metrics must end with _seconds (ignoring _created/_total suffixes)."""
@@ -202,9 +194,7 @@ class TestNamingConventions:
                 if base.endswith(suffix):
                     base = base[: -len(suffix)]
                     break
-            assert base.endswith("_seconds"), (
-                f"Duration metric '{name}' (base: '{base}') should end with _seconds"
-            )
+            assert base.endswith("_seconds"), f"Duration metric '{name}' (base: '{base}') should end with _seconds"
 
     def test_app_counter_metrics_have_total_suffix(self):
         """Application counter metrics should follow _total convention.
@@ -217,8 +207,7 @@ class TestNamingConventions:
         app_counters = [
             f.name
             for f in text_string_to_metric_families(data)
-            if f.type == "counter"
-            and not f.name.startswith(("python_", "process_"))
+            if f.type == "counter" and not f.name.startswith(("python_", "process_"))
         ]
         # Our application counters should follow _total convention
         for name in app_counters:
@@ -234,25 +223,15 @@ class TestMetricUpdates:
 
     def test_http_counter_increments(self):
         """HTTP request counter must increment."""
-        before = HTTP_REQUESTS_TOTAL.labels(
-            method="GET", endpoint="/test", status_code="200"
-        )._value.get()
-        HTTP_REQUESTS_TOTAL.labels(
-            method="GET", endpoint="/test", status_code="200"
-        ).inc()
-        after = HTTP_REQUESTS_TOTAL.labels(
-            method="GET", endpoint="/test", status_code="200"
-        )._value.get()
+        before = HTTP_REQUESTS_TOTAL.labels(method="GET", endpoint="/test", status_code="200")._value.get()
+        HTTP_REQUESTS_TOTAL.labels(method="GET", endpoint="/test", status_code="200").inc()
+        after = HTTP_REQUESTS_TOTAL.labels(method="GET", endpoint="/test", status_code="200")._value.get()
         assert after == before + 1
 
     def test_llm_tokens_counter_increments(self):
         """LLM token counter must increment."""
-        LLM_TOKENS_TOTAL.labels(
-            provider="test", model="test-model", token_type="input"
-        ).inc(100)
-        val = LLM_TOKENS_TOTAL.labels(
-            provider="test", model="test-model", token_type="input"
-        )._value.get()
+        LLM_TOKENS_TOTAL.labels(provider="test", model="test-model", token_type="input").inc(100)
+        val = LLM_TOKENS_TOTAL.labels(provider="test", model="test-model", token_type="input")._value.get()
         assert val >= 100
 
     def test_db_query_duration_observes(self):

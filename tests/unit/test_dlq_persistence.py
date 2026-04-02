@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from unittest.mock import patch
 
@@ -11,11 +10,16 @@ from solstein.worker.enrichment_tasks import _build_failure_result
 
 
 def test_dead_letter_queue_persists_structured_record_and_tracks_error(tmp_path: Path) -> None:
+    # DLQ now persists to PostgreSQL via persist_failed_task, not a .jsonl file.
+    # audit_path is kept for backward compat but is no longer written.
     audit_path = tmp_path / "dead_letter_queue.jsonl"
     queue = DeadLetterQueue(audit_path=audit_path)
     error = RuntimeError("connector exploded")
 
-    with patch("solstein.worker.base.global_error_tracker.track_error") as mock_track:
+    with (
+        patch("solstein.worker.base.global_error_tracker.track_error") as mock_track,
+        patch("solstein.worker.base.persist_failed_task") as mock_persist,
+    ):
         record = queue.record_failure(
             "refresh_sec_edgar",
             "task-123",
@@ -31,13 +35,11 @@ def test_dead_letter_queue_persists_structured_record_and_tracks_error(tmp_path:
     assert record["context"]["source_name"] == "SEC EDGAR"
     assert len(queue.failed_jobs) == 1
 
-    persisted = [json.loads(line) for line in audit_path.read_text(encoding="utf-8").splitlines()]
-    assert len(persisted) == 1
-    assert persisted[0]["task_name"] == "refresh_sec_edgar"
-    assert persisted[0]["task_id"] == "task-123"
-    assert persisted[0]["error_type"] == "RuntimeError"
-    assert persisted[0]["traceback"] == "traceback-line-1\ntraceback-line-2"
-    assert persisted[0]["context"]["source_name"] == "SEC EDGAR"
+    # Verify persist_failed_task was called with the right task identifiers
+    mock_persist.assert_called_once()
+    call_kwargs = mock_persist.call_args.kwargs
+    assert call_kwargs["task_name"] == "refresh_sec_edgar"
+    assert call_kwargs["task_id"] == "task-123"
     mock_track.assert_called_once()
 
 

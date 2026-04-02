@@ -206,8 +206,7 @@ class TestRouterBypassGuard:
         }
         result = _human_review_router(state)
         assert result == "human_review_gate", (
-            f"Router returned '{result}' instead of 'human_review_gate' — "
-            "empty confidence_scores must trigger review"
+            f"Router returned '{result}' instead of 'human_review_gate' — empty confidence_scores must trigger review"
         )
 
     def test_topology_router_passes_high_scores(self) -> None:
@@ -271,10 +270,7 @@ class TestRawDataSourceGuards:
             confidence=0.0,
         )
         report = check_raw_data_source_not_placeholder(source, "TestAdapter")
-        assert any(
-            v.field_name == "confidence" and v.severity == "warning"
-            for v in report.violations
-        )
+        assert any(v.field_name == "confidence" and v.severity == "warning" for v in report.violations)
 
     def test_missing_extraction_method_warned(self) -> None:
         """Missing extraction_method must produce a warning."""
@@ -286,10 +282,7 @@ class TestRawDataSourceGuards:
             extraction_method=None,
         )
         report = check_raw_data_source_not_placeholder(source, "TestAdapter")
-        assert any(
-            v.field_name == "extraction_method" and v.severity == "warning"
-            for v in report.violations
-        )
+        assert any(v.field_name == "extraction_method" and v.severity == "warning" for v in report.violations)
 
     def test_real_source_passes(self) -> None:
         """A properly filled RawDataSource must pass all guards."""

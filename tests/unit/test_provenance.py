@@ -265,6 +265,13 @@ class TestValidateCompanyProvenance:
         company = Mock()
         company.revenue = 1000000
         company.growth_rate = 0.5
+        # Fields with no data must be None so the validator skips provenance check;
+        # Mock() auto-generates truthy sentinel values otherwise.
+        company.profit_margin = None
+        company.ebitda = None
+        company.valuation = None
+        company.employee_count = None
+        company.funding_total = None
         company.provenance = DataProvenance()
         company.provenance.fields["revenue"] = FieldProvenance(source="sec_edgar")
         company.provenance.fields["growth_rate"] = FieldProvenance(source="crunchbase")

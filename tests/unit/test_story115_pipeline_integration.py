@@ -21,14 +21,16 @@ import pytest
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _run(coro: Any) -> Any:
     """Run a coroutine synchronously for test purposes."""
-    return asyncio.get_event_loop().run_until_complete(coro)
+    return asyncio.run(coro)
 
 
 # ---------------------------------------------------------------------------
 # _build_filename tests
 # ---------------------------------------------------------------------------
+
 
 class TestBuildFilename:
     """Tests for the filename builder."""
@@ -86,6 +88,7 @@ class TestBuildFilename:
 # _generate_file integration tests (mocked exporters + storage)
 # ---------------------------------------------------------------------------
 
+
 class TestGenerateFileWithStorage:
     """Tests for _generate_file with storage backend integration."""
 
@@ -113,23 +116,29 @@ class TestGenerateFileWithStorage:
 
         mock_dispatch.side_effect = fake_dispatch
 
-        with mock.patch(
-            "solstein.worker.export_tasks._dispatch_exporter",
-            mock_dispatch,
-        ), mock.patch(
-            "solstein.worker.export_tasks.get_storage_backend",
-            return_value=mock_backend,
-            create=True,
-        ), mock.patch(
-            "solstein.exporters.storage.get_storage_backend",
-            return_value=mock_backend,
+        with (
+            mock.patch(
+                "solstein.worker.export_tasks._dispatch_exporter",
+                mock_dispatch,
+            ),
+            mock.patch(
+                "solstein.worker.export_tasks.get_storage_backend",
+                return_value=mock_backend,
+                create=True,
+            ),
+            mock.patch(
+                "solstein.exporters.storage.get_storage_backend",
+                return_value=mock_backend,
+            ),
         ):
-            url = _run(_generate_file(
-                tenant_id="t1",
-                export_job_id="j1",
-                export_format="csv",
-                filters={},
-            ))
+            url = _run(
+                _generate_file(
+                    tenant_id="t1",
+                    export_job_id="j1",
+                    export_format="csv",
+                    filters={},
+                )
+            )
 
         assert url == "https://storage.example.com/signed-url"
         mock_backend.upload.assert_called_once()
@@ -156,19 +165,24 @@ class TestGenerateFileWithStorage:
             "https://ok.com/url",
         ]
 
-        with mock.patch(
-            "solstein.worker.export_tasks._dispatch_exporter",
-            mock_dispatch,
-        ), mock.patch(
-            "solstein.exporters.storage.get_storage_backend",
-            return_value=mock_backend,
+        with (
+            mock.patch(
+                "solstein.worker.export_tasks._dispatch_exporter",
+                mock_dispatch,
+            ),
+            mock.patch(
+                "solstein.exporters.storage.get_storage_backend",
+                return_value=mock_backend,
+            ),
         ):
-            url = _run(_generate_file(
-                tenant_id="t",
-                export_job_id="j",
-                export_format="json",
-                filters={},
-            ))
+            url = _run(
+                _generate_file(
+                    tenant_id="t",
+                    export_job_id="j",
+                    export_format="json",
+                    filters={},
+                )
+            )
 
         assert url == "https://ok.com/url"
         assert mock_backend.upload.call_count == 3
@@ -186,20 +200,25 @@ class TestGenerateFileWithStorage:
         mock_backend = mock.AsyncMock()
         mock_backend.upload.side_effect = RuntimeError("storage down")
 
-        with mock.patch(
-            "solstein.worker.export_tasks._dispatch_exporter",
-            mock_dispatch,
-        ), mock.patch(
-            "solstein.exporters.storage.get_storage_backend",
-            return_value=mock_backend,
+        with (
+            mock.patch(
+                "solstein.worker.export_tasks._dispatch_exporter",
+                mock_dispatch,
+            ),
+            mock.patch(
+                "solstein.exporters.storage.get_storage_backend",
+                return_value=mock_backend,
+            ),
         ):
             with pytest.raises(RuntimeError, match="3 attempts"):
-                _run(_generate_file(
-                    tenant_id="t",
-                    export_job_id="j",
-                    export_format="csv",
-                    filters={},
-                ))
+                _run(
+                    _generate_file(
+                        tenant_id="t",
+                        export_job_id="j",
+                        export_format="csv",
+                        filters={},
+                    )
+                )
 
         assert mock_backend.upload.call_count == 3
 
@@ -214,12 +233,14 @@ class TestGenerateFileWithStorage:
             mock_dispatch,
         ):
             with pytest.raises(RuntimeError, match="did not produce"):
-                _run(_generate_file(
-                    tenant_id="t",
-                    export_job_id="j",
-                    export_format="csv",
-                    filters={},
-                ))
+                _run(
+                    _generate_file(
+                        tenant_id="t",
+                        export_job_id="j",
+                        export_format="csv",
+                        filters={},
+                    )
+                )
 
     def test_temp_directory_cleaned_up(self) -> None:
         """Verify temp files are cleaned up after upload."""
@@ -228,7 +249,10 @@ class TestGenerateFileWithStorage:
         captured_paths: list[Path] = []
 
         async def capturing_dispatch(
-            fmt: str, path: Path, filters: Any, cb: Any,
+            fmt: str,
+            path: Path,
+            filters: Any,
+            cb: Any,
         ) -> None:
             captured_paths.append(path)
             path.write_bytes(b"temp-data")
@@ -236,19 +260,24 @@ class TestGenerateFileWithStorage:
         mock_backend = mock.AsyncMock()
         mock_backend.upload.return_value = "https://ok.com/url"
 
-        with mock.patch(
-            "solstein.worker.export_tasks._dispatch_exporter",
-            capturing_dispatch,
-        ), mock.patch(
-            "solstein.exporters.storage.get_storage_backend",
-            return_value=mock_backend,
+        with (
+            mock.patch(
+                "solstein.worker.export_tasks._dispatch_exporter",
+                capturing_dispatch,
+            ),
+            mock.patch(
+                "solstein.exporters.storage.get_storage_backend",
+                return_value=mock_backend,
+            ),
         ):
-            _run(_generate_file(
-                tenant_id="t",
-                export_job_id="j",
-                export_format="csv",
-                filters={},
-            ))
+            _run(
+                _generate_file(
+                    tenant_id="t",
+                    export_job_id="j",
+                    export_format="csv",
+                    filters={},
+                )
+            )
 
         # Temp directory should be cleaned up
         assert len(captured_paths) == 1

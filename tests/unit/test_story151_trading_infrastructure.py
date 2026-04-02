@@ -19,6 +19,7 @@ from solstein.analytics.energy_trading_infrastructure import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_company(**overrides):  # type: ignore[no-untyped-def]
     """Create a minimal Company for testing."""
     from solstein.domain.models import Company
@@ -42,6 +43,7 @@ def scorer() -> TradingInfrastructureScorer:
 # ---------------------------------------------------------------------------
 # TestResultStructure
 # ---------------------------------------------------------------------------
+
 
 class TestResultStructure:
     """Verify the infrastructure result has all required fields."""
@@ -78,32 +80,27 @@ class TestResultStructure:
 # TestTradingPlatform
 # ---------------------------------------------------------------------------
 
+
 class TestTradingPlatform:
     """Verify trading platform scoring."""
 
     def test_algo_trading_boosts_score(self, scorer: TradingInfrastructureScorer) -> None:
         basic = _make_company(description="Basic energy company")
-        algo = _make_company(
-            description="Algorithmic trading with energy trading platform"
-        )
+        algo = _make_company(description="Algorithmic trading with energy trading platform")
         r_basic = scorer.score(basic)
         r_algo = scorer.score(algo)
         assert r_algo.trading_platform_score > r_basic.trading_platform_score
 
     def test_market_access_boosts_score(self, scorer: TradingInfrastructureScorer) -> None:
         basic = _make_company(description="Basic energy")
-        market = _make_company(
-            description="Day-ahead intraday futures market access with epex"
-        )
+        market = _make_company(description="Day-ahead intraday futures market access with epex")
         r_basic = scorer.score(basic)
         r_market = scorer.score(market)
         assert r_market.trading_platform_score > r_basic.trading_platform_score
 
     def test_risk_management_boosts_score(self, scorer: TradingInfrastructureScorer) -> None:
         basic = _make_company(description="Basic energy")
-        risk = _make_company(
-            description="Value at risk position management with counterparty risk"
-        )
+        risk = _make_company(description="Value at risk position management with counterparty risk")
         r_basic = scorer.score(basic)
         r_risk = scorer.score(risk)
         assert r_risk.trading_platform_score > r_basic.trading_platform_score
@@ -124,6 +121,7 @@ class TestTradingPlatform:
 # TestDigitalInfrastructure
 # ---------------------------------------------------------------------------
 
+
 class TestDigitalInfrastructure:
     """Verify digital infrastructure scoring."""
 
@@ -136,18 +134,14 @@ class TestDigitalInfrastructure:
 
     def test_api_maturity_boosts_score(self, scorer: TradingInfrastructureScorer) -> None:
         basic = _make_company(description="Basic company")
-        api = _make_company(
-            description="REST api with graphql microservices and event-driven architecture"
-        )
+        api = _make_company(description="REST api with graphql microservices and event-driven architecture")
         r_basic = scorer.score(basic)
         r_api = scorer.score(api)
         assert r_api.digital_infrastructure_score > r_basic.digital_infrastructure_score
 
     def test_data_architecture_boosts_score(self, scorer: TradingInfrastructureScorer) -> None:
         basic = _make_company(description="Basic company")
-        data = _make_company(
-            description="Data lake with streaming kafka and time series database"
-        )
+        data = _make_company(description="Data lake with streaming kafka and time series database")
         r_basic = scorer.score(basic)
         r_data = scorer.score(data)
         assert r_data.digital_infrastructure_score > r_basic.digital_infrastructure_score
@@ -162,10 +156,7 @@ class TestDigitalInfrastructure:
     def test_cloud_native_tier(self, scorer: TradingInfrastructureScorer) -> None:
         company = _make_company(
             tech_stack=["aws", "kubernetes", "docker", "kafka"],
-            description=(
-                "Cloud-native api microservices with data lake "
-                "streaming and graphql event-driven"
-            ),
+            description=("Cloud-native api microservices with data lake streaming and graphql event-driven"),
             saas_maturity=9,
         )
         result = scorer.score(company)
@@ -176,23 +167,20 @@ class TestDigitalInfrastructure:
 # TestIntegrationReadiness
 # ---------------------------------------------------------------------------
 
+
 class TestIntegrationReadiness:
     """Verify integration readiness scoring."""
 
     def test_standards_boost_score(self, scorer: TradingInfrastructureScorer) -> None:
         basic = _make_company(description="Basic company")
-        standards = _make_company(
-            description="IEC 61968 CIM interoperability with openapi and edi"
-        )
+        standards = _make_company(description="IEC 61968 CIM interoperability with openapi and edi")
         r_basic = scorer.score(basic)
         r_std = scorer.score(standards)
         assert r_std.integration_readiness_score > r_basic.integration_readiness_score
 
     def test_security_boosts_score(self, scorer: TradingInfrastructureScorer) -> None:
         basic = _make_company(description="Basic company")
-        secure = _make_company(
-            description="Zero trust SSO OAuth with encryption and SIEM"
-        )
+        secure = _make_company(description="Zero trust SSO OAuth with encryption and SIEM")
         r_basic = scorer.score(basic)
         r_secure = scorer.score(secure)
         assert r_secure.integration_readiness_score > r_basic.integration_readiness_score
@@ -201,6 +189,7 @@ class TestIntegrationReadiness:
 # ---------------------------------------------------------------------------
 # TestRecommendations
 # ---------------------------------------------------------------------------
+
 
 class TestRecommendations:
     """Verify recommendations generation."""
@@ -231,6 +220,7 @@ class TestRecommendations:
 # TestCompanyModelIntegration
 # ---------------------------------------------------------------------------
 
+
 class TestCompanyModelIntegration:
     """Verify Company model has trading infrastructure fields."""
 
@@ -242,9 +232,7 @@ class TestCompanyModelIntegration:
         assert hasattr(company, "energy_trading_breakdown")
 
     def test_store_trading_results(self, scorer: TradingInfrastructureScorer) -> None:
-        company = _make_company(
-            description="Algorithmic trading energy trading platform"
-        )
+        company = _make_company(description="Algorithmic trading energy trading platform")
         result = scorer.score(company)
         company.energy_trading_score = result.composite_score
         company.energy_platform_maturity = result.platform_maturity.value

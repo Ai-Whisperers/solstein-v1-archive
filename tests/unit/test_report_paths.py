@@ -93,9 +93,7 @@ class TestReportPathNesting:
             nested_dir = company_dir / "Eneve"
             if nested_dir.exists():
                 nested_files = list(nested_dir.glob("*.md"))
-                assert (
-                    len(nested_files) == 0
-                ), f"Found nested files in {nested_dir}: {nested_files}"
+                assert len(nested_files) == 0, f"Found nested files in {nested_dir}: {nested_files}"
 
     def test_client_report_no_double_nesting(self) -> None:
         """ClientReportGenerator should write all reports to one directory level."""
@@ -117,9 +115,7 @@ class TestReportPathNesting:
                     dirs_used.add(path.parent)
 
             # Should use at most one directory (the company dir)
-            assert (
-                len(dirs_used) <= 1
-            ), f"Reports scattered across multiple dirs: {dirs_used}"
+            assert len(dirs_used) <= 1, f"Reports scattered across multiple dirs: {dirs_used}"
 
     def test_all_five_report_types_same_directory(self) -> None:
         """All 5 report types should be in the same directory."""

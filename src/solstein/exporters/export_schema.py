@@ -161,11 +161,7 @@ def validate_export(file_path: str | Any, schema: list[FieldSpec] | None = None)
         target_headers = sheet_headers.get(spec.sheet, set())
         if spec.header not in target_headers:
             # Check if it's on a different sheet (wrong placement)
-            found_elsewhere = any(
-                spec.header in hdrs
-                for name, hdrs in sheet_headers.items()
-                if name != spec.sheet
-            )
+            found_elsewhere = any(spec.header in hdrs for name, hdrs in sheet_headers.items() if name != spec.sheet)
             if found_elsewhere:
                 wrong_sheet.append(f"{spec.name} (expected on '{spec.sheet}', found elsewhere)")
             else:
@@ -210,10 +206,7 @@ def get_headers_for_sheet(sheet_name: str) -> list[str]:
     by_sheet = get_schema_by_sheet()
     specs = by_sheet.get(sheet_name)
     if specs is None:
-        raise ValueError(
-            f"No schema fields defined for sheet '{sheet_name}'. "
-            f"Known sheets: {sorted(by_sheet.keys())}"
-        )
+        raise ValueError(f"No schema fields defined for sheet '{sheet_name}'. Known sheets: {sorted(by_sheet.keys())}")
     return [spec.header for spec in specs]
 
 
@@ -251,7 +244,9 @@ def generate_schema_docs() -> str:
     lines.append("")
     lines.append("| Version | Date | Changes |")
     lines.append("|---------|------|---------|")
-    lines.append("| 1.1 | 2026-03-31 | STORY-250: Reconcile Executive Summary headers with schema — add AI Readiness and Transformation fields |")
+    lines.append(
+        "| 1.1 | 2026-03-31 | STORY-250: Reconcile Executive Summary headers with schema — add AI Readiness and Transformation fields |"
+    )
     lines.append("| 1.0 | 2026-03-27 | Initial schema: 5 sheets, all 20 STORY-125 fields + original fields |")
     lines.append("")
 

@@ -48,7 +48,10 @@ class TestHealthMonitor:
     @pytest.mark.asyncio
     async def test_api_health_check(self, monitor):
         """Verify that API health check works."""
-        check = await monitor.check_api_responsiveness()
+        # Individual check_ methods were extracted to strategy classes (EPIC-022).
+        # Use run_all_checks() and inspect the 'api' entry.
+        checks = await monitor.run_all_checks()
+        check = checks["api"]
 
         assert check.name == "api"
         assert check.status == HealthStatus.HEALTHY
@@ -57,7 +60,10 @@ class TestHealthMonitor:
     @pytest.mark.asyncio
     async def test_configuration_health_check(self, monitor):
         """Verify that configuration health check works."""
-        check = await monitor.check_configuration()
+        # Individual check_ methods were extracted to strategy classes (EPIC-022).
+        # Use run_all_checks() and inspect the 'configuration' entry.
+        checks = await monitor.run_all_checks()
+        check = checks["configuration"]
 
         assert check.name == "configuration"
         assert check.status == HealthStatus.HEALTHY

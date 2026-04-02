@@ -76,6 +76,7 @@ class FallbackChain:
     def __init__(self, settings: Settings | None = None) -> None:
         if settings is None:
             from ..config import get_settings
+
             settings = get_settings()
         self._settings = settings
         self._circuit_breakers: dict[str, CircuitBreaker] = {}
@@ -152,16 +153,15 @@ class FallbackChain:
                     if cb:
                         cb.record_success()
 
-                    decisions.append(FallbackDecision(
-                        provider=provider,
-                        action="attempted",
-                        reason="success",
-                        latency_s=elapsed,
-                    ))
-                    logger.info(
-                        f"[FallbackChain] {provider} succeeded "
-                        f"(attempt={attempt + 1}, latency={elapsed:.2f}s)"
+                    decisions.append(
+                        FallbackDecision(
+                            provider=provider,
+                            action="attempted",
+                            reason="success",
+                            latency_s=elapsed,
+                        )
                     )
+                    logger.info(f"[FallbackChain] {provider} succeeded (attempt={attempt + 1}, latency={elapsed:.2f}s)")
                     return FallbackResult(
                         result=result,
                         provider_used=provider,
@@ -172,13 +172,15 @@ class FallbackChain:
                 except Exception as exc:  # noqa: BLE001
                     elapsed = time.monotonic() - start
                     error_type = type(exc).__name__
-                    decisions.append(FallbackDecision(
-                        provider=provider,
-                        action="failed",
-                        reason=f"{error_type}: {exc}",
-                        latency_s=elapsed,
-                        error=str(exc),
-                    ))
+                    decisions.append(
+                        FallbackDecision(
+                            provider=provider,
+                            action="failed",
+                            reason=f"{error_type}: {exc}",
+                            latency_s=elapsed,
+                            error=str(exc),
+                        )
+                    )
                     logger.warning(
                         f"[FallbackChain] {provider} failed "
                         f"(attempt={attempt + 1}/{max_retries + 1}, "
@@ -191,15 +193,14 @@ class FallbackChain:
                         break
 
         # All providers exhausted — template fallback
-        logger.error(
-            f"[FallbackChain] All {len(providers)} providers failed. "
-            f"Returning template fallback."
+        logger.error(f"[FallbackChain] All {len(providers)} providers failed. Returning template fallback.")
+        decisions.append(
+            FallbackDecision(
+                provider="template_fallback",
+                action="attempted",
+                reason="all_providers_exhausted",
+            )
         )
-        decisions.append(FallbackDecision(
-            provider="template_fallback",
-            action="attempted",
-            reason="all_providers_exhausted",
-        ))
         return FallbackResult(
             result=None,
             provider_used=None,

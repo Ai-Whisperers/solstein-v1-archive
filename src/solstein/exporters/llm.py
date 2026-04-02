@@ -26,8 +26,16 @@ from .report_generators import (
     ExecutiveSummaryGenerator,
     MarketInsightsGenerator,
     RecommendationsGenerator,
+    StrategicRecommendations,
+    SWOTAnalysis,
     SWOTGenerator,
 )
+
+__all__ = [
+    "LLMReportEnhancer",
+    "StrategicRecommendations",
+    "SWOTAnalysis",
+]
 
 
 class LLMReportEnhancer:

@@ -28,8 +28,13 @@ def make_test_companies() -> list[Company]:
             ai_maturity=AIMaturity.STRONG,
             ai_score=7.5,
             geographic_presence=[
-                "Germany", "France", "UK", "Netherlands",
-                "Belgium", "Austria", "Switzerland",
+                "Germany",
+                "France",
+                "UK",
+                "Netherlands",
+                "Belgium",
+                "Austria",
+                "Switzerland",
             ],
             revenue_timeline=[
                 {"year": 2020, "eur_millions": 2.0, "yoy_growth_pct": 0},

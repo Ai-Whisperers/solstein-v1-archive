@@ -237,7 +237,7 @@ class SyntheticDataBlocker:
                 source_type=authenticity.source_type.value,
             )
         elif authenticity.source_type == DataSourceType.MIXED and self.block_mixed:
-            if authenticity.synthetic_percentage > self.synthetic_threshold_percentage:
+            if authenticity.synthetic_percentage >= self.synthetic_threshold_percentage:
                 violations.append(authenticity)
                 logger.warning(
                     "Mixed data with synthetic content detected",

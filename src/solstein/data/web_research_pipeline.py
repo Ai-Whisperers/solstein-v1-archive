@@ -298,9 +298,7 @@ class WebResearcher:
                 from solstein.domain.models import FinancialMetric
 
                 if result.financials is None:
-                    result.financials = FinancialMetric(
-                        employees=website_data["employees"], allow_empty_primary=True
-                    )
+                    result.financials = FinancialMetric(employees=website_data["employees"], allow_empty_primary=True)
                 else:
                     result.financials.employees = website_data["employees"]
             if website_data.get("founded"):

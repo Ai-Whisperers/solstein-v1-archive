@@ -28,6 +28,7 @@ from solstein.exporters.export_schema import (
 # Fixtures
 # ─────────────────────────────────────────────
 
+
 def _make_full_company() -> Company:
     """Create a company with ALL exported fields populated."""
     fm = FinancialMetric(
@@ -117,6 +118,7 @@ def mixed_export(tmp_path: Path) -> Path:
 # AC1: create_dashboard passes validate_export for full-data and sparse-data
 # ─────────────────────────────────────────────
 
+
 class TestSchemaGatePassesBothFixtures:
     """Acceptance Criteria 1: Workbook passes validate_export for both fixture types."""
 
@@ -144,12 +146,16 @@ class TestSchemaGatePassesBothFixtures:
 # AC2: AI readiness and transformation fields on correct sheet
 # ─────────────────────────────────────────────
 
+
 class TestAIAndTransformationFieldsPresent:
     """AC2: AI readiness and transformation fields are on Executive Summary."""
 
     EXPECTED_HEADERS = {
-        "AI Readiness", "AI Readiness Tier",
-        "Transform Time (mo)", "Transform Cost (EUR)", "Transform Risk",
+        "AI Readiness",
+        "AI Readiness Tier",
+        "Transform Time (mo)",
+        "Transform Cost (EUR)",
+        "Transform Risk",
     }
 
     def test_headers_on_executive_summary(self, full_export: Path) -> None:
@@ -185,6 +191,7 @@ class TestAIAndTransformationFieldsPresent:
 # ─────────────────────────────────────────────
 # AC3: Headers derived from single authoritative mapping (drift-proof)
 # ─────────────────────────────────────────────
+
 
 class TestDriftProofHeaders:
     """AC3: Sheet generators derive headers from export_schema, not hardcoded lists."""
@@ -254,6 +261,7 @@ class TestDriftProofHeaders:
 # AC4: Behavioral regression tests with live workbooks
 # ─────────────────────────────────────────────
 
+
 class TestBehavioralRegressions:
     """Tests that verify runtime behavior, not just static field inventories."""
 
@@ -261,8 +269,12 @@ class TestBehavioralRegressions:
         """Workbook must contain all 5 data sheets + metadata."""
         wb = load_workbook(full_export, read_only=True)
         expected_sheets = {
-            "Executive Summary", "Market Rankings", "Financial Intelligence",
-            "Revenue History", "Advanced Data", "Export Metadata",
+            "Executive Summary",
+            "Market Rankings",
+            "Financial Intelligence",
+            "Revenue History",
+            "Advanced Data",
+            "Export Metadata",
         }
         actual_sheets = set(wb.sheetnames)
         wb.close()

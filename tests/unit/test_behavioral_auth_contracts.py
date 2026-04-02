@@ -158,9 +158,7 @@ class TestSecurityConfigRuntime:
         """SecurityConfig must not have an admin_password_hash field."""
         settings = Settings.load()
         security = settings.security
-        assert not hasattr(security, "admin_password_hash"), (
-            "SecurityConfig still has admin_password_hash field"
-        )
+        assert not hasattr(security, "admin_password_hash"), "SecurityConfig still has admin_password_hash field"
 
     def test_no_change_me_in_secret_key_default(self):
         """The secret key default must not contain 'change-me-in-production'."""

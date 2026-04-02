@@ -20,6 +20,7 @@ from solstein.application.due_diligence import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_company(**overrides):  # type: ignore[no-untyped-def]
     """Create a minimal Company for testing."""
     from solstein.domain.models import Company
@@ -43,6 +44,7 @@ def engine() -> DueDiligenceEngine:
 # ---------------------------------------------------------------------------
 # TestDDReportStructure
 # ---------------------------------------------------------------------------
+
 
 class TestDDReportStructure:
     """Verify the DD report contains all required components."""
@@ -76,6 +78,7 @@ class TestDDReportStructure:
 # ---------------------------------------------------------------------------
 # TestRedFlagDetection
 # ---------------------------------------------------------------------------
+
 
 class TestRedFlagDetection:
     """Verify red flags are detected correctly."""
@@ -139,6 +142,7 @@ class TestRedFlagDetection:
 # TestCompetitivePositioning
 # ---------------------------------------------------------------------------
 
+
 class TestCompetitivePositioning:
     """Verify competitive positioning against peers."""
 
@@ -185,6 +189,7 @@ class TestCompetitivePositioning:
 # TestChecklist
 # ---------------------------------------------------------------------------
 
+
 class TestChecklist:
     """Verify DD checklist generation and auto-assessment."""
 
@@ -221,6 +226,7 @@ class TestChecklist:
 # ---------------------------------------------------------------------------
 # TestInvestmentMemo
 # ---------------------------------------------------------------------------
+
 
 class TestInvestmentMemo:
     """Verify investment memo generation."""

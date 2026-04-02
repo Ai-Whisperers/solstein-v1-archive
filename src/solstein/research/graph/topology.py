@@ -110,6 +110,7 @@ def _dispatch_node(state: ResearchState) -> dict[str, Any]:
 # implementations in research/graph/nodes/. This keeps topology.py focused
 # on graph structure rather than API integration logic.
 
+
 def _github_data_node(state: ResearchState) -> dict[str, Any]:
     """GitHub data collection node — calls real GitHubAgent (STORY-078).
 
@@ -126,7 +127,10 @@ def _companies_house_node(state: ResearchState) -> dict[str, Any]:
     Reads: company_identifiers, config
     Writes: raw_companies_house_facts, data_collection_errors, completed_nodes
     """
-    logger.info("[companies_house] Collecting Companies House filings for %d companies", len(state.get("company_identifiers") or []))
+    logger.info(
+        "[companies_house] Collecting Companies House filings for %d companies",
+        len(state.get("company_identifiers") or []),
+    )
     return companies_house_node(state)
 
 
@@ -146,7 +150,9 @@ def _sec_filings_node(state: ResearchState) -> dict[str, Any]:
     Reads: company_identifiers, config
     Writes: raw_sec_facts, data_collection_errors, completed_nodes
     """
-    logger.info("[sec_filings] Collecting SEC EDGAR filings for %d companies", len(state.get("company_identifiers") or []))
+    logger.info(
+        "[sec_filings] Collecting SEC EDGAR filings for %d companies", len(state.get("company_identifiers") or [])
+    )
     return sec_filings_node(state)
 
 
@@ -156,7 +162,9 @@ def _web_profile_node(state: ResearchState) -> dict[str, Any]:
     Reads: company_identifiers, config
     Writes: raw_web_facts, data_collection_errors, completed_nodes
     """
-    logger.info("[web_profile] Collecting web profile signals for %d companies", len(state.get("company_identifiers") or []))
+    logger.info(
+        "[web_profile] Collecting web profile signals for %d companies", len(state.get("company_identifiers") or [])
+    )
     return web_profile_node(state)
 
 
@@ -176,8 +184,7 @@ def _conflict_resolution_node(state: ResearchState) -> dict[str, Any]:
     reconciliation logic from src/solstein/research/reconcile.py.
     """
     logger.info(
-        "[conflict_resolution] Merging facts from %d github, %d companies_house, "
-        "%d news, %d sec, %d web records",
+        "[conflict_resolution] Merging facts from %d github, %d companies_house, %d news, %d sec, %d web records",
         len(state.get("raw_github_facts") or []),
         len(state.get("raw_companies_house_facts") or []),
         len(state.get("raw_news_facts") or []),
@@ -232,9 +239,7 @@ def _human_review_router(state: ResearchState) -> str:
     if state.get("human_review_required"):
         return "human_review_gate"
 
-    threshold: float = float(
-        state.get("config", {}).get("human_review_confidence_threshold", 0.5)
-    )
+    threshold: float = float(state.get("config", {}).get("human_review_confidence_threshold", 0.5))
     confidence_scores: dict[str, float] = state.get("confidence_scores") or {}
     # STORY-269: Empty confidence_scores means scoring produced no results —
     # this MUST trigger human review, not silently bypass it.
@@ -264,9 +269,7 @@ def _human_review_gate_node(state: ResearchState) -> dict[str, Any]:
     Writes: completed_nodes
     """
     run_id: str = state.get("run_id") or "unknown"
-    threshold: float = float(
-        state.get("config", {}).get("human_review_confidence_threshold", 0.5)
-    )
+    threshold: float = float(state.get("config", {}).get("human_review_confidence_threshold", 0.5))
 
     # Idempotent entry creation — node may be re-entered on first-resume pass
     store = get_review_store()
@@ -274,8 +277,7 @@ def _human_review_gate_node(state: ResearchState) -> dict[str, Any]:
     if existing is None:
         entry = store.create_entry(run_id=run_id, state=dict(state), threshold=threshold)
         logger.info(
-            "[human_review_gate] Created review entry %s for run %s "
-            "(low-confidence companies: %s)",
+            "[human_review_gate] Created review entry %s for run %s (low-confidence companies: %s)",
             entry.id,
             run_id,
             entry.low_confidence_companies,
@@ -292,15 +294,16 @@ def _human_review_gate_node(state: ResearchState) -> dict[str, Any]:
     # Pause execution — GraphInterrupt is raised internally by LangGraph.
     # The graph resumes when the review API issues:
     #   graph.invoke(Command(resume="approved"), config={"configurable": {"thread_id": run_id}})
-    interrupt({
-        "review_id": entry.id,
-        "run_id": run_id,
-        "low_confidence_companies": entry.low_confidence_companies,
-        "action_required": (
-            "Call POST /api/v1/review/{review_id}/approve "
-            "or POST /api/v1/review/{review_id}/reject"
-        ),
-    })
+    interrupt(
+        {
+            "review_id": entry.id,
+            "run_id": run_id,
+            "low_confidence_companies": entry.low_confidence_companies,
+            "action_required": (
+                "Call POST /api/v1/review/{review_id}/approve or POST /api/v1/review/{review_id}/reject"
+            ),
+        }
+    )
 
     # Execution resumes here after approval
     logger.info("[human_review_gate] Resuming after human approval for run %s", run_id)
@@ -388,6 +391,7 @@ def build_research_graph(isolate_errors: bool = False) -> StateGraph:
         START -> dispatch -> [5 parallel nodes] -> conflict_resolution
               -> scoring -> human_review_router -> analysis -> export -> END
     """
+
     def _maybe_isolate(name: str, fn: Callable) -> Callable:
         """Optionally wrap fn with error isolation."""
         if not isolate_errors:

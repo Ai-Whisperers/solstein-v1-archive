@@ -237,15 +237,13 @@ class BatchExtractor:
         Returns:
             Company profile or None if failed
         """
-        from ...domain.models import Company
-
         extracted = self._extractor.extract_from_file(file_path)
         if not extracted:
             return None
 
         try:
             profile = self._extractor.to_company_profile(extracted)
-            if isinstance(profile, Company):
+            if profile is not None:
                 return profile
         except Exception as e:
             logger.error(f"Failed to convert {file_path} to profile: {e}")

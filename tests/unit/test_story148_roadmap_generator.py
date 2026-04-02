@@ -17,6 +17,7 @@ from solstein.application.roadmap_generator import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_company(**overrides):  # type: ignore[no-untyped-def]
     """Create a minimal Company for testing."""
     from solstein.domain.models import Company
@@ -40,6 +41,7 @@ def generator() -> RoadmapGenerator:
 # ---------------------------------------------------------------------------
 # TestRoadmapStructure
 # ---------------------------------------------------------------------------
+
 
 class TestRoadmapStructure:
     """Verify the roadmap contains all 4 required phases."""
@@ -86,6 +88,7 @@ class TestRoadmapStructure:
 # TestIndustryPatterns
 # ---------------------------------------------------------------------------
 
+
 class TestIndustryPatterns:
     """Verify industry-specific patterns are applied."""
 
@@ -117,6 +120,7 @@ class TestIndustryPatterns:
 # ---------------------------------------------------------------------------
 # TestInitiativeQuality
 # ---------------------------------------------------------------------------
+
 
 class TestInitiativeQuality:
     """Verify initiatives have all required fields."""
@@ -151,6 +155,7 @@ class TestInitiativeQuality:
 # TestCustomisation
 # ---------------------------------------------------------------------------
 
+
 class TestCustomisation:
     """Verify customisation overrides work."""
 
@@ -173,6 +178,7 @@ class TestCustomisation:
 # ---------------------------------------------------------------------------
 # TestEdgeCases
 # ---------------------------------------------------------------------------
+
 
 class TestEdgeCases:
     """Handle sparse data gracefully."""

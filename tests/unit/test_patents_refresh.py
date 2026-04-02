@@ -33,9 +33,11 @@ class TestPatentsRefreshConnector:
         assert len(facts) >= 0
 
     @pytest.mark.asyncio
-    @patch("solstein.infrastructure.connectors.patents_refresh.search_company_patents")
-    async def test_error_handling(self, mock_search, mock_db_manager):
-        mock_search.side_effect = Exception("Error")
+    async def test_error_handling(self, mock_db_manager, monkeypatch):
+        monkeypatch.setattr(
+            "solstein.infrastructure.connectors.patents_refresh.search_company_patents",
+            MagicMock(side_effect=Exception("Error")),
+        )
         connector = PatentsRefreshConnector(mock_db_manager)
 
         facts = await connector.fetch_facts(["company"])

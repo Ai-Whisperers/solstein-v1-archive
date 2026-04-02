@@ -116,8 +116,11 @@ class TestCallWithRetry:
     async def test_retry_on_transient_failure(self) -> None:
         func = AsyncMock(side_effect=[OSError("fail"), "ok"])
         cfg = RetryConfig(
-            max_retries=2, backoff_base=0.01, backoff_max=0.01,
-            jitter=False, timeout_per_attempt=5.0,
+            max_retries=2,
+            backoff_base=0.01,
+            backoff_max=0.01,
+            jitter=False,
+            timeout_per_attempt=5.0,
         )
         result = await call_with_retry(func, config=cfg, name="test")
         assert result == "ok"
@@ -127,8 +130,11 @@ class TestCallWithRetry:
     async def test_exhausted_retries_raises(self) -> None:
         func = AsyncMock(side_effect=OSError("always fails"))
         cfg = RetryConfig(
-            max_retries=2, backoff_base=0.01, backoff_max=0.01,
-            jitter=False, timeout_per_attempt=5.0,
+            max_retries=2,
+            backoff_base=0.01,
+            backoff_max=0.01,
+            jitter=False,
+            timeout_per_attempt=5.0,
         )
         with pytest.raises(OSError, match="always fails"):
             await call_with_retry(func, config=cfg, name="test")
@@ -141,8 +147,10 @@ class TestCallWithRetry:
             max_retries=3,
             non_retryable_exceptions=(ValueError,),
             retryable_exceptions=(OSError,),
-            backoff_base=0.01, backoff_max=0.01,
-            jitter=False, timeout_per_attempt=5.0,
+            backoff_base=0.01,
+            backoff_max=0.01,
+            jitter=False,
+            timeout_per_attempt=5.0,
         )
         with pytest.raises(ValueError, match="bad input"):
             await call_with_retry(func, config=cfg, name="test")
@@ -161,8 +169,11 @@ class TestCallWithRetrySync:
     def test_retry_on_failure(self) -> None:
         func = MagicMock(side_effect=[OSError("fail"), "ok"])
         cfg = RetryConfig(
-            max_retries=2, backoff_base=0.01, backoff_max=0.01,
-            jitter=False, timeout_per_attempt=5.0,
+            max_retries=2,
+            backoff_base=0.01,
+            backoff_max=0.01,
+            jitter=False,
+            timeout_per_attempt=5.0,
         )
         result = call_with_retry_sync(func, config=cfg, name="test")
         assert result == "ok"
@@ -171,8 +182,11 @@ class TestCallWithRetrySync:
     def test_exhausted_raises(self) -> None:
         func = MagicMock(side_effect=ConnectionError("down"))
         cfg = RetryConfig(
-            max_retries=1, backoff_base=0.01, backoff_max=0.01,
-            jitter=False, timeout_per_attempt=5.0,
+            max_retries=1,
+            backoff_base=0.01,
+            backoff_max=0.01,
+            jitter=False,
+            timeout_per_attempt=5.0,
         )
         with pytest.raises(ConnectionError, match="down"):
             call_with_retry_sync(func, config=cfg, name="test")

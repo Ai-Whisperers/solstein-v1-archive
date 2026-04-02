@@ -273,9 +273,7 @@ class ContentExtractorAgent:
             return extraction.model_dump(exclude_none=False)
         except ValidationError as error:
             # STORY-252: Check if this is an empty-payload rejection
-            is_empty_payload = any(
-                "empty or non-informative" in str(e) for e in error.errors()
-            )
+            is_empty_payload = any("empty or non-informative" in str(e) for e in error.errors())
             if is_empty_payload:
                 logger.warning(
                     f"[ContentExtractor] Empty extraction payload rejected for {url}: {error}",

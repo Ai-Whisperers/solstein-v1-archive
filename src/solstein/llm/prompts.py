@@ -57,8 +57,7 @@ _DEFAULT_PROMPTS: dict[str, str] = {
     # System prompts (no placeholders — returned as-is)
     # -------------------------------------------------------------------------
     "system_research_planner": (
-        "You are a research planning assistant. Generate structured "
-        "search plans for competitive intelligence research."
+        "You are a research planning assistant. Generate structured search plans for competitive intelligence research."
     ),
     "system_company_extractor": (
         "You are a company data extraction specialist. "
@@ -79,8 +78,8 @@ _DEFAULT_PROMPTS: dict[str, str] = {
         "No markdown, no explanation—just the JSON object."
     ),
     "system_company_filter": (
-        'You are a company analysis assistant. Given a company profile and a filter '
-        'criteria, determine if the company matches. '
+        "You are a company analysis assistant. Given a company profile and a filter "
+        "criteria, determine if the company matches. "
         'Respond ONLY with JSON: {{"matches": true/false, "reasoning": "..."}}'
     ),
 }

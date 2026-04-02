@@ -19,13 +19,13 @@ from fpdf import FPDF  # type: ignore[import]
 from solstein.domain.models import Company
 
 # Colour palette (RGB tuples)
-_CLR_HEADING = (30, 58, 95)       # Dark navy
-_CLR_SUBHEADING = (50, 90, 140)   # Medium blue
-_CLR_BODY = (40, 40, 40)          # Near-black
-_CLR_MUTED = (100, 100, 100)      # Grey
-_CLR_ACCENT = (0, 120, 180)       # Bright blue for links / highlights
+_CLR_HEADING = (30, 58, 95)  # Dark navy
+_CLR_SUBHEADING = (50, 90, 140)  # Medium blue
+_CLR_BODY = (40, 40, 40)  # Near-black
+_CLR_MUTED = (100, 100, 100)  # Grey
+_CLR_ACCENT = (0, 120, 180)  # Bright blue for links / highlights
 _CLR_WHITE = (255, 255, 255)
-_CLR_LIGHT_BG = (240, 244, 248)   # Light blue-grey for table rows
+_CLR_LIGHT_BG = (240, 244, 248)  # Light blue-grey for table rows
 
 
 def render_cover_page(
@@ -51,9 +51,12 @@ def render_cover_page(
     pdf.set_text_color(*_CLR_MUTED)
     generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     pdf.cell(
-        0, 8,
+        0,
+        8,
         f"Generated: {generated}  |  Companies: {company_count}  |  Format: {page_format.upper()}",
-        new_x="LMARGIN", new_y="NEXT", align="C",
+        new_x="LMARGIN",
+        new_y="NEXT",
+        align="C",
     )
 
     # Classification badge
@@ -85,9 +88,9 @@ def render_executive_summary(pdf: FPDF, companies: Sequence[Company]) -> None:
     pdf.set_font("Helvetica", size=11)
     pdf.set_text_color(*_CLR_BODY)
     pdf.multi_cell(
-        0, 7,
-        f"This report covers {len(companies)} companies.\n"
-        f"Average composite score: {avg_score:.2f} / 10.0\n",
+        0,
+        7,
+        f"This report covers {len(companies)} companies.\nAverage composite score: {avg_score:.2f} / 10.0\n",
     )
 
     # Tier distribution table
@@ -125,13 +128,15 @@ def render_financial_overview(pdf: FPDF, companies: Sequence[Company]) -> None:
         growth = c.growth_rate or (c.financials.growth_rate if c.financials else None)
         funding = c.funding or (c.financials.funding_raised if c.financials else None)
 
-        rows.append((
-            c.name[:30],
-            _fmt_currency(revenue),
-            str(employees) if employees else "N/A",
-            f"{growth:.1%}" if growth is not None else "N/A",
-            _fmt_currency(funding),
-        ))
+        rows.append(
+            (
+                c.name[:30],
+                _fmt_currency(revenue),
+                str(employees) if employees else "N/A",
+                f"{growth:.1%}" if growth is not None else "N/A",
+                _fmt_currency(funding),
+            )
+        )
 
     if not rows:
         pdf.set_font("Helvetica", "I", 10)
@@ -187,10 +192,7 @@ def render_company_profile(
     hq = getattr(company, "headquarters", "N/A") or "N/A"
     website = getattr(company, "website", "") or ""
 
-    info_lines = (
-        f"Tier: {tier_str}  |  Score: {score:.2f}  |  Industry: {industry}\n"
-        f"Headquarters: {hq}"
-    )
+    info_lines = f"Tier: {tier_str}  |  Score: {score:.2f}  |  Industry: {industry}\nHeadquarters: {hq}"
     if website:
         info_lines += f"  |  Website: {website}"
     if pdf.get_y() > 260:
@@ -263,7 +265,8 @@ def render_scoring_methodology(pdf: FPDF) -> None:
     pdf.set_font("Helvetica", size=10)
     pdf.set_text_color(*_CLR_BODY)
     pdf.multi_cell(
-        0, 6,
+        0,
+        6,
         "Companies are scored on a 0-10 composite scale derived from three "
         "sub-scores: Growth Score (revenue trajectory, employee growth, market "
         "expansion), Financial Health Score (profitability, margins, funding "
@@ -296,6 +299,7 @@ def render_footnotes(pdf: FPDF, footnotes: list[tuple[int, str]]) -> None:
 # ------------------------------------------------------------------
 # Revenue trend chart (simple bar chart via cell drawing)
 # ------------------------------------------------------------------
+
 
 def render_revenue_chart(pdf: FPDF, companies: Sequence[Company]) -> None:
     """Render a simple revenue comparison bar chart using fpdf2 drawing."""
@@ -348,6 +352,7 @@ def render_revenue_chart(pdf: FPDF, companies: Sequence[Company]) -> None:
 # ------------------------------------------------------------------
 # Internal helpers
 # ------------------------------------------------------------------
+
 
 def _section_heading(pdf: FPDF, text: str) -> None:
     """Render a section heading."""

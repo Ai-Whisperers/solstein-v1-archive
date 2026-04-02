@@ -189,7 +189,8 @@ class TestGrowthScorerWithFacts:
 
         score, explanation = scorer.score(financials, fact_repo=mock_fact_repo, company_id="test-company")
 
-        assert score > 1.4
+        # 30% growth → +1.5, missing profit_margin → -1.0 penalty; net > 0
+        assert score > 0.4
         # Should have revenue growth component
         assert any(c.name == "Revenue Growth" for c in explanation.components)
 

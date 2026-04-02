@@ -38,8 +38,11 @@ def _make_company(**kwargs: Any) -> Company:
         "enrichment_sources": ["SEC EDGAR", "Companies House"],
         "signal_confidences": {"growth": 0.85, "financial_health": 0.72},
         "financials": FinancialMetric(
-            revenue=50_000_000, employees=200, profit_margin=0.15,
-            funding_raised=10_000_000, allow_empty_primary=True,
+            revenue=50_000_000,
+            employees=200,
+            profit_margin=0.15,
+            funding_raised=10_000_000,
+            allow_empty_primary=True,
         ),
     }
     defaults.update(kwargs)
@@ -150,7 +153,8 @@ class TestProgressCallback:
 
     def test_broken_callback_ok(self, tmp_path: Path) -> None:
         result = PDFExporter().export(
-            _make_companies(1), output_path=tmp_path / "b.pdf",
+            _make_companies(1),
+            output_path=tmp_path / "b.pdf",
             progress_callback=lambda p: (_ for _ in ()).throw(RuntimeError),
         )
         assert result.exists()

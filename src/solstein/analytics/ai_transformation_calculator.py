@@ -38,6 +38,7 @@ if TYPE_CHECKING:
 # Constants & lookup tables
 # ---------------------------------------------------------------------------
 
+
 class RiskLevel(str, Enum):
     """Risk severity for a transformation risk factor."""
 
@@ -118,21 +119,47 @@ _MATURITY_DISCOUNT: dict[str, float] = {
 _SAAS_DISCOUNT_SLOPE = 0.06  # each SaaS point reduces time/cost by 6 %
 
 # Tech-stack keywords that reduce transformation cost
-_MODERN_STACK_KEYWORDS = frozenset({
-    "python", "kubernetes", "docker", "aws", "azure", "gcp",
-    "tensorflow", "pytorch", "spark", "airflow", "snowflake",
-    "databricks", "mlflow", "cloud", "microservices", "api",
-})
+_MODERN_STACK_KEYWORDS = frozenset(
+    {
+        "python",
+        "kubernetes",
+        "docker",
+        "aws",
+        "azure",
+        "gcp",
+        "tensorflow",
+        "pytorch",
+        "spark",
+        "airflow",
+        "snowflake",
+        "databricks",
+        "mlflow",
+        "cloud",
+        "microservices",
+        "api",
+    }
+)
 
-_LEGACY_STACK_KEYWORDS = frozenset({
-    "cobol", "mainframe", "on-premise", "on-prem", "legacy",
-    "fortran", "delphi", "foxpro", "access", "vba",
-})
+_LEGACY_STACK_KEYWORDS = frozenset(
+    {
+        "cobol",
+        "mainframe",
+        "on-premise",
+        "on-prem",
+        "legacy",
+        "fortran",
+        "delphi",
+        "foxpro",
+        "access",
+        "vba",
+    }
+)
 
 
 # ---------------------------------------------------------------------------
 # Calculator
 # ---------------------------------------------------------------------------
+
 
 class TransformationCalculator:
     """Estimate cost, timeline and ROI for AI transformation.
@@ -238,7 +265,9 @@ class TransformationCalculator:
 
         # 7. Efficiency gain estimate (higher maturity -> less room for gain)
         efficiency_gain_pct = self._efficiency_gain(
-            maturity_factor, saas_maturity, growth_rate,
+            maturity_factor,
+            saas_maturity,
+            growth_rate,
         )
 
         # 8. Risk assessment
@@ -335,63 +364,77 @@ class TransformationCalculator:
 
         # Talent risk
         if employees < 50:
-            risks.append(RiskFactor(
-                category="talent",
-                description="Small team may lack capacity for parallel AI initiatives",
-                level=RiskLevel.HIGH,
-                mitigation="Consider outsourced AI team or managed ML platform",
-            ))
+            risks.append(
+                RiskFactor(
+                    category="talent",
+                    description="Small team may lack capacity for parallel AI initiatives",
+                    level=RiskLevel.HIGH,
+                    mitigation="Consider outsourced AI team or managed ML platform",
+                )
+            )
         elif employees < 200:
-            risks.append(RiskFactor(
-                category="talent",
-                description="Limited internal talent pool for AI roles",
-                level=RiskLevel.MEDIUM,
-                mitigation="Hire 2-3 ML engineers or partner with AI consultancy",
-            ))
+            risks.append(
+                RiskFactor(
+                    category="talent",
+                    description="Limited internal talent pool for AI roles",
+                    level=RiskLevel.MEDIUM,
+                    mitigation="Hire 2-3 ML engineers or partner with AI consultancy",
+                )
+            )
 
         # Legacy tech risk
         legacy_count = sum(1 for s in tech_stack if s in _LEGACY_STACK_KEYWORDS)
         if legacy_count >= 2:
-            risks.append(RiskFactor(
-                category="technology",
-                description="Heavy legacy technology stack increases migration complexity",
-                level=RiskLevel.HIGH,
-                mitigation="Phased modernisation: containerise first, then migrate",
-            ))
+            risks.append(
+                RiskFactor(
+                    category="technology",
+                    description="Heavy legacy technology stack increases migration complexity",
+                    level=RiskLevel.HIGH,
+                    mitigation="Phased modernisation: containerise first, then migrate",
+                )
+            )
         elif legacy_count == 1:
-            risks.append(RiskFactor(
-                category="technology",
-                description="Some legacy technology present",
-                level=RiskLevel.MEDIUM,
-                mitigation="Isolate legacy components behind APIs",
-            ))
+            risks.append(
+                RiskFactor(
+                    category="technology",
+                    description="Some legacy technology present",
+                    level=RiskLevel.MEDIUM,
+                    mitigation="Isolate legacy components behind APIs",
+                )
+            )
 
         # Data maturity risk
         if saas_maturity <= 2:
-            risks.append(RiskFactor(
-                category="data",
-                description="Low SaaS/data maturity hinders AI data pipeline setup",
-                level=RiskLevel.HIGH,
-                mitigation="Invest in data platform before AI initiatives",
-            ))
+            risks.append(
+                RiskFactor(
+                    category="data",
+                    description="Low SaaS/data maturity hinders AI data pipeline setup",
+                    level=RiskLevel.HIGH,
+                    mitigation="Invest in data platform before AI initiatives",
+                )
+            )
 
         # AI experience risk
         if ai_maturity in ("none", "unknown"):
-            risks.append(RiskFactor(
-                category="experience",
-                description="No prior AI experience increases adoption risk",
-                level=RiskLevel.MEDIUM,
-                mitigation="Start with low-risk AI pilot project",
-            ))
+            risks.append(
+                RiskFactor(
+                    category="experience",
+                    description="No prior AI experience increases adoption risk",
+                    level=RiskLevel.MEDIUM,
+                    mitigation="Start with low-risk AI pilot project",
+                )
+            )
 
         # Funding risk
         if funding is not None and funding < 500_000:
-            risks.append(RiskFactor(
-                category="financial",
-                description="Limited funding may constrain AI investment capacity",
-                level=RiskLevel.MEDIUM,
-                mitigation="Seek AI-specific grants or strategic investor",
-            ))
+            risks.append(
+                RiskFactor(
+                    category="financial",
+                    description="Limited funding may constrain AI investment capacity",
+                    level=RiskLevel.MEDIUM,
+                    mitigation="Seek AI-specific grants or strategic investor",
+                )
+            )
 
         return risks
 
@@ -432,6 +475,7 @@ class TransformationCalculator:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _ci(point: float, margin_pct: float) -> ConfidenceInterval:
     """Build a symmetric confidence interval."""

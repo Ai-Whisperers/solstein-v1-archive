@@ -28,6 +28,7 @@ class TestAdaptiveTemplates:
             financials=FinancialMetric(
                 revenue=None,
                 employees=None,
+                allow_empty_primary=True,
             ),
         )
 

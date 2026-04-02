@@ -177,7 +177,9 @@ These companies operate in the same tier with similar market positioning:
             if c.saas_maturity and client.saas_maturity and c.saas_maturity > client.saas_maturity:
                 section += f"- **SaaS Advantage**: {_fmt_float(c.saas_maturity)}/10 vs your {_fmt_float(client.saas_maturity)}/10\n"
             if c.revenue_cagr_3yr and client.revenue_cagr_3yr and c.revenue_cagr_3yr > client.revenue_cagr_3yr:
-                section += f"- **Growth Advantage**: {c.revenue_cagr_3yr:.1f}% CAGR vs your {client.revenue_cagr_3yr:.1f}%\n"
+                section += (
+                    f"- **Growth Advantage**: {c.revenue_cagr_3yr:.1f}% CAGR vs your {client.revenue_cagr_3yr:.1f}%\n"
+                )
 
             section += "\n"
 

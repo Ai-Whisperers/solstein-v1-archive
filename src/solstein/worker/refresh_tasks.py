@@ -76,9 +76,7 @@ def _handle_retry_or_dlq(
     Extracted from create_refresh_task to keep the factory under the 100-line limit.
     """
     countdown = 5 * (2**task_self.request.retries)
-    logger.info(
-        f"[RETRY-ATTEMPT-{task_self.request.retries + 1}] {source_name} refresh will retry in {countdown}s"
-    )
+    logger.info(f"[RETRY-ATTEMPT-{task_self.request.retries + 1}] {source_name} refresh will retry in {countdown}s")
     try:
         raise task_self.retry(exc=exc, countdown=countdown)  # noqa: B904
     except MaxRetriesExceededError:
@@ -173,15 +171,11 @@ def create_refresh_task(
     # as the lock discriminator so each of the 12 tasks gets a unique Redis key.
     # TTL matches task_time_limit — ensures the lock is held for the maximum
     # allowed task duration and releases before the next schedule window.
-    _body_with_dedup = deduplicate(ttl=_task_ttl, task_name_override=task_name)(
-        _refresh_task_body
-    )
+    _body_with_dedup = deduplicate(ttl=_task_ttl, task_name_override=task_name)(_refresh_task_body)
 
     # Register as a Celery shared_task. bind=True injects `self` (task instance)
     # as the first argument so retries can call self.retry().
-    refresh_task = shared_task(name=task_name, bind=True, max_retries=3)(
-        _body_with_dedup
-    )
+    refresh_task = shared_task(name=task_name, bind=True, max_retries=3)(_body_with_dedup)
     return refresh_task
 
 

@@ -61,9 +61,7 @@ class TestUnifiedLoaderOrchestration:
     def test_unified_loader_under_100_lines(self) -> None:
         loader_file = SRC / "data" / "unified_loader.py"
         line_count = len(loader_file.read_text().splitlines())
-        assert line_count <= 100, (
-            f"unified_loader.py is {line_count} lines (limit: 100)"
-        )
+        assert line_count <= 100, f"unified_loader.py is {line_count} lines (limit: 100)"
 
     def test_unified_loader_is_reexport_only(self) -> None:
         """Verify it only re-exports, no business logic."""
@@ -82,16 +80,12 @@ class TestNoHardcodedValues:
     def test_no_hardcoded_date(self) -> None:
         for py_file in UNIFIED_DIR.rglob("*.py"):
             content = py_file.read_text()
-            assert "2026-02-23" not in content, (
-                f"{py_file.name} contains hardcoded date '2026-02-23'"
-            )
+            assert "2026-02-23" not in content, f"{py_file.name} contains hardcoded date '2026-02-23'"
 
     def test_no_hardcoded_dutch_market(self) -> None:
         for py_file in UNIFIED_DIR.rglob("*.py"):
             content = py_file.read_text()
-            assert "dutch_market" not in content, (
-                f"{py_file.name} contains hardcoded 'dutch_market'"
-            )
+            assert "dutch_market" not in content, f"{py_file.name} contains hardcoded 'dutch_market'"
 
     def test_no_hardcoded_date_in_loader(self) -> None:
         content = (SRC / "data" / "unified_loader.py").read_text()
@@ -124,9 +118,7 @@ class TestModuleStructure:
             if py_file.name == "__pycache__":
                 continue
             line_count = len(py_file.read_text().splitlines())
-            assert line_count <= 500, (
-                f"{py_file.name} is {line_count} lines (limit: 500)"
-            )
+            assert line_count <= 500, f"{py_file.name} is {line_count} lines (limit: 500)"
 
 
 class TestModuleImportability:

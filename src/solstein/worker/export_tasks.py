@@ -82,15 +82,11 @@ def generate_export(
     )
 
     try:
-        _run_in_dedicated_loop(
-            _execute_export(export_job_id, tenant_id, export_format, filters)
-        )
+        _run_in_dedicated_loop(_execute_export(export_job_id, tenant_id, export_format, filters))
         return {"job_id": export_job_id, "status": "completed"}
 
     except self.MaxRetriesExceededError:
-        _run_in_dedicated_loop(
-            _mark_job_failed(export_job_id, "Max retries exceeded")
-        )
+        _run_in_dedicated_loop(_mark_job_failed(export_job_id, "Max retries exceeded"))
         dead_letter_queue.record_failure(
             task_name="solstein.worker_tasks.generate_export",
             task_id=self.request.id or str(uuid.uuid4()),
@@ -109,9 +105,7 @@ def generate_export(
         try:
             self.retry(exc=exc)
         except self.MaxRetriesExceededError:
-            _run_in_dedicated_loop(
-                _mark_job_failed(export_job_id, str(exc))
-            )
+            _run_in_dedicated_loop(_mark_job_failed(export_job_id, str(exc)))
             dead_letter_queue.record_failure(
                 task_name="solstein.worker_tasks.generate_export",
                 task_id=self.request.id or str(uuid.uuid4()),
@@ -143,11 +137,7 @@ async def _execute_export(
 
     # Mark as processing (idempotency check)
     async with AsyncSession(engine, expire_on_commit=False) as session:
-        result = await session.execute(
-            select(ExportJobRecord).where(
-                ExportJobRecord.id == uuid.UUID(export_job_id)
-            )
-        )
+        result = await session.execute(select(ExportJobRecord).where(ExportJobRecord.id == uuid.UUID(export_job_id)))
         job = result.scalar_one_or_none()
 
         if job is None:
@@ -168,11 +158,7 @@ async def _execute_export(
     # STORY-112: Progress callback updates export_jobs.progress_pct
     async def _update_progress(pct: int) -> None:
         async with AsyncSession(engine, expire_on_commit=False) as s:
-            r = await s.execute(
-                select(ExportJobRecord).where(
-                    ExportJobRecord.id == uuid.UUID(export_job_id)
-                )
-            )
+            r = await s.execute(select(ExportJobRecord).where(ExportJobRecord.id == uuid.UUID(export_job_id)))
             j = r.scalar_one_or_none()
             if j is not None:
                 j.progress_pct = min(pct, 99)  # 100 only on completion
@@ -184,16 +170,16 @@ async def _execute_export(
 
     # STORY-115: Generate file and upload to storage backend
     file_url = await _generate_file(
-        tenant_id, export_job_id, export_format, filters, _sync_progress,
+        tenant_id,
+        export_job_id,
+        export_format,
+        filters,
+        _sync_progress,
     )
 
     # Mark as completed with expiry (STORY-113)
     async with AsyncSession(engine, expire_on_commit=False) as session:
-        result = await session.execute(
-            select(ExportJobRecord).where(
-                ExportJobRecord.id == uuid.UUID(export_job_id)
-            )
-        )
+        result = await session.execute(select(ExportJobRecord).where(ExportJobRecord.id == uuid.UUID(export_job_id)))
         job = result.scalar_one_or_none()
         if job is not None:
             file_size = _get_file_size(file_url)
@@ -245,13 +231,14 @@ async def _generate_file(
     with tempfile.TemporaryDirectory(prefix="solstein_export_") as tmp_dir:
         tmp_path = Path(tmp_dir) / filename
         await _dispatch_exporter(
-            export_format, tmp_path, filters, progress_callback,
+            export_format,
+            tmp_path,
+            filters,
+            progress_callback,
         )
 
         if not tmp_path.exists():
-            raise RuntimeError(
-                f"Exporter did not produce output file: {filename}"
-            )
+            raise RuntimeError(f"Exporter did not produce output file: {filename}")
 
         file_bytes = tmp_path.read_bytes()
 
@@ -277,13 +264,13 @@ async def _generate_file(
                 str(exc)[:200],
             )
 
-    raise RuntimeError(
-        f"Export upload failed after 3 attempts: {last_exc}"
-    )
+    raise RuntimeError(f"Export upload failed after 3 attempts: {last_exc}")
 
 
 def _build_filename(
-    export_format: str, prefix: str, timestamp: str,
+    export_format: str,
+    prefix: str,
+    timestamp: str,
 ) -> str:
     """Build the export filename from format, prefix, and timestamp."""
     ext_map: dict[str, str] = {
@@ -342,7 +329,9 @@ async def _generate_excel(
     companies = await _fetch_companies(filters)
     if companies:
         exporter.create_dashboard(
-            companies, output_path, progress_callback,
+            companies,
+            output_path,
+            progress_callback,
         )
 
 
@@ -370,9 +359,7 @@ async def _generate_pdf(
         )
 
 
-async def _generate_csv(
-    output_path: Any, filters: dict[str, Any]
-) -> None:
+async def _generate_csv(output_path: Any, filters: dict[str, Any]) -> None:
     """Generate CSV export."""
     from solstein.exporters.csv import CSVExporter
 
@@ -382,9 +369,7 @@ async def _generate_csv(
         exporter.export(companies, output_path=output_path)
 
 
-async def _generate_json(
-    output_path: Any, filters: dict[str, Any]
-) -> None:
+async def _generate_json(output_path: Any, filters: dict[str, Any]) -> None:
     """Generate JSON export."""
     import json
 
@@ -393,9 +378,7 @@ async def _generate_json(
     output_path.write_text(json.dumps(data, indent=2, default=str))
 
 
-async def _generate_markdown(
-    output_path: Any, filters: dict[str, Any]
-) -> None:
+async def _generate_markdown(output_path: Any, filters: dict[str, Any]) -> None:
     """Generate Markdown export."""
     from solstein.exporters.markdown.generator import (
         generate_enhanced_report,
@@ -407,9 +390,7 @@ async def _generate_markdown(
         output_path.write_text(report)
 
 
-async def _generate_llm_report(
-    output_path: Any, filters: dict[str, Any]
-) -> None:
+async def _generate_llm_report(output_path: Any, filters: dict[str, Any]) -> None:
     """Generate LLM-enhanced report (higher time limit)."""
     from solstein.exporters import LLMReportEnhancer
 
@@ -463,15 +444,11 @@ async def _fetch_companies(
 
         company_id = filters.get("company_id")
         if company_id:
-            query = query.where(
-                CompanyRecord.company_id == company_id
-            )
+            query = query.where(CompanyRecord.company_id == company_id)
 
         tenant_id = filters.get("tenant_id")
         if tenant_id:
-            query = query.where(
-                CompanyRecord.tenant_id == tenant_id
-            )
+            query = query.where(CompanyRecord.tenant_id == tenant_id)
 
         result = await session.execute(query.limit(1000))
         records = result.scalars().all()
@@ -491,9 +468,7 @@ async def _fetch_companies(
     return companies
 
 
-async def _mark_job_failed(
-    export_job_id: str, error_message: str
-) -> None:
+async def _mark_job_failed(export_job_id: str, error_message: str) -> None:
     """Mark an export job as failed in the database."""
     from sqlalchemy import select
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -503,11 +478,7 @@ async def _mark_job_failed(
 
     engine = get_async_engine()
     async with AsyncSession(engine, expire_on_commit=False) as session:
-        result = await session.execute(
-            select(ExportJobRecord).where(
-                ExportJobRecord.id == uuid.UUID(export_job_id)
-            )
-        )
+        result = await session.execute(select(ExportJobRecord).where(ExportJobRecord.id == uuid.UUID(export_job_id)))
         job = result.scalar_one_or_none()
         if job is not None:
             job.status = "failed"

@@ -52,16 +52,6 @@ GROWTH_SIGNALS = [
         description="Revenue from existing customers including expansions",
     ),
     Signal(
-        name="Customer Lifetime Value (LTV)",
-        category=SignalCategory.GROWTH,
-        description="Predicted total revenue per customer",
-    ),
-    Signal(
-        name="Customer Acquisition Cost (CAC)",
-        category=SignalCategory.GROWTH,
-        description="Cost to acquire a new customer",
-    ),
-    Signal(
         name="LTV/CAC Ratio",
         category=SignalCategory.GROWTH,
         description="Efficiency of customer acquisition",

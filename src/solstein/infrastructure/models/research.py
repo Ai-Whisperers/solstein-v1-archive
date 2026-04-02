@@ -303,42 +303,18 @@ class ResearchJobRecord(Base):
 
     __tablename__ = "research_jobs"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
-    tenant_id: Mapped[str] = mapped_column(
-        String(255), index=True, nullable=False
-    )
-    company_id: Mapped[str] = mapped_column(
-        String(255), index=True, nullable=False
-    )
-    company_name: Mapped[str | None] = mapped_column(
-        String(500), nullable=True
-    )
-    status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="queued", index=True
-    )
-    progress_pct: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0
-    )
-    current_stage: Mapped[str | None] = mapped_column(
-        String(100), nullable=True
-    )
-    error_message: Mapped[str | None] = mapped_column(
-        Text, nullable=True
-    )
-    job_metadata: Mapped[object | None] = mapped_column(
-        JSON, nullable=True
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
-    )
-    started_at: Mapped[datetime | None] = mapped_column(
-        DateTime, nullable=True
-    )
-    completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime, nullable=True
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+    company_id: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+    company_name: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="queued", index=True)
+    progress_pct: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    current_stage: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    job_metadata: Mapped[object | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     __table_args__ = (
         Index("ix_research_job_tenant", "tenant_id"),

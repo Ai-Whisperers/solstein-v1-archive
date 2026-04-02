@@ -30,6 +30,7 @@ import pytest
 # Helpers: load modules that have deep import chains
 # ---------------------------------------------------------------------------
 
+
 def _load_module_directly(mod_name: str, file_path: str) -> object:
     """Load a module via importlib to bypass __init__.py import chains.
 
@@ -40,9 +41,7 @@ def _load_module_directly(mod_name: str, file_path: str) -> object:
     if mod_name in sys.modules:
         return sys.modules[mod_name]
 
-    spec = importlib.util.spec_from_file_location(
-        mod_name, file_path, submodule_search_locations=[]
-    )
+    spec = importlib.util.spec_from_file_location(mod_name, file_path, submodule_search_locations=[])
     mod = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
     sys.modules[mod_name] = mod
     spec.loader.exec_module(mod)  # type: ignore[union-attr]
@@ -51,16 +50,14 @@ def _load_module_directly(mod_name: str, file_path: str) -> object:
 
 def _load_export_tasks():
     """Load export_tasks module."""
-    task_path = str(
-        Path(__file__).parent.parent.parent
-        / "src" / "solstein" / "worker" / "export_tasks.py"
-    )
+    task_path = str(Path(__file__).parent.parent.parent / "src" / "solstein" / "worker" / "export_tasks.py")
     return _load_module_directly("solstein.worker.export_tasks", task_path)
 
 
 # ===================================================================
 # SECTION 1: Export Celery Task Behavioral Contracts (was STORY-111)
 # ===================================================================
+
 
 class TestExportTaskMetadata:
     """Verify Celery task wiring via runtime metadata, not source text."""
@@ -90,13 +87,16 @@ class TestExportTaskMetadata:
 
     # -- Generator functions are callable --
 
-    @pytest.mark.parametrize("fn_name", [
-        "_generate_excel",
-        "_generate_csv",
-        "_generate_json",
-        "_generate_markdown",
-        "_generate_llm_report",
-    ])
+    @pytest.mark.parametrize(
+        "fn_name",
+        [
+            "_generate_excel",
+            "_generate_csv",
+            "_generate_json",
+            "_generate_markdown",
+            "_generate_llm_report",
+        ],
+    )
     def test_generator_function_callable(self, fn_name):
         """Each format generator must be a callable in the module."""
         fn = getattr(self.mod, fn_name, None)
@@ -116,6 +116,7 @@ class TestExportTaskCeleryConfig:
         # Ensure export_tasks loaded first so task is registered
         _load_export_tasks()
         from solstein.celery_config import celery_app  # noqa: PLC0415
+
         self.app = celery_app
 
     def test_export_tasks_in_includes(self):
@@ -142,6 +143,7 @@ class TestExportTaskCeleryConfig:
 # SECTION 2: Export API Router Behavioral Contracts
 # ===================================================================
 
+
 class TestExportRouterRegistration:
     """Verify export router has correct routes via runtime inspection."""
 
@@ -149,11 +151,7 @@ class TestExportRouterRegistration:
     def _load(self):
         mod = importlib.import_module("solstein.api.routers.exports")
         self.router = mod.router
-        self._routes = {
-            (r.path, tuple(sorted(r.methods)))
-            for r in self.router.routes
-            if hasattr(r, "methods")
-        }
+        self._routes = {(r.path, tuple(sorted(r.methods))) for r in self.router.routes if hasattr(r, "methods")}
 
     def test_post_endpoint_registered(self):
         """POST /api/v1/exports must be registered."""
@@ -197,9 +195,17 @@ class TestExportJobResponseModel:
         mod = importlib.import_module("solstein.api.routers.exports")
         self.model = mod.ExportJobResponse
 
-    @pytest.mark.parametrize("field", [
-        "job_id", "status", "format", "file_url", "created_at", "completed_at",
-    ])
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "job_id",
+            "status",
+            "format",
+            "file_url",
+            "created_at",
+            "completed_at",
+        ],
+    )
     def test_response_has_required_field(self, field):
         """ExportJobResponse must expose all required fields."""
         assert field in self.model.model_fields
@@ -209,22 +215,34 @@ class TestExportJobResponseModel:
 # SECTION 3: ExportJobRecord SQLAlchemy Model Contracts
 # ===================================================================
 
+
 class TestExportJobRecordModel:
     """Verify ExportJobRecord columns and table config at runtime."""
 
     @pytest.fixture(autouse=True)
     def _load(self):
         from solstein.infrastructure.models.export import ExportJobRecord  # noqa: PLC0415
+
         self.model = ExportJobRecord
 
     def test_table_name(self):
         """Table must be named export_jobs."""
         assert self.model.__tablename__ == "export_jobs"
 
-    @pytest.mark.parametrize("column", [
-        "id", "tenant_id", "company_id", "format", "status",
-        "file_url", "error_message", "created_at", "completed_at",
-    ])
+    @pytest.mark.parametrize(
+        "column",
+        [
+            "id",
+            "tenant_id",
+            "company_id",
+            "format",
+            "status",
+            "file_url",
+            "error_message",
+            "created_at",
+            "completed_at",
+        ],
+    )
     def test_column_exists(self, column):
         """ExportJobRecord must have all required columns."""
         col_names = [c.name for c in self.model.__table__.columns]
@@ -258,12 +276,14 @@ class TestExportJobRecordModel:
     def test_model_importable_from_package(self):
         """ExportJobRecord must be importable from models package."""
         from solstein.infrastructure.models import ExportJobRecord as FromPkg  # noqa: PLC0415
+
         assert FromPkg is self.model
 
 
 # ===================================================================
 # SECTION 4: Health Check Router Behavioral Contracts (was STORY-047)
 # ===================================================================
+
 
 class TestHealthRouterRegistration:
     """Verify health router routes via runtime inspection."""
@@ -272,9 +292,7 @@ class TestHealthRouterRegistration:
     def _load(self):
         mod = importlib.import_module("solstein.api.routers.health")
         self.router = mod.router
-        self._route_paths = {
-            r.path for r in self.router.routes if hasattr(r, "methods")
-        }
+        self._route_paths = {r.path for r in self.router.routes if hasattr(r, "methods")}
 
     def test_health_check_endpoint(self):
         """GET /health must be registered."""
@@ -296,26 +314,32 @@ class TestHealthRouterRegistration:
 class TestHealthCheckModules:
     """Verify health check strategy classes exist and follow the pattern."""
 
-    @pytest.mark.parametrize("module_name,class_name", [
-        ("solstein.core.health_checks.database", "DatabaseHealthCheck"),
-        ("solstein.core.health_checks.redis", "RedisHealthCheck"),
-        ("solstein.core.health_checks.llm", "LLMHealthCheck"),
-        ("solstein.core.health_checks.api", "ApiHealthCheck"),
-        ("solstein.core.health_checks.configuration", "ConfigurationHealthCheck"),
-    ])
+    @pytest.mark.parametrize(
+        "module_name,class_name",
+        [
+            ("solstein.core.health_checks.database", "DatabaseHealthCheck"),
+            ("solstein.core.health_checks.redis", "RedisHealthCheck"),
+            ("solstein.core.health_checks.llm", "LLMHealthCheck"),
+            ("solstein.core.health_checks.api", "ApiHealthCheck"),
+            ("solstein.core.health_checks.configuration", "ConfigurationHealthCheck"),
+        ],
+    )
     def test_health_check_class_exists(self, module_name, class_name):
         """Each health check module must export its strategy class."""
         mod = importlib.import_module(module_name)
         cls = getattr(mod, class_name, None)
         assert cls is not None, f"{class_name} not found in {module_name}"
 
-    @pytest.mark.parametrize("module_name,class_name", [
-        ("solstein.core.health_checks.database", "DatabaseHealthCheck"),
-        ("solstein.core.health_checks.redis", "RedisHealthCheck"),
-        ("solstein.core.health_checks.llm", "LLMHealthCheck"),
-        ("solstein.core.health_checks.api", "ApiHealthCheck"),
-        ("solstein.core.health_checks.configuration", "ConfigurationHealthCheck"),
-    ])
+    @pytest.mark.parametrize(
+        "module_name,class_name",
+        [
+            ("solstein.core.health_checks.database", "DatabaseHealthCheck"),
+            ("solstein.core.health_checks.redis", "RedisHealthCheck"),
+            ("solstein.core.health_checks.llm", "LLMHealthCheck"),
+            ("solstein.core.health_checks.api", "ApiHealthCheck"),
+            ("solstein.core.health_checks.configuration", "ConfigurationHealthCheck"),
+        ],
+    )
     def test_health_check_inherits_strategy(self, module_name, class_name):
         """Each health check must implement the HealthCheckStrategy base."""
         mod = importlib.import_module(module_name)
@@ -329,11 +353,19 @@ class TestHealthCheckResult:
     @pytest.fixture(autouse=True)
     def _load(self):
         from solstein.monitoring.health import HealthCheckResult  # noqa: PLC0415
+
         self.result_cls = HealthCheckResult
 
-    @pytest.mark.parametrize("field", [
-        "name", "status", "response_time_ms", "message", "details",
-    ])
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "name",
+            "status",
+            "response_time_ms",
+            "message",
+            "details",
+        ],
+    )
     def test_result_has_field(self, field):
         """HealthCheckResult must have all required fields."""
         assert field in self.result_cls.__dataclass_fields__
@@ -355,6 +387,7 @@ class TestHealthCheckResult:
 # SECTION 5: Static tests intentionally retained
 # ===================================================================
 
+
 class TestRetainedStaticChecks:
     """Source-text assertions that are intentionally kept.
 
@@ -367,10 +400,7 @@ class TestRetainedStaticChecks:
     # Verifying the decorator text in source is the practical approach.
     def test_task_uses_shared_task_decorator(self):
         """Export task must use @shared_task (decorator intent not introspectable)."""
-        task_path = (
-            Path(__file__).parent.parent.parent
-            / "src" / "solstein" / "worker" / "export_tasks.py"
-        )
+        task_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "worker" / "export_tasks.py"
         source = task_path.read_text()
         assert "@shared_task" in source
 
@@ -379,10 +409,7 @@ class TestRetainedStaticChecks:
     # execution with a failing DB, which is an integration test concern.
     def test_task_integrates_with_dlq(self):
         """Export task must import and use dead_letter_queue (wiring intent)."""
-        task_path = (
-            Path(__file__).parent.parent.parent
-            / "src" / "solstein" / "worker" / "export_tasks.py"
-        )
+        task_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "worker" / "export_tasks.py"
         source = task_path.read_text()
         assert "dead_letter_queue" in source
         assert "record_failure" in source
@@ -392,10 +419,7 @@ class TestRetainedStaticChecks:
     # confirms the guard exists; the integration suite tests it end-to-end.
     def test_task_has_idempotency_guard(self):
         """Export task must check job status before processing."""
-        task_path = (
-            Path(__file__).parent.parent.parent
-            / "src" / "solstein" / "worker" / "export_tasks.py"
-        )
+        task_path = Path(__file__).parent.parent.parent / "src" / "solstein" / "worker" / "export_tasks.py"
         source = task_path.read_text()
         assert '"completed"' in source
         assert '"processing"' in source
@@ -403,15 +427,18 @@ class TestRetainedStaticChecks:
     # STATIC-OK: asyncio.sleep in health check code is a banned pattern.
     # There's no runtime check for "this function does NOT call sleep"
     # — absence of a call is only verifiable via source inspection or AST.
-    @pytest.mark.parametrize("path_suffix", [
-        "core/monitoring.py",
-        "core/health_checks/database.py",
-        "core/health_checks/redis.py",
-        "core/health_checks/llm.py",
-        "core/health_checks/api.py",
-        "core/health_checks/configuration.py",
-        "api/routers/health.py",
-    ])
+    @pytest.mark.parametrize(
+        "path_suffix",
+        [
+            "core/monitoring.py",
+            "core/health_checks/database.py",
+            "core/health_checks/redis.py",
+            "core/health_checks/llm.py",
+            "core/health_checks/api.py",
+            "core/health_checks/configuration.py",
+            "api/routers/health.py",
+        ],
+    )
     def test_no_asyncio_sleep_in_health_checks(self, path_suffix):
         """Health check code must not contain asyncio.sleep (banned pattern)."""
         src = Path(__file__).parent.parent.parent / "src" / "solstein" / path_suffix
@@ -422,8 +449,5 @@ class TestRetainedStaticChecks:
     # STATIC-OK: Documentation existence is inherently a file-system check.
     def test_export_api_documentation_exists(self):
         """Export API documentation must exist."""
-        doc_path = (
-            Path(__file__).parent.parent.parent
-            / "docs" / "exports" / "async-export-api.md"
-        )
+        doc_path = Path(__file__).parent.parent.parent / "docs" / "exports" / "async-export-api.md"
         assert doc_path.exists(), "Export API documentation not found"

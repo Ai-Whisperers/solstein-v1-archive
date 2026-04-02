@@ -133,9 +133,7 @@ class TestRealtimeCallback:
             }
         }
 
-        with patch(
-            "solstein.api.websocket.realtime_listener.manager"
-        ) as mock_manager:
+        with patch("solstein.api.websocket.realtime_listener.manager") as mock_manager:
             mock_manager.broadcast = AsyncMock()
 
             # Act
@@ -159,9 +157,7 @@ class TestRealtimeCallback:
         # Arrange
         payload = {"data": {"type": "UPDATE", "record": {}, "old_record": {}}}
 
-        with patch(
-            "solstein.api.websocket.realtime_listener.manager"
-        ) as mock_manager:
+        with patch("solstein.api.websocket.realtime_listener.manager") as mock_manager:
             mock_manager.broadcast = AsyncMock()
 
             # Act - should not raise
@@ -173,9 +169,7 @@ class TestRealtimeCallback:
     @pytest.mark.asyncio
     async def test_handles_empty_payload(self):
         # Arrange & Act - should not raise
-        with patch(
-            "solstein.api.websocket.realtime_listener.manager"
-        ) as mock_manager:
+        with patch("solstein.api.websocket.realtime_listener.manager") as mock_manager:
             mock_manager.broadcast = AsyncMock()
             await _on_research_job_change({})
             mock_manager.broadcast.assert_not_awaited()
@@ -198,9 +192,7 @@ class TestRealtimeCallback:
             }
         }
 
-        with patch(
-            "solstein.api.websocket.realtime_listener.manager"
-        ) as mock_manager:
+        with patch("solstein.api.websocket.realtime_listener.manager") as mock_manager:
             mock_manager.broadcast = AsyncMock()
 
             # Act
@@ -227,9 +219,7 @@ class TestRealtimeCallback:
             }
         }
 
-        with patch(
-            "solstein.api.websocket.realtime_listener.manager"
-        ) as mock_manager:
+        with patch("solstein.api.websocket.realtime_listener.manager") as mock_manager:
             mock_manager.broadcast = AsyncMock()
 
             # Act

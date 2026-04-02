@@ -13,6 +13,7 @@ from solstein.infrastructure.database_models import EnrichmentAuditRecord, Enric
 from solstein.infrastructure.enrichment_repositories import EnrichmentAuditRepository, EnrichmentCacheRepository
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 class TestEnrichmentAuditRepository:
     """Test suite for EnrichmentAuditRepository with real database backend."""
@@ -98,6 +99,7 @@ class TestEnrichmentAuditRepository:
         assert "failure_count" in stats
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 class TestEnrichmentCacheRepository:
     """Test suite for EnrichmentCacheRepository with real database backend."""

@@ -70,9 +70,7 @@ class EmbeddingRepository:
         Returns:
             True if update succeeded, False if company not found.
         """
-        result = await self.session.execute(
-            select(CompanyRecord).where(CompanyRecord.company_id == company_id)
-        )
+        result = await self.session.execute(select(CompanyRecord).where(CompanyRecord.company_id == company_id))
         record = result.scalar_one_or_none()
 
         if not record:
@@ -101,9 +99,7 @@ class EmbeddingRepository:
             List of CompanyRecord objects without embeddings.
         """
         result = await self.session.execute(
-            select(CompanyRecord)
-            .where(CompanyRecord.profile_embedding.is_(None))
-            .limit(limit)
+            select(CompanyRecord).where(CompanyRecord.profile_embedding.is_(None)).limit(limit)
         )
         return list(result.scalars().all())
 
@@ -121,9 +117,7 @@ class EmbeddingRepository:
             or if the company has no embedding.
         """
         result = await self.session.execute(
-            select(CompanyRecord.profile_embedding).where(
-                CompanyRecord.company_id == company_id
-            )
+            select(CompanyRecord.profile_embedding).where(CompanyRecord.company_id == company_id)
         )
         row = result.scalar_one_or_none()
         if row is None:
@@ -172,9 +166,7 @@ class EmbeddingRepository:
         where_sql = " AND ".join(where_clauses)
 
         # Count total matching rows
-        count_sql = text(
-            f"SELECT COUNT(*) FROM companies WHERE {where_sql}"
-        )
+        count_sql = text(f"SELECT COUNT(*) FROM companies WHERE {where_sql}")
         count_result = await self.session.execute(count_sql, params)
         total_count = count_result.scalar() or 0
 
@@ -192,11 +184,9 @@ class EmbeddingRepository:
 
         results: list[tuple[CompanyRecord, float]] = []
         for row in rows:
-            record = CompanyRecord(**{
-                col: getattr(row, col)
-                for col in CompanyRecord.__table__.columns.keys()
-                if hasattr(row, col)
-            })
+            record = CompanyRecord(
+                **{col: getattr(row, col) for col in CompanyRecord.__table__.columns.keys() if hasattr(row, col)}
+            )
             similarity = row.similarity
             results.append((record, similarity))
 

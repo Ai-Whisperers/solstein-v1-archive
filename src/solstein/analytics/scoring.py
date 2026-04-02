@@ -80,11 +80,11 @@ def _confidence_weight(
     signal_names = _COMPONENT_SIGNAL_MAP.get(component_name, [])
     if not signal_names:
         return 1.0
-    confidences = [
-        signal_confidences.get(s, _DEFAULT_SIGNAL_CONFIDENCE)
-        for s in signal_names
-    ]
-    return safe_avg(confidences, default=_DEFAULT_SIGNAL_CONFIDENCE, label="signal_confidence_avg") or _DEFAULT_SIGNAL_CONFIDENCE
+    confidences = [signal_confidences.get(s, _DEFAULT_SIGNAL_CONFIDENCE) for s in signal_names]
+    return (
+        safe_avg(confidences, default=_DEFAULT_SIGNAL_CONFIDENCE, label="signal_confidence_avg")
+        or _DEFAULT_SIGNAL_CONFIDENCE
+    )
 
 
 def _apply_confidence_weights(
@@ -127,16 +127,12 @@ def validate_before_scoring(company: Company) -> list[str]:
         warnings = company.validate_scoring_readiness()
     except Exception as exc:
         # Validation itself should never crash scoring
-        logger.error(
-            f"[EPIC-059] Validation failed for {company.name}: {exc}"
-        )
+        logger.error(f"[EPIC-059] Validation failed for {company.name}: {exc}")
         warnings = [f"Validation error: {exc}"]
 
     if warnings:
         for warning in warnings:
-            logger.warning(
-                f"[EPIC-059] Pre-scoring validation for '{company.name}': {warning}"
-            )
+            logger.warning(f"[EPIC-059] Pre-scoring validation for '{company.name}': {warning}")
 
     return warnings
 
@@ -490,10 +486,7 @@ class MarketAnalyzer:
         revenues = [p.financials.revenue for p in profiles if p.financials.revenue]
         if revenues:
             total_revenue = sum(revenues)
-            market_shares = [
-                safe_pct(r, total_revenue, default=0.0, label="market_share") or 0.0
-                for r in revenues
-            ]
+            market_shares = [safe_pct(r, total_revenue, default=0.0, label="market_share") or 0.0 for r in revenues]
             hhi = sum(share**2 for share in market_shares)
         else:
             hhi = 0.0

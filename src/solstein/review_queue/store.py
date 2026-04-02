@@ -152,9 +152,7 @@ class ReviewQueueStore:
 
         Returns None if not found.
         """
-        row = self._conn.execute(
-            "SELECT * FROM review_queue WHERE id = ?", (entry_id,)
-        ).fetchone()
+        row = self._conn.execute("SELECT * FROM review_queue WHERE id = ?", (entry_id,)).fetchone()
         if row is None:
             return None
         return _row_to_entry(row)
@@ -181,9 +179,7 @@ class ReviewQueueStore:
 
     def list_all(self, limit: int = 100) -> list[ReviewQueueEntry]:
         """Return recent review entries (any status), newest first."""
-        rows = self._conn.execute(
-            "SELECT * FROM review_queue ORDER BY created_at DESC LIMIT ?", (limit,)
-        ).fetchall()
+        rows = self._conn.execute("SELECT * FROM review_queue ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
         return [_row_to_entry(r) for r in rows]
 
     def approve(self, entry_id: str, reviewer_id: str | None = None) -> ReviewQueueEntry:
@@ -203,9 +199,7 @@ class ReviewQueueStore:
         """
         entry = self._get_or_raise(entry_id)
         if entry.status != ReviewStatus.PENDING:
-            raise ValueError(
-                f"Review entry {entry_id} is already {entry.status.value} — cannot approve."
-            )
+            raise ValueError(f"Review entry {entry_id} is already {entry.status.value} — cannot approve.")
         now = _now_iso()
         self._conn.execute(
             "UPDATE review_queue SET status = 'approved', reviewer_id = ?, updated_at = ? WHERE id = ?",
@@ -239,9 +233,7 @@ class ReviewQueueStore:
         """
         entry = self._get_or_raise(entry_id)
         if entry.status != ReviewStatus.PENDING:
-            raise ValueError(
-                f"Review entry {entry_id} is already {entry.status.value} — cannot reject."
-            )
+            raise ValueError(f"Review entry {entry_id} is already {entry.status.value} — cannot reject.")
         now = _now_iso()
         self._conn.execute(
             """

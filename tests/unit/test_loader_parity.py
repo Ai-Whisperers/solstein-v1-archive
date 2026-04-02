@@ -99,6 +99,7 @@ def test_load_companies_for_report_handles_wrapped_competitors(tmp_path: Path) -
 
 def test_load_companies_for_report_missing_default_raises_usage_error(monkeypatch) -> None:
     """When called without input_path and no default file exists, raises UsageError."""
+
     # Point settings data_dir to a temp dir with no competitor_data.json
     class MockDataConfig:
         data_dir = Path("/tmp/nonexistent-solstein-test-dir-xyz")

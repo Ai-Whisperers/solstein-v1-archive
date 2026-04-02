@@ -154,9 +154,7 @@ Companies are scored across three dimensions:
             else:
                 position = "~ Parity"
             score_str = f"{comp_score:.2f}" if comp_score else "N/A"
-            report += (
-                f"| {comp.name} | {score_str} | {getattr(comp, 'industry', 'N/A') or 'N/A'} | {position} |\n"
-            )
+            report += f"| {comp.name} | {score_str} | {getattr(comp, 'industry', 'N/A') or 'N/A'} | {position} |\n"
 
         report += """
 ---

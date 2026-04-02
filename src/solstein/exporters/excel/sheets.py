@@ -14,9 +14,7 @@ from .styles import ExcelStyles, LayoutConstants
 from .utils import auto_adjust_columns, format_number, format_percentage, safe_get, safe_get_financial
 
 
-def add_title_banner(
-    ws: Any, styles: ExcelStyles, title: str, subtitle: str = "", num_columns: int = 10
-) -> None:
+def add_title_banner(ws: Any, styles: ExcelStyles, title: str, subtitle: str = "", num_columns: int = 10) -> None:
     """Add a title banner to the worksheet.
 
     Args:

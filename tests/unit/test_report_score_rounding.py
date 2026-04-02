@@ -75,9 +75,7 @@ class TestScoreRounding:
         report = strategy.generate(company)
 
         raw_matches = RAW_FLOAT_PATTERN.findall(report)
-        assert not raw_matches, (
-            f"Found unrounded floats in deep analysis: {raw_matches}"
-        )
+        assert not raw_matches, f"Found unrounded floats in deep analysis: {raw_matches}"
 
     def test_corporate_history_no_raw_floats(self) -> None:
         """Corporate history report should not contain unrounded floats."""
@@ -87,9 +85,7 @@ class TestScoreRounding:
         report = strategy.generate(company)
 
         raw_matches = RAW_FLOAT_PATTERN.findall(report)
-        assert not raw_matches, (
-            f"Found unrounded floats in corporate history: {raw_matches}"
-        )
+        assert not raw_matches, f"Found unrounded floats in corporate history: {raw_matches}"
 
     def test_financial_growth_no_raw_floats(self) -> None:
         """Financial growth report should not contain unrounded floats."""
@@ -99,9 +95,7 @@ class TestScoreRounding:
         report = strategy.generate(company)
 
         raw_matches = RAW_FLOAT_PATTERN.findall(report)
-        assert not raw_matches, (
-            f"Found unrounded floats in financial growth: {raw_matches}"
-        )
+        assert not raw_matches, f"Found unrounded floats in financial growth: {raw_matches}"
 
     def test_client_report_no_raw_floats(self) -> None:
         """Full client report should not contain unrounded floats."""
@@ -120,9 +114,7 @@ class TestScoreRounding:
                 if isinstance(path, Path) and path.exists():
                     content = path.read_text()
                     raw_matches = RAW_FLOAT_PATTERN.findall(content)
-                    assert not raw_matches, (
-                        f"Found unrounded floats in {key} ({path.name}): {raw_matches}"
-                    )
+                    assert not raw_matches, f"Found unrounded floats in {key} ({path.name}): {raw_matches}"
 
     def test_none_score_shows_na(self) -> None:
         """A company with None scores should show N/A, not crash."""

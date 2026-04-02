@@ -6,6 +6,7 @@ STORY-073: Added Langfuse tracing via LLMTracer.
 STORY-075: Integrated FallbackChain with circuit breakers and template fallback.
 STORY-129: Classified exception handling with Prometheus metrics and health signals.
 """
+
 from __future__ import annotations
 
 import time
@@ -28,6 +29,7 @@ TBaseModel = TypeVar("TBaseModel", bound=BaseModel)
 
 class LLMGenerationError(Exception):
     """Raised when all LLM providers fail and template fallback is disabled."""
+
     def __init__(self, message: str, attempts: list[dict[str, Any]]):
         super().__init__(message)
         self.attempts = attempts
@@ -40,6 +42,7 @@ class EnhancedLLMClient:
     Circuit breakers prevent requests to known-failing providers.
     Template fallback returns structured placeholder when all providers fail.
     """
+
     def __init__(
         self,
         health_checker: ProviderHealthChecker | None = None,
@@ -55,6 +58,7 @@ class EnhancedLLMClient:
 
     def _get_client(self, provider: str) -> Any | None:
         from .provider_strategies import ProviderClientFactory
+
         if provider in self._clients:
             return self._clients[provider]
         client = ProviderClientFactory.create_client(provider, self.settings)
@@ -66,8 +70,11 @@ class EnhancedLLMClient:
         return getattr(self.settings, f"{provider}_model", "gpt-4o-mini")
 
     async def generate(
-        self, prompt: str, system_prompt: str | None = None,
-        max_retries: int = 2, preferred_provider: str | None = None,
+        self,
+        prompt: str,
+        system_prompt: str | None = None,
+        max_retries: int = 2,
+        preferred_provider: str | None = None,
         use_template_fallback: bool = True,
     ) -> str:
         """Generate text using available LLM with automatic failover.
@@ -89,16 +96,15 @@ class EnhancedLLMClient:
             logger.warning("[EnhancedLLMClient] Returning template fallback response")
             return TEMPLATE_FALLBACK_RESPONSE["content"]
 
-        attempts = [
-            {"provider": d.provider, "action": d.action, "reason": d.reason}
-            for d in fb_result.decisions
-        ]
-        raise LLMGenerationError(
-            f"All LLM providers exhausted ({len(attempts)} attempts)", attempts=attempts)
+        attempts = [{"provider": d.provider, "action": d.action, "reason": d.reason} for d in fb_result.decisions]
+        raise LLMGenerationError(f"All LLM providers exhausted ({len(attempts)} attempts)", attempts=attempts)
 
     async def generate_structured(
-        self, prompt: str, schema: type[TBaseModel],
-        system_prompt: str | None = None, max_retries: int = 2,
+        self,
+        prompt: str,
+        schema: type[TBaseModel],
+        system_prompt: str | None = None,
+        max_retries: int = 2,
         preferred_provider: str | None = None,
     ) -> TBaseModel | None:
         """Generate structured output using Pydantic schema."""
@@ -126,10 +132,15 @@ class EnhancedLLMClient:
             elapsed = time.monotonic() - start
 
             # Record success traces and metrics
-            get_tracer(self.settings).record(TraceRecord(
-                prompt=prompt[:500], provider=provider, model=model,
-                latency_s=elapsed, success=True,
-            ))
+            get_tracer(self.settings).record(
+                TraceRecord(
+                    prompt=prompt[:500],
+                    provider=provider,
+                    model=model,
+                    latency_s=elapsed,
+                    success=True,
+                )
+            )
             LLM_REQUESTS_TOTAL.labels(provider=provider, model=model, status="success").inc()
             self.health_checker.report_success(provider)
             return result
@@ -159,10 +170,16 @@ class EnhancedLLMClient:
             self.health_checker.report_error(provider, exc)
 
             # Langfuse trace
-            get_tracer(self.settings).record(TraceRecord(
-                prompt=prompt[:500], provider=provider, model=model,
-                latency_s=elapsed, success=False, error=str(exc),
-            ))
+            get_tracer(self.settings).record(
+                TraceRecord(
+                    prompt=prompt[:500],
+                    provider=provider,
+                    model=model,
+                    latency_s=elapsed,
+                    success=False,
+                    error=str(exc),
+                )
+            )
             raise
 
     async def check_all_providers(self) -> dict[str, Any]:

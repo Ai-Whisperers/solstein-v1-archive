@@ -48,16 +48,22 @@ class ExportJobRecord(Base):
         default=uuid.uuid4,
     )
     tenant_id: Mapped[str] = mapped_column(
-        String(255), nullable=False, index=True,
+        String(255),
+        nullable=False,
+        index=True,
     )
     user_id: Mapped[str | None] = mapped_column(
-        String(255), nullable=True, index=True,
+        String(255),
+        nullable=True,
+        index=True,
     )
     company_id: Mapped[str | None] = mapped_column(
-        String(255), nullable=True,
+        String(255),
+        nullable=True,
     )
     format: Mapped[str] = mapped_column(
-        String(50), nullable=False,
+        String(50),
+        nullable=False,
     )
     status: Mapped[str] = mapped_column(
         String(50),
@@ -66,19 +72,26 @@ class ExportJobRecord(Base):
         index=True,
     )
     file_url: Mapped[str | None] = mapped_column(
-        Text, nullable=True,
+        Text,
+        nullable=True,
     )
     file_size_bytes: Mapped[int | None] = mapped_column(
-        BigInteger, nullable=True,
+        BigInteger,
+        nullable=True,
     )
     error_message: Mapped[str | None] = mapped_column(
-        Text, nullable=True,
+        Text,
+        nullable=True,
     )
     progress_pct: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0,
+        Integer,
+        nullable=False,
+        default=0,
     )
     retry_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0,
+        Integer,
+        nullable=False,
+        default=0,
     )
     created_at: Mapped[datetime] = mapped_column(
         nullable=False,
@@ -142,19 +155,7 @@ class ExportJobRecord(Base):
             "file_size_bytes": self.file_size_bytes,
             "error_message": self.error_message,
             "progress_pct": self.progress_pct,
-            "created_at": (
-                self.created_at.isoformat()
-                if self.created_at
-                else None
-            ),
-            "completed_at": (
-                self.completed_at.isoformat()
-                if self.completed_at
-                else None
-            ),
-            "expires_at": (
-                self.expires_at.isoformat()
-                if self.expires_at
-                else None
-            ),
+            "created_at": (self.created_at.isoformat() if self.created_at else None),
+            "completed_at": (self.completed_at.isoformat() if self.completed_at else None),
+            "expires_at": (self.expires_at.isoformat() if self.expires_at else None),
         }

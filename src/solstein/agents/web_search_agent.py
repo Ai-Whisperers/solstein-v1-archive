@@ -70,9 +70,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
             for query_name, query_text in search_queries:
                 try:
                     search_results = await self.dispatcher.search(query_text)
-                    self.log_info(
-                        f"Found {len(search_results)} results for: {query_name}"
-                    )
+                    self.log_info(f"Found {len(search_results)} results for: {query_name}")
 
                     for sr in search_results[:5]:
                         raw_source = self._create_raw_source(
@@ -99,14 +97,10 @@ class WebSearchAgent(BaseDataGatheringAgent):
                     self.log_warning(f"Error searching {query_name}: {e}")
 
             if result.raw_sources:
-                result.extracted_facts.extend(
-                    self._extract_facts_from_sources(result.raw_sources, company_name)
-                )
+                result.extracted_facts.extend(self._extract_facts_from_sources(result.raw_sources, company_name))
 
             result.success = True
-            self.log_info(
-                f"Successfully gathered {len(result.raw_sources)} web sources"
-            )
+            self.log_info(f"Successfully gathered {len(result.raw_sources)} web sources")
 
         except Exception as e:  # noqa: BLE001
             self.log_error(f"Error gathering web search data: {e}")
@@ -114,15 +108,11 @@ class WebSearchAgent(BaseDataGatheringAgent):
             result.success = False
 
         finally:
-            result.execution_time_seconds = (
-                datetime.now(timezone.utc) - start_time
-            ).total_seconds()
+            result.execution_time_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
 
         return result
 
-    def _generate_search_queries(
-        self, company_name: str, context: dict
-    ) -> list[tuple[str, str]]:
+    def _generate_search_queries(self, company_name: str, context: dict) -> list[tuple[str, str]]:
         """Generate relevant search queries."""
         industry = context.get("industry", "company")
 
@@ -137,9 +127,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
             ("Press Releases", f"{company_name} press release news"),
         ]
 
-    def _extract_facts_from_sources(
-        self, raw_sources: list, company_name: str
-    ) -> list:
+    def _extract_facts_from_sources(self, raw_sources: list, company_name: str) -> list:
         """Extract facts from web search sources."""
         facts = []
 
@@ -148,11 +136,7 @@ class WebSearchAgent(BaseDataGatheringAgent):
             ("hiring_news_signal", "hiring", 0.70),
             ("product_innovation_signal", "product", 0.65),
         ]:
-            mentions = [
-                s
-                for s in raw_sources
-                if keyword in s.metadata.get("query", "").lower()
-            ]
+            mentions = [s for s in raw_sources if keyword in s.metadata.get("query", "").lower()]
             if mentions:
                 facts.append(
                     self._create_fact(

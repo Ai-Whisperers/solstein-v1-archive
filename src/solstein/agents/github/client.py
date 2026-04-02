@@ -65,9 +65,7 @@ class GitHubClient:
         headers = self._request_headers(unauthenticated)
 
         async with httpx.AsyncClient() as client:
-            resp = await client.get(
-                url, headers=headers, params=params, timeout=effective_timeout
-            )
+            resp = await client.get(url, headers=headers, params=params, timeout=effective_timeout)
 
         if resp.status_code == 401 and "Authorization" in self.headers and not unauthenticated:
             # Retry without auth
