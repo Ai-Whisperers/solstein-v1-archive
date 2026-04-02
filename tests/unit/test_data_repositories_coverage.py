@@ -32,7 +32,7 @@ def sample_companies():
             id="3",
             name="Gamma",
             industry="Tech Energy",
-            financials=FinancialMetric(revenue=None),
+            financials=FinancialMetric(revenue=None, allow_empty_primary=True),
             tier=CompanyTier.TIER_4,
             classification="Lead",
         ),

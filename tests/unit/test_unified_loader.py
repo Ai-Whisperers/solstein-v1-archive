@@ -298,7 +298,7 @@ class TestMergeFinancials:
         loader = UnifiedCompanyLoader()
 
         json_fin = make_financial_metric(revenue=100.0)
-        markdown_fin = FinancialMetric(revenue=None)
+        markdown_fin = FinancialMetric(revenue=None, allow_empty_primary=True)
 
         conflicts = []
         data_sources = {}
