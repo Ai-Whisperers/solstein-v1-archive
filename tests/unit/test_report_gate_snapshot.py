@@ -32,7 +32,7 @@ def test_report_gate_snapshot_machine_readable_shape() -> None:
     snapshot = build_report_gate_snapshot(companies)
 
     assert isinstance(snapshot, dict)
-    assert set(snapshot.keys()) == {"passed", "reason_count", "reasons"}
+    assert set(snapshot.keys()) == {"passed", "reason_count", "reasons", "skipped", "warn_mode"}
     assert isinstance(snapshot["passed"], bool)
     assert isinstance(snapshot["reason_count"], int)
     assert isinstance(snapshot["reasons"], list)
