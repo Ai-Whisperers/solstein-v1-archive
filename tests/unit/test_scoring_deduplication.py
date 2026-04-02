@@ -3,7 +3,11 @@ Scoring Deduplication Verification Tests
 Verifies that all duplicate scoring logic has been eliminated.
 """
 
+import pathlib
 import subprocess
+
+_PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[2]
+_SRC_DIR = _PROJECT_ROOT / "src" / "solstein"
 
 
 class TestScoringDeduplication:
@@ -15,7 +19,7 @@ class TestScoringDeduplication:
             ["grep", "-r", "def _merge_facts_into_financials", "src/solstein/analytics/", "--include=*.py"],
             capture_output=True,
             text=True,
-            cwd="/tmp/solstein",
+            cwd=str(_PROJECT_ROOT),
         )
         matches = [line for line in result.stdout.strip().split("\n") if line and "__pycache__" not in line]
         assert len(matches) == 1, f"Expected 1 definition, found {len(matches)}: {matches}"
@@ -27,7 +31,7 @@ class TestScoringDeduplication:
             ["grep", "-r", "def confidence_to_level", "src/solstein/analytics/", "--include=*.py"],
             capture_output=True,
             text=True,
-            cwd="/tmp/solstein",
+            cwd=str(_PROJECT_ROOT),
         )
         matches = [line for line in result.stdout.strip().split("\n") if line and "__pycache__" not in line]
         assert len(matches) == 1, f"Expected 1 definition, found {len(matches)}: {matches}"
@@ -55,16 +59,15 @@ class TestScoringDelegation:
             ["grep", "-E", "class.*Scorer.*:$", "src/solstein/analytics/scoring.py"],
             capture_output=True,
             text=True,
-            cwd="/tmp/solstein",
+            cwd=str(_PROJECT_ROOT),
         )
         # GrowthScorer is allowed (it's a facade that delegates)
         assert "GrowthScorer" in result.stdout
         # But it should delegate to the real scorers
-        with open("/tmp/solstein/src/solstein/analytics/scoring.py") as f:
-            content = f.read()
-            assert "GrowthMomentumScorer" in content
-            assert "FinancialHealthScorer" in content
-            assert "CompetitivePositionScorer" in content
+        content = (_SRC_DIR / "analytics" / "scoring.py").read_text()
+        assert "GrowthMomentumScorer" in content
+        assert "FinancialHealthScorer" in content
+        assert "CompetitivePositionScorer" in content
 
 
 class TestSharedUtilities:
