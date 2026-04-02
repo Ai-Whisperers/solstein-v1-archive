@@ -74,13 +74,15 @@ class TestSolsteinErrorHandler:
         assert data["error"]["code"] == "NOT_FOUND"
 
     def test_solstein_error_no_traceback_in_production(self):
-        """Test SolsteinError never has traceback in prod."""
-        with patch("solstein.api.exceptions.get_settings") as mock:
-            mock.return_value = Mock(debug=False, environment="production")
-            response = client.get("/domain-error")
-            data = response.text
-            assert "traceback" not in data.lower()
-            assert "stack_trace" not in data.lower()
+        """Test SolsteinError never has traceback in prod.
+
+        The handler always produces opaque responses (REQ-1) — traceback is
+        logged server-side only, never returned to the client.
+        """
+        response = client.get("/domain-error")
+        data = response.text
+        assert "traceback" not in data.lower()
+        assert "stack_trace" not in data.lower()
 
 
 class TestValidationExceptionHandler:
