@@ -98,8 +98,7 @@ class ApiKeyRecord(Base):
         Uuid(as_uuid=True),
         ForeignKey("tenants.id"),
         nullable=False,
-        index=True,
-    )
+    )  # index covered by ix_api_keys_tenant_id in __table_args__
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     key_prefix: Mapped[str] = mapped_column(String(16), nullable=False)
     key_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
