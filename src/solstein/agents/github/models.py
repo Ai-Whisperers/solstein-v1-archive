@@ -39,6 +39,40 @@ class GitHubRepo:
 
 
 @dataclass
+class GitHubIssue:
+    """GitHub issue data."""
+
+    number: int
+    title: str
+    html_url: str
+    state: str
+    created_at: str | None = None
+    updated_at: str | None = None
+    comments: int = 0
+    labels: list[str] = field(default_factory=list)
+
+    @classmethod
+    def from_api(cls, data: dict[str, Any]) -> GitHubIssue:
+        """Create from GitHub issue API response."""
+        raw_labels = data.get("labels", [])
+        labels = [
+            label.get("name", "")
+            for label in raw_labels
+            if isinstance(label, dict) and isinstance(label.get("name"), str)
+        ]
+        return cls(
+            number=int(data.get("number", 0)),
+            title=str(data.get("title", "")),
+            html_url=str(data.get("html_url", "")),
+            state=str(data.get("state", "open")),
+            created_at=data.get("created_at"),
+            updated_at=data.get("updated_at"),
+            comments=int(data.get("comments", 0) or 0),
+            labels=labels,
+        )
+
+
+@dataclass
 class TechStack:
     """Extracted tech stack from repos."""
 

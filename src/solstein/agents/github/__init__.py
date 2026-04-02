@@ -20,6 +20,7 @@ from .client import GitHubClient
 from .models import (
     AISignal,
     DependencyHealth,
+    GitHubIssue,
     GitHubRepo,
     TechStack,
     VelocityMetrics,
@@ -30,6 +31,7 @@ __all__ = [
     # Models
     "AISignal",
     "DependencyHealth",
+    "GitHubIssue",
     "GitHubRepo",
     "TechStack",
     "VelocityMetrics",

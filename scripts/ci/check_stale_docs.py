@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Check for stale documentation based on last modification time."""
 
+from __future__ import annotations
+
 import argparse
 import json
 import subprocess
@@ -45,7 +47,7 @@ def check_stale(path: str, fail_on_stale: bool = False, json_output: bool = Fals
         return {"error": f"Path not found: {path}"}
 
     stale_files = []
-    now = datetime.now()
+    now = datetime.now().astimezone()
     for md_file in docs_path.rglob("*.md"):
         if "generated" in md_file.parts or "__pycache__" in str(md_file):
             continue
@@ -57,7 +59,7 @@ def check_stale(path: str, fail_on_stale: bool = False, json_output: bool = Fals
                 text=True,
             )
             if result.stdout.strip():
-                last_modified = datetime.fromisoformat(result.stdout.strip().replace(" ", "T").split("+")[0])
+                last_modified = datetime.fromisoformat(result.stdout.strip())
                 age_days = (now - last_modified).days
 
                 if age_days > STALE_DAYS:
@@ -83,8 +85,11 @@ def check_stale(path: str, fail_on_stale: bool = False, json_output: bool = Fals
     }
 
     if json_output:
-        with open("/tmp/stale-docs-report.json", "w") as f:
-            json.dump(report, f, indent=2)
+        report_json = json.dumps(report, indent=2)
+        with open("/tmp/stale-docs-report.json", "w", encoding="utf-8") as f:
+            f.write(report_json + "\n")
+        print(report_json)
+        return report
 
     if actionable and fail_on_stale:
         print(f"FAIL: {len(actionable)} stale docs found (>{STALE_DAYS} days)")
@@ -96,15 +101,20 @@ def check_stale(path: str, fail_on_stale: bool = False, json_output: bool = Fals
     return report
 
 
-def main():
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Check for stale documentation")
     parser.add_argument("--path", default="docs", help="Path to check")
     parser.add_argument("--fail", action="store_true", help="Exit with error if stale docs found")
     parser.add_argument("--json", action="store_true", help="Output JSON report")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
-    check_stale(args.path, args.fail, args.json)
+    report = check_stale(args.path, args.fail, args.json)
+    if "error" in report:
+        return 1
+    if args.fail and report.get("actionable_stale_count", 0):
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

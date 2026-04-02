@@ -6,6 +6,7 @@ STORY-133: All HTTP calls now async — search, fetch_repos, fetch_file use awai
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime, timezone
 
 from solstein.config import get_settings
@@ -16,6 +17,7 @@ from .github import (
     AISignalAnalyzer,
     DependencyAnalyzer,
     GitHubClient,
+    GitHubIssue,
     GitHubOrgSearcher,
     GitHubRepo,
     TechStackAnalyzer,
@@ -96,6 +98,66 @@ class GitHubAgent(BaseDataGatheringAgent):
                     },
                 )
                 result.raw_sources.append(raw_source)
+
+            issue_batches = await asyncio.gather(
+                *[
+                    self.searcher.fetch_repo_issues(github_org, repo.name, max_issues=10)
+                    for repo in primary_repos
+                ],
+                return_exceptions=True,
+            )
+            issue_summaries: list[dict[str, object]] = []
+            issue_sources: list[str] = []
+            for repo, issue_batch in zip(primary_repos, issue_batches, strict=False):
+                if not isinstance(issue_batch, list) or not issue_batch:
+                    continue
+
+                issues = [GitHubIssue.from_api(item) for item in issue_batch if isinstance(item, dict)]
+                if not issues:
+                    continue
+
+                issue_summary = {
+                    "repo": repo.full_name,
+                    "issue_count": len(issues),
+                    "top_issues": [
+                        {
+                            "number": issue.number,
+                            "title": issue.title,
+                            "url": issue.html_url,
+                            "comments": issue.comments,
+                            "labels": issue.labels,
+                            "updated_at": issue.updated_at,
+                        }
+                        for issue in issues[:5]
+                    ],
+                }
+                issue_summaries.append(issue_summary)
+                issue_sources.append(f"GitHub Issues: {repo.full_name}")
+                result.raw_sources.append(
+                    self._create_raw_source(
+                        raw_content=issue_summary,
+                        source_name=f"GitHub Issues: {repo.full_name}",
+                        url=f"https://github.com/{repo.full_name}/issues",
+                        confidence=0.90,
+                        extraction_method="github_issues_api",
+                        metadata={"repo_name": repo.name, "issue_count": len(issues)},
+                    )
+                )
+
+            if issue_summaries:
+                total_open_issues = sum(int(summary["issue_count"]) for summary in issue_summaries)
+                result.extracted_facts.append(
+                    self._create_fact(
+                        fact_type="github_issue_summary",
+                        value={
+                            "total_open_issues": total_open_issues,
+                            "repos_with_open_issues": len(issue_summaries),
+                            "repos": issue_summaries,
+                        },
+                        confidence=0.86,
+                        sources_used=issue_sources,
+                    )
+                )
 
             # Analyze tech stack
             tech_stack = self.tech_analyzer.analyze(primary_repos)

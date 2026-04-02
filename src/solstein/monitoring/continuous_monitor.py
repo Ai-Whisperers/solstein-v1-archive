@@ -98,6 +98,10 @@ class ContinuousMonitor:
         if hiring_signal:
             signals.append(hiring_signal)
 
+        github_issue_signal = await self._detect_github_issue_activity(company.name)
+        if github_issue_signal:
+            signals.append(github_issue_signal)
+
         product_signal = await self._detect_product_launch(company.name)
         if product_signal:
             signals.append(product_signal)
@@ -161,6 +165,36 @@ class ContinuousMonitor:
                 "description": f"Multiple hiring signals: {len(result.raw_sources)} sources",
                 "severity": "medium",
                 "sources": len(result.raw_sources),
+            }
+
+        return None
+
+    async def _detect_github_issue_activity(self, company_name: str) -> dict | None:
+        """Detect materially active GitHub issue queues."""
+        self.logger.debug(f"Checking GitHub issue activity for {company_name}")
+
+        result = await self.github_agent.gather(company_name, {})
+        if not result.success:
+            return None
+
+        for fact in result.extracted_facts:
+            if fact.fact_type != "github_issue_summary" or not isinstance(fact.value, dict):
+                continue
+
+            total_open_issues = int(fact.value.get("total_open_issues", 0) or 0)
+            repos_with_open_issues = int(fact.value.get("repos_with_open_issues", 0) or 0)
+            if total_open_issues <= 0:
+                return None
+
+            severity = "high" if total_open_issues >= 25 else "medium"
+            return {
+                "signal_type": "github_issue_activity",
+                "description": (
+                    f"GitHub issue backlog detected: {total_open_issues} open issues "
+                    f"across {repos_with_open_issues} repos"
+                ),
+                "severity": severity,
+                "sources": repos_with_open_issues,
             }
 
         return None

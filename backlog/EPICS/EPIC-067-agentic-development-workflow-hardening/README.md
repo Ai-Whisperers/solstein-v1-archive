@@ -23,6 +23,15 @@ The core gap is that the backlog heavily covers runtime multi-agent orchestratio
 
 Without these, every new agent session still spends too much effort rediscovering context and too little applying verified changes.
 
+### Audit Update — 2026-04-02
+
+Current workflow review confirms a specific context split that this epic should close:
+
+- `planning/QUEUE.md` is still the autonomous worker's execution authority. Cron shifts are documented to pick the first `READY` story from the queue, not from GitHub Issues.
+- The live GitHub issue tracker duplicates backlog/epic planning state and is therefore informational today, not canonical.
+- A local cached issue snapshot is now available at `planning/generated/GITHUB_ISSUE_SNAPSHOT.{json,md}` so agents can inspect the current tracker without treating it as scheduling authority.
+- The remaining workflow gap is not "make the worker follow GitHub issues"; it is "make the canonical queue, cached tracker view, generated indexes, and handoff surfaces explicit and cheap to reuse."
+
 ---
 
 ## Scope
@@ -67,3 +76,4 @@ Without these, every new agent session still spends too much effort rediscoverin
 - Iterative edits can be validated with a focused gate pack in minutes, not the full suite in hours.
 - Session handoffs are queryable and compact.
 - Ownership/locking guidance aligns with current critical-path modules and active epics.
+- The workflow makes the distinction between execution authority (`planning/QUEUE.md`) and informational context (`planning/generated/GITHUB_ISSUE_SNAPSHOT.*`) explicit enough that agents do not infer the wrong source of truth.

@@ -12,7 +12,7 @@ def main() -> None:
     generate_ast_rule_catalog()
     generate_master_audit_issue_index()
     # Health dashboard is generated last so it can consume the freshly updated indexes
-    generate_docs_health()
+    generate_docs_health(["--skip-freshness"])
 
 
 if __name__ == "__main__":

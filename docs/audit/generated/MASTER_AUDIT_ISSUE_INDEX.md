@@ -1,6 +1,6 @@
 # Master Audit Issue Index
 
-Generated on `2026-04-01` from `docs/audit/18-03-2026_MASTER_AUDIT.md`.
+Generated on `2026-04-02` from `docs/audit/18-03-2026_MASTER_AUDIT.md`.
 
 This is a generated, deduplicated index of issue identifiers parsed from the master audit.
 It does not modify the source audit. If table metadata repeats across multiple passes, the latest row is kept.

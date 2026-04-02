@@ -28,6 +28,7 @@ from solstein.agents.github.client import GitHubClient
 from solstein.agents.github.models import GitHubRepo
 from solstein.agents.github.search import GitHubOrgSearcher
 from solstein.agents.github_agent import GitHubAgent
+from solstein.infrastructure.cache import get_cache
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -160,6 +161,37 @@ async def test_org_searcher_fetch_repos_returns_list():
     assert result[0]["name"] == "repo1"
 
 
+@pytest.mark.asyncio
+async def test_org_searcher_fetch_repo_issues_uses_cache():
+    """Issue fetches should use the shared cache on repeated calls."""
+    cache = get_cache()
+    await cache.clear_pattern("github:issues:")
+
+    client = GitHubClient(github_token="test")
+    searcher = GitHubOrgSearcher(client)
+
+    issues = [
+        {
+            "number": 42,
+            "title": "Cache issue ingestion",
+            "html_url": "https://github.com/acme/repo1/issues/42",
+            "state": "open",
+            "comments": 3,
+            "labels": [{"name": "bug"}],
+            "updated_at": "2026-04-02T00:00:00Z",
+        }
+    ]
+    resp = _fake_response(200, issues)
+    client.get = AsyncMock(return_value=resp)
+
+    first = await searcher.fetch_repo_issues("acme", "repo1", max_issues=5)
+    second = await searcher.fetch_repo_issues("acme", "repo1", max_issues=5)
+
+    assert len(first) == 1
+    assert second[0]["number"] == 42
+    client.get.assert_awaited_once()
+
+
 # ---------------------------------------------------------------------------
 # Test: DependencyAnalyzer is async
 # ---------------------------------------------------------------------------
@@ -253,6 +285,7 @@ async def test_github_agent_gather_end_to_end():
             "updated_at": "2026-01-01T00:00:00Z",
         }
     ])
+    agent.searcher.fetch_repo_issues = AsyncMock(return_value=[])
 
     # Mock dependency analyzer (async)
     agent.dep_analyzer.client.fetch_file = AsyncMock(return_value=None)
@@ -263,6 +296,46 @@ async def test_github_agent_gather_end_to_end():
     assert result.agent_name == "GitHubAgent"
     assert len(result.raw_sources) >= 1
     assert len(result.extracted_facts) >= 1  # At least tech_stack
+
+
+@pytest.mark.asyncio
+async def test_github_agent_gather_includes_issue_summary():
+    """GitHubAgent should include issue summary facts when repo issues exist."""
+    agent = GitHubAgent(github_token="test")
+    agent.searcher.search = AsyncMock(return_value="acme-corp")
+    agent.searcher.fetch_repos = AsyncMock(return_value=[
+        {
+            "name": "main-repo",
+            "full_name": "acme-corp/main-repo",
+            "html_url": "https://github.com/acme-corp/main-repo",
+            "description": "Main repo",
+            "language": "Python",
+            "stargazers_count": 500,
+            "forks_count": 50,
+            "open_issues_count": 10,
+            "default_branch": "main",
+            "updated_at": "2026-01-01T00:00:00Z",
+        }
+    ])
+    agent.searcher.fetch_repo_issues = AsyncMock(return_value=[
+        {
+            "number": 7,
+            "title": "Persist issue cache",
+            "html_url": "https://github.com/acme-corp/main-repo/issues/7",
+            "state": "open",
+            "comments": 4,
+            "labels": [{"name": "bug"}],
+            "updated_at": "2026-04-02T00:00:00Z",
+        }
+    ])
+    agent.dep_analyzer.client.fetch_file = AsyncMock(return_value=None)
+
+    result = await agent.gather("Acme Corp", {})
+
+    issue_fact = next(fact for fact in result.extracted_facts if fact.fact_type == "github_issue_summary")
+    assert issue_fact.value["total_open_issues"] == 1
+    assert issue_fact.value["repos_with_open_issues"] == 1
+    assert any(source.source_name.startswith("GitHub Issues:") for source in result.raw_sources)
 
 
 @pytest.mark.asyncio

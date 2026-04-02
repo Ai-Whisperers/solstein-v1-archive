@@ -1,0 +1,32 @@
+name: Docs Health Dashboard
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'docs/**'
+      - 'backlog/**'
+      - 'scripts/docs/**'
+      - 'scripts/ci/**'
+      - 'tooling/ast-grep/rules/**'
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-docs-health:
+    name: Generate docs health dashboard
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/workflows/composite/setup-python
+      - uses: ./.github/workflows/composite/setup-uv
+      - uses: ./.github/workflows/composite/install-deps
+        with:
+          extras: dev
+      - name: Generate derived docs artifacts
+        run: make docs-generate

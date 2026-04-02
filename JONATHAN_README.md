@@ -110,6 +110,8 @@ Every shift follows this protocol (inspired by Andrej Karpathy's autoresearch re
 5. **COMMIT ONLY IF GREEN** — Never push failing tests. Include metrics delta in commit message
 6. **UPDATE QUEUE** — Mark story as DONE, pick next
 
+GitHub issues are not the execution authority for cron shifts. If you want a local cached view of the live issue tracker, refresh `planning/generated/GITHUB_ISSUE_SNAPSHOT.{json,md}` with `make issues-snapshot`, but continue selecting work from `planning/QUEUE.md`.
+
 ### What You'll See
 
 - **Telegram notifications** after each shift with: stories completed, test results, PRs created, blockers found
