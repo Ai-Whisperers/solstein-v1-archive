@@ -24,7 +24,7 @@ import pytest
 
 def _run(coro: Any) -> Any:
     """Run a coroutine synchronously for test purposes."""
-    return asyncio.get_event_loop().run_until_complete(coro)
+    return asyncio.run(coro)
 
 
 # ---------------------------------------------------------------------------
