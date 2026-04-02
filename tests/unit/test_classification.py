@@ -67,9 +67,9 @@ class TestCalculateClassificationConfidence:
 
     def test_boundary_score_reduces_confidence(self):
         """Test scores near boundaries have reduced confidence."""
-        # Score near boundary (5.5)
-        boundary_confidence = calculate_classification_confidence(5.5, 80.0)
-        # Score far from boundary (6.5) - should have higher confidence
+        # Score near the Lead/Salt boundary (4.5 is inside the 4.3-4.7 guard)
+        boundary_confidence = calculate_classification_confidence(4.5, 80.0)
+        # Score far from any boundary — should have higher confidence
         normal_confidence = calculate_classification_confidence(6.5, 80.0)
 
         assert boundary_confidence < normal_confidence
