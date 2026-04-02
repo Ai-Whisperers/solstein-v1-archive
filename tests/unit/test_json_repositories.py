@@ -14,7 +14,7 @@ from solstein.domain.models import Company, CompanyTier, FinancialMetric
 @pytest.fixture
 def mock_loader_companies():
     c1 = Company(
-        id="c1",
+        id="co1",
         name="Alpha",
         tier=CompanyTier.TIER_1,
         industry="Tech",
@@ -22,7 +22,7 @@ def mock_loader_companies():
         financials=FinancialMetric(revenue=100.0),
     )
     c2 = Company(
-        id="c2",
+        id="co2",
         name="Beta",
         tier=CompanyTier.TIER_2,
         industry="Finance",
