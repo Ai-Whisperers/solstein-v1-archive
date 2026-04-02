@@ -66,11 +66,11 @@ def test_markdown_extractor_parse(sample_markdown, tmp_path):
     assert profile.name == "Acme Corp"
     assert profile.financials is not None
     assert profile.financials.revenue_confidence == ConfidenceLevel.UNKNOWN
-    assert profile.financials.growth_rate is None
-    assert profile.financials.profit_margin is None
-    assert profile.financials.funding_raised is None
-    assert profile.financials.valuation is None
-    assert profile.financials.employees is None
+    assert profile.financials.growth_rate == pytest.approx(0.255)
+    assert profile.financials.profit_margin == pytest.approx(0.15)
+    assert profile.financials.funding_raised is None  # $500M prefix not parseable
+    assert profile.financials.valuation is None  # €5T prefix not parseable
+    assert profile.financials.employees == 1500
     assert isinstance(profile.metric_observations, dict)
     assert isinstance(profile.metric_justifications, dict)
 
