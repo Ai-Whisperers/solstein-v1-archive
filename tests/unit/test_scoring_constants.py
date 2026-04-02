@@ -3,7 +3,10 @@ Scoring Constants Verification Tests
 Verifies that all magic numbers in scoring logic are replaced with named constants.
 """
 
+import pathlib
 import re
+
+_SRC_DIR = pathlib.Path(__file__).resolve().parents[2] / "src" / "solstein"
 
 
 class TestScoringConstants:
@@ -25,7 +28,7 @@ class TestScoringConstants:
         """Verify scoring.py has no unexplained numeric literals."""
         magic_number_pattern = r"\b\d+\.\d+\b"
 
-        with open("/tmp/solstein/src/solstein/analytics/scoring.py") as f:
+        with open(_SRC_DIR / "analytics" / "scoring.py") as f:
             content = f.read()
 
         # Remove comments and docstrings
@@ -95,9 +98,9 @@ class TestScoringConstants:
     def test_no_scoring_magic_numbers_in_scorers(self):
         """Verify scorer files have no unexplained magic numbers."""
         scorer_files = [
-            "/tmp/solstein/src/solstein/analytics/scorers/financial_health.py",
-            "/tmp/solstein/src/solstein/analytics/scorers/growth_momentum.py",
-            "/tmp/solstein/src/solstein/analytics/scorers/competitive_position.py",
+            _SRC_DIR / "analytics" / "scorers" / "financial_health.py",
+            _SRC_DIR / "analytics" / "scorers" / "growth_momentum.py",
+            _SRC_DIR / "analytics" / "scorers" / "competitive_position.py",
         ]
 
         magic_number_pattern = r"\b\d+\.\d+\b"
@@ -133,7 +136,7 @@ class TestScoringMethodologyDocumentation:
 
     def test_constants_have_documentation(self):
         """Verify key constants have documentation comments."""
-        with open("/tmp/solstein/src/solstein/analytics/constants.py") as f:
+        with open(_SRC_DIR / "analytics" / "constants.py") as f:
             content = f.read()
 
         # Check that key threshold constants have comments
