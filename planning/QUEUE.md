@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-04-01 | Updated By | gestalt — ruff gate DONE (0 errors), STORY-276 queued for develop→master merge |
+| Last Updated | 2026-04-01 | Updated By | Product readiness audit — 15 new EPICs (071-085), 71 stories (277-347) for real product |
 
 ## Status Key
 
@@ -529,7 +529,178 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 ---
 
-## Orchestrator Log
+     1|
+     2|## Phase P1: Data Supply — Make Pipeline Produce Real Data (2026-04-01)
+     3|
+     4|> Added 2026-04-01 after product readiness audit. See docs/audits/2026-04-01-product-readiness-audit.md
+     5|> ROOT CAUSE: Pipeline architecture works but data supply is broken — no tickers, no website URLs,
+     6|> no API keys configured, connectors not wired to pipeline. This phase fixes data flow.
+     7|
+     8|### EPIC-071: Enrich Market Catalog with Real Data Hooks
+     9|
+    10|| # | Story | Title | Status | Notes |
+    11||---|-------|-------|--------|-------|
+    12|| 1 | STORY-277 | Add website URLs to all 24 Dutch Energy catalog companies in market_catalogs.py | READY | Pure data entry. Research each company's website. |
+    13|| 2 | STORY-278 | Add stock tickers for all publicly traded catalog companies (Volue=VOLUE.OL, Shell=SHEL, BP=BP.L, Equinor=EQNR, Orsted=ORSTED.CO, Siemens=ENR.DE, GE=GEV, Schneider=SU.PA, ABB=ABBN.SW, Hitachi=6501.T, Accenture=ACN, CGI=GIB, TCS=TCS.NS, Infosys=INFY, Sopra=SOP.PA, Capgemini=CAP.PA) | READY | Pure data entry. Verify each ticker on Yahoo Finance. |
+    14|| 3 | STORY-279 | Add LinkedIn company slugs to all catalog companies | READY | Deps: none |
+    15|| 4 | STORY-280 | Add GitHub org names where applicable | READY | Deps: none |
+    16|| 5 | STORY-281 | Add CrunchBase slugs for startups/funded companies | READY | Deps: none |
+    17|
+    18|### EPIC-072: Fix Enrichment Adapter Resilience
+    19|
+    20|| # | Story | Title | Status | Notes |
+    21||---|-------|-------|--------|-------|
+    22|| 1 | STORY-282 | YahooFinanceEnrichment: fall back to web scraping when no ticker available | READY | Deps: STORY-277 |
+    23|| 2 | STORY-283 | WebsiteEnrichment: auto-discover website URL from company name via SearXNG when not provided | READY | Deps: none |
+    24|| 3 | STORY-284 | GlobalMarketEnrichment: fall back to sector ETF data when no ticker | READY | Deps: none |
+    25|| 4 | STORY-285 | FundingEnrichment: implement Crunchbase-free fallback using GDELT news + web scraping | READY | Deps: none |
+    26|| 5 | STORY-286 | All enrichment adapters: return partial data with low confidence instead of raising ValueError | READY | CRITICAL — Deps: none |
+    27|
+    28|### EPIC-073: Wire Connectors into Pipeline
+    29|
+    30|| # | Story | Title | Status | Notes |
+    31||---|-------|-------|--------|-------|
+    32|| 1 | STORY-287 | Create SearXNG-based web search enrichment adapter (company website scraping + news) | READY | Deps: none (SearXNG in docker-compose) |
+    33|| 2 | STORY-288 | Create GDELT news enrichment adapter (news signals, funding mentions, M&A) | READY | Deps: none (GDELT API is free) |
+    34|| 3 | STORY-289 | Create SEC EDGAR enrichment adapter (10-K/10-Q for US-listed companies) | READY | Deps: none (SEC API is free) |
+    35|| 4 | STORY-290 | Create GitHub enrichment adapter (tech stack, repo activity, open source signals) | READY | Deps: none (GITHUB_TOKEN exists) |
+    36|| 5 | STORY-291 | Create arXiv/patent enrichment adapter (R&D and innovation signals) | READY | Deps: none |
+    37|| 6 | STORY-292 | Register all new enrichment adapters in build_default_registry() | READY | Deps: STORY-287 through STORY-291 |
+    38|
+    39|### EPIC-074: Revenue & Financial Data Validation
+    40|
+    41|| # | Story | Title | Status | Notes |
+    42||---|-------|-------|--------|-------|
+    43|| 1 | STORY-293 | Add revenue sanity checks in aggregation: cap at industry-appropriate max, flag outliers > 3 sigma | READY | Deps: none |
+    44|| 2 | STORY-294 | Normalize revenue units: detect thousands/millions/billions strings, convert all to EUR millions | READY | Deps: none |
+    45|| 3 | STORY-295 | Cross-validate revenue across 2+ sources before accepting high-confidence value | READY | Deps: none |
+    46|| 4 | STORY-296 | Add employee count validation (1-10M range, cross-reference with revenue/employee ratio) | READY | Deps: none |
+    47|| 5 | STORY-297 | Add funding amount validation with automatic currency conversion to EUR | READY | Deps: none |
+    48|
+    49|---
+    50|
+    51|## Phase P2: Scoring Accuracy — Make Scores Meaningful (2026-04-01)
+    52|
+    53|### EPIC-075: Fix Scoring for Missing Data
+    54|
+    55|| # | Story | Title | Status | Notes |
+    56||---|-------|-------|--------|-------|
+    57|| 1 | STORY-298 | GrowthMomentumScorer: change base from 0 to 3.0, reduce missing-data penalty from -1.0 to -0.5 | READY | Deps: none. File: analytics/scorers/growth_momentum.py |
+    58|| 2 | STORY-299 | FinancialHealthScorer: change base from 2.5 to 4.0, reduce missing-revenue penalty from -2.0 to -0.5 | READY | Deps: none. File: analytics/scorers/financial_health.py |
+    59|| 3 | STORY-300 | Add DataCompletenessScorer: new scorer that measures % of data fields populated per company | READY | Deps: none |
+    60|| 4 | STORY-301 | Weight composite score by data completeness — high-data companies weighted more in market analysis | READY | Deps: STORY-300 |
+    61|| 5 | STORY-302 | Update golden dataset expected ranges to match corrected scoring formula | READY | Deps: STORY-298, STORY-299 |
+    62|
+    63|### EPIC-076: Capability Overlap Enhancement
+    64|
+    65|| # | Story | Title | Status | Notes |
+    66||---|-------|-------|--------|-------|
+    67|| 1 | STORY-303 | Expand capability keyword lists: add 20+ synonyms per Eneve capability (smart meter→AMI, meter data management, MDM; balancing→imbalance settlement, TSO allocation, etc.) | READY | File: intelligence/capability_overlap.py |
+    68|| 2 | STORY-304 | Add LLM-based capability matching: classify company descriptions against Eneve's 8 capabilities using structured extraction | READY | Deps: LLM provider configured |
+    69|| 3 | STORY-305 | Add energy-software-specific capability taxonomy with industry standard terms | READY | Deps: none |
+    70|| 4 | STORY-306 | Integrate capability overlap % into composite score formula as 4th dimension (10% weight) | READY | Deps: STORY-303 |
+    71|
+    72|### EPIC-077: AI Maturity Scoring Enhancement
+    73|
+    74|| # | Story | Title | Status | Notes |
+    75||---|-------|-------|--------|-------|
+    76|| 1 | STORY-307 | Expand AI signal detection: add ML/DL/neural/GPT/LLM/automation/predictive/NLP/computer vision keywords | READY | File: research/signals.py, analytics/ai_readiness.py |
+    77|| 2 | STORY-308 | Use LLM to assess AI maturity from company descriptions and recent news | READY | Deps: LLM provider |
+    78|| 3 | STORY-309 | Add GitHub-based AI signals (ML repos, tensorflow/pytorch/sklearn in dependencies) | READY | Deps: STORY-290 |
+    79|| 4 | STORY-310 | Add patent-based AI signals (AI/ML patent filings from USPTO) | READY | Deps: STORY-291 |
+    80|
+    81|---
+    82|
+    83|## Phase P3: Infrastructure — Run as Real Service (2026-04-01)
+    84|
+    85|### EPIC-078: Deploy Core Infrastructure
+    86|
+    87|| # | Story | Title | Status | Notes |
+    88||---|-------|-------|--------|-------|
+    89|| 1 | STORY-311 | Deploy PostgreSQL 15 with pgvector extension (docker-compose or managed) | READY | Deps: none |
+    90|| 2 | STORY-312 | Run all Alembic migrations on deployed database | READY | Deps: STORY-311 |
+    91|| 3 | STORY-313 | Deploy Redis 7 for Celery broker and result backend | READY | Deps: none |
+    92|| 4 | STORY-314 | Deploy SearXNG instance for web search | READY | Deps: none |
+    93|| 5 | STORY-315 | Create .env.production with all required env vars, secrets rotated | READY | Deps: STORY-311 through STORY-314 |
+    94|
+    95|### EPIC-079: Deploy Application Stack
+    96|
+    97|| # | Story | Title | Status | Notes |
+    98||---|-------|-------|--------|-------|
+    99|| 1 | STORY-316 | Build and test Solstein Docker image | READY | Deps: STORY-315 |
+   100|| 2 | STORY-317 | Deploy FastAPI API server with uvicorn | READY | Deps: STORY-316 |
+   101|| 3 | STORY-318 | Deploy Celery worker (4 queues: default, scoring, export, enrichment) | READY | Deps: STORY-316 |
+   102|| 4 | STORY-319 | Deploy Celery Beat scheduler | READY | Deps: STORY-318 |
+   103|| 5 | STORY-320 | Verify all health checks pass (DB, Redis, workers, LLM) | READY | Deps: STORY-317 through STORY-319 |
+   104|
+   105|### EPIC-080: Configure LLM Providers
+   106|
+   107|| # | Story | Title | Status | Notes |
+   108||---|-------|-------|--------|-------|
+   109|| 1 | STORY-321 | Configure primary LLM provider (Anthropic Claude) with API key in .env | READY | Deps: none |
+   110|| 2 | STORY-322 | Configure fallback LLM provider chain (3+ providers) | READY | Deps: STORY-321 |
+   111|| 3 | STORY-323 | Verify LLM health check + deep_analyzer produces real output (not template) | READY | Deps: STORY-321 |
+   112|
+   113|---
+   114|
+   115|## Phase P4: End-to-End Pipeline Execution (2026-04-01)
+   116|
+   117|### EPIC-081: First Real Pipeline Run for ENEVE
+   118|
+   119|| # | Story | Title | Status | Notes |
+   120||---|-------|-------|--------|-------|
+   121|| 1 | STORY-324 | Execute discovery stage: verify 20+ companies discovered with metadata | BLOCKED | Deps: STORY-277, 273, 287 |
+   122|| 2 | STORY-325 | Execute gather stage: verify 15+ companies enriched with financial data | BLOCKED | Deps: STORY-282-281, STORY-324 |
+   123|| 3 | STORY-326 | Execute scoring stage: verify composite scores in 2.0-9.0 range (no zeros) | BLOCKED | Deps: STORY-298-294, STORY-325 |
+   124|| 4 | STORY-327 | Execute analysis stage: verify LLM insights are real (not templates) | BLOCKED | Deps: STORY-321, STORY-326 |
+   125|| 5 | STORY-328 | Execute export stage: generate Excel + PDF with complete landscape | BLOCKED | Deps: STORY-327 |
+   126|| 6 | STORY-329 | Validate: at least 3 Phoenix, 10 Salt, 5 Lead in results | BLOCKED | Deps: STORY-328 |
+   127|| 7 | STORY-330 | Save golden run results as regression baseline for future runs | BLOCKED | Deps: STORY-329 |
+   128|
+   129|### EPIC-082: Live Web Discovery
+   130|
+   131|| # | Story | Title | Status | Notes |
+   132||---|-------|-------|--------|-------|
+   133|| 1 | STORY-331 | Implement SearXNG-based competitor discovery adapter | BLOCKED | Deps: STORY-314 |
+   134|| 2 | STORY-332 | Add LLM-powered competitor identification from web search results | BLOCKED | Deps: STORY-321, STORY-331 |
+   135|| 3 | STORY-333 | Merge static catalog + web discovery + LLM discovery with deduplication | BLOCKED | Deps: STORY-331, STORY-332 |
+   136|
+   137|---
+   138|
+   139|## Phase P5: Quality & Polish (2026-04-01)
+   140|
+   141|### EPIC-083: Fix Test Suite (target 95%+ pass rate)
+   142|
+   143|| # | Story | Title | Status | Notes |
+   144||---|-------|-------|--------|-------|
+   145|| 1 | STORY-334 | Fix 23 news_signal_detector tests (interface drift: daily_query_limit → _daily_query_count) | READY | Deps: none |
+   146|| 2 | STORY-335 | Fix 15 test_models tests (FinancialMetric validator change) | READY | Deps: none |
+   147|| 3 | STORY-336 | Fix 21 test_unified_loader tests (refactored loader interface) | READY | Deps: none |
+   148|| 4 | STORY-337 | Fix API router tests (add test auth bypass for 401 failures) | READY | Deps: none |
+   149|| 5 | STORY-338 | Skip or conditionally run 210 database-dependent tests (mark with @pytest.mark.db) | READY | Deps: none |
+   150|| 6 | STORY-339 | Update golden dataset expected ranges to match current scoring engine output | READY | Deps: STORY-302 |
+   151|
+   152|### EPIC-084: Dead Code Cleanup
+   153|
+   154|| # | Story | Title | Status | Notes |
+   155||---|-------|-------|--------|-------|
+   156|| 1 | STORY-340 | Delete data/real_data_integration.py (broken import of non-existent web_research_pipeline) | READY | Deps: none |
+   157|| 2 | STORY-341 | Delete adapters/enrichment/_retired/ directory (8 dead adapter files) | READY | Deps: none |
+   158|| 3 | STORY-342 | Delete adapters/discovery/_retired/ directory (dead Exa web search adapter) | READY | Deps: none |
+   159|| 4 | STORY-343 | Delete research/graph/ frozen runtime (per ADR-009 and ADR-010) | BLOCKED | Needs team sign-off |
+   160|
+   161|### EPIC-085: Operator Documentation
+   162|
+   163|| # | Story | Title | Status | Notes |
+   164||---|-------|-------|--------|-------|
+   165|| 1 | STORY-344 | Write deployment guide: docker-compose up → working system in 10 min | READY | Deps: STORY-320 |
+   166|| 2 | STORY-345 | Write API key configuration guide: which keys unlock which features | READY | Deps: none |
+   167|| 3 | STORY-346 | Write market catalog customization guide: add new markets and companies | READY | Deps: none |
+   168|| 4 | STORY-347 | Write pipeline operations runbook: run, monitor, debug, export | READY | Deps: STORY-330 |
+   169|
+   170|---
+   171|
+   172|## Orchestrator Log
 
 Worker and checker append timestamped entries here:
 
