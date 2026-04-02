@@ -97,11 +97,11 @@ class TestRealDataRobustness:
             company = convert_to_domain_company(raw_data, index=index)
 
             # Scoring should handle None/missing fields gracefully
-            score_result = scorer.score(company)
+            scored = scorer.calculate_scores(company)
 
-            # Should return valid ScoreComponent
-            assert score_result is not None
-            assert score_result.score is not None or score_result.score == 0.0
+            # Should return the company with scores populated
+            assert scored is not None
+            assert scored.growth_score is not None
 
     def test_real_companies_have_geographic_presence(self, real_companies_data):
         """Verify geographic presence extraction from real data."""
