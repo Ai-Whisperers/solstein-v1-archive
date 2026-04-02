@@ -155,11 +155,20 @@ class TestSharedUtilityUsage:
         assert "validate_url" in content, "website_agent.py does not use validate_url"
 
     def test_website_agent_calls_validate_url(self):
-        """website_agent.py must call validate_url before fetch."""
+        """website_agent.py must call validate_url before any HTTP fetch.
+
+        STORY-135 migrated from requests to httpx.AsyncClient — check for
+        httpx usage rather than requests.get.
+        """
         content = WEBSITE_AGENT_PATH.read_text()
         validate_pos = content.find("validate_url")
-        fetch_pos = content.find("requests.get")
-        assert validate_pos < fetch_pos, "validate_url must be called before requests.get in website_agent.py"
+        # Accept either requests.get (legacy) or httpx (STORY-135 migration)
+        fetch_pos = content.find("httpx")
+        if fetch_pos == -1:
+            fetch_pos = content.find("requests.get")
+        assert validate_pos != -1, "website_agent.py does not use validate_url"
+        assert fetch_pos != -1, "website_agent.py does not use httpx or requests.get"
+        assert validate_pos < fetch_pos, "validate_url must be called before HTTP fetch in website_agent.py"
 
     def test_website_agent_catches_ssrf_error(self):
         """website_agent.py must catch SSRFError specifically."""
