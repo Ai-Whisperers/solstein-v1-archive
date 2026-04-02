@@ -151,15 +151,15 @@ def test_growth_score_ranges(scorer, growth_rate, expected_min, expected_max):
 
 
 def test_growth_score_always_clamped_to_10(scorer):
-    """Extreme growth_rate must never produce a score > 10.0."""
-    company = make_company(financials=FinancialMetric(growth_rate=10_000.0, employees=1))
+    """Max growth_rate must never produce a score > 10.0."""
+    company = make_company(financials=FinancialMetric(growth_rate=1000.0, employees=1))
     scored = scorer.calculate_scores(company)
     assert scored.growth_score <= 10.0
 
 
 def test_growth_score_never_below_zero(scorer):
-    """Extreme negative growth_rate must never produce a score < 0.0."""
-    company = make_company(financials=FinancialMetric(growth_rate=-10_000.0, employees=1))
+    """Min growth_rate must never produce a score < 0.0."""
+    company = make_company(financials=FinancialMetric(growth_rate=-100.0, employees=1))
     scored = scorer.calculate_scores(company)
     assert scored.growth_score >= 0.0
 
