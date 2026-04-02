@@ -248,8 +248,8 @@ class TestProgressCallback:
         """_execute_export must define _update_progress and _sync_progress."""
         assert "_update_progress" in _EXPORT_TASKS_SOURCE
         assert "_sync_progress" in _EXPORT_TASKS_SOURCE
-        # _sync_progress must be passed to _generate_file
-        assert "filters, _sync_progress" in _EXPORT_TASKS_SOURCE
+        # _sync_progress must be passed to _generate_file (on its own line, after filters)
+        assert "filters,\n        _sync_progress," in _EXPORT_TASKS_SOURCE
 
     def test_callback_error_does_not_crash(
         self,
