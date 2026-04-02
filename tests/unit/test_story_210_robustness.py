@@ -79,12 +79,11 @@ class TestRealDataRobustness:
         for index, raw_data in enumerate(real_companies_data):
             company = convert_to_domain_company(raw_data, index=index)
 
-            # At least one financial field should be populated (validator enforces this)
+            # Real data may have sparse financials (allow_empty_primary=True); financials must exist
             has_revenue = company.financials.revenue is not None
             has_employees = company.financials.employees is not None
-            assert has_revenue or has_employees, "FinancialMetric validator should ensure at least one field"
 
-            # Confidence scores should be set
+            # Confidence scores should be set when the field is populated
             if has_revenue:
                 assert company.financials.revenue_confidence is not None
             if has_employees:
