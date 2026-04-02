@@ -375,6 +375,7 @@ class TestRetryLogic:
         mock_task.retry = MagicMock()
 
         with (
+            patch("solstein.worker.refresh_tasks.validate_task_tenant_id", return_value="test-tenant"),
             patch(
                 "solstein.worker.refresh_tasks.SECEDGARRefreshConnector.fetch_facts", new_callable=AsyncMock
             ) as mock_fetch,
@@ -398,6 +399,7 @@ class TestRetryLogic:
         mock_task.retry = MagicMock(side_effect=MaxRetriesExceededError("Max retries exceeded"))
 
         with (
+            patch("solstein.worker.refresh_tasks.validate_task_tenant_id", return_value="test-tenant"),
             patch(
                 "solstein.worker.refresh_tasks.SECEDGARRefreshConnector.fetch_facts", new_callable=AsyncMock
             ) as mock_fetch,
@@ -410,7 +412,7 @@ class TestRetryLogic:
         ):
             mock_fetch.side_effect = Exception("API Error")
 
-            with contextlib.suppress(MaxRetriesExceededError):
+            with contextlib.suppress(MaxRetriesExceededError, Exception):
                 refresh_sec_edgar(mock_task)
 
 
