@@ -101,7 +101,8 @@ class ApiKeyRecord(Base):
     )  # index covered by ix_api_keys_tenant_id in __table_args__
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     key_prefix: Mapped[str] = mapped_column(String(16), nullable=False)
-    key_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)  # index covered by ix_api_keys_key_hash in __table_args__
+    # ix_api_keys_key_hash index is declared in __table_args__ — do not add index=True here
+    key_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     scope: Mapped[str] = mapped_column(String(50), nullable=False, default="read_only")  # read_only|read_write|admin
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
