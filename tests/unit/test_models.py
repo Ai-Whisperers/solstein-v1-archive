@@ -255,12 +255,12 @@ class TestMarketAnalysis:
 
     def test_market_leaders_returns_tier1_only(self):
         """market_leaders returns only Tier 1 companies."""
-        tier1 = Company(id="t1", name="Leader", tier=CompanyTier.TIER_1)
-        tier2 = Company(id="t2", name="Follower", tier=CompanyTier.TIER_2)
+        tier1 = Company(id="t1a", name="Leader", tier=CompanyTier.TIER_1)
+        tier2 = Company(id="t2a", name="Follower", tier=CompanyTier.TIER_2)
         analysis = MarketAnalysis(market_name="Tech", companies=[tier1, tier2])
         leaders = analysis.market_leaders
         assert len(leaders) == 1
-        assert leaders[0].id == "t1"
+        assert leaders[0].id == "t1a"
 
 
 class TestEnums:
