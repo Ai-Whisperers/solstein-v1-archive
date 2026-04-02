@@ -8,13 +8,18 @@ def test_sec_edgar_connector_default_confidence():
 
 
 def test_sec_edgar_connector_user_agent_from_env(monkeypatch: pytest.MonkeyPatch):
+    from solstein.config import get_settings
+
     monkeypatch.setenv("SEC_USER_AGENT", "Solstein Test UA")
-    connector = SECEdgarConnector(user_agent=None)
-    assert connector.user_agent == "Solstein Test UA"
+    get_settings.cache_clear()
+    try:
+        connector = SECEdgarConnector(user_agent=None)
+        assert connector.user_agent == "Solstein Test UA"
+    finally:
+        get_settings.cache_clear()
 
 
 def test_sec_edgar_connector_user_agent_param_overrides_env(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setenv("SEC_USER_AGENT", "Env UA")
     connector = SECEdgarConnector(user_agent="Param UA")
     assert connector.user_agent == "Param UA"
 
