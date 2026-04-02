@@ -87,7 +87,7 @@ def test_generate_llm_report_no_llm_flag_produces_report(tmp_path, monkeypatch):
         def generate_client_report(self, target: Company, competitors: list[Company]) -> dict:
             return {"client_report": tmp_path / "report.md"}
 
-    monkeypatch.setattr(cli_module, "CompetitorDataLoader", DummyLoader)
+    monkeypatch.setattr(cli_module, "_load_companies_for_report", lambda *a, **kw: DummyLoader().load_companies())
     monkeypatch.setattr(cli_module, "GrowthScorer", DummyScorer)
     monkeypatch.setattr(cli_module, "assert_client_report_ready", lambda *_, **__: None)
     monkeypatch.setattr(cli_module, "ClientReportGenerator", DummyClientGenerator)
@@ -110,7 +110,7 @@ def test_generate_llm_report_no_llm_default_output_dir(monkeypatch):
         def generate_client_report(self, target: Company, competitors: list[Company]) -> dict:
             return {}
 
-    monkeypatch.setattr(cli_module, "CompetitorDataLoader", DummyLoader)
+    monkeypatch.setattr(cli_module, "_load_companies_for_report", lambda *a, **kw: DummyLoader().load_companies())
     monkeypatch.setattr(cli_module, "GrowthScorer", DummyScorer)
     monkeypatch.setattr(cli_module, "assert_client_report_ready", lambda *_, **__: None)
     monkeypatch.setattr(cli_module, "ClientReportGenerator", DummyClientGenerator)
@@ -124,7 +124,7 @@ def test_generate_llm_report_no_llm_default_output_dir(monkeypatch):
 
 def test_generate_llm_report_company_not_found(tmp_path, monkeypatch):
     """Should print error and exit 0 when company name does not match any loaded company."""
-    monkeypatch.setattr(cli_module, "CompetitorDataLoader", DummyLoader)
+    monkeypatch.setattr(cli_module, "_load_companies_for_report", lambda *a, **kw: DummyLoader().load_companies())
     monkeypatch.setattr(cli_module, "GrowthScorer", DummyScorer)
     monkeypatch.setattr(cli_module, "assert_client_report_ready", lambda *_, **__: None)
 
@@ -155,7 +155,7 @@ def test_generate_llm_report_llm_path_mocked(tmp_path, monkeypatch):
         async def generate_llm_enhanced_report(self, target: Company, competitors: list[Company]) -> dict:
             return expected_reports
 
-    monkeypatch.setattr(cli_module, "CompetitorDataLoader", DummyLoader)
+    monkeypatch.setattr(cli_module, "_load_companies_for_report", lambda *a, **kw: DummyLoader().load_companies())
     monkeypatch.setattr(cli_module, "GrowthScorer", DummyScorer)
     monkeypatch.setattr(cli_module, "assert_client_report_ready", lambda *_, **__: None)
     monkeypatch.setattr(cli_module, "LLMEnhancedReportGenerator", DummyLLMGenerator)
@@ -177,7 +177,7 @@ def test_generate_llm_report_llm_exception_handled(tmp_path, monkeypatch):
         async def generate_llm_enhanced_report(self, target: Company, competitors: list[Company]) -> dict:
             raise RuntimeError("LLM provider unavailable")
 
-    monkeypatch.setattr(cli_module, "CompetitorDataLoader", DummyLoader)
+    monkeypatch.setattr(cli_module, "_load_companies_for_report", lambda *a, **kw: DummyLoader().load_companies())
     monkeypatch.setattr(cli_module, "GrowthScorer", DummyScorer)
     monkeypatch.setattr(cli_module, "assert_client_report_ready", lambda *_, **__: None)
     monkeypatch.setattr(cli_module, "LLMEnhancedReportGenerator", FailingLLMGenerator)
