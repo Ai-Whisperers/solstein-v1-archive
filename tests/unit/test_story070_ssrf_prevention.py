@@ -161,13 +161,14 @@ class TestSharedUtilityUsage:
         httpx usage rather than requests.get.
         """
         content = WEBSITE_AGENT_PATH.read_text()
-        validate_pos = content.find("validate_url")
-        # Accept either requests.get (legacy) or httpx (STORY-135 migration)
-        fetch_pos = content.find("httpx")
+        # Use the actual call site, not the import statement
+        validate_pos = content.find("validate_url(")
+        # Accept either requests.get (legacy) or httpx.AsyncClient( (STORY-135 migration)
+        fetch_pos = content.find("httpx.AsyncClient(")
         if fetch_pos == -1:
             fetch_pos = content.find("requests.get")
-        assert validate_pos != -1, "website_agent.py does not use validate_url"
-        assert fetch_pos != -1, "website_agent.py does not use httpx or requests.get"
+        assert validate_pos != -1, "website_agent.py does not call validate_url"
+        assert fetch_pos != -1, "website_agent.py does not use httpx.AsyncClient or requests.get"
         assert validate_pos < fetch_pos, "validate_url must be called before HTTP fetch in website_agent.py"
 
     def test_website_agent_catches_ssrf_error(self):
