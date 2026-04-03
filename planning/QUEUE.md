@@ -61,55 +61,66 @@
 
 ## P1: Workflow Orchestration API (2026-04-03)
 
-> `GET /jobs/{workflow_id}` returns 501. No way to track or retrieve pipeline results via API.
-> Blocked by EPIC-086 (pipeline must produce correct data first).
+> Codebase audit (2026-04-03):
+> - `GET /jobs/{workflow_id}` (jobs.py:18) returns 501 — confirmed
+> - `orchestration.py` only has `refresh_all_sources`; no `run_workflow_task` exists — confirmed
+> - `run_market_intelligence()` is in `research/pipeline.py:211`; requires caller-supplied `output_dir: Path`
+> - `ResearchJobRecord` is the preferred backing table — has `status` (not `state`), `job_metadata` JSONB
+> - No `output_dir` column in any table — must store as key in `job_metadata` JSON
+> - New router should go to `api/routers/workflows.py` (not `async_jobs.py` which is for enrichment)
+> EPIC-086 must be DONE first.
 
 ### EPIC-089: Workflow Orchestration API
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 1 | STORY-362 | Define Workflow model, states, and storage contract | BLOCKED | Blocked by EPIC-086 completion |
-| 2 | STORY-363 | Implement POST /workflows — submit and enqueue a research workflow | BLOCKED | Blocked by STORY-362 |
-| 3 | STORY-364 | Implement GET /workflows/{workflow_id} — retrieve live status and results | BLOCKED | Blocked by STORY-363 |
+| 1 | STORY-362 | Define Workflow model, states, WorkflowRepository over ResearchJobRecord | READY | EPIC-086 DONE; use ResearchJobRecord not ResearchRunRecord |
+| 2 | STORY-363 | Implement POST /workflows — new workflows.py router + run_workflow_task in orchestration.py | BLOCKED | Blocked by STORY-362 |
+| 3 | STORY-364 | Implement GET /workflows/{id} — read ResearchJobRecord; output_dir from job_metadata JSON | BLOCKED | Blocked by STORY-363 |
 
 ---
 
 ## P0: Pipeline Unit Tests (2026-04-03)
 
 > No unit tests for the two most critical transformation layers (aggregate.py, signals.py).
-> Blocked until extractors and signal definitions are complete (STORY-349).
+> STORY-349 is DONE. Tests are now unblocked.
 
 ### EPIC-086 (continued): Pipeline Test Coverage
 
+> Codebase audit (2026-04-03): STORY-349 complete. 8 extractor functions in aggregate.py (line 148–376). 15 signal extractors in signals.py (line 40–444). Stories updated with line numbers.
+
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 5 | STORY-355 | Unit tests for pipeline extractor layer (aggregate.py) | BLOCKED | Blocked by STORY-349 |
-| 6 | STORY-356 | Unit tests for signal extraction layer (signals.py) | BLOCKED | Blocked by STORY-349 |
+| 5 | STORY-355 | Unit tests for pipeline extractor layer (aggregate.py) | READY | Unblocked; 8 extractors at lines 148–376 |
+| 6 | STORY-356 | Unit tests for signal extraction layer (signals.py) | READY | Unblocked; 15 extractors at lines 40–444 |
 
 ---
 
 ## P2: Infrastructure Reliability (2026-04-03)
 
-> Celery health check is a placeholder. Broker failures are silent. Beat schedule is untested.
+> Codebase audit (2026-04-03): worker_health() exists but always returns 200. Beat schedule has 13 static tasks (not 12). `solstein.worker_tasks` is a real re-export module at src/solstein/worker_tasks.py.
 
 ### EPIC-088: Infrastructure Reliability
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 1 | STORY-357 | Implement real Celery health check with worker introspection | READY | Independent |
+| 1 | STORY-357 | Harden Celery health check — return HTTP 503 when workers unreachable | READY | worker_health() exists; gap is always HTTP 200 |
 | 2 | STORY-358 | Add startup check: broker reachable before accepting traffic | READY | Independent |
-| 3 | STORY-359 | Add task discovery test for all Beat-scheduled tasks | READY | Independent |
+| 3 | STORY-359 | Add task discovery test — 13 Beat-scheduled tasks (12 refresh + refresh_all_sources) | READY | Independent; module is solstein.worker_tasks |
 
 ---
 
 ## P3: Classification Threshold Hardening (2026-04-03)
 
+> Codebase audit (2026-04-03): core thresholds (7.0, 4.5, 4.49) already use constants. Only boundary uncertainty ranges (4.3, 4.7, 6.8, 7.2 in classification.py:71) remain as literals. `classify_company()` is at scoring.py:144 and uses PHOENIX_SCORE_THRESHOLD, LEAD_SCORE_THRESHOLD from constants.py. STORY-365 adds 3 pre-existing fixture failures.
+
 ### EPIC-003 (continued): Core Product Correctness
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| N | STORY-360 | Consolidate classification thresholds into single source of truth | READY | Independent |
-| N | STORY-361 | Add classification threshold consistency regression test | BLOCKED | Blocked by STORY-360 |
+| N | STORY-360 | Consolidate boundary literals (4.3, 4.7, 6.8, 7.2) in classification.py:71 into constants | VERIFY | Core constants already done; only boundary literals remain |
+| N | STORY-361 | Add classification threshold regression test (classify_company at scoring.py:144) | BLOCKED | Blocked by STORY-360 |
+| N | STORY-365 | Fix 3 pre-existing test fixture failures in test_scoring.py and test_scorers_financial.py | READY | XS; no prod code changes |
 
 ---
 

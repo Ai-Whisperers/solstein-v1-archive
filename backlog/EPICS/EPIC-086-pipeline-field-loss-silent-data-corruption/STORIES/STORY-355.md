@@ -7,8 +7,9 @@
 | **Size** | M (2 days) |
 | **Epic** | EPIC-086 Pipeline Field Loss |
 | **Created** | 2026-04-03 |
+| **Updated** | 2026-04-03 (revised after codebase audit — STORY-349 done, line numbers verified) |
 | **Risk** | Low |
-| **Blocked By** | STORY-349 (extractors must be complete before tests are authoritative) |
+| **Blocked By** | none (STORY-349 is DONE) |
 
 ---
 
@@ -24,6 +25,25 @@
 - [ ] All tests run in < 200ms (no I/O, no DB, no network)
 - [ ] Coverage of `aggregate.py` extractor functions reaches 90%+
 - [ ] `pytest` passes at 0 failures, `ruff check` at 0 errors
+
+## Actual Codebase State (verified 2026-04-03)
+
+**8 extractor functions** in `src/solstein/research/aggregate.py`:
+
+| Line | Function | Source |
+|------|----------|--------|
+| 101 | `_extract_facts_from_source()` | dispatcher — routes to per-source extractors |
+| 148 | `_extract_yahoo_finance()` | Yahoo Finance nested JSON |
+| 267 | `_extract_news()` | News API response |
+| 286 | `_extract_exa_search()` | Exa search results |
+| 297 | `_extract_crunchbase()` | Crunchbase funding data |
+| 321 | `_extract_patents()` | Patent DB response |
+| 338 | `_extract_linkedin()` | LinkedIn employee/hiring |
+| 357 | `_extract_website()` | Web scrape (products, pricing, etc.) |
+| 376 | `_extract_generic()` | Fallback for unknown source types |
+| 562 | `DefaultFactAggregator` | Main class; `.aggregate()` calls dispatcher |
+
+---
 
 ## Tasks
 

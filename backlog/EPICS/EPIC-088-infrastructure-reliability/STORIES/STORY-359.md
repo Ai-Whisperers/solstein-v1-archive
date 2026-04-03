@@ -11,16 +11,25 @@
 
 ---
 
+## Actual Codebase State (verified 2026-04-03)
+
+`src/solstein/celery_config.py` defines **13 static Beat-scheduled tasks** (12 refresh sources + `refresh_all_sources` weekly). All task paths use the prefix `solstein.worker_tasks.*`. The module `src/solstein/worker_tasks.py` exists and re-exports all task functions from `solstein.worker.*` submodules — it is a valid import target.
+
+Dynamic tasks may also be added from `settings.refresh_schedule` at runtime (line ~190 of `celery_config.py`) — the test only needs to cover static tasks.
+
+---
+
 ## Problem Statement
 
-`celery_config.py` defines 12 Beat-scheduled tasks. There is no test that verifies all 12 task function paths are importable and properly `@app.task`-decorated. A renamed module or missing decorator silently breaks the entire Beat schedule — tasks stop running with no error at startup.
+`celery_config.py` defines 13 Beat-scheduled tasks (12 refresh sources + `refresh_all_sources`). There is no test that verifies all task function paths are importable and properly `@app.task`-decorated. A renamed module or missing decorator silently breaks the entire Beat schedule — tasks stop running with no error at startup.
 
 ## Acceptance Criteria
 
-- [ ] A unit test reads the `beat_schedule` dict from `celery_config.py`
+- [ ] A unit test reads the static `beat_schedule` dict from `celery_config.py` (all 13 entries)
 - [ ] For each entry: imports the module path, resolves the function, asserts it is a registered Celery task
 - [ ] Test runs in < 500ms (no network, no broker, no DB)
 - [ ] Test fails if any scheduled task path is unresolvable
+- [ ] Dynamic tasks added via `settings.refresh_schedule` are explicitly out of scope for this test
 
 ## Tasks
 

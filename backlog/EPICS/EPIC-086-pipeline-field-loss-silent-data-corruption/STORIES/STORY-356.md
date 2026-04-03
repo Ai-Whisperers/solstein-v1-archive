@@ -7,8 +7,9 @@
 | **Size** | M (1-2 days) |
 | **Epic** | EPIC-086 Pipeline Field Loss |
 | **Created** | 2026-04-03 |
+| **Updated** | 2026-04-03 (revised after codebase audit — STORY-349 is DONE, 15 extractors exist) |
 | **Risk** | Low |
-| **Blocked By** | STORY-349 (signal extractors must be complete before tests are authoritative) |
+| **Blocked By** | none (STORY-349 is DONE) |
 
 ---
 
@@ -27,8 +28,36 @@
 
 ## Tasks
 
+## Actual Codebase State (verified 2026-04-03)
+
+**15 signal extractor functions** exist in `src/solstein/research/signals.py` (STORY-349 added 5):
+
+| Line | Function | Source fact |
+|------|----------|-------------|
+| 40 | `_signal_revenue_level` | `revenue` |
+| 61 | `_signal_growth_rate` | `revenue_growth` |
+| 81 | `_signal_profitability` | `profit_margin` |
+| 101 | `_signal_company_size` | `employee_count` |
+| 139 | `_signal_valuation` | `valuation` / `market_cap` |
+| 171 | `_signal_innovation` | `total_patents`, `ai_related_patents` |
+| 202 | `_signal_ai_maturity` | `ai_signal_strength` |
+| 242 | `_signal_hiring_velocity` | `open_positions` |
+| 279 | `_signal_market_sentiment` | `sentiment_score` / article counts |
+| 329 | `_signal_funding` | `funding_rounds`, `last_round_stage`, `last_round_amount` |
+| 372 | `_signal_ebitda` | `ebitda` |
+| 390 | `_signal_net_income` | `net_income` |
+| 408 | `_signal_pe_ratio` | `pe_ratio` |
+| 426 | `_signal_current_price` | `current_price` |
+| 444 | `_signal_eps_ttm` | `eps_ttm` |
+
+`extract_signals()` entry point at line 491. `_SIGNAL_EXTRACTORS` list at line 466.
+
+---
+
+## Tasks
+
 - [ ] Write `_make_fact(fact_type, value, confidence)` test helper
-- [ ] Write tests for each of the 10 existing signal extractors (plus any added in STORY-349)
+- [ ] Write tests for all 15 signal extractors (see table above)
 - [ ] Write a test for `extract_signals()` with a fully populated `AggregatedDataRecord`
 - [ ] Verify: `extract_signals()` with empty facts produces `SignalExtractionRecord` with 0 signals (no crash)
 - [ ] Verify: signal extractor exception is caught and logged, not propagated (graceful degradation)
