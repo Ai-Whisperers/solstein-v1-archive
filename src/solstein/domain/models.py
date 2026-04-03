@@ -104,7 +104,14 @@ class FinancialMetric(BaseModel):
     employees_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
     profit_margin: float | None = None
     margin_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
+    # Absolute EBITDA value (NOT the ratio — see ebitda_margin for ratio)
+    ebitda: float | None = None  # STORY-350
+    # Ratio = ebitda / revenue; populated by company_builder when both are available
     ebitda_margin: float | None = None
+    net_income: float | None = None  # STORY-350
+    pe_ratio: float | None = None  # STORY-350: price-to-earnings ratio
+    current_price: float | None = None  # STORY-350: current stock price
+    eps_ttm: float | None = None  # STORY-350: earnings per share (trailing 12 months)
     recurring_revenue_pct: float | None = None
     funding_raised: float | None = None
     funding_confidence: ConfidenceLevel = ConfidenceLevel.UNKNOWN
@@ -251,6 +258,30 @@ class Company(BaseModel):
     # Market
     geographic_presence: list[str] = Field(default_factory=list)
     key_customers: list[str] = Field(default_factory=list)
+    # STORY-350: product and market context from website adapter
+    sector: str | None = None  # exchange sector (distinct from industry)
+    exchange: str | None = None  # stock exchange (NYSE, NASDAQ, etc.)
+    products: list[str] = Field(default_factory=list)  # product/service list
+    pricing_model: str | None = None  # SaaS, transactional, usage-based, etc.
+    target_customers: list[str] = Field(default_factory=list)  # SMB, enterprise, etc.
+
+    # STORY-350: funding round details from Crunchbase
+    # Note: funding_rounds (list[dict]) already exists below for full round objects
+    funding_round_count: int | None = None  # total number of rounds (integer count)
+    last_round_stage: str | None = None  # Series A, B, Seed, etc.
+    last_round_amount: float | None = None  # most recent round amount
+
+    # STORY-350: patent data from patents adapter
+    patent_count: int | None = None  # total patents
+    patent_categories: list[str] = Field(default_factory=list)  # patent technology categories
+
+    # STORY-350: news and sentiment from news adapter
+    news_sentiment: float | None = None  # aggregate sentiment score (-1 to 1)
+    news_article_count: int | None = None  # total articles found
+
+    # STORY-350: hiring and AI workforce data
+    employee_growth_pct: float | None = None  # headcount growth percentage
+    ai_jobs_count: int | None = None  # AI-related open positions
 
     # Structure
     parent_company: str | None = None

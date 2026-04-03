@@ -50,6 +50,18 @@ def _build_financials(
     funding_raised = _get_signal_numeric(signals, "funding")
     valuation = _get_signal_numeric(signals, "valuation")
 
+    # STORY-350: populate new financial fields from signals added in STORY-349
+    ebitda = _get_signal_numeric(signals, "ebitda")
+    net_income = _get_signal_numeric(signals, "net_income")
+    pe_ratio = _get_signal_numeric(signals, "pe_ratio")
+    current_price = _get_signal_numeric(signals, "current_price")
+    eps_ttm = _get_signal_numeric(signals, "eps_ttm")
+
+    # ebitda_margin is a ratio — only compute when both absolute values are present
+    ebitda_margin: float | None = None
+    if ebitda is not None and revenue is not None and revenue > 0:
+        ebitda_margin = ebitda / revenue
+
     return FinancialMetric(
         revenue=revenue,
         revenue_confidence=_confidence_from_signal(signals["revenue_level"].signal_confidence)
@@ -67,6 +79,12 @@ def _build_financials(
         margin_confidence=_confidence_from_signal(signals["profitability"].signal_confidence)
         if "profitability" in signals
         else ConfidenceLevel.UNKNOWN,
+        ebitda=ebitda,
+        ebitda_margin=ebitda_margin,
+        net_income=net_income,
+        pe_ratio=pe_ratio,
+        current_price=current_price,
+        eps_ttm=eps_ttm,
         funding_raised=funding_raised,
         funding_confidence=_confidence_from_signal(signals["funding"].signal_confidence)
         if "funding" in signals
@@ -189,6 +207,21 @@ def build_company_entity_from_signals(
     open_positions_val = _get_fact_value(facts, "open_positions")
     ai_sig = _get_signal(signals, "ai_maturity")
 
+    # STORY-350: extract new fields from facts
+    exchange_val = _get_fact_value(facts, "exchange")
+    products_val = _get_fact_value(facts, "products")
+    pricing_model_val = _get_fact_value(facts, "pricing_model")
+    target_customers_val = _get_fact_value(facts, "target_customers")
+    funding_rounds_val = _get_fact_value(facts, "funding_rounds")
+    last_round_stage_val = _get_fact_value(facts, "last_round_stage")
+    last_round_amount_val = _get_fact_value(facts, "last_round_amount")
+    patent_count_val = _get_fact_value(facts, "total_patents")
+    patent_categories_val = _get_fact_value(facts, "patent_categories")
+    article_count_val = _get_fact_value(facts, "article_count")
+    ai_jobs_val = _get_fact_value(facts, "ai_related_positions")
+    hiring_sig = _get_signal(signals, "hiring_velocity")
+    sentiment_sig = _get_signal(signals, "market_sentiment")
+
     # Build provenance
     metric_sources = _build_metric_sources(signals, facts)
     metric_observations = _build_metric_observations(facts)
@@ -204,6 +237,7 @@ def build_company_entity_from_signals(
         website=str(descriptive["website"]) if descriptive["website"] else None,
         headquarters=str(descriptive["headquarters"]),
         founded_year=int(descriptive["founded_year"]) if descriptive["founded_year"] is not None else None,
+        sector=str(descriptive["sector"]) if descriptive.get("sector") else None,
         tier=tier,
         threat_level=threat,
         ai_maturity=ai_maturity,
@@ -222,4 +256,20 @@ def build_company_entity_from_signals(
         metric_observations=metric_observations,
         signal_confidences={s.signal_name: s.signal_confidence for s in signal_record.signals},
         last_updated=now,
+        # STORY-350: new fields wired from facts and signals
+        exchange=str(exchange_val) if exchange_val else None,
+        products=list(products_val) if isinstance(products_val, list) else [],
+        pricing_model=str(pricing_model_val) if pricing_model_val else None,
+        target_customers=list(target_customers_val) if isinstance(target_customers_val, list) else [],
+        funding_round_count=int(funding_rounds_val) if funding_rounds_val is not None else None,
+        last_round_stage=str(last_round_stage_val) if last_round_stage_val else None,
+        last_round_amount=float(last_round_amount_val) if last_round_amount_val is not None else None,
+        patent_count=int(patent_count_val) if patent_count_val is not None else None,
+        patent_categories=list(patent_categories_val) if isinstance(patent_categories_val, list) else [],
+        news_sentiment=float(sentiment_sig.signal_value) if sentiment_sig else None,
+        news_article_count=int(article_count_val) if article_count_val is not None else None,
+        employee_growth_pct=float(hiring_sig.signal_value)
+        if hiring_sig and isinstance(hiring_sig.signal_value, (int, float))
+        else None,
+        ai_jobs_count=int(ai_jobs_val) if ai_jobs_val is not None else None,
     )
