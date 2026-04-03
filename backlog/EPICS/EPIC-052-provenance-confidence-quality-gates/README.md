@@ -2,11 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | 🔴 Not Started |
+| **Status** | ⏳ BLOCKED |
 | **Priority** | P0 – Ship Blocker |
 | **Created** | 2026-03-10 |
+| **Updated** | 2026-04-03 (blocked by EPIC-050 + EPIC-051 — both Not Started; QUEUE.md corrected) |
 | **Stories** | STORY-198, STORY-199, STORY-200, STORY-201 |
-| **Dependencies** | EPIC-050 (Web Acquisition Pipeline), EPIC-051 (Multi-Source Growth Signals), EPIC-003 (Core Product Correctness) |
+| **Dependencies** | EPIC-050 (Web Acquisition Pipeline) **NOT STARTED**, EPIC-051 (Multi-Source Growth Signals) **NOT STARTED**, EPIC-003 (Core Product Correctness) ✅ DONE |
 
 ## Context
 
