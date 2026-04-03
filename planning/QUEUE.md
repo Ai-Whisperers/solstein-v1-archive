@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-04-03 | Updated By | EPIC-090/091 added as P0 (synthetic data contamination audit); contamination nodes documented in docs/audit/BACKLOG_STRUCTURAL_AUDIT_2026-04-03.md; STORY-366–373 created |
+| Last Updated | 2026-04-03 | Updated By | EPIC-092/093 added as P0 (second contamination pass: module-scope test mutations + production loader tagging); STORY-374–381 created; third-pass audit appended to docs/audit/BACKLOG_STRUCTURAL_AUDIT_2026-04-03.md |
 
 ## Status Key
 
@@ -67,6 +67,40 @@
 | 4 | STORY-369 | Contract tests: gate blocks synthetic/unknown/mixed, passes real | BLOCKED | Blocked by STORY-366 + 367 + 368 |
 
 Stories 366, 367, 368 are independent — can be worked in any order. STORY-369 requires all three.
+
+### EPIC-092: Test Isolation — Module-Scope Mutation Prevention
+
+> Second-pass audit (2026-04-03) found module-scope test mutations that bypass security gates
+> for the entire pytest session:
+> - `test_api_routers_coverage.py:19-25` permanently overrides `app.dependency_overrides`, disables API key check, disables rate limiting at module import time
+> - `test_load.py:7-8` overrides `DATABASE_URL` before `solstein.config` is imported — poisons Settings for the process
+> - `test_integration.db` (796KB) and `test_perf.sqlite3` (812KB) are tracked in git — leaked test artefacts
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 1 | STORY-374 | Fix `test_api_routers_coverage.py` — move module-scope app/settings mutations into fixtures | READY | S; 3 mutations at lines 19–25 |
+| 2 | STORY-375 | Fix `test_load.py` — move DB URL env overrides into monkeypatched fixtures | READY | S; os.environ before imports at lines 7–8 |
+| 3 | STORY-376 | Remove leaked test DB files from git; add `.gitignore` rules | READY | XS; `git rm --cached` + gitignore |
+| 4 | STORY-377 | Add CI guard: detect module-scope os.environ / app.dependency_overrides in test files | READY | S; new scripts/ci/check_test_module_scope_mutations.py |
+
+All four stories independent — any order.
+
+### EPIC-093: Production Loader Synthetic Tagging
+
+> Second-pass audit (2026-04-03) found production `src/` code loading untagged data into pipeline:
+> - `src/solstein/data/seed_db.py` (production module!) seeds Supabase from JSON with no `data_source_type`
+> - `src/solstein/adapters/discovery/competitor_json.py` — production pipeline discovery drops `data_source_type`
+> - `competitor_loader.py` singleton cache persists between production and test calls
+> - `load_competitor_data.py` migration sets `data_source` (filename) but not `data_source_type`
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 1 | STORY-378 | Fix `src/solstein/data/seed_db.py` — set `data_source_type` before `repo.save()` | READY | XS; production module seeds Supabase untagged |
+| 2 | STORY-379 | Fix `competitor_loader.py` — tag loaded companies; expose `reset_loader()` for tests | READY | S; tagging at load time + singleton reset API |
+| 3 | STORY-380 | Fix `CompetitorJsonSource.discover()` — propagate `data_source_type` into pipeline | READY | S; blocked on STORY-379 for correct tagging at source |
+| 4 | STORY-381 | Fix `load_competitor_data.py` migration — set `data_source_type` on all `CompanyRecord` objects | READY | XS; `_build_company_record()` sets filename only |
+
+All four stories independent. STORY-380 benefits from STORY-379 being done first but can proceed in parallel.
 
 ### EPIC-091: Test/Production Runtime Separation
 

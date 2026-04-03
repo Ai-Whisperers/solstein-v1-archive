@@ -627,3 +627,231 @@ Three directory names in `backlog/EPICS/` are likely stale duplicates from earli
 | `EPIC-067-agentic-development-workflow-hardening/` | Duplicate of `EPIC-067-*/` | Same resolution |
 
 Do not delete without team review — may contain in-progress notes not yet merged to canonical dir.
+
+---
+
+## Third-Pass Contamination Audit — 2026-04-03 (module-scope mutations + production loader chain)
+
+> **Scope**: Deeper scan targeting (a) test files that mutate production singletons at module scope,
+> (b) production code inside `src/` that loads untagged data into Supabase/pipeline,
+> (c) leaked test DB artefacts tracked in git.
+>
+> All findings below were verified by direct file read. Items already in EPIC-090/091 are not repeated.
+>
+> **Remediation tracked in**: EPIC-092 (test isolation) and EPIC-093 (production loader tagging).
+
+---
+
+### CRITICAL — `tests/unit/test_api_routers_coverage.py:19–25`: Module-scope mutations never cleaned up
+
+Three mutations execute at module **import time** and are **never reversed**:
+
+```python
+# Line 20-21 — permanent for the rest of the test session:
+app.dependency_overrides[get_current_user] = lambda: {"username": "test_user"}
+app.dependency_overrides[get_current_tenant] = lambda: {"tenant_id": "test-tenant", ...}
+
+# Line 23-24 — Settings singleton mutated globally:
+_settings = get_settings()
+_settings.api.require_api_key = False
+
+# Line 25 — env var set, never reset:
+os.environ["SOLSTEIN_DISABLE_RATE_LIMIT"] = "true"
+```
+
+**Impact**: Any test file loaded *after* this module in the same pytest session inherits:
+- Bypassed authentication (`get_current_tenant` always returns test-tenant)
+- Disabled API key requirement
+- Disabled rate limiting
+
+This is a silent security-gate bypass that leaks across the entire test run. If pytest discovers
+test files alphabetically, any file after `test_api_routers_coverage.py` in the `tests/unit/`
+directory runs with these permanent overrides.
+
+| Symbol mutated | Location | Type of contamination |
+|---------------|----------|-----------------------|
+| `app.dependency_overrides` | `api/main.py` — production FastAPI app | Permanent auth bypass |
+| `_settings.api.require_api_key` | Settings singleton from `get_settings()` | Permanent config mutation |
+| `os.environ["SOLSTEIN_DISABLE_RATE_LIMIT"]` | Process environment | Never unset across session |
+
+**Fix**: Move all three into a `@pytest.fixture(autouse=True)` with `yield` + cleanup, or use
+`monkeypatch` fixtures that auto-restore on teardown.
+
+---
+
+### CRITICAL — `tests/performance/test_load.py:7–8`: DB URL overrides before `solstein` imports
+
+```python
+# Lines 7-8 — BEFORE any solstein import:
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///file:testdb?mode=memory&cache=shared"
+os.environ["SYNC_DATABASE_URL"] = "sqlite:///file:testdb?mode=memory&cache=shared"
+
+import asyncio   # line 10 (after the override)
+...
+from solstein.config import Settings   # line 23 — reads env that was just poisoned
+```
+
+Because the env override happens before `solstein.config` is imported, Settings loads with
+the in-memory SQLite URL as its database URL. This mutation is never reset. Any test that
+runs after this file has a Settings singleton pointing to an in-memory test database.
+
+Additionally, line 21: `sys.path.insert(0, ...)` permanently mutates Python's import search
+path. If a module name collision exists, subsequent imports after this test file may resolve
+to the wrong package.
+
+---
+
+### CRITICAL — `src/solstein/data/seed_db.py`: Production module seeds Supabase from untagged JSON
+
+This file lives inside `src/solstein/data/` — **it is production code**, not a script.
+
+```python
+# seed_db.py — production module, no data_source_type tagging
+async def seed_supabase() -> None:
+    loader = CompetitorDataLoader()
+    repo = SupabaseRepository()
+    scorer = GrowthScorer()
+
+    companies = loader.load_companies()         # loads competitor_data.json → Company objects
+    for company in companies:
+        scored_company = scorer.calculate_scores(company)   # scores it
+        repo.save(scored_company)               # writes to Supabase — NO data_source_type set
+```
+
+**Chain**: `competitor_data.json` → `CompetitorDataLoader._load_from_json()` →
+`convert_to_domain_company()` (no `data_source_type` propagation) → `GrowthScorer.calculate_scores()`
+→ `SupabaseRepository.save()` — companies land in production Supabase with `data_source_type="unknown"`.
+
+This is distinct from `scripts/seed_db.py` (which uses Faker). This module seeds from a JSON file
+that may or may not be synthetic (the file is `data/input/competitor_data.json` — if the synthetic
+fixture from `scripts/generate_synthetic_companies.py` was ever copied there, it becomes production data).
+
+---
+
+### CRITICAL — `src/solstein/adapters/discovery/competitor_json.py:41–44`: Pipeline discovery uses untagged loader
+
+The production pipeline uses `CompetitorJsonSource.discover()` as a `DiscoverySource` during
+market intelligence runs:
+
+```python
+def discover(self, market, seed_company, max_results=50, ...) -> list[DiscoveryCandidate]:
+    from solstein.data.loaders import CompetitorDataLoader
+    loader = CompetitorDataLoader()             # new instance each call
+    companies = loader.load_companies()         # reads competitor_data.json
+    # converts to DiscoveryCandidates — no data_source_type propagated
+```
+
+Every `run_market_intelligence()` call that uses this source feeds untagged companies into
+the pipeline. These candidates are then enriched, scored, and exported. No gate intercepts
+them because `data_source_type` was never set.
+
+---
+
+### HIGH — `competitor_loader.py:107–115`: Module-level singleton with persistent cache
+
+```python
+_loader_instance: CompetitorDataLoader | None = None   # module-level
+
+def get_loader() -> CompetitorDataLoader:
+    global _loader_instance
+    if _loader_instance is None:
+        _loader_instance = CompetitorDataLoader()
+    return _loader_instance
+
+loader = _LazyLoader()   # transparent proxy to _loader_instance
+```
+
+**Cache contamination**: `CompetitorDataLoader` caches loaded companies in
+`self._cache: dict[str, list[Company]]`. Once loaded (whether in a test or production call),
+the result is cached for the lifetime of the process. Tests that call `loader.load_companies()`
+with test data populate the singleton cache. Any subsequent call — including from a production
+code path in the same process — returns the cached test result.
+
+`tests/conftest.py:137–158` uses `monkeypatch.setattr(CompetitorDataLoader, "load_companies", ...)`,
+which patches the class method but does NOT clear the existing singleton instance's `_cache`.
+
+---
+
+### HIGH — `src/solstein/migrations/load_competitor_data.py:77`: Migration tags source by filename only
+
+```python
+return CompanyRecord(
+    ...
+    data_source="competitor_data.json",   # string filename, not data_source_type
+    # data_source_type NOT SET — CompanyRecord may default to None or "unknown"
+)
+```
+
+The migration populates the `data_source` column (a free-text provenance string) but sets no
+`data_source_type` field. If `CompanyRecord` has a `data_source_type` column, it defaults to
+whatever the SQLAlchemy column default is. Records inserted by this migration cannot be
+distinguished from real data by the export gate.
+
+---
+
+### HIGH — `test_integration.db` and `test_perf.sqlite3` exist and are tracked in git
+
+```
+-rw-rw-r-- 796K Apr 3  test_integration.db    ← created by tests/integration/test_data_migration.py
+-rw-rw-r-- 812K Apr 3  test_perf.sqlite3       ← created by tests/performance/test_load.py
+```
+
+Both files are at the repo root and are in `git status` as modified. They contain real SQLAlchemy
+schema + data written by test runs. Any developer checking out the repo gets these pre-populated
+databases. Any CI run that doesn't delete them first may run against stale test data.
+
+The `test_load.py` fixture does call `db_manager.drop_tables()` in teardown (line 51), but if
+a test is interrupted or the fixture fails, the tables/data persist.
+
+---
+
+### HIGH — `security_hardening.py:404`: Module-level `rate_limiter` and `audit_logger` singletons exposed to tests
+
+```python
+# Module-level singletons in src/solstein/data/security_hardening.py:
+audit_logger = AuditLogger()          # mutable deque of entries (line 404)
+rate_limiter = RedisRateLimiter(...)  # exposes client_requests dict (line 229, 284)
+input_validator = InputValidator()    # line 406
+```
+
+`RedisRateLimiter` exposes `self.client_requests` as a public attribute (documented at line 228:
+`"Expose memory fallback's client_requests for test compatibility"`). This means tests can — and
+likely do — directly mutate the production singleton's rate-limit state. Any mutation survives
+to the next test or to production if the same process is reused.
+
+`AuditLogger` accumulates entries in a `deque` with no maximum size by default. Security audit
+entries from one test accumulate in the shared singleton visible to subsequent tests.
+
+---
+
+### MEDIUM — `test_load.py:31–45`: Settings singleton mutated inside fixture without `monkeypatch`
+
+```python
+@pytest_asyncio.fixture
+async def db_session():
+    settings = Settings.load()          # returns cached singleton
+    settings.database.url = "sqlite+aiosqlite:///test_perf.sqlite3"   # mutates singleton
+    # ... yield ...
+    # NO RESTORE — settings.database.url remains "test_perf.sqlite3" after fixture exits
+```
+
+`Settings.load()` likely returns a cached singleton (common Pydantic settings pattern). Mutating
+`settings.database.url` inside a fixture that does not use `monkeypatch` means the mutation
+persists after the fixture exits. Subsequent tests — or production code running after tests
+in the same process — may use the test SQLite URL instead of the real database URL.
+
+---
+
+### Contamination summary for EPIC-092 / EPIC-093
+
+| Node | File | Line | Severity | Epic |
+|------|------|------|----------|------|
+| Module-scope `app.dependency_overrides` + settings mutation | `tests/unit/test_api_routers_coverage.py` | 19–25 | CRITICAL | 092 |
+| Module-scope `os.environ["DATABASE_URL"]` + sys.path | `tests/performance/test_load.py` | 7–8, 21 | CRITICAL | 092 |
+| Leaked test DB files in git | `test_integration.db`, `test_perf.sqlite3` | repo root | HIGH | 092 |
+| Settings singleton mutated without `monkeypatch` | `tests/performance/test_load.py` | 31–45 | MEDIUM | 092 |
+| Production `seed_db.py` seeds Supabase untagged | `src/solstein/data/seed_db.py` | all | CRITICAL | 093 |
+| Production pipeline discovers via untagged loader | `src/solstein/adapters/discovery/competitor_json.py` | 41–44 | CRITICAL | 093 |
+| Loader singleton cache persists across calls | `src/solstein/data/competitor_loader.py` | 107–115 | HIGH | 093 |
+| Migration sets filename-only provenance, no type tag | `src/solstein/migrations/load_competitor_data.py` | 77 | HIGH | 093 |
+| Module-level rate_limiter/audit_logger singletons | `src/solstein/data/security_hardening.py` | 404–406 | HIGH | 092 |
