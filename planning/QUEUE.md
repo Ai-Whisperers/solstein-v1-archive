@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-04-03 | Updated By | Deep gap analysis: EPIC-087 (multi-tenancy), EPIC-088 (infra reliability), EPIC-089 (workflow API) + STORY-355/356/360/361 added; production readiness checklist appended to audit |
+| Last Updated | 2026-04-03 | Updated By | STORY-348 DONE: extra="forbid" on Company+FinancialMetric; zero new extra_forbidden failures; STORY-349 now READY |
 
 ## Status Key
 
@@ -33,8 +33,8 @@
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 1 | STORY-348 | Change `extra="ignore"` to `extra="forbid"` on Company and FinancialMetric | READY | Do first — makes all losses visible. Will break tests intentionally. |
-| 2 | STORY-349 | Add signal extractors for all orphaned fact types | BLOCKED | Blocked by STORY-348. Fix Group A fact types with no signal extractor or Company mapping. |
+| 1 | STORY-348 | Change `extra="ignore"` to `extra="forbid"` on Company and FinancialMetric | DONE | extra="forbid" live on both models. Zero new extra_forbidden failures in prod code; pre-existing test fixture bugs unchanged. |
+| 2 | STORY-349 | Add signal extractors for all orphaned fact types | READY | Unblocked. Fix Group A fact types with no signal extractor or Company mapping. |
 | 3 | STORY-350 | Map all surviving signals and facts to Company/FinancialMetric fields | BLOCKED | Blocked by STORY-349. Add missing fields to domain models and builder. |
 | 4 | STORY-351 | Add field-count regression gate across all pipeline layers | BLOCKED | Blocked by STORY-350. Permanent CI gate to prevent future field loss. |
 

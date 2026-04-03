@@ -89,12 +89,11 @@ DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000000"
 class FinancialMetric(BaseModel):
     """Financial metrics domain entity.
 
-    STORY-251: extra="ignore" is the explicit policy for domain models.
-    Extra fields are silently dropped rather than persisted, ensuring
-    model_dump() never contains undeclared keys.
+    STORY-348: extra="forbid" — any unknown key passed to FinancialMetric
+    raises ValidationError immediately, making silent field-loss visible.
     """
 
-    model_config = ConfigDict(validate_assignment=True, extra="ignore")
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")
 
     allow_empty_primary: bool = Field(default=False, exclude=True)
     revenue: float | None = None
@@ -156,12 +155,11 @@ class FinancialMetric(BaseModel):
 class Company(BaseModel):
     """Company domain entity.
 
-    STORY-251: extra="ignore" is the explicit policy. Extra fields are
-    silently dropped at construction so model_dump() never leaks undeclared
-    keys downstream.
+    STORY-348: extra="forbid" — any unknown key passed to Company
+    raises ValidationError immediately, making silent field-loss visible.
     """
 
-    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True, extra="ignore")
+    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True, extra="forbid")
 
     id: str = Field(..., description="Unique company identifier")
     tenant_id: str = Field(

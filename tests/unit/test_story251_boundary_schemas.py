@@ -148,39 +148,35 @@ class TestDomainModelExtraPolicy:
     """Domain models must define explicit extra-field policy."""
 
     def test_company_has_explicit_extra_policy(self) -> None:
-        """Company model_config explicitly defines extra field handling."""
+        """Company model_config explicitly defines extra field handling (STORY-348: forbid)."""
         config = Company.model_config
         assert "extra" in config, "Company must define explicit extra-field policy"
-        assert config["extra"] == "ignore"
+        assert config["extra"] == "forbid"
 
     def test_financial_metric_has_explicit_extra_policy(self) -> None:
-        """FinancialMetric model_config explicitly defines extra field handling."""
+        """FinancialMetric model_config explicitly defines extra field handling (STORY-348: forbid)."""
         config = FinancialMetric.model_config
         assert "extra" in config, "FinancialMetric must define explicit extra-field policy"
-        assert config["extra"] == "ignore"
+        assert config["extra"] == "forbid"
 
-    def test_company_extra_fields_do_not_survive_dump(self) -> None:
-        """Extra fields passed to Company are dropped, not persisted."""
-        company = Company.model_validate({
-            "id": "TEST-001",
-            "name": "Test Corp",
-            "unexpected_extra": "should be dropped",
-            "another_extra": 42,
-        })
-        dumped = company.model_dump()
-        assert "unexpected_extra" not in dumped
-        assert "another_extra" not in dumped
+    def test_company_extra_fields_raise_validation_error(self) -> None:
+        """Extra fields passed to Company raise ValidationError (STORY-348)."""
+        with pytest.raises(ValidationError, match="extra_forbidden|extra_inputs"):
+            Company.model_validate({
+                "id": "TEST-001",
+                "name": "Test Corp",
+                "unexpected_extra": "should raise",
+                "another_extra": 42,
+            })
 
-    def test_financial_metric_extra_fields_do_not_survive_dump(self) -> None:
-        """Extra fields passed to FinancialMetric are dropped."""
-        fm = FinancialMetric.model_validate({
-            "revenue": 50.0,
-            "growth_rate": 0.15,
-            "allow_empty_primary": True,
-            "bogus_metric": 999,
-        })
-        dumped = fm.model_dump()
-        assert "bogus_metric" not in dumped
+    def test_financial_metric_extra_fields_raise_validation_error(self) -> None:
+        """Extra fields passed to FinancialMetric raise ValidationError (STORY-348)."""
+        with pytest.raises(ValidationError, match="extra_forbidden|extra_inputs"):
+            FinancialMetric.model_validate({
+                "revenue": 50.0,
+                "allow_empty_primary": True,
+                "bogus_metric": 999,
+            })
 
     def test_connector_payload_model_dump_clean(self) -> None:
         """ConnectorFactPayload model_dump has no extra keys."""
