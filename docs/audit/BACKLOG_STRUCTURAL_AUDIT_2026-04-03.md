@@ -119,7 +119,7 @@ async def get_research_job(
     return _job_to_response(job)
 ```
 
-**`get_current_tenant` dependency**: defined at `src/solstein/api/main.py:140` (or imported dependency) — returns `dict[str, Any]` with key `"tenant_id"`. **Not** the `get_current_tenant()` from `tenant/context.py` — that's a ContextVar getter.
+**`get_current_tenant` dependency**: defined at `src/solstein/api/dependencies.py:140` — returns `dict[str, Any]` with key `"tenant_id"`. Reads `request.state.tenant` (set by `TenantMiddleware`), raises `HTTPException(401)` if None. **Not** the `get_current_tenant()` from `tenant/context.py` — that's a ContextVar getter with no `request` parameter.
 
 ---
 
@@ -355,3 +355,275 @@ def validate_growth_rate_range(cls, v: float | None) -> float | None:
 | `src/solstein/api/routers/research_jobs.py` | Has `get_current_tenant` dependency and `_job_to_response()` helper — STORY-364 should import `get_current_tenant` from same location (`api.dependencies` or `api.main`) |
 | `src/solstein/worker/refresh_tasks.py` | Contains all 12 `refresh_*` tasks imported by orchestration.py |
 | `src/solstein/worker/tenant_isolation.py` | Has `validate_task_tenant_id()` — used by orchestration.py but not relevant to EPIC-089 |
+
+---
+
+## Contamination Analysis — 2026-04-03 (synthetic/fake data bleeding into production)
+
+> **Trigger**: `faker` was found in `scripts/seed_db.py`. Analysis expanded to all contamination
+> vectors — shared imports, module aliases, factory defaults, and gate enforcement gaps.
+>
+> **Conclusion**: 5 CRITICAL nodes confirmed. Faker-generated test data can reach production export
+> silently because (a) records default to `data_source_type="unknown"`, (b) the export gate
+> detects violations but never raises, and (c) `SyntheticDataBlocker.ensure_safe()` is dead code.
+> Tracked in EPIC-090 (gate enforcement) and EPIC-091 (runtime boundary).
+
+### CRITICAL 1 — `scripts/seed_db.py`: Faker writes to production DB untagged
+
+| Fact | Detail |
+|------|--------|
+| **File** | `scripts/seed_db.py:20,26` |
+| **Code** | `from faker import Faker; fake = Faker()` |
+| **DB write** | Lines 99–119 call `CompanyRepository.save()` via `get_async_session()` — same session factory as production |
+| **Missing tag** | `generate_company()` (lines 51–90) never sets `data_source_type` → defaults to `"unknown"` |
+| **Gate bypass** | Export gate only blocks `"synthetic"` / `"mixed"` — `"unknown"` passes through |
+| **Result** | If run against production DB, all seeded companies are exported as real data |
+
+Contrast: `scripts/generate_synthetic_companies.py:320` does set `"data_source_type": "synthetic"` correctly.
+
+### CRITICAL 2 — `src/solstein/domain/models.py:294`: Default creates gate blind spot
+
+```python
+data_source_type: str = "unknown"   # gate blocks "synthetic"/"mixed" only
+```
+
+Every factory, fixture, or seed script that omits `data_source_type` defaults to `"unknown"`.
+The gate treats `"unknown"` as acceptable. This makes the default a contamination pass-through.
+
+### CRITICAL 3 — `SyntheticDataBlocker.ensure_safe()` is dead code
+
+| Fact | Detail |
+|------|--------|
+| **File** | `src/solstein/data/synthetic_data_safety.py:284–322` |
+| **Method** | `ensure_safe()` raises `SyntheticDataError` when synthetic data detected |
+| **Callers** | **Zero** — no code in `src/solstein/api/routers/export.py` or any exporter calls it |
+| **Effect** | The blocking mechanism was written but never wired in |
+
+### CRITICAL 4 — `src/solstein/data/report_release_gate.py:168–178`: Gate detects, never enforces
+
+```python
+# Gate appends violations but callers never check gate_result.passed:
+if not self.allow_synthetic:
+    if str(data_source_type).lower() in {"synthetic", "mixed"}:
+        reasons.append(GateReason(code="synthetic_data", ...))
+```
+
+In `export.py` (lines ~41–45):
+```python
+gate_result = gate.evaluate(companies)
+export_metadata = build_export_metadata(companies, gate_result)
+excel_exporter.create_dashboard(...)   # proceeds regardless
+```
+
+No `if not gate_result.passed: raise` guard exists anywhere.
+
+### CRITICAL 5 — Two test factory modules, both without `data_source_type` default
+
+| File | Lines | Risk |
+|------|-------|------|
+| `tests/factories.py:56–90` | 27 Faker fields in `CompanyFactory` | No `data_source_type="synthetic"` default |
+| `tests/factories/__init__.py:64–99` | 20+ Faker fields in duplicate `CompanyFactory` | Same omission |
+| `tests/factories.py:44–53` | `FinancialMetricFactory` | No synthetic tag |
+
+Both modules are used by `conftest.py`. The duplication (two `CompanyFactory` definitions) also
+creates alias risk — future import order changes can silently switch which factory is resolved.
+
+### HIGH — `tests/conftest.py` fixture chain reaches export endpoint
+
+```
+make_company() [Faker, no tag]
+  → mock_company fixture (conftest:66)
+  → mock_repo fixture (conftest:70-86)   [AsyncMock returning mock_company]
+  → test_export_to_excel / test_export_to_json (test_routers_export_jobs.py:14–44)
+```
+
+Export tests exercise the real export code path with unmarked synthetic data — confirming the gate
+would not catch real contamination because the test itself would pass.
+
+### HIGH — `tests/test_data.py:10–109`: Three `Company` objects, no `data_source_type`
+
+Three hand-coded companies (Eneve, Test Company 2, Test Company 3) never set `data_source_type`.
+Consumed via `mock_competitor_data` fixture (conftest:137–158).
+
+### MEDIUM — `tests/unit/test_story114_pdf_export.py:23–56`: local `_make_company` helper
+
+Local helper creates Company objects without `data_source_type`. Pattern is self-contained to
+the test file but reinforces the default-passes-through risk.
+
+### Contamination Path Summary
+
+```
+seed_db.py / factories / test_data.py
+    ↓ creates Company with data_source_type="unknown"
+CompanyRepository.save() [production DB]
+    ↓
+export.py → gate.evaluate() [detects nothing — "unknown" ignored]
+    ↓
+ensure_safe() NOT CALLED
+    ↓
+if not gate_result.passed: NOT CHECKED
+    ↓
+Export file written — synthetic data treated as real
+```
+
+**Remediation tracked in**: EPIC-090 (gate enforcement) and EPIC-091 (runtime boundary).
+
+---
+
+## Second-Pass Audit — 2026-04-03 (deeper codebase read)
+
+> This pass targeted specific claims in story task bodies and found critical implementation errors
+> in STORY-363 that will cause runtime failures if implemented as written.
+
+### CRITICAL: `get_current_tenant` import path corrected (STORY-364 and EPIC-087 generally)
+
+The first-pass audit cited `api/main.py:140` as the definition site for the `get_current_tenant`
+FastAPI dependency. This is **wrong**. The correct file is `src/solstein/api/dependencies.py:140`.
+
+| File | Line | What it defines |
+|------|------|-----------------|
+| `src/solstein/api/dependencies.py` | 140 | `async def get_current_tenant(request: Request) -> dict[str, Any]` — the FastAPI Depends() target |
+| `src/solstein/api/main.py` | 140 | lifespan body code (not a dependency definition) |
+| `src/solstein/tenant/context.py` | 54 | `def get_current_tenant() -> str \| None` — ContextVar getter, not a Depends() |
+
+**Action for STORY-364**: Import must be `from solstein.api.dependencies import get_current_tenant`, not from `tenant.context` or `api.main`.
+
+---
+
+### CRITICAL: STORY-363 task body has two breaking defects
+
+The task body described in STORY-363 for the Celery `run_workflow_task` will not work as written.
+
+#### Defect 1 — `get_sync_session` is NOT a module-level function
+
+```python
+# STORY-363 task body proposes:
+from solstein.infrastructure.database import get_sync_session
+with get_sync_session() as session:
+    ...
+```
+
+**Reality** — `src/solstein/infrastructure/database.py`:
+
+| Symbol | Line | Type |
+|--------|------|------|
+| `DatabaseManager` class | — | class |
+| `DatabaseManager.get_sync_session()` | 128 | **instance method**, not module-level |
+| `db_manager` | 169 | module-level `DatabaseManager` instance |
+
+The import `from solstein.infrastructure.database import get_sync_session` will raise
+`ImportError` at Celery worker startup because no `get_sync_session` symbol exists at module scope.
+
+**Correct approach**: `from solstein.infrastructure.database import db_manager` then
+`with db_manager.get_sync_session() as session: ...`
+
+#### Defect 2 — All `ResearchJobRepository` methods are `async def`
+
+The task body calls repository methods synchronously:
+```python
+# STORY-363 proposes (inside sync Celery task):
+repo.update_status(job_id, "running")
+result = pipeline.run_market_intelligence(...)
+repo.update_status(job_id, "completed", ...)
+```
+
+**Reality** — `src/solstein/infrastructure/research_job_repository.py`:
+
+| Method | Line | Signature |
+|--------|------|-----------|
+| `create_job()` | 52 | **`async def`** |
+| `update_status()` | 85 | **`async def`** |
+| `get_job()` | 154 | **`async def`** |
+| `get_jobs_for_tenant()` | 168 | **`async def`** |
+
+All four methods are `async def`. Calling them without `await` inside a synchronous Celery task
+returns coroutine objects — the repository operations silently do nothing, no exception is raised.
+
+**Correct approach** (two options):
+1. **Use `asyncio.run()`** inside the sync task for each async call, e.g.
+   `asyncio.run(repo.update_status(job_id, "running"))` — works but is ugly
+2. **Rewrite as a Celery async task** using `celery-aio-pool` or a custom event loop — architecturally cleaner
+
+The story body must be corrected before implementation. The executor should choose option 1 or 2
+and update the task body in STORY-363 before writing code.
+
+---
+
+### STORY-365 third failure: `test_profit_margin_boundaries` — Root cause confirmed
+
+Confirmed by running `uv run python -m pytest tests/unit/test_scorers_financial.py::TestFinancialHealthScorer::test_profit_margin_boundaries -x 2>&1`.
+
+**File**: `tests/unit/test_scorers_financial.py`, test `test_profit_margin_boundaries`
+
+**Failure**:
+```
+ValidationError: Value error, At least revenue OR employees is required for scoring
+```
+
+**Root cause**: Each iteration calls `FinancialMetric(profit_margin=margin)` with no `revenue` or
+`employees`. The `require_primary_metric` model_validator added in STORY-348
+(`src/solstein/domain/models.py:122–127`) raises `ValueError` if both are absent.
+
+**Fix for STORY-365**: In `test_scorers_financial.py`, change every
+`FinancialMetric(profit_margin=margin)` call to `FinancialMetric(profit_margin=margin, employees=1)`.
+
+**Full STORY-365 fix list**:
+
+| File | Line(s) | Change |
+|------|---------|--------|
+| `tests/unit/test_scoring.py` | 151 | `growth_rate=10_000.0` → `growth_rate=999.0` |
+| `tests/unit/test_scoring.py` | 158 | `growth_rate=-10_000.0` → `growth_rate=-99.0` |
+| `tests/unit/test_scorers_financial.py` | all `FinancialMetric(profit_margin=...)` in `test_profit_margin_boundaries` | add `employees=1` |
+
+---
+
+### `worker_tasks.py` stale comment
+
+`src/solstein/worker_tasks.py` module docstring says **"All 12 Beat-scheduled refresh tasks"**.
+Actual count is **13** (as confirmed in first-pass audit against `celery_config.py:109–184`).
+
+Minor issue — does not affect runtime — but will confuse anyone using the comment as a checklist
+for STORY-359's task discovery test.
+
+**Fix**: Change "12" → "13" in the docstring header when implementing STORY-359.
+
+---
+
+### `async_jobs.router` prefix architecture confirmed
+
+`src/solstein/api/routers/async_jobs.py` self-declares `prefix="/async"` in its own `APIRouter(prefix="/async", ...)` constructor. Therefore `main.py:221` correctly includes it **without** a prefix argument:
+
+```python
+app.include_router(async_jobs.router)   # correct — prefix="/async" comes from the router itself
+app.include_router(jobs.router, prefix="/jobs")  # correct — jobs.router has no prefix
+```
+
+STORY-362 adds `workflows.router` — verify whether to self-declare prefix in the router or pass it at `include_router()` time. Recommend following the `research_jobs.router` pattern (check that router's prefix style and match it for consistency).
+
+---
+
+### STORY-353 — `get_jobs_for_tenant()` scoping example at `research_job_repository.py:188`
+
+STORY-353 cites `research_job_repository.py:188` as the "correct tenant-scoped query example to replicate".
+
+**Verified**: `get_jobs_for_tenant()` starts at line 168 (declaration) and the `.where(tenant_id==...)` filter is approximately at line 188. The claim is accurate. The pattern:
+```python
+stmt = select(ResearchJobRecord).where(
+    ResearchJobRecord.tenant_id == tenant_id
+).order_by(ResearchJobRecord.created_at.desc()).limit(limit).offset(offset)
+```
+is the correct pattern for all tenant-scoped queries in EPIC-087 and EPIC-089.
+
+---
+
+### Stale duplicate epic directories (informational)
+
+Three directory names in `backlog/EPICS/` are likely stale duplicates from earlier reorganization:
+
+| Directory | Status | Recommended action |
+|-----------|--------|--------------------|
+| `EPIC-002/` | Likely orphaned | Verify against EPIC-002 story files before deletion |
+| `EPIC-052-provenance-quality-gates/` | Duplicate of `EPIC-052-provenance-confidence-quality-gates/` | Archive or delete after confirming canonical dir is `EPIC-052-provenance-confidence-quality-gates/` |
+| `EPIC-067-agentic-development-workflow-hardening/` | Duplicate of `EPIC-067-*/` | Same resolution |
+
+Do not delete without team review — may contain in-progress notes not yet merged to canonical dir.

@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-04-03 | Updated By | Stories 352–364 rewritten from codebase audit; STORY-365 added; STORY-357 status corrected; STORY-360 status changed to VERIFY; READMEs for EPIC-086/087/088/089 corrected; EPIC-052 stories blocked (deps EPIC-050/051 not started) |
+| Last Updated | 2026-04-03 | Updated By | EPIC-090/091 added as P0 (synthetic data contamination audit); contamination nodes documented in docs/audit/BACKLOG_STRUCTURAL_AUDIT_2026-04-03.md; STORY-366–373 created |
 
 ## Status Key
 
@@ -37,6 +37,47 @@
 | 2 | STORY-349 | Add signal extractors for all orphaned fact types | DONE | 5 new extractors (ebitda, net_income, pe_ratio, current_price, eps_ttm); extended funding+sentiment. 15 extractors total. |
 | 3 | STORY-350 | Map all surviving signals and facts to Company/FinancialMetric fields | DONE | 5 new FinancialMetric fields (ebitda, net_income, pe_ratio, current_price, eps_ttm); 14 new Company fields; builder fully wired. Zero new failures. |
 | 4 | STORY-351 | Add field-count regression gate across all pipeline layers | DONE | 8 tests in test_pipeline_field_survival.py; field_survival_policy.py with documented exclusions; all pass. |
+
+---
+
+## 🚨 P0 CRITICAL: Synthetic Data Contamination (2026-04-03)
+
+> **STOP. Read this before picking any other story.**
+>
+> Codebase audit (2026-04-03) confirmed that Faker-generated synthetic data can silently reach
+> production scoring and export pipelines without detection or blocking:
+>
+> 1. `scripts/seed_db.py` writes Faker data to the production DB with `data_source_type="unknown"`
+> 2. `SyntheticDataBlocker.ensure_safe()` exists but is never called by any exporter — dead code
+> 3. `ReportReleaseGate` detects violations but callers never check `gate_result.passed` — export proceeds regardless
+> 4. Gate only blocks `"synthetic"/"mixed"` — `"unknown"` (the default) is invisible to the gate
+> 5. Two duplicate test factory modules (`tests/factories.py`, `tests/factories/__init__.py`) both
+>    create Company objects with no `data_source_type` set — alias risk and missing synthetic tag
+>
+> **EPIC-090 first** (gate enforcement), **then EPIC-091** (boundary hardening).
+> Full details: `docs/audit/BACKLOG_STRUCTURAL_AUDIT_2026-04-03.md` (Contamination Analysis section)
+
+### EPIC-090: Synthetic Data Gate Enforcement
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 1 | STORY-366 | Extend gate to treat `data_source_type="unknown"` as blocked (allowlist: only "real"/"verified" pass) | READY | XS; one-line logic inversion in report_release_gate.py:168 |
+| 2 | STORY-367 | Wire `SyntheticDataBlocker.ensure_safe()` into `export.py` before any file write | READY | S; currently zero callers of ensure_safe() |
+| 3 | STORY-368 | Add `if not gate_result.passed: raise` guard after `gate.evaluate()` in `export.py` | READY | XS; export.py currently ignores gate_result.passed |
+| 4 | STORY-369 | Contract tests: gate blocks synthetic/unknown/mixed, passes real | BLOCKED | Blocked by STORY-366 + 367 + 368 |
+
+Stories 366, 367, 368 are independent — can be worked in any order. STORY-369 requires all three.
+
+### EPIC-091: Test/Production Runtime Separation
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 1 | STORY-370 | Fix `seed_db.py` — set `data_source_type="synthetic"` on all seeded records | READY | XS; one field assignment in generate_company() |
+| 2 | STORY-371 | Fix test factories — add `data_source_type="synthetic"` default to CompanyFactory in both modules | READY | XS; tests/factories.py + tests/factories/__init__.py |
+| 3 | STORY-372 | Deduplicate test factories — consolidate two CompanyFactory definitions into one | READY | S; alias risk from two divergent definitions |
+| 4 | STORY-373 | Add CI lint guard: no src/ module may import from tests.* or scripts.* | READY | XS; new scripts/ci/check_src_test_imports.py |
+
+All four stories independent — any order.
 
 ---
 
