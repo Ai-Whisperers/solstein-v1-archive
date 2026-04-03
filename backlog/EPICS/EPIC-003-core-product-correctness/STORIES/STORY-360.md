@@ -1,65 +1,103 @@
-# STORY-360: Consolidate Classification Thresholds into Single Source of Truth
+# STORY-360: Consolidate Classification Boundary Literals into Constants
 
 | Field | Value |
 |---|---|
-| **Status** | 🟡 VERIFY |
+| **Status** | 🔴 READY |
 | **Priority** | P3 |
-| **Size** | XS (1 hour) |
+| **Size** | XS (2 hours) |
 | **Epic** | EPIC-003 Core Product Correctness |
 | **Created** | 2026-04-03 |
-| **Updated** | 2026-04-03 (revised after codebase audit — mostly done) |
+| **Updated** | 2026-04-03 (deep wiring audit — scope narrowed to 4 boundary literals) |
 | **Risk** | Low |
 
 ---
 
-## Actual Codebase State (verified 2026-04-03)
+## Exact Codebase Wiring (deep audit 2026-04-03)
 
-**Constants are already defined:**
-- `src/solstein/analytics/constants.py:7`: `PHOENIX_SCORE_THRESHOLD = 7.0`
-- `src/solstein/analytics/constants.py:8`: `SALT_SCORE_THRESHOLD = 4.5`
-- `src/solstein/analytics/constants.py:9`: `LEAD_SCORE_THRESHOLD = 4.49`
+### Current State: Core thresholds already use constants
 
-**Classification logic uses constants correctly:**
-- `src/solstein/analytics/scoring.py:148`: `if score >= PHOENIX_SCORE_THRESHOLD:` — ✅ uses constant
-- `src/solstein/analytics/scoring.py:150`: `if score <= LEAD_SCORE_THRESHOLD:` — ✅ uses constant
-- `src/solstein/analytics/classification_service.py:45-47`: assigns constants to class attributes — ✅
+**`src/solstein/analytics/constants.py`** (all relevant constants):
 
-**Remaining literal values:**
-- `src/solstein/analytics/classification.py:9`: docstring says "4.5 - 7.49" — **7.49 is not a constant, it's a boundary description**
-- `src/solstein/analytics/classification.py:71`: `if 4.3 <= composite_score <= 4.7 or 6.8 <= composite_score <= 7.2:` — **these uncertainty ranges are hardcoded literals**, not covered by existing constants
+```python
+PHOENIX_SCORE_THRESHOLD = 7.0   # High-growth companies (top ~20%)
+SALT_SCORE_THRESHOLD = 4.5      # Stable companies (middle 60-70%)
+LEAD_SCORE_THRESHOLD = 4.49     # Legacy/opportunity (bottom 15-20%)
+```
+
+**`src/solstein/analytics/scoring.py:144`** — `classify_company()` already uses these:
+
+```python
+def classify_company(score: float | None) -> CompanyClassification:
+    if score is None:
+        return CompanyClassification.SALT
+    if score >= PHOENIX_SCORE_THRESHOLD:    # line 148
+        return CompanyClassification.PHOENIX
+    if score <= LEAD_SCORE_THRESHOLD:       # line 150
+        return CompanyClassification.LEAD
+    return CompanyClassification.SALT
+```
+
+### Remaining Literals: `classification.py:71`
+
+**`src/solstein/analytics/classification.py` (lines ~66–75)**:
+
+```python
+# Score certainty: higher scores are more certain
+# Scores near boundaries are less certain
+score_certainty = 1.0
+if 4.3 <= composite_score <= 4.7 or 6.8 <= composite_score <= 7.2:
+    score_certainty = 0.7
+```
+
+**The 4 boundary literals**:
+- `4.3` = `LEAD_SCORE_THRESHOLD - 0.19` (Lead/Salt boundary lower margin)
+- `4.7` = `LEAD_SCORE_THRESHOLD + 0.21` (Lead/Salt boundary upper margin)
+- `6.8` = `PHOENIX_SCORE_THRESHOLD - 0.2` (Phoenix boundary lower margin)
+- `7.2` = `PHOENIX_SCORE_THRESHOLD + 0.2` (Phoenix boundary upper margin)
+
+These represent "uncertainty zones" around the classification boundaries — scores near these ranges get lower confidence (0.7 vs 1.0). They should be named constants in `constants.py`.
+
+**`CompanyClassification`** (`src/solstein/domain/models/__init__.py:31`):
+```python
+class CompanyClassification(StrEnum):
+    PHOENIX = "Phoenix"
+    SALT = "Salt"
+    LEAD = "Lead"
+```
 
 ---
 
 ## Problem Statement
 
-The core classification thresholds (7.0, 4.5, 4.49) are already imported from `constants.py`. However, the boundary uncertainty ranges (4.3, 4.7, 6.8, 7.2 in `classification.py:71`) are hardcoded literals. These are not business-critical but create a maintenance risk — if thresholds change, the uncertainty bands won't update automatically.
+The core classification thresholds (7.0, 4.5, 4.49) already use named constants. The remaining 4 literals (4.3, 4.7, 6.8, 7.2) in `classification.py:71` represent the confidence uncertainty zone around boundaries. If a threshold changes, someone must remember to update 6 places instead of 2.
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] `src/solstein/analytics/constants.py` adds constants for boundary uncertainty bands:
-  - `LEAD_SALT_BOUNDARY_LOW = 4.3`
-  - `LEAD_SALT_BOUNDARY_HIGH = 4.7`
-  - `SALT_PHOENIX_BOUNDARY_LOW = 6.8`
-  - `SALT_PHOENIX_BOUNDARY_HIGH = 7.2`
-- [ ] `src/solstein/analytics/classification.py:71` uses these constants instead of literals
-- [ ] A grep CI check (or test) asserts no literal `7.0`, `4.5`, `4.49`, `4.3`, `4.7`, `6.8`, `7.2` appear outside `constants.py`
-- [ ] `pytest` passes at 0 failures
-- [ ] `ruff check` at 0 errors
+- [ ] `constants.py` gains 4 new constants for boundary uncertainty margins:
+  ```python
+  LEAD_BOUNDARY_LOW = 4.3      # Lower edge of Lead/Salt uncertainty zone
+  LEAD_BOUNDARY_HIGH = 4.7     # Upper edge of Lead/Salt uncertainty zone
+  PHOENIX_BOUNDARY_LOW = 6.8   # Lower edge of Phoenix uncertainty zone
+  PHOENIX_BOUNDARY_HIGH = 7.2  # Upper edge of Phoenix uncertainty zone
+  ```
+- [ ] `classification.py:71` uses these constants instead of literals
+- [ ] No change to computed values — this is pure name substitution
+- [ ] `ruff check` 0 errors; all existing tests pass
 
 ---
 
 ## Tasks
 
-- [ ] Read `src/solstein/analytics/classification.py:71` — confirm hardcoded boundary literals
-- [ ] Add 4 new boundary constants to `src/solstein/analytics/constants.py`
-- [ ] Replace literals in `classification.py:71` with the new constants
-- [ ] Add CI assertion or test to catch future literal threshold usage
+- [ ] Add 4 constants to `src/solstein/analytics/constants.py`
+- [ ] Import them in `src/solstein/analytics/classification.py`
+- [ ] Replace literals at line 71
 
 ## Key Files
 
 | File | Line | Note |
 |------|------|------|
-| `src/solstein/analytics/constants.py` | 7–9 | Core thresholds already here — add boundary constants |
-| `src/solstein/analytics/classification.py` | 71 | `4.3, 4.7, 6.8, 7.2` literals — replace with constants |
+| `src/solstein/analytics/classification.py` | ~71 | 4 literals to replace |
+| `src/solstein/analytics/constants.py` | — | Add 4 constants here |
+| `src/solstein/analytics/scoring.py` | 26–29 | Already imports correctly — reference |

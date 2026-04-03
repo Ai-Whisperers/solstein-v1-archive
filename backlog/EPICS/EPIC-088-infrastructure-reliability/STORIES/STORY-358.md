@@ -7,50 +7,110 @@
 | **Size** | S (half day) |
 | **Epic** | EPIC-088 Infrastructure Reliability |
 | **Created** | 2026-04-03 |
-| **Updated** | 2026-04-03 (confirmed not implemented after codebase audit) |
+| **Updated** | 2026-04-03 (deep wiring audit) |
 | **Risk** | Low |
 
 ---
 
-## Actual Codebase State (verified 2026-04-03)
+## Exact Codebase Wiring (deep audit 2026-04-03)
 
-**No startup broker check exists:**
-- `src/solstein/api/main.py` lifespan handler (lines 70–141) initializes: tracing, profiling, cache warming, Supabase Realtime listener
-- Celery app is created from config (`src/solstein/celery_config.py`) but never pinged or validated on startup
-- Broker URL: `settings.celery_broker_url or "redis://localhost:6379/0"` — passively set, no connectivity check
-- If Redis is down at startup, the app boots silently and only fails when a task is enqueued
+### Lifespan Block (`src/solstein/api/main.py:69–154`)
+
+```python
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # line 69
+    # line 77:  settings.check_configuration()  ← config validation (can raise)
+    # line 88:  settings.data.ensure_dirs()
+    # line 93:  feature_flags = FeatureFlagManager()
+    # line 94:  response_cache = ResponseCache()
+    # line 103: init_tracing(...)              ← OpenTelemetry (line 103; warn-only on fail)
+    # line 116: enable_profiling()             ← dev only
+    # line 121: warm_cache(_cache)             ← background task (warn-only on fail)
+    # line 128: start_realtime_listener()      ← Supabase (warn-only on fail)
+    # line 141: yield                          ← server starts accepting traffic HERE
+    # lines 142–153: shutdown block
+```
+
+**Current broker handling**: None. The `yield` at line 141 fires immediately after cache warming and realtime setup — the app starts serving requests even if Redis is down.
+
+**Module-level flags**: No `_broker_reachable` or similar flag exists.
+
+### Celery App Config (`src/solstein/celery_config.py:26–34`)
+
+```python
+celery_app = Celery(
+    "solstein",
+    broker=settings.celery_broker_url or "redis://localhost:6379/0",
+    backend=settings.celery_result_backend or "redis://localhost:6379/1",
+    include=["solstein.worker_tasks", "solstein.worker.export_tasks"],
+)
+```
+
+Broker URL comes from `settings.celery_broker_url` (env var). Default: `redis://localhost:6379/0`.
+
+### Existing Pattern for Non-Critical Startup Steps
+
+```python
+# lines 121–128 (cache warming — pattern to follow)
+try:
+    from solstein.infrastructure.cache import CacheManager as _CacheManager
+    _cache = _CacheManager()
+    _asyncio.create_task(warm_cache(_cache))
+    logger.info("Cache warming task scheduled")
+except Exception as _exc:
+    logger.warning("Cache warming could not start", error=str(_exc))
+```
 
 ---
 
 ## Problem Statement
 
-The FastAPI application starts successfully even when the Celery broker (Redis) is unreachable. Any background task submitted while Redis is down silently fails. There is no warning at startup that background processing is unavailable.
+The FastAPI lifespan block (`main.py:69–141`) performs no Celery broker reachability check. The application starts and begins serving API traffic even when Redis is completely unreachable. Async job submission endpoints (`POST /async/enrich/single`, etc.) will succeed at request validation then silently fail at task dispatch time — after the response has already been sent.
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] During the lifespan `startup` phase, attempt a broker connectivity check using `celery_app.control.inspect(timeout=2.0).ping()`
-- [ ] If the broker is unreachable: log `CRITICAL` but **do NOT raise** (app must still start — broker may come up after startup)
-- [ ] Set a module-level `_broker_reachable: bool = False` flag; update to `True` if ping succeeds
-- [ ] Expose `_broker_reachable` via the existing `GET /health` endpoint (add `broker_reachable` field to response)
-- [ ] Test: mock `inspect().ping()` returning `None` → assert `_broker_reachable is False` and app still starts
-- [ ] Test: mock `inspect().ping()` returning active worker dict → assert `_broker_reachable is True`
+- [ ] Lifespan startup block pings the Celery broker before `yield`
+- [ ] If broker is reachable but no workers are connected: log WARNING, continue startup (workers may start later)
+- [ ] If broker is completely unreachable (connection refused / timeout): log ERROR with broker URL; **decision required**: fail startup (raise) OR continue with degraded mode flag
+- [ ] Startup check must complete in ≤ 5 seconds (use `timeout=5` on `inspect`)
+- [ ] Check is async-safe (run in thread pool via `asyncio.to_thread` or use async Celery inspect)
+- [ ] Test: mock broker unreachable → assert startup log contains error (and optionally raises)
+- [ ] Test: mock broker reachable → assert startup proceeds normally
 
 ---
 
 ## Tasks
 
-- [ ] Read `src/solstein/api/main.py:70` — identify the lifespan startup block
-- [ ] Add broker reachability check at the end of the startup block (after existing initializations)
-- [ ] Add `_broker_reachable` module-level flag to `src/solstein/api/main.py` or a dedicated health module
-- [ ] Expose flag in `GET /health` response
-- [ ] Write two unit tests as described above
+- [ ] Insert after `main.py:128` (after cache warming, before realtime):
+  ```python
+  # STORY-358: Verify Celery broker reachability on startup
+  try:
+      from solstein.celery_config import celery_app as _celery_app
+      import asyncio as _asyncio
+
+      def _ping_broker():
+          inspect = _celery_app.control.inspect(timeout=5)
+          return inspect.ping()
+
+      ping_result = await _asyncio.to_thread(_ping_broker)
+      if ping_result:
+          logger.info(f"Celery broker reachable: {len(ping_result)} worker(s) connected")
+      else:
+          logger.warning("Celery broker reachable but no workers connected on startup")
+  except Exception as _broker_exc:
+      logger.error(f"Celery broker unreachable on startup: {_broker_exc}",
+                   broker_url=settings.celery_broker_url)
+      # Decide: raise to block startup, or continue with degraded mode
+  ```
+- [ ] Team decision: raise vs warn-and-continue — document in code comment
+- [ ] Write tests
 
 ## Key Files
 
 | File | Line | Note |
 |------|------|------|
-| `src/solstein/api/main.py` | 70 | Lifespan startup block — add check here |
-| `src/solstein/celery_config.py` | 28 | Broker URL — used by celery_app |
-| `src/solstein/api/routers/health.py` | — | Add `broker_reachable` to response |
+| `src/solstein/api/main.py` | 128 | Insert broker check after this line |
+| `src/solstein/api/main.py` | 141 | `yield` — app starts serving here |
+| `src/solstein/celery_config.py` | 26 | `celery_app` — broker URL from settings |

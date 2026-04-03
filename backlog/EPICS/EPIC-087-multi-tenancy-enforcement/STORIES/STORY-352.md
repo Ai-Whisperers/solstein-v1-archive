@@ -1,4 +1,4 @@
-# STORY-352: Wire TenantIsolationMiddleware._validate_api_key() to the database
+# STORY-352: Fix TenantIsolationMiddleware._validate_api_key() Stub
 
 | Field | Value |
 |---|---|
@@ -7,63 +7,146 @@
 | **Size** | S (half day) |
 | **Epic** | EPIC-087 Multi-Tenancy Enforcement |
 | **Created** | 2026-04-03 |
-| **Updated** | 2026-04-03 (rewritten after codebase audit) |
-| **Risk** | Low — isolated to one method in one class |
+| **Updated** | 2026-04-03 (deep wiring audit) |
+| **Risk** | Medium — touches auth path |
 
 ---
 
-## Actual Codebase State (verified 2026-04-03)
+## Exact Codebase Wiring (deep audit 2026-04-03)
 
-Two middleware implementations exist and serve different purposes:
+### The Stub
 
-**`TenantMiddleware`** — `src/solstein/api/middleware/tenant.py:59`
-- IS registered at `src/solstein/api/main.py:207` via `app.add_middleware(TenantMiddleware)`
-- Validates `X-API-Key`, hashes with SHA-256, queries `TenantRecord` table via `_lookup_tenant()` (line 151)
-- On success: sets `request.state.tenant` (dict) and `request.state.tenant_id` (string)
-- Correctly implemented and working
+**`src/solstein/tenant/context.py`**:
 
-**`TenantIsolationMiddleware`** — `src/solstein/tenant/context.py:78`
-- **NOT registered** — not in `main.py`
-- Sets `current_tenant_var` (ContextVar) which is what `TenantAwareRepository` reads (line 183)
-- `_validate_api_key()` (line 134): hashes key but **returns `None` unconditionally** — comment says "In production, query database"
-- `_validate_jwt()` (line 149): correctly calls `verify_token()` and extracts `tenant_id`
+```
+Line 21:  current_tenant_var: ContextVar[str | None] = ContextVar("current_tenant", default=None)
+Line 78:  class TenantIsolationMiddleware
+Line 84:      def __init__(self, app)
+Line 92:      async def __call__(self, scope, receive, send)
+Line 112:     async def _extract_tenant_id(request) -> str | None
+Line 122:         reads X-API-Key header first
+Line 127:         falls back to Authorization: Bearer <JWT>
+Line 134:     async def _validate_api_key(api_key: str) -> str | None   ← STUB
+Line 144:         key_hash = hashlib.sha256(api_key.encode()).hexdigest()  # computed, not used
+Line 149:         return None   ← unconditionally None — the bug
+Line 151:     async def _validate_jwt(token) -> str | None              ← correctly implemented
+Line 161:         from solstein.security.jwt import verify_token
+Line 163:         payload = verify_token(token)
+Line 164:         return payload.get("tenant_id")
+Line 169:  class TenantAwareRepository
+Line 175:      def __init__(self, session, tenant_id: str | None = None)
+Line 183:          self.tenant_id = tenant_id or get_current_tenant()   ← reads ContextVar
+Line 198:      def _apply_tenant_filter(self, query)
+Line 210:          return query.filter_by(tenant_id=tenant_id)
+```
 
-**The gap**: `TenantAwareRepository` reads `current_tenant_var` (set by `TenantIsolationMiddleware`), but `TenantIsolationMiddleware._validate_api_key()` always returns `None`. So API-key requests get no tenant context even though `TenantMiddleware` correctly validates the key. JWT requests work correctly because `_validate_jwt` is implemented.
+### Working DB Lookup Pattern to Replicate
+
+**`src/solstein/api/middleware/tenant.py`**:
+
+```
+Line 59:   class TenantMiddleware(BaseHTTPMiddleware)   ← registered at main.py:207
+Line 68:   async def dispatch(request, call_next)
+Line 101:      key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+Line 104:      tenant = await _lookup_tenant(key_hash, request)
+Line 145:      request.state.tenant = tenant
+Line 146:      request.state.tenant_id = tenant["id"]    ← sets request state (not ContextVar)
+
+Line 151:  async def _lookup_tenant(key_hash: str, request) -> dict | None
+Line 162:      # imports: select, AsyncSession, get_async_engine
+Line 168:      async with AsyncSession(get_async_engine()) as session:
+Line 170:          result = await session.execute(
+Line 171:              select(TenantRecord).where(
+Line 172:                  TenantRecord.api_key_hash == key_hash,    ← exact column to query
+Line 173:                  TenantRecord.is_active.is_(True),
+Line 174:              )
+Line 175:          )
+Line 176:          tenant_record = result.scalar_one_or_none()
+Line 179:          return tenant_record.to_dict()
+```
+
+### TenantRecord Schema (`src/solstein/infrastructure/models/infrastructure.py:40`)
+
+Table: `tenants`
+
+| Column | SQLAlchemy Type | Constraint |
+|--------|-----------------|------------|
+| `id` | `Uuid(as_uuid=True)` | PK, default `uuid.uuid4()` |
+| `name` | `String(255)` | NOT NULL, UNIQUE |
+| `api_key_hash` | `String(64)` | NOT NULL, UNIQUE — SHA-256 hex (64 chars) |
+| `is_active` | `Boolean` | NOT NULL, default `True` |
+| `plan` | `String(64)` | NOT NULL, default `"standard"` |
+| `rate_limit_per_min` | `Integer` | NOT NULL, default `60` |
+
+`to_dict()` at line 72 — serializes safely (never exposes `api_key_hash`).
+
+Indexes (lines 67–70): `api_key_hash` (unique), `is_active`.
+
+### Registration State (`src/solstein/api/main.py`)
+
+```
+Line 43:   from .middleware.tenant import TenantMiddleware
+Line 207:  app.add_middleware(TenantMiddleware)          ← registered, working
+           # TenantIsolationMiddleware: NOT registered anywhere
+Line 204:  app.add_middleware(AuditMiddleware)           ← outermost
+```
+
+**Effect**: `TenantMiddleware` validates the key and sets `request.state.tenant_id` — but NOT `current_tenant_var`. Downstream code that calls `get_current_tenant()` gets `None` for every API-key-authenticated request.
 
 ---
 
 ## Problem Statement
 
-`TenantIsolationMiddleware._validate_api_key()` (line 134 of `src/solstein/tenant/context.py`) always returns `None`. It hashes the API key but never queries the database. This means all API-key authenticated requests have no tenant context in `current_tenant_var`, so `TenantAwareRepository` queries are not tenant-scoped.
-
-**Do NOT register `TenantIsolationMiddleware` in main.py** — `TenantMiddleware` is already registered and handles the DB lookup. Instead, fix `_validate_api_key` to query the DB or delegate to `TenantMiddleware`'s lookup function.
+`TenantIsolationMiddleware._validate_api_key()` at `context.py:149` always returns `None`. The middleware is also never registered in `main.py`. Consequence: `current_tenant_var` is never populated for API-key requests, so any code using `get_current_tenant()` (including `TenantAwareRepository._apply_tenant_filter()`) cannot filter by tenant — silent cross-tenant data access risk.
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] `TenantIsolationMiddleware._validate_api_key()` queries the `TenantRecord` table and returns the tenant `id` for a valid active key, `None` otherwise
-- [ ] Reuses `_lookup_tenant()` from `src/solstein/api/middleware/tenant.py` (import it) — do not duplicate the DB query logic
-- [ ] `TenantIsolationMiddleware` is registered in `src/solstein/api/main.py` (pure ASGI wrap: `app = TenantIsolationMiddleware(app)`) — after `TenantMiddleware` so both run
-- [ ] A request with a valid `X-API-Key` has `get_current_tenant()` return the correct `tenant_id` inside route handlers
-- [ ] Existing auth tests pass (no regression)
-- [ ] New test: `test_tenant_context_var_set_by_api_key_request()` in `tests/unit/`
+- [ ] `_validate_api_key(api_key)` queries `tenants` table by `api_key_hash` and returns `str(record.id)` or `None`
+- [ ] SHA-256 hash pattern used (matches `TenantMiddleware` line 101)
+- [ ] `TenantIsolationMiddleware` registered in `main.py` after `TenantMiddleware` — `current_tenant_var` set on every authenticated request
+- [ ] `TenantMiddleware` remains registered — do NOT remove it (`request.state.tenant_id` used by many routes)
+- [ ] `get_current_tenant()` returns correct tenant_id for API-key-authenticated requests
+- [ ] Test: valid API key → `get_current_tenant()` returns tenant_id
+- [ ] Test: unknown API key → request rejected (401 or 403)
+- [ ] `ruff check` 0 errors
 
 ---
 
 ## Tasks
 
-- [ ] Read `src/solstein/tenant/context.py:134` — confirm `_validate_api_key` stub
-- [ ] Import and call `_lookup_tenant` from `solstein.api.middleware.tenant` inside `_validate_api_key()` to avoid duplicate DB logic
-- [ ] Register `TenantIsolationMiddleware` in `src/solstein/api/main.py` after line 207 (after `TenantMiddleware`) as a pure ASGI wrap
-- [ ] Write a unit test using a mock DB that validates `current_tenant_var` is set correctly on a valid API key request
-- [ ] Run `pytest tests/unit/test_classification_service.py tests/unit/test_story063_tenant_model.py` to confirm no regressions
+- [ ] Replace `context.py:134–149` stub body:
+  ```python
+  async def _validate_api_key(self, api_key: str) -> str | None:
+      from solstein.infrastructure.models.infrastructure import TenantRecord
+      from solstein.infrastructure.database import get_async_engine
+      from sqlalchemy import select
+      from sqlalchemy.ext.asyncio import AsyncSession
+      key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+      async with AsyncSession(get_async_engine()) as session:
+          result = await session.execute(
+              select(TenantRecord).where(
+                  TenantRecord.api_key_hash == key_hash,
+                  TenantRecord.is_active.is_(True),
+              )
+          )
+          record = result.scalar_one_or_none()
+          return str(record.id) if record else None
+  ```
+- [ ] Register in `main.py` after line 207:
+  ```python
+  from solstein.tenant.context import TenantIsolationMiddleware
+  app.add_middleware(TenantIsolationMiddleware)
+  ```
+- [ ] Write `tests/unit/test_tenant_isolation_middleware.py` using mock DB session
 
 ## Key Files
 
 | File | Line | Note |
 |------|------|------|
-| `src/solstein/tenant/context.py` | 134 | `_validate_api_key` — fix here |
-| `src/solstein/api/middleware/tenant.py` | 151 | `_lookup_tenant()` — reuse this |
-| `src/solstein/api/main.py` | 207 | Add `TenantIsolationMiddleware` wrap after this line |
-| `src/solstein/tenant/context.py` | 21 | `current_tenant_var` — the ContextVar being set |
+| `src/solstein/tenant/context.py` | 134–149 | Stub — replace body |
+| `src/solstein/tenant/context.py` | 21 | `current_tenant_var` ContextVar |
+| `src/solstein/api/middleware/tenant.py` | 101–179 | Working pattern to replicate |
+| `src/solstein/infrastructure/models/infrastructure.py` | 40–84 | `TenantRecord` columns |
+| `src/solstein/api/main.py` | 207 | Insert `add_middleware(TenantIsolationMiddleware)` here |
