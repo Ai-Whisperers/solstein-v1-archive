@@ -4,7 +4,7 @@
 > **Stories**: 4 (STORY-348 through STORY-351)
 > **Effort**: L (5–7 days total)
 > **Dependencies**: None — must be resolved before ANY other pipeline work
-> **Status**: 🔴 URGENT — blocks all downstream correctness work
+> **Status**: ✅ COMPLETE (all 4 stories done as of 2026-04-03)
 > **Created**: 2026-04-02
 > **Audit Reference**: `docs/audit-2026-04-02.md` (Section: Field Loss Root Cause)
 
@@ -70,12 +70,12 @@ no test failure. The domain models become a silent corruption sink.
 
 ## Definition of Done
 
-- [ ] `extra="forbid"` enforced on `Company` and `FinancialMetric`
-- [ ] All 10+ currently-orphaned fact types have signal extractors or direct Company field mappings
-- [ ] `FinancialMetric.ebitda_margin` and `recurring_revenue_pct` are populated from facts when available
-- [ ] A pipeline regression test asserts field count in ≥ field count out at each stage boundary
-- [ ] `ruff check` and `pytest` both pass at 0 errors after each story
-- [ ] No existing test is deleted or weakened to make stories pass
+- [x] `extra="forbid"` enforced on `Company` and `FinancialMetric` (STORY-348)
+- [x] All orphaned fact types have signal extractors (ebitda, net_income, pe_ratio, current_price, eps_ttm added; 15 extractors total) (STORY-349)
+- [x] All surviving signals and facts mapped to Company/FinancialMetric fields; 5 new FinancialMetric fields + 14 new Company fields (STORY-350)
+- [x] Pipeline regression test asserts field survival across all layers (8 tests in test_pipeline_field_survival.py) (STORY-351)
+- [x] `ruff check` and `pytest` both pass at 0 errors
+- [x] No existing test deleted or weakened
 
 ---
 

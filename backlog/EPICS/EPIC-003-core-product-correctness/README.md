@@ -206,7 +206,7 @@ from .scorers.growth_momentum import GrowthMomentumScorer
 
 ## Conclusion
 
-**EPIC-003 is fully complete.** All three stories (STORY-009, STORY-010, STORY-011) have been verified:
+**EPIC-003 original scope (STORY-009/010/011) is fully complete.**
 
 - ✅ Classification thresholds unified in `analytics/constants.py`
 - ✅ Scoring duplication eliminated (functions delegated to scorers/)
@@ -214,6 +214,16 @@ from .scorers.growth_momentum import GrowthMomentumScorer
 - ✅ Weight validation tests exist and pass
 - ✅ Same input produces same output regardless of code path
 
-No further action required.
+**Continuation work (added 2026-04-03 audit):**
+
+STORY-360, STORY-361, and STORY-365 are queued continuation stories under EPIC-003 in QUEUE.md. They address boundary literal hardening and pre-existing test fixture failures discovered during the 2026-04-03 audit:
+
+| Story | Title | Status |
+|-------|-------|--------|
+| STORY-360 | Consolidate boundary literals (4.3, 4.7, 6.8, 7.2) in `classification.py:71` | VERIFY |
+| STORY-361 | Add classification threshold regression test | BLOCKED by STORY-360 |
+| STORY-365 | Fix 3 pre-existing test fixture failures in test_scoring.py and test_scorers_financial.py | READY (XS) |
+
+Original 3 stories require no further action. Continuation stories above are incremental improvements.
 
 ---

@@ -23,7 +23,7 @@
     "available": true,
     "paths": {
       "backlog": {
-        "blocking": 366,
+        "blocking": 364,
         "exit_code": 1,
         "warnings": 0
       },
@@ -34,7 +34,7 @@
       }
     },
     "status": "fail",
-    "total_blocking": 509,
+    "total_blocking": 507,
     "total_warnings": 0
   },
   "stale_docs": {

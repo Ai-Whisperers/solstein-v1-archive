@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-04-03 | Updated By | Stories 352–364 rewritten from codebase audit; STORY-365 added; STORY-357 status corrected; STORY-360 status changed to VERIFY |
+| Last Updated | 2026-04-03 | Updated By | Stories 352–364 rewritten from codebase audit; STORY-365 added; STORY-357 status corrected; STORY-360 status changed to VERIFY; READMEs for EPIC-086/087/088/089 corrected; EPIC-052 stories blocked (deps EPIC-050/051 not started) |
 
 ## Status Key
 
@@ -317,10 +317,10 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 26a | STORY-198 | Enforce provenance completeness at write boundary | READY | Story files created 2026-04-01, P0 ship blocker |
-| 26b | STORY-199 | Confidence calibration per source tier | READY | Story files created 2026-04-01 |
-| 26c | STORY-200 | Quality gate before scoring and export | READY | Story files created 2026-04-01, P0 ship blocker |
-| 26d | STORY-201 | Provenance dashboard and audit trail | READY | Story files created 2026-04-01 |
+| 26a | STORY-198 | Enforce provenance completeness at write boundary | BLOCKED | Blocked by EPIC-050 + EPIC-051 (Not Started) — EPIC-052 dep chain not satisfied |
+| 26b | STORY-199 | Confidence calibration per source tier | BLOCKED | Blocked by EPIC-050 + EPIC-051 (Not Started) |
+| 26c | STORY-200 | Quality gate before scoring and export | BLOCKED | Blocked by EPIC-050 + EPIC-051 (Not Started) |
+| 26d | STORY-201 | Provenance dashboard and audit trail | BLOCKED | Blocked by EPIC-050 + EPIC-051 (Not Started) |
 
 ### EPIC-058: Data Conversion Pipeline Consolidation (P0)
 
@@ -814,6 +814,27 @@ These stories convert the dual-runtime diagnosis into explicit execution work. D
 Worker and checker append timestamped entries here:
 
 <!-- Entries below this line -->
+
+### [2026-04-03] Backlog Reorganization — Full Epic Audit
+
+**Scope**: Read all 75+ epic READMEs and all active story files. Documented and corrected all inconsistencies.
+
+**EPIC-086 README**: Status updated from "🔴 URGENT" to "✅ COMPLETE"; all Definition of Done checkboxes checked.
+
+**EPIC-087 README**: Fully rewritten. Corrected: (1) execution order — 353 must precede 352, not vice versa; (2) STORY-354 status → CANCELLED; (3) wrong file ref `worker/tenant_isolation.py` → `tenant/context.py`; (4) wrong table — `TenantRecord` is in `tenants` table not `api_keys`; (5) story titles corrected to match actual story content.
+
+**EPIC-088 README**: Corrected: (1) task count 12 → 13; (2) function name `check_celery()` → `worker_health()` at line 156 (not ~255); (3) all line references verified.
+
+**EPIC-089 README**: Fully rewritten. Corrected: (1) state backend `ResearchRunRecord` → `ResearchJobRecord`; (2) `workflow_id` = batch_id → `str(ResearchJobRecord.id)`; (3) router location `async_jobs.py` → create `workflows.py`; (4) STORY-362 size M → XS; (5) architecture decision: no WorkflowRepository class — inline pattern only.
+
+**EPIC-052 stories (STORY-198/199/200/201)**: Status corrected from READY → BLOCKED. EPIC-052 README lists EPIC-050 (Web Acquisition Pipeline) and EPIC-051 (Multi-Source Growth Signals) as hard dependencies — both are "Not Started". Stories cannot be picked up until those epics land.
+
+**Duplicate directory anomalies identified** (do not delete without team review):
+- `EPIC-002/` (stale, same content as `EPIC-002-configuration-integrity/`)
+- `EPIC-052-provenance-quality-gates/` (stale, no stories — `EPIC-052-provenance-confidence-quality-gates/` is canonical)
+- `EPIC-067-agentic-development-workflow-hardening/` (superseded by `EPIC-067-legacy-runtime-canonicalization/`; story number references overlap with audit hotfixes)
+
+**STORY-276** (merge develop→master): Still READY — ruff gate is clean; no blocker, requires human release decision.
 
 ### [2026-04-01 02:20 BRT] Worker Morning Shift
 - **Stories completed**: STORY-246 (Break patents_unified/discovery/registry import cycle)
