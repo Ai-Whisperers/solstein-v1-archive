@@ -280,8 +280,10 @@ def _signal_market_sentiment(facts: dict[str, AggregatedFact]) -> SignalExtracti
     """Market sentiment signal from news coverage."""
     sentiment = _get_numeric(facts, "sentiment_score")
     article_count = _get_numeric(facts, "article_count")
+    positive_count = _get_numeric(facts, "positive_article_count")
+    negative_count = _get_numeric(facts, "negative_article_count")
 
-    if sentiment is None and article_count is None:
+    if sentiment is None and article_count is None and positive_count is None:
         return None
 
     source_facts = []
@@ -297,6 +299,19 @@ def _signal_market_sentiment(facts: dict[str, AggregatedFact]) -> SignalExtracti
         source_facts.append("article_count")
         parts.append(f"{int(article_count)} articles")
 
+    if positive_count is not None:
+        source_facts.append("positive_article_count")
+        parts.append(f"{int(positive_count)} positive")
+
+    if negative_count is not None:
+        source_facts.append("negative_article_count")
+        parts.append(f"{int(negative_count)} negative")
+
+    # Derive sentiment from article polarity when no explicit score
+    if sentiment is None and positive_count is not None and negative_count is not None:
+        total = (positive_count + negative_count) or 1
+        sentiment = (positive_count - negative_count) / total
+
     value = sentiment if sentiment is not None else 0.0
 
     return SignalExtraction(
@@ -304,8 +319,8 @@ def _signal_market_sentiment(facts: dict[str, AggregatedFact]) -> SignalExtracti
         signal_value=value,
         signal_confidence=confidence,
         source_facts=source_facts,
-        calculation_method="direct" if sentiment is not None else "inferred",
-        calculation_formula="sentiment_score from news analysis",
+        calculation_method="direct" if _get_numeric(facts, "sentiment_score") is not None else "derived",
+        calculation_formula="sentiment_score direct, or (positive - negative) / total from article counts",
         reasoning=f"Market sentiment: {', '.join(parts)}",
         why_it_matters="Press sentiment reflects market perception and brand strength",
     )
@@ -323,10 +338,15 @@ def _signal_funding(facts: dict[str, AggregatedFact]) -> SignalExtraction | None
 
     rounds = _get_numeric(facts, "funding_rounds")
     stage_fact = facts.get("last_round_stage")
+    last_round_amount = _get_numeric(facts, "last_round_amount")
 
     if rounds is not None:
         source_facts.append("funding_rounds")
         parts.append(f"{int(rounds)} rounds")
+
+    if last_round_amount is not None:
+        source_facts.append("last_round_amount")
+        parts.append(f"${last_round_amount:,.0f} last round")
 
     if stage_fact is not None:
         source_facts.append("last_round_stage")
@@ -345,6 +365,101 @@ def _signal_funding(facts: dict[str, AggregatedFact]) -> SignalExtraction | None
 
 
 # ---------------------------------------------------------------------------
+# STORY-349: New signal extractors for numeric Group A orphaned facts
+# ---------------------------------------------------------------------------
+
+
+def _signal_ebitda(facts: dict[str, AggregatedFact]) -> SignalExtraction | None:
+    """EBITDA signal from financial facts."""
+    ebitda = _get_numeric(facts, "ebitda")
+    if ebitda is None:
+        return None
+    fact = facts["ebitda"]
+    return SignalExtraction(
+        signal_name="ebitda",
+        signal_value=ebitda,
+        signal_confidence=fact.confidence,
+        source_facts=["ebitda"],
+        calculation_method="direct",
+        calculation_formula="ebitda from highest-confidence source",
+        reasoning=f"EBITDA of {ebitda:,.0f} from {len(fact.sources_used)} source(s)",
+        why_it_matters="EBITDA indicates operating profitability before capital structure effects",
+    )
+
+
+def _signal_net_income(facts: dict[str, AggregatedFact]) -> SignalExtraction | None:
+    """Net income signal from financial facts."""
+    net_income = _get_numeric(facts, "net_income")
+    if net_income is None:
+        return None
+    fact = facts["net_income"]
+    return SignalExtraction(
+        signal_name="net_income",
+        signal_value=net_income,
+        signal_confidence=fact.confidence,
+        source_facts=["net_income"],
+        calculation_method="direct",
+        calculation_formula="net_income from highest-confidence source",
+        reasoning=f"Net income of {net_income:,.0f} from {len(fact.sources_used)} source(s)",
+        why_it_matters="Net income is the bottom-line profitability after all expenses and taxes",
+    )
+
+
+def _signal_pe_ratio(facts: dict[str, AggregatedFact]) -> SignalExtraction | None:
+    """Price-to-earnings ratio signal from market data."""
+    pe = _get_numeric(facts, "pe_ratio")
+    if pe is None:
+        return None
+    fact = facts["pe_ratio"]
+    return SignalExtraction(
+        signal_name="pe_ratio",
+        signal_value=pe,
+        signal_confidence=fact.confidence,
+        source_facts=["pe_ratio"],
+        calculation_method="direct",
+        calculation_formula="pe_ratio from market data",
+        reasoning=f"P/E ratio of {pe:.1f}x",
+        why_it_matters="P/E ratio reflects market expectations of earnings growth",
+    )
+
+
+def _signal_current_price(facts: dict[str, AggregatedFact]) -> SignalExtraction | None:
+    """Current stock price signal from market data."""
+    price = _get_numeric(facts, "current_price")
+    if price is None:
+        return None
+    fact = facts["current_price"]
+    return SignalExtraction(
+        signal_name="current_price",
+        signal_value=price,
+        signal_confidence=fact.confidence,
+        source_facts=["current_price"],
+        calculation_method="direct",
+        calculation_formula="current_price from market data",
+        reasoning=f"Current price of {price:.2f}",
+        why_it_matters="Current stock price is a real-time market valuation signal",
+    )
+
+
+def _signal_eps_ttm(facts: dict[str, AggregatedFact]) -> SignalExtraction | None:
+    """Earnings per share (trailing twelve months) signal."""
+    eps = _get_numeric(facts, "eps_ttm")
+    if eps is None:
+        return None
+    fact = facts["eps_ttm"]
+    return SignalExtraction(
+        signal_name="eps_ttm",
+        signal_value=eps,
+        signal_confidence=fact.confidence,
+        source_facts=["eps_ttm"],
+        calculation_method="direct",
+        calculation_formula="eps_ttm from financial data",
+        reasoning=f"EPS (TTM) of {eps:.2f}",
+        why_it_matters="Trailing EPS captures per-share profitability over the last year",
+    )
+
+
+# ---------------------------------------------------------------------------
 # All signal extractors
 # ---------------------------------------------------------------------------
 
@@ -359,6 +474,12 @@ _SIGNAL_EXTRACTORS = [
     _signal_hiring_velocity,
     _signal_market_sentiment,
     _signal_funding,
+    # STORY-349: new extractors for Group A numeric orphaned facts
+    _signal_ebitda,
+    _signal_net_income,
+    _signal_pe_ratio,
+    _signal_current_price,
+    _signal_eps_ttm,
 ]
 
 

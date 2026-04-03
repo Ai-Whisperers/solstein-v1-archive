@@ -34,8 +34,8 @@
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 1 | STORY-348 | Change `extra="ignore"` to `extra="forbid"` on Company and FinancialMetric | DONE | extra="forbid" live on both models. Zero new extra_forbidden failures in prod code; pre-existing test fixture bugs unchanged. |
-| 2 | STORY-349 | Add signal extractors for all orphaned fact types | READY | Unblocked. Fix Group A fact types with no signal extractor or Company mapping. |
-| 3 | STORY-350 | Map all surviving signals and facts to Company/FinancialMetric fields | BLOCKED | Blocked by STORY-349. Add missing fields to domain models and builder. |
+| 2 | STORY-349 | Add signal extractors for all orphaned fact types | DONE | 5 new extractors (ebitda, net_income, pe_ratio, current_price, eps_ttm); extended funding+sentiment. 15 extractors total. |
+| 3 | STORY-350 | Map all surviving signals and facts to Company/FinancialMetric fields | READY | Unblocked. Add missing fields to domain models + wire company_builder.py for all Group A/B facts. |
 | 4 | STORY-351 | Add field-count regression gate across all pipeline layers | BLOCKED | Blocked by STORY-350. Permanent CI gate to prevent future field loss. |
 
 ---
