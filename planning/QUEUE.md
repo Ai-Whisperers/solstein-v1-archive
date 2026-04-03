@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-04-03 | Updated By | STORY-348 DONE: extra="forbid" on Company+FinancialMetric; zero new extra_forbidden failures; STORY-349 now READY |
+| Last Updated | 2026-04-03 | Updated By | Stories 352–364 rewritten from codebase audit; STORY-365 added; STORY-357 status corrected; STORY-360 status changed to VERIFY |
 
 ## Status Key
 
@@ -42,17 +42,20 @@
 
 ## ⚠️ P1 HIGH: Multi-Tenancy Enforcement (2026-04-03)
 
-> Cross-tenant data isolation is not enforced. `TenantIsolationMiddleware` is defined but never registered.
-> RLS policies may not exist in the DB. API key validation returns `None` unconditionally.
-> Start STORY-352 immediately after EPIC-086 is complete.
+> Codebase audit (2026-04-03) found:
+> - `TenantMiddleware` IS registered and queries the DB correctly for API keys
+> - `TenantIsolationMiddleware` (tenant/context.py) is NOT registered — its `_validate_api_key()` always returns None (stub)
+> - No PostgreSQL RLS exists — isolation is application-layer only
+> - Table is `TenantRecord` not `api_keys`
+> Stories rewritten to match actual state.
 
 ### EPIC-087: Multi-Tenancy Enforcement
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 1 | STORY-352 | Register TenantIsolationMiddleware and verify tenant context propagation | READY | Start first |
-| 2 | STORY-353 | Audit and deploy PostgreSQL RLS policies | READY | Can run parallel with STORY-354 |
-| 3 | STORY-354 | Implement API key lookup from api_keys table | BLOCKED | Blocked by STORY-352 |
+| 1 | STORY-352 | Wire TenantIsolationMiddleware._validate_api_key() to DB + register middleware | READY | Fix stub in tenant/context.py:134; reuse _lookup_tenant from api/middleware/tenant.py |
+| 2 | STORY-353 | Audit tenant isolation strategy and add PostgreSQL RLS or document why not | READY | No RLS exists; decision + implementation needed; fix incorrect docstring in models |
+| 3 | STORY-354 | Close TenantIsolationMiddleware._validate_api_key() stub (may be subsumed by STORY-352) | BLOCKED | Blocked by STORY-352; table is TenantRecord not api_keys |
 
 ---
 

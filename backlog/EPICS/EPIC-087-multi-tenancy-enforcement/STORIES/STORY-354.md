@@ -1,39 +1,55 @@
-# STORY-354: Implement API Key Lookup and Validation from api_keys Table
+# STORY-354: Close the TenantIsolationMiddleware._validate_api_key() Stub
 
 | Field | Value |
 |---|---|
-| **Status** | 🔴 READY |
-| **Priority** | P2 |
-| **Size** | M (2 days) |
+| **Status** | 🔴 BLOCKED |
+| **Priority** | P1 |
+| **Size** | XS (2 hours) |
 | **Epic** | EPIC-087 Multi-Tenancy Enforcement |
 | **Created** | 2026-04-03 |
-| **Risk** | Medium |
-| **Blocked By** | STORY-352 (tenant context must be wired first) |
+| **Updated** | 2026-04-03 (rewritten after codebase audit) |
+| **Risk** | Low |
+| **Blocked By** | STORY-352 |
+
+---
+
+## Actual Codebase State (verified 2026-04-03)
+
+**Two separate API key validation implementations exist:**
+
+1. `TenantMiddleware._lookup_tenant()` — `src/solstein/api/middleware/tenant.py:151`
+   - **Fully implemented** — hashes key, queries `TenantRecord`, returns dict or None
+   - Sets `request.state.tenant` and `request.state.tenant_id`
+   - Used by the registered `TenantMiddleware`
+
+2. `TenantIsolationMiddleware._validate_api_key()` — `src/solstein/tenant/context.py:134`
+   - **Stub** — hashes key but `return None` unconditionally (line 149)
+   - Comment: "In production, query database"
+   - This is what STORY-352 must fix by importing `_lookup_tenant` from middleware
+
+**The table is NOT called `api_keys` — it's `TenantRecord` (with column `api_key_hash`)**
 
 ---
 
 ## Problem Statement
 
-`_validate_api_key()` in `src/solstein/tenant/context.py` unconditionally returns `None`, meaning any API key is accepted without validation. The `api_keys` table (created in migration 015) exists and has the correct schema but the application never queries it.
+This story is superseded by STORY-352. The actual fix (wiring `_validate_api_key` to query the DB) is tracked there as part of registering `TenantIsolationMiddleware`. This story is retained only to track the `TenantRecord` table schema, which serves as the source of truth for API key validation.
+
+**If STORY-352 is complete, this story may be closed as DONE without separate work.**
+
+---
 
 ## Acceptance Criteria
 
-- [ ] `_validate_api_key(key: str) -> str | None` queries the `api_keys` table and returns the owning `tenant_id` if the key is valid and active, or `None` if invalid/expired/revoked
-- [ ] A request with an invalid API key receives HTTP 401
-- [ ] A request with a valid API key has the correct `tenant_id` injected into `TenantContext`
-- [ ] API key lookup result is cached in Redis (TTL 5 minutes) to avoid per-request DB queries
-- [ ] New tests: `test_valid_api_key_sets_tenant()`, `test_invalid_api_key_returns_401()`, `test_revoked_api_key_returns_401()`
+- [ ] Verify STORY-352 is DONE and `TenantIsolationMiddleware._validate_api_key()` now returns correct tenant ID for valid keys
+- [ ] Verify `TenantRecord` table has the following columns: `id`, `name`, `api_key_hash` (SHA-256, 64 chars), `is_active`, `plan`, `rate_limit_per_min`
+- [ ] Confirm no second `api_keys` table is needed — `TenantRecord` is the correct single source of truth
+- [ ] Add test: invalid API key returns `None` from `_validate_api_key()`; valid active key returns the correct tenant UUID
 
-## Tasks
+## Key Files
 
-- [ ] Read `alembic/versions/015_*.py` to confirm `api_keys` table schema (columns: `key_hash`, `tenant_id`, `is_active`, `expires_at`)
-- [ ] Implement `_validate_api_key()`: hash incoming key, query `api_keys`, check `is_active` and `expires_at`
-- [ ] Add Redis cache layer: `redis.get(f"apikey:{hash}")` before DB query
-- [ ] Wire result into `TenantIsolationMiddleware` — if API key header present, use key validation instead of JWT
-- [ ] Add tests for valid, invalid, expired, and revoked keys
-
-## Autonomous Continuation Notes
-
-- Store key hash (SHA-256), never the raw key — the raw key is shown only once at creation
-- Cache TTL should be short (5 min) to allow prompt key revocation propagation
-- The `api_keys` table uses RLS — ensure the DB connection uses a superuser or bypass role for the validation query itself, not the request tenant role
+| File | Line | Note |
+|------|------|------|
+| `src/solstein/tenant/context.py` | 134 | `_validate_api_key` stub — fixed by STORY-352 |
+| `src/solstein/api/middleware/tenant.py` | 151 | `_lookup_tenant` — the working implementation |
+| `src/solstein/infrastructure/models/infrastructure.py` | 40 | `TenantRecord` — the correct table (not `api_keys`) |
