@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-04-01 | Updated By | Product readiness audit — 15 new EPICs (071-085), 71 stories (277-347) for real product |
+| Last Updated | 2026-04-02 | Updated By | P0 emergency: EPIC-086 pipeline field loss root cause confirmed — STORY-348-351 inserted at top of queue |
 
 ## Status Key
 
@@ -14,6 +14,29 @@
 | DONE | Completed, PR merged |
 | BLOCKED | Dependencies not met |
 | SKIP | Superseded or not applicable |
+
+---
+
+## ⚠️ P0 EMERGENCY: Pipeline Field Loss — Silent Data Corruption (2026-04-02)
+
+> **STOP. Read this before picking any other story.**
+>
+> Root-cause analysis on 2026-04-02 confirmed that the pipeline silently discards 70%+ of adapter
+> fields at four distinct layers. This means every score, classification, and report generated so far
+> may be based on fabricated/incomplete data. No other work delivers reliable value until this is fixed.
+>
+> **Execution order is strict: 348 → 349 → 350 → 351. Do not skip or reorder.**
+> Full details: `backlog/EPICS/EPIC-086-pipeline-field-loss-silent-data-corruption/README.md`
+> Audit reference: `docs/audit-2026-04-02.md` (Section: Field Loss Root Cause)
+
+### EPIC-086: Pipeline Field Loss — Silent Data Corruption
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 1 | STORY-348 | Change `extra="ignore"` to `extra="forbid"` on Company and FinancialMetric | READY | Do first — makes all losses visible. Will break tests intentionally. |
+| 2 | STORY-349 | Add signal extractors for all orphaned fact types | BLOCKED | Blocked by STORY-348. Fix Group A fact types with no signal extractor or Company mapping. |
+| 3 | STORY-350 | Map all surviving signals and facts to Company/FinancialMetric fields | BLOCKED | Blocked by STORY-349. Add missing fields to domain models and builder. |
+| 4 | STORY-351 | Add field-count regression gate across all pipeline layers | BLOCKED | Blocked by STORY-350. Permanent CI gate to prevent future field loss. |
 
 ---
 

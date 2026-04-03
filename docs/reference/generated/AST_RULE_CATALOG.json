@@ -123,6 +123,6 @@
       "severity": "error"
     }
   ],
-  "generated_on": "2026-04-02",
+  "generated_on": "2026-04-03",
   "source_dir": "tooling/ast-grep/rules"
 }
