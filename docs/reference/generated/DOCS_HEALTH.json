@@ -28,13 +28,13 @@
         "warnings": 0
       },
       "docs": {
-        "blocking": 143,
+        "blocking": 144,
         "exit_code": 1,
         "warnings": 0
       }
     },
     "status": "fail",
-    "total_blocking": 507,
+    "total_blocking": 508,
     "total_warnings": 0
   },
   "stale_docs": {
@@ -42,6 +42,6 @@
     "allowlisted_stale": 0,
     "available": true,
     "status": "pass",
-    "total_scanned": 343
+    "total_scanned": 344
   }
 }
