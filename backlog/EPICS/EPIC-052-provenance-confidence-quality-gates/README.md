@@ -2,12 +2,12 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | ⏳ BLOCKED |
+| **Status** | ⚡ PARTIALLY UNBLOCKED |
 | **Priority** | P0 – Ship Blocker |
 | **Created** | 2026-03-10 |
-| **Updated** | 2026-04-03 (blocked by EPIC-050 + EPIC-051 — both Not Started; QUEUE.md corrected) |
-| **Stories** | STORY-198, STORY-199, STORY-200, STORY-201 |
-| **Dependencies** | EPIC-050 (Web Acquisition Pipeline) **NOT STARTED**, EPIC-051 (Multi-Source Growth Signals) **NOT STARTED**, EPIC-003 (Core Product Correctness) ✅ DONE |
+| **Updated** | 2026-04-03 (gate enforcement stories 366–370, 378–380 added as READY from contamination audit; STORY-198/199 still blocked on EPIC-050/051; STORY-200/201 unblocked — gate code exists, needs wiring) |
+| **Stories** | STORY-198, STORY-199, STORY-200, STORY-201, STORY-366–370, STORY-378–380 |
+| **Dependencies** | STORY-198/199 blocked by: EPIC-050 **NOT STARTED**, EPIC-051 **NOT STARTED** · STORY-200/201/366–370/378–380: **no dependency — READY NOW** |
 
 ## Context
 
@@ -27,12 +27,36 @@ This epic creates hard quality gates so untrusted or low-confidence data cannot 
 
 ## Stories
 
-| Story | Title | Priority | Status |
-|-------|-------|----------|--------|
-| [STORY-198](STORIES/STORY-198-enforce-provenance-completeness-at-write-boundary.md) | Enforce provenance completeness at enrichment write boundary | P0 | 🔴 Not Started |
-| [STORY-199](STORIES/STORY-199-confidence-calibration-profile-per-source-tier.md) | Implement confidence calibration profile per source/reliability tier | P1 | 🔴 Not Started |
-| [STORY-200](STORIES/STORY-200-quality-gate-before-scoring-and-export.md) | Add quality-gate policy before scoring and export | P0 | 🔴 Not Started |
-| [STORY-201](STORIES/STORY-201-ci-contract-tests-for-provenance-confidence-and-synthetic-gates.md) | Add CI contract tests for provenance, confidence, and synthetic gates | P1 | 🔴 Not Started |
+### Original stories (STORY-198/199 blocked; STORY-200/201 unblocked)
+
+| Story | Title | Priority | Status | Blocked? |
+|-------|-------|----------|--------|----------|
+| STORY-198 | Enforce provenance completeness at enrichment write boundary | P0 | ⏳ BLOCKED | Yes — needs EPIC-050/051 |
+| STORY-199 | Implement confidence calibration profile per source/reliability tier | P1 | ⏳ BLOCKED | Yes — needs EPIC-050/051 |
+| STORY-200 | Add quality-gate policy before scoring and export | P0 | 🔴 READY | No — gate code exists, needs wiring (see STORY-366–368) |
+| STORY-201 | Add CI contract tests for provenance, confidence, and synthetic gates | P1 | 🔴 READY | No (see STORY-369) |
+
+> Note: STORY-200 and STORY-201 story files were never created. STORY-366–369 below are their
+> concrete implementation tasks, verified against the live codebase. Treat 366–369 as the
+> actionable decomposition of 200/201.
+
+### Gate enforcement (contamination audit 2026-04-03 — all READY, no dependencies)
+
+| Story | Title | Priority | Size | Status |
+|-------|-------|----------|------|--------|
+| [STORY-366](STORIES/STORY-366.md) | Extend gate to treat `data_source_type="unknown"` as blocked (allowlist: only "real"/"verified" pass) | P0 | XS | 🔴 READY |
+| [STORY-367](STORIES/STORY-367.md) | Wire `SyntheticDataBlocker.ensure_safe()` into `export.py` — currently has zero callers | P0 | S | 🔴 READY |
+| [STORY-368](STORIES/STORY-368.md) | Add `if not gate_result.passed: raise` guard after `gate.evaluate()` in `export.py` | P0 | XS | 🔴 READY |
+| [STORY-369](STORIES/STORY-369.md) | Contract tests: gate blocks synthetic/unknown/mixed, passes real | P0 | S | 🔴 BLOCKED by 366–368 |
+
+### Production loader provenance (contamination audit 2026-04-03 — all READY)
+
+| Story | Title | Priority | Size | Status |
+|-------|-------|----------|------|--------|
+| [STORY-370](STORIES/STORY-370.md) | Fix `scripts/seed_db.py` — set `data_source_type="synthetic"` on all Faker-seeded records | P0 | XS | 🔴 READY |
+| [STORY-378](STORIES/STORY-378.md) | Fix `src/solstein/data/seed_db.py` (production module) — set `data_source_type` before `repo.save()` | P0 | XS | 🔴 READY |
+| [STORY-379](STORIES/STORY-379.md) | Fix `competitor_loader.py` — tag loaded companies; expose `reset_loader()` cache API | P0 | S | 🔴 READY |
+| [STORY-380](STORIES/STORY-380.md) | Fix `CompetitorJsonSource.discover()` — propagate `data_source_type` into pipeline candidates | P0 | S | 🔴 READY (benefits from STORY-379 first) |
 
 ## Target Integration Points
 

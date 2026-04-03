@@ -1,0 +1,22 @@
+{
+  "source_type": "YAHOO_FINANCE",
+  "source_name": "Yahoo Finance",
+  "raw_content": {
+    "ticker": "AAPL",
+    "name": "Apple Inc.",
+    "exchange": "NMS",
+    "description": "Technology company",
+    "market_cap": 3000000000000
+  },
+  "url": "https://finance.yahoo.com/quote/AAPL/",
+  "retrieval_timestamp": "2026-04-03T12:23:42.910171Z",
+  "publication_date": null,
+  "confidence": 0.8,
+  "relevance_score": 0.9,
+  "metadata": {
+    "ticker": "AAPL",
+    "exchange": "NMS"
+  },
+  "extraction_method": "yfinance_api",
+  "notes": null
+}

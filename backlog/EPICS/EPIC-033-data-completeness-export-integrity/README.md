@@ -3,9 +3,10 @@
 | Field | Value |
 |-------|-------|
 | **Status** | 🔴 Not Started |
-| **Priority** | P1 – High |
+| **Priority** | P1 – High (STORY-381 is P0 — migration inserts untagged records) |
 | **Severity** | Critical |
 | **Created** | 2026-03-01 |
+| **Updated** | 2026-04-03 (STORY-381 added from contamination audit) |
 | **Owner** | Platform Engineering |
 | **Dependencies** | EPIC-030: Export Pipeline Modernization |
 
@@ -68,6 +69,12 @@ This epic addresses the full scope of the data completeness failure: restoring d
 | [STORY-127](STORIES/STORY-127-deduplicate-fields.md) | Deduplicate profit_margin and employee Fields | P1 | 🔴 Not Started |
 | [STORY-128](STORIES/STORY-128-document-field-lineage.md) | Document Field Lineage from Ingestion to Export | P2 | 🔴 Not Started |
 | [STORY-250](STORIES/STORY-250-reconcile-export-schema-with-workbook-output.md) | Reconcile Export Schema Contract with Workbook Output | P1 | 🔴 Not Started |
+| [STORY-381](STORIES/STORY-381.md) | Fix `load_competitor_data.py` migration — set `data_source_type` on all `CompanyRecord` inserts | **P0** | 🔴 READY |
+
+> **STORY-381** added 2026-04-03 from contamination audit. `_build_company_record()` in
+> `src/solstein/migrations/load_competitor_data.py:53–80` sets `data_source="competitor_data.json"`
+> (free-text) but never `data_source_type`, making migrated records indistinguishable from real data
+> by the export gate. This is a P0 fix independent of all other EPIC-033 stories.
 
 ---
 

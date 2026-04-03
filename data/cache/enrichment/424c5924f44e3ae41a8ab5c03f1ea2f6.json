@@ -1,0 +1,38 @@
+{
+  "timestamp": "2026-04-03T12:24:20.122916+00:00",
+  "company_name": "Company 9",
+  "params": {
+    "website": "https://company9.com",
+    "industry": null
+  },
+  "sources": [
+    {
+      "source_name": "Patent search (none)",
+      "source_type": "competitor_json",
+      "entity_id": "company-9",
+      "entity_name": "Company 9",
+      "raw_content": {
+        "total_patents": 0,
+        "recent_patents": [],
+        "ai_related_patents": 0,
+        "top_categories": [],
+        "source_backend": "none"
+      }
+    },
+    {
+      "source_name": "LinkedIn (news-derived)",
+      "source_type": "competitor_json",
+      "entity_id": "company-9",
+      "entity_name": "Company 9",
+      "raw_content": {
+        "company_name": "Company 9",
+        "employee_count": null,
+        "employee_growth_pct": null,
+        "open_positions": null,
+        "ai_related_positions": 0,
+        "recent_hires": [],
+        "company_size": null
+      }
+    }
+  ]
+}

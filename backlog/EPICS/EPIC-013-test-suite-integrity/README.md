@@ -2,10 +2,11 @@
 
 | Field | Value |
 |-------|-------|
-| Priority | **P2** |
+| Priority | **P0 — Ship Blocker** (upgraded 2026-04-03: module-scope mutations bypass auth/rate-limit gates for entire test session) |
 | Status | 🔴 Open |
-| Stories | 5 |
+| Stories | 13 (5 original + 8 added 2026-04-03 from contamination audit) |
 | Created | 2026-02-28 |
+| Updated | 2026-04-03 |
 | Depends On | None |
 
 ## Context
@@ -20,13 +21,41 @@ There are zero boundary tests for any scoring tier transition. The most importan
 
 ## Scope
 
-| Story | Title | Severity |
-|-------|-------|----------|
-| [STORY-044](STORIES/STORY-044-fix-autouse-fixture-masking.md) | Fix autouse Fixture Masking in Test Suite | HIGH |
-| [STORY-045](STORIES/STORY-045-add-scoring-boundary-tests.md) | Add Boundary Tests for All Scoring Tiers | HIGH |
-| [STORY-046](STORIES/STORY-046-add-missing-module-tests.md) | Add Tests for Untested Core Modules | MEDIUM |
-| [STORY-253](STORIES/STORY-253-replace-structural-tests-with-behavioral-contract-tests.md) | Replace Structural Source-Inspection Tests with Behavioral Contract Tests | HIGH |
-| [STORY-254](STORIES/STORY-254-remove-test-collection-side-effects.md) | Remove Test Collection Side Effects and Env-Coupled Imports | HIGH |
+### Original stories
+
+| Story | Title | Severity | Status |
+|-------|-------|----------|--------|
+| [STORY-044](STORIES/STORY-044-fix-autouse-fixture-masking.md) | Fix autouse Fixture Masking in Test Suite | HIGH | 🔴 Open |
+| [STORY-045](STORIES/STORY-045-add-scoring-boundary-tests.md) | Add Boundary Tests for All Scoring Tiers | HIGH | 🔴 Open |
+| [STORY-046](STORIES/STORY-046-add-missing-module-tests.md) | Add Tests for Untested Core Modules | MEDIUM | 🔴 Open |
+| [STORY-253](STORIES/STORY-253-replace-structural-tests-with-behavioral-contract-tests.md) | Replace Structural Source-Inspection Tests with Behavioral Contract Tests | HIGH | 🔴 Open |
+| [STORY-254](STORIES/STORY-254-remove-test-collection-side-effects.md) | Remove Test Collection Side Effects and Env-Coupled Imports | HIGH | 🔴 Open |
+
+### P0 additions — test isolation (contamination audit 2026-04-03)
+
+Verified by direct codebase read. All READY, no dependencies.
+
+**Factory and runtime separation:**
+
+| Story | Title | Size | Status |
+|-------|-------|------|--------|
+| [STORY-371](STORIES/STORY-371.md) | Fix test factories — add `data_source_type="synthetic"` default to all CompanyFactory classes | XS | 🔴 READY |
+| [STORY-372](STORIES/STORY-372.md) | Deduplicate test factory modules — one `CompanyFactory` definition, not two divergent ones | S | 🔴 READY |
+| [STORY-373](STORIES/STORY-373.md) | Add CI guard: no `src/` module may import from `tests.*` or `scripts.*` | XS | 🔴 READY |
+
+**Module-scope mutation isolation** (extends STORY-254):
+
+| Story | Title | Size | Status |
+|-------|-------|------|--------|
+| [STORY-374](STORIES/STORY-374.md) | Fix `test_api_routers_coverage.py` — move module-scope `app.dependency_overrides` / settings mutations into fixtures | S | 🔴 READY |
+| [STORY-375](STORIES/STORY-375.md) | Fix `test_load.py` — move `os.environ["DATABASE_URL"]` override (before imports) into monkeypatched fixture | S | 🔴 READY |
+| [STORY-376](STORIES/STORY-376.md) | Remove `test_integration.db` and `test_perf.sqlite3` from git; add `.gitignore` rules | XS | 🔴 READY |
+| [STORY-377](STORIES/STORY-377.md) | Add CI guard: detect module-scope `os.environ`, `app.dependency_overrides`, `get_settings()` mutations in test files | S | 🔴 READY |
+
+**Key verified findings driving P0 upgrade:**
+- `tests/unit/test_api_routers_coverage.py:19–25` — permanently disables auth, API key check, and rate limiting at module import time for the entire pytest session
+- `tests/performance/test_load.py:7–8` — overrides `DATABASE_URL` before `solstein.config` is imported, poisoning `Settings` singleton for the process; never reset
+- `test_integration.db` (796KB) and `test_perf.sqlite3` (812KB) tracked in git — developers clone stale pre-seeded databases
 
 ## Definition of Done
 
@@ -35,6 +64,10 @@ There are zero boundary tests for any scoring tier transition. The most importan
 - [ ] registry.py, instrumented.py, and monitoring.py have test coverage
 - [ ] Critical-path tests prove runtime behavior instead of only matching source text
 - [ ] Targeted unit-test collection works without ad-hoc runtime env injection
+- [ ] No module-scope `os.environ`, `app.dependency_overrides`, or settings mutations in any test file
+- [ ] Both factory modules default to `data_source_type="synthetic"`; single canonical `CompanyFactory`
+- [ ] `test_integration.db` and `test_perf.sqlite3` removed from git tracking
+- [ ] CI guards enforce src/test boundary and module-scope mutation prohibition
 
 ## Autonomous Continuation Notes
 

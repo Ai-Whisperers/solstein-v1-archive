@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-04-03 | Updated By | EPIC-092/093 added as P0 (second contamination pass: module-scope test mutations + production loader tagging); STORY-374–381 created; third-pass audit appended to docs/audit/BACKLOG_STRUCTURAL_AUDIT_2026-04-03.md |
+| Last Updated | 2026-04-03 | Updated By | Contamination audit complete; EPIC-090–093 dissolved — stories absorbed into EPIC-052 (gate enforcement + loader provenance), EPIC-013 (test isolation, upgraded P2→P0), EPIC-033 (migration tagging); STORY-366–381 |
 
 ## Status Key
 
@@ -44,65 +44,58 @@
 
 > **STOP. Read this before picking any other story.**
 >
-> Codebase audit (2026-04-03) confirmed that Faker-generated synthetic data can silently reach
-> production scoring and export pipelines without detection or blocking:
+> Codebase audit (2026-04-03) confirmed that Faker-generated and untagged synthetic data reaches
+> production scoring, Supabase, and export pipelines without detection or blocking. Five CRITICAL
+> and multiple HIGH contamination nodes confirmed by direct file read.
 >
-> 1. `scripts/seed_db.py` writes Faker data to the production DB with `data_source_type="unknown"`
-> 2. `SyntheticDataBlocker.ensure_safe()` exists but is never called by any exporter — dead code
-> 3. `ReportReleaseGate` detects violations but callers never check `gate_result.passed` — export proceeds regardless
-> 4. Gate only blocks `"synthetic"/"mixed"` — `"unknown"` (the default) is invisible to the gate
-> 5. Two duplicate test factory modules (`tests/factories.py`, `tests/factories/__init__.py`) both
->    create Company objects with no `data_source_type` set — alias risk and missing synthetic tag
->
-> **EPIC-090 first** (gate enforcement), **then EPIC-091** (boundary hardening).
 > Full details: `docs/audit/BACKLOG_STRUCTURAL_AUDIT_2026-04-03.md` (Contamination Analysis section)
+>
+> Stories distributed to existing epics: **EPIC-052** (gate + provenance), **EPIC-013** (test isolation, upgraded P2→P0), **EPIC-033** (migration tagging).
 
-### EPIC-090: Synthetic Data Gate Enforcement
+### EPIC-052 (partial): Gate Enforcement + Production Provenance — all READY
 
-| # | Story | Title | Status | Notes |
-|---|-------|-------|--------|-------|
-| 1 | STORY-366 | Extend gate to treat `data_source_type="unknown"` as blocked (allowlist: only "real"/"verified" pass) | READY | XS; one-line logic inversion in report_release_gate.py:168 |
-| 2 | STORY-367 | Wire `SyntheticDataBlocker.ensure_safe()` into `export.py` before any file write | READY | S; currently zero callers of ensure_safe() |
-| 3 | STORY-368 | Add `if not gate_result.passed: raise` guard after `gate.evaluate()` in `export.py` | READY | XS; export.py currently ignores gate_result.passed |
-| 4 | STORY-369 | Contract tests: gate blocks synthetic/unknown/mixed, passes real | BLOCKED | Blocked by STORY-366 + 367 + 368 |
-
-Stories 366, 367, 368 are independent — can be worked in any order. STORY-369 requires all three.
-
-### EPIC-092: Test Isolation — Module-Scope Mutation Prevention
-
-> Second-pass audit (2026-04-03) found module-scope test mutations that bypass security gates
-> for the entire pytest session:
-> - `test_api_routers_coverage.py:19-25` permanently overrides `app.dependency_overrides`, disables API key check, disables rate limiting at module import time
-> - `test_load.py:7-8` overrides `DATABASE_URL` before `solstein.config` is imported — poisons Settings for the process
-> - `test_integration.db` (796KB) and `test_perf.sqlite3` (812KB) are tracked in git — leaked test artefacts
+> Gate code exists but is wired to detect only, never block. `ensure_safe()` has zero callers.
+> `gate_result.passed` is never checked. `data_source_type="unknown"` bypasses the gate.
+> Production `src/solstein/data/seed_db.py` (not a script — a module) seeds Supabase untagged.
+> Full epic: `backlog/EPICS/EPIC-052-provenance-confidence-quality-gates/README.md`
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 1 | STORY-374 | Fix `test_api_routers_coverage.py` — move module-scope app/settings mutations into fixtures | READY | S; 3 mutations at lines 19–25 |
-| 2 | STORY-375 | Fix `test_load.py` — move DB URL env overrides into monkeypatched fixtures | READY | S; os.environ before imports at lines 7–8 |
-| 3 | STORY-376 | Remove leaked test DB files from git; add `.gitignore` rules | READY | XS; `git rm --cached` + gitignore |
-| 4 | STORY-377 | Add CI guard: detect module-scope os.environ / app.dependency_overrides in test files | READY | S; new scripts/ci/check_test_module_scope_mutations.py |
+| 1 | STORY-366 | Extend gate allowlist: only `"real"/"verified"` pass — `"unknown"` is now blocked | READY | XS; `report_release_gate.py:168` |
+| 2 | STORY-367 | Wire `SyntheticDataBlocker.ensure_safe()` into `export.py` — currently zero callers | READY | S; dead code needs wiring |
+| 3 | STORY-368 | Add `if not gate_result.passed: raise` guard in `export.py` — result currently ignored | READY | XS; `export.py:~41` |
+| 4 | STORY-369 | Contract tests: gate blocks synthetic/unknown/mixed, passes real | BLOCKED | Blocked by 366+367+368 |
+| 5 | STORY-370 | Fix `scripts/seed_db.py` — set `data_source_type="synthetic"` on all Faker-seeded records | READY | XS; no tag on Faker output |
+| 6 | STORY-378 | Fix `src/solstein/data/seed_db.py` (production module) — set `data_source_type` before `repo.save()` | READY | XS; production Supabase seeder untagged |
+| 7 | STORY-379 | Fix `competitor_loader.py` — tag companies at load time; expose `reset_loader()` cache clear | READY | S; singleton cache contaminates across calls |
+| 8 | STORY-380 | Fix `CompetitorJsonSource.discover()` — propagate `data_source_type` into pipeline candidates | READY | S; benefits from STORY-379 first |
 
-All four stories independent — any order.
+366, 367, 368, 370, 378, 379 are independent. STORY-369 requires 366+367+368. STORY-380 benefits from 379.
 
-### EPIC-093: Production Loader Synthetic Tagging
+### EPIC-013 (additions): Test Isolation — upgraded P0
 
-> Second-pass audit (2026-04-03) found production `src/` code loading untagged data into pipeline:
-> - `src/solstein/data/seed_db.py` (production module!) seeds Supabase from JSON with no `data_source_type`
-> - `src/solstein/adapters/discovery/competitor_json.py` — production pipeline discovery drops `data_source_type`
-> - `competitor_loader.py` singleton cache persists between production and test calls
-> - `load_competitor_data.py` migration sets `data_source` (filename) but not `data_source_type`
+> Module-scope mutations in test files bypass auth and security gates for the entire pytest session.
+> Full epic: `backlog/EPICS/EPIC-013-test-suite-integrity/README.md`
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 1 | STORY-378 | Fix `src/solstein/data/seed_db.py` — set `data_source_type` before `repo.save()` | READY | XS; production module seeds Supabase untagged |
-| 2 | STORY-379 | Fix `competitor_loader.py` — tag loaded companies; expose `reset_loader()` for tests | READY | S; tagging at load time + singleton reset API |
-| 3 | STORY-380 | Fix `CompetitorJsonSource.discover()` — propagate `data_source_type` into pipeline | READY | S; blocked on STORY-379 for correct tagging at source |
-| 4 | STORY-381 | Fix `load_competitor_data.py` migration — set `data_source_type` on all `CompanyRecord` objects | READY | XS; `_build_company_record()` sets filename only |
+| 1 | STORY-371 | Fix test factories — add `data_source_type="synthetic"` default to both CompanyFactory definitions | READY | XS; `tests/factories.py` + `tests/factories/__init__.py` |
+| 2 | STORY-372 | Deduplicate test factory modules — single canonical `CompanyFactory` | READY | S; two divergent definitions create alias risk |
+| 3 | STORY-373 | CI guard: no `src/` module may import from `tests.*` or `scripts.*` | READY | XS; new `scripts/ci/check_src_test_imports.py` |
+| 4 | STORY-374 | Fix `test_api_routers_coverage.py:19–25` — move module-scope auth bypass into fixtures | READY | S; permanently disables auth for entire session |
+| 5 | STORY-375 | Fix `test_load.py:7–8` — move `DATABASE_URL` override (before imports) into monkeypatched fixture | READY | S; poisons Settings singleton for process |
+| 6 | STORY-376 | Remove `test_integration.db` + `test_perf.sqlite3` from git; add `.gitignore` rules | READY | XS; 796KB + 812KB tracked in git |
+| 7 | STORY-377 | CI guard: detect module-scope `os.environ` / `app.dependency_overrides` mutations in test files | READY | S; new `scripts/ci/check_test_module_scope_mutations.py` |
 
-All four stories independent. STORY-380 benefits from STORY-379 being done first but can proceed in parallel.
+All seven stories independent.
 
-### EPIC-091: Test/Production Runtime Separation
+### EPIC-033 (addition): Migration Provenance — P0 story in P1 epic
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 1 | STORY-381 | Fix `load_competitor_data.py` migration — set `data_source_type` on all `CompanyRecord` inserts | READY | XS; `_build_company_record()` sets filename string only |
+
+---
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|

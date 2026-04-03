@@ -1,0 +1,43 @@
+{
+  "source_type": "USPTO",
+  "source_name": "Patent search (uspto_peds)",
+  "raw_content": {
+    "total_patents": 42,
+    "recent_patents": [
+      {
+        "title": "Patent 0"
+      },
+      {
+        "title": "Patent 1"
+      },
+      {
+        "title": "Patent 2"
+      },
+      {
+        "title": "Patent 3"
+      },
+      {
+        "title": "Patent 4"
+      }
+    ],
+    "ai_related_patents": 3,
+    "top_categories": [
+      "AI",
+      "ML",
+      "Cloud"
+    ],
+    "source_backend": "uspto_peds"
+  },
+  "url": null,
+  "retrieval_timestamp": "2026-04-03T12:27:18.474733Z",
+  "publication_date": null,
+  "confidence": 0.7,
+  "relevance_score": 0.6,
+  "metadata": {
+    "backend": "uspto_peds",
+    "total_patents": 42,
+    "ai_related_patents": 3
+  },
+  "extraction_method": "patent_client_uspto_peds",
+  "notes": null
+}
