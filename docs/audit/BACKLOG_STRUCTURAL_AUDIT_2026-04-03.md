@@ -125,18 +125,27 @@ async def get_research_job(
 
 ## EPIC-088: Infrastructure Reliability — Status: Not Started
 
-### `src/solstein/monitoring/health.py` — Verified
+### `src/solstein/api/routers/health.py` — `worker_health()` (Verified)
+
+There are **two health modules** — do not confuse them:
+
+| Module | Purpose |
+|--------|---------|
+| `src/solstein/api/routers/health.py` | FastAPI route handlers — `worker_health()` lives here |
+| `src/solstein/monitoring/health.py` | `HealthChecker` class with `check_celery()` placeholder — NOT the STORY-357 target |
+
+**STORY-357 target**: `src/solstein/api/routers/health.py:156–187`
 
 | Symbol | Line | Facts |
 |--------|------|-------|
-| `check_celery()` method | 269 | method on `HealthChecker` class |
-| Stub body | 279–289 | no Celery Inspect API call; returns hardcoded `status="healthy"`, `message="Celery workers operational (placeholder)"` |
-| **Bug**: always returns healthy | 283–289 | `HealthCheckResult(name="celery", status="healthy", ...)` unconditionally |
-| `check_all()` | 299 | calls `check_celery()` and aggregates; `"unhealthy"` in statuses → overall `"unhealthy"` |
+| `@router.get("/workers", name="worker_health")` | 156 | Route decorator |
+| `async def worker_health() -> dict` | 157 | Handler function |
+| Real Celery inspect | 177–178 | `celery_app.control.inspect(timeout=N).ping()` — real implementation |
+| `status="no_workers"` | 183 | returned when ping() returns None — HTTP 200 ← **bug** |
+| `status="unreachable"` | 185–186 | returned when exception — HTTP 200 ← **bug** |
+| `status="healthy"` | 181 | returned when workers respond — HTTP 200 ✅ |
 
-**STORY-357 scope**: Replace `check_celery()` body with real `Celery().control.inspect().ping()` call. If result is empty/None → `status="unhealthy"`. The `check_all()` aggregation at line 322–328 already handles propagating unhealthy to overall — no change needed there.
-
-**No `worker_health()` endpoint**: The stories referenced a `worker_health()` function — this does not exist as a standalone function. The health is exposed via `check_celery()` on `HealthChecker`, called by `check_all()`, and surfaced via the `GET /health` route. The story must target `check_celery()` not `worker_health()`.
+**STORY-357 scope**: After `if ping_result:` branch sets healthy and returns 200, the `else` and `except` paths must raise `APIError(status_code=503)` instead of returning the dict.
 
 ### `src/solstein/api/main.py` — Lifespan (lines 70–153)
 
@@ -320,7 +329,7 @@ def validate_growth_rate_range(cls, v: float | None) -> float | None:
 | STORY-352 | `_validate_api_key` at `context.py:134` | ✅ Correct — line 134 | None |
 | STORY-352 | "register after line 207 in main.py" | ✅ Correct — TenantMiddleware is at 207 | None |
 | STORY-352 | imports `TenantRecord` from `models/infrastructure.py` | Working code imports from `database_models` | Use `from solstein.infrastructure.database_models import TenantRecord` |
-| STORY-357 | "worker_health() at health.py:156" | Function is named `check_celery()` at line 269 on class `HealthChecker` | Rename reference in story |
+| STORY-357 | "worker_health() at routers/health.py:156" | ✅ Correct — `worker_health()` at `api/routers/health.py:157`. Separate from `check_celery()` in `monitoring/health.py` which is a different module | None |
 | STORY-358 | "insert after line 128 (after cache warming)" | Cache warming ends at line 127 (`except` block); `yield` is at line 141 | Insert between lines 128–129 ✅ |
 | STORY-359 | "13 Beat-scheduled tasks (12 refresh + refresh_all_sources)" | ✅ Correct — confirmed 13 tasks | None |
 | STORY-362 | "remove 501 stub from jobs.py:18–36" | Full file is 37 lines; 501 route is at 18–36 ✅ | Also note: double `router =` definition at lines 12+15 |

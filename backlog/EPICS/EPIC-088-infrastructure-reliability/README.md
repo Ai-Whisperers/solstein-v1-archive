@@ -47,7 +47,7 @@ All three stories are independent and can be worked in any order.
 
 | File | Line | Role |
 |------|------|------|
-| `src/solstein/monitoring/health.py` | 156–187 | `worker_health()` — returns 200 even for "unreachable" (the bug) |
+| `src/solstein/api/routers/health.py` | 156–187 | `worker_health()` — returns 200 even for "unreachable" (the bug) |
 | `src/solstein/api/main.py` | 77–141 | FastAPI lifespan — add broker ping after line 128 (after cache warming) |
 | `src/solstein/celery_config.py` | 109–184 | Beat schedule — 13 static task entries |
 | `src/solstein/worker_tasks.py` | — | Re-export module for worker tasks |
