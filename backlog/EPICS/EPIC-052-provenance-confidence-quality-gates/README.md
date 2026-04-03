@@ -58,6 +58,17 @@ This epic creates hard quality gates so untrusted or low-confidence data cannot 
 | [STORY-379](STORIES/STORY-379.md) | Fix `competitor_loader.py` — tag loaded companies; expose `reset_loader()` cache API | P0 | S | 🔴 READY |
 | [STORY-380](STORIES/STORY-380.md) | Fix `CompetitorJsonSource.discover()` — propagate `data_source_type` into pipeline candidates | P0 | S | 🔴 READY (benefits from STORY-379 first) |
 
+### Deep gate + schema pass (third-pass contamination audit 2026-04-03 — all READY)
+
+| Story | Title | Priority | Size | Status |
+|-------|-------|----------|------|--------|
+| [STORY-382](STORIES/STORY-382.md) | Fix `test_modes.py` — change `SOLSTEIN_TEST_MODE` default from `"mixed"` to `"strict_real"` | P0 | XS | 🔴 READY |
+| [STORY-383](STORIES/STORY-383.md) | Fix `research_dual_write.py` — remove hardcoded `strict_provenance=False` from production pipeline | P0 | S | 🔴 READY |
+| [STORY-385](STORIES/STORY-385.md) | Fix `converters/company.py` — change `data_source_type` fallback from `"real"` to `"unknown"` | P0 | XS | 🔴 READY (benefits from STORY-384 first) |
+| [STORY-388](STORIES/STORY-388.md) | Fix `instrumented.py` — propagate actual adapter confidence instead of hardcoding `1.0` | P1 | S | 🔴 READY |
+| [STORY-389](STORIES/STORY-389.md) | Fix SEC EDGAR connectors — replace `solstein@example.com` placeholder with configured email | P1 | XS | 🔴 READY |
+| [STORY-390](STORIES/STORY-390.md) | Fix `domain/models.py` — change `industry` default from `"Energy Software"` to `None` | P1 | M | 🔴 READY |
+
 ## Target Integration Points
 
 - `src/solstein/data/provenance.py`

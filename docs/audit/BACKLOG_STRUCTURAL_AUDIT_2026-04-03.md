@@ -842,16 +842,263 @@ in the same process — may use the test SQLite URL instead of the real database
 
 ---
 
-### Contamination summary for EPIC-092 / EPIC-093
+### Contamination summary for second pass (absorbed into EPIC-013, EPIC-052, EPIC-033)
 
-| Node | File | Line | Severity | Epic |
-|------|------|------|----------|------|
-| Module-scope `app.dependency_overrides` + settings mutation | `tests/unit/test_api_routers_coverage.py` | 19–25 | CRITICAL | 092 |
-| Module-scope `os.environ["DATABASE_URL"]` + sys.path | `tests/performance/test_load.py` | 7–8, 21 | CRITICAL | 092 |
-| Leaked test DB files in git | `test_integration.db`, `test_perf.sqlite3` | repo root | HIGH | 092 |
-| Settings singleton mutated without `monkeypatch` | `tests/performance/test_load.py` | 31–45 | MEDIUM | 092 |
-| Production `seed_db.py` seeds Supabase untagged | `src/solstein/data/seed_db.py` | all | CRITICAL | 093 |
-| Production pipeline discovers via untagged loader | `src/solstein/adapters/discovery/competitor_json.py` | 41–44 | CRITICAL | 093 |
-| Loader singleton cache persists across calls | `src/solstein/data/competitor_loader.py` | 107–115 | HIGH | 093 |
-| Migration sets filename-only provenance, no type tag | `src/solstein/migrations/load_competitor_data.py` | 77 | HIGH | 093 |
-| Module-level rate_limiter/audit_logger singletons | `src/solstein/data/security_hardening.py` | 404–406 | HIGH | 092 |
+> Note: EPIC-092/093 were dissolved. Stories moved into canonical epics. See `planning/QUEUE.md`.
+
+| Node | File | Line | Severity | Canon Epic |
+|------|------|------|----------|------------|
+| Module-scope `app.dependency_overrides` + settings mutation | `tests/unit/test_api_routers_coverage.py` | 19–25 | CRITICAL | EPIC-013 (STORY-374) |
+| Module-scope `os.environ["DATABASE_URL"]` + sys.path | `tests/performance/test_load.py` | 7–8, 21 | CRITICAL | EPIC-013 (STORY-375) |
+| Leaked test DB files in git | `test_integration.db`, `test_perf.sqlite3` | repo root | HIGH | EPIC-013 (STORY-376) |
+| Settings singleton mutated without `monkeypatch` | `tests/performance/test_load.py` | 31–45 | MEDIUM | EPIC-013 (STORY-375) |
+| Production `seed_db.py` seeds Supabase untagged | `src/solstein/data/seed_db.py` | all | CRITICAL | EPIC-052 (STORY-378) |
+| Production pipeline discovers via untagged loader | `src/solstein/adapters/discovery/competitor_json.py` | 41–44 | CRITICAL | EPIC-052 (STORY-380) |
+| Loader singleton cache persists across calls | `src/solstein/data/competitor_loader.py` | 107–115 | HIGH | EPIC-052 (STORY-379) |
+| Migration sets filename-only provenance, no type tag | `src/solstein/migrations/load_competitor_data.py` | 77 | HIGH | EPIC-033 (STORY-381) |
+| Module-level rate_limiter/audit_logger singletons | `src/solstein/data/security_hardening.py` | 404–406 | HIGH | EPIC-013 (STORY-377) |
+
+---
+
+## Third-Pass Contamination Audit — 2026-04-03 (deep gate + schema pass)
+
+> Performed after dissolution of EPIC-090–093. All findings verified by direct file read.
+> Focus: production gate bypass paths, DB schema gaps, default-value contamination, and
+> pytest config that silences contamination evidence.
+
+### CRITICAL — `src/solstein/core/test_modes.py:16`: `SOLSTEIN_TEST_MODE` defaults to `"mixed"` → `allow_synthetic=True`
+
+```python
+# src/solstein/core/test_modes.py:16
+mode = os.getenv("SOLSTEIN_TEST_MODE", "mixed").strip().lower()
+# ...
+# line 23-24: invalid modes fall back to "mixed"
+if mode not in {"synthetic", "mixed", "strict_real"}:
+    mode = "mixed"
+# line 26: "mixed" maps to allow_synthetic=True
+allow_synthetic = mode in {"synthetic", "mixed"}
+return TestMode(name=mode, seed=seed, allow_synthetic=allow_synthetic)
+```
+
+This is a **production `src/` module**. When no `SOLSTEIN_TEST_MODE` env var is set (the common
+case in production), `mode = "mixed"` and `allow_synthetic = True`. Any code path that calls
+`get_test_mode()` without having set the env var will operate in synthetic-allowed mode.
+
+The module docstring does not document that the **production default permits synthetic data**.
+Any production process that imports this module without the env var configured allows synthetic
+records through gates that check `allow_synthetic`.
+
+**Story required**: Change the unset-env-var default from `"mixed"` to `"strict_real"`, or
+remove the cross-contamination from production code by moving `test_modes.py` out of `src/`.
+Assign to **EPIC-052**.
+
+---
+
+### CRITICAL — `src/solstein/infrastructure/research_dual_write.py:340,424`: `strict_provenance` hardcoded `False` in production pipeline path
+
+```python
+# Line 340 — fallback when field missing from outbox payload
+strict_provenance = strict_obj if isinstance(strict_obj, bool) else False
+
+# Line 424 — PersistRunPayload construction for ALL runs through dual-write
+return PersistRunPayload(
+    ...
+    strict_provenance=False,   # hardcoded — bypasses quality gate for every run
+    ...
+)
+```
+
+Combined with `pipeline.py:82–84`:
+```python
+def _run_quality_gate(context: PipelineContext, strict_provenance: bool) -> None:
+    if not strict_provenance:
+        return   # gate entirely skipped
+```
+
+**The production research pipeline path (outbox → dual-write worker → pipeline) has its quality
+gate permanently disabled.** `pipeline.py:72` sets `strict_provenance=True` as the default for
+direct API calls, but the outbox worker path (`research_dual_write.py`) hardcodes `False` at
+both the payload construction site and the fallback. Any run dispatched through the worker
+(which is the primary async production path) skips provenance validation entirely.
+
+**Story required**: Remove hardcoded `False`, propagate the caller's `strict_provenance`
+value through `PersistRunPayload`. Assign to **EPIC-052**.
+
+---
+
+### CRITICAL — `src/solstein/infrastructure/models/company.py:77`: `CompanyRecord` has NO `data_source_type` DB column
+
+```python
+# src/solstein/infrastructure/models/company.py:77
+data_source = Column(String(100), nullable=True)   # filename/free-text only
+# data_source_type column does NOT exist
+```
+
+The domain `Company` model has `data_source_type: str` (gating field for export and quality
+gates). The SQLAlchemy `CompanyRecord` — the DB persistence model — has only `data_source`
+(free-text string, e.g. a filename). **There is no `data_source_type` column in the database.**
+
+Consequence: any `Company` reconstructed from a DB-persisted `CompanyRecord` will have
+`data_source_type` derived from the converter's fallback logic. `convert_to_domain_company()`
+at `converters/company.py:341–344` defaults to `"real"` (see below). All DB-loaded records
+therefore present as `data_source_type="real"` and pass every gate unconditionally, regardless
+of their actual provenance.
+
+**Story required**: Add `data_source_type = Column(String(50), nullable=False, default="unknown")`
+to `CompanyRecord` + Alembic migration + update converter to round-trip the field. Assign to
+**EPIC-033** (data completeness / export integrity).
+
+---
+
+### HIGH — `src/solstein/data/converters/company.py:341–344`: converter defaults `data_source_type` to `"real"`
+
+```python
+# src/solstein/data/converters/company.py:341–344
+data_source_type=raw_data.get(
+    "data_source_type",
+    "synthetic" if raw_data.get("is_synthetic", False) else "real",
+),
+```
+
+When `data_source_type` is absent from the raw data dict (the common case for records loaded
+from the DB, which has no such column), the fallback is `"real"`. Only if the unlikely
+`is_synthetic` flag is also present does it fall back to `"synthetic"`.
+
+This means the converter **treats missing provenance as confirmed real data**. The correct
+defensive default would be `"unknown"` (blocked by gate) rather than `"real"` (passes gate).
+
+**Story required**: Change fallback to `"unknown"`. Assign to **EPIC-052** (gate enforcement —
+pairs with STORY-366 which extends the gate to block `"unknown"`).
+
+---
+
+### CRITICAL — `src/solstein/migrations/load_competitor_data.py:179`: production migration hardcodes `test=True` database URL
+
+```python
+# src/solstein/migrations/load_competitor_data.py:179
+db_url = settings.get_database_url(test=True) or "postgresql+asyncpg://solstein:solstein@localhost:5432/solstein"
+```
+
+A production migration script — `load_competitor_data.py` — calls `get_database_url(test=True)`.
+This unconditionally requests the **test database URL**. If `get_database_url` honours the
+`test=True` flag (likely returning a SQLite or staging URL), the migration inserts competitor
+records into the test database rather than production.
+
+If the URL falls through to the hardcoded fallback (`localhost:5432/solstein`), it targets
+a local dev instance — not production. Either way, this script cannot safely be run in production
+as-is. The `test=True` argument is a latent bug: whoever runs this migration may believe they
+are loading data into production while it routes to test.
+
+**Story required**: Remove `test=True`, validate that the resolved URL matches the expected
+production database before inserting. Assign to **EPIC-033** (STORY-381 context — same file,
+same migration).
+
+---
+
+### HIGH — `pyproject.toml:257–260`: all `DeprecationWarning` suppressed — hides contamination evidence
+
+```toml
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+```
+
+`CompetitorDataLoader` (and other singletons) emit `DeprecationWarning` on initialization.
+With all deprecation warnings globally silenced, these warnings never surface during test runs.
+Contamination from deprecated production singletons is therefore invisible in CI output.
+
+Additionally, `addopts` at line 246:
+```toml
+addopts = "-v --cov=solstein --cov-report=term-missing"
+```
+No `-m "not integration"` filter. Integration tests run as part of the default test suite with
+no enforcement of test type separation. Unit tests can be contaminated by integration fixtures
+that set up real or semi-real resources.
+
+**Story required**: Remove global `DeprecationWarning` suppression (or scope it narrowly to
+known-safe third-party warnings). Add `-m "not integration"` to `addopts` or add a separate
+`pytest-integration` tox/nox target. Assign to **EPIC-013**.
+
+---
+
+### MEDIUM — `src/solstein/adapters/instrumented.py:138`: `confidence=1.0` hardcoded on every discovery success
+
+```python
+# src/solstein/adapters/instrumented.py:138
+confidence=1.0,
+```
+
+`InstrumentedDiscoveryAdapter` wraps all discovery adapters and records a `DiscoveryCandidate`
+with `confidence=1.0` on every successful call. The actual adapter's result may carry its own
+confidence estimate, but this value is overwritten by the hardcoded `1.0`.
+
+Downstream provenance and quality gates that rely on `confidence` scores will see every
+adapter-discovered record as maximum-confidence regardless of source reliability. This breaks
+the calibration intent of EPIC-052 STORY-199.
+
+**Story required**: Propagate the underlying adapter's confidence value; fall back to `1.0`
+only if the adapter does not return one. Assign to **EPIC-052**.
+
+---
+
+### MEDIUM — `src/solstein/connectors/financial/sec_edgar.py:18` and `extra.py:25`: placeholder email in SEC EDGAR user-agent
+
+```python
+# sec_edgar.py:18 and extra.py:25 (both files)
+def __init__(self, email: str = "solstein@example.com"):
+```
+
+SEC EDGAR's EFTS API requires a real contact email in the `User-Agent` header per their terms
+of service. `@example.com` is an RFC 2606 reserved domain — invalid for API contact. Requests
+using this email may be rejected or rate-limited by SEC EDGAR.
+
+Two connector files share the same placeholder. Any production enrichment call through either
+connector will use the invalid email unless the caller explicitly overrides the parameter.
+
+**Story required**: Require email from config (`Settings`) with no default, or document that
+the production deployment must set it explicitly. Assign to **EPIC-052** (data integrity — bad
+default corrupts enrichment quality).
+
+---
+
+### MEDIUM — `src/solstein/domain/models.py:178`: `industry` default `"Energy Software"` propagates through production paths
+
+```python
+# src/solstein/domain/models.py:178
+industry: str = "Energy Software"
+```
+
+When a `Company` is constructed without an explicit `industry` value (e.g., from a sparse
+enrichment result), it silently defaults to `"Energy Software"`. This default propagates into:
+- Scoring models that weight industry-specific signals
+- Excel export columns visible to PE/VC analysts
+- The `FinancialMetric` converter (which reads `company.industry`)
+- The competitor migration (`load_competitor_data.py`) which passes through the domain model
+
+A company with no known industry gets classified as `"Energy Software"` in deliverables. This
+is a **false classification** with potential downstream investment decision impact.
+
+The same default exists in duplicate domain model files; exact count requires cross-file audit.
+
+**Story required**: Change default to `None` (Optional[str]), update all downstream code that
+assumes `industry` is non-null, add validation that warns when industry is absent. Assign to
+**EPIC-052** (data integrity — false classification from bad default).
+
+---
+
+### Third-pass contamination summary
+
+| Node | File | Line | Severity | Canon Epic / Story |
+|------|------|------|----------|--------------------|
+| `SOLSTEIN_TEST_MODE` defaults `"mixed"` → `allow_synthetic=True` | `src/solstein/core/test_modes.py` | 16 | CRITICAL | EPIC-052 (new STORY-382) |
+| `strict_provenance=False` hardcoded in dual-write path | `src/solstein/infrastructure/research_dual_write.py` | 340, 424 | CRITICAL | EPIC-052 (new STORY-383) |
+| `CompanyRecord` missing `data_source_type` DB column | `src/solstein/infrastructure/models/company.py` | 77 | CRITICAL | EPIC-033 (new STORY-384) |
+| Converter defaults `data_source_type` to `"real"` | `src/solstein/data/converters/company.py` | 341–344 | HIGH | EPIC-052 (new STORY-385) |
+| Production migration calls `get_database_url(test=True)` | `src/solstein/migrations/load_competitor_data.py` | 179 | CRITICAL | EPIC-033 (STORY-381 context — new STORY-386) |
+| All `DeprecationWarning` suppressed in pytest config | `pyproject.toml` | 257–260 | HIGH | EPIC-013 (new STORY-387) |
+| No `-m "not integration"` in default addopts | `pyproject.toml` | 246 | MEDIUM | EPIC-013 (new STORY-387) |
+| `confidence=1.0` hardcoded in instrumented adapter | `src/solstein/adapters/instrumented.py` | 138 | MEDIUM | EPIC-052 (new STORY-388) |
+| Placeholder `solstein@example.com` in SEC EDGAR connectors | `sec_edgar.py`, `extra.py` | 18, 25 | MEDIUM | EPIC-052 (new STORY-389) |
+| `industry: str = "Energy Software"` false classification default | `src/solstein/domain/models.py` | 178 | MEDIUM | EPIC-052 (new STORY-390) |

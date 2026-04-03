@@ -51,6 +51,7 @@ Verified by direct codebase read. All READY, no dependencies.
 | [STORY-375](STORIES/STORY-375.md) | Fix `test_load.py` — move `os.environ["DATABASE_URL"]` override (before imports) into monkeypatched fixture | S | 🔴 READY |
 | [STORY-376](STORIES/STORY-376.md) | Remove `test_integration.db` and `test_perf.sqlite3` from git; add `.gitignore` rules | XS | 🔴 READY |
 | [STORY-377](STORIES/STORY-377.md) | Add CI guard: detect module-scope `os.environ`, `app.dependency_overrides`, `get_settings()` mutations in test files | S | 🔴 READY |
+| [STORY-387](STORIES/STORY-387.md) | Fix `pyproject.toml` — remove global `DeprecationWarning` suppression; add integration test separation | S | 🔴 READY |
 
 **Key verified findings driving P0 upgrade:**
 - `tests/unit/test_api_routers_coverage.py:19–25` — permanently disables auth, API key check, and rate limiting at module import time for the entire pytest session

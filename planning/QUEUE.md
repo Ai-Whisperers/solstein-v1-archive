@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-04-03 | Updated By | Contamination audit complete; EPIC-090–093 dissolved — stories absorbed into EPIC-052 (gate enforcement + loader provenance), EPIC-013 (test isolation, upgraded P2→P0), EPIC-033 (migration tagging); STORY-366–381 |
+| Last Updated | 2026-04-03 | Updated By | Third-pass deep audit complete; STORY-382–390 added to EPIC-052/013/033; critical findings: SOLSTEIN_TEST_MODE defaults allow_synthetic=True, strict_provenance=False hardcoded in async pipeline, CompanyRecord missing data_source_type DB column, migration uses test DB URL, converter defaults to "real" for untagged data |
 
 ## Status Key
 
@@ -72,6 +72,19 @@
 
 366, 367, 368, 370, 378, 379 are independent. STORY-369 requires 366+367+368. STORY-380 benefits from 379.
 
+**Third-pass additions (deep gate + schema pass 2026-04-03):**
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 9 | STORY-382 | Fix `test_modes.py` — change `SOLSTEIN_TEST_MODE` default from `"mixed"` to `"strict_real"` | READY | XS; production module defaults allow_synthetic=True without env var |
+| 10 | STORY-383 | Fix `research_dual_write.py` — remove hardcoded `strict_provenance=False` | READY | S; production async pipeline path has quality gate permanently disabled |
+| 11 | STORY-385 | Fix `converters/company.py` — change `data_source_type` fallback `"real"` → `"unknown"` | READY | XS; treat missing provenance as untrusted; deploy after STORY-384 |
+| 12 | STORY-388 | Fix `instrumented.py` — propagate adapter confidence instead of hardcoding `1.0` | READY | S; all discovered records show max confidence regardless of source |
+| 13 | STORY-389 | Fix SEC EDGAR connectors — replace `solstein@example.com` placeholder | READY | XS; both sec_edgar.py + extra.py; SEC TOS violation |
+| 14 | STORY-390 | Fix `domain/models.py` — change `industry` default from `"Energy Software"` to `None` | READY | M; false classification in analyst deliverables |
+
+STORY-382, 383, 388, 389 are independent. STORY-385 benefits from STORY-384 (EPIC-033) first.
+
 ### EPIC-013 (additions): Test Isolation — upgraded P0
 
 > Module-scope mutations in test files bypass auth and security gates for the entire pytest session.
@@ -86,25 +99,32 @@
 | 5 | STORY-375 | Fix `test_load.py:7–8` — move `DATABASE_URL` override (before imports) into monkeypatched fixture | READY | S; poisons Settings singleton for process |
 | 6 | STORY-376 | Remove `test_integration.db` + `test_perf.sqlite3` from git; add `.gitignore` rules | READY | XS; 796KB + 812KB tracked in git |
 | 7 | STORY-377 | CI guard: detect module-scope `os.environ` / `app.dependency_overrides` mutations in test files | READY | S; new `scripts/ci/check_test_module_scope_mutations.py` |
+| 8 | STORY-387 | Fix `pyproject.toml` — remove global `DeprecationWarning` suppression; add integration test separation | READY | S; hiding contamination evidence + no unit/integration split |
 
-All seven stories independent.
+All eight stories independent.
 
-### EPIC-033 (addition): Migration Provenance — P0 story in P1 epic
+### EPIC-033 (additions): Migration Provenance + DB Schema Gap — P0 stories
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
 | 1 | STORY-381 | Fix `load_competitor_data.py` migration — set `data_source_type` on all `CompanyRecord` inserts | READY | XS; `_build_company_record()` sets filename string only |
+| 2 | STORY-384 | Add `data_source_type` column to `CompanyRecord` DB schema + Alembic migration | READY | S; gating field not persisted — all DB-loaded records bypass gate |
+| 3 | STORY-386 | Fix `load_competitor_data.py` — remove `get_database_url(test=True)` from production migration | READY | XS; migration routes to test DB — no data reaches production |
+
+STORY-381 and STORY-386 target the same file — land in same PR. STORY-384 is independent.
 
 ---
 
-| # | Story | Title | Status | Notes |
-|---|-------|-------|--------|-------|
-| 1 | STORY-370 | Fix `seed_db.py` — set `data_source_type="synthetic"` on all seeded records | READY | XS; one field assignment in generate_company() |
-| 2 | STORY-371 | Fix test factories — add `data_source_type="synthetic"` default to CompanyFactory in both modules | READY | XS; tests/factories.py + tests/factories/__init__.py |
-| 3 | STORY-372 | Deduplicate test factories — consolidate two CompanyFactory definitions into one | READY | S; alias risk from two divergent definitions |
-| 4 | STORY-373 | Add CI lint guard: no src/ module may import from tests.* or scripts.* | READY | XS; new scripts/ci/check_src_test_imports.py |
-
-All four stories independent — any order.
+> **Execution order for maximum impact** (addresses gate bypass paths first):
+> 1. STORY-383 — re-enable quality gate in production async path (1 line change, enormous impact)
+> 2. STORY-382 — fix allow_synthetic default in test_modes.py
+> 3. STORY-384 — add data_source_type column to DB (migration)
+> 4. STORY-385 — fix converter default to "unknown" (deploy after 384 + 366)
+> 5. STORY-381 + STORY-386 — fix migration script (same file, same PR)
+> 6. STORY-370, 378, 379, 380 — tag all seeder/loader paths
+> 7. STORY-366, 367, 368 — wire gate enforcement in export
+> 8. STORY-369 — gate contract tests
+> 9. STORY-371–377, 387 — test isolation and pytest config fixes
 
 ---
 

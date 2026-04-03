@@ -70,6 +70,8 @@ This epic addresses the full scope of the data completeness failure: restoring d
 | [STORY-128](STORIES/STORY-128-document-field-lineage.md) | Document Field Lineage from Ingestion to Export | P2 | 🔴 Not Started |
 | [STORY-250](STORIES/STORY-250-reconcile-export-schema-with-workbook-output.md) | Reconcile Export Schema Contract with Workbook Output | P1 | 🔴 Not Started |
 | [STORY-381](STORIES/STORY-381.md) | Fix `load_competitor_data.py` migration — set `data_source_type` on all `CompanyRecord` inserts | **P0** | 🔴 READY |
+| [STORY-384](STORIES/STORY-384.md) | Add `data_source_type` column to `CompanyRecord` DB schema + Alembic migration | **P0** | 🔴 READY |
+| [STORY-386](STORIES/STORY-386.md) | Fix `load_competitor_data.py` — remove `get_database_url(test=True)` from production migration | **P0** | 🔴 READY |
 
 > **STORY-381** added 2026-04-03 from contamination audit. `_build_company_record()` in
 > `src/solstein/migrations/load_competitor_data.py:53–80` sets `data_source="competitor_data.json"`
