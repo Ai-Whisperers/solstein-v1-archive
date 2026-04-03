@@ -1,132 +1,109 @@
-# STORY-362: Define Workflow API Model and WorkflowRepository Over Existing DB Tables
+# STORY-362: Define Workflow Response Model and WorkflowStatus Enum
 
 | Field | Value |
 |---|---|
 | **Status** | 🔴 READY |
 | **Priority** | P1 |
-| **Size** | M (1-2 days) |
+| **Size** | XS (2 hours) |
 | **Epic** | EPIC-089 Workflow Orchestration API |
 | **Created** | 2026-04-03 |
-| **Updated** | 2026-04-03 (deep wiring audit completed) |
-| **Risk** | Low — only adding new code over existing tables |
+| **Updated** | 2026-04-03 (scope cut: no WorkflowRepository class) |
+| **Risk** | Low |
 | **Blocked By** | EPIC-086 (DONE) |
 
 ---
 
-## Actual Codebase State (deep audit 2026-04-03)
+## Why No WorkflowRepository
 
-### What exists
+The original design had a `WorkflowRepository` wrapping `ResearchJobRepository` — a thin class that adds no logic, only delegation. `ResearchJobRepository.get_job()` already exists at `research_job_repository.py:154`. The inline tenant validation pattern (`if job is None or job.tenant_id != tenant_id: raise 404`) is already established in `research_jobs.py:156`. Adding a `WorkflowRepository` class would create a second abstraction layer over an existing abstraction for no gain, and would need to be maintained in sync with `ResearchJobRepository` as it evolves.
 
-**`ResearchJobRecord`** (`src/solstein/infrastructure/models/research.py:281`):
-- Table: `research_jobs`
-- Columns: `id` (UUID PK), `tenant_id` (String 255, NOT NULL, indexed), `company_id` (String 255, indexed), `company_name` (String 500, nullable), `status` (String 50, default `"queued"`, indexed), `progress_pct` (Integer, default 0), `current_stage` (String 100, nullable), `error_message` (Text, nullable), `job_metadata` (JSON, nullable), `created_at` (DateTime UTC), `started_at` (DateTime, nullable), `completed_at` (DateTime, nullable)
-- Composite indexes (lines 343–349): `(tenant_id)`, `(company_id)`, `(status)`, `(tenant_id, status)`, `(created_at)`
-- State machine built in: `VALID_TRANSITIONS` dict + `can_transition_to()` method (lines 351–370)
-- Valid transitions: `queued→{running,cancelled}`, `running→{completed,failed,cancelled}`; terminal states have no exits
-
-**`ResearchJobRepository`** (`src/solstein/infrastructure/research_job_repository.py:37`):
-
-| Method | Signature | Lines |
-|--------|-----------|-------|
-| `create_job` | `(tenant_id, company_id, company_name=None) → ResearchJobRecord` | 52–83 |
-| `update_status` | `(job_id, new_status, progress_pct=None, current_stage=None, error_message=None) → ResearchJobRecord \| None` | 85–152 |
-| `get_job` | `(job_id: uuid.UUID) → ResearchJobRecord \| None` | 154–166 |
-| `get_jobs_for_tenant` | `(tenant_id, status_filter=None, limit=50, offset=0) → list[ResearchJobRecord]` | 168–198 |
-| `get_active_jobs_for_company` | `(company_id, tenant_id) → list[ResearchJobRecord]` | 200–223 |
-
-Key query patterns:
-- `get_job()` has **no built-in tenant filter** — caller must validate (`research_jobs.py:156`)
-- `get_jobs_for_tenant()` always includes `.where(ResearchJobRecord.tenant_id == tenant_id)` (line 188)
-
-**Existing job API** (`src/solstein/api/routers/research_jobs.py`):
-- `ResearchJobResponse` model (lines 27–42): `id`, `tenant_id`, `company_id`, `company_name`, `status`, `progress_pct`, `current_stage`, `error_message`, `created_at`, `started_at`, `completed_at`; `model_config = {"from_attributes": True}` (line 42)
-- Routes (under `/jobs` prefix, registered at `main.py:222`):
-  - `GET /jobs/research-jobs` — list with `status_filter`, `limit`, `offset`
-  - `GET /jobs/research-jobs/{job_id}` — single job with in-memory tenant validation
-
-**`GET /jobs/{workflow_id}`** (`src/solstein/api/routers/jobs.py:18`):
-- Returns HTTP 501: `APIError(code="NOT_IMPLEMENTED", message="Job status endpoint disabled - Temporal integration removed", status_code=501)`
-- Registered at `main.py:218` under `/jobs` prefix
-
-### What does NOT exist
-
-- `src/solstein/domain/workflow.py` — **does not exist** (must create)
-- `src/solstein/infrastructure/workflow_repository.py` — **does not exist** (must create)
-- `src/solstein/api/routers/workflows.py` — **does not exist** (must create in STORY-363)
-
-### Router registration pattern (main.py)
-
-```python
-# main.py lines 218, 222
-app.include_router(jobs.router, prefix="/jobs")           # line 218 — 501 stub
-app.include_router(research_jobs.router, prefix="/jobs")  # line 222 — read-only
-# ADD (STORY-363/364):
-app.include_router(workflows.router, prefix="/workflows") # new
-```
-
-No route conflict: `research_jobs` routes at `/jobs/research-jobs/*` do not collide with `jobs` catch-all `GET /jobs/{workflow_id}`.
+**Pattern for STORY-363 and STORY-364**: import `ResearchJobRepository` directly, call `get_job()`, validate tenant inline. Same as `research_jobs.py`.
 
 ---
 
-## Problem Statement
+## Exact Codebase Wiring
 
-The `GET /jobs/{workflow_id}` route returns HTTP 501. A read-capable `ResearchJobRepository` exists but there is no `Workflow` domain model, no `WorkflowRepository` abstraction, and no unified API response type. STORY-363 and STORY-364 depend on this story's domain contract.
+### What to reuse (do NOT reimplment)
+
+**`ResearchJobRepository`** (`src/solstein/infrastructure/research_job_repository.py`):
+
+| Method | Use in STORY | Line |
+|--------|-------------|------|
+| `create_job(tenant_id, company_id, company_name=None)` | STORY-363 POST | 52–83 |
+| `update_status(job_id, new_status, ...)` | STORY-363 task | 85–152 |
+| `get_job(job_id: uuid.UUID) → ResearchJobRecord \| None` | STORY-364 GET | 154–166 |
+| `get_jobs_for_tenant(tenant_id, ...)` | Future list endpoint | 168–198 |
+
+**Tenant validation pattern** from `research_jobs.py:134–160`:
+```python
+tenant_id = tenant.get("tenant_id", "")     # from Depends(get_current_tenant)
+repo = ResearchJobRepository(session)
+job = await repo.get_job(parsed_uuid)
+if job is None or job.tenant_id != tenant_id:
+    raise APIError(code="NOT_FOUND", status_code=404)
+```
+
+**`ResearchJobRecord`** columns used by workflow endpoints (`models/research.py:281`):
+`status`, `progress_pct`, `current_stage`, `error_message`, `job_metadata` (JSON — `output_dir` stored here by STORY-363 task), `started_at`, `completed_at`
+
+### What does NOT exist (create in this story)
+
+**`src/solstein/domain/workflow.py`** — does not exist. Create:
+
+```python
+from enum import StrEnum
+from datetime import datetime
+from pydantic import BaseModel
+
+class WorkflowStatus(StrEnum):
+    QUEUED = "queued"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+class Workflow(BaseModel):
+    """API response model for workflow status."""
+    workflow_id: str
+    status: WorkflowStatus
+    current_stage: str | None = None
+    progress_pct: int = 0
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    output_url: str | None = None
+    error: str | None = None
+```
+
+Note: `tenant_id` excluded from response — never expose internal IDs to the client.
+
+### 501 stub to remove
+
+`src/solstein/api/routers/jobs.py:18` — `GET /{workflow_id}` returns 501. Remove this route in this story (or in STORY-364 at latest) to avoid confusing coexistence with `GET /workflows/{id}`.
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] `WorkflowStatus` StrEnum defined: `queued | running | completed | failed | cancelled` (matches `ResearchJobRecord.status` values exactly)
-- [ ] `Workflow` Pydantic response model: `workflow_id` (str), `tenant_id` (str), `status` (WorkflowStatus), `current_stage` (str | None), `progress_pct` (int), `started_at` (datetime | None), `completed_at` (datetime | None), `output_url` (str | None), `error` (str | None)
-- [ ] `WorkflowRepository.get(workflow_id: str, tenant_id: str) -> Workflow | None` — queries `ResearchJobRecord` by `id` (parse to UUID first), validates `tenant_id` in-memory (following `research_jobs.py:156` pattern), maps to `Workflow`
-- [ ] `output_url` derived from `job_metadata["output_dir"]` if present (no column; stored as JSON key by STORY-363's Celery task)
-- [ ] The 501 route in `src/solstein/api/routers/jobs.py` is **removed** — `GET /jobs/{workflow_id}` must not coexist once `/workflows/{id}` works (avoids confusion)
-- [ ] Unit test: given a mock `ResearchJobRecord` at each of 5 statuses, `WorkflowRepository.get()` returns correct `WorkflowStatus`
-- [ ] Unit test: `workflow_id` belonging to different tenant returns `None` (not 403 — 404 behavior)
-- [ ] `ruff check` at 0 errors
+- [ ] `src/solstein/domain/workflow.py` created with `WorkflowStatus` StrEnum and `Workflow` Pydantic model
+- [ ] `WorkflowStatus` values exactly match `ResearchJobRecord.status` string values: `queued`, `running`, `completed`, `failed`, `cancelled`
+- [ ] `Workflow` model has no `tenant_id` field (internal)
+- [ ] The 501 route in `src/solstein/api/routers/jobs.py` is removed
+- [ ] Unit test: `Workflow.model_validate({"workflow_id": "x", "status": "running", "progress_pct": 30})` passes
+- [ ] `ruff check` 0 errors
 
 ---
 
 ## Tasks
 
-- [ ] Create `src/solstein/domain/workflow.py`:
-  ```python
-  from enum import StrEnum
-  class WorkflowStatus(StrEnum):
-      QUEUED = "queued"
-      RUNNING = "running"
-      COMPLETED = "completed"
-      FAILED = "failed"
-      CANCELLED = "cancelled"
-
-  class Workflow(BaseModel):
-      workflow_id: str
-      tenant_id: str
-      status: WorkflowStatus
-      current_stage: str | None = None
-      progress_pct: int = 0
-      started_at: datetime | None = None
-      completed_at: datetime | None = None
-      output_url: str | None = None
-      error: str | None = None
-  ```
-- [ ] Create `src/solstein/infrastructure/workflow_repository.py`:
-  - Import `ResearchJobRecord` from `models/research.py:281`
-  - Import `ResearchJobRepository` from `research_job_repository.py:37`
-  - `WorkflowRepository.get(workflow_id: str, tenant_id: str, session: AsyncSession) -> Workflow | None`
-  - Parse `workflow_id` → `uuid.UUID`; call `ResearchJobRepository(session).get_job(uuid_val)`; check `job.tenant_id == tenant_id`; map to `Workflow`
-  - `output_url`: `job.job_metadata.get("output_dir")` if `job.job_metadata` else `None`
-- [ ] Remove or replace the 501 route in `src/solstein/api/routers/jobs.py` — it must be gone before STORY-364 ships
-- [ ] Write unit tests in `tests/unit/test_workflow_repository.py`
+- [ ] Create `src/solstein/domain/workflow.py` (see model above)
+- [ ] Delete the 501 stub route from `src/solstein/api/routers/jobs.py:18–36` (or delete the whole file if nothing else uses it — verify with `grep -rn "jobs.router" src/`)
+- [ ] Write one-line smoke test
 
 ## Key Files
 
 | File | Line | Note |
 |------|------|------|
-| `src/solstein/infrastructure/models/research.py` | 281 | `ResearchJobRecord` — columns, indexes, state machine |
-| `src/solstein/infrastructure/research_job_repository.py` | 37 | `ResearchJobRepository` — reuse `get_job()` at line 154 |
-| `src/solstein/api/routers/research_jobs.py` | 27 | `ResearchJobResponse` — reference for field naming |
-| `src/solstein/api/routers/jobs.py` | 18 | 501 stub — remove this |
-| `src/solstein/api/main.py` | 218, 222 | Router registrations under `/jobs` |
-| `src/solstein/domain/workflow.py` | — | CREATE (does not exist) |
-| `src/solstein/infrastructure/workflow_repository.py` | — | CREATE (does not exist) |
+| `src/solstein/domain/workflow.py` | — | CREATE — `Workflow` model + `WorkflowStatus` enum |
+| `src/solstein/api/routers/jobs.py` | 18–36 | DELETE 501 stub |
+| `src/solstein/infrastructure/research_job_repository.py` | 52–198 | REUSE — no new repo class needed |
+| `src/solstein/infrastructure/models/research.py` | 281 | `ResearchJobRecord` — backing table |

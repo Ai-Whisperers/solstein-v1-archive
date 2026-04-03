@@ -51,11 +51,13 @@
 
 ### EPIC-087: Multi-Tenancy Enforcement
 
+> Structural fix (2026-04-03): STORY-353 moved to position 1 — strategy decision (Option A/RLS vs Option B/app-layer) must precede stub fix, as the chosen option changes whether TenantIsolationMiddleware registration is needed. STORY-354 cancelled — identical scope to STORY-352.
+
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 1 | STORY-352 | Wire TenantIsolationMiddleware._validate_api_key() to DB + register middleware | READY | Fix stub in tenant/context.py:134; reuse _lookup_tenant from api/middleware/tenant.py |
-| 2 | STORY-353 | Audit tenant isolation strategy and add PostgreSQL RLS or document why not | READY | No RLS exists; decision + implementation needed; fix incorrect docstring in models |
-| 3 | STORY-354 | Close TenantIsolationMiddleware._validate_api_key() stub (may be subsumed by STORY-352) | BLOCKED | Blocked by STORY-352; table is TenantRecord not api_keys |
+| 1 | STORY-353 | Audit isolation strategy: Option A (SQLAlchemy RLS event) vs Option B (app-layer exhaustive) | READY | Decide first; outcome gates STORY-352 scope |
+| 2 | STORY-352 | Fix TenantIsolationMiddleware._validate_api_key() stub (scope depends on STORY-353 decision) | BLOCKED | Blocked by STORY-353; stub at context.py:149 |
+| 3 | STORY-354 | ~~Duplicate of STORY-352~~ | CANCELLED | Dead weight — identical scope; do not implement |
 
 ---
 
@@ -74,7 +76,7 @@
 
 | # | Story | Title | Status | Notes |
 |---|-------|-------|--------|-------|
-| 1 | STORY-362 | Define Workflow model, states, WorkflowRepository over ResearchJobRecord | READY | EPIC-086 DONE; use ResearchJobRecord not ResearchRunRecord |
+| 1 | STORY-362 | Define Workflow response model + WorkflowStatus enum; remove 501 stub (NO WorkflowRepository class) | READY | XS; reuse ResearchJobRepository inline — no new abstraction layer |
 | 2 | STORY-363 | Implement POST /workflows — new workflows.py router + run_workflow_task in orchestration.py | BLOCKED | Blocked by STORY-362 |
 | 3 | STORY-364 | Implement GET /workflows/{id} — read ResearchJobRecord; output_dir from job_metadata JSON | BLOCKED | Blocked by STORY-363 |
 
