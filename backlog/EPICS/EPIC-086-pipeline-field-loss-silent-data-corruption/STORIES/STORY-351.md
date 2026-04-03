@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| **Status** | 🔴 READY (unblocked after STORY-350) |
+| **Status** | ✅ DONE |
 | **Priority** | P0 |
 | **Size** | S (1 day) |
 | **Epic** | EPIC-086 Pipeline Field Loss — Silent Data Corruption |

@@ -49,6 +49,8 @@ def _build_financials(
     employees = int(employees_raw.value) if employees_raw is not None and hasattr(employees_raw, "value") else None
     funding_raised = _get_signal_numeric(signals, "funding")
     valuation = _get_signal_numeric(signals, "valuation")
+    # Allow empty primary when this source set provides no revenue/employees
+    allow_empty = revenue is None and employees is None
 
     # STORY-350: populate new financial fields from signals added in STORY-349
     ebitda = _get_signal_numeric(signals, "ebitda")
@@ -63,6 +65,7 @@ def _build_financials(
         ebitda_margin = ebitda / revenue
 
     return FinancialMetric(
+        allow_empty_primary=allow_empty,
         revenue=revenue,
         revenue_confidence=_confidence_from_signal(signals["revenue_level"].signal_confidence)
         if "revenue_level" in signals
