@@ -2,7 +2,7 @@
 
 > Ordered by milestone, then epic, then story priority. The autonomous worker picks the first READY story top-to-bottom.
 
-| Last Updated | 2026-04-02 | Updated By | P0 emergency: EPIC-086 pipeline field loss root cause confirmed — STORY-348-351 inserted at top of queue |
+| Last Updated | 2026-04-03 | Updated By | Deep gap analysis: EPIC-087 (multi-tenancy), EPIC-088 (infra reliability), EPIC-089 (workflow API) + STORY-355/356/360/361 added; production readiness checklist appended to audit |
 
 ## Status Key
 
@@ -37,6 +37,76 @@
 | 2 | STORY-349 | Add signal extractors for all orphaned fact types | BLOCKED | Blocked by STORY-348. Fix Group A fact types with no signal extractor or Company mapping. |
 | 3 | STORY-350 | Map all surviving signals and facts to Company/FinancialMetric fields | BLOCKED | Blocked by STORY-349. Add missing fields to domain models and builder. |
 | 4 | STORY-351 | Add field-count regression gate across all pipeline layers | BLOCKED | Blocked by STORY-350. Permanent CI gate to prevent future field loss. |
+
+---
+
+## ⚠️ P1 HIGH: Multi-Tenancy Enforcement (2026-04-03)
+
+> Cross-tenant data isolation is not enforced. `TenantIsolationMiddleware` is defined but never registered.
+> RLS policies may not exist in the DB. API key validation returns `None` unconditionally.
+> Start STORY-352 immediately after EPIC-086 is complete.
+
+### EPIC-087: Multi-Tenancy Enforcement
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 1 | STORY-352 | Register TenantIsolationMiddleware and verify tenant context propagation | READY | Start first |
+| 2 | STORY-353 | Audit and deploy PostgreSQL RLS policies | READY | Can run parallel with STORY-354 |
+| 3 | STORY-354 | Implement API key lookup from api_keys table | BLOCKED | Blocked by STORY-352 |
+
+---
+
+## P1: Workflow Orchestration API (2026-04-03)
+
+> `GET /jobs/{workflow_id}` returns 501. No way to track or retrieve pipeline results via API.
+> Blocked by EPIC-086 (pipeline must produce correct data first).
+
+### EPIC-089: Workflow Orchestration API
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 1 | STORY-362 | Define Workflow model, states, and storage contract | BLOCKED | Blocked by EPIC-086 completion |
+| 2 | STORY-363 | Implement POST /workflows — submit and enqueue a research workflow | BLOCKED | Blocked by STORY-362 |
+| 3 | STORY-364 | Implement GET /workflows/{workflow_id} — retrieve live status and results | BLOCKED | Blocked by STORY-363 |
+
+---
+
+## P0: Pipeline Unit Tests (2026-04-03)
+
+> No unit tests for the two most critical transformation layers (aggregate.py, signals.py).
+> Blocked until extractors and signal definitions are complete (STORY-349).
+
+### EPIC-086 (continued): Pipeline Test Coverage
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 5 | STORY-355 | Unit tests for pipeline extractor layer (aggregate.py) | BLOCKED | Blocked by STORY-349 |
+| 6 | STORY-356 | Unit tests for signal extraction layer (signals.py) | BLOCKED | Blocked by STORY-349 |
+
+---
+
+## P2: Infrastructure Reliability (2026-04-03)
+
+> Celery health check is a placeholder. Broker failures are silent. Beat schedule is untested.
+
+### EPIC-088: Infrastructure Reliability
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| 1 | STORY-357 | Implement real Celery health check with worker introspection | READY | Independent |
+| 2 | STORY-358 | Add startup check: broker reachable before accepting traffic | READY | Independent |
+| 3 | STORY-359 | Add task discovery test for all Beat-scheduled tasks | READY | Independent |
+
+---
+
+## P3: Classification Threshold Hardening (2026-04-03)
+
+### EPIC-003 (continued): Core Product Correctness
+
+| # | Story | Title | Status | Notes |
+|---|-------|-------|--------|-------|
+| N | STORY-360 | Consolidate classification thresholds into single source of truth | READY | Independent |
+| N | STORY-361 | Add classification threshold consistency regression test | BLOCKED | Blocked by STORY-360 |
 
 ---
 

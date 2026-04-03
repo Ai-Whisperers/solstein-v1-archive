@@ -23,18 +23,18 @@
     "available": true,
     "paths": {
       "backlog": {
-        "blocking": 350,
+        "blocking": 368,
         "exit_code": 1,
         "warnings": 0
       },
       "docs": {
-        "blocking": 141,
+        "blocking": 143,
         "exit_code": 1,
         "warnings": 0
       }
     },
     "status": "fail",
-    "total_blocking": 491,
+    "total_blocking": 511,
     "total_warnings": 0
   },
   "stale_docs": {
