@@ -42,14 +42,14 @@ Long-running epics (EPIC-007, EPIC-021) can be demoralizing. Quick wins provide:
 |-------|-------|--------|-------|
 | [STORY-403](STORIES/STORY-403-api-response-times.md) | Add API Response Time Headers | Users see performance | Backend |
 | [STORY-404](STORIES/STORY-404-health-check-real.md) | Replace Fake Health Check with Real DB Probe | Ops can trust health | Backend |
-| STORY-171 | Improve Error Message Clarity | Users understand failures | Backend |
-| STORY-172 | Add Request IDs to All Logs | Debugging is easier | Backend |
-| STORY-173 | Create Seed Data Script for Local Dev | New devs productive in 30 min | Backend |
-| STORY-174 | Add Request/Response Examples to API Docs | API easier to use | Backend |
-| STORY-175 | Speed Up Slowest Test by 50% | Faster feedback | Backend |
-| STORY-176 | Add Startup Validation for Critical Env Vars | Fail fast on misconfig | Backend |
-| STORY-177 | Standardize Log Format Across All Modules | Logs are parseable | Backend |
-| STORY-178 | Add Common Commands to Makefile | Fewer commands to remember | DevEx |
+| [STORY-405](STORIES/STORY-405.md) | Improve Error Message Clarity | Users understand failures | Backend |
+| [STORY-406](STORIES/STORY-406.md) | Add Request IDs to All Logs | Debugging is easier | Backend |
+| [STORY-407](STORIES/STORY-407.md) | Create Seed Data Script for Local Dev | New devs productive in 30 min | Backend |
+| [STORY-408](STORIES/STORY-408.md) | Add Request/Response Examples to API Docs | API easier to use | Backend |
+| [STORY-409](STORIES/STORY-409.md) | Speed Up Slowest Test by 50% | Faster feedback | Backend |
+| [STORY-410](STORIES/STORY-410.md) | Add Startup Validation for Critical Env Vars | Fail fast on misconfig | Backend |
+| [STORY-411](STORIES/STORY-411.md) | Standardize Log Format Across All Modules | Logs are parseable | Backend |
+| [STORY-412](STORIES/STORY-412.md) | Add Common Commands to Makefile | Fewer commands to remember | DevEx |
 
 ---
 
@@ -57,18 +57,18 @@ Long-running epics (EPIC-007, EPIC-021) can be demoralizing. Quick wins provide:
 
 ### User Experience (4 stories)
 - STORY-403: API Response Time Headers
-- STORY-171: Error Message Clarity
-- STORY-174: API Docs Examples
+- STORY-405: Error Message Clarity
+- STORY-408: API Docs Examples
 
 ### Developer Experience (4 stories)
-- STORY-173: Seed Data Script
-- STORY-175: Test Speed Optimization
-- STORY-177: Logging Consistency
-- STORY-178: Makefile Improvements
+- STORY-407: Seed Data Script
+- STORY-409: Test Speed Optimization
+- STORY-411: Logging Consistency
+- STORY-412: Makefile Improvements
 
 ### Operations (2 stories)
 - STORY-404: Real Health Checks
-- STORY-176: Env Validation
+- STORY-410: Env Validation
 
 ---
 

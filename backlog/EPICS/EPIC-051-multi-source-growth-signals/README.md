@@ -28,10 +28,10 @@ This epic expands enrichment to multi-source growth signals and formalizes fallb
 
 | Story | Title | Priority | Status |
 |-------|-------|----------|--------|
-| STORY-194 | Build hiring signal adapters (employee trend, open jobs) | P1 | 🔴 Not Started |
-| STORY-195 | Build product and web-momentum extractors from crawl output | P1 | 🔴 Not Started |
-| STORY-196 | Add growth-signal normalization contract and merge policy | P1 | 🔴 Not Started |
-| STORY-197 | Implement source fallback matrix (premium/free/degraded) | P1 | 🔴 Not Started |
+| [STORY-194](STORIES/STORY-194.md) | Build hiring signal adapters (employee trend, open jobs) | P1 | 🔴 Not Started |
+| [STORY-195](STORIES/STORY-195.md) | Build product and web-momentum extractors from crawl output | P1 | 🔴 Not Started |
+| [STORY-196](STORIES/STORY-196.md) | Add growth-signal normalization contract and merge policy | P1 | 🔴 Not Started |
+| [STORY-197](STORIES/STORY-197.md) | Implement source fallback matrix (premium/free/degraded) | P1 | 🔴 Not Started |
 
 ## Target Integration Points
 

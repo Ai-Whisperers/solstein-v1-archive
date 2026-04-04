@@ -5,7 +5,8 @@
 | **Status** | 🔴 Not Started |
 | **Priority** | P1 – High |
 | **Created** | 2026-03-10 |
-| **Stories** | STORY-202, STORY-203, STORY-204, STORY-205 |
+| **Stories** | STORY-413, STORY-414, STORY-415, STORY-416 |
+| **Renumbered** | 2026-04-03 — STORY-202-205 numbers were in use by EPIC-058; renumbered to 413-416 |
 | **Dependencies** | EPIC-014 (Observability & Telemetry), EPIC-052 (Provenance, Confidence, and Quality Gates) |
 
 ## Context
@@ -28,10 +29,10 @@ This epic introduces production observability for enrichment and an evaluation l
 
 | Story | Title | Priority | Status |
 |-------|-------|----------|--------|
-| STORY-202 | Add enrichment KPI instrumentation and dashboards | P1 | 🔴 Not Started |
-| STORY-203 | Add quality-drift and source-outage alert policies | P1 | 🔴 Not Started |
-| STORY-204 | Add scheduled evaluation harness for real-data benchmark set | P1 | 🔴 Not Started |
-| STORY-205 | Add human-review sampling and confidence recalibration workflow | P2 | 🔴 Not Started |
+| [STORY-413](STORIES/STORY-413.md) | Add enrichment KPI instrumentation and dashboards | P1 | 🔴 Not Started |
+| [STORY-414](STORIES/STORY-414.md) | Add quality-drift and source-outage alert policies | P1 | 🔴 Not Started |
+| [STORY-415](STORIES/STORY-415.md) | Add scheduled evaluation harness for real-data benchmark set | P1 | 🔴 Not Started |
+| [STORY-416](STORIES/STORY-416.md) | Add human-review sampling and confidence recalibration workflow | P2 | 🔴 Not Started |
 
 ## Target Integration Points
 

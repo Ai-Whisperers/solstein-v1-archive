@@ -4,12 +4,12 @@
     "available": true,
     "blocking_gates": 5,
     "ci_script_gate_count": 8,
-    "generated_on": "2026-04-03"
+    "generated_on": "2026-04-04"
   },
   "audit_index": {
     "available": true,
     "closed_issues": 1,
-    "generated_on": "2026-04-03",
+    "generated_on": "2026-04-04",
     "open_issues": 270,
     "total_issues": 271
   },
@@ -18,12 +18,12 @@
     "error": "Skipped during aggregate docs generation to avoid recursion",
     "status": null
   },
-  "generated_on": "2026-04-03",
+  "generated_on": "2026-04-04",
   "quality_gate": {
     "available": true,
     "paths": {
       "backlog": {
-        "blocking": 391,
+        "blocking": 493,
         "exit_code": 1,
         "warnings": 0
       },
@@ -34,7 +34,7 @@
       }
     },
     "status": "fail",
-    "total_blocking": 535,
+    "total_blocking": 637,
     "total_warnings": 0
   },
   "stale_docs": {

@@ -33,10 +33,10 @@ This epic introduces a staged acquisition design:
 
 | Story | Title | Priority | Status |
 |-------|-------|----------|--------|
-| STORY-190 | Implement domain mapping stage for company URL discovery | P1 | 🔴 Not Started |
-| STORY-191 | Implement async crawl executor with queue + polling | P1 | 🔴 Not Started |
-| STORY-192 | Implement schema extraction contracts for product/team/tech fields | P1 | 🔴 Not Started |
-| STORY-193 | Integrate crawl outputs into enrichment orchestrator with provenance | P1 | 🔴 Not Started |
+| [STORY-190](STORIES/STORY-190.md) | Implement domain mapping stage for company URL discovery | P1 | 🔴 Not Started |
+| [STORY-191](STORIES/STORY-191.md) | Implement async crawl executor with queue + polling | P1 | 🔴 Not Started |
+| [STORY-192](STORIES/STORY-192.md) | Implement schema extraction contracts for product/team/tech fields | P1 | 🔴 Not Started |
+| [STORY-193](STORIES/STORY-193.md) | Integrate crawl outputs into enrichment orchestrator with provenance | P1 | 🔴 Not Started |
 
 ## Target Integration Points
 
