@@ -4,7 +4,7 @@
 |-------|-------|
 | Priority | P1 |
 | Status | 🔴 Open |
-| Stories | STORY-028, STORY-029, STORY-030, STORY-031 |
+| Stories | [STORY-028](STORIES/STORY-028-decompose-markdown-generator.md), [STORY-029](STORIES/STORY-029-decompose-unified-loader.md), [STORY-030](STORIES/STORY-030-decompose-enrichment-router.md), [STORY-031](STORIES/STORY-031-decompose-github-agent.md) |
 | Created | 2026-02-28 |
 
 ---
@@ -56,9 +56,9 @@ If the answer to any of these is "no," the module has too many responsibilities.
 
 ## Ordering Notes
 
-STORY-028 (markdown generator) and STORY-031 (GitHub agent) have no dependencies and can start immediately. STORY-029 (unified loader) depends on STORY-020 (loader consolidation) — you must choose the canonical loader before decomposing it. STORY-030 (enrichment router) depends on STORY-027 (domain service extraction) — extracting business logic to services will naturally reduce the router's size before further decomposition.
+[STORY-028](STORIES/STORY-028-decompose-markdown-generator.md) (markdown generator) and [STORY-031](STORIES/STORY-031-decompose-github-agent.md) (GitHub agent) have no dependencies and can start immediately. [STORY-029](STORIES/STORY-029-decompose-unified-loader.md) (unified loader) depends on STORY-020 (loader consolidation) — you must choose the canonical loader before decomposing it. [STORY-030](STORIES/STORY-030-decompose-enrichment-router.md) (enrichment router) depends on STORY-027 (domain service extraction) — extracting business logic to services will naturally reduce the router's size before further decomposition.
 
 Recommended execution order:
-1. STORY-028 and STORY-031 in parallel (no dependencies)
-2. STORY-020 → STORY-029 (consolidate, then decompose)
-3. STORY-027 → STORY-030 (extract services, then decompose router)
+1. [STORY-028](STORIES/STORY-028-decompose-markdown-generator.md) and [STORY-031](STORIES/STORY-031-decompose-github-agent.md) in parallel (no dependencies)
+2. STORY-020 → [STORY-029](STORIES/STORY-029-decompose-unified-loader.md) (consolidate, then decompose)
+3. STORY-027 → [STORY-030](STORIES/STORY-030-decompose-enrichment-router.md) (extract services, then decompose router)

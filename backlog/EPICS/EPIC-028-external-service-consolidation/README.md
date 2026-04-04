@@ -5,7 +5,7 @@
 | **Status** | 🔴 Not Started |
 | **Priority** | P2 – Medium |
 | **Created** | 2026-03-01 |
-| **Stories** | STORY-101, STORY-102, STORY-103, STORY-104, STORY-105 |
+| **Stories** | [STORY-101](STORIES/STORY-101-searxng-web-search.md), [STORY-102](STORIES/STORY-102-gdelt-rss-news.md), [STORY-103](STORIES/STORY-103-yahoo-finance-stability.md), [STORY-104](STORIES/STORY-104-notification-service.md), [STORY-105](STORIES/STORY-105-supabase-storage-exports.md) |
 | **Dependencies** | EPIC-019 (Multi-Tenancy), EPIC-020 (Supabase Integration) |
 
 ## Context
@@ -49,16 +49,16 @@ This epic rationalizes the external service layer. Replace paid/brittle services
 
 ```
 EPIC-019 (Multi-Tenancy) ──┐
-                            ├──► STORY-105 (Supabase Storage)
+                            ├──► [STORY-105](STORIES/STORY-105-supabase-storage-exports.md) (Supabase Storage)
 EPIC-020 (Supabase) ────────┘
 
-EPIC-026 (Docker) ──► STORY-101 (SearXNG)
+EPIC-026 (Docker) ──► [STORY-101](STORIES/STORY-101-searxng-web-search.md) (SearXNG)
 
-STORY-101 (SearXNG) ─┐
+[STORY-101](STORIES/STORY-101-searxng-web-search.md) (SearXNG) ─┐
                       ├──► Can be parallelized — no inter-story dependencies
-STORY-102 (GDELT) ────┤    except STORY-104 (Notifications) is referenced
-STORY-103 (Yahoo) ─────┤    by EPIC-027 STORY-099 (staging workflow)
-STORY-104 (Notify) ───┘
+[STORY-102](STORIES/STORY-102-gdelt-rss-news.md) (GDELT) ────┤    except [STORY-104](STORIES/STORY-104-notification-service.md) (Notifications) is referenced
+[STORY-103](STORIES/STORY-103-yahoo-finance-stability.md) (Yahoo) ─────┤    by EPIC-027 STORY-099 (staging workflow)
+[STORY-104](STORIES/STORY-104-notification-service.md) (Notify) ───┘
 ```
 
 ## Success Criteria

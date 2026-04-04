@@ -32,4 +32,4 @@ The test suite currently has ~313 failed + 149 errors (pre-existing baseline). M
 
 ## Dependencies
 
-- STORY-302 (scoring formula update) for STORY-339
+- STORY-302 (scoring formula update) for [STORY-339](STORIES/STORY-339.md)

@@ -1,7 +1,7 @@
 # EPIC-063: Documentation Topology and Source-of-Truth Governance
 
 > **Priority**: P1 - High
-> **Stories**: 4 (STORY-230 through STORY-233)
+> **Stories**: 4 ([STORY-230](STORIES/STORY-230-canonical-docs-topology-ownership-matrix.md) through [STORY-233](STORIES/STORY-233-archival-and-deprecation-metadata-policy.md))
 > **Effort**: L (2-3 weeks)
 > **Dependencies**: EPIC-043 (Repository Cleanup and Organization)
 > **Status**: 🔴 Not Started
@@ -36,10 +36,10 @@ Audit evidence:
 
 | Story | Title | Priority | Size | Status |
 |---|---|---|---|---|
-| STORY-230 | Define canonical docs topology and ownership matrix | P1 | M | 🔴 Open |
-| STORY-231 | Resolve mirrored backlog trees with one-way sync/migration plan | P1 | L | 🔴 Open |
-| STORY-232 | Normalize epic directory naming and remove topology anomalies | P1 | M | 🔴 Open |
-| STORY-233 | Establish archival/deprecation metadata policy for docs | P2 | M | 🔴 Open |
+| [STORY-230](STORIES/STORY-230-canonical-docs-topology-ownership-matrix.md) | Define canonical docs topology and ownership matrix | P1 | M | 🔴 Open |
+| [STORY-231](STORIES/STORY-231-resolve-mirrored-backlog-trees.md) | Resolve mirrored backlog trees with one-way sync/migration plan | P1 | L | 🔴 Open |
+| [STORY-232](STORIES/STORY-232-normalize-epic-directory-naming.md) | Normalize epic directory naming and remove topology anomalies | P1 | M | 🔴 Open |
+| [STORY-233](STORIES/STORY-233-archival-and-deprecation-metadata-policy.md) | Establish archival/deprecation metadata policy for docs | P2 | M | 🔴 Open |
 
 ---
 

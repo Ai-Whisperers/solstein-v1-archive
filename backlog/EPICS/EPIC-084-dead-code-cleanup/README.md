@@ -25,9 +25,9 @@ Several files and directories are confirmed dead code: broken imports, retired a
 - `data/real_data_integration.py` deleted; no remaining imports
 - `adapters/enrichment/_retired/` deleted; no remaining imports
 - `adapters/discovery/_retired/` deleted; no remaining imports
-- `research/graph/` deleted after team sign-off (STORY-343)
+- `research/graph/` deleted after team sign-off ([STORY-343](STORIES/STORY-343.md))
 - Dead code CI detector confirms no new orphaned modules
 
 ## Dependencies
 
-- STORY-343 requires explicit team sign-off (ADR-009/010 reference frozen graph runtime)
+- [STORY-343](STORIES/STORY-343.md) requires explicit team sign-off (ADR-009/010 reference frozen graph runtime)

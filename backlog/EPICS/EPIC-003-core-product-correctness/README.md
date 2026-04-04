@@ -75,7 +75,7 @@ The scoring and classification system is the platform's core deliverable. PE/VC 
 
 ## Ordering Rationale
 
-STORY-009 (thresholds) must complete before STORY-010 (deduplication), which must complete before STORY-011 (naming). Consolidating scoring logic before establishing a single threshold source risks embedding the wrong thresholds into the consolidated implementation. Naming constants before the implementation is consolidated means naming constants that will be deleted.
+[STORY-009](STORIES/STORY-009-unify-classification-thresholds.md) (thresholds) must complete before [STORY-010](STORIES/STORY-010-eliminate-scoring-duplication.md) (deduplication), which must complete before [STORY-011](STORIES/STORY-011-name-scoring-constants.md) (naming). Consolidating scoring logic before establishing a single threshold source risks embedding the wrong thresholds into the consolidated implementation. Naming constants before the implementation is consolidated means naming constants that will be deleted.
 
 ---
 
@@ -83,7 +83,7 @@ STORY-009 (thresholds) must complete before STORY-010 (deduplication), which mus
 
 ### Verification of Work Items
 
-#### STORY-009: Classification Thresholds - ✅ COMPLETE
+#### [STORY-009](STORIES/STORY-009-unify-classification-thresholds.md): Classification Thresholds - ✅ COMPLETE
 
 - **Single source of truth**: All classification now uses `analytics/constants.py`
 - Thresholds defined: `PHOENIX_SCORE_THRESHOLD = 7.0`, `SALT_SCORE_THRESHOLD = 4.5`, `LEAD_SCORE_THRESHOLD = 4.49`
@@ -91,13 +91,13 @@ STORY-009 (thresholds) must complete before STORY-010 (deduplication), which mus
 - `analytics/scoring.py` line 22: imports from `.constants`
 - No hardcoded threshold literals found outside `constants.py`
 
-#### STORY-010: Scoring Deduplication - ✅ COMPLETE
+#### [STORY-010](STORIES/STORY-010-eliminate-scoring-duplication.md): Scoring Deduplication - ✅ COMPLETE
 
 - **Duplicate functions REMOVED**: No `_calculate_growth_score` or `_calculate_financial_health_score` found in codebase
 - **Duplicate helpers REMOVED**: No `_merge_facts_into_financials` or `_confidence_to_level` duplicates found
 - `analytics/scoring.py` now delegates to scorer classes in `analytics/scorers/`
 
-#### STORY-011: Named Constants - ✅ COMPLETE
+#### [STORY-011](STORIES/STORY-011-name-scoring-constants.md): Named Constants - ✅ COMPLETE
 
 - Classification thresholds: ✅ Fully named with documentation
 - Component weights: ✅ Validated in tests
@@ -206,7 +206,7 @@ from .scorers.growth_momentum import GrowthMomentumScorer
 
 ## Conclusion
 
-**EPIC-003 original scope (STORY-009/010/011) is fully complete.**
+**EPIC-003 original scope ([STORY-009](STORIES/STORY-009-unify-classification-thresholds.md)/010/011) is fully complete.**
 
 - ✅ Classification thresholds unified in `analytics/constants.py`
 - ✅ Scoring duplication eliminated (functions delegated to scorers/)
@@ -216,13 +216,13 @@ from .scorers.growth_momentum import GrowthMomentumScorer
 
 **Continuation work (added 2026-04-03 audit):**
 
-STORY-360, STORY-361, and STORY-365 are queued continuation stories under EPIC-003 in QUEUE.md. They address boundary literal hardening and pre-existing test fixture failures discovered during the 2026-04-03 audit:
+[STORY-360](STORIES/STORY-360.md), [STORY-361](STORIES/STORY-361.md), and [STORY-365](STORIES/STORY-365.md) are queued continuation stories under EPIC-003 in QUEUE.md. They address boundary literal hardening and pre-existing test fixture failures discovered during the 2026-04-03 audit:
 
 | Story | Title | Status |
 |-------|-------|--------|
-| STORY-360 | Consolidate boundary literals (4.3, 4.7, 6.8, 7.2) in `classification.py:71` | VERIFY |
-| STORY-361 | Add classification threshold regression test | BLOCKED by STORY-360 |
-| STORY-365 | Fix 3 pre-existing test fixture failures in test_scoring.py and test_scorers_financial.py | READY (XS) |
+| [STORY-360](STORIES/STORY-360.md) | Consolidate boundary literals (4.3, 4.7, 6.8, 7.2) in `classification.py:71` | VERIFY |
+| [STORY-361](STORIES/STORY-361.md) | Add classification threshold regression test | BLOCKED by [STORY-360](STORIES/STORY-360.md) |
+| [STORY-365](STORIES/STORY-365.md) | Fix 3 pre-existing test fixture failures in test_scoring.py and test_scorers_financial.py | READY (XS) |
 
 Original 3 stories require no further action. Continuation stories above are incremental improvements.
 

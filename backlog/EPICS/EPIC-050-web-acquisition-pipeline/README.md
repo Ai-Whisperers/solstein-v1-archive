@@ -5,7 +5,7 @@
 | **Status** | 🔴 Not Started |
 | **Priority** | P1 – High |
 | **Created** | 2026-03-10 |
-| **Stories** | STORY-190, STORY-191, STORY-192, STORY-193 |
+| **Stories** | [STORY-190](STORIES/STORY-190.md), [STORY-191](STORIES/STORY-191.md), [STORY-192](STORIES/STORY-192.md), [STORY-193](STORIES/STORY-193.md) |
 | **Dependencies** | EPIC-028 (External Service Consolidation), EPIC-035 (Async-First External Adapters) |
 
 ## Context

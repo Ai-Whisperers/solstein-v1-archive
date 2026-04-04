@@ -17,7 +17,7 @@ This codebase is already using Supabase (supabase client exists in the codebase)
 
 **Path B decision**: Do not build what Supabase already provides. Migrate to Supabase Auth and redirect the engineering effort saved toward the business logic that actually differentiates this platform.
 
-**STORY-001 through STORY-005 are marked Superseded.** Their outcomes are delivered by STORY-067 through STORY-070.
+**STORY-001 through STORY-005 are marked Superseded.** Their outcomes are delivered by [STORY-067](STORIES/STORY-067-migrate-to-supabase-auth.md) through [STORY-070](STORIES/STORY-070-ssrf-prevention.md).
 
 ## Scope
 

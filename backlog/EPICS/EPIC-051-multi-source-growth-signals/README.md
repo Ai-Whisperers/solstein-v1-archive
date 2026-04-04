@@ -5,7 +5,7 @@
 | **Status** | 🔴 Not Started |
 | **Priority** | P1 – High |
 | **Created** | 2026-03-10 |
-| **Stories** | STORY-194, STORY-195, STORY-196, STORY-197 |
+| **Stories** | [STORY-194](STORIES/STORY-194.md), [STORY-195](STORIES/STORY-195.md), [STORY-196](STORIES/STORY-196.md), [STORY-197](STORIES/STORY-197.md) |
 | **Dependencies** | EPIC-050 (Web Acquisition Pipeline), EPIC-028 (External Service Consolidation) |
 
 ## Context

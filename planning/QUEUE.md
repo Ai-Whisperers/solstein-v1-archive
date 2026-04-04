@@ -920,7 +920,7 @@ Worker and checker append timestamped entries here:
 **Duplicate directory anomalies identified** (do not delete without team review):
 - `EPIC-002/` (stale, same content as `EPIC-002-configuration-integrity/`)
 - `EPIC-052-provenance-quality-gates/` (stale, no stories — `EPIC-052-provenance-confidence-quality-gates/` is canonical)
-- `EPIC-067-agentic-development-workflow-hardening/` (superseded by `EPIC-067-legacy-runtime-canonicalization/`; story number references overlap with audit hotfixes)
+- `EPIC-SUPERSEDED-agentic-development-workflow-hardening/` (superseded by `EPIC-067-legacy-runtime-canonicalization/`; story number references overlap with audit hotfixes)
 
 **STORY-276** (merge develop→master): Still READY — ruff gate is clean; no blocker, requires human release decision.
 

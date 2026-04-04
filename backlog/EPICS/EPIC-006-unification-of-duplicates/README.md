@@ -4,7 +4,7 @@
 |-------|-------|
 | Priority | P1 |
 | Status | 🔴 Open |
-| Stories | STORY-019, STORY-020, STORY-021, STORY-022 |
+| Stories | [STORY-019](STORIES/STORY-019-eliminate-unified-adapter-pairs.md), [STORY-020](STORIES/STORY-020-consolidate-loader-systems.md), [STORY-021](STORIES/STORY-021-consolidate-middleware.md), [STORY-022](STORIES/STORY-022-consolidate-route-directories.md) |
 | Created | 2026-02-28 |
 
 ---
@@ -73,4 +73,4 @@ The refresh route lives in a separate directory with no explanation. This is eit
 
 ## Ordering Notes
 
-STORY-020 (loader consolidation) should be completed before EPIC-008's STORY-029 (loader decomposition). You must decide what the canonical loader is before you decompose it. STORY-021 (middleware) is independent and can be executed in parallel with other stories. STORY-022 (routes) is the simplest item and can be completed in under an hour.
+[STORY-020](STORIES/STORY-020-consolidate-loader-systems.md) (loader consolidation) should be completed before EPIC-008's STORY-029 (loader decomposition). You must decide what the canonical loader is before you decompose it. [STORY-021](STORIES/STORY-021-consolidate-middleware.md) (middleware) is independent and can be executed in parallel with other stories. [STORY-022](STORIES/STORY-022-consolidate-route-directories.md) (routes) is the simplest item and can be completed in under an hour.

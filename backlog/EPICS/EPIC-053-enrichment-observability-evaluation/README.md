@@ -5,7 +5,7 @@
 | **Status** | 🔴 Not Started |
 | **Priority** | P1 – High |
 | **Created** | 2026-03-10 |
-| **Stories** | STORY-413, STORY-414, STORY-415, STORY-416 |
+| **Stories** | [STORY-413](STORIES/STORY-413.md), [STORY-414](STORIES/STORY-414.md), [STORY-415](STORIES/STORY-415.md), [STORY-416](STORIES/STORY-416.md) |
 | **Renumbered** | 2026-04-03 — STORY-202-205 numbers were in use by EPIC-058; renumbered to 413-416 |
 | **Dependencies** | EPIC-014 (Observability & Telemetry), EPIC-052 (Provenance, Confidence, and Quality Gates) |
 

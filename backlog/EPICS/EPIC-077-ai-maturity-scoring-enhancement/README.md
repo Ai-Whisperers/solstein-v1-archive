@@ -28,6 +28,6 @@ AI maturity detection relies on a narrow keyword list that misses modern termino
 
 ## Dependencies
 
-- STORY-290 (GitHub adapter) for STORY-309
-- STORY-291 (arXiv/patent adapter) for STORY-310
-- STORY-321 (LLM provider) for STORY-308
+- STORY-290 (GitHub adapter) for [STORY-309](STORIES/STORY-309.md)
+- STORY-291 (arXiv/patent adapter) for [STORY-310](STORIES/STORY-310.md)
+- STORY-321 (LLM provider) for [STORY-308](STORIES/STORY-308.md)

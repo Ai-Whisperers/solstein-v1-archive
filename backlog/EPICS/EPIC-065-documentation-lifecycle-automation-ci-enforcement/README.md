@@ -1,7 +1,7 @@
 # EPIC-065: Documentation Lifecycle Automation and CI Enforcement
 
 > **Priority**: P1 - High
-> **Stories**: 8 (STORY-238 through STORY-245)
+> **Stories**: 8 ([STORY-238](STORIES/STORY-238-ci-docs-quality-gates.md) through [STORY-245](STORIES/STORY-245-expand-generated-api-docs-and-schema-registries.md))
 > **Effort**: L (3-4 weeks)
 > **Dependencies**: EPIC-063 (Documentation Topology and Source-of-Truth Governance), EPIC-064 (Markdown Integrity and Registry Correctness)
 > **Status**: 🟡 In Progress
@@ -33,14 +33,14 @@ There is no consistent lifecycle enforcement from authoring through archival.
 
 | Story | Title | Priority | Size | Status |
 |---|---|---|---|---|
-| STORY-238 | Implement CI docs quality gates (links, tokens, front matter) | P1 | M | 🔴 Open |
-| STORY-239 | Add stale-doc detection and ownership alert workflow | P1 | M | 🔴 Open |
-| STORY-240 | Introduce docs review checklist and change-control workflow | P2 | M | 🔴 Open |
-| STORY-241 | Publish docs health dashboard and weekly audit automation | P2 | M | 🔴 Open |
-| STORY-242 | Generate AST rule catalog and guardrail registry | P1 | M | 🟡 In Progress |
-| STORY-243 | Generate master audit issue index and keep it current | P1 | M | 🟡 In Progress |
-| STORY-244 | Enforce generated docs freshness through git hooks and CI | P1 | S | 🟡 In Progress |
-| STORY-245 | Expand generated API docs and schema registries | P1 | L | 🔴 Open |
+| [STORY-238](STORIES/STORY-238-ci-docs-quality-gates.md) | Implement CI docs quality gates (links, tokens, front matter) | P1 | M | 🔴 Open |
+| [STORY-239](STORIES/STORY-239-stale-doc-detection-and-ownership-alerts.md) | Add stale-doc detection and ownership alert workflow | P1 | M | 🔴 Open |
+| [STORY-240](STORIES/STORY-240-docs-review-checklist-and-change-control.md) | Introduce docs review checklist and change-control workflow | P2 | M | 🔴 Open |
+| [STORY-241](STORIES/STORY-241-docs-health-dashboard-and-weekly-audit.md) | Publish docs health dashboard and weekly audit automation | P2 | M | 🔴 Open |
+| [STORY-242](STORIES/STORY-242-generated-ast-rule-catalog-and-guardrail-registry.md) | Generate AST rule catalog and guardrail registry | P1 | M | 🟡 In Progress |
+| [STORY-243](STORIES/STORY-243-generated-master-audit-issue-index.md) | Generate master audit issue index and keep it current | P1 | M | 🟡 In Progress |
+| [STORY-244](STORIES/STORY-244-hook-enforced-generated-doc-freshness.md) | Enforce generated docs freshness through git hooks and CI | P1 | S | 🟡 In Progress |
+| [STORY-245](STORIES/STORY-245-expand-generated-api-docs-and-schema-registries.md) | Expand generated API docs and schema registries | P1 | L | 🔴 Open |
 
 ---
 
@@ -71,12 +71,12 @@ There is no consistent lifecycle enforcement from authoring through archival.
 ### Queue Status
 
 - Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` before continuing this epic.
-- `planning/QUEUE.md` shows `STORY-242` through `STORY-244` complete on `develop`.
-- The only remaining active story in this epic is `STORY-245`, currently `READY`.
+- `planning/QUEUE.md` shows `[STORY-242](STORIES/STORY-242-generated-ast-rule-catalog-and-guardrail-registry.md)` through `[STORY-244](STORIES/STORY-244-hook-enforced-generated-doc-freshness.md)` complete on `develop`.
+- The only remaining active story in this epic is `[STORY-245](STORIES/STORY-245-expand-generated-api-docs-and-schema-registries.md)`, currently `READY`.
 
 ### Next Agent Action
 
-- Continue with `STORY-245` only.
+- Continue with `[STORY-245](STORIES/STORY-245-expand-generated-api-docs-and-schema-registries.md)` only.
 - Keep the work source-derived: expand generated API docs and schema registries from code, schemas, and audited structural inputs rather than hand-written summaries.
 
 ### Required Working Style

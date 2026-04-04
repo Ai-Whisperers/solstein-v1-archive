@@ -1,7 +1,7 @@
 # EPIC-088: Infrastructure Reliability & Observability
 
 > **Priority**: P2 – Medium (silent failures undetectable today)
-> **Stories**: 3 (STORY-357 through STORY-359)
+> **Stories**: 3 ([STORY-357](STORIES/STORY-357.md) through [STORY-359](STORIES/STORY-359.md))
 > **Effort**: S (2–3 days total)
 > **Dependencies**: None
 > **Status**: 🔴 Not Started
@@ -26,9 +26,9 @@ Two infrastructure components fail silently with no detection mechanism:
 
 | Story | Title | Priority | Size | Status |
 |-------|-------|----------|------|--------|
-| STORY-357 | Harden Celery health check — return HTTP 503 when workers unreachable | P2 | S | 🔴 READY |
-| STORY-358 | Add startup check: broker reachable before accepting traffic | P2 | S | 🔴 READY |
-| STORY-359 | Add task discovery test — all 13 Beat-scheduled tasks importable and decorated | P2 | S | 🔴 READY |
+| [STORY-357](STORIES/STORY-357.md) | Harden Celery health check — return HTTP 503 when workers unreachable | P2 | S | 🔴 READY |
+| [STORY-358](STORIES/STORY-358.md) | Add startup check: broker reachable before accepting traffic | P2 | S | 🔴 READY |
+| [STORY-359](STORIES/STORY-359.md) | Add task discovery test — all 13 Beat-scheduled tasks importable and decorated | P2 | S | 🔴 READY |
 
 All three stories are independent and can be worked in any order.
 

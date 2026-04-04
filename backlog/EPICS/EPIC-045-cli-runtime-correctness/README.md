@@ -2,7 +2,7 @@
 
 > **Discovered**: 2026-03-01 via live end-to-end run analysis  
 > **Priority**: P0 — BLOCKER (4 of 8 CLI commands crash on every invocation)  
-> **Stories**: 4 (STORY-169 through STORY-172)  
+> **Stories**: 4 ([STORY-169](STORIES/STORY-169.md) through [STORY-172](STORIES/STORY-172.md))  
 > **Effort**: M (3–5 days total)
 
 ---
@@ -32,10 +32,10 @@ These are not edge cases — they are the primary user-facing commands.
 
 | Story | Title | Priority | Size |
 |-------|-------|----------|------|
-| STORY-169 | Fix JSON parsing in score/analyze-market/compare/export-excel | P0 | S |
-| STORY-170 | Restore `generate-llm-report` exporter import | P0 | S |
-| STORY-171 | Migrate all CLI commands from deprecated `CompetitorDataLoader` | P1 | M |
-| STORY-172 | Add structured input validation with actionable error messages | P2 | M |
+| [STORY-169](STORIES/STORY-169.md) | Fix JSON parsing in score/analyze-market/compare/export-excel | P0 | S |
+| [STORY-170](STORIES/STORY-170.md) | Restore `generate-llm-report` exporter import | P0 | S |
+| [STORY-171](STORIES/STORY-171.md) | Migrate all CLI commands from deprecated `CompetitorDataLoader` | P1 | M |
+| [STORY-172](STORIES/STORY-172.md) | Add structured input validation with actionable error messages | P2 | M |
 
 ---
 

@@ -56,19 +56,19 @@ Long-running epics (EPIC-007, EPIC-021) can be demoralizing. Quick wins provide:
 ## Impact Areas
 
 ### User Experience (4 stories)
-- STORY-403: API Response Time Headers
-- STORY-405: Error Message Clarity
-- STORY-408: API Docs Examples
+- [STORY-403](STORIES/STORY-403-api-response-times.md): API Response Time Headers
+- [STORY-405](STORIES/STORY-405.md): Error Message Clarity
+- [STORY-408](STORIES/STORY-408.md): API Docs Examples
 
 ### Developer Experience (4 stories)
-- STORY-407: Seed Data Script
-- STORY-409: Test Speed Optimization
-- STORY-411: Logging Consistency
-- STORY-412: Makefile Improvements
+- [STORY-407](STORIES/STORY-407.md): Seed Data Script
+- [STORY-409](STORIES/STORY-409.md): Test Speed Optimization
+- [STORY-411](STORIES/STORY-411.md): Logging Consistency
+- [STORY-412](STORIES/STORY-412.md): Makefile Improvements
 
 ### Operations (2 stories)
-- STORY-404: Real Health Checks
-- STORY-410: Env Validation
+- [STORY-404](STORIES/STORY-404-health-check-real.md): Real Health Checks
+- [STORY-410](STORIES/STORY-410.md): Env Validation
 
 ---
 

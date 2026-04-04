@@ -5,7 +5,7 @@
 | **Status** | 🔴 Not Started |
 | **Priority** | P2 – Medium |
 | **Created** | 2026-03-01 |
-| **Stories** | STORY-106 through STORY-110 |
+| **Stories** | [STORY-106](STORIES/STORY-106-nextjs-bootstrap-supabase-auth.md) through [STORY-110](STORIES/STORY-110-export-download-ui.md) |
 | **Dependencies** | EPIC-019 (Multi-Tenancy), EPIC-020 (Supabase Auth), EPIC-024 (Realtime Job Status) |
 
 ## Context
@@ -22,11 +22,11 @@ This epic delivers the minimum viable dashboard: authentication, company list, c
 
 | Story | Title | Summary |
 |-------|-------|---------|
-| STORY-106 | Bootstrap Next.js Dashboard with Supabase Auth | Project scaffolding, auth integration, protected routes, shared layout |
-| STORY-107 | Company List and Detail Pages | Paginated company table, classification badges, full detail view with signals |
-| STORY-108 | Research Pipeline Trigger UI | Search-and-trigger interface for new company research |
-| STORY-109 | Real-Time Job Status UI via Supabase Realtime | Live progress tracking for research jobs without polling |
-| STORY-110 | Export Download UI | Export trigger, history, and signed URL download |
+| [STORY-106](STORIES/STORY-106-nextjs-bootstrap-supabase-auth.md) | Bootstrap Next.js Dashboard with Supabase Auth | Project scaffolding, auth integration, protected routes, shared layout |
+| [STORY-107](STORIES/STORY-107-company-list-detail-pages.md) | Company List and Detail Pages | Paginated company table, classification badges, full detail view with signals |
+| [STORY-108](STORIES/STORY-108-research-trigger-ui.md) | Research Pipeline Trigger UI | Search-and-trigger interface for new company research |
+| [STORY-109](STORIES/STORY-109-realtime-job-status-ui.md) | Real-Time Job Status UI via Supabase Realtime | Live progress tracking for research jobs without polling |
+| [STORY-110](STORIES/STORY-110-export-download-ui.md) | Export Download UI | Export trigger, history, and signed URL download |
 
 ## Architecture Decisions
 
@@ -40,12 +40,12 @@ This epic delivers the minimum viable dashboard: authentication, company list, c
 
 ```
 EPIC-019 (Multi-Tenancy) ──┐
-                            ├──→ STORY-106 (Bootstrap) ──→ STORY-107 (Companies)
-EPIC-020 (Supabase Auth) ──┘                            ├──→ STORY-108 (Research Trigger)
-                                                        ├──→ STORY-109 (Job Status)
+                            ├──→ [STORY-106](STORIES/STORY-106-nextjs-bootstrap-supabase-auth.md) (Bootstrap) ──→ [STORY-107](STORIES/STORY-107-company-list-detail-pages.md) (Companies)
+EPIC-020 (Supabase Auth) ──┘                            ├──→ [STORY-108](STORIES/STORY-108-research-trigger-ui.md) (Research Trigger)
+                                                        ├──→ [STORY-109](STORIES/STORY-109-realtime-job-status-ui.md) (Job Status)
 EPIC-024 (Realtime) ────────────────────────────────────┘
-                                                        └──→ STORY-110 (Exports)
-EPIC-030/STORY-111 (Async Exports) ─────────────────────────→ STORY-110 (Exports)
+                                                        └──→ [STORY-110](STORIES/STORY-110-export-download-ui.md) (Exports)
+EPIC-030/STORY-111 (Async Exports) ─────────────────────────→ [STORY-110](STORIES/STORY-110-export-download-ui.md) (Exports)
 ```
 
 ## Out of Scope
@@ -60,8 +60,8 @@ EPIC-030/STORY-111 (Async Exports) ───────────────
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
-| Supabase Realtime connection instability | Medium | High | Polling fallback (STORY-109) |
-| EPIC-019/020 delays block all dashboard work | High | Critical | STORY-106 can scaffold with mock auth |
+| Supabase Realtime connection instability | Medium | High | Polling fallback ([STORY-109](STORIES/STORY-109-realtime-job-status-ui.md)) |
+| EPIC-019/020 delays block all dashboard work | High | Critical | [STORY-106](STORIES/STORY-106-nextjs-bootstrap-supabase-auth.md) can scaffold with mock auth |
 | API schema changes during dashboard development | Medium | Medium | OpenAPI contract as source of truth |
 | Next.js App Router immaturity in edge cases | Low | Medium | Server components only where necessary |
 

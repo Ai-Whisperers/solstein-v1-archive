@@ -1,7 +1,7 @@
 # EPIC-089: Workflow Orchestration API
 
 > **Priority**: P1 – High (async job endpoint returns 501; no multi-step orchestration)
-> **Stories**: 3 (STORY-362 through STORY-364)
+> **Stories**: 3 ([STORY-362](STORIES/STORY-362.md) through [STORY-364](STORIES/STORY-364.md))
 > **Effort**: M (3–5 days total)
 > **Dependencies**: EPIC-086 DONE (pipeline must produce correct data before wiring workflows)
 > **Status**: 🔴 Not Started
@@ -26,9 +26,9 @@ For a research run to be useful as an API-driven product:
 
 | Story | Title | Priority | Size | Status |
 |-------|-------|----------|------|--------|
-| STORY-362 | Define `Workflow` response model + `WorkflowStatus` enum; remove 501 stub | P1 | XS | 🔴 READY |
-| STORY-363 | Implement `POST /workflows` — new `workflows.py` router + `run_workflow_task` in `orchestration.py` | P1 | M | ⏳ BLOCKED by STORY-362 |
-| STORY-364 | Implement `GET /workflows/{workflow_id}` — read `ResearchJobRecord`; `output_dir` from `job_metadata` JSON | P1 | M | ⏳ BLOCKED by STORY-363 |
+| [STORY-362](STORIES/STORY-362.md) | Define `Workflow` response model + `WorkflowStatus` enum; remove 501 stub | P1 | XS | 🔴 READY |
+| [STORY-363](STORIES/STORY-363.md) | Implement `POST /workflows` — new `workflows.py` router + `run_workflow_task` in `orchestration.py` | P1 | M | ⏳ BLOCKED by [STORY-362](STORIES/STORY-362.md) |
+| [STORY-364](STORIES/STORY-364.md) | Implement `GET /workflows/{workflow_id}` — read `ResearchJobRecord`; `output_dir` from `job_metadata` JSON | P1 | M | ⏳ BLOCKED by [STORY-363](STORIES/STORY-363.md) |
 
 **Execution order**: 362 → 363 → 364 (strictly sequential).
 
@@ -72,8 +72,8 @@ For a research run to be useful as an API-driven product:
 
 | File | Line | Role |
 |------|------|------|
-| `src/solstein/domain/workflow.py` | — | CREATE: `Workflow` + `WorkflowStatus` (STORY-362) |
-| `src/solstein/api/routers/jobs.py` | 18–36 | 501 stub — DELETE in STORY-362 |
+| `src/solstein/domain/workflow.py` | — | CREATE: `Workflow` + `WorkflowStatus` ([STORY-362](STORIES/STORY-362.md)) |
+| `src/solstein/api/routers/jobs.py` | 18–36 | 501 stub — DELETE in [STORY-362](STORIES/STORY-362.md) |
 | `src/solstein/api/routers/workflows.py` | — | CREATE: `POST /workflows` + `GET /workflows/{id}` |
 | `src/solstein/worker/orchestration.py` | — | Add `run_workflow_task` here |
 | `src/solstein/research/pipeline.py` | 211 | `run_market_intelligence()` — the workflow body |

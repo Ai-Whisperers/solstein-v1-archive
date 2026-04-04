@@ -2,7 +2,7 @@
 
 > **Discovered**: 2026-03-01 via live end-to-end run analysis  
 > **Priority**: P1 — High (scoring accuracy depends on correct data ingestion)  
-> **Stories**: 4 (STORY-177 through STORY-180)  
+> **Stories**: 4 ([STORY-177](STORIES/STORY-177.md) through [STORY-180](STORIES/STORY-180.md))  
 > **Effort**: M (3–4 days total)
 
 ---
@@ -30,10 +30,10 @@ These are not cosmetic issues. Funding data directly impacts Financial Health Sc
 
 | Story | Title | Priority | Size |
 |-------|-------|----------|------|
-| STORY-177 | Fix `ai_score` float truncation in company loaders | P1 | S |
-| STORY-178 | Map `funding_raised` to `financials.total_funding_raised` | P1 | S |
-| STORY-179 | Expose `ebitda_margin_pct` and `recurring_revenue_pct` on `Company` model | P1 | M |
-| STORY-180 | Add field mapping parity test between raw JSON and `Company` objects | P1 | M |
+| [STORY-177](STORIES/STORY-177.md) | Fix `ai_score` float truncation in company loaders | P1 | S |
+| [STORY-178](STORIES/STORY-178.md) | Map `funding_raised` to `financials.total_funding_raised` | P1 | S |
+| [STORY-179](STORIES/STORY-179.md) | Expose `ebitda_margin_pct` and `recurring_revenue_pct` on `Company` model | P1 | M |
+| [STORY-180](STORIES/STORY-180.md) | Add field mapping parity test between raw JSON and `Company` objects | P1 | M |
 
 ---
 

@@ -1,7 +1,7 @@
 # EPIC-064: Markdown Integrity and Registry Correctness
 
 > **Priority**: P0 - Ship Blocker
-> **Stories**: 4 (STORY-234 through STORY-237)
+> **Stories**: 4 ([STORY-234](STORIES/STORY-234-repair-broken-relative-links.md) through [STORY-237](STORIES/STORY-237-reconcile-mirrored-drift-with-changelog.md))
 > **Effort**: L (2-3 weeks)
 > **Dependencies**: EPIC-063 (Documentation Topology and Source-of-Truth Governance)
 > **Status**: 🔴 Not Started
@@ -35,10 +35,10 @@ Audit evidence:
 
 | Story | Title | Priority | Size | Status |
 |---|---|---|---|---|
-| STORY-234 | Repair broken relative links and establish baseline report | P0 | L | 🔴 Open |
-| STORY-235 | Eliminate placeholder token leakage in active docs | P1 | M | 🔴 Open |
-| STORY-236 | Correct backlog registry/dashboard metric inconsistencies | P0 | M | 🔴 Open |
-| STORY-237 | Reconcile mirrored drift and publish changelog of deltas | P1 | M | 🔴 Open |
+| [STORY-234](STORIES/STORY-234-repair-broken-relative-links.md) | Repair broken relative links and establish baseline report | P0 | L | 🔴 Open |
+| [STORY-235](STORIES/STORY-235-remove-placeholder-token-leakage.md) | Eliminate placeholder token leakage in active docs | P1 | M | 🔴 Open |
+| [STORY-236](STORIES/STORY-236-correct-backlog-dashboard-metrics.md) | Correct backlog registry/dashboard metric inconsistencies | P0 | M | 🔴 Open |
+| [STORY-237](STORIES/STORY-237-reconcile-mirrored-drift-with-changelog.md) | Reconcile mirrored drift and publish changelog of deltas | P1 | M | 🔴 Open |
 
 ---
 

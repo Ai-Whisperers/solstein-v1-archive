@@ -1,7 +1,7 @@
 # EPIC-069: Provider Surface Rationalization
 
 > **Priority**: P0 - Ship Blocker
-> **Stories**: 4 (STORY-263 through STORY-266)
+> **Stories**: 4 ([STORY-263](STORIES/STORY-263-build-provider-scorecard-and-enforcement-matrix.md) through [STORY-266](STORIES/STORY-266-ban-new-compatibility-patches-at-provider-boundaries.md))
 > **Effort**: L (2-3 weeks)
 > **Dependencies**: EPIC-067 (Legacy Runtime Canonicalization), EPIC-068 (Boundary Schemas and Type Gates)
 > **Status**: 🔴 Not Started

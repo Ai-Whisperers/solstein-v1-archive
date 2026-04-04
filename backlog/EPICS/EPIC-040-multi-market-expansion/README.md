@@ -16,10 +16,10 @@ The call identified three geographic markets for expansion: Netherlands (primary
 
 | Story | Title | Priority |
 |-------|-------|----------|
-| STORY-153 | Dutch Market Localization & Data Sources | P2 |
-| STORY-154 | Spanish Market Localization & Expansion | P2 |
-| STORY-155 | UK/London Market Entry Infrastructure | P2 |
-| STORY-156 | Multi-Language Support Infrastructure | P2 |
+| [STORY-153](STORIES/STORY-153-dutch-market-localization.md) | Dutch Market Localization & Data Sources | P2 |
+| [STORY-154](STORIES/STORY-154-spanish-market-expansion.md) | Spanish Market Localization & Expansion | P2 |
+| [STORY-155](STORIES/STORY-155-uk-market-entry.md) | UK/London Market Entry Infrastructure | P2 |
+| [STORY-156](STORIES/STORY-156-multi-language-support.md) | Multi-Language Support Infrastructure | P2 |
 
 ## Dependencies
 

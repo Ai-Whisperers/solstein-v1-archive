@@ -17,10 +17,10 @@ This is not a configuration oversight — it is a missing architectural layer. F
 
 | Story | Title | Priority |
 |-------|-------|----------|
-| STORY-093 | Add Celery Worker Service to docker-compose | P1 |
-| STORY-094 | Add Celery Beat Service to docker-compose | P1 |
-| STORY-095 | Add Flower Monitoring Service to docker-compose | P1 |
-| STORY-096 | Multi-Stage Dockerfile for Production | P1 |
+| [STORY-093](STORIES/STORY-093-celery-worker-docker-service.md) | Add Celery Worker Service to docker-compose | P1 |
+| [STORY-094](STORIES/STORY-094-celery-beat-docker-service.md) | Add Celery Beat Service to docker-compose | P1 |
+| [STORY-095](STORIES/STORY-095-flower-monitoring-service.md) | Add Flower Monitoring Service to docker-compose | P1 |
+| [STORY-096](STORIES/STORY-096-multi-stage-dockerfile.md) | Multi-Stage Dockerfile for Production | P1 |
 
 ## Dependencies
 - EPIC-025 (Worker Reliability) — workers should be hardened before being formalized in topology

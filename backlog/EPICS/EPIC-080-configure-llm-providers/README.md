@@ -16,8 +16,8 @@ LLM-based features (company descriptions, AI maturity assessment, competitor ide
 | Story | Title | Status | Notes |
 |-------|-------|--------|-------|
 | [STORY-321](STORIES/STORY-321.md) | Configure primary LLM provider (Anthropic Claude) with API key in .env | 🔴 READY | Deps: none |
-| [STORY-322](STORIES/STORY-322.md) | Configure fallback LLM provider chain (3+ providers) | 🔴 READY | Deps: STORY-321 |
-| [STORY-323](STORIES/STORY-323.md) | Verify LLM health check + deep_analyzer produces real output (not template) | 🔴 READY | Deps: STORY-321 |
+| [STORY-322](STORIES/STORY-322.md) | Configure fallback LLM provider chain (3+ providers) | 🔴 READY | Deps: [STORY-321](STORIES/STORY-321.md) |
+| [STORY-323](STORIES/STORY-323.md) | Verify LLM health check + deep_analyzer produces real output (not template) | 🔴 READY | Deps: [STORY-321](STORIES/STORY-321.md) |
 
 ## Success Criteria
 

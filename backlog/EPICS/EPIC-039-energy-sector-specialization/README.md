@@ -16,10 +16,10 @@ Energy 21 is the living proof case for Solstein's methodology. The call revealed
 
 | Story | Title | Priority |
 |-------|-------|----------|
-| STORY-149 | Energy Compliance & Control Intelligence Module | P1 |
-| STORY-150 | Energy Forecasting Capability Scoring | P1 |
-| STORY-151 | Trading Platform Sophistication Assessment | P2 |
-| STORY-152 | Grid Point Access & Integration Scoring | P2 |
+| [STORY-149](STORIES/STORY-149-energy-compliance-module.md) | Energy Compliance & Control Intelligence Module | P1 |
+| [STORY-150](STORIES/STORY-150-energy-forecasting-scoring.md) | Energy Forecasting Capability Scoring | P1 |
+| [STORY-151](STORIES/STORY-151-trading-platform-assessment.md) | Trading Platform Sophistication Assessment | P2 |
+| [STORY-152](STORIES/STORY-152-grid-integration-scoring.md) | Grid Point Access & Integration Scoring | P2 |
 
 ## Dependencies
 

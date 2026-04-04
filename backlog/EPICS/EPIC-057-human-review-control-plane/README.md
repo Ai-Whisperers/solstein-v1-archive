@@ -5,7 +5,7 @@
 | **Status** | 🔴 Not Started |
 | **Priority** | P1 – High |
 | **Created** | 2026-03-10 |
-| **Stories** | STORY-218, STORY-219, STORY-220, STORY-221 |
+| **Stories** | [STORY-218](STORIES/STORY-218-recipe-schema-validator.md), [STORY-219](STORIES/STORY-219-plan-compilation-hash.md), [STORY-220](STORIES/STORY-220-reviewer-loop-template.md), [STORY-221](STORIES/STORY-221-recipe-versioning-rollbacks.md) |
 | **Dependencies** | EPIC-053, EPIC-054, EPIC-056 |
 
 ## Context
@@ -27,10 +27,10 @@ This epic introduces configuration-defined research recipes and reusable produce
 
 | Story | Title | Priority | Status |
 |-------|-------|----------|--------|
-| STORY-218 | Define recipe schema and validator | P1 | 🔴 Not Started |
-| STORY-219 | Implement recipe-to-plan compilation with deterministic hashing | P1 | 🔴 Not Started |
-| STORY-220 | Add producer-reviewer loop template with bounded retries | P1 | 🔴 Not Started |
-| STORY-221 | Add recipe versioning, promotion rules, and rollback controls | P2 | 🔴 Not Started |
+| [STORY-218](STORIES/STORY-218-recipe-schema-validator.md) | Define recipe schema and validator | P1 | 🔴 Not Started |
+| [STORY-219](STORIES/STORY-219-plan-compilation-hash.md) | Implement recipe-to-plan compilation with deterministic hashing | P1 | 🔴 Not Started |
+| [STORY-220](STORIES/STORY-220-reviewer-loop-template.md) | Add producer-reviewer loop template with bounded retries | P1 | 🔴 Not Started |
+| [STORY-221](STORIES/STORY-221-recipe-versioning-rollbacks.md) | Add recipe versioning, promotion rules, and rollback controls | P2 | 🔴 Not Started |
 
 ## Success Criteria
 

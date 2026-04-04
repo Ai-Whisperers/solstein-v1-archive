@@ -1,7 +1,7 @@
 # EPIC-058: Data Conversion Pipeline Consolidation
 
 > **Priority**: P0 – Critical (affects all data ingestion)  
-> **Stories**: 4 (STORY-202 through STORY-205)  
+> **Stories**: 4 ([STORY-202](STORIES/STORY-202.md) through [STORY-205](STORIES/STORY-205.md))  
 > **Effort**: L (5–6 days total)  
 > **Dependencies**: EPIC-047 (Data Loading Fidelity), EPIC-003 (Core Product Correctness)  
 > **Status**: 🔴 Not Started
@@ -69,10 +69,10 @@ elif isinstance(revenue_data, (int, float)):
 
 | Story | Title | Priority | Size | Notes |
 |-------|-------|----------|------|-------|
-| STORY-202 | Replace `convert_json_to_company()` with unified extractor functions | P0 | M | Delete dead code from run_eneve_199.py, use company_extractors.py functions |
-| STORY-203 | Add format auto-detection for revenue/growth_rate/profit_margin fields | P0 | M | Handle both flat (float) and nested (dict with timeline) structures |
-| STORY-204 | Wire metric_lineage confidence into Company.signal_confidences | P1 | S | Extract 0.72-0.78 confidence values from metric_lineage, use in scoring |
-| STORY-205 | Add golden-dataset format verification test | P1 | M | Test conversion against real JSON structure (both flat and nested), verify no field loss |
+| [STORY-202](STORIES/STORY-202.md) | Replace `convert_json_to_company()` with unified extractor functions | P0 | M | Delete dead code from run_eneve_199.py, use company_extractors.py functions |
+| [STORY-203](STORIES/STORY-203.md) | Add format auto-detection for revenue/growth_rate/profit_margin fields | P0 | M | Handle both flat (float) and nested (dict with timeline) structures |
+| [STORY-204](STORIES/STORY-204.md) | Wire metric_lineage confidence into Company.signal_confidences | P1 | S | Extract 0.72-0.78 confidence values from metric_lineage, use in scoring |
+| [STORY-205](STORIES/STORY-205.md) | Add golden-dataset format verification test | P1 | M | Test conversion against real JSON structure (both flat and nested), verify no field loss |
 
 ---
 

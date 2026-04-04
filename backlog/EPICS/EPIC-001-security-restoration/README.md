@@ -9,7 +9,7 @@
 | Field | Value |
 |-------|-------|
 | Priority | **P0 — Ship Blocker** |
-| Status | 🔴 Open |
+| Status | 📦 Superseded — see EPIC-020 |
 | Stories | 5 |
 | Created | 2026-02-28 |
 | Depends On | [EPIC-002: Configuration Integrity](../EPIC-002-configuration-integrity/README.md) must complete first |

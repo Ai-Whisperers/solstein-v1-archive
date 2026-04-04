@@ -4,7 +4,7 @@
 |-------|-------|
 | Priority | P1 |
 | Status | 🔴 Open |
-| Stories | STORY-032, STORY-033, STORY-034, STORY-035 |
+| Stories | [STORY-032](STORIES/STORY-032-single-cache-abstraction.md), [STORY-033](STORIES/STORY-033-single-validation-service.md), [STORY-034](STORIES/STORY-034-fix-n-plus-one-queries.md), [STORY-035](STORIES/STORY-035-add-missing-database-indexes.md) |
 | Created | 2026-02-28 |
 
 ---
@@ -66,4 +66,4 @@ The same data field is potentially validated three times with different rules. O
 
 ## Ordering Notes
 
-STORY-032 (cache), STORY-033 (validation), and STORY-034 (N+1 queries) are independent and can be executed in parallel. STORY-035 (indexes) should follow STORY-034 because the index additions should be verified by testing the queries that STORY-034 pushes to the database.
+[STORY-032](STORIES/STORY-032-single-cache-abstraction.md) (cache), [STORY-033](STORIES/STORY-033-single-validation-service.md) (validation), and [STORY-034](STORIES/STORY-034-fix-n-plus-one-queries.md) (N+1 queries) are independent and can be executed in parallel. [STORY-035](STORIES/STORY-035-add-missing-database-indexes.md) (indexes) should follow [STORY-034](STORIES/STORY-034-fix-n-plus-one-queries.md) because the index additions should be verified by testing the queries that [STORY-034](STORIES/STORY-034-fix-n-plus-one-queries.md) pushes to the database.

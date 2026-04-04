@@ -1,7 +1,7 @@
 # EPIC-067: Legacy Runtime Canonicalization
 
 > **Priority**: P0 - Ship Blocker
-> **Stories**: 5 (STORY-255 through STORY-258, STORY-271)
+> **Stories**: 5 ([STORY-255](STORIES/STORY-255-freeze-graph-runtime-and-declare-legacy-canonical.md) through [STORY-258](STORIES/STORY-258-define-salvage-vs-rebuild-trigger-for-legacy-runtime.md), [STORY-271](STORIES/STORY-271-publish-runtime-depth-and-duplication-ledger.md))
 > **Effort**: L (2-3 weeks)
 > **Dependencies**: EPIC-058 (Data Conversion Pipeline Consolidation), EPIC-066 (Architectural Boundaries and Cycle Elimination)
 > **Status**: 🔴 Not Started

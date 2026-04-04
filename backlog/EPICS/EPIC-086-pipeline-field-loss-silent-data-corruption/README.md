@@ -1,7 +1,7 @@
 # EPIC-086: Pipeline Field Loss — Silent Data Corruption
 
 > **Priority**: P0 – CRITICAL (root cause of hallucinated/fabricated output content)
-> **Stories**: 4 (STORY-348 through STORY-351)
+> **Stories**: 4 ([STORY-348](STORIES/STORY-348.md) through [STORY-351](STORIES/STORY-351.md))
 > **Effort**: L (5–7 days total)
 > **Dependencies**: None — must be resolved before ANY other pipeline work
 > **Status**: ✅ COMPLETE (all 4 stories done as of 2026-04-03)
@@ -59,10 +59,10 @@ no test failure. The domain models become a silent corruption sink.
 
 | Story | Title | Priority | Size | Blocks |
 |-------|-------|----------|------|--------|
-| STORY-348 | Change `extra="ignore"` to `extra="forbid"` on Company and FinancialMetric | P0 | S | All others — this makes all existing losses visible |
-| STORY-349 | Add signal extractors for all orphaned fact types | P0 | M | STORY-350 |
-| STORY-350 | Map all surviving signals and facts to Company/FinancialMetric fields | P0 | M | — |
-| STORY-351 | Add field-count regression gate: assert field survival across all pipeline layers | P0 | S | — |
+| [STORY-348](STORIES/STORY-348.md) | Change `extra="ignore"` to `extra="forbid"` on Company and FinancialMetric | P0 | S | All others — this makes all existing losses visible |
+| [STORY-349](STORIES/STORY-349.md) | Add signal extractors for all orphaned fact types | P0 | M | [STORY-350](STORIES/STORY-350.md) |
+| [STORY-350](STORIES/STORY-350.md) | Map all surviving signals and facts to Company/FinancialMetric fields | P0 | M | — |
+| [STORY-351](STORIES/STORY-351.md) | Add field-count regression gate: assert field survival across all pipeline layers | P0 | S | — |
 
 **Execution order: 348 → 349 → 350 → 351** (run in sequence; each story will cause failures that the next fixes)
 
@@ -70,10 +70,10 @@ no test failure. The domain models become a silent corruption sink.
 
 ## Definition of Done
 
-- [x] `extra="forbid"` enforced on `Company` and `FinancialMetric` (STORY-348)
-- [x] All orphaned fact types have signal extractors (ebitda, net_income, pe_ratio, current_price, eps_ttm added; 15 extractors total) (STORY-349)
-- [x] All surviving signals and facts mapped to Company/FinancialMetric fields; 5 new FinancialMetric fields + 14 new Company fields (STORY-350)
-- [x] Pipeline regression test asserts field survival across all layers (8 tests in test_pipeline_field_survival.py) (STORY-351)
+- [x] `extra="forbid"` enforced on `Company` and `FinancialMetric` ([STORY-348](STORIES/STORY-348.md))
+- [x] All orphaned fact types have signal extractors (ebitda, net_income, pe_ratio, current_price, eps_ttm added; 15 extractors total) ([STORY-349](STORIES/STORY-349.md))
+- [x] All surviving signals and facts mapped to Company/FinancialMetric fields; 5 new FinancialMetric fields + 14 new Company fields ([STORY-350](STORIES/STORY-350.md))
+- [x] Pipeline regression test asserts field survival across all layers (8 tests in test_pipeline_field_survival.py) ([STORY-351](STORIES/STORY-351.md))
 - [x] `ruff check` and `pytest` both pass at 0 errors
 - [x] No existing test deleted or weakened
 
@@ -93,7 +93,7 @@ no test failure. The domain models become a silent corruption sink.
 
 ## Implementation Notes
 
-### STORY-348 will break existing tests intentionally
+### [STORY-348](STORIES/STORY-348.md) will break existing tests intentionally
 Changing to `extra="forbid"` will expose every place in the codebase that passes undeclared fields to
 `Company` or `FinancialMetric`. **Each failure is a real bug, not a test problem.** Fix the caller,
 not the model config.

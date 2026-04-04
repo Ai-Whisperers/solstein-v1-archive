@@ -16,10 +16,10 @@ The call with Michiel Kuiper revealed a critical gap in the PE market: the tradi
 
 | Story | Title | Priority |
 |-------|-------|----------|
-| STORY-145 | Portfolio Company AI-Readiness Scoring Model | P1 |
-| STORY-146 | AI Transformation Readiness Calculator | P1 |
-| STORY-147 | PE Due Diligence Integration Module | P1 |
-| STORY-148 | Transformation Roadmap Generator | P2 |
+| [STORY-145](STORIES/STORY-145-portfolio-ai-readiness-scoring.md) | Portfolio Company AI-Readiness Scoring Model | P1 |
+| [STORY-146](STORIES/STORY-146-transformation-readiness-calculator.md) | AI Transformation Readiness Calculator | P1 |
+| [STORY-147](STORIES/STORY-147-pe-due-diligence-integration.md) | PE Due Diligence Integration Module | P1 |
+| [STORY-148](STORIES/STORY-148-transformation-roadmap-generator.md) | Transformation Roadmap Generator | P2 |
 
 ## Dependencies
 

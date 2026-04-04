@@ -1,7 +1,7 @@
 # EPIC-059: Input Validation & Graceful Degradation
 
 > **Priority**: P1 – High (prevents silent data corruption)  
-> **Stories**: 6 (STORY-206 through STORY-210, STORY-251)  
+> **Stories**: 6 ([STORY-206](STORIES/STORY-206.md) through [STORY-210](STORIES/STORY-210.md), [STORY-251](STORIES/STORY-251-enforce-strict-boundary-schemas.md))  
 > **Effort**: M (3–4 days total)  
 > **Dependencies**: EPIC-047 (Data Loading Fidelity), EPIC-046 (Scoring Engine Correctness)  
 > **Status**: 🔴 Not Started
@@ -43,12 +43,12 @@ The data pipeline silently accepts incomplete or invalid data, passes it through
 
 | Story | Title | Priority | Size | Notes |
 |-------|-------|----------|------|-------|
-| STORY-206 | Add input validation to Company model (require revenue OR employees) | P1 | S | Either one must be present, halt on both-missing |
-| STORY-207 | Add None-safety checks in GrowthScorer and CompetitivePositionScorer | P1 | M | Skip scoring for None fields, reduce confidence weight |
-| STORY-208 | Extract and apply metric_lineage confidence to signal_confidences | P1 | M | Confidence 0.72→weight 0.72 applied to score component |
-| STORY-209 | Add conversion output validation before Company construction | P1 | S | Fail fast if conversion loses too many fields |
-| STORY-210 | Implement graceful degradation mode for incomplete data | P2 | M | Score with warnings instead of blocking export |
-| STORY-251 | Enforce strict boundary schemas for connector, API, and domain ingress | P1 | M | Reject undeclared fields at high-risk boundaries while preserving explicit legacy aliases |
+| [STORY-206](STORIES/STORY-206.md) | Add input validation to Company model (require revenue OR employees) | P1 | S | Either one must be present, halt on both-missing |
+| [STORY-207](STORIES/STORY-207.md) | Add None-safety checks in GrowthScorer and CompetitivePositionScorer | P1 | M | Skip scoring for None fields, reduce confidence weight |
+| [STORY-208](STORIES/STORY-208.md) | Extract and apply metric_lineage confidence to signal_confidences | P1 | M | Confidence 0.72→weight 0.72 applied to score component |
+| [STORY-209](STORIES/STORY-209.md) | Add conversion output validation before Company construction | P1 | S | Fail fast if conversion loses too many fields |
+| [STORY-210](STORIES/STORY-210.md) | Implement graceful degradation mode for incomplete data | P2 | M | Score with warnings instead of blocking export |
+| [STORY-251](STORIES/STORY-251-enforce-strict-boundary-schemas.md) | Enforce strict boundary schemas for connector, API, and domain ingress | P1 | M | Reject undeclared fields at high-risk boundaries while preserving explicit legacy aliases |
 
 ---
 
@@ -148,8 +148,8 @@ Add test fixtures for:
 ### Develop-Relevant Evidence
 
 - `tests/unit/test_story209_validation_before_scoring.py` already exists and should be treated as a real boundary-validation anchor rather than a future placeholder.
-- `STORY-206` through `STORY-210` already encode Pydantic `ValidationError` expectations and conversion/scoring validation behavior in a machine-checkable way.
-- The 2026-03-31 audit found connector and API ingress paths still accepting or silently discarding undeclared keys; `STORY-251` is the follow-up hardening item for those boundaries.
+- `[STORY-206](STORIES/STORY-206.md)` through `[STORY-210](STORIES/STORY-210.md)` already encode Pydantic `ValidationError` expectations and conversion/scoring validation behavior in a machine-checkable way.
+- The 2026-03-31 audit found connector and API ingress paths still accepting or silently discarding undeclared keys; `[STORY-251](STORIES/STORY-251-enforce-strict-boundary-schemas.md)` is the follow-up hardening item for those boundaries.
 - Future work should extend these validation-before-scoring contracts, not create a second detached validation pass.
 
 ### Next Agent Action

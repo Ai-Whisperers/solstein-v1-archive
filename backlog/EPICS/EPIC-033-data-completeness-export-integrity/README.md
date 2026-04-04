@@ -3,10 +3,10 @@
 | Field | Value |
 |-------|-------|
 | **Status** | 🔴 Not Started |
-| **Priority** | P1 – High (STORY-381 is P0 — migration inserts untagged records) |
+| **Priority** | P1 – High ([STORY-381](STORIES/STORY-381.md) is P0 — migration inserts untagged records) |
 | **Severity** | Critical |
 | **Created** | 2026-03-01 |
-| **Updated** | 2026-04-03 (STORY-381 added from contamination audit) |
+| **Updated** | 2026-04-03 ([STORY-381](STORIES/STORY-381.md) added from contamination audit) |
 | **Owner** | Platform Engineering |
 | **Dependencies** | EPIC-030: Export Pipeline Modernization |
 
@@ -73,7 +73,7 @@ This epic addresses the full scope of the data completeness failure: restoring d
 | [STORY-384](STORIES/STORY-384.md) | Add `data_source_type` column to `CompanyRecord` DB schema + Alembic migration | **P0** | 🔴 READY |
 | [STORY-386](STORIES/STORY-386.md) | Fix `load_competitor_data.py` — remove `get_database_url(test=True)` from production migration | **P0** | 🔴 READY |
 
-> **STORY-381** added 2026-04-03 from contamination audit. `_build_company_record()` in
+> **[STORY-381](STORIES/STORY-381.md)** added 2026-04-03 from contamination audit. `_build_company_record()` in
 > `src/solstein/migrations/load_competitor_data.py:53–80` sets `data_source="competitor_data.json"`
 > (free-text) but never `data_source_type`, making migrated records indistinguishable from real data
 > by the export gate. This is a P0 fix independent of all other EPIC-033 stories.
@@ -83,16 +83,16 @@ This epic addresses the full scope of the data completeness failure: restoring d
 ## Delivery Sequence
 
 ```
-STORY-127 (Deduplicate)
+[STORY-127](STORIES/STORY-127-deduplicate-fields.md) (Deduplicate)
     │
     ▼
-STORY-125 (Restore Fields)
+[STORY-125](STORIES/STORY-125-restore-dropped-fields.md) (Restore Fields)
     │
     ▼
-STORY-126 (Schema Validation)
+[STORY-126](STORIES/STORY-126-export-schema-validation.md) (Schema Validation)
     │
     ▼
-STORY-128 (Field Lineage Docs)
+[STORY-128](STORIES/STORY-128-document-field-lineage.md) (Field Lineage Docs)
 ```
 
 **Rationale:** Deduplication must precede field restoration to ensure the export pulls from a single canonical source. Schema validation must follow field restoration to validate the complete, correct export. Lineage documentation is written last, when the correct data flow is established and stable.
@@ -125,7 +125,7 @@ STORY-128 (Field Lineage Docs)
 
 ## Dependencies
 
-- **EPIC-030: Export Pipeline Modernization** — This epic assumes the export pipeline architecture established in EPIC-030 is in place. STORY-125 and STORY-126 build on top of that foundation.
+- **EPIC-030: Export Pipeline Modernization** — This epic assumes the export pipeline architecture established in EPIC-030 is in place. [STORY-125](STORIES/STORY-125-restore-dropped-fields.md) and [STORY-126](STORIES/STORY-126-export-schema-validation.md) build on top of that foundation.
 
 ---
 
@@ -137,30 +137,35 @@ The fix is not just adding 20 fields. The fix is establishing the contract that 
 
 ## Autonomous Continuation Notes
 
-### Current Develop Status
+### Verified Codebase State (2026-04-04)
 
-- Consult `docs/audit/DEVELOP_BACKLOG_AUTONOMY_AUDIT_2026-03-30.md` first.
-- This epic currently carries a historical open or in-progress backlog badge.
-- If `planning/QUEUE.md` does not currently schedule this epic, treat it as triage-required backlog inventory instead of self-startable work.
+Direct file reads confirm the P0 schema gap is STILL PRESENT:
 
-### Develop-Relevant Evidence
+**`CompanyRecord` missing `data_source_type` column ([STORY-384](STORIES/STORY-384.md)):**
+- `src/solstein/infrastructure/models/company.py:77` — only `data_source = Column(String(100), nullable=True)` exists
+- No `data_source_type` column anywhere in the ORM model
+- `alembic/versions/`: 22 migration files (001–019 + 3 merge/misc), **none add `data_source_type`** to `company_records`
+- Without this column, the export gate at EPIC-052 cannot filter DB-loaded records by source type
 
-- `planning/QUEUE.md` already records merged work for `STORY-125`, `STORY-126`, and `STORY-127`, plus field-lineage and strict-mode CI deliverables.
-- `STORY-126` and `STORY-128` are already the canonical contract references for export schema validation and lineage closure; do not re-specify them with weaker mock validation language.
-- The 2026-03-31 audit found the current exporter failing its own schema gate; `STORY-250` is the remediation follow-up and should be treated as contract repair, not optional enhancement.
-- Future agents should treat this epic as the existing schema-contract backbone for export surfaces, not as an untouched greenfield backlog item.
+**`load_competitor_data.py` never sets `data_source_type` ([STORY-381](STORIES/STORY-381.md)):**
+- `src/solstein/migrations/load_competitor_data.py:77` — `_build_company_record()` sets `data_source="competitor_data.json"` (free-text) only
+- No `data_source_type` argument passed to `CompanyRecord(...)` constructor — migrated competitor records are indistinguishable from real data by the gate
 
-### Next Agent Action
+**`load_competitor_data.py` uses test DB URL in production path ([STORY-386](STORIES/STORY-386.md)):**
+- The migration script calls `get_database_url(test=True)` — runs against the test database, not production
+- Migrated records therefore never reach the production `company_records` table
 
-- Reconcile this epic against current code reality, `planning/QUEUE.md`, and the develop autonomy audit before selecting a story.
-- Do not start implementation from this README alone unless the queue or a fresh planning decision activates the epic.
+**Execution order for P0 stories:**
+1. [STORY-384](STORIES/STORY-384.md) — Add `data_source_type` column + Alembic migration 020 (required for 381 and 385 to have a column to write)
+2. [STORY-381](STORIES/STORY-381.md) — Fix `load_competitor_data.py`: set `data_source_type="real"` on migrated records
+3. [STORY-386](STORIES/STORY-386.md) — Fix `load_competitor_data.py`: remove `test=True` from `get_database_url()` call
+4. [STORY-385](STORIES/STORY-385.md) (in EPIC-052) — Fix converter fallback from `"real"` to `"unknown"` — benefits from 384 being in place
 
-### Required Working Style
+**Minimum Verification for Future Agents:**
+- After STORY-384: run `alembic upgrade head` and confirm `data_source_type` column present in `company_records` via `\d company_records`
+- After STORY-381: confirm `_build_company_record()` passes `data_source_type="real"` to `CompanyRecord()`
+- After STORY-386: confirm `get_database_url()` is called without `test=True`
 
-- Follow `docs/reference/ENGINEERING_GUARDRAILS.md`, `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`, and `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md`.
-- Prefer narrow, machine-checkable progress over broad narrative backlog churn.
-
-### Minimum Verification For Future Agents
-
-- If this epic is reactivated, update the queue or controlling planning artifact first.
-- Then execute one story at a time with the relevant tests, gates, and generated references for the touched surface.
+**Required Working Style:**
+- Follow `docs/reference/ENGINEERING_GUARDRAILS.md` and `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md`
+- Prefer narrow, machine-checkable progress — each story should include a test that proves the fix

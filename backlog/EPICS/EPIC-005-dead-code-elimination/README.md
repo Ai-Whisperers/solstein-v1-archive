@@ -4,7 +4,7 @@
 |-------|-------|
 | Priority | P1 |
 | Status | 🔴 Open |
-| Stories | STORY-015, STORY-016, STORY-017, STORY-018 |
+| Stories | [STORY-015](STORIES/STORY-015-consolidate-worker-tasks.md), [STORY-016](STORIES/STORY-016-wire-or-delete-usage-tracker.md), [STORY-017](STORIES/STORY-017-implement-or-remove-stub-agents.md), [STORY-018](STORIES/STORY-018-remove-temporal-workflow-stubs.md) |
 | Created | 2026-02-28 |
 
 ---
@@ -49,4 +49,4 @@ This epic eliminates dead code that actively misleads developers and, in the cas
 
 ## Ordering Notes
 
-Stories in this epic are independent and can be executed in parallel. STORY-017 (stub agents) is the highest-risk item due to the possibility of fabricated data in client deliverables — it should be prioritised for investigation even if full implementation of replacement agents is deferred.
+Stories in this epic are independent and can be executed in parallel. [STORY-017](STORIES/STORY-017-implement-or-remove-stub-agents.md) (stub agents) is the highest-risk item due to the possibility of fabricated data in client deliverables — it should be prioritised for investigation even if full implementation of replacement agents is deferred.

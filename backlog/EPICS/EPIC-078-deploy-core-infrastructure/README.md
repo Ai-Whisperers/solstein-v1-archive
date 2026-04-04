@@ -16,10 +16,10 @@ The platform requires PostgreSQL 15 (with pgvector), Redis 7, and SearXNG to fun
 | Story | Title | Status | Notes |
 |-------|-------|--------|-------|
 | [STORY-311](STORIES/STORY-311.md) | Deploy PostgreSQL 15 with pgvector extension (docker-compose or managed) | 🔴 READY | Deps: none |
-| [STORY-312](STORIES/STORY-312.md) | Run all Alembic migrations on deployed database | 🔴 READY | Deps: STORY-311 |
+| [STORY-312](STORIES/STORY-312.md) | Run all Alembic migrations on deployed database | 🔴 READY | Deps: [STORY-311](STORIES/STORY-311.md) |
 | [STORY-313](STORIES/STORY-313.md) | Deploy Redis 7 for Celery broker and result backend | 🔴 READY | Deps: none |
 | [STORY-314](STORIES/STORY-314.md) | Deploy SearXNG instance for web search | 🔴 READY | Deps: none |
-| [STORY-315](STORIES/STORY-315.md) | Create .env.production with all required env vars, secrets rotated | 🔴 READY | Deps: STORY-311 through STORY-314 |
+| [STORY-315](STORIES/STORY-315.md) | Create .env.production with all required env vars, secrets rotated | 🔴 READY | Deps: [STORY-311](STORIES/STORY-311.md) through [STORY-314](STORIES/STORY-314.md) |
 
 ## Success Criteria
 

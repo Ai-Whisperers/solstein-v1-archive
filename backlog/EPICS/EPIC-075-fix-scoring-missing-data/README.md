@@ -18,8 +18,8 @@ Current scorers produce near-zero composite scores for companies with incomplete
 | [STORY-298](STORIES/STORY-298.md) | GrowthMomentumScorer: change base from 0 to 3.0, reduce missing-data penalty from -1.0 to -0.5 | 🔴 READY | Deps: none. File: analytics/scorers/growth_momentum.py |
 | [STORY-299](STORIES/STORY-299.md) | FinancialHealthScorer: change base from 2.5 to 4.0, reduce missing-revenue penalty from -2.0 to -0.5 | 🔴 READY | Deps: none. File: analytics/scorers/financial_health.py |
 | [STORY-300](STORIES/STORY-300.md) | Add DataCompletenessScorer: new scorer that measures % of data fields populated per company | 🔴 READY | Deps: none |
-| [STORY-301](STORIES/STORY-301.md) | Weight composite score by data completeness — high-data companies weighted more in market analysis | 🔴 READY | Deps: STORY-300 |
-| [STORY-302](STORIES/STORY-302.md) | Update golden dataset expected ranges to match corrected scoring formula | 🔴 READY | Deps: STORY-298, STORY-299 |
+| [STORY-301](STORIES/STORY-301.md) | Weight composite score by data completeness — high-data companies weighted more in market analysis | 🔴 READY | Deps: [STORY-300](STORIES/STORY-300.md) |
+| [STORY-302](STORIES/STORY-302.md) | Update golden dataset expected ranges to match corrected scoring formula | 🔴 READY | Deps: [STORY-298](STORIES/STORY-298.md), [STORY-299](STORIES/STORY-299.md) |
 
 ## Success Criteria
 
@@ -30,4 +30,4 @@ Current scorers produce near-zero composite scores for companies with incomplete
 
 ## Dependencies
 
-- STORY-302 blocks STORY-339 (update golden dataset expected ranges)
+- [STORY-302](STORIES/STORY-302.md) blocks STORY-339 (update golden dataset expected ranges)

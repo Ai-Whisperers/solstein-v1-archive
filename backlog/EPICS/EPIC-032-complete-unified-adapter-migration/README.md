@@ -7,7 +7,7 @@
 | **Severity** | Critical |
 | **Created** | 2026-03-01 |
 | **Dependencies** | EPIC-006 (unification of duplicates), STORY-092 (merge task files) |
-| **Stories** | STORY-121, STORY-122, STORY-123, STORY-124 |
+| **Stories** | [STORY-121](STORIES/STORY-121-restore-news-unified-error-handling.md), [STORY-122](STORIES/STORY-122-restore-funding-unified-wrapper.md), [STORY-123](STORIES/STORY-123-restore-website-validation.md), [STORY-124](STORIES/STORY-124-delete-old-adapters.md) |
 
 ---
 
@@ -43,12 +43,12 @@ This epic covers four stories that together complete the migration:
 
 | Story | Title | Focus |
 |-------|-------|-------|
-| STORY-121 | Restore Error Handling in news_unified.py | Error handling, retry logic |
-| STORY-122 | Restore Funding Adapter Wrapper | Error handling, news cross-reference |
-| STORY-123 | Restore Website Adapter Validation | Input validation, early exit |
-| STORY-124 | Delete Old Adapter Versions After Parity | Cleanup, import consolidation |
+| [STORY-121](STORIES/STORY-121-restore-news-unified-error-handling.md) | Restore Error Handling in news_unified.py | Error handling, retry logic |
+| [STORY-122](STORIES/STORY-122-restore-funding-unified-wrapper.md) | Restore Funding Adapter Wrapper | Error handling, news cross-reference |
+| [STORY-123](STORIES/STORY-123-restore-website-validation.md) | Restore Website Adapter Validation | Input validation, early exit |
+| [STORY-124](STORIES/STORY-124-delete-old-adapters.md) | Delete Old Adapter Versions After Parity | Cleanup, import consolidation |
 
-STORY-124 is a hard dependency on STORY-121, STORY-122, and STORY-123. Old files must not be deleted until unified parity is verified.
+[STORY-124](STORIES/STORY-124-delete-old-adapters.md) is a hard dependency on [STORY-121](STORIES/STORY-121-restore-news-unified-error-handling.md), [STORY-122](STORIES/STORY-122-restore-funding-unified-wrapper.md), and [STORY-123](STORIES/STORY-123-restore-website-validation.md). Old files must not be deleted until unified parity is verified.
 
 ---
 
@@ -69,11 +69,11 @@ STORY-124 is a hard dependency on STORY-121, STORY-122, and STORY-123. Old files
 | File | Issue |
 |------|-------|
 | `data/news_unified.py` | Missing error handling wrapper and retry logic |
-| `data/news.py` | Old version — to be deleted after STORY-121 |
+| `data/news.py` | Old version — to be deleted after [STORY-121](STORIES/STORY-121-restore-news-unified-error-handling.md) |
 | `data/funding_unified.py` | Missing `news_api_key` parameter and error wrapper |
-| `data/funding.py` | Old version — to be deleted after STORY-122 |
+| `data/funding.py` | Old version — to be deleted after [STORY-122](STORIES/STORY-122-restore-funding-unified-wrapper.md) |
 | `data/website_unified.py` | Missing early validation for empty website URL |
-| `data/website.py` | Old version — to be deleted after STORY-123 |
+| `data/website.py` | Old version — to be deleted after [STORY-123](STORIES/STORY-123-restore-website-validation.md) |
 | `data/linkedin.py` | Old version — to be deleted after parity confirmed |
 | `data/patents.py` | Old version — to be deleted after parity confirmed |
 | `data/web_search_news.py` | Old version — to be deleted after parity confirmed |
@@ -106,4 +106,4 @@ STORY-124 is a hard dependency on STORY-121, STORY-122, and STORY-123. Old files
 
 The irony of this epic is that the original unification effort was correct in intent. `BaseRefreshConnector` is the right abstraction. The problem is that architectural correctness was treated as a proxy for functional correctness, and it isn't. A class that inherits from the right base but drops error handling is worse than the class it replaced — it looks right while behaving wrong.
 
-STORY-124 (deletion of old files) should not be rushed. It is the final gate, not a cleanup task. Deleting the old adapters before parity is verified would remove the reference implementation that the unified adapters are supposed to match.
+[STORY-124](STORIES/STORY-124-delete-old-adapters.md) (deletion of old files) should not be rushed. It is the final gate, not a cleanup task. Deleting the old adapters before parity is verified would remove the reference implementation that the unified adapters are supposed to match.

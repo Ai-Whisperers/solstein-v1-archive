@@ -16,10 +16,10 @@ The call revealed Solstein's long-term strategic shift: from SaaS/consulting fee
 
 | Story | Title | Priority |
 |-------|-------|----------|
-| STORY-157 | Cap Table Integration & Equity Tracking | P2 |
-| STORY-158 | Portfolio Company Performance Correlation | P2 |
-| STORY-159 | Equity-Based Billing & Revenue Recognition | P2 |
-| STORY-160 | Investment Thesis Documentation & Tracking | P2 |
+| [STORY-157](STORIES/STORY-157-cap-table-integration.md) | Cap Table Integration & Equity Tracking | P2 |
+| [STORY-158](STORIES/STORY-158-portfolio-performance-correlation.md) | Portfolio Company Performance Correlation | P2 |
+| [STORY-159](STORIES/STORY-159-equity-based-billing.md) | Equity-Based Billing & Revenue Recognition | P2 |
+| [STORY-160](STORIES/STORY-160-investment-thesis-tracking.md) | Investment Thesis Documentation & Tracking | P2 |
 
 ## Dependencies
 

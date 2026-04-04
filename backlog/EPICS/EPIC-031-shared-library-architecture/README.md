@@ -16,11 +16,11 @@ The platform has accumulated several architectural debts in its utility and shar
 
 | Story | Title | Priority |
 |-------|-------|----------|
-| STORY-116 | Centralize All Retry/Backoff in core/retry_policy.py | P2 |
-| STORY-117 | Fix Circular Import Risk — Introduce shared/ Package | P2 |
-| STORY-118 | Formalize CLI as Proper Package Entrypoint | P2 |
-| STORY-119 | Split unified_loader.py into Separate Modules | P2 |
-| STORY-120 | Enforce UTC Timezone Policy Across All Modules | P2 |
+| [STORY-116](STORIES/STORY-116-centralize-retry-policy.md) | Centralize All Retry/Backoff in core/retry_policy.py | P2 |
+| [STORY-117](STORIES/STORY-117-fix-circular-imports-shared-package.md) | Fix Circular Import Risk — Introduce shared/ Package | P2 |
+| [STORY-118](STORIES/STORY-118-formalize-cli-entrypoint.md) | Formalize CLI as Proper Package Entrypoint | P2 |
+| [STORY-119](STORIES/STORY-119-split-unified-loader.md) | Split unified_loader.py into Separate Modules | P2 |
+| [STORY-120](STORIES/STORY-120-utc-timezone-policy.md) | Enforce UTC Timezone Policy Across All Modules | P2 |
 
 ## Dependencies
 

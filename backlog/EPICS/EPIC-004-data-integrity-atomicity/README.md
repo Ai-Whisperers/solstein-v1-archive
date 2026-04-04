@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | Priority | **P0 — Ship Blocker** |
-| Status | 🔶 Partial — STORY-012 Complete |
+| Status | 🔶 Partial — [STORY-012](STORIES/STORY-012-dual-write-atomicity.md) Complete |
 | Stories | 3 |
 | Created | 2026-02-28 |
 | Depends On | [EPIC-001: Security Restoration](../EPIC-001-security-restoration/README.md) |
@@ -46,4 +46,4 @@ Additionally, `data/unified_loader.py` line 929 hardcodes `GBP_EUR_RATE = 1.17`.
 
 ## Ordering Rationale
 
-The three stories in this epic are independent of each other and can be executed in parallel. However, STORY-012 (atomicity) should be prioritized as it addresses silent data corruption — the most dangerous class of defect because it is invisible until downstream consumers produce incorrect results.
+The three stories in this epic are independent of each other and can be executed in parallel. However, [STORY-012](STORIES/STORY-012-dual-write-atomicity.md) (atomicity) should be prioritized as it addresses silent data corruption — the most dangerous class of defect because it is invisible until downstream consumers produce incorrect results.

@@ -1,12 +1,12 @@
 # EPIC-087: Multi-Tenancy Enforcement
 
 > **Priority**: P1 – High (cross-tenant data leakage possible today)
-> **Stories**: 3 (STORY-352 through STORY-354)
+> **Stories**: 3 ([STORY-352](STORIES/STORY-352.md) through [STORY-354](STORIES/STORY-354.md))
 > **Effort**: M (3–5 days total)
 > **Dependencies**: Migrations 013–015 (already merged — schema exists)
 > **Status**: 🔴 Not Started
 > **Created**: 2026-04-03
-> **Updated**: 2026-04-03 (codebase audit corrected all file/table references; STORY-354 cancelled; execution order inverted)
+> **Updated**: 2026-04-03 (codebase audit corrected all file/table references; [STORY-354](STORIES/STORY-354.md) cancelled; execution order inverted)
 
 ---
 
@@ -27,21 +27,21 @@ Multi-tenancy infrastructure (migrations, models, `TenantAwareRepository`) exist
 
 | Story | Title | Priority | Size | Status |
 |-------|-------|----------|------|--------|
-| STORY-353 | Audit tenant isolation strategy: Option A (SQLAlchemy RLS event) vs Option B (app-layer exhaustive) | P1 | M | 🔴 READY |
-| STORY-352 | Fix `_validate_api_key()` stub and (if Option B) register `TenantIsolationMiddleware` | P1 | S | ⏳ BLOCKED by STORY-353 |
-| STORY-354 | ~~Duplicate of STORY-352~~ | — | — | ❌ CANCELLED |
+| [STORY-353](STORIES/STORY-353.md) | Audit tenant isolation strategy: Option A (SQLAlchemy RLS event) vs Option B (app-layer exhaustive) | P1 | M | 🔴 READY |
+| [STORY-352](STORIES/STORY-352.md) | Fix `_validate_api_key()` stub and (if Option B) register `TenantIsolationMiddleware` | P1 | S | ⏳ BLOCKED by [STORY-353](STORIES/STORY-353.md) |
+| [STORY-354](STORIES/STORY-354.md) | ~~Duplicate of [STORY-352](STORIES/STORY-352.md)~~ | — | — | ❌ CANCELLED |
 
 **Execution order**: 353 first (strategy decision), then 352 (implementation — scope depends on 353's decision).
 
-**Why 353 must precede 352**: If STORY-353 chooses Option A (wire PostgreSQL RLS via SQLAlchemy event listener), the `TenantIsolationMiddleware` registration in STORY-352 may be redundant or conflicting — scope shrinks to stub-fix only. If Option B, register and test fully.
+**Why 353 must precede 352**: If [STORY-353](STORIES/STORY-353.md) chooses Option A (wire PostgreSQL RLS via SQLAlchemy event listener), the `TenantIsolationMiddleware` registration in [STORY-352](STORIES/STORY-352.md) may be redundant or conflicting — scope shrinks to stub-fix only. If Option B, register and test fully.
 
-**Why STORY-354 is cancelled**: Identical scope to STORY-352 — both target `context.py:134–149`. No distinct deliverable. Do not reopen.
+**Why [STORY-354](STORIES/STORY-354.md) is cancelled**: Identical scope to [STORY-352](STORIES/STORY-352.md) — both target `context.py:134–149`. No distinct deliverable. Do not reopen.
 
 ---
 
 ## Definition of Done
 
-- [ ] STORY-353: written ADR capturing the chosen isolation strategy (Option A or B) with concrete rationale
+- [ ] [STORY-353](STORIES/STORY-353.md): written ADR capturing the chosen isolation strategy (Option A or B) with concrete rationale
 - [ ] `_validate_api_key(api_key)` queries `tenants` table via `api_key_hash` → returns `str(record.id)` or `None`
 - [ ] If Option B: `TenantIsolationMiddleware` registered in `main.py` after line 207 (after `TenantMiddleware` — do NOT remove `TenantMiddleware`)
 - [ ] `get_current_tenant()` returns correct `tenant_id` for API-key requests

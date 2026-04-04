@@ -18,7 +18,7 @@ The current capability overlap detector uses narrow keyword lists that miss most
 | [STORY-303](STORIES/STORY-303.md) | Expand capability keyword lists: add 20+ synonyms per Eneve capability | 🔴 READY | File: intelligence/capability_overlap.py |
 | [STORY-304](STORIES/STORY-304.md) | Add LLM-based capability matching: classify company descriptions against Eneve's 8 capabilities using structured extraction | 🔴 READY | Deps: LLM provider configured |
 | [STORY-305](STORIES/STORY-305.md) | Add energy-software-specific capability taxonomy with industry standard terms | 🔴 READY | Deps: none |
-| [STORY-306](STORIES/STORY-306.md) | Integrate capability overlap % into composite score formula as 4th dimension (10% weight) | 🔴 READY | Deps: STORY-303 |
+| [STORY-306](STORIES/STORY-306.md) | Integrate capability overlap % into composite score formula as 4th dimension (10% weight) | 🔴 READY | Deps: [STORY-303](STORIES/STORY-303.md) |
 
 ## Success Criteria
 
@@ -28,4 +28,4 @@ The current capability overlap detector uses narrow keyword lists that miss most
 
 ## Dependencies
 
-- LLM provider configured (STORY-321) for STORY-304
+- LLM provider configured (STORY-321) for [STORY-304](STORIES/STORY-304.md)

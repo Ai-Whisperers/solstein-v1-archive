@@ -2,7 +2,7 @@
 
 > **Discovered**: 2026-03-01 via live end-to-end run analysis  
 > **Priority**: P1 — High (primary user-facing output is low quality)  
-> **Stories**: 5 (STORY-181 through STORY-185)  > **Effort**: M–L (4–6 days total)
+> **Stories**: 5 ([STORY-181](STORIES/STORY-181.md) through [STORY-185](STORIES/STORY-185.md))  > **Effort**: M–L (4–6 days total)
 
 ---
 
@@ -26,11 +26,11 @@ The `generate-report` command produces 5 report files per company, but 3 of them
 
 | Story | Title | Priority | Size |
 |-------|-------|----------|------|
-| STORY-181 | Fix report output path nesting bug | P1 | S |
-| STORY-182 | Round all score outputs to 2 decimal places | P1 | S |
-| STORY-183 | Fix market overview classification counters | P1 | S |
-| STORY-184 | Replace boilerplate deep analysis with actual signal-based weaknesses | P1 | M |
-| STORY-185 | Add report content quality assertions to tests | P2 | M |
+| [STORY-181](STORIES/STORY-181.md) | Fix report output path nesting bug | P1 | S |
+| [STORY-182](STORIES/STORY-182.md) | Round all score outputs to 2 decimal places | P1 | S |
+| [STORY-183](STORIES/STORY-183.md) | Fix market overview classification counters | P1 | S |
+| [STORY-184](STORIES/STORY-184.md) | Replace boilerplate deep analysis with actual signal-based weaknesses | P1 | M |
+| [STORY-185](STORIES/STORY-185.md) | Add report content quality assertions to tests | P2 | M |
 
 ---
 

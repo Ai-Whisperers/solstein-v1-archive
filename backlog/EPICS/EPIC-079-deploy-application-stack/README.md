@@ -16,10 +16,10 @@ The application must be deployed as a Docker container with FastAPI, Celery work
 | Story | Title | Status | Notes |
 |-------|-------|--------|-------|
 | [STORY-316](STORIES/STORY-316.md) | Build and test Solstein Docker image | 🔴 READY | Deps: STORY-315 |
-| [STORY-317](STORIES/STORY-317.md) | Deploy FastAPI API server with uvicorn | 🔴 READY | Deps: STORY-316 |
-| [STORY-318](STORIES/STORY-318.md) | Deploy Celery worker (4 queues: default, scoring, export, enrichment) | 🔴 READY | Deps: STORY-316 |
-| [STORY-319](STORIES/STORY-319.md) | Deploy Celery Beat scheduler | 🔴 READY | Deps: STORY-318 |
-| [STORY-320](STORIES/STORY-320.md) | Verify all health checks pass (DB, Redis, workers, LLM) | 🔴 READY | Deps: STORY-317 through STORY-319 |
+| [STORY-317](STORIES/STORY-317.md) | Deploy FastAPI API server with uvicorn | 🔴 READY | Deps: [STORY-316](STORIES/STORY-316.md) |
+| [STORY-318](STORIES/STORY-318.md) | Deploy Celery worker (4 queues: default, scoring, export, enrichment) | 🔴 READY | Deps: [STORY-316](STORIES/STORY-316.md) |
+| [STORY-319](STORIES/STORY-319.md) | Deploy Celery Beat scheduler | 🔴 READY | Deps: [STORY-318](STORIES/STORY-318.md) |
+| [STORY-320](STORIES/STORY-320.md) | Verify all health checks pass (DB, Redis, workers, LLM) | 🔴 READY | Deps: [STORY-317](STORIES/STORY-317.md) through [STORY-319](STORIES/STORY-319.md) |
 
 ## Success Criteria
 

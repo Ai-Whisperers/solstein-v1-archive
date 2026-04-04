@@ -7,7 +7,7 @@
 | **Severity** | High |
 | **Created** | 2026-03-01 |
 | **Dependencies** | EPIC-002 (Configuration Integrity) |
-| **Stories** | STORY-137, STORY-138, STORY-139, STORY-140 |
+| **Stories** | [STORY-137](STORIES/STORY-137-centralize-env-vars.md), [STORY-138](STORIES/STORY-138-config-driven-paths.md), [STORY-139](STORIES/STORY-139-centralize-timeouts.md), [STORY-140](STORIES/STORY-140-fix-env-example.md) |
 
 ---
 
@@ -116,12 +116,12 @@ This epic establishes the discipline that should have existed from the start: a 
 
 ## Recommended Execution Order
 
-1. **STORY-137** first — establishes the config.py structure that all other stories depend on
-2. **STORY-138** second — path consolidation can reference the new config structure
-3. **STORY-139** third — timeout consolidation populates the config structure established in 137
-4. **STORY-140** last — `.env.example` is generated from the completed config.py
+1. **[STORY-137](STORIES/STORY-137-centralize-env-vars.md)** first — establishes the config.py structure that all other stories depend on
+2. **[STORY-138](STORIES/STORY-138-config-driven-paths.md)** second — path consolidation can reference the new config structure
+3. **[STORY-139](STORIES/STORY-139-centralize-timeouts.md)** third — timeout consolidation populates the config structure established in 137
+4. **[STORY-140](STORIES/STORY-140-fix-env-example.md)** last — `.env.example` is generated from the completed config.py
 
-STORY-137 is a hard prerequisite for STORY-140. STORY-138 and STORY-139 can proceed in parallel after STORY-137 is complete.
+[STORY-137](STORIES/STORY-137-centralize-env-vars.md) is a hard prerequisite for [STORY-140](STORIES/STORY-140-fix-env-example.md). [STORY-138](STORIES/STORY-138-config-driven-paths.md) and [STORY-139](STORIES/STORY-139-centralize-timeouts.md) can proceed in parallel after [STORY-137](STORIES/STORY-137-centralize-env-vars.md) is complete.
 
 ---
 

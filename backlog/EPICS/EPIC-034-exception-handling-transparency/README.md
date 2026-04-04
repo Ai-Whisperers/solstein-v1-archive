@@ -69,12 +69,12 @@ This epic does not ask for perfect error handling. It asks for **honest** error 
 ## Dependencies
 
 ### Upstream (Must Exist Before This Epic)
-- **EPIC-014 (Observability Infrastructure)**: Structured logging pipeline, metrics collection, and alerting infrastructure must be in place before error logs and metrics can be emitted meaningfully. If EPIC-014 is not complete, STORY-129 and STORY-130 should still add logging — but the logs will not be aggregated or alerted on until EPIC-014 delivers.
-- **EPIC-021 (LLM Stack Reliability)**: The LLM provider abstraction layer must be stable before STORY-129 can implement circuit breakers and provider-specific error classification.
+- **EPIC-014 (Observability Infrastructure)**: Structured logging pipeline, metrics collection, and alerting infrastructure must be in place before error logs and metrics can be emitted meaningfully. If EPIC-014 is not complete, [STORY-129](STORIES/STORY-129-enhanced-client-silent-failures.md) and [STORY-130](STORIES/STORY-130-adapter-exception-logging.md) should still add logging — but the logs will not be aggregated or alerted on until EPIC-014 delivers.
+- **EPIC-021 (LLM Stack Reliability)**: The LLM provider abstraction layer must be stable before [STORY-129](STORIES/STORY-129-enhanced-client-silent-failures.md) can implement circuit breakers and provider-specific error classification.
 
 ### Downstream (Blocked By This Epic)
 - Any epic that depends on accurate pipeline health metrics
-- Any epic that adds new data adapters (must follow standards from STORY-132)
+- Any epic that adds new data adapters (must follow standards from [STORY-132](STORIES/STORY-132-exception-standards-doc.md))
 - EPIC-035 (Retry and Backoff Strategy) — cannot implement intelligent retry without first knowing what errors are occurring
 
 ---
@@ -83,10 +83,10 @@ This epic does not ask for perfect error handling. It asks for **honest** error 
 
 Stories should be delivered in this sequence to maximize early value:
 
-1. **STORY-132** (Standards Document) — Define the target state before implementing it. Prevents rework.
-2. **STORY-129** (enhanced_client.py) — Highest-impact single file. LLM failures are the most expensive silent failures.
-3. **STORY-130** (Adapter Logging) — Broadest coverage. Touches the most files.
-4. **STORY-131** (Division Safety) — Narrowest scope. Targeted math fixes.
+1. **[STORY-132](STORIES/STORY-132-exception-standards-doc.md)** (Standards Document) — Define the target state before implementing it. Prevents rework.
+2. **[STORY-129](STORIES/STORY-129-enhanced-client-silent-failures.md)** (enhanced_client.py) — Highest-impact single file. LLM failures are the most expensive silent failures.
+3. **[STORY-130](STORIES/STORY-130-adapter-exception-logging.md)** (Adapter Logging) — Broadest coverage. Touches the most files.
+4. **[STORY-131](STORIES/STORY-131-null-safety-division.md)** (Division Safety) — Narrowest scope. Targeted math fixes.
 
 ---
 
@@ -104,6 +104,6 @@ Stories should be delivered in this sequence to maximize early value:
 
 ## Notes
 
-The 20+ silent failure locations identified in the audit represent the **known** failures. The actual count is likely higher — the audit was not exhaustive. Any new adapters or LLM integrations added before this epic is complete should be held to the standards defined in STORY-132, even if the document is not yet formally published.
+The 20+ silent failure locations identified in the audit represent the **known** failures. The actual count is likely higher — the audit was not exhaustive. Any new adapters or LLM integrations added before this epic is complete should be held to the standards defined in [STORY-132](STORIES/STORY-132-exception-standards-doc.md), even if the document is not yet formally published.
 
 The cynical read: the platform was built to never show errors because errors are embarrassing. The professional read: the platform needs to show errors because errors are information. This epic is the transition from the former to the latter.

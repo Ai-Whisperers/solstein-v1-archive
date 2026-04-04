@@ -2,7 +2,7 @@
 
 > **Discovered**: 2026-03-01 via live end-to-end run analysis  
 > **Priority**: P0–P1 — Core output of the platform is wrong  
-> **Stories**: 4 (STORY-173 through STORY-176)  
+> **Stories**: 4 ([STORY-173](STORIES/STORY-173.md) through [STORY-176](STORIES/STORY-176.md))  
 > **Effort**: M (3–4 days total)
 
 ---
@@ -29,10 +29,10 @@ Additionally, the scoring module contains 270 lines of dead private methods (`_c
 
 | Story | Title | Priority | Size |
 |-------|-------|----------|------|
-| STORY-173 | Derive `threat_level` from composite score and classification after scoring | P0 | S |
-| STORY-174 | Add null guard for `saas_maturity` in `CompetitivePositionScorer` | P0 | S |
-| STORY-175 | Remove 270 lines of dead `_calculate_*` private methods from `GrowthScorer` | P1 | S |
-| STORY-176 | Define authoritative `classification → threat_level` mapping in constants | P1 | S |
+| [STORY-173](STORIES/STORY-173.md) | Derive `threat_level` from composite score and classification after scoring | P0 | S |
+| [STORY-174](STORIES/STORY-174.md) | Add null guard for `saas_maturity` in `CompetitivePositionScorer` | P0 | S |
+| [STORY-175](STORIES/STORY-175.md) | Remove 270 lines of dead `_calculate_*` private methods from `GrowthScorer` | P1 | S |
+| [STORY-176](STORIES/STORY-176.md) | Define authoritative `classification → threat_level` mapping in constants | P1 | S |
 
 ---
 

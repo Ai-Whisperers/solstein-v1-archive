@@ -16,10 +16,10 @@ The repository root has accumulated 18+ markdown files that create visual clutte
 
 | Story | Title | Priority |
 |-------|-------|----------|
-| STORY-165 | Archive Historical Professionalization Documents | P2 |
-| STORY-166 | Consolidate Setup Documentation | P2 |
-| STORY-167 | Organize Strategic Documents and Call Summaries | P2 |
-| STORY-168 | Create Repository Organization Standards | P2 |
+| [STORY-165](STORIES/STORY-165-archive-professionalization-docs.md) | Archive Historical Professionalization Documents | P2 |
+| [STORY-166](STORIES/STORY-166-consolidate-setup-docs.md) | Consolidate Setup Documentation | P2 |
+| [STORY-167](STORIES/STORY-167-organize-strategic-docs.md) | Organize Strategic Documents and Call Summaries | P2 |
+| [STORY-168](STORIES/STORY-168-repository-organization-standards.md) | Create Repository Organization Standards | P2 |
 
 ## Dependencies
 

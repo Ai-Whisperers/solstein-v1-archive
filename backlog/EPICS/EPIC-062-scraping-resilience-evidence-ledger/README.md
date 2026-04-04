@@ -1,7 +1,7 @@
 # EPIC-062: Scraping Resilience and Field Evidence Ledger
 
 > **Priority**: P0 - Ship Blocker  
-> **Stories**: 4 (STORY-226 through STORY-229)  
+> **Stories**: 4 ([STORY-226](STORIES/STORY-226-domain-fetch-policy-matrix.md) through [STORY-229](STORIES/STORY-229-freshness-and-export-trust-tiers.md))  
 > **Effort**: L (2-3 weeks)  
 > **Dependencies**: EPIC-052 (Provenance, Confidence, and Quality Gates), EPIC-061 (Adaptive Research Planning and Source Intelligence), EPIC-033 (Data Completeness and Export Integrity)  
 > **Status**: 🔴 Not Started
@@ -38,10 +38,10 @@ This creates risk of stale carry-forward, difficult forensic tracing, and weak c
 
 | Story | Title | Priority | Size | Status |
 |-------|-------|----------|------|--------|
-| STORY-226 | Implement domain-aware fetch policy matrix and retry strategy | P0 | M | 🔴 Open |
-| STORY-227 | Add extraction contract with unit normalization and contradiction flags | P0 | L | 🔴 Open |
-| STORY-228 | Persist field-level evidence ledger and provenance lineage | P0 | L | 🔴 Open |
-| STORY-229 | Apply freshness windows and evidence-aware export trust tiers | P1 | M | 🔴 Open |
+| [STORY-226](STORIES/STORY-226-domain-fetch-policy-matrix.md) | Implement domain-aware fetch policy matrix and retry strategy | P0 | M | 🔴 Open |
+| [STORY-227](STORIES/STORY-227-extraction-contract-unit-normalization.md) | Add extraction contract with unit normalization and contradiction flags | P0 | L | 🔴 Open |
+| [STORY-228](STORIES/STORY-228-field-evidence-ledger.md) | Persist field-level evidence ledger and provenance lineage | P0 | L | 🔴 Open |
+| [STORY-229](STORIES/STORY-229-freshness-and-export-trust-tiers.md) | Apply freshness windows and evidence-aware export trust tiers | P1 | M | 🔴 Open |
 
 ---
 

@@ -53,7 +53,7 @@ This epic deletes 661 lines of custom client code and replaces them with three w
 
 ### Develop-Relevant Evidence
 
-- `STORY-072` is already the canonical structured-output/schema-enforcement backlog item for LLM boundaries.
+- `[STORY-072](STORIES/STORY-072-instructor-structured-outputs.md)` is already the canonical structured-output/schema-enforcement backlog item for LLM boundaries.
 - `docs/reference/TYPESCRIPT_ISSUE_MAPPING_2026-03-26.md` and `docs/reference/TYPESCRIPT_CRITICAL_NODES_PLAN.md` both point to strict contract boundaries, not ad-hoc parsing, as the intended develop direction.
 - Ivan should treat schema-validated LLM outputs as an existing requirement, not a speculative optional refinement.
 

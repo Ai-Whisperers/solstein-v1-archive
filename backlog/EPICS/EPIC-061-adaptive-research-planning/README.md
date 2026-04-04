@@ -1,7 +1,7 @@
 # EPIC-061: Adaptive Research Planning and Source Intelligence
 
 > **Priority**: P1 - High  
-> **Stories**: 4 (STORY-222 through STORY-225)  
+> **Stories**: 4 ([STORY-222](STORIES/STORY-222-source-intelligence-scoring.md) through [STORY-225](STORIES/STORY-225-decision-telemetry-benchmark.md))  
 > **Effort**: L (2-3 weeks)  
 > **Dependencies**: EPIC-050 (Web Acquisition Pipeline), EPIC-052 (Provenance, Confidence, and Quality Gates), EPIC-053 (Enrichment Observability and Evaluation Loop)  
 > **Status**: 🔴 Not Started
@@ -38,10 +38,10 @@ This causes avoidable low-value scraping, weaker source quality in top results, 
 
 | Story | Title | Priority | Size | Status |
 |-------|-------|----------|------|--------|
-| STORY-222 | Replace static relevance ranking with source intelligence scoring | P1 | M | 🔴 Open |
-| STORY-223 | Implement iterative uncertainty-driven research loop | P1 | L | 🔴 Open |
-| STORY-224 | Add query budget allocator by field priority and expected value | P1 | M | 🔴 Open |
-| STORY-225 | Build decision telemetry and benchmark runner for tuning | P1 | M | 🔴 Open |
+| [STORY-222](STORIES/STORY-222-source-intelligence-scoring.md) | Replace static relevance ranking with source intelligence scoring | P1 | M | 🔴 Open |
+| [STORY-223](STORIES/STORY-223-iterative-uncertainty-loop.md) | Implement iterative uncertainty-driven research loop | P1 | L | 🔴 Open |
+| [STORY-224](STORIES/STORY-224-query-budget-allocator.md) | Add query budget allocator by field priority and expected value | P1 | M | 🔴 Open |
+| [STORY-225](STORIES/STORY-225-decision-telemetry-benchmark.md) | Build decision telemetry and benchmark runner for tuning | P1 | M | 🔴 Open |
 
 ---
 

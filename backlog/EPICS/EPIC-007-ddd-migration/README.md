@@ -4,7 +4,7 @@
 |-------|-------|
 | Priority | P1 |
 | Status | 🔴 Open |
-| Stories | STORY-023, STORY-024, STORY-025, STORY-026, STORY-027 |
+| Stories | [STORY-023](STORIES/STORY-023-introduce-value-objects.md), [STORY-024](STORIES/STORY-024-migrate-company-rich-domain.md), [STORY-025](STORIES/STORY-025-abstract-repository-interfaces.md), [STORY-026](STORIES/STORY-026-define-domain-events.md), [STORY-027](STORIES/STORY-027-extract-domain-services.md) |
 | Created | 2026-02-28 |
 
 ---
@@ -60,6 +60,6 @@ Scoring logic, classification thresholds, and statistical calculations live in r
 
 ## Ordering Notes
 
-STORY-023 (Value Objects) should be completed before STORY-024 (rich domain model) because the entity methods will use Value Objects. STORY-025 (repository interfaces) is independent and can proceed in parallel. STORY-026 (domain events) depends on STORY-024 because events are emitted by entity state transitions. STORY-027 (domain services) depends on STORY-024 and STORY-025 because services use the rich entity and depend on repository interfaces.
+[STORY-023](STORIES/STORY-023-introduce-value-objects.md) (Value Objects) should be completed before [STORY-024](STORIES/STORY-024-migrate-company-rich-domain.md) (rich domain model) because the entity methods will use Value Objects. [STORY-025](STORIES/STORY-025-abstract-repository-interfaces.md) (repository interfaces) is independent and can proceed in parallel. [STORY-026](STORIES/STORY-026-define-domain-events.md) (domain events) depends on [STORY-024](STORIES/STORY-024-migrate-company-rich-domain.md) because events are emitted by entity state transitions. [STORY-027](STORIES/STORY-027-extract-domain-services.md) (domain services) depends on [STORY-024](STORIES/STORY-024-migrate-company-rich-domain.md) and [STORY-025](STORIES/STORY-025-abstract-repository-interfaces.md) because services use the rich entity and depend on repository interfaces.
 
-Recommended execution order: STORY-023 → STORY-024 → STORY-027, with STORY-025 and STORY-026 in parallel after their dependencies are met.
+Recommended execution order: [STORY-023](STORIES/STORY-023-introduce-value-objects.md) → [STORY-024](STORIES/STORY-024-migrate-company-rich-domain.md) → [STORY-027](STORIES/STORY-027-extract-domain-services.md), with [STORY-025](STORIES/STORY-025-abstract-repository-interfaces.md) and [STORY-026](STORIES/STORY-026-define-domain-events.md) in parallel after their dependencies are met.

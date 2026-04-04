@@ -1,7 +1,7 @@
 # EPIC-068: Boundary Schemas and Type Gates
 
 > **Priority**: P0 - Ship Blocker
-> **Stories**: 4 (STORY-259 through STORY-262)
+> **Stories**: 4 ([STORY-259](STORIES/STORY-259-define-canonical-boundary-models-for-runs-providers-and-company-payloads.md) through [STORY-262](STORIES/STORY-262-generate-json-schema-and-zod-from-canonical-python-contracts.md))
 > **Effort**: L (2-3 weeks)
 > **Dependencies**: EPIC-067 (Legacy Runtime Canonicalization), EPIC-052 (Provenance, Confidence, and Quality Gates)
 > **Status**: 🔴 Not Started

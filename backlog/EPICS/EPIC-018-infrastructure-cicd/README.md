@@ -36,10 +36,10 @@ This is not a nice-to-have. Without a CI pipeline, every bug fix in this backlog
 |-----------|--------|--------|
 | `src/` (main app) | ✅ Clean | 0 |
 | `tests/` (active) | ✅ Clean | 0 |
-| `scripts/ci/` | ✅ Clean | 0 (done in STORY-272 work branch) |
-| `scripts/` (legacy) | ✅ Done (STORY-273) | 0 |
-| `alembic/versions/` | ✅ Done (STORY-274) | 0 |
-| `.claude/`, `tests/unit/` sort, `bin/`, `src/research/` | ✅ Done (STORY-275) | 0 |
+| `scripts/ci/` | ✅ Clean | 0 (done in [STORY-272](STORIES/STORY-272-restore-ruff-gate-signal-on-develop.md) work branch) |
+| `scripts/` (legacy) | ✅ Done ([STORY-273](STORIES/STORY-273-ruff-slice-scripts-legacy.md)) | 0 |
+| `alembic/versions/` | ✅ Done ([STORY-274](STORIES/STORY-274-ruff-slice-alembic-versions.md)) | 0 |
+| `.claude/`, `tests/unit/` sort, `bin/`, `src/research/` | ✅ Done ([STORY-275](STORIES/STORY-275-ruff-slice-tooling-and-bin.md)) | 0 |
 | **Repo-wide total** | **✅ CLEAN** | **0** |
 
 ## Definition of Done

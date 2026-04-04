@@ -5,7 +5,7 @@
 | **Status** | 🔴 Not Started |
 | **Priority** | P1 – High |
 | **Created** | 2026-03-10 |
-| **Stories** | STORY-214, STORY-215, STORY-216, STORY-217 |
+| **Stories** | [STORY-214](STORIES/STORY-214-tool-contract-schema.md), [STORY-215](STORIES/STORY-215-connector-registry.md), [STORY-216](STORIES/STORY-216-sandbox-policy.md), [STORY-217](STORIES/STORY-217-status-envelope-taxonomy.md) |
 | **Dependencies** | EPIC-052 |
 
 ## Context
@@ -27,10 +27,10 @@ This epic introduces claim-level review gates and approval handling before downs
 
 | Story | Title | Priority | Status |
 |-------|-------|----------|--------|
-| STORY-214 | Detect and escalate critical contradictory claims | P1 | 🔴 Not Started |
-| STORY-215 | Implement decision model and adjudication API | P1 | 🔴 Not Started |
-| STORY-216 | Enforce scoring/export hold for unresolved critical claims | P1 | 🔴 Not Started |
-| STORY-217 | Update merge strategy from adjudication outcomes | P2 | 🔴 Not Started |
+| [STORY-214](STORIES/STORY-214-tool-contract-schema.md) | Detect and escalate critical contradictory claims | P1 | 🔴 Not Started |
+| [STORY-215](STORIES/STORY-215-connector-registry.md) | Implement decision model and adjudication API | P1 | 🔴 Not Started |
+| [STORY-216](STORIES/STORY-216-sandbox-policy.md) | Enforce scoring/export hold for unresolved critical claims | P1 | 🔴 Not Started |
+| [STORY-217](STORIES/STORY-217-status-envelope-taxonomy.md) | Update merge strategy from adjudication outcomes | P2 | 🔴 Not Started |
 
 ## Success Criteria
 

@@ -19,11 +19,11 @@ This epic hardens the worker system so that task failures are durable, task exec
 
 | Story | Title | Priority |
 |-------|-------|----------|
-| STORY-088 | Fix In-Memory DLQ — Persist to PostgreSQL | P1 |
-| STORY-089 | Set task_acks_late and task_reject_on_worker_lost | P1 |
-| STORY-090 | Implement Task Idempotency via Deduplication Lock | P1 |
-| STORY-091 | Set Result Expiry TTL to Prevent Redis Bloat | P1 |
-| STORY-092 | Merge worker_tasks_v2.py — Eliminate Duplicate Task Files | P1 |
+| [STORY-088](STORIES/STORY-088-persistent-dead-letter-queue.md) | Fix In-Memory DLQ — Persist to PostgreSQL | P1 |
+| [STORY-089](STORIES/STORY-089-task-acks-late-configuration.md) | Set task_acks_late and task_reject_on_worker_lost | P1 |
+| [STORY-090](STORIES/STORY-090-task-idempotency-deduplication.md) | Implement Task Idempotency via Deduplication Lock | P1 |
+| [STORY-091](STORIES/STORY-091-result-expiry-ttl.md) | Set Result Expiry TTL to Prevent Redis Bloat | P1 |
+| [STORY-092](STORIES/STORY-092-merge-duplicate-task-files.md) | Merge worker_tasks_v2.py — Eliminate Duplicate Task Files | P1 |
 
 ## Dependencies
 - EPIC-002 (Configuration Integrity) — environment-driven config must be stable first

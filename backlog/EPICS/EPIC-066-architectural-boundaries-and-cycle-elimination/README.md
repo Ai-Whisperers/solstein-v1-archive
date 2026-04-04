@@ -1,7 +1,7 @@
 # EPIC-066: Architectural Boundaries and Cycle Elimination
 
 > **Priority**: P1 - High
-> **Stories**: 4 (STORY-246 through STORY-249)
+> **Stories**: 4 ([STORY-246](STORIES/STORY-246-break-patents-unified-discovery-registry-cycle.md) through [STORY-249](STORIES/STORY-249-enforce-cycle-and-boundary-checks-in-gates.md))
 > **Effort**: M (1-2 weeks)
 > **Dependencies**: EPIC-065 (Documentation Lifecycle Automation and CI Enforcement), EPIC-031 (Shared Library Architecture)
 > **Status**: 🔴 Not Started
@@ -35,10 +35,10 @@ These issues do not always fail at runtime immediately, but they make strict typ
 
 | Story | Title | Priority | Size | Status |
 |---|---|---|---|---|
-| STORY-246 | Break `patents_unified` / discovery / registry cycle | P1 | S | 🔴 Open |
-| STORY-247 | Move canonicalization and hashing helpers to a lower shared boundary | P1 | M | 🔴 Open |
-| STORY-248 | Decouple domain value objects from analytics constants | P1 | S | 🔴 Open |
-| STORY-249 | Enforce import-cycle and module-boundary checks in maintained gates | P1 | M | 🔴 Open |
+| [STORY-246](STORIES/STORY-246-break-patents-unified-discovery-registry-cycle.md) | Break `patents_unified` / discovery / registry cycle | P1 | S | 🔴 Open |
+| [STORY-247](STORIES/STORY-247-move-canonicalization-and-hashing-helpers-lower.md) | Move canonicalization and hashing helpers to a lower shared boundary | P1 | M | 🔴 Open |
+| [STORY-248](STORIES/STORY-248-decouple-domain-value-objects-from-analytics-constants.md) | Decouple domain value objects from analytics constants | P1 | S | 🔴 Open |
+| [STORY-249](STORIES/STORY-249-enforce-cycle-and-boundary-checks-in-gates.md) | Enforce import-cycle and module-boundary checks in maintained gates | P1 | M | 🔴 Open |
 
 ---
 

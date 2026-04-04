@@ -2,7 +2,7 @@
 
 > **Discovered**: 2026-03-01 via live end-to-end run analysis  
 > **Priority**: P1–P2 — Blocks full system operation  
-> **Stories**: 4 (STORY-186 through STORY-189)  
+> **Stories**: 4 ([STORY-186](STORIES/STORY-186.md) through [STORY-189](STORIES/STORY-189.md))  
 > **Effort**: M (2–3 days total)
 
 ---
@@ -27,10 +27,10 @@ The infrastructure layer is partially functional: PostgreSQL is running and reac
 
 | Story | Title | Priority | Size |
 |-------|-------|----------|------|
-| STORY-186 | Install and configure Redis Python module | P1 | S |
-| STORY-187 | Add docker-compose for local development stack | P2 | M |
-| STORY-188 | Create startup script for full system (API + Celery) | P2 | S |
-| STORY-189 | Document infrastructure troubleshooting guide | P2 | S |
+| [STORY-186](STORIES/STORY-186.md) | Install and configure Redis Python module | P1 | S |
+| [STORY-187](STORIES/STORY-187.md) | Add docker-compose for local development stack | P2 | M |
+| [STORY-188](STORIES/STORY-188.md) | Create startup script for full system (API + Celery) | P2 | S |
+| [STORY-189](STORIES/STORY-189.md) | Document infrastructure troubleshooting guide | P2 | S |
 
 ---
 

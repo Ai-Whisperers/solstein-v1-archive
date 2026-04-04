@@ -16,8 +16,8 @@ The pipeline currently discovers only companies from the static market catalog. 
 | Story | Title | Status | Notes |
 |-------|-------|--------|-------|
 | [STORY-331](STORIES/STORY-331.md) | Implement SearXNG-based competitor discovery adapter | ⏳ BLOCKED | Deps: STORY-314 |
-| [STORY-332](STORIES/STORY-332.md) | Add LLM-powered competitor identification from web search results | ⏳ BLOCKED | Deps: STORY-321, STORY-331 |
-| [STORY-333](STORIES/STORY-333.md) | Merge static catalog + web discovery + LLM discovery with deduplication | ⏳ BLOCKED | Deps: STORY-331, STORY-332 |
+| [STORY-332](STORIES/STORY-332.md) | Add LLM-powered competitor identification from web search results | ⏳ BLOCKED | Deps: STORY-321, [STORY-331](STORIES/STORY-331.md) |
+| [STORY-333](STORIES/STORY-333.md) | Merge static catalog + web discovery + LLM discovery with deduplication | ⏳ BLOCKED | Deps: [STORY-331](STORIES/STORY-331.md), [STORY-332](STORIES/STORY-332.md) |
 
 ## Success Criteria
 
@@ -30,4 +30,4 @@ The pipeline currently discovers only companies from the static market catalog. 
 
 - STORY-314 (SearXNG deployed)
 - STORY-321 (LLM provider configured)
-- STORY-331 → STORY-332 → STORY-333 (sequential)
+- [STORY-331](STORIES/STORY-331.md) → [STORY-332](STORIES/STORY-332.md) → [STORY-333](STORIES/STORY-333.md) (sequential)

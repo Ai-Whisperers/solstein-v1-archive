@@ -16,10 +16,10 @@ Forensic audit found DISCONNECTED ROUTER (api/routes/refresh.py — 200+ lines, 
 
 | Story | Title | Priority |
 |-------|-------|----------|
-| STORY-141 | Delete Disconnected Refresh Router | P2 |
-| STORY-142 | Delete Orphaned worker_tasks_v2.py | P2 |
-| STORY-143 | Audit and Delete Orphaned Data Layer Files | P2 |
-| STORY-144 | Create Dead Code Detection CI Job | P2 |
+| [STORY-141](STORIES/STORY-141-delete-refresh-router.md) | Delete Disconnected Refresh Router | P2 |
+| [STORY-142](STORIES/STORY-142-delete-worker-tasks-v2.md) | Delete Orphaned worker_tasks_v2.py | P2 |
+| [STORY-143](STORIES/STORY-143-delete-orphaned-data-files.md) | Audit and Delete Orphaned Data Layer Files | P2 |
+| [STORY-144](STORIES/STORY-144-dead-code-ci-job.md) | Create Dead Code Detection CI Job | P2 |
 
 ## Dependencies
 

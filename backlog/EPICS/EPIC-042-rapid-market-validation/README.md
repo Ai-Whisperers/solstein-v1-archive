@@ -16,10 +16,10 @@ The call emphasized rapid "click and deploy" MVPs for market validation. Solstei
 
 | Story | Title | Priority |
 |-------|-------|----------|
-| STORY-161 | Automated Data Source Discovery for New Markets | P2 |
-| STORY-162 | Template-Based Scoring Model Customization | P2 |
-| STORY-163 | Energy 21 Case Study Documentation System | P2 |
-| STORY-164 | Proof-of-Concept Metrics & Success Tracking | P2 |
+| [STORY-161](STORIES/STORY-161-automated-data-discovery.md) | Automated Data Source Discovery for New Markets | P2 |
+| [STORY-162](STORIES/STORY-162-template-scoring-customization.md) | Template-Based Scoring Model Customization | P2 |
+| [STORY-163](STORIES/STORY-163-energy-21-case-study.md) | Energy 21 Case Study Documentation System | P2 |
+| [STORY-164](STORIES/STORY-164-poc-success-tracking.md) | Proof-of-Concept Metrics & Success Tracking | P2 |
 
 ## Dependencies
 

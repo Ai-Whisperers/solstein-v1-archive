@@ -5,7 +5,7 @@
 | **Status** | 🔴 Not Started |
 | **Priority** | P1 – High |
 | **Created** | 2026-03-01 |
-| **Stories** | STORY-097, STORY-098, STORY-099, STORY-100 |
+| **Stories** | [STORY-097](STORIES/STORY-097-automate-alembic-migrations.md), [STORY-098](STORIES/STORY-098-makefile-targets.md), [STORY-099](STORIES/STORY-099-staging-smoke-test-workflow.md), [STORY-100](STORIES/STORY-100-delete-bypass-scripts.md) |
 | **Dependencies** | EPIC-002 (Configuration Management), EPIC-025 (Worker Reliability) |
 
 ## Context
@@ -43,13 +43,13 @@ This epic addresses the deploy pipeline end-to-end: from Makefile developer ergo
 
 ```
 EPIC-002 (Config) ──┐
-                     ├──► STORY-097 (Migrations) ──► STORY-099 (Staging Deploy)
+                     ├──► [STORY-097](STORIES/STORY-097-automate-alembic-migrations.md) (Migrations) ──► [STORY-099](STORIES/STORY-099-staging-smoke-test-workflow.md) (Staging Deploy)
 EPIC-025 (Workers) ──┘         │
                                ▼
-                         STORY-098 (Makefile Targets)
+                         [STORY-098](STORIES/STORY-098-makefile-targets.md) (Makefile Targets)
                                │
                                ▼
-                         STORY-100 (Delete Bypass Scripts)
+                         [STORY-100](STORIES/STORY-100-delete-bypass-scripts.md) (Delete Bypass Scripts)
 ```
 
 ## Success Criteria
@@ -71,4 +71,4 @@ EPIC-025 (Workers) ──┘         │
 
 ## Notes
 
-The bypass scripts (`run_research.py`, `run_market_pipeline.py`) are a symptom, not a cause. They exist because the API was insufficient for operational workflows. STORY-100 must not just delete the scripts — it must ensure the API covers every operation those scripts performed. Deleting the crutch before fixing the leg is not progress.
+The bypass scripts (`run_research.py`, `run_market_pipeline.py`) are a symptom, not a cause. They exist because the API was insufficient for operational workflows. [STORY-100](STORIES/STORY-100-delete-bypass-scripts.md) must not just delete the scripts — it must ensure the API covers every operation those scripts performed. Deleting the crutch before fixing the leg is not progress.

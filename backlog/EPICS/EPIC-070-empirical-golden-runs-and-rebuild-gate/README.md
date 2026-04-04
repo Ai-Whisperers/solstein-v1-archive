@@ -1,7 +1,7 @@
 # EPIC-070: Empirical Golden Runs and Rebuild Gate
 
 > **Priority**: P0 - Ship Blocker
-> **Stories**: 4 (STORY-267 through STORY-270)
+> **Stories**: 4 ([STORY-267](STORIES/STORY-267-add-provider-level-golden-contract-runs.md) through [STORY-270](STORIES/STORY-270-make-save-vs-rebuild-decision-from-golden-run-evidence.md))
 > **Effort**: L (2-3 weeks)
 > **Dependencies**: EPIC-067 (Legacy Runtime Canonicalization), EPIC-068 (Boundary Schemas and Type Gates), EPIC-069 (Provider Surface Rationalization)
 > **Status**: 🔴 Not Started

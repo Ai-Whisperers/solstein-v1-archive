@@ -4,7 +4,7 @@
 |-------|-------|
 | Priority | P1 |
 | Status | 🔴 Open |
-| Stories | STORY-036, STORY-037, STORY-038 |
+| Stories | [STORY-036](STORIES/STORY-036-move-business-logic-from-routers.md), [STORY-037](STORIES/STORY-037-add-pagination.md), [STORY-038](STORIES/STORY-038-add-typed-response-models.md) |
 | Created | 2026-02-28 |
 
 ---
@@ -36,7 +36,7 @@ The API layer has three fundamental problems:
 |-------|-------|----------|----------|--------------|
 | [STORY-036](STORIES/STORY-036-move-business-logic-from-routers.md) | Move Business Logic Out of Router Handlers | P1 | HIGH | STORY-027 |
 | [STORY-037](STORIES/STORY-037-add-pagination.md) | Add Pagination to All Bulk Endpoints | P1 | HIGH | STORY-034 |
-| [STORY-038](STORIES/STORY-038-add-typed-response-models.md) | Add Typed Response Models to All Endpoints | P1 | MEDIUM | STORY-036, STORY-023 |
+| [STORY-038](STORIES/STORY-038-add-typed-response-models.md) | Add Typed Response Models to All Endpoints | P1 | MEDIUM | [STORY-036](STORIES/STORY-036-move-business-logic-from-routers.md), STORY-023 |
 
 ## Definition of Done
 
@@ -48,13 +48,13 @@ The API layer has three fundamental problems:
 
 ## Ordering Notes
 
-STORY-036 depends on STORY-027 (domain services) from EPIC-007. STORY-037 depends on STORY-034 (database-level filtering) from EPIC-009. STORY-038 depends on STORY-036 (service extraction) and STORY-023 (Value Objects) — response models should reflect Value Objects, not raw primitives.
+[STORY-036](STORIES/STORY-036-move-business-logic-from-routers.md) depends on STORY-027 (domain services) from EPIC-007. [STORY-037](STORIES/STORY-037-add-pagination.md) depends on STORY-034 (database-level filtering) from EPIC-009. [STORY-038](STORIES/STORY-038-add-typed-response-models.md) depends on [STORY-036](STORIES/STORY-036-move-business-logic-from-routers.md) (service extraction) and STORY-023 (Value Objects) — response models should reflect Value Objects, not raw primitives.
 
-Recommended execution order: STORY-036 → STORY-038, with STORY-037 executable in parallel with STORY-036 once its dependency (STORY-034) is complete.
+Recommended execution order: [STORY-036](STORIES/STORY-036-move-business-logic-from-routers.md) → [STORY-038](STORIES/STORY-038-add-typed-response-models.md), with [STORY-037](STORIES/STORY-037-add-pagination.md) executable in parallel with [STORY-036](STORIES/STORY-036-move-business-logic-from-routers.md) once its dependency (STORY-034) is complete.
 
 ## Relationship to Other Epics
 
-This epic overlaps with EPIC-007 (DDD Migration) through STORY-036/STORY-027 — the service extraction work. It overlaps with EPIC-009 (Data Layer Consolidation) through STORY-037/STORY-034 — pagination requires database-level filtering. These overlaps are intentional: the same architectural principle (separation of concerns) manifests differently in the domain layer, the data layer, and the API layer.
+This epic overlaps with EPIC-007 (DDD Migration) through [STORY-036](STORIES/STORY-036-move-business-logic-from-routers.md)/STORY-027 — the service extraction work. It overlaps with EPIC-009 (Data Layer Consolidation) through [STORY-037](STORIES/STORY-037-add-pagination.md)/STORY-034 — pagination requires database-level filtering. These overlaps are intentional: the same architectural principle (separation of concerns) manifests differently in the domain layer, the data layer, and the API layer.
 
 ## Autonomous Continuation Notes
 
