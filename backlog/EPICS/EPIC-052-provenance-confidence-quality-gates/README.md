@@ -31,14 +31,14 @@ This epic creates hard quality gates so untrusted or low-confidence data cannot 
 
 | Story | Title | Priority | Status | Blocked? |
 |-------|-------|----------|--------|----------|
-| STORY-198 | Enforce provenance completeness at enrichment write boundary | P0 | ⏳ BLOCKED | Yes — needs EPIC-050/051 |
-| STORY-199 | Implement confidence calibration profile per source/reliability tier | P1 | ⏳ BLOCKED | Yes — needs EPIC-050/051 |
-| STORY-200 | Add quality-gate policy before scoring and export | P0 | 🔴 READY | No — gate code exists, needs wiring (see STORY-366–368) |
-| STORY-201 | Add CI contract tests for provenance, confidence, and synthetic gates | P1 | 🔴 READY | No (see STORY-369) |
+| [STORY-198](STORIES/STORY-198.md) | Enforce provenance completeness at enrichment write boundary | P0 | ⏳ BLOCKED | Yes — needs EPIC-050/051 |
+| [STORY-199](STORIES/STORY-199.md) | Implement confidence calibration profile per source/reliability tier | P1 | ⏳ BLOCKED | Yes — needs EPIC-050/051 |
+| [STORY-200](STORIES/STORY-200.md) | Add quality-gate policy before scoring and export | P0 | 🔴 READY | No — gate code exists, needs wiring (see STORY-366–368) |
+| [STORY-201](STORIES/STORY-201.md) | Add CI contract tests for provenance, confidence, and synthetic gates | P1 | 🔴 READY | No (see STORY-369) |
 
-> Note: STORY-200 and STORY-201 story files were never created. STORY-366–369 below are their
-> concrete implementation tasks, verified against the live codebase. Treat 366–369 as the
-> actionable decomposition of 200/201.
+> STORY-200 and STORY-201 story files recovered from stale `EPIC-052-provenance-quality-gates/`
+> directory (dissolved 2026-04-03). STORY-366–369 are the concrete implementation decomposition
+> of STORY-200/201 verified against the live codebase. Treat 366–369 as the actionable work.
 
 ### Gate enforcement (contamination audit 2026-04-03 — all READY, no dependencies)
 

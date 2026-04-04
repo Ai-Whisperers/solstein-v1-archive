@@ -1,4 +1,4 @@
-# STORY-213: Decouple Export from Gate Validation
+# STORY-401: Decouple Export from Gate Validation
 
 | Field | Value |
 |-------|-------|
@@ -9,7 +9,7 @@
 | **Created** | 2026-03-01 |
 | **Risk** | Low — separation of concerns; no logic change |
 | **Assigned** | — |
-| **Depends On** | STORY-212 (Gate Refactor) |
+| **Depends On** | STORY-401 (Gate Refactor) |
 
 ---
 
@@ -63,7 +63,7 @@ Decoupling means:
 
 ## Dependencies
 
-- **Hard**: STORY-212 (Gate Refactor)
+- **Hard**: STORY-401 (Gate Refactor)
 - **Blocks**: Nothing
 
 ---

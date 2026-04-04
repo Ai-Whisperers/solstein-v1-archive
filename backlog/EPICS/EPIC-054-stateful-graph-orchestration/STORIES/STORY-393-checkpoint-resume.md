@@ -1,4 +1,4 @@
-# STORY-208: Add checkpoint persistence and resume command
+# STORY-393: Add checkpoint persistence and resume command
 
 | Field | Value |
 |-------|-------|

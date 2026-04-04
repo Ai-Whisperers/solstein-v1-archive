@@ -1,4 +1,4 @@
-# STORY-212: Migrate web acquisition connectors to runtime contracts
+# STORY-397: Migrate web acquisition connectors to runtime contracts
 
 | Field | Value |
 |-------|-------|

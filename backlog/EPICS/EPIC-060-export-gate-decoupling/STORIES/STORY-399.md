@@ -1,4 +1,4 @@
-# STORY-211: Add --force-export and --warn-mode CLI Flags
+# STORY-399: Add --force-export and --warn-mode CLI Flags
 
 | Field | Value |
 |-------|-------|
@@ -9,7 +9,7 @@
 | **Created** | 2026-03-01 |
 | **Risk** | Low — CLI flags only; no logic change |
 | **Assigned** | — |
-| **Depends On** | STORY-212 (Gate Refactor) |
+| **Depends On** | STORY-399 (Gate Refactor) |
 
 ---
 
@@ -72,8 +72,8 @@ Script users need three modes:
 
 ## Dependencies
 
-- **Hard**: STORY-212 (Gate Refactor to return warnings)
-- **Blocks**: STORY-213, STORY-214
+- **Hard**: STORY-399 (Gate Refactor to return warnings)
+- **Blocks**: STORY-399, STORY-399
 
 ---
 

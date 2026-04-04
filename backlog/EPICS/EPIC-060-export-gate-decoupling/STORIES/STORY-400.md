@@ -1,4 +1,4 @@
-# STORY-212: Refactor Release Gate to Return Warnings, Not Exceptions
+# STORY-400: Refactor Release Gate to Return Warnings, Not Exceptions
 
 | Field | Value |
 |-------|-------|
@@ -73,7 +73,7 @@ Better design: Gate returns detailed result, caller decides what to do.
 ## Dependencies
 
 - **Hard**: None
-- **Blocks**: STORY-211, STORY-213
+- **Blocks**: STORY-400, STORY-400
 
 ---
 

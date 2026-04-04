@@ -1,4 +1,4 @@
-# STORY-213: Add config-driven session/proxy/page-budget controls
+# STORY-398: Add config-driven session/proxy/page-budget controls
 
 | Field | Value |
 |-------|-------|

@@ -1,10 +1,17 @@
 # EPIC-067: Agentic Development Workflow Hardening
 
-> **Priority**: P1 - High
-> **Stories**: 6 (STORY-250 through STORY-255)
+> ⚫ **SUPERSEDED** — This epic was superseded by `EPIC-067-legacy-runtime-canonicalization`
+> which took the EPIC-067 number and was completed (STORY-255 through STORY-258, STORY-271 — all DONE).
+> Story numbers 250-255 in this directory **conflict** with completed work in other epics:
+> STORY-250 (EPIC-033), STORY-251 (EPIC-059), STORY-252 (EPIC-021), STORY-253/254 (EPIC-013),
+> STORY-255 (EPIC-067-legacy). **Do not implement these stories under these numbers.**
+> Preserved for audit trail only.
+>
+> **Priority**: P1 - High (SUPERSEDED)
+> **Stories**: 6 (STORY-250 through STORY-255 — number-colliding with completed work, superseded)
 > **Effort**: L (2-4 weeks)
 > **Dependencies**: EPIC-013, EPIC-014, EPIC-017, EPIC-021, EPIC-022, EPIC-054, EPIC-055, EPIC-061, EPIC-065, EPIC-066
-> **Status**: 🔴 Not Started
+> **Status**: ⚫ SUPERSEDED
 
 ---
 

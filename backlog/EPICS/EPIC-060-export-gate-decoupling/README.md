@@ -1,7 +1,7 @@
 # EPIC-060: Export & Release Gate Decoupling
 
 > **Priority**: P1 – High (blocks all real data export)  
-> **Stories**: 4 (STORY-211 through STORY-214)  
+> **Stories**: 4 (STORY-399 through STORY-402)  
 > **Effort**: M (3–4 days total)  
 > **Dependencies**: EPIC-052 (Provenance, Confidence, Quality Gates), EPIC-033 (Data Completeness & Export Integrity)  
 > **Status**: 🔴 Not Started
@@ -59,10 +59,10 @@ Real data from `competitor_data_real_enriched.json` **fails validation on**:
 
 | Story | Title | Priority | Size | Notes |
 |-------|-------|----------|------|-------|
-| STORY-211 | Make ReportReleaseGate configurable: add --skip-gate and --min-completeness flags | P1 | S | Allow CLI to override gate thresholds at runtime |
-| STORY-212 | Implement warn-mode for release gate (log issues, don't block) | P1 | M | Gate logs violations but returns OK, allowing export |
-| STORY-213 | Decouple export from gate: always export with quality metadata | P1 | M | Export JSON with data_quality scores, optional Excel only if passing |
-| STORY-214 | Add quality tiers to exports: gold/silver/bronze based on gate evaluation | P1 | M | Export different output based on confidence/completeness levels |
+| STORY-399 | Make ReportReleaseGate configurable: add --skip-gate and --min-completeness flags | P1 | S | Allow CLI to override gate thresholds at runtime |
+| STORY-400 | Implement warn-mode for release gate (log issues, don't block) | P1 | M | Gate logs violations but returns OK, allowing export |
+| STORY-401 | Decouple export from gate: always export with quality metadata | P1 | M | Export JSON with data_quality scores, optional Excel only if passing |
+| STORY-402 | Add quality tiers to exports: gold/silver/bronze based on gate evaluation | P1 | M | Export different output based on confidence/completeness levels |
 
 ---
 

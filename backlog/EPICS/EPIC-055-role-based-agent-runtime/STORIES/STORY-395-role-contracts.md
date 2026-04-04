@@ -1,4 +1,4 @@
-# STORY-210: Define connector request/response envelope schema
+# STORY-395: Define connector request/response envelope schema
 
 | Field | Value |
 |-------|-------|

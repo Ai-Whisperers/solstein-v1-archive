@@ -40,8 +40,8 @@ Long-running epics (EPIC-007, EPIC-021) can be demoralizing. Quick wins provide:
 
 | Story | Title | Impact | Owner |
 |-------|-------|--------|-------|
-| [STORY-169](STORIES/STORY-169-api-response-times.md) | Add API Response Time Headers | Users see performance | Backend |
-| [STORY-170](STORIES/STORY-170-health-check-real.md) | Replace Fake Health Check with Real DB Probe | Ops can trust health | Backend |
+| [STORY-403](STORIES/STORY-403-api-response-times.md) | Add API Response Time Headers | Users see performance | Backend |
+| [STORY-404](STORIES/STORY-404-health-check-real.md) | Replace Fake Health Check with Real DB Probe | Ops can trust health | Backend |
 | STORY-171 | Improve Error Message Clarity | Users understand failures | Backend |
 | STORY-172 | Add Request IDs to All Logs | Debugging is easier | Backend |
 | STORY-173 | Create Seed Data Script for Local Dev | New devs productive in 30 min | Backend |
@@ -56,7 +56,7 @@ Long-running epics (EPIC-007, EPIC-021) can be demoralizing. Quick wins provide:
 ## Impact Areas
 
 ### User Experience (4 stories)
-- STORY-169: API Response Time Headers
+- STORY-403: API Response Time Headers
 - STORY-171: Error Message Clarity
 - STORY-174: API Docs Examples
 
@@ -67,7 +67,7 @@ Long-running epics (EPIC-007, EPIC-021) can be demoralizing. Quick wins provide:
 - STORY-178: Makefile Improvements
 
 ### Operations (2 stories)
-- STORY-170: Real Health Checks
+- STORY-404: Real Health Checks
 - STORY-176: Env Validation
 
 ---

@@ -1,4 +1,4 @@
-# STORY-207: Convert stage flow to explicit transition graph
+# STORY-392: Convert stage flow to explicit transition graph
 
 | Field | Value |
 |-------|-------|

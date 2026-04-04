@@ -5,7 +5,7 @@
 | **Status** | 🔴 Not Started |
 | **Priority** | P1 – High |
 | **Created** | 2026-03-10 |
-| **Stories** | STORY-210, STORY-211, STORY-212, STORY-213 |
+| **Stories** | STORY-395, STORY-396, STORY-397, STORY-398 |
 | **Dependencies** | EPIC-050, EPIC-051 |
 
 ## Context
@@ -27,10 +27,10 @@ This epic standardizes connector runtime contracts and operational controls for 
 
 | Story | Title | Priority | Status |
 |-------|-------|----------|--------|
-| STORY-210 | Define connector request/response envelope schema | P1 | 🔴 Not Started |
-| STORY-211 | Add shared retry/circuit-breaker connector wrapper | P1 | 🔴 Not Started |
-| STORY-212 | Migrate web acquisition connectors to runtime contracts | P1 | 🔴 Not Started |
-| STORY-213 | Add config-driven session/proxy/page-budget controls | P1 | 🔴 Not Started |
+| STORY-395 | Define connector request/response envelope schema | P1 | 🔴 Not Started |
+| STORY-396 | Add shared retry/circuit-breaker connector wrapper | P1 | 🔴 Not Started |
+| STORY-397 | Migrate web acquisition connectors to runtime contracts | P1 | 🔴 Not Started |
+| STORY-398 | Add config-driven session/proxy/page-budget controls | P1 | 🔴 Not Started |
 
 ## Success Criteria
 

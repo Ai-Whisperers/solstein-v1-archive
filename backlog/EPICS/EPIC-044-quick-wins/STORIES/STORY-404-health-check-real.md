@@ -1,4 +1,4 @@
-# STORY-170: Replace Fake Health Check with Real DB Probe
+# STORY-404: Replace Fake Health Check with Real DB Probe
 
 | Field | Value |
 |-------|-------|

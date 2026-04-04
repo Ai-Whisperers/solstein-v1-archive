@@ -1,4 +1,4 @@
-# STORY-206: Define typed state contract for orchestration graph
+# STORY-391: Define typed state contract for orchestration graph
 
 | Field | Value |
 |-------|-------|

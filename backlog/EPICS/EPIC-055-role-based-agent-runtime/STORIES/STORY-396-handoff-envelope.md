@@ -1,4 +1,4 @@
-# STORY-211: Add shared retry/circuit-breaker connector wrapper
+# STORY-396: Add shared retry/circuit-breaker connector wrapper
 
 | Field | Value |
 |-------|-------|

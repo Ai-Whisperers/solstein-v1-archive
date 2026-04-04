@@ -5,7 +5,7 @@
 | **Status** | 🔴 Not Started |
 | **Priority** | P1 – High |
 | **Created** | 2026-03-10 |
-| **Stories** | STORY-206, STORY-207, STORY-208, STORY-209 |
+| **Stories** | STORY-391, STORY-392, STORY-393, STORY-394 |
 | **Dependencies** | EPIC-052, EPIC-053, EPIC-055 |
 
 ## Context
@@ -27,10 +27,10 @@ This epic adds a durable run model and recovery controls while preserving existi
 
 | Story | Title | Priority | Status |
 |-------|-------|----------|--------|
-| STORY-206 | Persist canonical run state model | P1 | 🔴 Not Started |
-| STORY-207 | Add stage-level checkpoint and replay primitives | P1 | 🔴 Not Started |
-| STORY-208 | Implement resume/cancel operations with deterministic transitions | P1 | 🔴 Not Started |
-| STORY-209 | Build unified run journal for gate and review decisions | P2 | 🔴 Not Started |
+| STORY-391 | Persist canonical run state model | P1 | 🔴 Not Started |
+| STORY-392 | Add stage-level checkpoint and replay primitives | P1 | 🔴 Not Started |
+| STORY-393 | Implement resume/cancel operations with deterministic transitions | P1 | 🔴 Not Started |
+| STORY-394 | Build unified run journal for gate and review decisions | P2 | 🔴 Not Started |
 
 ## Success Criteria
 
@@ -57,7 +57,7 @@ This epic adds a durable run model and recovery controls while preserving existi
 
 ### Develop-Relevant Evidence
 
-- `STORY-206-typed-state-contract.md` already positions typed schema validation as the anti-drift mechanism for node state.
+- `STORY-391-typed-state-contract.md` already positions typed schema validation as the anti-drift mechanism for node state.
 - `docs/reference/PIPELINE_QUALITY_ENFORCEMENT_PLAN.md` and `docs/reference/SCHEMA_INVENTORY_AND_VALIDATION_NOTES.md` already treat boundary schemas as part of the enforcement model, not optional docs.
 - Future run-state work should reuse those typed-boundary patterns instead of inventing mock state envelopes.
 

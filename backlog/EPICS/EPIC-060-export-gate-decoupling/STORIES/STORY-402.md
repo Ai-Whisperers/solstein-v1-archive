@@ -1,4 +1,4 @@
-# STORY-214: Add Gate Evaluation Metadata to Export Output
+# STORY-402: Add Gate Evaluation Metadata to Export Output
 
 | Field | Value |
 |-------|-------|
@@ -9,7 +9,7 @@
 | **Created** | 2026-03-01 |
 | **Risk** | Low — adds metadata; no logic change |
 | **Assigned** | — |
-| **Depends On** | STORY-212 (Gate Refactor) |
+| **Depends On** | STORY-402 (Gate Refactor) |
 
 ---
 
@@ -56,7 +56,7 @@ Adding gate metadata to export makes the data quality story transparent.
 
 ## Dependencies
 
-- **Hard**: STORY-212 (Gate Refactor to return detailed result)
+- **Hard**: STORY-402 (Gate Refactor to return detailed result)
 - **Blocks**: Nothing
 
 ---
@@ -71,7 +71,7 @@ Adding gate metadata to export makes the data quality story transparent.
 - Thresholds used
 - Warning messages (if any)
 
-**REQ-2**: Main scores sheet includes confidence column (from STORY-208).
+**REQ-2**: Main scores sheet includes confidence column (from STORY-402).
 
 **REQ-3**: Export remains backward compatible (existing sheets unchanged).
 
