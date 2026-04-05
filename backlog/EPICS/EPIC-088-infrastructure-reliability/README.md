@@ -1,12 +1,14 @@
 # EPIC-088: Infrastructure Reliability & Observability
 
-> **Priority**: P2 – Medium (silent failures undetectable today)
-> **Stories**: 3 ([STORY-357](STORIES/STORY-357.md) through [STORY-359](STORIES/STORY-359.md))
-> **Effort**: S (2–3 days total)
-> **Dependencies**: None
-> **Status**: 🔴 Not Started
-> **Created**: 2026-04-03
-> **Updated**: 2026-04-03 (codebase audit corrected all line/function references)
+| Field | Value |
+|-------|-------|
+| **Status** | 🔴 Not Started |
+| **Priority** | P2 |
+| **Phase** | P3 — Run as Real Service |
+| **Effort** | S (2–3 days) |
+| **Stories** | 3 ([STORY-357](STORIES/STORY-357.md) through [STORY-359](STORIES/STORY-359.md)) |
+| **Created** | 2026-04-03 |
+| **Updated** | 2026-04-03 (codebase audit corrected all line/function references) |
 
 ---
 

@@ -1,12 +1,15 @@
 # EPIC-087: Multi-Tenancy Enforcement
 
-> **Priority**: P1 – High (cross-tenant data leakage possible today)
-> **Stories**: 3 ([STORY-352](STORIES/STORY-352.md) through [STORY-354](STORIES/STORY-354.md))
-> **Effort**: M (3–5 days total)
-> **Dependencies**: Migrations 013–015 (already merged — schema exists)
-> **Status**: 🔴 Not Started
-> **Created**: 2026-04-03
-> **Updated**: 2026-04-03 (codebase audit corrected all file/table references; [STORY-354](STORIES/STORY-354.md) cancelled; execution order inverted)
+| Field | Value |
+|-------|-------|
+| **Status** | 🔴 Not Started |
+| **Priority** | P1 |
+| **Phase** | P0 — Security (cross-tenant data leakage possible today) |
+| **Effort** | M (3–5 days) |
+| **Stories** | 2 ([STORY-353](STORIES/STORY-353.md), [STORY-352](STORIES/STORY-352.md)) — STORY-354 cancelled |
+| **Created** | 2026-04-03 |
+| **Updated** | 2026-04-03 (codebase audit corrected all file/table references; STORY-354 cancelled; execution order inverted) |
+| **Dependencies** | Migrations 013–015 (already merged — schema exists) |
 
 ---
 

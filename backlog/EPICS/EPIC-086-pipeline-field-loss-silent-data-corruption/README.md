@@ -1,12 +1,15 @@
 # EPIC-086: Pipeline Field Loss — Silent Data Corruption
 
-> **Priority**: P0 – CRITICAL (root cause of hallucinated/fabricated output content)
-> **Stories**: 4 ([STORY-348](STORIES/STORY-348.md) through [STORY-351](STORIES/STORY-351.md))
-> **Effort**: L (5–7 days total)
-> **Dependencies**: None — must be resolved before ANY other pipeline work
-> **Status**: ✅ COMPLETE (all 4 stories done as of 2026-04-03)
-> **Created**: 2026-04-02
-> **Audit Reference**: `docs/audit-2026-04-02.md` (Section: Field Loss Root Cause)
+| Field | Value |
+|-------|-------|
+| **Status** | ✅ Complete |
+| **Priority** | P0 — CRITICAL |
+| **Phase** | P0 — Must resolve before any pipeline work |
+| **Effort** | L (5–7 days) |
+| **Stories** | 4 ([STORY-348](STORIES/STORY-348.md) through [STORY-351](STORIES/STORY-351.md)) |
+| **Created** | 2026-04-02 |
+| **Updated** | 2026-04-05 (standardized metadata; all 4 stories done as of 2026-04-03) |
+| **Audit Reference** | `docs/audit-2026-04-02.md` (Section: Field Loss Root Cause) |
 
 ---
 

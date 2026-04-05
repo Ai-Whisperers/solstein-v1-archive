@@ -1,12 +1,15 @@
 # EPIC-089: Workflow Orchestration API
 
-> **Priority**: P1 – High (async job endpoint returns 501; no multi-step orchestration)
-> **Stories**: 3 ([STORY-362](STORIES/STORY-362.md) through [STORY-364](STORIES/STORY-364.md))
-> **Effort**: M (3–5 days total)
-> **Dependencies**: EPIC-086 DONE (pipeline must produce correct data before wiring workflows)
-> **Status**: 🔴 Not Started
-> **Created**: 2026-04-03
-> **Updated**: 2026-04-03 (codebase audit corrected all file/table/abstraction references)
+| Field | Value |
+|-------|-------|
+| **Status** | 🔴 Not Started |
+| **Priority** | P1 |
+| **Phase** | P4 — End-to-End Pipeline Execution |
+| **Effort** | M (3–5 days) |
+| **Stories** | 3 ([STORY-362](STORIES/STORY-362.md) through [STORY-364](STORIES/STORY-364.md)) |
+| **Created** | 2026-04-03 |
+| **Updated** | 2026-04-03 (codebase audit corrected all file/table/abstraction references) |
+| **Dependencies** | [EPIC-086](../EPIC-086-pipeline-field-loss-silent-data-corruption/README.md) ✅ Complete |
 
 ---
 
