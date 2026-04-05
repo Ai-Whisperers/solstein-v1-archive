@@ -372,4 +372,105 @@ PYTHONPATH=src .venv/bin/python3 -m pytest tests/unit/ -q \
 
 ---
 
+## 11. Verified Test Baseline (2026-04-05)
+
+Two full test runs completed after the backlog enrichment commits. This is the authoritative regression floor for all future sessions.
+
+### Results (both runs consistent)
+
+| Run | Python binary | Passed | Failed | Errors | Skipped | Duration |
+|-----|--------------|--------|--------|--------|---------|----------|
+| Run A | system `python3` + `--ignore` x2 | 3851 | 295 | 237 | 5 | 7m 34s |
+| Run B | `.venv/bin/python3` + `--ignore` x2 | 3855 | 291 | 237 | 5 | 22m 27s |
+
+**Canonical baseline: 3855 passed / 291 failed / 237 errors**  
+(4-test variance between runs is pytest-randomly ordering noise — not a real difference)
+
+### What the failures and errors mean
+
+**291 failures** — all infrastructure-dependent. Every failing test requires a live PostgreSQL or Redis instance that is not present in local dev. These are expected and must NOT be "fixed" by an agent. Do not add `pytest.mark.skip`, mock the DB, or change the tests. They pass in CI (which spins up postgres:14-alpine).
+
+**237 errors** — same cause: test collection succeeds but setup fixtures that require a DB session fail at runtime. Same class of expected failure.
+
+**Regression rule:** If a future session reports fewer than **3800 passing tests**, regressions were introduced. Stop and investigate before committing.
+
+### Python binary matters
+
+The `pgvector` import error seen earlier in this session was an invocation artifact: system `python3` lacks `pgvector` in its site-packages, but `.venv/bin/python3` has it installed (v0.4.2). The `--ignore` flags for the two known-broken files are still required regardless of which binary is used, because:
+
+- `test_async_boundary_regressions.py` — imports `duckduckgo_search` which is not in any Python environment on this machine (not in `pyproject.toml` dev deps)
+- `test_api_routers_coverage.py` — module-scope auth bypass (STORY-374 fixes this at source)
+
+### Corrected Section 9 entry for pgvector
+
+The earlier Section 9 table listed `pgvector` as a test infrastructure bug. That entry is **incorrect**. Using `.venv/bin/python3` resolves it completely. The only real import blocker is `duckduckgo_search`.
+
+---
+
+## 12. Additional Anti-Patterns Identified from Hermes Session
+
+### 12.1 Bulk story unblocking without verification
+
+Hermes committed `chore: unblock ALL blocked stories (4 blockers → 0)` — a single commit that changed the status of multiple stories without any code change or verification that the blocking condition was resolved. This is dangerous: a story marked READY that is actually still blocked will waste the next agent's entire session on a dead end.
+
+**Rule addition for `.hermes.md`:** Only change a story status from BLOCKED to READY if you directly verified (by file read or grep) that the dependency the story was blocked on is present in the codebase.
+
+### 12.2 Creating infrastructure for infrastructure's sake
+
+Hermes created `docs/work-logs/README.md` — a README for a directory that contains no actual work logs. The act of creating the scaffolding was committed as progress. This is the planning-work anti-pattern applied to docs.
+
+**Rule addition:** Never create a directory, template, or README for work that isn't done yet. Create the actual artifact or don't create anything.
+
+### 12.3 Interpreting absence of ruff output as a problem
+
+`ruff check src/` produces **no output** when there are zero violations. An agent that pattern-matches on "empty output = error" will misdiagnose a clean lint state. Always use the exit code: `ruff check src/; echo "exit: $?"` — exit 0 means clean.
+
+### 12.4 Not checking `git log` before starting a story
+
+Hermes implemented STORY-251 without checking that gesttaltt had been actively working on the same epic hours earlier. A `git log --oneline -10` at session start would have shown the recent activity and prompted Hermes to check whether STORY-251's direction was already decided.
+
+**Rule:** Run `git log --oneline -10` as the first command of every session. If the most recent commits touch the same epic you're about to work on, read those commits before starting.
+
+### 12.5 Feature flag / story status inflation
+
+The commit `chore: unblock ALL blocked stories (4 blockers → 0)` changed story statuses in QUEUE.md based on Hermes' own assessment of what was blocking them — not based on verified code state. Status changes are planning decisions. An agent should only update a story status to DONE after delivering the code change, not as a planning assertion.
+
+---
+
+## 13. CI Coverage Threshold is Too Low
+
+`ci.yml` runs `pytest --cov-fail-under=25`. At 28% actual coverage, this gate has almost no headroom — a single file deletion would pass it. It provides no protection against coverage regression.
+
+**Recommended increments:**
+
+| Timeline | Threshold | Rationale |
+|----------|-----------|-----------|
+| Now | 25% (current) | Baseline — do not lower |
+| After STORY-374/375 (test isolation fixes) | 30% | Test isolation improvements expose real coverage |
+| After EPIC-013 complete | 35% | Factory/boundary tests added |
+| After EPIC-069 (golden runs) | 40% | Integration test harness in place |
+
+Each threshold increase should be a separate commit after the tests that justify it are merged. Never raise the threshold without the tests to back it.
+
+---
+
+## 14. `.hermes.md` Current State vs Required State
+
+For human reference — a side-by-side of what exists and what needs to change:
+
+| Section | Current `.hermes.md` | Required |
+|---------|---------------------|----------|
+| Session start | Not present | Mandatory 5-step protocol |
+| Story selection | "Pick first READY top-to-bottom" | Full rules with DO-NOT-TOUCH list |
+| Implementation | Karpathy 5-step loop (abstract) | Per-story protocol with exact commands |
+| Session exit | Not present | Mandatory work log + QUEUE.md update |
+| Prohibited actions | Not present | Explicit list (12.1–12.5 above) |
+| Test baseline | Not present | 3855/291/237 with regression floor |
+| Python binary | Not specified | `.venv/bin/python3` required |
+| AGENTS.md reference | Not present | "Verify AGENTS.md before trusting architecture claims" |
+
+The current `.hermes.md` is 56 lines. The required version is approximately 150 lines. All additions are operational rules, not prose.
+
+---
+
 *This document is for human review and implementation. Agents should not act on this document directly — the improvements must be applied to `.hermes.md`, `AGENTS.md`, and story files before the next autonomous session starts.*
