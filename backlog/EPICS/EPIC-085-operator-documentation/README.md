@@ -3,9 +3,12 @@
 | Field | Value |
 |-------|-------|
 | **Status** | 🔴 Not Started |
-| **Priority** | P1 — Phase P5: Quality |
+| **Priority** | P1 |
 | **Phase** | P5 — Quality & Polish |
+| **Effort** | M (3–5 days) |
+| **Stories** | 4 ([STORY-344](STORIES/STORY-344.md) through [STORY-347](STORIES/STORY-347.md)) |
 | **Created** | 2026-04-01 |
+| **Updated** | 2026-04-05 (added metadata, DoD) |
 
 ## Context
 
@@ -27,7 +30,14 @@ There is no operator documentation. A new operator cannot deploy the system, con
 - Market catalog guide demonstrates adding a new company end-to-end
 - Pipeline runbook covers all failure modes and their resolutions
 
+## Definition of Done
+
+- [ ] [STORY-344](STORIES/STORY-344.md): `docs/operator/deployment-guide.md` exists; a cold-start test takes < 10 min
+- [ ] [STORY-345](STORIES/STORY-345.md): `docs/operator/api-keys.md` documents every `*_API_KEY` env var with feature description
+- [ ] [STORY-346](STORIES/STORY-346.md): `docs/operator/market-catalog.md` has step-by-step example of adding a new company
+- [ ] [STORY-347](STORIES/STORY-347.md): `docs/operator/pipeline-runbook.md` documents all known failure modes and resolutions
+
 ## Dependencies
 
-- STORY-320 (all health checks pass) for deployment guide
-- STORY-330 (golden run baseline) for operations runbook
+- STORY-320 ([EPIC-079](../EPIC-079-deploy-application-stack/README.md)) — all health checks pass — for deployment guide
+- STORY-330 ([EPIC-081](../EPIC-081-first-real-pipeline-run/README.md)) — golden run baseline — for operations runbook

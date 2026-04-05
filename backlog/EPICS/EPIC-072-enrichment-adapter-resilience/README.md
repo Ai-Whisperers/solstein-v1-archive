@@ -3,9 +3,12 @@
 | Field | Value |
 |-------|-------|
 | **Status** | 🔴 Not Started |
-| **Priority** | P1 — Phase P1: Data Supply |
+| **Priority** | P1 |
 | **Phase** | P1 — Make Pipeline Produce Real Data |
+| **Effort** | M (3–5 days) |
+| **Stories** | 5 ([STORY-282](STORIES/STORY-282.md) through [STORY-286](STORIES/STORY-286.md)) |
 | **Created** | 2026-04-01 |
+| **Updated** | 2026-04-05 (added metadata, DoD; clarified cross-epic deps) |
 
 ## Context
 
@@ -28,8 +31,17 @@ Enrichment adapters fail hard when data is missing or unavailable instead of ret
 - YahooFinance successfully enriches companies without pre-configured tickers
 - Website adapter discovers URLs for at least 80% of companies when URL not provided
 
+## Definition of Done
+
+- [ ] [STORY-286](STORIES/STORY-286.md): `grep -rn "raise ValueError" src/solstein/adapters/` returns zero results in enrichment adapters
+- [ ] [STORY-282](STORIES/STORY-282.md): YahooFinance enriches a company with no ticker via web fallback
+- [ ] [STORY-283](STORIES/STORY-283.md): WebsiteEnrichment auto-discovers URL when none provided
+- [ ] [STORY-284](STORIES/STORY-284.md): GlobalMarketEnrichment returns sector data when no ticker
+- [ ] [STORY-285](STORIES/STORY-285.md): FundingEnrichment returns partial funding data without Crunchbase
+- [ ] `pytest tests/unit/ -k "enrichment"` passes
+
 ## Dependencies
 
 - STORY-277 (website URLs in catalog) — for YahooFinance ticker fallback
-- STORY-287 (SearXNG adapter) — for website auto-discovery
-- STORY-314 (SearXNG deployed) — for web search
+- STORY-287 ([EPIC-078](../EPIC-078-deploy-core-infrastructure/README.md)) — SearXNG adapter — for website auto-discovery
+- STORY-314 ([EPIC-078](../EPIC-078-deploy-core-infrastructure/README.md)) — SearXNG deployed — for web search
