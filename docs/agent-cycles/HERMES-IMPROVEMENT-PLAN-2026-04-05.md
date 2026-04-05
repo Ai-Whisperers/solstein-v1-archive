@@ -473,4 +473,411 @@ The current `.hermes.md` is 56 lines. The required version is approximately 150 
 
 ---
 
+---
+
+## 15. Navigation Guide: Where to Look Given the Abundance of Issues
+
+The codebase has 90 EPICs, 350+ stories, and 342 markdown files. An agent opening the repo cold will drown. This section is the entry point map — read in this order, nothing else.
+
+### The 3-file read sequence (mandatory session start)
+
+```
+1. planning/QUEUE.md          lines 1–120   ← P0 emergencies, current execution order
+2. backlog/EPICS/EPIC-052-provenance-confidence-quality-gates/README.md  ← gate state
+3. backlog/EPICS/EPIC-013-test-suite-integrity/README.md                 ← test isolation
+```
+
+After these three files, an agent has enough context to pick and execute any P0 story without further reading. Everything else is background.
+
+### Do NOT read these files first (they will mislead you)
+
+| File | Why it misleads |
+|------|----------------|
+| `NEXT_ACTIONS.md` | Written 2026-03-31, superseded by QUEUE.md. References a broken state that has since been partially fixed. |
+| `docs/reference/AGENTS.md` | Last updated 2026-03-01. Seven documented incorrect claims (see Section 7). Architecture diagrams are stale. |
+| `.hermes.md` (architecture section) | Says "70 EPICs" — there are now 90. Story counts are stale. |
+| `docs/audit/HEALTH_REPORT_2026-04-01.md` | Snapshot from April 1. EPIC-086 was open then; it is DONE now. |
+| `backlog/EPICS/EPIC-071-085/` | These are P1–P5 product stories. Do not read before clearing the P0 queue. |
+| Any file in `docs/active/` | These were being migrated during a docs cleanup. Status uncertain; do not treat as current. |
+
+### Issue triage map
+
+The issues in this codebase fall into four distinct classes. Agents should work down this list strictly — never start a lower class while a higher class has READY stories.
+
+```
+Class 1 — CONTAMINATION GATE (P0): data_source_type not enforced
+  Stories: STORY-383, 382, 366, 367, 368, 370, 378, 379, 380, 381, 384, 385, 386, 388, 389, 390
+  Root cause: Synthetic/untagged data reaches scoring and export without detection
+  Signals in code: grep for "strict_provenance=False", "mixed", "unknown", "ensure_safe"
+  Epic: EPIC-052
+
+Class 2 — TEST ISOLATION (P0): module-scope mutations bypass security for entire session
+  Stories: STORY-371, 372, 373, 374, 375, 376, 377, 387
+  Root cause: app.dependency_overrides and os.environ set at import time
+  Signals in code: grep module-level "os.environ[" and "app.dependency_overrides[" in tests/
+  Epic: EPIC-013
+
+Class 3 — DB SCHEMA GAP (P0): data_source_type column missing from company_records
+  Stories: STORY-381, 384, 386
+  Root cause: Gate field cannot be persisted or queried — all DB-loaded records bypass gate
+  Signals in code: grep "data_source_type" in infrastructure/models/company.py → nothing
+  Epic: EPIC-033
+
+Class 4 — PRODUCT BACKLOG (P1–P5): features, adapters, infra
+  Stories: STORY-277–347 (EPIC-071–085)
+  Do not touch until Classes 1–3 are complete
+```
+
+### Quick orientation grep commands
+
+Run these at session start to orient yourself instantly:
+
+```bash
+# How many P0 stories still READY?
+grep -c "| READY |" planning/QUEUE.md
+
+# Are gate bypass paths still present?
+grep -n "strict_provenance=False" src/solstein/infrastructure/research_dual_write.py
+grep -n '"mixed"' src/solstein/core/test_modes.py
+
+# Are test module-scope mutations still present?
+grep -n "^os.environ\[" tests/unit/test_api_routers_coverage.py tests/performance/test_load.py
+grep -n "^app.dependency_overrides" tests/unit/test_api_routers_coverage.py
+
+# Is data_source_type column missing?
+grep -n "data_source_type" src/solstein/infrastructure/models/company.py
+
+# Are the test databases still tracked in git?
+git ls-files tests/test_integration.db tests/test_perf.sqlite3
+```
+
+If all five checks return nothing (or expected "no output"), the P0 class 1–3 work is done.
+
+---
+
+## 16. Verification Task Library
+
+For every P0 story, this section provides exact before-state grep (to confirm the pre-condition holds), after-state grep (to confirm the fix landed), and the regression test command. Run all three for every story.
+
+---
+
+### STORY-383 — Remove `strict_provenance=False` from `_payload_from_legacy_kwargs()`
+
+**File:** `src/solstein/infrastructure/research_dual_write.py:424`
+
+```bash
+# BEFORE (must return line 424 — if it doesn't, story was already done or file moved):
+grep -n "strict_provenance=False" src/solstein/infrastructure/research_dual_write.py
+
+# AFTER (must return nothing):
+grep -n "strict_provenance=False" src/solstein/infrastructure/research_dual_write.py
+
+# Regression test:
+PYTHONPATH=src .venv/bin/python3 -m pytest tests/unit/ -k "legacy_kwargs or dual_write or strict_provenance" -v --no-header
+# Expected: 0 failures. Add a test if none exists that asserts legacy path triggers the quality gate.
+```
+
+**What "done" looks like:** Line 424 reads `strict_provenance=True,` or the argument is removed entirely (if the field has a default of True). Verify by reading `pipeline.py:82-84` — the `if not strict_provenance: return` guard must be reachable only when explicitly set.
+
+---
+
+### STORY-382 — Change `SOLSTEIN_TEST_MODE` default from `"mixed"` to `"strict_real"`
+
+**File:** `src/solstein/core/test_modes.py:16`
+
+```bash
+# BEFORE:
+grep -n '"mixed"' src/solstein/core/test_modes.py
+# Expected: line 16: mode = os.getenv("SOLSTEIN_TEST_MODE", "mixed").strip().lower()
+
+# AFTER:
+grep -n '"strict_real"' src/solstein/core/test_modes.py
+# Expected: line 16: mode = os.getenv("SOLSTEIN_TEST_MODE", "strict_real").strip().lower()
+
+# Regression test:
+PYTHONPATH=src .venv/bin/python3 -c "
+import os
+# unset the env var to test default behavior
+os.environ.pop('SOLSTEIN_TEST_MODE', None)
+from solstein.core.test_modes import get_test_mode
+mode = get_test_mode()
+assert not mode.allow_synthetic, f'Expected allow_synthetic=False, got {mode.allow_synthetic}'
+print('PASS: unset env var produces allow_synthetic=False')
+"
+```
+
+---
+
+### STORY-376 — Remove `test_integration.db` and `test_perf.sqlite3` from git
+
+```bash
+# BEFORE (must return both files):
+git ls-files tests/test_integration.db tests/test_perf.sqlite3
+
+# AFTER (must return nothing):
+git ls-files tests/test_integration.db tests/test_perf.sqlite3
+
+# Verify .gitignore rule added:
+grep "test_integration.db\|test_perf.sqlite3\|\.sqlite3\|\.db" .gitignore
+
+# No regression test needed — this is a git operation. Verify the files are gone from tracking.
+# Note: the files may still exist on disk (that's fine). They must not be tracked.
+```
+
+---
+
+### STORY-374 — Move module-scope auth bypass in `test_api_routers_coverage.py` into fixtures
+
+**File:** `tests/unit/test_api_routers_coverage.py:19–25`
+
+```bash
+# BEFORE (lines 20, 21, 25 must be at column 0 — module scope):
+grep -n "^app.dependency_overrides\|^os.environ" tests/unit/test_api_routers_coverage.py
+# Expected: lines 20, 21, 25 with no leading whitespace
+
+# AFTER (those lines must be inside a fixture — indented):
+grep -n "^app.dependency_overrides\|^os.environ" tests/unit/test_api_routers_coverage.py
+# Expected: nothing (module-scope mutations gone)
+
+# Regression test (remove from ignore list first):
+PYTHONPATH=src .venv/bin/python3 -m pytest tests/unit/test_api_routers_coverage.py -v --no-header 2>&1 | tail -5
+# Expected: tests pass AND auth is no longer globally disabled after collection
+```
+
+---
+
+### STORY-375 — Move `DATABASE_URL` override in `test_load.py` into a monkeypatched fixture
+
+**File:** `tests/performance/test_load.py:7–8`
+
+```bash
+# BEFORE (lines 7-8 must be at column 0 — before any imports):
+grep -n "^os.environ\[.DATABASE_URL.\]\|^os.environ\[.SYNC_DATABASE_URL.\]" tests/performance/test_load.py
+# Expected: lines 7 and 8 with no leading whitespace
+
+# AFTER:
+grep -n "^os.environ\[.DATABASE_URL.\]\|^os.environ\[.SYNC_DATABASE_URL.\]" tests/performance/test_load.py
+# Expected: nothing
+
+# Regression test:
+PYTHONPATH=src .venv/bin/python3 -m pytest tests/performance/test_load.py -v --no-header 2>&1 | tail -5
+```
+
+---
+
+### STORY-370 — Set `data_source_type="synthetic"` in `scripts/seed_db.py`
+
+**File:** `scripts/seed_db.py` (Faker-seeded records)
+
+```bash
+# BEFORE:
+grep -n "data_source_type" scripts/seed_db.py
+# Expected: nothing
+
+# AFTER:
+grep -n "data_source_type" scripts/seed_db.py
+# Expected: at least one line setting data_source_type="synthetic" before the save call
+
+# Regression test:
+PYTHONPATH=src .venv/bin/python3 -m pytest tests/unit/ -k "seed_db or seed" -v --no-header 2>&1 | tail -5
+# Add a test if none exists: instantiate the Company/record built by seed_db and assert data_source_type == "synthetic"
+```
+
+---
+
+### STORY-378 — Set `data_source_type` in `src/solstein/data/seed_db.py` before `repo.save()`
+
+**File:** `src/solstein/data/seed_db.py` (production Supabase seeder)
+
+```bash
+# BEFORE:
+grep -n "data_source_type" src/solstein/data/seed_db.py
+# Expected: nothing
+
+# AFTER:
+grep -n "data_source_type" src/solstein/data/seed_db.py
+# Expected: line setting data_source_type="synthetic" before line 31 (repo.save(scored_company))
+
+# Verify order — the assignment must come BEFORE repo.save():
+grep -n "data_source_type\|repo.save" src/solstein/data/seed_db.py
+```
+
+---
+
+### STORY-371 — Add `data_source_type="synthetic"` default to both `CompanyFactory` definitions
+
+**Files:** `tests/factories.py:56` AND `tests/factories/__init__.py:64`
+
+```bash
+# BEFORE (must return nothing for both files):
+grep -n "data_source_type" tests/factories.py tests/factories/__init__.py
+
+# AFTER (must appear in BOTH files):
+grep -n "data_source_type" tests/factories.py tests/factories/__init__.py
+# Expected: two lines, one per file, both showing data_source_type = "synthetic"
+
+# Regression test:
+PYTHONPATH=src .venv/bin/python3 -c "
+import sys; sys.path.insert(0, 'src'); sys.path.insert(0, '.')
+from tests.factories import CompanyFactory
+c = CompanyFactory()
+assert c.data_source_type == 'synthetic', f'Got: {c.data_source_type}'
+print('PASS: CompanyFactory defaults to data_source_type=synthetic')
+"
+```
+
+---
+
+### STORY-366 — Block `data_source_type="unknown"` in `ReportReleaseGate`
+
+**File:** `src/solstein/data/report_release_gate.py:172`
+
+```bash
+# BEFORE (unknown is NOT in the blocked set — only synthetic and mixed are blocked):
+grep -n '"unknown"' src/solstein/data/report_release_gate.py
+# Expected: nothing (unknown is the fallback default but is not explicitly blocked)
+
+# AFTER:
+grep -n '"unknown"' src/solstein/data/report_release_gate.py
+# Expected: "unknown" appears in the blocked condition alongside "synthetic" and "mixed"
+
+# Regression test:
+PYTHONPATH=src .venv/bin/python3 -c "
+import sys; sys.path.insert(0, 'src')
+from solstein.data.report_release_gate import ReportReleaseGate
+from solstein.domain.models import Company
+gate = ReportReleaseGate(min_confidence=0.0, allow_synthetic=False)
+# Create a company with unknown data_source_type
+c = Company(id='test', name='Test', data_source_type='unknown')
+result = gate.evaluate([c])
+assert not result.passed, 'Gate must block data_source_type=unknown'
+print('PASS: unknown is blocked')
+"
+```
+
+---
+
+### STORY-367 — Wire `SyntheticDataBlocker.ensure_safe()` into export path
+
+**File:** `src/solstein/api/routers/export.py` (add caller)  
+**Definition:** `src/solstein/data/synthetic_data_safety.py:284`
+
+```bash
+# BEFORE (no callers in production code — only the definition):
+grep -rn "ensure_safe" src/ --include="*.py" | grep -v "synthetic_data_safety.py\|\.pyc"
+# Expected: nothing
+
+# AFTER:
+grep -rn "ensure_safe" src/ --include="*.py" | grep -v "synthetic_data_safety.py\|\.pyc"
+# Expected: at least one call site in export.py or a shared export boundary
+
+# Regression test:
+PYTHONPATH=src .venv/bin/python3 -m pytest tests/unit/ -k "ensure_safe or synthetic_blocker" -v --no-header
+```
+
+---
+
+### STORY-368 — Add `if not gate_result.passed: raise` guard in `export.py`
+
+**File:** `src/solstein/api/routers/export.py:42` (and L120 — both export endpoints)
+
+```bash
+# BEFORE (gate_result is computed but .passed is never checked to raise):
+grep -n "gate_result.passed\|if not gate_result" src/solstein/api/routers/export.py
+# Expected: nothing — gate_result is used only for metadata, never to block
+
+# AFTER:
+grep -n "gate_result.passed\|if not gate_result" src/solstein/api/routers/export.py
+# Expected: at least one line with "if not gate_result.passed"
+
+# Regression test:
+PYTHONPATH=src .venv/bin/python3 -m pytest tests/unit/ -k "export and (gate or synthetic or blocked)" -v --no-header
+# Must include a test asserting that a request with synthetic data returns 4xx, not 200.
+```
+
+---
+
+### STORY-381 + STORY-386 — Fix `load_competitor_data.py` (land in same PR)
+
+**File:** `src/solstein/migrations/load_competitor_data.py`  
+**STORY-381** targets line 77 (missing `data_source_type`)  
+**STORY-386** targets line 179 (`test=True` in production path)
+
+```bash
+# BEFORE:
+grep -n "data_source_type" src/solstein/migrations/load_competitor_data.py
+# Expected: nothing
+
+grep -n "test=True" src/solstein/migrations/load_competitor_data.py
+# Expected: line 179: db_url = settings.get_database_url(test=True) or "..."
+
+# AFTER:
+grep -n "data_source_type" src/solstein/migrations/load_competitor_data.py
+# Expected: line in _build_company_record() setting data_source_type="real"
+
+grep -n "test=True" src/solstein/migrations/load_competitor_data.py
+# Expected: nothing
+
+# Regression test:
+PYTHONPATH=src .venv/bin/python3 -m pytest tests/unit/ -k "competitor_data or load_competitor" -v --no-header
+```
+
+---
+
+### STORY-384 — Add `data_source_type` column to `CompanyRecord`
+
+**File:** `src/solstein/infrastructure/models/company.py` (add column)  
+**Also requires:** new Alembic migration (020 or next available number)
+
+```bash
+# BEFORE:
+grep -n "data_source_type" src/solstein/infrastructure/models/company.py
+# Expected: nothing (only data_source exists at line 77)
+
+# AFTER:
+grep -n "data_source_type" src/solstein/infrastructure/models/company.py
+# Expected: data_source_type = Column(String(20), nullable=True) or similar
+
+# Verify migration created:
+ls alembic/versions/ | grep -i "020\|data_source"
+# Expected: new file like 020_add_data_source_type_to_company_records.py
+
+# Regression test — verify migration is reversible:
+PYTHONPATH=src .venv/bin/python3 -m pytest tests/unit/ -k "data_source_type or company_record" -v --no-header
+```
+
+---
+
+## 17. Verification Summary Checklist
+
+Use this as a post-session audit. Every checkbox should be ticked before writing the session exit log.
+
+```markdown
+## Session Verification Checklist
+
+### Gate bypass paths (Class 1)
+- [ ] `grep -n "strict_provenance=False" src/solstein/infrastructure/research_dual_write.py` → nothing
+- [ ] `grep -n '"mixed"' src/solstein/core/test_modes.py` → references strict_real, not mixed
+- [ ] `grep -rn "ensure_safe" src/ --include="*.py" | grep -v synthetic_data_safety` → ≥1 caller
+- [ ] `grep -n "if not gate_result.passed" src/solstein/api/routers/export.py` → ≥1 line
+- [ ] `grep -n '"unknown"' src/solstein/data/report_release_gate.py` → unknown in blocked set
+
+### Test isolation (Class 2)
+- [ ] `grep -n "^app.dependency_overrides\[" tests/unit/test_api_routers_coverage.py` → nothing
+- [ ] `grep -n "^os.environ\[" tests/performance/test_load.py` → nothing
+- [ ] `git ls-files tests/test_integration.db tests/test_perf.sqlite3` → nothing
+- [ ] `grep -n "data_source_type" tests/factories.py tests/factories/__init__.py` → 2 lines
+
+### DB schema gap (Class 3)
+- [ ] `grep -n "data_source_type" src/solstein/infrastructure/models/company.py` → ≥1 line
+- [ ] `grep -n "test=True" src/solstein/migrations/load_competitor_data.py` → nothing
+- [ ] `grep -n "data_source_type" src/solstein/migrations/load_competitor_data.py` → ≥1 line
+
+### Regression floor
+- [ ] `PYTHONPATH=src .venv/bin/python3 -m pytest tests/unit/ -q --ignore=tests/unit/test_async_boundary_regressions.py --ignore=tests/unit/test_api_routers_coverage.py --no-header 2>&1 | tail -3` → ≥3800 passed
+- [ ] `ruff check src/ tests/ scripts/` → exit code 0
+```
+
+---
+
 *This document is for human review and implementation. Agents should not act on this document directly — the improvements must be applied to `.hermes.md`, `AGENTS.md`, and story files before the next autonomous session starts.*
