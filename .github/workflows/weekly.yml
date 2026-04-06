@@ -28,7 +28,7 @@ jobs:
       SECURITY__SECRET_KEY: test-secret-key-minimum-32-characters-long
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/workflows/composite/setup-python
       - uses: ./.github/workflows/composite/setup-uv
       - uses: ./.github/workflows/composite/install-deps
