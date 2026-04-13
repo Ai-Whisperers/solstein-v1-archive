@@ -77,7 +77,7 @@ solstein-legacy = "solstein.cli_legacy:main"
 
 [build-system]
 requires = [
-    "setuptools>=61.0",
+    "setuptools>=82.0.1",
     "wheel",
 ]
 build-backend = "setuptools.build_meta"
