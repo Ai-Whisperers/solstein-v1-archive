@@ -274,7 +274,7 @@ asyncio_mode = "auto"
 
 [dependency-groups]
 dev = [
-    "basedpyright>=1.38.4",
+    "basedpyright>=1.39.0",
     "factory-boy>=3.3.3",
     "griffe>=2.0.1",
     "libcst>=1.8.6",
