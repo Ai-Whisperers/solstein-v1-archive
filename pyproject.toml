@@ -286,7 +286,7 @@ dev = [
     "pytest-randomly>=4.0.1",
     "pytest-xdist>=3.3.0",
     "syrupy>=5.1.0",
-    "testcontainers>=4.14.1",
+    "testcontainers>=4.14.2",
 ]
 
 [tool.mutmut]
